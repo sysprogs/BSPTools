@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink</Name>
+	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><InternalValue>A</InternalValue></Suggestion>
+			<Suggestion><InternalValue>B</InternalValue></Suggestion>
+			<Suggestion><InternalValue>C</InternalValue></Suggestion>
+			<Suggestion><InternalValue>D</InternalValue></Suggestion>
+			<Suggestion><InternalValue>E</InternalValue></Suggestion>
+			<Suggestion><InternalValue>F</InternalValue></Suggestion>
+			<Suggestion><InternalValue>G</InternalValue></Suggestion>
+			<Suggestion><InternalValue>H</InternalValue></Suggestion>
+			<Suggestion><InternalValue>I</InternalValue></Suggestion>
+			<Suggestion><InternalValue>J</InternalValue></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>5</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>3</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>7</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay (msec)</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAY</UniqueID>
+		  <Description>Specifies the delay (in cycles) between LED toggling events</Description>
+		  <DefaultValue>1000000</DefaultValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Boolean">
+		  <Name>Use API from ROM</Name>
+		  <UniqueID>com.sysprogs.examples.tiva.ROMPREFIX</UniqueID>
+		  <DefaultValue>false</DefaultValue>
+		  <ValueForTrue>ROM_</ValueForTrue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+</EmbeddedProjectSample>

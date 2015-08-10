@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>TM4C129</Name>
+	<DeviceRegex>^TM4C129.*</DeviceRegex>
+	<FamilySubdirectory>TM4C129</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\examples\project</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+            <Properties>
+              <PropertyEntry xsi:type="Enumerated">
+                <Name>Revision</Name>
+                <UniqueID>com.sysprogs.arm.ti.tiva.rev</UniqueID>
+				<Description>Sets revision-specific settings</Description>
+                <SuggestionList>
+                  <Suggestion>
+                    <UserFriendlyName>A0</UserFriendlyName>
+                    <InternalValue>TARGET_IS_TM4C129_RA0</InternalValue>
+                  </Suggestion>
+				  <Suggestion>
+                    <UserFriendlyName>A1</UserFriendlyName>
+                    <InternalValue>TARGET_IS_TM4C129_RA1</InternalValue>
+                  </Suggestion>
+                </SuggestionList>
+                <DefaultEntryIndex>1</DefaultEntryIndex>
+                <AllowFreeEntry>false</AllowFreeEntry>
+              </PropertyEntry>
+			  </Properties>
+			  </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+</FamilyDefinition>

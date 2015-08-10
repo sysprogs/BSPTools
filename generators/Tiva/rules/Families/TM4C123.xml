@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>TM4C123</Name>
+	<DeviceRegex>^TM4C123.*</DeviceRegex>
+	<FamilySubdirectory>TM4C123</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\examples\project</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+            <Properties>
+              <PropertyEntry xsi:type="Enumerated">
+                <Name>Revision</Name>
+                <UniqueID>com.sysprogs.arm.ti.tiva.rev</UniqueID>
+				<Description>Sets revision-specific settings</Description>
+                <SuggestionList>
+                  <Suggestion>
+                    <UserFriendlyName>A1</UserFriendlyName>
+                    <InternalValue>TARGET_IS_TM4C123_RA1</InternalValue>
+                  </Suggestion>
+				  <Suggestion>
+                    <UserFriendlyName>A2</UserFriendlyName>
+                    <InternalValue>TARGET_IS_TM4C123_RA2</InternalValue>
+                  </Suggestion>
+				  <Suggestion>
+                    <UserFriendlyName>A3</UserFriendlyName>
+                    <InternalValue>TARGET_IS_TM4C123_RA3</InternalValue>
+                  </Suggestion>
+				  <Suggestion>
+                    <UserFriendlyName>B0</UserFriendlyName>
+                    <InternalValue>TARGET_IS_TM4C123_RB0</InternalValue>
+                  </Suggestion>
+				  <Suggestion>
+                    <UserFriendlyName>B1</UserFriendlyName>
+                    <InternalValue>TARGET_IS_TM4C123_RB1</InternalValue>
+                  </Suggestion>
+                </SuggestionList>
+                <DefaultEntryIndex>4</DefaultEntryIndex>
+                <AllowFreeEntry>false</AllowFreeEntry>
+              </PropertyEntry>
+			  </Properties>
+			  </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+</FamilyDefinition>
