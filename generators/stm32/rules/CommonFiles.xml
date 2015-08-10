@@ -1,0 +1,258 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>STM32 USB Device Library</Name>
+			<ID>com.sysprogs.arm.stm32.usbdev</ID>
+			<ProjectFolderName>USB Device</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32_USB_Device_Library/Core/Inc;$$SYS:BSP_ROOT$$/STM32_USB_Device_Library/Class/$$com.sysprogs.bspoptions.stm32.usb.devclass$$/Inc</AdditionalIncludeDirs>
+					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
+					<SimpleFileConditions>
+						<string>Class\\AUDIO\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == AUDIO</string>
+						<string>Class\\CDC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == CDC</string>
+						<string>Class\\CustomHID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == CustomHID</string>
+						<string>Class\\DFU\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == DFU</string>
+						<string>Class\\HID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == HID</string>
+						<string>Class\\MSC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == MSC</string>
+					</SimpleFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+					  <PropertyEntry xsi:type="Enumerated">
+						<Name>USB Device Class</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.usb.devclass</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<SuggestionList>
+						  <Suggestion>
+							<UserFriendlyName>Audio Device</UserFriendlyName>
+							<InternalValue>AUDIO</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>Communications Device (CDC)</UserFriendlyName>
+							<InternalValue>CDC</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>Custom Human Interface Device (CustomHID)</UserFriendlyName>
+							<InternalValue>CustomHID</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>Device Firmware Update (DFU)</UserFriendlyName>
+							<InternalValue>DFU</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>Human Interface Device (HID)</UserFriendlyName>
+							<InternalValue>HID</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>Mass Storage (MSC)</UserFriendlyName>
+							<InternalValue>MSC</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>None</UserFriendlyName>
+							<InternalValue>none</InternalValue>
+						  </Suggestion>
+						</SuggestionList>
+						<DefaultEntryIndex>1</DefaultEntryIndex>
+						<AllowFreeEntry>false</AllowFreeEntry>
+					  </PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>USB Device Speed</Name>
+						  <UniqueID>com.sysprogs.bspoptions.stm32.usb.speed</UniqueID>
+						  <Description>Specifies the USB peripheral (USB_FS vs USB_HS) used by the device</Description>
+						  <SuggestionList>
+							<Suggestion><InternalValue>FS</InternalValue><UserFriendlyName>USB 2.0 Full Speed</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>HS</InternalValue><UserFriendlyName>USB 2.0 High Speed</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+		<Framework>
+			<Name>STM32 USB Host Library</Name>
+			<ID>com.sysprogs.arm.stm32.usbhost</ID>
+			<ProjectFolderName>USB Host</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
+					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
+					<SimpleFileConditions>
+						<string>Class\\MTP\\: $$com.sysprogs.bspoptions.stm32.usb.host.mtp$$ == 1</string>
+						<string>Class\\MSC\\: $$com.sysprogs.bspoptions.stm32.usb.host.msc$$ == 1</string>
+						<string>Class\\HID\\: $$com.sysprogs.bspoptions.stm32.usb.host.hid$$ == 1</string>
+						<string>Class\\CDC\\: $$com.sysprogs.bspoptions.stm32.usb.host.cdc$$ == 1</string>
+						<string>Class\\Audio\\: $$com.sysprogs.bspoptions.stm32.usb.host.audio$$ == 1</string>
+					</SimpleFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>USB Host Audio Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.usb.host.audio</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>USB Host CDC Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.usb.host.cdc</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>USB Host HID Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.usb.host.hid</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>USB Host Mass Storage Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.usb.host.msc</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>USB Host MTP Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.usb.host.mtp</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>USB Device Speed</Name>
+						  <UniqueID>com.sysprogs.bspoptions.stm32.usb.speed</UniqueID>
+						  <Description>Specifies the USB peripheral (USB_FS vs USB_HS) used by the device</Description>
+						  <SuggestionList>
+							<Suggestion><InternalValue>FS</InternalValue><UserFriendlyName>USB 2.0 Full Speed</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>HS</InternalValue><UserFriendlyName>USB 2.0 High Speed</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+		<Framework>
+			<Name>FreeRTOS</Name>
+			<ID>com.sysprogs.arm.stm32.freertos</ID>
+			<ProjectFolderName>FreeRTOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.0.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
+					<SimpleFileConditions>
+						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_1</string>
+						<string>Source\\portable\\MemMang\\heap_2.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_2</string>
+						<string>Source\\portable\\MemMang\\heap_3.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_3</string>
+						<string>Source\\portable\\MemMang\\heap_4.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_4</string>
+						<string>Source\\portable\\MemMang\\heap_5.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_5</string>
+						<string>Source\\portable\\GCC\\ARM_CM0\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM0</string>
+						<string>Source\\portable\\GCC\\ARM_CM3\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM3</string>
+						<string>Source\\portable\\GCC\\ARM_CM3_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM3_MPU</string>
+						<string>Source\\portable\\GCC\\ARM_CM4F\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4F</string>
+						<string>Source\\portable\\GCC\\ARM_CM7\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7/r0p1</string>
+					</SimpleFileConditions>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+						<OldLine>#ifndef __VFP_FP__</OldLine>
+						<NewLine>#if !defined(__VFP_FP__) || defined(__SOFTFP__)</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+						<OldLine>	#error This port can only be used when the project options are configured to enable hardware floating point support.</OldLine>
+						<NewLine>	#error This port can only be used when the project options are configured to enable hardware floating point support. Please switch to hardware FP or select a different FreeRTOS port on the Frameworks page of VisualGDB Project Properties.</NewLine>
+					</Patch>
+				</Patches>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>FreeRTOS Heap Implementation</Name>
+						  <UniqueID>com.sysprogs.bspoptions.stm32.freertos.heap</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>heap_1</InternalValue><UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_2</InternalValue><UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_3</InternalValue><UserFriendlyName>Heap3 - use newlib malloc()/free()</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_4</InternalValue><UserFriendlyName>Heap4 - contiguous heap area</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_5</InternalValue><UserFriendlyName>Heap5 - scattered heap area</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>3</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>FreeRTOS CPU Core support</Name>
+						  <UniqueID>com.sysprogs.bspoptions.stm32.freertos.portcore</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>CM0</InternalValue><UserFriendlyName>ARM Cortex M0</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM3</InternalValue><UserFriendlyName>ARM Cortex M3 or M4 with Software FP</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM3_MPU</InternalValue><UserFriendlyName>ARM Cortex M3 with MPU</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM4F</InternalValue><UserFriendlyName>ARM Cortex M4 with Hardware FP</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM7/r0p1</InternalValue><UserFriendlyName>ARM Cortex M7</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>1</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+	</AdditionalFrameworks>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>
+			<DestinationFolder>samples\LEDBlink</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\FreeRTOS</SourceFolder>
+			<DestinationFolder>samples\FreeRTOS</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
+			</AdditionalSources>
+		</SmartSample>
+	</SmartSamples>
+</FamilyDefinition>

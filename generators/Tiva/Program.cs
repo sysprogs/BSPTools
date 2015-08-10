@@ -141,7 +141,7 @@ namespace Tiva_bsp_generator
         static void Main(string[] args)
         {
             if (args.Length < 1)
-                throw new Exception("Usage: tiva.exe <Nordic SW package directory>");
+                throw new Exception("Usage: tiva.exe <Tiva SW package directory>");
 
             var bspBuilder = new TivaBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
 

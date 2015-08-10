@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>STM32W1</Name>
+	<DeviceRegex>^STM32W1.*</DeviceRegex>
+	<FamilySubdirectory>STM32W1xxxx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\CMSIS\Device\ST\STM32W108xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\CMSIS\Device\ST\STM32W108xx\Source\Templates\gcc_ride7</StartupFileDir>
+	<Subfamilies>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.stm32.legacy_device_family</VariableName>
+			<Required>true</Required>
+			<IsPrimary>true</IsPrimary>
+			<AutoOptions>STM32W108C8;STM32W108CB;STM32W108CC;STM32W108CZ;STM32W108HB</AutoOptions>
+			<Options/>
+		</MCUClassifier>
+	</Subfamilies>
+	<CompilationFlags>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
+	</CompilationFlags>
+	<CoreFramework>
+		<CopyJobs>
+		</CopyJobs>
+	</CoreFramework>
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>STM32W1 Peripheral Library</Name>
+			<ID>com.sysprogs.arm.stm32.w1_stdperiph</ID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.stm32.w1_hal</string>
+			</IncompatibleFrameworks>
+			<ProjectFolderName>StdPeriph</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\STM32W108xx_StdPeriph_Driver</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\CMSIS</SourceFolder>
+					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
+					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
+					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
+					<ProjectInclusionMask>-*Include\stm32w1????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>Device\ST\STM32W108xx\Include\stm32w108xx.h</FilePath>
+							<AfterLine>#define __STM32W108XX_H</AfterLine>
+							<InsertedLines>
+								<string></string>
+								<string>#define assert_param(expr)</string>
+							</InsertedLines>
+						</Patch>
+					</Patches>
+				</CopyJob>
+			</CopyJobs>			
+		</Framework>
+	</AdditionalFrameworks>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_STM32W1X</SourceFolder>
+			<DestinationFolder>samples\LEDBlink_STM32W1X</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/STM32W1xxxx/CMSIS_StdPeriph/Device/ST/STM32W108xx/Source/Templates/system_stm32w108xx.c</string>
+			</AdditionalSources>
+		</SmartSample>
+	</SmartSamples>
+</FamilyDefinition>

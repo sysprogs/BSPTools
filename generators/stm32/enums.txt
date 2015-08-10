@@ -1,0 +1,41 @@
+#Empty line - next register
+GPIO.->MODER->MODER[0-9]+
+Prefix: GPIO_Mode_
+  GPIO_Mode_IN   = 0x00
+  GPIO_Mode_OUT  = 0x01
+  GPIO_Mode_AF   = 0x02
+  GPIO_Mode_AN   = 0x03
+
+GPIO.->OSPEEDR->OSPEEDR[0-9]+
+  GPIO_Low_Speed     = 0x00, /*!< Low speed    */
+  GPIO_Medium_Speed  = 0x01, /*!< Medium speed */
+  GPIO_Fast_Speed    = 0x02, /*!< Fast speed   */
+  GPIO_High_Speed    = 0x03  /*!< High speed   */
+ 
+GPIO.->PUPDR->PUPDR[0-9]+
+  GPIO_PuPd_NOPULL = 0x00,
+  GPIO_PuPd_UP     = 0x01,
+  GPIO_PuPd_DOWN   = 0x02
+  GPIO_PuPd_RESERVED = 0x03
+
+TIM[0-9]->CR1->CMS
+	EDGE = 0x0
+	CENTER1 = 0x1
+	CENTER2 = 0x2
+	CENTER3 = 0x3
+	
+TIM[0-9]->CR1->CKD
+	DIV1 = 0x0
+	DIV2 = 0x1
+	DIV3 = 0x2
+	RESERVED = 0x3
+	
+TIM[0-9]->CR2->MMS$
+	Reset               0x000
+	Enable              0x001
+	Update              0x002
+	OC1                 0x003
+	OC1Ref              0x004
+	OC2Ref              0x005
+	OC3Ref              0x006
+	OC4Ref              0x007
