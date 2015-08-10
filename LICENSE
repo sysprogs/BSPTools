@@ -1,0 +1,28 @@
+Sysprogs BSP Generator License
+
+Copyright (c) 2015, Sysprogs OU
+All rights reserved.
+
+This software is intended for creating tools for building BSP packages used by Sysprogs products. 
+By using the code from this Software in your Software (hereinafter referred to as Derived Software) 
+or linking your Derived Software against the library, you expressly grant to Sysprogs a non-exclusive,
+perpetual, fully transferable and sub-licensable, worldwide, irrevocable right to use, reproduce, 
+modify and create derivative works from, distribute, transmit the Derived Software , or any portion
+thereof, without further notice, payment or attribution to you. You grant Sysprogs all licenses, 
+consents and clearances to enable Sysprogs to use such content for such purposes.
+
+Redistribution and use of this Software in source and binary forms, with or without modification, are 
+permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and 
+   the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+   and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

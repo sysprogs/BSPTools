@@ -1,4 +1,9 @@
-﻿using BSPEngine;
+﻿/* Copyright (c) 2015 Sysprogs OU. All Rights Reserved.
+   This software is licensed under the Sysprogs BSP Generator License.
+   https://github.com/sysprogs/BSPTools/blob/master/LICENSE
+*/
+
+using BSPEngine;
 using BSPGenerationTools;
 using LinkerScriptGenerator;
 using System;

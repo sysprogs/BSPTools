@@ -1,4 +1,9 @@
-﻿using System;
+﻿/* Copyright (c) 2015 Sysprogs OU. All Rights Reserved.
+   This software is licensed under the Sysprogs BSP Generator License.
+   https://github.com/sysprogs/BSPTools/blob/master/LICENSE
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;

@@ -48,6 +48,7 @@
     <Compile Include="SourceCopyTools.cs" />
     <Compile Include="StartupFileGenerator.cs" />
     <Compile Include="SVDParser.cs" />
+    <Compile Include="TarPacker.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LinkerScriptGenerator\LinkerScriptGenerator.csproj">
