@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<MemoryLayout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <DeviceName>KL25Z128</DeviceName>
+  <Memories>
+    <Memory>
+      <Name>RAM</Name>
+      <Type>RAM</Type>
+      <Start>0x20004000</Start>
+      <Size>240K</Size>
+    </Memory>
+  </Memories>
+</MemoryLayout>

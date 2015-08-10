@@ -1,0 +1,28 @@
+ble_advertising|Connectable Advertising Support
+ble_db_discovery|Database Discovery Module
+ble_debug_assert_handler|Assert Handler
+ble_dtm|RF/PHY Testing using DTM commands
+ble_error_log|Error Logging Support
+ble_racp|Record Access Control Point library
+ble_radio_notification|Radio Notifications
+ble_services\ble_ancs_c|Apple Notification Service Client
+ble_services\ble_ans_c|Alert Notification Service Client
+ble_services\ble_bas|Battery Service
+ble_services\ble_bas_c|Battery Service Client
+ble_services\ble_bps|Blood Pressure Service
+ble_services\ble_cscs|Cycling Speed and Cadence Service
+ble_services\ble_cts_c|Current Time Service Client
+ble_services\ble_dfu|Device Firmware Update Service
+ble_services\ble_dis|Device Information Service
+ble_services\ble_gls|Glucose Service
+ble_services\ble_hids|Human Interface Device Service
+ble_services\ble_hrs|Heart Rate Service
+ble_services\ble_hrs_c|Heart Rate Service Client
+ble_services\ble_hts|Health Thermometer Service
+ble_services\ble_ias|Immediate Alert Service
+ble_services\ble_ias_c|Immediate Alert Service Client
+ble_services\ble_lls|Link Loss Service
+ble_services\ble_nus|Nordic UART Service
+ble_services\ble_rscs|Running Speed and Cadence Service
+ble_services\ble_rscs_c|Running Speed and Cadence Service Client
+ble_services\ble_tps|TX Power Service

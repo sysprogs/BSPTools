@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink</Name>
+	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>21</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>31</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay (msec)</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYMSEC</UniqueID>
+		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+		  <DefaultValue>500</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.nordic.nrf5x.util</string>
+		<string>com.sysprogs.arm.nordic.nrf5x.nrf51_periph</string>
+	</RequiredFrameworks>
+</EmbeddedProjectSample>

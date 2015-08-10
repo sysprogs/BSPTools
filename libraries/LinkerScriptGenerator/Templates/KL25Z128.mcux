@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<MemoryLayout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <DeviceName>KL25Z128</DeviceName>
+  <Memories>
+    <Memory>
+      <Name>FLASH</Name>
+      <Type>FLASH</Type>
+      <Start>0x410</Start>
+      <Size>0x1FBF0</Size>
+    </Memory>
+    <Memory>
+      <Name>FLASH_Interrupts</Name>
+      <Type>FLASH</Type>
+      <Start>0</Start>
+      <Size>0x400</Size>
+    </Memory>
+    <Memory>
+      <Name>FLASH_Security</Name>
+      <Type>FLASH</Type>
+      <Start>0x400</Start>
+      <Size>0x10</Size>
+    </Memory>
+    <Memory>
+      <Name>RAM</Name>
+      <Type>RAM</Type>
+      <Start>0x1FFFF000</Start>
+      <Size>16K</Size>
+    </Memory>
+  </Memories>
+</MemoryLayout>

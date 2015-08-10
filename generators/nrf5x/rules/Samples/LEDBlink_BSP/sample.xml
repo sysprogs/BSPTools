@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink (BSP)</Name>
+	<Description>This sample toggles all LEDs on a specified evaluation board using the nRF51 board abstraction API.</Description>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.nordic.nrf5x.util</string>
+		<string>com.sysprogs.arm.nordic.nrf5x.nrf51_periph</string>
+		<string>com.sysprogs.arm.nordic.nrf5x.nrf51_boards</string>
+	</RequiredFrameworks>
+</EmbeddedProjectSample>

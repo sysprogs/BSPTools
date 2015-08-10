@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	  <Name>Blueooth LE Mouse</Name>
+	  <Description>This sample demonstrates a Blueooth LE Mouse controlled via the on-board buttons.</Description>
+	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+	<string>com.sysprogs.arm.nordic.nrf5x.util</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.nrf51_periph</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.nrf51_boards</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.nrf51_libraries</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.ble_device_manager</string>
+    <string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string>
+    <string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
+    <string>com.sysprogs.arm.nordic.nrfx.ble_dis</string>
+    <string>com.sysprogs.arm.nordic.nrfx.ble_hids</string>
+  </RequiredFrameworks>
+  <ConditionalErrors>
+	<ConditionalError>
+		<ErrorCondition xsi:type="Not">
+			<Argument xsi:type="MatchesRegex">
+				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
+				<Regex>S(110|130|310)</Regex>
+				<IgnoreCase>false</IgnoreCase>
+			</Argument>
+		</ErrorCondition>
+		<ErrorText>Please select a BLE Peripheral-capable softdevice on the previous page.</ErrorText>
+	</ConditionalError>
+  </ConditionalErrors>
+  <DefaultConfiguration>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
+        <Value>PCA10028</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
+        <Value>BSP_UART_SUPPORT</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.button</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.crc16</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fifo</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.gpiote</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.hci</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ic_info</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.pwm</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.scheduler</Key>
+        <Value>normal</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.sensorsim</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.sha256</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.simple_timer</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.timer</Key>
+        <Value>appsh</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.trace</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.uart</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.util</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.ble.devmgr</Key>
+        <Value>peripheral</Value>
+      </KeyValue>
+    </Entries>
+	</DefaultConfiguration>
+</EmbeddedProjectSample>
