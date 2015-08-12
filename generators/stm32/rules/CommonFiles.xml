@@ -169,7 +169,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.0.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.1.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -230,6 +230,41 @@
 						  <DefaultEntryIndex>1</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+		<Framework>
+			<Name>STM32 Utilities</Name>
+			<ID>com.sysprogs.arm.stm32.utilities</ID>
+			<ProjectFolderName>Utilities</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.1.0\Utilities</SourceFolder>
+					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
+					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
+					<SimpleFileConditions>
+						<string>CPU\\*: $$com.sysprogs.bspoptions.stm32.utils.cpu$$ == 1</string>
+						<string>Fonts\\*: $$com.sysprogs.bspoptions.stm32.utils.fonts$$ == 1</string>
+						<string>Log\\*: $$com.sysprogs.bspoptions.stm32.utils.log$$ == 1</string>
+					</SimpleFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Name>STM32 Utilities</Name>
+					<UniqueID>com.sysprogs.bspoptions.stm32.utils.</UniqueID>
+					<Properties>
+						<PropertyEntry xsi:type="Boolean"><Name>CPU Usage Monitor (FreeRTOS)</Name><UniqueID>cpu</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>Fonts</Name><UniqueID>fonts</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>LCD Logging Support</Name><UniqueID>log</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
 					</Properties>
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>

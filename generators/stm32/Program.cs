@@ -90,6 +90,29 @@ namespace stm32_bsp_generator
                 }
             }
 
+            public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
+            {
+                base.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout, generalizedName);
+                if (familyFilePrefix.StartsWith("STM32F7"))
+                {
+                    //We only use this layout for SRAM configurations because the ST system file expects vectors at 0x20010000 and not at 0x20000000.
+                    //If the end user wants to distinguish between different memory types, they will need to modify the linker script.
+                    var updatedLayout = layout.Clone();
+                    var sram = updatedLayout.Memories.First(m => m.Start == SRAMBase);
+                    sram.Start += 0x10000;
+                    sram.Size -= 0x10000;
+
+                    updatedLayout.Memories.Add(new Memory { Name = "DTCM_RAM", Size = 64 * 1024, Start = SRAMBase, Access = MemoryAccess.Readable | MemoryAccess.Writable | MemoryAccess.Executable });
+                    updatedLayout.Memories.Add(new Memory { Name = "ITCM_RAM", Size = 16 * 1024, Start = 0, Access = MemoryAccess.Readable | MemoryAccess.Writable | MemoryAccess.Executable });
+                    using (var gen = new LdsFileGenerator(LDSTemplate, updatedLayout) { RedirectMainFLASHToRAM = true })
+                    {
+                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_sram.lds")))
+                            gen.GenerateLdsFile(sw);
+                    }
+
+                }
+            }
+
             XmlDocument STM32CubeDeviceDatabase = new XmlDocument();
             Regex rgMemoryDef = new Regex(@"I(RAM|ROM[1-9]?)\(0x([0-9A-F]+)-0x([0-9A-F]+)\)");
 
@@ -337,7 +360,7 @@ namespace stm32_bsp_generator
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
-                PackageVersion = "3.2",
+                PackageVersion = "3.3",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",

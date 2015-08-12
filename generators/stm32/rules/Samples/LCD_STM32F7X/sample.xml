@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>STM32F7-Discovery LCD Demo</Name>
+	<Description>This example shows how to display a static image using the STM32F7-Discovery LCD.</Description>
+	<MCUFilterRegex>STM32F7.*</MCUFilterRegex>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.stm32.hal</string>
+		<string>com.sysprogs.arm.stm32.bspdrv.stm2746g-discovery</string>
+		<string>com.sysprogs.arm.stm32.f7_systeminit</string>
+	</RequiredFrameworks>
+	  <DefaultConfiguration>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.stm32746g_discovery.lcd</Key>
+        <Value>1</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.stm32746g_discovery.sdram</Key>
+        <Value>1</Value>
+      </KeyValue>
+	  </Entries>
+	  </DefaultConfiguration>
+</EmbeddedProjectSample>

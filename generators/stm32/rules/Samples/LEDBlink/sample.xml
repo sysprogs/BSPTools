@@ -19,6 +19,8 @@
 			<Suggestion><InternalValue>GPIOE</InternalValue></Suggestion>
 			<Suggestion><InternalValue>GPIOF</InternalValue></Suggestion>
 			<Suggestion><InternalValue>GPIOG</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOH</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOI</InternalValue></Suggestion>
 		  </SuggestionList>
 		  <DefaultEntryIndex>3</DefaultEntryIndex>
 		  <AllowFreeEntry>false</AllowFreeEntry>

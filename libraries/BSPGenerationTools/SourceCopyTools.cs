@@ -72,7 +72,12 @@ namespace BSPGenerationTools
             if (!string.IsNullOrEmpty(rules))
             {
                 foreach (var r in rules.Split(';'))
-                    Rules.Add(FileMaskToRegexWithFlag(r, true));
+                {
+                    var rule = FileMaskToRegexWithFlag(r, true);
+                    if (rule.Key == null)
+                        throw new Exception("Empty rule");
+                    Rules.Add(rule);
+                }
             }
         }
 
@@ -436,6 +441,41 @@ namespace BSPGenerationTools
         }
     }
 
+    public class FrameworkTemplate
+    {
+        public string Range;
+        public Framework Template;
+
+        //Warning: the expansion is not complete and should be updated as needed
+        public IEnumerable<Framework> Expand()
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(Framework));
+            MemoryStream ms = new MemoryStream();
+            ser.Serialize(ms, Template);
+
+            foreach (var n in Range.Split(' '))
+            {
+                ms.Seek(0, SeekOrigin.Begin);
+                Framework deepCopy = (Framework)ser.Deserialize(ms);
+                Expand(ref deepCopy.Name, n);
+                Expand(ref deepCopy.ID, n);
+                Expand(ref deepCopy.ProjectFolderName, n);
+                foreach (var job in deepCopy.CopyJobs)
+                {
+                    Expand(ref job.SourceFolder, n);
+                    Expand(ref job.TargetFolder, n);
+                    Expand(ref job.FilesToCopy, n);
+                }
+                yield return deepCopy;
+            }
+        }
+
+        static void Expand(ref string str, string name)
+        {
+            str = str.Replace("$$BSPGEN:FRAMEWORK$$", name);
+        }
+    }
+
     public class FamilyDefinition
     {
         public string Name;
@@ -452,5 +492,6 @@ namespace BSPGenerationTools
         public SysVarEntry[] AdditionalSystemVars;
         public PropertyList ConfigurableProperties;
         public ConditionalToolFlags[] ConditionalFlags;
+        public FrameworkTemplate[] AdditionalFrameworkTemplates;
     }
 }

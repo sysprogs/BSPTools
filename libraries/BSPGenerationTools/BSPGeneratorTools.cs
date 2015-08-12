@@ -139,7 +139,15 @@ namespace BSPGenerationTools
             if (Directory.Exists(dirs.OutputDir))
             {
                 Console.Write("Deleting {0}...", dirs.OutputDir);
-                Directory.Delete(dirs.OutputDir, true);
+                try
+                {
+                    Directory.Delete(dirs.OutputDir, true);
+                }
+                catch
+                {
+                    if (Directory.GetFiles(dirs.OutputDir, "*", SearchOption.AllDirectories).Length != 0)
+                        throw;
+                }
                 Console.WriteLine(" done");
             }
             Directory.CreateDirectory(dirs.OutputDir);
@@ -289,7 +297,7 @@ namespace BSPGenerationTools
                             }
                     };
 
-                    if (core == CortexCore.M4)
+                    if (core == CortexCore.M4 || core == CortexCore.M7)
                     {
                         family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
                             new PropertyEntry.Enumerated
@@ -431,7 +439,12 @@ namespace BSPGenerationTools
         {
             if (Definition.AdditionalFrameworks != null)
             {
-                foreach (var fw in Definition.AdditionalFrameworks)
+                IEnumerable<Framework> allFrameworks = Definition.AdditionalFrameworks;
+                if (Definition.AdditionalFrameworkTemplates != null)
+                    foreach (var t in Definition.AdditionalFrameworkTemplates)
+                        allFrameworks = allFrameworks.Concat(t.Expand());
+
+                foreach (var fw in allFrameworks)
                 {
                     List<string> projectFiles = new List<string>();
                     var fwDef = new EmbeddedFramework
