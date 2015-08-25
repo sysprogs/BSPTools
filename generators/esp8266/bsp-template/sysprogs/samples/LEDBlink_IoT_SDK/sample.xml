@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink (IoT SDK)</Name>
+	<Description>This project demonstrates how to control an LED using the ESP8266 timer API.</Description>
+	<MCUFilterRegex>ESP8266$</MCUFilterRegex>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay (msec)</Name>
+		  <UniqueID>com.sysprogs.esp8266.ledblink.DELAYMSEC</UniqueID>
+		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+		  <DefaultValue>300</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<RequiredFrameworks>
+		<string>com.sysprogs.esp8266.iot_sdk</string>
+	</RequiredFrameworks>
+</EmbeddedProjectSample>
