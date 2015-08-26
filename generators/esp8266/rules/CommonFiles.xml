@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>ESP8266 IoT SDK</Name>
+			<ID>com.sysprogs.esp8266.iot_sdk</ID>
+			<ProjectFolderName>SDK</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.esp8266.rtos_sdk</string>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.2.0</SourceFolder>
+					<TargetFolder>IoT-SDK</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-include\json\*;include\*</ProjectInclusionMask>
+					<AutoIncludeMask>*eagle_soc.h</AutoIncludeMask>
+				</CopyJob>			
+			</CopyJobs>
+				<AdditionalSystemVars>
+					<SysVarEntry>
+					  <Key>com.sysprogs.esp8266.sdktype</Key>
+					  <Value>IoT</Value>
+					</SysVarEntry>
+					<SysVarEntry>
+					  <Key>com.sysprogs.esp8266.sdkdir</Key>
+					  <Value>IoT-SDK</Value>
+					</SysVarEntry>
+				</AdditionalSystemVars>
+		</Framework>
+		<Framework>
+			<Name>ESP8266 Peripheral Drivers (IoT SDK)</Name>
+			<ID>com.sysprogs.esp8266.iot_sdk_drivers</ID>
+			<ProjectFolderName>Drivers</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.esp8266.iot_sdk</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.2.0</SourceFolder>
+					<TargetFolder>IoT-SDK</TargetFolder>
+					<FilesToCopy>examples\driver_lib\*</FilesToCopy>
+					<AlreadyCopied>true</AlreadyCopied>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/IoT-SDK/examples/driver_lib/include</AdditionalIncludeDirs>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>ESP8266 RTOS SDK</Name>
+			<ID>com.sysprogs.esp8266.rtos_sdk</ID>
+			<ProjectFolderName>SDK</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.esp8266.iot_sdk</string>
+			</IncompatibleFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_rtos_sdk-master</SourceFolder>
+					<TargetFolder>RTOS-SDK</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>include\espressif\*</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip;$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip/ipv4;$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip/ipv6;$$SYS:BSP_ROOT$$/RTOS-SDK/include;$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include</AdditionalIncludeDirs>
+					<AutoIncludeMask>include\espressif\*</AutoIncludeMask>
+				</CopyJob>			
+			</CopyJobs>
+				<AdditionalSystemVars>
+					<SysVarEntry>
+					  <Key>com.sysprogs.esp8266.sdktype</Key>
+					  <Value>RTOS</Value>
+					</SysVarEntry>
+					<SysVarEntry>
+					  <Key>com.sysprogs.esp8266.sdkdir</Key>
+					  <Value>RTOS-SDK</Value>
+					</SysVarEntry>
+				</AdditionalSystemVars>
+		</Framework>	
+		<Framework>
+			<Name>ESP8266 Peripheral Drivers (RTOS SDK)</Name>
+			<ID>com.sysprogs.esp8266.rtos_sdk_drivers</ID>
+			<ProjectFolderName>Drivers</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.esp8266.rtos_sdk</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_rtos_sdk-master</SourceFolder>
+					<TargetFolder>RTOS-SDK</TargetFolder>
+					<FilesToCopy>examples\driver_lib\*</FilesToCopy>
+					<AlreadyCopied>true</AlreadyCopied>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/examples/driver_lib/include</AdditionalIncludeDirs>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>examples\driver_lib\driver\gpio.c</FilePath>
+							<OldLine>    _xt_isr_attach(ETS_GPIO_INUM, fn);</OldLine>
+							<NewLine>    _xt_isr_attach(ETS_GPIO_INUM, fn, 0);</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>examples\driver_lib\driver\uart.c</FilePath>
+							<OldLine>    _xt_isr_attach(ETS_UART_INUM, fn);</OldLine>
+							<NewLine>    _xt_isr_attach(ETS_UART_INUM, fn, 0);</NewLine>
+						</Patch>
+					</Patches>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>		
+	</AdditionalFrameworks>
+</FamilyDefinition>

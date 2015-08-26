@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>HTTP Server (RTOS SDK)</Name>
+	<Description>This project demonstrates a very basic HTTP server using the lwIP API under FreeRTOS.</Description>
+	<MCUFilterRegex>ESP8266$</MCUFilterRegex>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Subnet number (192.168.N.1)</Name>
+		  <UniqueID>com.sysprogs.esp8266.http.subnet</UniqueID>
+		  <Description>Specifies the subnet number used by the demo</Description>
+		  <DefaultValue>123</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>255</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="String">
+		  <Name>WiFi Network Name</Name>
+		  <UniqueID>com.sysprogs.esp8266.http.ssid</UniqueID>
+		  <Description>Specifies the wireless network name (SSID)</Description>
+		  <DefaultValue>ESP8266_VisualGDB_RTOS</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<RequiredFrameworks>
+		<string>com.sysprogs.esp8266.rtos_sdk</string>
+		<string>com.sysprogs.esp8266.rtos_sdk_drivers</string>
+	</RequiredFrameworks>
+</EmbeddedProjectSample>
