@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\SystemInit</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\inc</SourceFolder>
+				<TargetFolder>SDK\inc</TargetFolder>
+				<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/SDK/</AdditionalIncludeDirs>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\driverlib\MSP432P4xx</SourceFolder>
+				<TargetFolder>SDK\driverlib</TargetFolder>
+				<FilesToCopy>*.h;*.c</FilesToCopy>				
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+		</SmartSample>
+	</SmartSamples>
+</FamilyDefinition>

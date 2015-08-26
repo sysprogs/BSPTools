@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>MSP432</Name>
+	<DeviceRegex>^MSP432P4.*</DeviceRegex>
+	<FamilySubdirectory>MSP432P4xx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<Subfamilies></Subfamilies>
+	<CompilationFlags>
+		<PreprocessorMacros>
+			<string>TARGET_IS_MSP432P4XX</string>
+			<string>__MSP432P401R__</string>
+		</PreprocessorMacros>
+	</CompilationFlags>
+	<AdditionalSystemVars>
+	    <SysVarEntry>
+			<Key>com.sysprogs.examples.msp432.ROMPREFIX</Key>
+			<Value></Value>
+		</SysVarEntry>
+	</AdditionalSystemVars>
+</FamilyDefinition>
