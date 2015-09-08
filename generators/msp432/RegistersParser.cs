@@ -458,7 +458,7 @@ namespace msp432_bsp_generator
 
         private static bool IsReadOnly(string definition)
         {
-            return definition.Trim() == "__O";
+            return definition.Trim() == "__I";
         }
 
         private static string FormatToHex(ulong addr, int length = 32)
