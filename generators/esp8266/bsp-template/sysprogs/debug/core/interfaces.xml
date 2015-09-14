@@ -1,0 +1,243 @@
+<?xml version="1.0"?>
+<DebugInterfaceList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Interfaces>
+		<DebugInterface>
+			<Name>Segger J-Link (USB)</Name>
+			<ID>jlink_usb</ID>
+			<Module>jlink</Module>
+			<Parameters>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>J-Link serial #</Name>
+				  <UniqueID>usbser</UniqueID>
+				  <SuggestionList/>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Speed (Hz)</Name>
+				  <UniqueID>speed</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>1000000</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+			</Parameters>
+		</DebugInterface>
+		<DebugInterface>
+			<Name>Segger J-Link (Ethernet)</Name>
+			<ID>jlink_net</ID>
+			<Module>jlink</Module>
+			<Parameters>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>IP address</Name>
+				  <UniqueID>ipaddr</UniqueID>
+				  <SuggestionList/>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Port</Name>
+				  <UniqueID>port</UniqueID>
+				  <SuggestionList/>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Speed (Hz)</Name>
+				  <UniqueID>speed</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>1000000</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+			</Parameters>
+		</DebugInterface>
+		<DebugInterface>
+			<Name>FT2232-based interface</Name>
+			<ID>ft2232</ID>
+			<Module>ft2232</Module>
+			<Parameters>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Layout</Name>
+				  <UniqueID>probe</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>ML605</InternalValue></Suggestion>
+					<Suggestion><InternalValue>flyswatter</InternalValue></Suggestion>
+					<Suggestion><InternalValue>flyswatter2</InternalValue></Suggestion>
+					<Suggestion><InternalValue>flyswatter3</InternalValue></Suggestion>
+					<Suggestion><InternalValue>jtagkey-2</InternalValue></Suggestion>
+					<Suggestion><InternalValue>olimex-tiny-h</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Speed</Name>
+				  <UniqueID>speed</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>10MHz</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>USB Serial #</Name>
+				  <UniqueID>usbser</UniqueID>
+				  <SuggestionList/>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+			</Parameters>
+		</DebugInterface>
+		<DebugInterface>
+			<Name>ByteTools Catapult (USB)</Name>
+			<ID>catapult_usb</ID>
+			<Module>catapult</Module>
+			<Parameters>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Catapult serial #</Name>
+				  <UniqueID>usbser</UniqueID>
+				  <SuggestionList/>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Speed (Hz)</Name>
+				  <UniqueID>speed</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>1000000</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Debug mode</Name>
+				  <UniqueID>debug</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>0</InternalValue></Suggestion>
+					<Suggestion><InternalValue>1</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>false</AllowFreeEntry>
+				</PropertyEntry>
+			</Parameters>
+		</DebugInterface>
+		<DebugInterface>
+			<Name>ByteTools Catapult (Ethernet)</Name>
+			<ID>catapult_net</ID>
+			<Module>catapult</Module>
+			<Parameters>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>IP Address</Name>
+				  <UniqueID>ipadddr</UniqueID>
+				  <SuggestionList/>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Speed (Hz)</Name>
+				  <UniqueID>speed</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>1000000</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Debug mode</Name>
+				  <UniqueID>debug</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>0</InternalValue></Suggestion>
+					<Suggestion><InternalValue>1</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>false</AllowFreeEntry>
+				</PropertyEntry>
+			</Parameters>
+		</DebugInterface>
+		<DebugInterface>
+			<Name>RVI JTAG</Name>
+			<ID>rvijtag</ID>
+			<Module>rvijtag</Module>
+			<Parameters>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Configuration file</Name>
+				  <UniqueID>rvconf</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>rv-conf.rvc</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Speed (Hz)</Name>
+				  <UniqueID>speed</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>1000000</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Address</Name>
+				  <UniqueID>rvaddr</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>USB:12345</InternalValue></Suggestion>
+					<Suggestion><InternalValue>TCP:192.168.1.1</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+			</Parameters>
+		</DebugInterface>
+		<DebugInterface>
+			<Name>Macraigor</Name>
+			<ID>macraigor</ID>
+			<Module>macraigor</Module>
+			<Parameters>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Cable type</Name>
+				  <UniqueID>cable</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>usb2demon</InternalValue></Suggestion>
+					<Suggestion><InternalValue>wiggler</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Speed</Name>
+				  <UniqueID>speed</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>1</InternalValue></Suggestion>
+					<Suggestion><InternalValue>4</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Port</Name>
+				  <UniqueID>port</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>0</InternalValue></Suggestion>
+					<Suggestion><InternalValue>1</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Address</Name>
+				  <UniqueID>rvaddr</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>USB:12345</InternalValue></Suggestion>
+					<Suggestion><InternalValue>TCP:192.168.1.1</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+			</Parameters>
+		</DebugInterface>
+	</Interfaces>
+</DebugInterfaceList>	
