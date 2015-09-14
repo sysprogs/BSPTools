@@ -89,7 +89,7 @@ namespace ESP8266DebugPackage
                                 {
                                     val = subkey.GetValue(kv.Key) as string;
                                     if (val != null)
-                                        kv.Value.Text = val;
+                                        SetComboBoxValue(kv.Value, val);
                                 }
                             }
 
@@ -135,7 +135,6 @@ namespace ESP8266DebugPackage
                         result[kv.Key] = kv.Value.Text;
                 }
                 
-                result["com.sysprogs.esp8266.xt-ocd.program_flash"] = cbProgramFLASH.Checked ? "1" : "";
                 result["com.sysprogs.esp8266.xt-ocd.daemonpath"] = txtXtOcd.Text;
 
                 foreach (var kv in _DebuggerComboBoxes)
@@ -156,13 +155,11 @@ namespace ESP8266DebugPackage
                 string val;
                 if (value.TryGetValue("com.sysprogs.esp8266.xt-ocd.daemonpath", out val))
                     txtXtOcd.Text = val;
-                if (value.TryGetValue("com.sysprogs.esp8266.xt-ocd.program_flash", out val))
-                    cbProgramFLASH.Checked = val == "1";
 
                 foreach(var kv in _ComboBoxes)
                 {
                     if (value.TryGetValue(kv.Key, out val))
-                        kv.Value.Text = val;
+                        SetComboBoxValue(kv.Value, val);
                 }
 
                 bool ifaceFound = false;
@@ -194,11 +191,7 @@ namespace ESP8266DebugPackage
             get { return this; }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            SettingsChangedHandler(this, e);
-            pnlFLASH.Enabled = cbProgramFLASH.Checked;
-        }
+
 
         private void SettingsChangedHandler(object sender, EventArgs e)
         {
@@ -282,13 +275,35 @@ namespace ESP8266DebugPackage
             string val;
             foreach (var kv in _DebuggerComboBoxes)
                 if (_Configuration.TryGetValue(InterfaceSettingPrefix + kv.Key, out val))
-                    kv.Value.Text = val;
+                    SetComboBoxValue(kv.Value, val);
+        }
+
+        private void SetComboBoxValue(ComboBox comboBox, string val)
+        {
+            for (int i = 0; i < comboBox.Items.Count; i++)
+            {
+                if (comboBox.Items[i] is PropertyEntry.Enumerated.Suggestion && (comboBox.Items[i] as PropertyEntry.Enumerated.Suggestion).InternalValue == val)
+                {
+                    comboBox.SelectedIndex = i;
+                    return;
+                }
+            }
+
+            var item = new PropertyEntry.Enumerated.Suggestion { InternalValue = val };
+            comboBox.Items.Add(item);
+            comboBox.SelectedItem = item;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             if (openFileDialog2.ShowDialog() == DialogResult.OK)
                 txtTopologyFile.Text = openFileDialog2.FileName;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SettingsChangedHandler(this, e);
+            pnlFLASH.Enabled = cbProgramMode.SelectedIndex != 1;
         }
     }
 }

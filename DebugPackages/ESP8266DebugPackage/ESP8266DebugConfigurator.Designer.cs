@@ -35,7 +35,6 @@
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
             this.cbDebugInterface = new System.Windows.Forms.ComboBox();
-            this.cbProgramFLASH = new System.Windows.Forms.CheckBox();
             this.pnlFLASH = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
             this.comboBox6 = new System.Windows.Forms.ComboBox();
@@ -54,10 +53,12 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.pnlDebuggerSettings = new System.Windows.Forms.Panel();
             this.pnlCustom = new System.Windows.Forms.Panel();
+            this.label9 = new System.Windows.Forms.Label();
             this.txtTopologyFile = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.label9 = new System.Windows.Forms.Label();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
+            this.cbProgramMode = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.pnlFLASH.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -126,19 +127,6 @@
             this.cbDebugInterface.Size = new System.Drawing.Size(275, 21);
             this.cbDebugInterface.TabIndex = 10;
             this.cbDebugInterface.SelectedIndexChanged += new System.EventHandler(this.cbDebugInterface_SelectedIndexChanged);
-            // 
-            // cbProgramFLASH
-            // 
-            this.cbProgramFLASH.AutoSize = true;
-            this.cbProgramFLASH.Checked = true;
-            this.cbProgramFLASH.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbProgramFLASH.Location = new System.Drawing.Point(3, 32);
-            this.cbProgramFLASH.Name = "cbProgramFLASH";
-            this.cbProgramFLASH.Size = new System.Drawing.Size(186, 17);
-            this.cbProgramFLASH.TabIndex = 40;
-            this.cbProgramFLASH.Text = "Program SPI FLASH automatically";
-            this.cbProgramFLASH.UseVisualStyleBackColor = true;
-            this.cbProgramFLASH.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // pnlFLASH
             // 
@@ -307,8 +295,9 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.label10);
             this.panel2.Controls.Add(this.label8);
-            this.panel2.Controls.Add(this.cbProgramFLASH);
+            this.panel2.Controls.Add(this.cbProgramMode);
             this.panel2.Controls.Add(this.cbResetMode);
             this.panel2.Controls.Add(this.pnlFLASH);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
@@ -350,6 +339,15 @@
             this.pnlCustom.Size = new System.Drawing.Size(398, 35);
             this.pnlCustom.TabIndex = 44;
             // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(3, 9);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(98, 13);
+            this.label9.TabIndex = 5;
+            this.label9.Text = "xt-ocd topology file:";
+            // 
             // txtTopologyFile
             // 
             this.txtTopologyFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -371,19 +369,32 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(3, 9);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(98, 13);
-            this.label9.TabIndex = 5;
-            this.label9.Text = "xt-ocd topology file:";
-            // 
             // openFileDialog2
             // 
             this.openFileDialog2.DefaultExt = "exe";
             this.openFileDialog2.Filter = "XML files|*.xml";
+            // 
+            // cbProgramMode
+            // 
+            this.cbProgramMode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbProgramMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbProgramMode.FormattingEnabled = true;
+            this.cbProgramMode.Location = new System.Drawing.Point(120, 28);
+            this.cbProgramMode.Name = "cbProgramMode";
+            this.cbProgramMode.Size = new System.Drawing.Size(278, 21);
+            this.cbProgramMode.TabIndex = 30;
+            this.cbProgramMode.Tag = "com.sysprogs.esp8266.xt-ocd.program_flash";
+            this.cbProgramMode.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(3, 31);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(86, 13);
+            this.label10.TabIndex = 5;
+            this.label10.Text = "Program FLASH:";
             // 
             // ESP8266DebugConfigurator
             // 
@@ -415,7 +426,6 @@
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cbDebugInterface;
-        private System.Windows.Forms.CheckBox cbProgramFLASH;
         private System.Windows.Forms.TableLayoutPanel pnlFLASH;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox comboBox6;
@@ -438,5 +448,7 @@
         private System.Windows.Forms.TextBox txtTopologyFile;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.OpenFileDialog openFileDialog2;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.ComboBox cbProgramMode;
     }
 }

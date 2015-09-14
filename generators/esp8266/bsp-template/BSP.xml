@@ -126,7 +126,7 @@
   </SupportedMCUs>
   <Frameworks/>
   <DebugMethodPackages>
-	<string>sysprogs/debug/xt-ocd</string>
+	<string>sysprogs/debug/core</string>
   </DebugMethodPackages>
   <Examples>
 	<string>sysprogs/samples/LEDBlink_NoFLASH</string>
