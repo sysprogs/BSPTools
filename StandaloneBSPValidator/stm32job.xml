@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainPath>F:\SysGCC\arm-eabi</ToolchainPath>
+	<BSPPath>%LOCALAPPDATA%\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32</BSPPath>
+	<Samples>
+		<TestedSample>
+			<Name>LEDBlink (HAL)</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>true</ValidateRegisters>
+			<SampleConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
+						<Value>GPIOA</Value>
+					</KeyValue>
+					<KeyValue>
+						<Key>com.sysprogs.examples.stm32.LEDPORT</Key>
+						<Value>GPIOA</Value>
+					</KeyValue>
+				</Entries>
+			</SampleConfiguration>
+		</TestedSample>
+		<TestedSample>
+			<Name>LEDBlink (StdPeriph)</Name>
+			<TestDirSuffix>-Legacy</TestDirSuffix>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<SampleConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
+						<Value>GPIOA</Value>
+					</KeyValue>
+					<KeyValue>
+						<Key>com.sysprogs.examples.stm32.LEDPORT</Key>
+						<Value>GPIOA</Value>
+					</KeyValue>
+				</Entries>
+			</SampleConfiguration>
+		</TestedSample>
+	</Samples>
+</TestJob>
