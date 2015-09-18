@@ -46,6 +46,21 @@ namespace esp8266
             frameworks.AddRange(commonPseudofamily.GenerateFrameworkDefinitions());
             bsp.Frameworks = frameworks.ToArray();
 
+            List<string> projectFiles = new List<string>();
+
+            if (commonPseudofamily.Definition.CoreFramework != null)
+                foreach (var job in commonPseudofamily.Definition.CoreFramework.CopyJobs)
+                    job.CopyAndBuildFlags(bspBuilder, projectFiles, null);
+
+            var mainFamily = bsp.MCUFamilies.First();
+
+            if (mainFamily.AdditionalSourceFiles != null || mainFamily.AdditionalHeaderFiles != null || bsp.FileConditions != null)
+                throw new Exception("TODO: merge lists");
+
+            mainFamily.AdditionalSourceFiles = projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray();
+            mainFamily.AdditionalHeaderFiles = projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray();
+            bsp.FileConditions = bspBuilder.MatchedFileConditions.ToArray();
+
             XmlTools.SaveObject(bsp, Path.Combine(bspBuilder.BSPRoot, "BSP.XML"));
         }
     }

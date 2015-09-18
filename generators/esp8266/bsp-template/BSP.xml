@@ -73,6 +73,19 @@
 			  <DefaultEntryIndex>0</DefaultEntryIndex>
 			  <AllowFreeEntry>false</AllowFreeEntry>
 			</PropertyEntry>
+			<PropertyEntry xsi:type="Boolean">
+			  <Name>Enable UART GDB Stub</Name>
+			  <UniqueID>com.sysprogs.esp8266.gdbstub</UniqueID>
+			  <DefaultValue>false</DefaultValue>
+			  <ValueForTrue>ESP8266_GDBSTUB</ValueForTrue>
+			</PropertyEntry>
+			<PropertyEntry xsi:type="Boolean">
+			  <Name>GDB Stub Initial Breakpoint</Name>
+			  <UniqueID>com.sysprogs.esp8266.gdbstub.break</UniqueID>
+			  <DefaultValue>true</DefaultValue>
+			  <ValueForTrue>GDBSTUB_BREAK_ON_INIT=1</ValueForTrue>
+			  <ValueForFalse>GDBSTUB_BREAK_ON_INIT=0</ValueForFalse>
+			</PropertyEntry>
 		  </Properties>
 		  <CollapsedByDefault>false</CollapsedByDefault>
 		</PropertyGroup>
@@ -81,6 +94,8 @@
 	  <CompilationFlags>
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.esp8266.icache_flash$$</string>
+			<string>$$com.sysprogs.esp8266.gdbstub$$</string>
+			<string>$$com.sysprogs.esp8266.gdbstub.break$$</string>
 		</PreprocessorMacros>
 	  </CompilationFlags>
       <AdditionalSystemVars>
@@ -143,6 +158,9 @@
         <IgnoreCase>false</IgnoreCase>
       </FlagCondition>
       <Flags>
+		<PreprocessorMacros>
+			<string>GDBSTUB_FREERTOS=0</string>
+		</PreprocessorMacros>
         <AdditionalLibraryDirectories>
           <string>$$SYS:BSP_ROOT$$/IoT-SDK/lib</string>
           <string>$$SYS:BSP_ROOT$$/IoT-SDK/ld</string>
@@ -192,6 +210,9 @@
         <IgnoreCase>false</IgnoreCase>
       </FlagCondition>
       <Flags>
+		<PreprocessorMacros>
+			<string>GDBSTUB_FREERTOS=1</string>
+		</PreprocessorMacros>
         <AdditionalLibraryDirectories>
           <string>$$SYS:BSP_ROOT$$/RTOS-SDK/lib</string>
           <string>$$SYS:BSP_ROOT$$/RTOS-SDK/ld</string>
@@ -211,6 +232,18 @@
         <LinkerScript>$$SYS:BSP_ROOT$$/RTOS-SDK/$$com.sysprogs.esp8266.linker_script$$</LinkerScript>
         <COMMONFLAGS>-nostdlib -mlongcalls -mtext-section-literals</COMMONFLAGS>
         <EnableLinkerGroups>true</EnableLinkerGroups>
+      </Flags>
+    </ConditionalToolFlags>
+    <ConditionalToolFlags>
+      <FlagCondition xsi:type="Equals">
+        <Expression>$$com.sysprogs.esp8266.gdbstub$$</Expression>
+        <ExpectedValue>ESP8266_GDBSTUB</ExpectedValue>
+        <IgnoreCase>false</IgnoreCase>
+      </FlagCondition>
+      <Flags>
+        <IncludeDirectories>
+          <string>$$SYS:BSP_ROOT$$/GDBStub</string>
+        </IncludeDirectories>
       </Flags>
     </ConditionalToolFlags>
   </ConditionalFlags>

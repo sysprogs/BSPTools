@@ -1,5 +1,19 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\GDBStub</SourceFolder>
+				<TargetFolder>GDBStub</TargetFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>*.c;*.h;*.S</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+				<SimpleFileConditions>
+					<string>.*: $$com.sysprogs.esp8266.gdbstub$$ == ESP8266_GDBSTUB</string>
+				</SimpleFileConditions>				
+			</CopyJob>			
+		</CopyJobs>
+	</CoreFramework>	
 	<AdditionalFrameworks>
 		<Framework>
 			<Name>ESP8266 IoT SDK</Name>
@@ -18,6 +32,7 @@
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-include\json\*;include\*</ProjectInclusionMask>
 					<AutoIncludeMask>*eagle_soc.h</AutoIncludeMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include</AdditionalIncludeDirs>
 				</CopyJob>			
 			</CopyJobs>
 				<AdditionalSystemVars>

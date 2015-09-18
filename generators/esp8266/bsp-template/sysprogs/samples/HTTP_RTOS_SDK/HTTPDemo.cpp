@@ -17,6 +17,10 @@ void user_init(void);
 }
 #endif
 
+#ifdef ESP8266_GDBSTUB
+#include <gdbstub.h>
+#endif
+
 #define RAMFUNC __attribute__((section(".entry.text")))
 
 static const char szHeader[] = "HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n<html><body><h1>Hello, world</h1>You have requested the following URL: ";
@@ -111,6 +115,10 @@ void dhcps_lease_test(void)
 
 void RAMFUNC user_init(void)
 {
+#ifdef ESP8266_GDBSTUB
+	gdbstub_init();
+#endif
+
 	struct ip_info info;
 	struct softap_config cfg;
 	wifi_softap_get_config(&cfg);

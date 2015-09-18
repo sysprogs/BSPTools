@@ -16,6 +16,10 @@ int user_init();
 }
 #endif
 
+#ifdef ESP8266_GDBSTUB
+#include <gdbstub.h>
+#endif
+
 static os_timer_t s_Timer;
 int s_Tick = 0;
 
@@ -38,8 +42,14 @@ void TimerFunction(void *arg)
 
 int user_init()
 {
+#ifdef ESP8266_GDBSTUB
+	gdbstub_init();
+#endif
 	gpio_init();
 
+#ifdef ESP8266_GDBSTUB
+#error The LED on the Olimex board is multiplexed with the TXD line used by the GDB stub. In order to use the stub, select a different LED pin below.
+#endif
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_GPIO1);
 
 	gpio_output_set(0, BIT1, BIT1, 0);

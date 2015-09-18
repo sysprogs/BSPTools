@@ -17,6 +17,10 @@ void user_init(void);
 }
 #endif
 
+#ifdef ESP8266_GDBSTUB
+#include <gdbstub.h>
+#endif
+
 void dhcps_lease_test(void)
 {
 	struct dhcps_lease dhcp_lease;
@@ -47,6 +51,10 @@ static void httpdConnectCb(void *arg)
 
 void user_init()
 {
+#ifdef ESP8266_GDBSTUB
+	gdbstub_init();
+#endif
+
 	//Uncomment the line below if you want to step through the initialization function in the debugger without getting a reset from a watchdog.
 	//system_soft_wdt_stop();
 	struct ip_info info;

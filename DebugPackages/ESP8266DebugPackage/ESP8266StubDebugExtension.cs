@@ -1,6 +1,7 @@
 ﻿using BSPEngine;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -40,6 +41,39 @@ namespace ESP8266DebugPackage
 
             public CustomStartupSequence BuildSequence(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
             {
+                if (!File.Exists(targetPath))
+                    throw new Exception(targetPath + " not found. Debugging will not be possible.");
+
+                bool stubFound = false;
+                using (var elf = new ELFFile(targetPath))
+                {
+                    foreach (var sym in elf.LoadAllSymbols())
+                    {
+                        if (sym.Name == "gdbstub_init")
+                        {
+                            stubFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!stubFound)
+                {
+                    var wrp = new ResultWrapper();
+                    _SyncContext.Send(o => ((ResultWrapper)o).Result = MessageBox.Show("The programmed image does not contain the GDB stub. Do you want to open instructions on debugging with ESP8266 GDB stub?", "VisualGDB", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information), wrp);
+                    switch(wrp.Result)
+                    {
+                        case DialogResult.Yes:
+                            Process.Start("http://visualgdb.com/KB/esp8266gdbstub");
+                            goto case DialogResult.Cancel;
+                            break;
+                        case DialogResult.No:
+                            break;
+                        case DialogResult.Cancel:
+                            throw new OperationCanceledException();
+                    }
+                }
+
                 string val;
                 if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.program_flash", out val) || val != "0")
                 {

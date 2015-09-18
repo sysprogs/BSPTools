@@ -17,6 +17,10 @@ void user_init(void);
 }
 #endif
 
+#ifdef ESP8266_GDBSTUB
+#include <gdbstub.h>
+#endif
+
 #define RAMFUNC __attribute__((section(".entry.text")))
 	
 static void RAMFUNC LEDBlinkTask(void *pvParameters)
@@ -34,6 +38,13 @@ static void RAMFUNC LEDBlinkTask(void *pvParameters)
 //won't be able to set software breakpoints there.
 void RAMFUNC user_init(void)  
 {
+#ifdef ESP8266_GDBSTUB
+	gdbstub_init();
+#endif
+
+#ifdef ESP8266_GDBSTUB
+#error The LED on the Olimex board is multiplexed with the TXD line used by the GDB stub. In order to use the stub, select a different LED pin below.
+#endif
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_GPIO1);
 	gpio_output_conf(0, BIT1, BIT1, 0);
 

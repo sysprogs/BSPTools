@@ -45,9 +45,9 @@
 				  <Name>Program SPI FLASH</Name>
 				  <UniqueID>com.sysprogs.esp8266.xt-ocd.program_flash</UniqueID>
 				  <SuggestionList>
-					<Suggestion><UserFriendlyName>Program before debugging</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Assume it is already programmed</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Re-program when the image is rebuilt</UserFriendlyName><InternalValue>auto</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Always program before debugging</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Assume it is already programmed</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Program only if changed</UserFriendlyName><InternalValue>auto</InternalValue></Suggestion>
 				  </SuggestionList>
 				  <DefaultEntryIndex>0</DefaultEntryIndex>
 				</PropertyEntry>
@@ -193,9 +193,9 @@
 				  <Name>Program SPI FLASH</Name>
 				  <UniqueID>com.sysprogs.esp8266.program_flash</UniqueID>
 				  <SuggestionList>
-					<Suggestion><UserFriendlyName>Program before debugging</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Assume it is already programmed</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Re-program when the image is rebuilt</UserFriendlyName><InternalValue>auto</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Always program before debugging</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Assume it is already programmed</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Program only if changed</UserFriendlyName><InternalValue>auto</InternalValue></Suggestion>
 				  </SuggestionList>
 				  <DefaultEntryIndex>0</DefaultEntryIndex>
 				</PropertyEntry>
