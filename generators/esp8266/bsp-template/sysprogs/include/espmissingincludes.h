@@ -35,6 +35,7 @@ void *pvPortZalloc(size_t);
 void uart_div_modify(int no, unsigned int freq);
 void vPortFree(void *ptr);
 void *vPortMalloc(size_t xWantedSize);
+int os_printf_plus(const char *format, ...)  __attribute__ ((format (printf, 1, 2)));
 
 #ifdef __cplusplus
 }
