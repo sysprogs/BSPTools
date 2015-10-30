@@ -174,14 +174,14 @@
 				  <Name>GDB Stub Baud Rate</Name>
 				  <UniqueID>com.sysprogs.esp8266.gdbstub.baud</UniqueID>
 				  <SuggestionList>
-					<Suggestion><InternalValue>74800</InternalValue></Suggestion>
+					<Suggestion><InternalValue>74880</InternalValue></Suggestion>
 					<Suggestion><InternalValue>115200</InternalValue></Suggestion>
 				  </SuggestionList>
 				  <DefaultEntryIndex>0</DefaultEntryIndex>
 				  <AllowFreeEntry>true</AllowFreeEntry>
 				</PropertyEntry>
 				<PropertyEntry xsi:type="Enumerated">
-				  <Name>GDB Stub Baud Rate</Name>
+				  <Name>Bootloader Baud Rate</Name>
 				  <UniqueID>com.sysprogs.esp8266.gdbstub.bl_baud</UniqueID>
 				  <SuggestionList>
 					<Suggestion><InternalValue>115200</InternalValue></Suggestion>
