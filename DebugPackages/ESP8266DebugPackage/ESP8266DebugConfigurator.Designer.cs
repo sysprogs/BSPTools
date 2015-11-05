@@ -50,6 +50,8 @@
             this.cbResetMode = new System.Windows.Forms.ComboBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.label10 = new System.Windows.Forms.Label();
+            this.cbProgramMode = new System.Windows.Forms.ComboBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.pnlDebuggerSettings = new System.Windows.Forms.Panel();
             this.pnlCustom = new System.Windows.Forms.Panel();
@@ -57,8 +59,6 @@
             this.txtTopologyFile = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
-            this.cbProgramMode = new System.Windows.Forms.ComboBox();
-            this.label10 = new System.Windows.Forms.Label();
             this.pnlFLASH.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -306,6 +306,28 @@
             this.panel2.Size = new System.Drawing.Size(398, 147);
             this.panel2.TabIndex = 41;
             // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(3, 31);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(86, 13);
+            this.label10.TabIndex = 5;
+            this.label10.Text = "Program FLASH:";
+            // 
+            // cbProgramMode
+            // 
+            this.cbProgramMode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbProgramMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbProgramMode.FormattingEnabled = true;
+            this.cbProgramMode.Location = new System.Drawing.Point(120, 28);
+            this.cbProgramMode.Name = "cbProgramMode";
+            this.cbProgramMode.Size = new System.Drawing.Size(278, 21);
+            this.cbProgramMode.TabIndex = 30;
+            this.cbProgramMode.Tag = "com.sysprogs.esp8266.xt-ocd.program_flash";
+            this.cbProgramMode.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.label1);
@@ -373,28 +395,6 @@
             // 
             this.openFileDialog2.DefaultExt = "exe";
             this.openFileDialog2.Filter = "XML files|*.xml";
-            // 
-            // cbProgramMode
-            // 
-            this.cbProgramMode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbProgramMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbProgramMode.FormattingEnabled = true;
-            this.cbProgramMode.Location = new System.Drawing.Point(120, 28);
-            this.cbProgramMode.Name = "cbProgramMode";
-            this.cbProgramMode.Size = new System.Drawing.Size(278, 21);
-            this.cbProgramMode.TabIndex = 30;
-            this.cbProgramMode.Tag = "com.sysprogs.esp8266.xt-ocd.program_flash";
-            this.cbProgramMode.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(3, 31);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(86, 13);
-            this.label10.TabIndex = 5;
-            this.label10.Text = "Program FLASH:";
             // 
             // ESP8266DebugConfigurator
             // 

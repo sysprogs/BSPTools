@@ -278,7 +278,7 @@ namespace ESP8266DebugPackage
                     SetComboBoxValue(kv.Value, val);
         }
 
-        private void SetComboBoxValue(ComboBox comboBox, string val)
+        public static void SetComboBoxValue(ComboBox comboBox, string val)
         {
             for (int i = 0; i < comboBox.Items.Count; i++)
             {

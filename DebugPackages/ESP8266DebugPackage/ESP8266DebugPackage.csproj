@@ -51,6 +51,12 @@
     <Compile Include="ESP8266DebugExtension.cs" />
     <Compile Include="ESP8266StartupSequence.cs" />
     <Compile Include="ESP8266StubDebugExtension.cs" />
+    <Compile Include="OpenOCDDebugConfigurator.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OpenOCDDebugConfigurator.Designer.cs">
+      <DependentUpon>OpenOCDDebugConfigurator.cs</DependentUpon>
+    </Compile>
     <Compile Include="ProgramProgressForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -64,9 +70,18 @@
     <EmbeddedResource Include="ESP8266DebugConfigurator.resx">
       <DependentUpon>ESP8266DebugConfigurator.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="OpenOCDDebugConfigurator.resx">
+      <DependentUpon>OpenOCDDebugConfigurator.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ProgramProgressForm.resx">
       <DependentUpon>ProgramProgressForm.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\sysprogs\support\OpenOCDPackage\OpenOCDPackage.csproj">
+      <Project>{84589bb6-390b-49ec-a412-d7cadc0ee289}</Project>
+      <Name>OpenOCDPackage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

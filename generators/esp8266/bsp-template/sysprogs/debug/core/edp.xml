@@ -7,6 +7,165 @@
   <ExtensionDLL>ESP8266DebugPackage.dll</ExtensionDLL>
   <SupportedDebugMethods>
     <DebugMethod>
+      <UserFriendlyName>OpenOCD</UserFriendlyName>
+	  <AutoSelectScore>2000</AutoSelectScore>
+      <ID>openocd</ID>
+	  <ExtensionClass>ESP8266DebugPackage.ESP8266DebugExtension</ExtensionClass>
+	  <GDBServerApplication>$$SYS:BSP_ROOT$$\openocd\bin\openocd.exe</GDBServerApplication>
+	  <GDBServerWorkingDir>$$SYS:BSP_ROOT$$\openocd\share\openocd\scripts</GDBServerWorkingDir>
+	  <GDBServerArguments>
+		  <GNUStyle>false</GNUStyle>
+		  <Template>-f $$com.sysprogs.esp8266.openocd.iface_script$$ -f target/esp8266.cfg $$com.sysprogs.esp8266.openocd.speed_cmd$$ $$com.sysprogs.esp8266.openocd.extra_cmdline$$</Template>
+      </GDBServerArguments>
+      <GDBServerDelay>500</GDBServerDelay>
+      <GDBStartupCommands>
+        <string>target remote :3333</string>
+        <string>$$com.sysprogs.esp8266.load_sequence$$</string>
+        <string>mon xtensa_no_interrupts_during_steps $$com.sysprogs.esp8266.disable_interrupts_during_steps$$</string>
+        <string>mon esp8266_autofeed_watchdog $$com.sysprogs.esp8266.autofeed_watchdog$$</string>
+      </GDBStartupCommands>
+      <UseContinueToStart>true</UseContinueToStart>
+      <SendCtrlCToGDBServer>false</SendCtrlCToGDBServer>
+	  <RequireExplicitDisconnect>true</RequireExplicitDisconnect>
+	  <ResetCommand>mon reset halt</ResetCommand>
+	  <WriteOnlyPCOverride>$epc2</WriteOnlyPCOverride>
+	  <RequestAdvancedDebugVariables>true</RequestAdvancedDebugVariables>
+	  <AdditionalProperties>
+          <PropertyGroups>
+            <PropertyGroup>
+              <Properties>
+			  	<PropertyEntry xsi:type="String">
+                  <Name>Inteface script</Name>
+                  <UniqueID>com.sysprogs.esp8266.openocd.iface_script</UniqueID>
+				  <DefaultValue>interface/olimex-arm-usb-ocd-h.cfg</DefaultValue>
+                </PropertyEntry>
+			  	<PropertyEntry xsi:type="Boolean">
+                  <Name>Suppress interrupts during single-stepping</Name>
+                  <UniqueID>com.sysprogs.esp8266.disable_interrupts_during_steps</UniqueID>
+				  <DefaultValue>true</DefaultValue>
+				  <ValueForTrue>on</ValueForTrue>
+				  <ValueForFalse>off</ValueForFalse>
+                </PropertyEntry>
+			  	<PropertyEntry xsi:type="Boolean">
+                  <Name>Feed watchdog while stopped</Name>
+                  <UniqueID>com.sysprogs.esp8266.autofeed_watchdog</UniqueID>
+				  <DefaultValue>true</DefaultValue>
+				  <ValueForTrue>on</ValueForTrue>
+				  <ValueForFalse>off</ValueForFalse>
+                </PropertyEntry>
+			  	<PropertyEntry xsi:type="String">
+                  <Name>Speed selection command</Name>
+                  <UniqueID>com.sysprogs.esp8266.openocd.speed_cmd</UniqueID>
+				  <DefaultValue></DefaultValue>
+                </PropertyEntry>
+			  	<PropertyEntry xsi:type="String">
+                  <Name>Additional command line</Name>
+                  <UniqueID>com.sysprogs.esp8266.openocd.extra_cmdline</UniqueID>
+				  <DefaultValue></DefaultValue>
+                </PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Program SPI FLASH</Name>
+				  <UniqueID>com.sysprogs.esp8266.xt-ocd.program_flash</UniqueID>
+				  <SuggestionList>
+					<Suggestion><UserFriendlyName>Always program before debugging</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Assume it is already programmed</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Program only if changed</UserFriendlyName><InternalValue>auto</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>Start mode</Name>
+				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_start_mode</UniqueID>
+				  <SuggestionList>
+					<Suggestion><UserFriendlyName>Emulate a CPU reset</UserFriendlyName><InternalValue>soft_reset</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Reset entire chip</UserFriendlyName><InternalValue>hard_reset</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>false</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>SPI FLASH Sector Size</Name>
+				  <UniqueID>com.sysprogs.esp8266.xt-ocd.prog_sector_size</UniqueID>
+				  <SuggestionList>
+					<Suggestion><UserFriendlyName>4096</UserFriendlyName><InternalValue>4096</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>SPI FLASH Erase Block Size</Name>
+				  <UniqueID>com.sysprogs.esp8266.xt-ocd.erase_sector_size</UniqueID>
+				  <SuggestionList>
+					<Suggestion><UserFriendlyName>4096</UserFriendlyName><InternalValue>4096</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>SPI FLASH Frequency</Name>
+				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_freq</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>40m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>26m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>20m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>80m</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>SPI FLASH Mode</Name>
+				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_mode</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>qio</InternalValue></Suggestion>
+					<Suggestion><InternalValue>qout</InternalValue></Suggestion>
+					<Suggestion><InternalValue>dio</InternalValue></Suggestion>
+					<Suggestion><InternalValue>dout</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+				<PropertyEntry xsi:type="Enumerated">
+				  <Name>SPI FLASH Size</Name>
+				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_size</UniqueID>
+				  <SuggestionList>
+					<Suggestion><InternalValue>4m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>2m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>8m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>16m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>32m</InternalValue></Suggestion>
+					<Suggestion><InternalValue>16m-c1</InternalValue></Suggestion>
+					<Suggestion><InternalValue>32m-c1</InternalValue></Suggestion>
+					<Suggestion><InternalValue>32m-c2</InternalValue></Suggestion>
+				  </SuggestionList>
+				  <DefaultEntryIndex>0</DefaultEntryIndex>
+				  <AllowFreeEntry>true</AllowFreeEntry>
+				</PropertyEntry>
+			  </Properties>
+            </PropertyGroup>
+          </PropertyGroups>
+	  </AdditionalProperties>
+      <AutoProgramProfile>
+		<AutoProgramCondition xsi:type="Equals">
+			<Expression>$$com.sysprogs.esp8266.xt-ocd.program_flash$$</Expression>
+			<ExpectedValue>auto</ExpectedValue>
+		</AutoProgramCondition>
+		<ProgramCommandRegex>\$\$com.sysprogs.esp8266.load_sequence\$\$</ProgramCommandRegex>
+		<VarsToProgram>
+			<SysVarEntry>
+				<Key>com.sysprogs.esp8266.xt-ocd.program_flash</Key>
+				<Value>1</Value>
+			</SysVarEntry>
+		</VarsToProgram>
+		<VarsToSkip>
+			<SysVarEntry>
+				<Key>com.sysprogs.esp8266.xt-ocd.program_flash</Key>
+				<Value>0</Value>
+			</SysVarEntry>
+		</VarsToSkip>
+	  </AutoProgramProfile>
+	</DebugMethod>
+    <DebugMethod>
       <UserFriendlyName>Xtensa OCD Daemon</UserFriendlyName>
 	  <AutoSelectScore>1000</AutoSelectScore>
       <ID>xt-ocd</ID>

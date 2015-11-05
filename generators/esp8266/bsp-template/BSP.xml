@@ -227,6 +227,8 @@
           <string>wpa</string>
           <string>freertos</string>
           <string>lwip</string>
+          <string>crypto</string>
+          <string>wpa</string>
         </AdditionalLibraries>
         <LDFLAGS>-lmain</LDFLAGS>
         <LinkerScript>$$SYS:BSP_ROOT$$/RTOS-SDK/$$com.sysprogs.esp8266.linker_script$$</LinkerScript>
