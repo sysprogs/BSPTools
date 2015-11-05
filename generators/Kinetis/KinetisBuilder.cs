@@ -12,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using System.Xml.XPath;
 
 namespace kinetis_bsp_generator {
 
@@ -34,7 +33,7 @@ namespace kinetis_bsp_generator {
         private const string FSL_DEVICE_REGISTERS_FILE = "fsl_device_registers.h";
         private const string SRAM_MEMORY = "SRAM";
         private const string FLASH_MEMORY = "FLASH";
-        private const string SVD_CPU_ELEMENT = "/device/cpu/name";
+        private const string KSDK_MANIFEST_FILE = "ksdk_manifest.xml";
 
         private static readonly Dictionary<string, string> LdMemoryNameToBSPName = new Dictionary<string, string> {
             { "text", FLASH_MEMORY },
@@ -43,8 +42,6 @@ namespace kinetis_bsp_generator {
             { "data", SRAM_MEMORY },
             { "data_2", SRAM_MEMORY }
         };
-
-        private static readonly HashSet<string> _familiesWithGpioPrefix = new HashSet<string>(new []{"KL02Z4", "KL17Z4", "KV10Z7", "KW01Z4", "KW21D5", "KW22D5", "KW24D5"});
 
         private readonly Dictionary<string, MemoryLayout> _mcuMemoryLayouts = new Dictionary<string, MemoryLayout>();
 
@@ -190,20 +187,40 @@ namespace kinetis_bsp_generator {
             _mcuFamilyBuilders = mcuFamilyBuilders;
         }
 
+        private Dictionary<string, CortexCore> ReadMcuFamilyCores() {
+            var dict = new Dictionary<string, CortexCore>();
+            foreach (var device in XDocument.Load(Directories.InputDir + "\\" + KSDK_MANIFEST_FILE).Descendants("device")) {
+                var deviceName = device.Attribute("name").Value.Substring(1);
+                var deviceCore = (CortexCore)Enum.Parse(typeof(CortexCore), device.Element("core").Attribute("name").Value.Substring(1), true);
+                if (dict.ContainsKey(deviceName) && dict[deviceName] != deviceCore) {
+                    throw new Exception(string.Format("{0} has different core types in manifest", deviceName));
+                }
+                if (!dict.ContainsKey(deviceName))
+                {
+                    dict.Add(deviceName, deviceCore);
+                }
+            }
+            return dict;
+        }
+
         private void AssignMCUsToFamilies() {
             var assignedMCUs = new List<MCUBuilder>();
             var mcuNamePatterns = new HashSet<string>();
+            var familyCores = ReadMcuFamilyCores();
 
-            foreach (var mcuFamilyBuilder in _mcuFamilyBuilders) {                
+            foreach (var mcuFamilyBuilder in _mcuFamilyBuilders) {
+
                 var ldFiles = Directory.GetFiles(mcuFamilyBuilder.Definition.PrimaryHeaderDir, "*.ld", SearchOption.AllDirectories);
                 _familyToMCUs.Add(mcuFamilyBuilder.Definition.Name, new List<string>());
 
                 foreach (var ldFile in ldFiles) {
+
                     var ldFileName = ldFile.Substring(ldFile.LastIndexOf(Path.DirectorySeparatorChar) + 1);
                     var generalizedMCUName = ldFileName.Split('_')[0];
                     var mcuNamePattern = generalizedMCUName.Replace('x', '.');
 
                     if (!mcuNamePatterns.Contains(mcuNamePattern)) {
+
                         mcuNamePatterns.Add(mcuNamePattern);
                         var mcuFamilyMemoryLayout = ReadMemoryLayout(ldFile);
 
@@ -219,6 +236,7 @@ namespace kinetis_bsp_generator {
                                 _mcuMemoryLayouts.Add(mcu.Name, mcuMemoryLayout);
                                 mcu.RAMSize = (int)mcuMemoryLayout.Memories.First(mem => mem.Name == SRAM_MEMORY).Size;
                                 mcu.FlashSize = (int)mcuMemoryLayout.Memories.First(mem => mem.Name == FLASH_MEMORY).Size;
+                                mcu.Core = familyCores[mcuFamilyBuilder.Definition.Name];
                                 mcuFamilyBuilder.MCUs.Add(mcu);
                                 _familyToMCUs[mcuFamilyBuilder.Definition.Name].Add(mcu.Name);
                                 assignedMCUs.Add(mcu);
@@ -226,35 +244,6 @@ namespace kinetis_bsp_generator {
                             }
                         }
                     }
-                }
-
-                var svdContents = XDocument.Load(mcuFamilyBuilder.Definition.PrimaryHeaderDir + "\\M" + mcuFamilyBuilder.Definition.Name + ".svd");
-                var cpuName = svdContents.XPathSelectElement(SVD_CPU_ELEMENT).Value;
-                CortexCore cortexCore;
-
-                switch (cpuName) {
-                    case "CM0":
-                        cortexCore = CortexCore.M0;
-                        break;
-                    case "CM0PLUS":
-                        cortexCore = CortexCore.M0Plus;
-                        break;
-                    case "CM3":
-                        cortexCore = CortexCore.M3;
-                        break;
-                    case "CM4":
-                        cortexCore = CortexCore.M4;
-                        break;
-                    case "CM7":
-                        cortexCore = CortexCore.M7;
-                        break;
-                    default:
-                        cortexCore = CortexCore.Invalid;
-                        break;
-                }
-
-                foreach (var mcu in mcuFamilyBuilder.MCUs) {
-                    mcu.Core = cortexCore;
                 }
             }
 
@@ -270,7 +259,10 @@ namespace kinetis_bsp_generator {
             var rgMemory = new Regex(@"\s*m_([\w]+)\s*\([RWX]+\)\s*:\s*ORIGIN\s*=\s*0x([0-9a-fA-F]+)\s*,\s*LENGTH\s*=\s*0x([0-9a-fA-F]+)");
 
             foreach (var match in rgMemory.Matches(File.ReadAllText(ldFile)).Cast<Match>()) {
-                var name = LdMemoryNameToBSPName[match.Groups[1].Value];
+                string name;
+                if (!LdMemoryNameToBSPName.TryGetValue(match.Groups[1].Value, out name)) {
+                    continue;
+                }
                 Memory memory = null;
                 if (name == "SRAM") {
                     memory = memoryLayout.Memories.FirstOrDefault(mem => mem.Name == SRAM_MEMORY);
@@ -510,7 +502,6 @@ namespace kinetis_bsp_generator {
                 famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, deviceSpecificFiles.Where(f => f.Contains(famObj.ID) && !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
                 famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, deviceSpecificFiles.
                     Where(f => (f.Contains(famObj.ID) || f.Contains("CMSIS") || f.Contains("fsl_device_registers.h")) && MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
-                famObj.AdditionalSystemVars = new[] { new SysVarEntry { Key = "com.sysprogs.kinetis.gpio_port_prefix", Value = _familiesWithGpioPrefix.Contains(famObj.ID) ? "GPIO" : "PT" } };
                 famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, _commonPseudofamily.Definition.AdditionalSystemVars);
                 famObj.CompilationFlags = famObj.CompilationFlags.Merge(_flags);
                 famObj.CompilationFlags.IncludeDirectories = new HashSet<string>(famObj.AdditionalSourceFiles.Concat(famObj.AdditionalHeaderFiles).Select(f => f.Substring(0, f.LastIndexOf("/")))).ToArray();
@@ -621,7 +612,7 @@ namespace kinetis_bsp_generator {
         }
 
         const uint FLASHBase = 0x410;
-        const uint SRAMBase = 0x20000000;        
+        const uint SRAMBase = 0x20000000;
 
         public override void GetMemoryBases(out uint flashBase, out uint ramBase) {
             flashBase = FLASHBase;

@@ -13,15 +13,8 @@ namespace kinetis_bsp_generator {
 
     static class PeripheralRegisterGenerator {
 
-        public static HardwareRegisterSet[] GenerateFamilyPeripheralRegisters(string PeripheralHeaderFile) {
-            string file = File.ReadAllText(PeripheralHeaderFile);
-
-            Dictionary<string, HardwareRegisterSet> types = new Dictionary<string, HardwareRegisterSet>();
-            Dictionary<string, List<HardwareSubRegister>> subregisters = new Dictionary<string, List<HardwareSubRegister>>();
-            Dictionary<string, KeyValuePair<string, ulong>> addresses = new Dictionary<string, KeyValuePair<string, ulong>>();
-
-            List<string> REGISTERSETS_WITHOUT_SUBREGISTERS = new List<string>() { "CoreDebug", "DWT", "ETB", "ETF", "ETM", "FPB", "ITM", "TPIU", "BP" };
-            List<string> REGISTERS_WITHOUT_SUBREGISTERS = new List<string>() { "MCG_C9", "MCG_C10", "SIM_CLKDIV2", "AIPS_MPRA",
+        private static readonly List<string> REGISTERSETS_WITHOUT_SUBREGISTERS = new List<string>() { "CoreDebug", "DWT", "ETB", "ETF", "ETM", "FPB", "ITM", "TPIU", "BP" };
+        private static readonly List<string> REGISTERS_WITHOUT_SUBREGISTERS = new List<string>() { "MCG_C9", "MCG_C10", "SIM_CLKDIV2", "AIPS_MPRA",
                 "CAU_DIRECT", "CAU_LDR_CAA", "CAU_LDR_CA", "CAU_STR_CAA", "CAU_STR_CA", "CAU_ADR_CAA", "CAU_ADR_CA", "CAU_RADR_CAA", "CAU_RADR_CA", "CAU_XOR_CAA", "CAU_XOR_CA", "CAU_ROTL_CAA", "CAU_ROTL_CA", "CAU_AESC_CAA", "CAU_AESC_CA", "CAU_AESIC_CAA", "CAU_AESIC_CA",
                 "USBHS_CONFIGFLAG",
                 "ENET_RMON_T_CRC_ALIGN",
@@ -87,11 +80,19 @@ namespace kinetis_bsp_generator {
                 "MCG_C7",
                 "FMC",
                 "FMC_PFB1CR",
-                "USBPHY_DEBUGr"
+                "USBPHY_DEBUGr",
+                "XCVR_SOFT_RESET"
             };
 
-            List<string> REGISTERS_ENDING_UNDERSCORE_NUMBER = new List<string> { "RMON_R_RESVD_0" };
+        private static readonly List<string> REGISTERS_ENDING_UNDERSCORE_NUMBER = new List<string> { "RMON_R_RESVD_0" };
 
+        public static HardwareRegisterSet[] GenerateFamilyPeripheralRegisters(string PeripheralHeaderFile) {
+            string file = File.ReadAllText(PeripheralHeaderFile);
+
+            Dictionary<string, HardwareRegisterSet> types = new Dictionary<string, HardwareRegisterSet>();
+            Dictionary<string, List<HardwareSubRegister>> subregisters = new Dictionary<string, List<HardwareSubRegister>>();
+            Dictionary<string, KeyValuePair<string, ulong>> addresses = new Dictionary<string, KeyValuePair<string, ulong>>();
+            
             var struct_regex = new Regex(@"typedef\s+struct\s*{(.+?)}\s*([^ ]*)_Type", RegexOptions.Singleline);            
 
             // 1. Process all structures in the file one by one
@@ -119,18 +120,48 @@ namespace kinetis_bsp_generator {
                     throw new Exception("Failed to find register masks!");
                 string register_masks_content = register_masks_m.Groups[0].ToString();
 
-                Regex subregister_regex = new Regex(@"#define ([^_]+)_([^()\n\r]+)_MASK[ \t]+([0-9A-Fa-fx]+)u\n#define ([^_]+)_(.+?)_SHIFT[ \t]+([0-9]+)\n", RegexOptions.Singleline);
+                Regex subregister_regex = new Regex(@"#define\s([^()\s]+)_MASK[\s]*([0-9A-Fa-fx]+)u\s*#define\s([^()\s]+)_SHIFT\s*([0-9]+)\s*", RegexOptions.Singleline);
                 var subregisters_m = subregister_regex.Matches(register_masks_content);
                 if ((subregisters_m.Count == 0) && !REGISTERSETS_WITHOUT_SUBREGISTERS.Contains(struct_name))
                     throw new Exception("No subregisters found from register masks!");
 
                 foreach (Match subregister_m in subregisters_m) {
-                    string subregister_mask_set_name = subregister_m.Groups[1].ToString();
-                    string subregister_mask_reg_subreg_name = subregister_m.Groups[2].ToString();
-                    string subregister_mask = subregister_m.Groups[3].ToString();
-                    string subregister_shift_set_name = subregister_m.Groups[4].ToString();
-                    string subregister_shift_reg_subreg_name = subregister_m.Groups[5].ToString();
-                    int subregister_first_bit = Int32.Parse(subregister_m.Groups[6].Value);
+                    var subregister_mask_name = subregister_m.Groups[1].ToString();
+
+                    if (!subregister_mask_name.StartsWith(set.UserFriendlyName)) {
+                        throw new Exception(string.Format("Wrong subregister mask name {0} for register set {1}", subregister_mask_name, set.UserFriendlyName));
+                    }
+
+                    var subregister_mask_set_name = set.UserFriendlyName;
+                    var temp_subregister_mask_reg_subreg_name = subregister_mask_name.Substring(subregister_mask_set_name.Length + 1);
+                    string subregister_mask_reg_subreg_name = null;
+
+                    foreach (var register in set.Registers) {
+                        var cleaned_reg_name = CleanRegisterName(register.Name);
+                        if (cleaned_reg_name.EndsWith("r")) {
+                            cleaned_reg_name = cleaned_reg_name.Substring(0, cleaned_reg_name.Length - 1);
+                        }
+                        if (subregister_mask_name.Contains(cleaned_reg_name)) {
+                            subregister_mask_reg_subreg_name = temp_subregister_mask_reg_subreg_name;
+                            break;
+                        }
+                    }
+
+                    if (subregister_mask_reg_subreg_name == null) {
+                        throw new Exception(string.Format("Wrong combined register and subregister mask name {0} for register set {1}", temp_subregister_mask_reg_subreg_name, set.UserFriendlyName));
+                    }
+                                        
+                    string subregister_mask = subregister_m.Groups[2].ToString();
+
+                    var subregister_shift_name = subregister_m.Groups[3].ToString();
+                    
+                    if (!subregister_shift_name.StartsWith(set.UserFriendlyName)) {
+                        throw new Exception(string.Format("Wrong subregister shift name {0} for register set {1}", subregister_mask_name, set.UserFriendlyName));
+                    }
+
+                    string subregister_shift_set_name = set.UserFriendlyName;
+                    string subregister_shift_reg_subreg_name = subregister_shift_name.Substring(subregister_shift_set_name.Length + 1);
+                    int subregister_first_bit = Int32.Parse(subregister_m.Groups[4].Value);
 
                     if (subregister_mask_set_name != subregister_shift_set_name)
                         throw new Exception("The subregister mask and shift have non-matching register set names!");
@@ -140,21 +171,21 @@ namespace kinetis_bsp_generator {
 
                     string subregister_register_name = null;
                     string subregister_name = null;
+                    var foundRegisterLength = int.MinValue;
+
                     foreach (var register in set.Registers) {
-                        string cleaned_reg_name = register.Name;
-                        Regex reg_name_regex1 = new Regex(@"(.*)_[0-9]+_[0-9]+$");
-                        Regex reg_name_regex2 = new Regex(@"(.*)_[0-9]+$");
-
-                        Match reg_name1_m = reg_name_regex1.Match(register.Name);
-                        Match reg_name2_m = reg_name_regex2.Match(register.Name);
-                        if (reg_name1_m.Success)
-                            cleaned_reg_name = reg_name1_m.Groups[1].ToString();
-                        else if (reg_name2_m.Success && !REGISTERS_ENDING_UNDERSCORE_NUMBER.Contains(register.Name))
-                            cleaned_reg_name = reg_name2_m.Groups[1].ToString();
-
-                        if (subregister_mask_reg_subreg_name.StartsWith(cleaned_reg_name + "_") && ((subregister_register_name == null) || (subregister_register_name.Length < cleaned_reg_name.Length))) {
+                        string cleaned_reg_name = CleanRegisterName(register.Name);
+                        var testRegName = cleaned_reg_name;
+                        if (testRegName.EndsWith("r")) {
+                            testRegName = testRegName.Substring(0, testRegName.Length - 1);
+                        }
+                        if (subregister_mask_reg_subreg_name.StartsWith(testRegName + "_") && 
+                            ((subregister_register_name == null) || 
+                            (subregister_register_name.Length < cleaned_reg_name.Length)) &&
+                            testRegName.Length > foundRegisterLength) {
+                            foundRegisterLength = cleaned_reg_name.Length;
                             subregister_register_name = cleaned_reg_name;
-                            subregister_name = subregister_mask_reg_subreg_name.Substring((cleaned_reg_name + "_").Length);
+                            subregister_name = subregister_mask_reg_subreg_name.Substring((testRegName + "_").Length);
                         }
                     }
 
@@ -373,6 +404,20 @@ namespace kinetis_bsp_generator {
             if (!insideUnion)
                 structSize = hex_offset;
             return regs.ToArray();
+        }
+
+        private static string CleanRegisterName(string registerName) {
+            string cleaned_reg_name = registerName;
+            Regex reg_name_regex1 = new Regex(@"(.*)_[0-9]+_[0-9]+$");
+            Regex reg_name_regex2 = new Regex(@"(.*)_[0-9]+$");
+
+            Match reg_name1_m = reg_name_regex1.Match(registerName);
+            Match reg_name2_m = reg_name_regex2.Match(registerName);
+            if (reg_name1_m.Success)
+                cleaned_reg_name = reg_name1_m.Groups[1].ToString();
+            else if (reg_name2_m.Success && !REGISTERS_ENDING_UNDERSCORE_NUMBER.Contains(registerName))
+                cleaned_reg_name = reg_name2_m.Groups[1].ToString();
+            return cleaned_reg_name;
         }
 
         private static int BitMaskToBitLength(ulong mask) {
