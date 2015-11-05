@@ -360,6 +360,8 @@ class ELFFile:
             sys.exit(1)
         for l in proc.stdout:
             fields = l.strip().split()
+            if fields[0] == 'U':
+				continue;
             self.symbols[fields[2]] = int(fields[0], 16)
 
     def get_symbol_addr(self, sym):
