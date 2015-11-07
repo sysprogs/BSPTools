@@ -190,7 +190,7 @@ namespace BSPGenerationTools
     //  <condition> can be:
     //      a == b
     //      a != b
-    //      a ~= regex
+    //      a =~ regex
     //  E.g. 
     //      Class\\AUDIO\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == AUDIO
     //  means:
