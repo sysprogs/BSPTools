@@ -111,8 +111,10 @@ namespace ESP8266DebugPackage
         }
         public CustomStartupSequence BuildSequence(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
         {
+            bool isOpenOCD = debugMethodConfig.ContainsKey("com.sysprogs.esp8266.openocd.iface_script");
+
             List<CustomStartStep> cmds = new List<CustomStartStep>();
-            cmds.Add(new CustomStartStep("maint packet R",
+            cmds.Add(new CustomStartStep(isOpenOCD ? "mon reset halt" : "maint packet R",
                 "-exec-next-instruction",
                 "set $com_sysprogs_esp8266_wdcfg=0",
                 "set $vecbase=0x40000000",
@@ -176,7 +178,7 @@ namespace ESP8266DebugPackage
                     result.InitialHardBreakpointExpression = "*$$DEBUG:ENTRY_POINT$$";
                 }
                 else
-                    cmds.Add(new CustomStartStep("maint packet R"));
+                    cmds.Add(new CustomStartStep(isOpenOCD ? "mon reset halt" : "maint packet R"));
             }
             else
             {

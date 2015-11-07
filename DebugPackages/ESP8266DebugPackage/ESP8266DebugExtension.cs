@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using OpenOCDPackage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,43 +25,52 @@ namespace ESP8266DebugPackage
         public void AdjustDebugMethod(LoadedBSP.ConfiguredMCU mcu, ConfiguredDebugMethod method)
         {
             string iface;
-            if (method.Parameters.TryGetValue("com.sysprogs.esp8266.xt-ocd.debug_iface", out iface))
+            if (method.Method.ID == "xt-ocd")
             {
-                ESP8266DebugConfigurator.DebugInterface ifaceObj = null;
-                foreach(var obj in _Interfaces.Interfaces)
-                    if (obj.ID == iface)
-                    {
-                        ifaceObj = obj;
-                        break;
-                    }
-
-                if (ifaceObj != null)
+                if (method.Parameters.TryGetValue("com.sysprogs.esp8266.xt-ocd.debug_iface", out iface))
                 {
-                    string templateFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "topology-template.xml");
-                    XmlDocument doc = new XmlDocument();
-                    doc.Load(templateFile);
+                    ESP8266DebugConfigurator.DebugInterface ifaceObj = null;
+                    foreach (var obj in _Interfaces.Interfaces)
+                        if (obj.ID == iface)
+                        {
+                            ifaceObj = obj;
+                            break;
+                        }
 
-                    XmlElement el = doc.CreateElement("controller");
-                    el.SetAttribute("id", "Controller0");
-                    el.SetAttribute("module", ifaceObj.Module);
-                    foreach(var p in ifaceObj.Parameters)
+                    if (ifaceObj != null)
                     {
-                        string val;
-                        if (method.Parameters.TryGetValue(ESP8266DebugConfigurator.InterfaceSettingPrefix + p.UniqueID, out val) && !string.IsNullOrEmpty(val))
-                            el.SetAttribute(p.UniqueID, val);
-                    }
-                    doc.DocumentElement.InsertBefore(el, doc.DocumentElement.FirstChild);
+                        string templateFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "topology-template.xml");
+                        XmlDocument doc = new XmlDocument();
+                        doc.Load(templateFile);
 
-                    string newFn = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"VisualGDB\xt-ocd-topology.xml");
-                    doc.Save(newFn);
-                    method.Method.GDBServerArguments.Template = method.Method.GDBServerArguments.Template.Replace("$$com.sysprogs.esp8266.xt-ocd.configfile$$", "\"" + newFn + "\"");
+                        XmlElement el = doc.CreateElement("controller");
+                        el.SetAttribute("id", "Controller0");
+                        el.SetAttribute("module", ifaceObj.Module);
+                        foreach (var p in ifaceObj.Parameters)
+                        {
+                            string val;
+                            if (method.Parameters.TryGetValue(ESP8266DebugConfigurator.InterfaceSettingPrefix + p.UniqueID, out val) && !string.IsNullOrEmpty(val))
+                                el.SetAttribute(p.UniqueID, val);
+                        }
+                        doc.DocumentElement.InsertBefore(el, doc.DocumentElement.FirstChild);
+
+                        string newFn = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"VisualGDB\xt-ocd-topology.xml");
+                        doc.Save(newFn);
+                        method.Method.GDBServerArguments.Template = method.Method.GDBServerArguments.Template.Replace("$$com.sysprogs.esp8266.xt-ocd.configfile$$", "\"" + newFn + "\"");
+                    }
                 }
             }
         }
 
+        QuickSetupDatabase _QuickSetupData = new QuickSetupDatabase();
+
         public ICustomBSPConfigurator CreateConfigurator(LoadedBSP.ConfiguredMCU mcu, DebugMethod method)
         {
-            return new ESP8266DebugConfigurator(method, _Interfaces);
+            if (method.ID == "xt-ocd")
+                return new ESP8266DebugConfigurator(method, _Interfaces);
+            else if (method.ID == "openocd")
+                return new OpenOCDDebugConfigurator(method, _QuickSetupData);
+            return null;
         }
 
         public IEnumerable<ICustomStartupSequenceBuilder> StartupSequences

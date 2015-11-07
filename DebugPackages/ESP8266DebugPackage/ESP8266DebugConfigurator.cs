@@ -201,7 +201,7 @@ namespace ESP8266DebugPackage
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("http://www.esp8266.com/viewtopic.php?t=1960");
+            Process.Start("http://visualgdb.com/install_redir.php?item=xt-ocd");
         }
 
         private void btnOpenScript_Click(object sender, EventArgs e)
@@ -278,7 +278,7 @@ namespace ESP8266DebugPackage
                     SetComboBoxValue(kv.Value, val);
         }
 
-        private void SetComboBoxValue(ComboBox comboBox, string val)
+        public static void SetComboBoxValue(ComboBox comboBox, string val)
         {
             for (int i = 0; i < comboBox.Items.Count; i++)
             {
