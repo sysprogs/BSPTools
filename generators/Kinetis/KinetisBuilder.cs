@@ -91,6 +91,33 @@ namespace kinetis_bsp_generator {
             GenerateMCUsAndMCUFamilies();
             Console.WriteLine("done");
 
+            //We don't want to include the same include paths twice (once from the family and another time from the framework), so we filter out the family-provided ones here.
+            HashSet<string> includeDirsFromFamilies = new HashSet<string>();
+            foreach(var fam in _mcuFamilies)
+            {
+                foreach (var dir in fam.CompilationFlags.IncludeDirectories)
+                    includeDirsFromFamilies.Add(dir.Replace(fam.ID, "$$SYS:FAMILY_ID$$"));
+            }
+
+            foreach(var fw in _frameworks)
+            {
+                fw.AdditionalIncludeDirs = fw.AdditionalIncludeDirs.Where(d => !includeDirsFromFamilies.Contains(d)).ToArray();
+            };
+
+            Console.Write("Detecting GPIO prefixes... ");
+            Regex rgBrackets = new Regex(@"\(([^\(\)]+)\)");
+            foreach (var fam in _mcuFamilies)
+            {
+                var mainIncludeFile = string.Format(@"{0}\platform\devices\M{1}\include\M{1}.h", Directories.InputDir, fam.ID);
+                string gpioaLine = File.ReadAllLines(mainIncludeFile).First(s => s.Contains("#define GPIOA_PDOR"));
+                var m = rgBrackets.Match(gpioaLine);
+                if (!m.Success)
+                    throw new Exception("Cannot detect GPIO prefix for " + fam.ID);
+                fam.AdditionalSystemVars = LoadedBSP.Combine(fam.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.arm.kinetis.gpio_prefix", Value = m.Groups[1].Value.Substring(0, m.Groups[1].Value.Length - 1) } });
+            }
+
+            Console.WriteLine("done");
+
             Console.Write("Reading MCUs listed in Segger lists... ");
             var mcusFromSeggerFile = new HashSet<string>(ReadSeggerMCUs(Directories.RulesDir + "\\" + SEGGER_FILE, MANUFACTURER));
             Console.WriteLine("done");            
@@ -295,37 +322,22 @@ namespace kinetis_bsp_generator {
             _commonPseudofamily = new MCUFamilyBuilder(this, XmlTools.LoadObject<FamilyDefinition>(Directories.RulesDir + @"\CommonFiles.xml"));            
             _commonPseudofamily.CopyFamilyFiles(ref _flags, _projectFiles);
 
-            var includeDirs = new Dictionary<string, List<string>>();
-            var sourceFiles = new Dictionary<string, List<string>>();
-            var headerFiles = new Dictionary<string, List<string>>();
-
             if (_commonPseudofamily.Definition.AdditionalFrameworks != null) {
                 foreach (var framework in _commonPseudofamily.Definition.AdditionalFrameworks) {
-                    GenerateFrameworkDefinition(framework, includeDirs, sourceFiles, headerFiles);
+                    SynthesizeAndAppendCopyJobFromCMakeFiles(framework);
                 }
             }
 
             foreach (var fw in _commonPseudofamily.GenerateFrameworkDefinitions()) {
-                fw.AdditionalIncludeDirs = includeDirs[fw.ID].ToArray();
-                fw.AdditionalHeaderFiles = headerFiles[fw.ID].ToArray();
-                fw.AdditionalSourceFiles = sourceFiles[fw.ID].ToArray();
                 _frameworks.Add(fw);
             }
 
-            foreach (var sample in _commonPseudofamily.CopySamples()) {
+            foreach (var sample in _commonPseudofamily.CopySamples(_frameworks)) {
                 _exampleDirs.Add(sample);
             }
         }
 
-        private void GenerateFrameworkDefinition(
-            Framework framework, 
-            Dictionary<string, List<string>> frameworkIncludeDirs, 
-            Dictionary<string, List<string>> frameworkSourceFiles,
-            Dictionary<string, List<string>> frameworkHeaderFiles) {
-
-            if (framework.CopyJobs.Length < 1 || framework.CopyJobs.Length > 1) {
-                throw new Exception("Expected one CopyJob object for a framework");
-            }
+        private void SynthesizeAndAppendCopyJobFromCMakeFiles(Framework framework) {
 
             var fwPath = string.Format("{0}\\lib\\ksdk_{1}_lib\\armgcc", Directories.InputDir, framework.ID.Substring(framework.ID.LastIndexOf(".") + 1));
             var cmakeFiles = Directory.GetFiles(fwPath, "CMakeLists.txt", SearchOption.AllDirectories);            
@@ -345,7 +357,7 @@ namespace kinetis_bsp_generator {
                     f => 
                     {
                         var t = f.ToLower();
-                        return !t.Contains(DEVICES_FOLDER) && !t.Contains(CMSIS_FOLDER) && !t.Contains("iar") && !t.Contains("realview") && !t.Contains("mdk");
+                        return !t.Contains(DEVICES_FOLDER) && !t.Contains(CMSIS_FOLDER) && !t.Contains("iar") && !t.Contains("realview") && !t.Contains("mdk") && !t.Contains("rtos/freertos/config");
                     }).ToArray();
 
                 allFiles.UnionWith(allFamilyFiles);
@@ -371,9 +383,6 @@ namespace kinetis_bsp_generator {
                 }
             }
 
-            framework.CopyJobs[0].FilesToCopy = string.Join(";", copyPaths);
-            var allSourceFiles = new HashSet<string>(allFiles.Where(f => f.EndsWith(".c")).Select(f => "$$SYS:BSP_ROOT$$/" + f)).ToList();
-            var allHeaderFiles = new HashSet<string>(allFiles.Where(f => f.EndsWith(".h")).Select(f => "$$SYS:BSP_ROOT$$/" + f)).ToList();
 
             var dirs = allFiles.Where(f => !f.EndsWith(".h") && !f.EndsWith(".c")).Select(f => "$$SYS:BSP_ROOT$$/" + f).ToArray();
             var allIncludeDirs = new HashSet<string>();
@@ -389,7 +398,9 @@ namespace kinetis_bsp_generator {
                 if (!familyFound) {
                     allIncludeDirs.Add(dirs[i]);
                 }
-            }           
+            }
+
+            allIncludeDirs.Remove("$$SYS:BSP_ROOT$$/rtos/FreeRTOS/config/$$SYS:FAMILY_ID$$/gcc");   //FreeRTOS config files are copied to each project individually
             
             var frameworkMCUs = new List<string>();          
             foreach (var familyName in families) {
@@ -397,9 +408,6 @@ namespace kinetis_bsp_generator {
             }
 
             framework.Filter = string.Join("|", frameworkMCUs);
-            frameworkIncludeDirs.Add(framework.ID, allIncludeDirs.ToList());
-            frameworkSourceFiles.Add(framework.ID, allSourceFiles);
-            frameworkHeaderFiles.Add(framework.ID, allHeaderFiles);
 
             var fileConditions = new Dictionary<string, string>();
             foreach (var fileFamilies in filesToFamilies) {
@@ -411,8 +419,20 @@ namespace kinetis_bsp_generator {
                     fileConditions.Add(fcKey, string.Join("|", fileFamilies.Value));
                 }
             }
-             
-            framework.CopyJobs[0].SimpleFileConditions = fileConditions.Select(kv => string.Format("{0}: $$SYS:FAMILY_ID$$ =~ {1}", kv.Key, kv.Value)).ToArray();
+
+            var newJob = new CopyJob
+            {
+                SourceFolder = Directories.InputDir,
+                TargetFolder = "",
+                FilesToCopy = "-platform\\devices\\startup.*;" + string.Join(";", copyPaths),
+                SimpleFileConditions = fileConditions.Select(kv => string.Format("{0}: $$SYS:FAMILY_ID$$ =~ {1}", kv.Key, kv.Value)).ToArray(),
+                AdditionalIncludeDirs = string.Join(";", allIncludeDirs.ToArray()),
+                ProjectInclusionMask = string.Join(";", allFiles.Where(f => f.EndsWith(".h", StringComparison.CurrentCultureIgnoreCase) || f.EndsWith(".c", StringComparison.CurrentCultureIgnoreCase))),
+                AlreadyCopied = true,
+                AutoIncludeMask = "-*",
+            };
+
+            framework.CopyJobs = framework.CopyJobs.Concat(new CopyJob[] { newJob }).ToArray();
         }
 
         private void GenerateMCUsAndMCUFamilies() {
@@ -521,7 +541,7 @@ namespace kinetis_bsp_generator {
                     _frameworks.Add(fw);
                 }
 
-                foreach (var sample in mcuFamilyBuilder.CopySamples()) {
+                foreach (var sample in mcuFamilyBuilder.CopySamples(_frameworks)) {
                     _exampleDirs.Add(sample);
                 }
             }

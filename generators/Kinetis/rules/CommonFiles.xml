@@ -13,10 +13,6 @@
 				<FilesToCopy>-devices\startup.*;-CMSIS\DSP_Lib\*;-CMSIS\Lib\*;*.h;*.c</FilesToCopy>
 				<ProjectInclusionMask>devices\*.*;CMSIS\Include\*.*</ProjectInclusionMask>
 			</CopyJob>
-			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos</SourceFolder>
-				<FilesToCopy>-iar\*;-mdk\*;-IAR\*;-RealView\*;FreeRTOS\*.c;FreeRTOS\*.h;FreeRTOS\*.txt;mqx\config\*.h;mqx\config\*.c;mqx\mqx\source\*.c;mqx\mqx\source\*.h;mqx\mqx_stdlib\source\*.c;mqx\mqx_stdlib\source\*.h;mqx\nshell\source\*.c;mqx\nshell\source\*.h;uCOSII\*.h;uCOSII\*.c;uCOSIII\*.h;uCOSIII\*.c</FilesToCopy>
-			</CopyJob>
 		</CopyJobs>
 	</CoreFramework>
 	<AdditionalFrameworks>
@@ -25,118 +21,62 @@
 			<ID>com.sysprogs.arm.kinetis.freertos</ID>
 			<ProjectFolderName>FreeRTOS</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
-			<AlreadyCopied>true</AlreadyCopied>			
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<TargetFolder></TargetFolder>
-					<ProjectInclusionMask>*.h;*.c</ProjectInclusionMask>
+					<PreprocessorMacros>FSL_RTOS_FREE_RTOS</PreprocessorMacros>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos\FreeRTOS</SourceFolder>
+					<TargetFolder>RTOS\FreeRTOS</TargetFolder>
+					<ProjectInclusionMask>-*\iar\*;-*\mdk\*;config\*.h;include\*.h;port\*.h;port\*.c;src\*.c;src\*.txt</ProjectInclusionMask>
 					<FilesToCopy>*</FilesToCopy>
+					<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
 					<AutoIncludeMask/>
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>port\gcc\port.c</FilePath>
+							<AfterLine>#if configCPU_FAMILY==configCPU_FAMILY_ARM_M4F /* floating point unit */</AfterLine>
+							<InsertedLines>
+								<string>#ifndef __ARM_FP</string>
+								<string>#error Hardware FP support is disabled. Please enable it via VisualGDB Project Properties or change configCPU_FAMILY to configCPU_FAMILY_ARM_M4</string>
+								<string>#endif</string>
+							</InsertedLines>
+						</Patch>					
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
-		<Framework>
-			<Name>Kinetis HAL</Name>
-			<ID>com.sysprogs.arm.kinetis.hal</ID>
-			<ProjectFolderName>HAL</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<AlreadyCopied>true</AlreadyCopied>			
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<TargetFolder></TargetFolder>
-					<ProjectInclusionMask>*.h;*.c</ProjectInclusionMask>
-					<FilesToCopy>*</FilesToCopy>
-					<AutoIncludeMask/>
-				</CopyJob>
-			</CopyJobs>
-		</Framework>
+		<!--
 		<Framework>
 			<Name>Kinetis MQX</Name>
 			<ID>com.sysprogs.arm.kinetis.mqx</ID>
 			<ProjectFolderName>MQX</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
-			<AlreadyCopied>true</AlreadyCopied>			
+			<PreprocessorMacros>
+				<string>FSL_RTOS_MQX</string>
+			</PreprocessorMacros>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<TargetFolder></TargetFolder>
-					<ProjectInclusionMask>*.h;*.c</ProjectInclusionMask>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos\mqx</SourceFolder>
+					<TargetFolder>RTOS\mqx</TargetFolder>
+					<ProjectInclusionMask>-*\compiler\iar\*;-*\compiler\rv_mdk\*</ProjectInclusionMask>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/port/gcc;$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/config/$$SYS:FAMILY_ID$$/gcc;$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/include;$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/src
+					</AdditionalIncludeDirs>
 				</CopyJob>
 			</CopyJobs>
-		</Framework>
-		<Framework>
-			<Name>Kinetis Platform</Name>
-			<ID>com.sysprogs.arm.kinetis.platform</ID>
-			<ProjectFolderName>Platform</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<AlreadyCopied>true</AlreadyCopied>			
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<TargetFolder></TargetFolder>
-					<ProjectInclusionMask>*.h;*.c</ProjectInclusionMask>
-					<FilesToCopy>*</FilesToCopy>
-					<AutoIncludeMask/>
-				</CopyJob>
-			</CopyJobs>
-		</Framework>
-		<Framework>
-			<Name>Kinetis Startup</Name>
-			<ID>com.sysprogs.arm.kinetis.startup</ID>
-			<ProjectFolderName>Startup</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<AlreadyCopied>true</AlreadyCopied>			
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<TargetFolder></TargetFolder>
-					<ProjectInclusionMask>*.h;*.c</ProjectInclusionMask>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<AutoIncludeMask/>
-				</CopyJob>
-			</CopyJobs>
-		</Framework>
-		<Framework>
-			<Name>Kinetis uCOSII</Name>
-			<ID>com.sysprogs.arm.kinetis.ucosii</ID>
-			<ProjectFolderName>uCOSII</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<AlreadyCopied>true</AlreadyCopied>			
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<TargetFolder></TargetFolder>
-					<ProjectInclusionMask>*.h;*.c</ProjectInclusionMask>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<AutoIncludeMask/>
-				</CopyJob>
-			</CopyJobs>
-		</Framework>
-		<Framework>
-			<Name>Kinetis uCOSIII</Name>
-			<ID>com.sysprogs.arm.kinetis.ucosiii</ID>
-			<ProjectFolderName>uCOSIII</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<AlreadyCopied>true</AlreadyCopied>			
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<TargetFolder></TargetFolder>
-					<ProjectInclusionMask>*.h;*.c</ProjectInclusionMask>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<AutoIncludeMask/>
-				</CopyJob>
-			</CopyJobs>
-		</Framework>
+		</Framework> -->	
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
 			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink(FreeRTOS)</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink(FreeRTOS)</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/config/$$SYS:FAMILY_ID$$/gcc/FreeRTOSConfig.h</string>
+			</AdditionalSources>
 		</SmartSample>
 	</SmartSamples>
 </FamilyDefinition>

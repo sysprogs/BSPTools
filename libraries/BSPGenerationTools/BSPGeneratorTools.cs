@@ -480,7 +480,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public IEnumerable<string> CopySamples()
+        public IEnumerable<string> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null)
         {
             if (Definition.SmartSamples != null)
             {
@@ -501,6 +501,28 @@ namespace BSPGenerationTools
                                 else
                                     return new AdditionalSourceFile { SourcePath = f.Substring(0, idx).Trim(), TargetFileName = f.Substring(idx + 2).Trim() };
                             }).ToArray();
+
+                    if (sampleObj.MCUFilterRegex == null & allFrameworks != null && sampleObj.RequiredFrameworks != null)
+                    {
+                        string[] devices = null;
+                        
+                        foreach(var fw in allFrameworks)
+                        {
+                            if (fw.MCUFilterRegex == null)
+                                continue;
+
+                            if (sampleObj.RequiredFrameworks.Contains(fw.ID) || sampleObj.RequiredFrameworks.Contains(fw.ClassID))
+                            {
+                                if (devices == null)
+                                    devices = fw.MCUFilterRegex.Split('|');
+                                else
+                                    devices = devices.Intersect(fw.MCUFilterRegex.Split('|')).ToArray();
+                            }
+                        }
+
+                        sampleObj.MCUFilterRegex = string.Join("|", devices);
+                    }
+
                     XmlTools.SaveObject(sampleObj, Path.Combine(destFolder, "sample.xml"));
                     yield return sample.DestinationFolder;
                 }

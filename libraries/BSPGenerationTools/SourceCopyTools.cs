@@ -73,7 +73,7 @@ namespace BSPGenerationTools
             {
                 foreach (var r in rules.Split(';'))
                 {
-                    var rule = FileMaskToRegexWithFlag(r, true);
+                    var rule = FileMaskToRegexWithFlag(r.Replace('/', '\\'), true);
                     if (rule.Key == null)
                         throw new Exception("Empty rule");
                     Rules.Add(rule);
@@ -257,7 +257,7 @@ namespace BSPGenerationTools
                 folderInsideBSPPrefix = "/" + folderInsideBSPPrefix;
             
             var copyMasks = new CopyFilters(FilesToCopy);
-            var autoIncludes = new CopyFilters(AutoIncludeMask);
+            var autoIncludes = new CopyFilters(AutoIncludeMask);    
             var projectContents = new CopyFilters(ProjectInclusionMask);
             var filesToCopy = Directory.GetFiles(expandedSourceFolder, "*", SearchOption.AllDirectories).Select(f => f.Substring(expandedSourceFolder.Length + 1)).Where(f => copyMasks.IsMatch(f)).ToArray();
             foreach (var dir in filesToCopy.Select(f => Path.Combine(absTarget, Path.GetDirectoryName(f))).Distinct())
@@ -284,6 +284,7 @@ namespace BSPGenerationTools
 
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + f.Replace('\\', '/');
+
                 if (projectContents.IsMatch(f))
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
 

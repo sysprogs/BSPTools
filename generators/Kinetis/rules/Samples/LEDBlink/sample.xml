@@ -1,42 +1,65 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>LEDBlink</Name>
-	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
-	<ConfigurableProperties>
-	<PropertyGroups>
-	<PropertyGroup>
-	  <Properties>
-		<PropertyEntry xsi:type="Enumerated">
-		  <Name>LED Port Group</Name>
-		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
-		  <Description>Specifies the port group where the LED is connected</Description>
-		  <SuggestionList>
-			<Suggestion><InternalValue>A</InternalValue><UserFriendlyName>PTA</UserFriendlyName></Suggestion>
-			<Suggestion><InternalValue>B</InternalValue><UserFriendlyName>PTB</UserFriendlyName></Suggestion>
-			<Suggestion><InternalValue>C</InternalValue><UserFriendlyName>PTC</UserFriendlyName></Suggestion>
-			<Suggestion><InternalValue>D</InternalValue><UserFriendlyName>PTD</UserFriendlyName></Suggestion>
-			<Suggestion><InternalValue>E</InternalValue><UserFriendlyName>PTE</UserFriendlyName></Suggestion>
-		  </SuggestionList>
-		  <DefaultEntryIndex>1</DefaultEntryIndex>
-		  <AllowFreeEntry>false</AllowFreeEntry>
-		</PropertyEntry>
-		<PropertyEntry xsi:type="Integral">
-		  <Name>LED Port Number</Name>
-		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
-		  <Description>Specifies the port number of the LED port</Description>
-		  <DefaultValue>18</DefaultValue>
-		  <MinValue>0</MinValue>
-		  <MaxValue>31</MaxValue>
-		</PropertyEntry>
-		<PropertyEntry xsi:type="Integral">
-		  <Name>Delay cycles</Name>
-		  <UniqueID>com.sysprogs.examples.ledblink.DELAYCYCLES</UniqueID>
-		  <Description>Specifies the delay (in empty loop cycles) between LED toggling events</Description>
-		  <DefaultValue>1000000</DefaultValue>
-		</PropertyEntry>
-	  </Properties>
-	  <CollapsedByDefault>false</CollapsedByDefault>
-	</PropertyGroup>
-	</PropertyGroups>
-	</ConfigurableProperties>
+  <Name>LEDBlink</Name>
+  <Description>This is a very basic sample project - a classical blinking LED example.</Description>
+  <ConfigurableProperties>
+    <PropertyGroups>
+      <PropertyGroup>
+        <Properties>
+          <PropertyEntry xsi:type="Enumerated">
+            <Name>LED Port Group</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the port group where the LED is connected</Description>
+            <SuggestionList>
+              <Suggestion>
+                <UserFriendlyName>PTA</UserFriendlyName>
+                <InternalValue>A</InternalValue>
+              </Suggestion>
+              <Suggestion>
+                <UserFriendlyName>PTB</UserFriendlyName>
+                <InternalValue>B</InternalValue>
+              </Suggestion>
+              <Suggestion>
+                <UserFriendlyName>PTC</UserFriendlyName>
+                <InternalValue>C</InternalValue>
+              </Suggestion>
+              <Suggestion>
+                <UserFriendlyName>PTD</UserFriendlyName>
+                <InternalValue>D</InternalValue>
+              </Suggestion>
+              <Suggestion>
+                <UserFriendlyName>PTE</UserFriendlyName>
+                <InternalValue>E</InternalValue>
+              </Suggestion>
+            </SuggestionList>
+            <DefaultEntryIndex>1</DefaultEntryIndex>
+            <AllowFreeEntry>false</AllowFreeEntry>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>LED Port Number</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the port number of the LED port</Description>
+            <DefaultValue>18</DefaultValue>
+            <MinValue>0</MinValue>
+            <MaxValue>31</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>Delay cycles</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.DELAYCYCLES</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the delay (in empty loop cycles) between LED toggling events</Description>
+            <DefaultValue>1000000</DefaultValue>
+            <MinValue>-2147483648</MinValue>
+            <MaxValue>2147483647</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+        </Properties>
+        <CollapsedByDefault>false</CollapsedByDefault>
+      </PropertyGroup>
+    </PropertyGroups>
+  </ConfigurableProperties>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
 </EmbeddedProjectSample>
