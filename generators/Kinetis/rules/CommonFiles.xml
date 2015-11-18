@@ -44,27 +44,45 @@
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
-		<!--
-		<Framework>
+<!--		<Framework>
 			<Name>Kinetis MQX</Name>
 			<ID>com.sysprogs.arm.kinetis.mqx</ID>
 			<ProjectFolderName>MQX</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
-			<PreprocessorMacros>
-				<string>FSL_RTOS_MQX</string>
-			</PreprocessorMacros>
 			<CopyJobs>
 				<CopyJob>
+					<PreprocessorMacros>FSL_RTOS_MQX</PreprocessorMacros>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos\mqx</SourceFolder>
 					<TargetFolder>RTOS\mqx</TargetFolder>
-					<ProjectInclusionMask>-*\compiler\iar\*;-*\compiler\rv_mdk\*</ProjectInclusionMask>
-					<FilesToCopy>*</FilesToCopy>
-					<AutoIncludeMask/>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/port/gcc;$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/config/$$SYS:FAMILY_ID$$/gcc;$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/include;$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/src
-					</AdditionalIncludeDirs>
+					<ProjectInclusionMask>config\common\*;-config\*;*.h;*.c</ProjectInclusionMask>
+					<FilesToCopy>-build\*;-*\build\*;-mqx\examples\*;*</FilesToCopy>
+					<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
+					<AutoIncludeMask>-config\board\*;-config\mcu\*;*.h</AutoIncludeMask>
 				</CopyJob>
 			</CopyJobs>
-		</Framework> -->	
+		</Framework> -->
+		<Framework>
+			<Name>Kinetis uCOS II</Name>
+			<ID>com.sysprogs.arm.kinetis.ucosii</ID>
+			<ProjectFolderName>uCOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<PreprocessorMacros>FSL_RTOS_UCOSII</PreprocessorMacros>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos\uCOSII</SourceFolder>
+					<TargetFolder>RTOS\uCOSII</TargetFolder>
+					<ProjectInclusionMask>*.h;*.c;*\os_cpu_a.S</ProjectInclusionMask>
+					<FilesToCopy>-*\IAR\*;-*\RealView\*;-build\*;-*\build\*;-mqx\examples\*;*</FilesToCopy>
+					<AdditionalIncludeDirs>.;$(BSP_ROOT)/RTOS/uCOSII/src/uCOS-II/Ports/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/Generic/GNU;$(BSP_ROOT)/RTOS/uCOSII/src/uC-CPU/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/GNU</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*\ARM-Cortex-*;*</AutoIncludeMask>
+					<SimpleFileConditions>
+						<string>.*\\ARM-Cortex-M0\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M0</string>
+						<string>.*\\ARM-Cortex-M4\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M4</string>
+					</SimpleFileConditions>				
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>
@@ -77,6 +95,14 @@
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/config/$$SYS:FAMILY_ID$$/gcc/FreeRTOSConfig.h</string>
 			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink(MQX)</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink(MQX)</DestinationFolder>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink(uCOSII)</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink(uCOSII)</DestinationFolder>
 		</SmartSample>
 	</SmartSamples>
 </FamilyDefinition>

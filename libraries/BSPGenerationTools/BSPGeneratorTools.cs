@@ -240,27 +240,34 @@ namespace BSPGenerationTools
                     throw new Exception("Different MCUs within " + Definition.Name + " have different core types");
 
             var family = new MCUFamily { ID = Definition.Name };
+            string coreName = null;
             switch (core)
             {
                 case CortexCore.M0:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m0 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM0" };
+                    coreName = "M0";
                     break;
                 case CortexCore.M0Plus:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m0plus -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM0PLUS" };
+                    coreName = "M0";
                     break;
                 case CortexCore.M3:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m3 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
+                    coreName = "M3";
                     break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
+                    family.CompilationFlags.ASFLAGS = "-mfpu=fpv4-sp-d16";
+                    coreName = "M4";
                     break;
                 case CortexCore.M7:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
+                    coreName = "M7";
                     break;
                 default:
                     throw new Exception("Unsupported core type");
@@ -315,6 +322,9 @@ namespace BSPGenerationTools
                         family.CompilationFlags.COMMONFLAGS += " $$com.sysprogs.bspoptions.arm.floatmode$$";
                     }
                 }
+
+                if (coreName != null)
+                    family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName } });
             }
 
             List<string> projectFiles = new List<string>();
@@ -520,7 +530,8 @@ namespace BSPGenerationTools
                             }
                         }
 
-                        sampleObj.MCUFilterRegex = string.Join("|", devices);
+                        if (devices != null)
+                            sampleObj.MCUFilterRegex = string.Join("|", devices);
                     }
 
                     XmlTools.SaveObject(sampleObj, Path.Combine(destFolder, "sample.xml"));

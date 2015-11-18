@@ -369,6 +369,9 @@ namespace kinetis_bsp_generator {
                         filePath = file.Substring(0, file.LastIndexOf('/'));
                     }
 
+                    if (file == "rtos")
+                        continue;
+
                     filePath = filePath.Replace("/", "\\");
                     filePath += "\\";
                     copyPaths.Add(filePath + "*.c");

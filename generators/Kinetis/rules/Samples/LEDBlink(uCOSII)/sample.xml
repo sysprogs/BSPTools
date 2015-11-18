@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>LEDBlink(uCOSII)</Name>
+  <Description>This is a very basic sample project - a classical blinking LED example.</Description>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><InternalValue>A</InternalValue><UserFriendlyName>PTA</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>B</InternalValue><UserFriendlyName>PTB</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>C</InternalValue><UserFriendlyName>PTC</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>D</InternalValue><UserFriendlyName>PTD</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>E</InternalValue><UserFriendlyName>PTE</UserFriendlyName></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>1</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>18</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>31</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay (msec)</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYMSEC</UniqueID>
+		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+		  <DefaultValue>500</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<RequiredFrameworks>
+    <string>com.sysprogs.arm.kinetis.ucosii</string>
+  </RequiredFrameworks>
+</EmbeddedProjectSample>
