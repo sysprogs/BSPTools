@@ -71,10 +71,31 @@
 					<PreprocessorMacros>FSL_RTOS_UCOSII</PreprocessorMacros>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos\uCOSII</SourceFolder>
 					<TargetFolder>RTOS\uCOSII</TargetFolder>
-					<ProjectInclusionMask>*.h;*.c;*\os_cpu_a.S</ProjectInclusionMask>
+					<ProjectInclusionMask>-src\config\*;*.h;*.c;*\os_cpu_a.S</ProjectInclusionMask>
 					<FilesToCopy>-*\IAR\*;-*\RealView\*;-build\*;-*\build\*;-mqx\examples\*;*</FilesToCopy>
 					<AdditionalIncludeDirs>.;$(BSP_ROOT)/RTOS/uCOSII/src/uCOS-II/Ports/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/Generic/GNU;$(BSP_ROOT)/RTOS/uCOSII/src/uC-CPU/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/GNU</AdditionalIncludeDirs>
-					<AutoIncludeMask>-*\ARM-Cortex-*;*</AutoIncludeMask>
+					<AutoIncludeMask>-src\config\*;-*\ARM-Cortex-*;*</AutoIncludeMask>
+					<SimpleFileConditions>
+						<string>.*\\ARM-Cortex-M0\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M0</string>
+						<string>.*\\ARM-Cortex-M4\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M4</string>
+					</SimpleFileConditions>				
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Kinetis uCOS III</Name>
+			<ID>com.sysprogs.arm.kinetis.ucosiii</ID>
+			<ProjectFolderName>uCOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<PreprocessorMacros>FSL_RTOS_UCOSIII</PreprocessorMacros>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos\uCOSIII</SourceFolder>
+					<TargetFolder>RTOS\uCOSIII</TargetFolder>
+					<ProjectInclusionMask>-src\config\*;*.h;*.c;*\os_cpu_a.S;*\cpu_a.S</ProjectInclusionMask>
+					<FilesToCopy>-*\IAR\*;-*\RealView\*;-build\*;-*\build\*;-mqx\examples\*;*</FilesToCopy>
+					<AdditionalIncludeDirs>.;$(BSP_ROOT)/RTOS/uCOSIII/src/uCOS-III/Ports/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/Generic/GNU;$(BSP_ROOT)/RTOS/uCOSIII/src/uC-CPU/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/GNU</AdditionalIncludeDirs>
+					<AutoIncludeMask>-src\config\*;-*\ARM-Cortex-*;*</AutoIncludeMask>
 					<SimpleFileConditions>
 						<string>.*\\ARM-Cortex-M0\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M0</string>
 						<string>.*\\ARM-Cortex-M4\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M4</string>
@@ -103,6 +124,26 @@
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink(uCOSII)</SourceFolder>
 			<DestinationFolder>Samples\LEDBlink(uCOSII)</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSII/src/config/app_cfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSII/src/config/app_hooks.c</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSII/src/config/cpu_cfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSII/src/config/lib_cfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSII/src/config/os_cfg.h</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink(uCOSIII)</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink(uCOSIII)</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/config/app_cfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/config/cpu_cfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/config/lib_cfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/config/os_app_hooks.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/config/os_app_hooks.c</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/config/os_cfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/config/os_cfg_app.h</string>
+			</AdditionalSources>
 		</SmartSample>
 	</SmartSamples>
 </FamilyDefinition>
