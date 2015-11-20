@@ -26,6 +26,22 @@
   </ConditionalErrors>
   <DefaultConfiguration>
     <Entries>
+		<KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.pstorage_driver</Key>
+        <Value>normal</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.spi_driver</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.twi_driver</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.uart_driver</Key>
+        <Value>yes</Value>
+      </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
         <Value>PCA10028</Value>
@@ -35,16 +51,12 @@
         <Value />
       </KeyValue>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.uart_driver</Key>
-        <Value>app_uart_fifo</Value>
-      </KeyValue>
-      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
         <Value>BSP_UART_SUPPORT</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu</Key>
-        <Value />
+        <Value>none</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.button</Key>
@@ -55,8 +67,16 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.fifo</Key>
         <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fstorage</Key>
+        <Value />
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.gpiote</Key>
@@ -71,8 +91,24 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.led_softblink</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.low_power_pwm</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.mailbox</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.pwm</Key>
         <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.slip</Key>
+        <Value />
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.scheduler</Key>
@@ -99,16 +135,12 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.twi	</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.uart</Key>
-        <Value>yes</Value>
-      </KeyValue>
-      <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.util</Key>
-        <Value>yes</Value>
-      </KeyValue>
-      <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.ble.devmgr</Key>
-        <Value>peripheral</Value>
+        <Value>app_uart_fifo</Value>
       </KeyValue>
     </Entries>
 	</DefaultConfiguration>

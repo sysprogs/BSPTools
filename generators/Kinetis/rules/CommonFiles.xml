@@ -13,12 +13,37 @@
 				<FilesToCopy>-devices\startup.*;-CMSIS\DSP_Lib\*;-CMSIS\Lib\*;*.h;*.c</FilesToCopy>
 				<ProjectInclusionMask>devices\*.*;CMSIS\Include\*.*</ProjectInclusionMask>
 			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\USB</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+			</CopyJob>
 		</CopyJobs>
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
+			<Name>Kinetis Platform (no RTOS)</Name>
+			<ID>com.sysprogs.arm.kinetis.platform</ID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.kinetis.freertos</string>
+				<string>com.sysprogs.arm.kinetis.mqx</string>
+				<string>com.sysprogs.arm.kinetis.ucosii</string>
+				<string>com.sysprogs.arm.kinetis.ucosiii</string>
+			</IncompatibleFrameworks>
+			<ProjectFolderName>Platform</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+			</CopyJobs>
+		</Framework>
+		<Framework>
 			<Name>Kinetis FreeRTOS</Name>
 			<ID>com.sysprogs.arm.kinetis.freertos</ID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.kinetis.platform</string>
+				<string>com.sysprogs.arm.kinetis.mqx</string>
+				<string>com.sysprogs.arm.kinetis.ucosii</string>
+				<string>com.sysprogs.arm.kinetis.ucosiii</string>
+			</IncompatibleFrameworks>
 			<ProjectFolderName>FreeRTOS</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
@@ -44,8 +69,14 @@
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
-<!--		<Framework>
+		<Framework>
 			<Name>Kinetis MQX</Name>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.kinetis.platform</string>
+				<string>com.sysprogs.arm.kinetis.freertos</string>
+				<string>com.sysprogs.arm.kinetis.ucosii</string>
+				<string>com.sysprogs.arm.kinetis.ucosiii</string>
+			</IncompatibleFrameworks>
 			<ID>com.sysprogs.arm.kinetis.mqx</ID>
 			<ProjectFolderName>MQX</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
@@ -54,15 +85,21 @@
 					<PreprocessorMacros>FSL_RTOS_MQX</PreprocessorMacros>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\rtos\mqx</SourceFolder>
 					<TargetFolder>RTOS\mqx</TargetFolder>
-					<ProjectInclusionMask>config\common\*;-config\*;*.h;*.c</ProjectInclusionMask>
+					<ProjectInclusionMask>config\common\*;-mqx_stdlib\*;-config\*;*.h;*.c</ProjectInclusionMask>
 					<FilesToCopy>-build\*;-*\build\*;-mqx\examples\*;*</FilesToCopy>
 					<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
 					<AutoIncludeMask>-config\board\*;-config\mcu\*;*.h</AutoIncludeMask>
 				</CopyJob>
 			</CopyJobs>
-		</Framework> -->
+		</Framework>
 		<Framework>
 			<Name>Kinetis uCOS II</Name>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.kinetis.platform</string>
+				<string>com.sysprogs.arm.kinetis.freertos</string>
+				<string>com.sysprogs.arm.kinetis.mqx</string>
+				<string>com.sysprogs.arm.kinetis.ucosiii</string>
+			</IncompatibleFrameworks>
 			<ID>com.sysprogs.arm.kinetis.ucosii</ID>
 			<ProjectFolderName>uCOS</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
@@ -85,6 +122,12 @@
 		<Framework>
 			<Name>Kinetis uCOS III</Name>
 			<ID>com.sysprogs.arm.kinetis.ucosiii</ID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.kinetis.platform</string>
+				<string>com.sysprogs.arm.kinetis.freertos</string>
+				<string>com.sysprogs.arm.kinetis.mqx</string>
+				<string>com.sysprogs.arm.kinetis.ucosii</string>
+			</IncompatibleFrameworks>
 			<ProjectFolderName>uCOS</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
@@ -117,10 +160,12 @@
 				<string>$$SYS:BSP_ROOT$$/RTOS/FreeRTOS/config/$$SYS:FAMILY_ID$$/gcc/FreeRTOSConfig.h</string>
 			</AdditionalSources>
 		</SmartSample>
+		<!-- MQX currently does not work out-of-the-box, so we don't want to show the corresponding sample -->
+		<!-- 
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink(MQX)</SourceFolder>
 			<DestinationFolder>Samples\LEDBlink(MQX)</DestinationFolder>
-		</SmartSample>
+		</SmartSample> -->
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink(uCOSII)</SourceFolder>
 			<DestinationFolder>Samples\LEDBlink(uCOSII)</DestinationFolder>

@@ -36,7 +36,9 @@ namespace nrf5x
 
             public override bool OnFilePathTooLong(string pathInsidePackage)
             {
-                if ((pathInsidePackage.EndsWith(".ld") || pathInsidePackage.EndsWith(".eww") || pathInsidePackage.EndsWith(".uvmpw")) && (pathInsidePackage.Contains("experimental") || pathInsidePackage.Contains("\\ant\\") || pathInsidePackage.Contains("\\ser_")))
+                if ((pathInsidePackage.EndsWith(".ld") || pathInsidePackage.EndsWith(".eww") || pathInsidePackage.EndsWith(".uvmpw")) || (pathInsidePackage.Contains("experimental") || pathInsidePackage.Contains("\\ant\\") || pathInsidePackage.Contains("\\ser_")))
+                    return false;
+                if (pathInsidePackage.Contains("nrf_drv_config.h"))
                     return false;
                 return base.OnFilePathTooLong(pathInsidePackage);
             }
@@ -167,9 +169,10 @@ namespace nrf5x
             {
                 foreach (var sd in SoftDevices)
                 {
-                    Process.Start(BSPRoot + @"\nRF51\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name).WaitForExit();
+                    string hexFileName = Path.GetFullPath(Directory.GetFiles(BSPRoot + @"\nRF51\components\softdevice\" + sd.Name + @"\hex", "*.hex")[0]);
+                    Process.Start(BSPRoot + @"\nRF51\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName).WaitForExit();
                     string softdevLib = string.Format(@"{0}\nRF51\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
-                    if (!File.Exists(softdevLib))
+                    if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
                         throw new Exception("Failed to convert a softdevice");
                 }
             }
@@ -286,7 +289,7 @@ namespace nrf5x
                 fam.Definition.AdditionalFrameworks = fam.Definition.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
 
                 fam.AttachStartupFiles(new StartupFileGenerator.InterruptVectorTable[] { vectorTable });
-                fam.AttachPeripheralRegisters(new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nrf51.xml"), "nRF51") });
+                fam.AttachPeripheralRegisters(new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nrf51.svd"), "nRF51") });
 
                 var famObj = fam.GenerateFamilyObject(true);
 
@@ -344,7 +347,7 @@ namespace nrf5x
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
-                PackageVersion = "1.0",
+                PackageVersion = "2.0",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray()

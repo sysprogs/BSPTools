@@ -217,12 +217,19 @@ namespace BSPGenerationTools
 
         public Patch[] Patches;
 
+        class ParsedCondition
+        {
+            public Regex Regex;
+            public Condition Condition;
+            public int UseCount;
+        }
+
         public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir)
         {
-            List<KeyValuePair<Regex, Condition>> conditions = null;
+            List<ParsedCondition> conditions = null;
             if (SimpleFileConditions != null)
             {
-                conditions = new List<KeyValuePair<Regex, Condition>>();
+                conditions = new List<ParsedCondition>();
                 foreach (var cond in SimpleFileConditions)
                 {
                     int idx = cond.IndexOf(':');
@@ -232,7 +239,7 @@ namespace BSPGenerationTools
                     Regex rgFile = new Regex(cond.Substring(0, idx), RegexOptions.IgnoreCase);
                     string rawCond = cond.Substring(idx + 1).Trim();
                     Condition parsedCond = ParseCondition(rawCond);
-                    conditions.Add(new KeyValuePair<Regex, Condition>(rgFile, parsedCond));
+                    conditions.Add(new ParsedCondition { Regex = rgFile, Condition = parsedCond });
                 }
             }
 
@@ -291,12 +298,19 @@ namespace BSPGenerationTools
                 if (conditions != null)
                 {
                     foreach (var cond in conditions)
-                        if (cond.Key.IsMatch(f))
+                        if (cond.Regex.IsMatch(f))
                         {
-                            bsp.MatchedFileConditions.Add(new FileCondition { ConditionToInclude = cond.Value, FilePath = encodedPath });
+                            bsp.MatchedFileConditions.Add(new FileCondition { ConditionToInclude = cond.Condition, FilePath = encodedPath });
+                            cond.UseCount++;
+                            break;
                         }
                 }
             }
+
+            if (conditions != null)
+                foreach (var cond in conditions)
+                    if (cond.UseCount == 0)
+                        throw new Exception("Unused condition in copy job: " + cond.Regex);
 
             if (Patches != null)
                 foreach(var p in Patches)

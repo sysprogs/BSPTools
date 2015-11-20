@@ -503,6 +503,7 @@ namespace BSPGenerationTools
 
                     var sampleObj = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(destFolder, "sample.xml"));
                     if (sample.AdditionalSources != null)
+                    {
                         sampleObj.AdditionalSourcesToCopy = sample.AdditionalSources.Select(f =>
                             {
                                 int idx = f.IndexOf("=>");
@@ -511,6 +512,11 @@ namespace BSPGenerationTools
                                 else
                                     return new AdditionalSourceFile { SourcePath = f.Substring(0, idx).Trim(), TargetFileName = f.Substring(idx + 2).Trim() };
                             }).ToArray();
+
+                        foreach (var f in sampleObj.AdditionalSourcesToCopy)
+                            if (!File.Exists(f.SourcePath.Replace("$$SYS:BSP_ROOT$$", BSP.Directories.OutputDir)))
+                                throw new Exception("Missing sample file: " + f.SourcePath);
+                    }
 
                     if (sampleObj.MCUFilterRegex == null & allFrameworks != null && sampleObj.RequiredFrameworks != null)
                     {

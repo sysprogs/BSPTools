@@ -109,6 +109,7 @@ namespace BSPGenerationTools
             doc.Load(file);
 
             List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
+            Dictionary<string, XmlElement> periphNodes = new Dictionary<string, XmlElement>();
 
             foreach (XmlElement periph in doc.DocumentElement.SelectNodes("peripherals/peripheral"))
             {
@@ -120,8 +121,18 @@ namespace BSPGenerationTools
                 {
                     defaultRegisterSize = ParseScaledNonNegativeInteger(defaultRegisterSizeProp.InnerText);
                 }
+
+                periphNodes[name] = periph;
                 List<HardwareRegister> registers = new List<HardwareRegister>();
-                foreach (XmlElement reg in periph.SelectNodes("registers/*"))
+                var basePeriph = periph.GetAttribute("derivedFrom");
+                List<XmlNode> regNodes = periph.SelectNodes("registers/*").Cast<XmlNode>().ToList();
+
+                if (!string.IsNullOrEmpty(basePeriph))
+                {
+                    regNodes.InsertRange(0, periphNodes[basePeriph].SelectNodes("registers/*").Cast<XmlNode>());
+                }
+
+                foreach (XmlElement reg in regNodes)
                 {
                     if (reg.Name == "register")
                         ProcessRegister(reg, registers, null, baseAddr, defaultRegisterSize);

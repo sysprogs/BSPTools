@@ -124,8 +124,8 @@ namespace kinetis_bsp_generator {
 
             Console.Write("Generating BSP... ");
             BoardSupportPackage bsp = new BoardSupportPackage {
-                PackageID = "com.sysprogs.arm.freescale.kinetis",
-                PackageDescription = "Freescale Kinetis Devices",
+                PackageID = "com.sysprogs.arm.freescale.kinetis_ksdk",
+                PackageDescription = "Freescale Kinetis (KSDK)",
                 GNUTargetID = "arm-eabi",
                 GeneratedMakFileName = "kinetis.mak",
                 MCUFamilies = _mcuFamilies.ToArray(),
@@ -133,7 +133,8 @@ namespace kinetis_bsp_generator {
                 Frameworks = _frameworks.ToArray(),
                 Examples = _exampleDirs.ToArray(),
                 FileConditions = MatchedFileConditions.ToArray(),
-                PackageVersion = "1.4"
+                PackageVersion = "1.3",
+                MinimumEngineVersion = "5.0",
             };
 
             Save(bsp, true);
