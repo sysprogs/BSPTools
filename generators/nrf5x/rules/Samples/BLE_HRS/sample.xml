@@ -4,10 +4,10 @@
 	  <Description>This sample demonstrates the Bluetooth LE Heart Rate Service</Description>
 	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
-    <string>com.sysprogs.arm.nordic.nrf5x.nrf51_periph</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.periph</string>
     <string>com.sysprogs.arm.nordic.nrf5x.util</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.nrf51_boards</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.nrf51_libraries</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_device_manager</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string>
@@ -20,7 +20,7 @@
 		<ErrorCondition xsi:type="Not">
 			<Argument xsi:type="MatchesRegex">
 				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>S(110|130|310)</Regex>
+				<Regex>S(110|130|310|132)</Regex>
 				<IgnoreCase>false</IgnoreCase>
 			</Argument>
 		</ErrorCondition>
@@ -47,7 +47,7 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu</Key>
-        <Value />
+        <Value>none</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.button</Key>

@@ -53,38 +53,43 @@ namespace BSPGenerationTools
                     XmlElement vals = (XmlElement)fld.SelectSingleNode("enumeratedValues");
                     var numOfAddedKnownValues = 0;
                     if (vals != null && subreg.SizeInBits > 1 && subreg.SizeInBits != 32)
-                    {                        
-                        KnownSubRegisterValue[] values = new KnownSubRegisterValue[1 << subreg.SizeInBits];
-                        foreach (XmlElement ev in vals)
+                    {
+                        if (subreg.SizeInBits > 8)
+                            Console.WriteLine(string.Format("Warning: suspiciously large register with known values: {0} ({1} bits)", subreg.Name, subreg.SizeInBits));
+                        else
                         {
-                            var knownValueProp = ev.SelectSingleNode("value");
-                            if (DoNotCareBits(knownValueProp.InnerText))
+                            KnownSubRegisterValue[] values = new KnownSubRegisterValue[1 << subreg.SizeInBits];
+                            foreach (XmlElement ev in vals)
                             {
-                                continue;
-                            }
-                            var knownValueIndex = (int)ParseScaledNonNegativeInteger(knownValueProp.InnerText);
-                            var knowValueName = ev.SelectSingleNode("name").InnerText;
-                            if (IsUserFriendlyName(knowValueName))
-                            {
-                                values[knownValueIndex] = new KnownSubRegisterValue { Name = knowValueName };
-                                ++numOfAddedKnownValues;
-                            }
-                        }
-
-                        if (numOfAddedKnownValues > 0)
-                        {
-                            int found = 0;
-                            for (int j = 0; j < values.Length; j++)
-                            {
-                                if (values[j] == null)
-                                    values[j] = new KnownSubRegisterValue { Name = string.Format("Unknown (0x{0:x})", j) };
-                                else
-                                    found++;
+                                var knownValueProp = ev.SelectSingleNode("value");
+                                if (DoNotCareBits(knownValueProp.InnerText))
+                                {
+                                    continue;
+                                }
+                                var knownValueIndex = (int)ParseScaledNonNegativeInteger(knownValueProp.InnerText);
+                                var knowValueName = ev.SelectSingleNode("name").InnerText;
+                                if (IsUserFriendlyName(knowValueName))
+                                {
+                                    values[knownValueIndex] = new KnownSubRegisterValue { Name = knowValueName };
+                                    ++numOfAddedKnownValues;
+                                }
                             }
 
-                            double utilization = (double)found / values.Length;
-                            if (utilization > 0.5 || values.Length < 16)
-                                subreg.KnownValues = values;
+                            if (numOfAddedKnownValues > 0)
+                            {
+                                int found = 0;
+                                for (int j = 0; j < values.Length; j++)
+                                {
+                                    if (values[j] == null)
+                                        values[j] = new KnownSubRegisterValue { Name = string.Format("Unknown (0x{0:x})", j) };
+                                    else
+                                        found++;
+                                }
+
+                                double utilization = (double)found / values.Length;
+                                if (utilization > 0.5 || values.Length < 16)
+                                    subreg.KnownValues = values;
+                            }
                         }
                     }
                     subregs.Add(subreg);

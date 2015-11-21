@@ -68,13 +68,14 @@ namespace nrf5x
                 return layout;
             }
 
+
             public struct SoftDevice
             {
                 public string Name;
                 public string Description;
                 public uint FLASHSize;
                 public uint SRAMSize;
-                public bool NRF5142xOnly;
+                public string DevicePrefix;
 
                 public string UserFriendlyName
                 {
@@ -84,31 +85,32 @@ namespace nrf5x
                     }
                 }
 
-                public SoftDevice(string name, uint flash, uint sram, bool nrf4, string desc)
+                public SoftDevice(string name, uint flash, uint sram, string devicePrefix, string desc)
                 {
                     Name = name;
                     FLASHSize = flash;
                     SRAMSize = sram;
-                    NRF5142xOnly = nrf4;
+                    DevicePrefix = devicePrefix;
                     Description = desc;
                 }
 
                 public bool IsCompatible(string name)
                 {
-                    if (NRF5142xOnly && name.StartsWith("NRF518", StringComparison.CurrentCultureIgnoreCase))
-                        return false;
-                    return true;
+                    return name.StartsWith(DevicePrefix, StringComparison.InvariantCultureIgnoreCase);
                 }
             }
 
 
             public List<SoftDevice> SoftDevices = new List<SoftDevice>
             {
-                new SoftDevice("S110", 0x18000, 0x2000, false, "Bluetooth LE Peripheral"),
-                new SoftDevice("S120", 0x1d000, 0x2800, false, "Bluetooth LE Master"),
-                new SoftDevice("S130", 0x1c000, 0x2800, false, "Bluetooth LE Universal"),
-                new SoftDevice("S210", 0xd000,  0x900, true, "ANT Master"),
-                new SoftDevice("S310", 0x1d000, 0x2200, true, "Bluetooth LE/ANT"),
+                new SoftDevice("S110", 0x18000, 0x2000, "nrf51", "Bluetooth LE Peripheral"),
+                new SoftDevice("S120", 0x1d000, 0x2800, "nrf51", "Bluetooth LE Master"),
+                new SoftDevice("S130", 0x1c000, 0x2800, "nrf51", "Bluetooth LE Universal"),
+                new SoftDevice("S210", 0xd000,  0x900, " nrf514", "ANT Master"),
+                new SoftDevice("S310", 0x1d000, 0x2200, "nrf514", "Bluetooth LE/ANT"),
+
+                new SoftDevice("S132", 0x1f000, 0x2800, "nrf52", "Bluetooth LE"),
+                //new SoftDevice("S212", 0x12000, 0x0a00, "nrf52", "ANT"),  //Not included in the SDK v 0.9.2
             };
 
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
@@ -169,9 +171,18 @@ namespace nrf5x
             {
                 foreach (var sd in SoftDevices)
                 {
-                    string hexFileName = Path.GetFullPath(Directory.GetFiles(BSPRoot + @"\nRF51\components\softdevice\" + sd.Name + @"\hex", "*.hex")[0]);
-                    Process.Start(BSPRoot + @"\nRF51\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName).WaitForExit();
-                    string softdevLib = string.Format(@"{0}\nRF51\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
+                    string family = "nRF51";
+                    string sdDir = BSPRoot + @"\nRF51\components\softdevice\" + sd.Name + @"\hex";
+                    string abi = "";
+                    if (!Directory.Exists(sdDir))
+                    {
+                        sdDir = BSPRoot + @"\nRF52\components\softdevice\" + sd.Name + @"\hex";
+                        family = "nRF52";
+                        abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
+                    }
+                    string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
+                    Process.Start(BSPRoot + @"\" + family + @"\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName + abi).WaitForExit();
+                    string softdevLib = string.Format(@"{0}\{1}\SoftdeviceLibraries\{2}_softdevice.o", BSPRoot, family, sd.Name);
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
                         throw new Exception("Failed to convert a softdevice");
                 }
@@ -194,41 +205,16 @@ namespace nrf5x
                 devices.Add(new MCUBuilder { Name = part + "_XXAC", FlashSize = 256 * 1024, RAMSize = 32 * 1024, Core = CortexCore.M0 });
             }
 
+            devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 32 * 1024, Core = CortexCore.M4 });
+
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
                 allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
             var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
-            var vectorTable = new StartupFileGenerator.InterruptVectorTable
-            {
-                FileName = "startup_nrf51x.c",
-                Vectors = StartupFileGenerator.ParseInterruptVectors(Path.Combine(allFamilies[0].Definition.StartupFileDir, "arm_startup_nrf51.s"),
-                    "^__Vectors",
-                    @"__Vectors_End",
-                    @"^[ \t]+DCD[ \t]+([^ \t]+)[ \t]+; *([^ \t].*)$",
-                    null,
-                    @"^[ \t]+;.*",
-                    null,
-                    1,
-                    2),
-
-                AdditionalResetHandlerLines = new string[]
-                {
-                    "asm volatile(\".equ NRF_POWER_RAMON_ADDRESS,0x40000524\");",
-                    "asm volatile(\".equ NRF_POWER_RAMON_RAMxON_ONMODE_Msk,3\");",
-                    "asm volatile(\"LDR     R0, =NRF_POWER_RAMON_ADDRESS\");",
-                    "asm volatile(\"LDR     R2, [R0]\");",
-                    "asm volatile(\"MOVS    R1, #NRF_POWER_RAMON_RAMxON_ONMODE_Msk\");",
-                    "asm volatile(\"ORR     R2, R2, R1\");",
-                    "asm volatile(\"STR     R2, [R0]\");",
-                }
-            };
 
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
             List<string> exampleDirs = new List<string>();
-
-
-            vectorTable.Vectors = new StartupFileGenerator.InterruptVector[] { new StartupFileGenerator.InterruptVector { Name = "_estack" } }.Concat(vectorTable.Vectors).ToArray();
 
             bool noPeripheralRegisters = true;
 
@@ -243,41 +229,11 @@ namespace nrf5x
 
             List<ConditionalToolFlags> condFlags = new List<ConditionalToolFlags>();
 
-            List<Framework> bleFrameworks = new List<Framework>();
-            foreach (var line in File.ReadAllLines(bspBuilder.Directories.RulesDir + @"\BLEFrameworks.txt"))
-            {
-                int idx = line.IndexOf('|');
-                string dir = line.Substring(0, idx);
-                string desc = line.Substring(idx + 1);
-
-                string id = Path.GetFileName(dir);
-                if (!id.StartsWith("ble_"))
-                    id = "ble_" + id;
-
-                if (dir.StartsWith("services\\", StringComparison.CurrentCultureIgnoreCase))
-                    id = "ble_svc_" + id.Substring(4);
-
-                bleFrameworks.Add(new Framework
-                {
-                    Name = string.Format("Bluetooth LE - {0} ({1})", desc, Path.GetFileName(dir)),
-                    ID = "com.sysprogs.arm.nordic.nrfx." + id,
-                    ProjectFolderName = "BLE " + desc,
-                    DefaultEnabled = false,
-                    CopyJobs = new CopyJob[]
-                    {
-                        new CopyJob
-                        {
-                            SourceFolder = allFamilies[0].Definition.PrimaryHeaderDir + @"\..\components\ble\" + dir,
-                            TargetFolder = dir,
-                            FilesToCopy = "*.c;*.h",
-                        }
-                    }
-                });
-            }
-            
-
             foreach (var fam in allFamilies)
             {
+                Console.WriteLine("Processing " + fam.Definition.Name + " family...");
+                string famBase = fam.Definition.Name.Substring(0, 5).ToLower();
+
                 var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
                 if (rejectedMCUs.Length != 0)
                 {
@@ -286,12 +242,83 @@ namespace nrf5x
                         Console.WriteLine("\t{0}", mcu.Name);
                 }
 
+                List<Framework> bleFrameworks = new List<Framework>();
+                foreach (var line in File.ReadAllLines(bspBuilder.Directories.RulesDir + @"\BLEFrameworks.txt"))
+                {
+                    int idx = line.IndexOf('|');
+                    string dir = line.Substring(0, idx);
+                    string desc = line.Substring(idx + 1);
+
+                    string id = Path.GetFileName(dir);
+                    if (!id.StartsWith("ble_"))
+                        id = "ble_" + id;
+
+                    if (dir.StartsWith("services\\", StringComparison.CurrentCultureIgnoreCase))
+                        id = "ble_svc_" + id.Substring(4);
+
+                    bleFrameworks.Add(new Framework
+                    {
+                        Name = string.Format("Bluetooth LE - {0} ({1})", desc, Path.GetFileName(dir)),
+                        ID = "com.sysprogs.arm.nordic." + famBase + "." + id,
+                        ClassID = "com.sysprogs.arm.nordic.nrfx." + id,
+                        ProjectFolderName = "BLE " + desc,
+                        DefaultEnabled = false,
+                        CopyJobs = new CopyJob[]
+                        {
+                            new CopyJob
+                            {
+                                SourceFolder = allFamilies[0].Definition.PrimaryHeaderDir + @"\..\components\ble\" + dir,
+                                TargetFolder = dir,
+                                FilesToCopy = "*.c;*.h",
+                            }
+                        }
+                    });
+                }
+
                 fam.Definition.AdditionalFrameworks = fam.Definition.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
 
+                var vectorTable = new StartupFileGenerator.InterruptVectorTable
+                {
+                    FileName = "startup_" + famBase + "x.c",
+                    Vectors = StartupFileGenerator.ParseInterruptVectors(Path.Combine(fam.Definition.StartupFileDir, "arm_startup_" + famBase + ".s"),
+                        "^__Vectors",
+                        @"__Vectors_End",
+                        @"^[ \t]+DCD[ \t]+([^ \t]+)[ \t]+; *([^ \t].*)$",
+                        @"^[ \t]+DCD[ \t]+([^ \t]+)$",
+                        @"^[ \t]+;.*",
+                        null,
+                        1,
+                        2),
+                };
+
+                if (famBase.ToLower() == "nrf51")
+                {
+                    vectorTable.AdditionalResetHandlerLines = new string[]
+                    {
+                        "asm volatile(\".equ NRF_POWER_RAMON_ADDRESS,0x40000524\");",
+                        "asm volatile(\".equ NRF_POWER_RAMON_RAMxON_ONMODE_Msk,3\");",
+                        "asm volatile(\"LDR     R0, =NRF_POWER_RAMON_ADDRESS\");",
+                        "asm volatile(\"LDR     R2, [R0]\");",
+                        "asm volatile(\"MOVS    R1, #NRF_POWER_RAMON_RAMxON_ONMODE_Msk\");",
+                        "asm volatile(\"ORR     R2, R2, R1\");",
+                        "asm volatile(\"STR     R2, [R0]\");",
+                    };
+                }
+
+                vectorTable.Vectors = new StartupFileGenerator.InterruptVector[] { new StartupFileGenerator.InterruptVector { Name = "_estack" } }.Concat(vectorTable.Vectors).ToArray();
+
                 fam.AttachStartupFiles(new StartupFileGenerator.InterruptVectorTable[] { vectorTable });
-                fam.AttachPeripheralRegisters(new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nrf51.svd"), "nRF51") });
+                fam.AttachPeripheralRegisters(new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, famBase + (famBase == "nrf51" ? ".svd" : ".xml")), "nRF5" + famBase[4]) });
 
                 var famObj = fam.GenerateFamilyObject(true);
+                if (famBase == "nrf52")
+                {
+                    var prop = famObj.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode") as PropertyEntry.Enumerated;
+                    var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
+
+                    prop.DefaultEntryIndex = idx;
+                    prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
+                }
 
                 famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
                 famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
@@ -350,7 +377,8 @@ namespace nrf5x
                 PackageVersion = "2.0",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
-                ConditionalFlags = condFlags.ToArray()
+                ConditionalFlags = condFlags.ToArray(),
+                FirstCompatibleVersion = "2.0",
             };
 
             bspBuilder.Save(bsp, true);

@@ -540,6 +540,9 @@ namespace BSPGenerationTools
                             sampleObj.MCUFilterRegex = string.Join("|", devices);
                     }
 
+                    if (sampleObj.MCUFilterRegex == null && sample.MCUFilterRegex != null)
+                        sampleObj.MCUFilterRegex = sample.MCUFilterRegex;
+
                     XmlTools.SaveObject(sampleObj, Path.Combine(destFolder, "sample.xml"));
                     yield return sample.DestinationFolder;
                 }
