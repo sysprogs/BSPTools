@@ -110,6 +110,10 @@
         <Key>com.sysprogs.bspoptions.nrf5x.ble.devmgr</Key>
         <Value>peripheral</Value>
       </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.saadc_driver</Key>
+        <Value>yes</Value>
+      </KeyValue>
     </Entries>
 	</DefaultConfiguration>
 </EmbeddedProjectSample>
