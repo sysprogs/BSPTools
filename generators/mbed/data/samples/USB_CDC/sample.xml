@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>USB Communications Device</Name>
+  <Description>This is a basic USB CDC device based on the mbed USB library</Description>
+  <ConfigurableProperties>
+  </ConfigurableProperties>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+	<string>com.sysprogs.arm.mbed.usb</string>
+  </RequiredFrameworks>
+</EmbeddedProjectSample>

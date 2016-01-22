@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<BoardSupportPackage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <PackageID>com.sysprogs.arm.mbed</PackageID>
+  <PackageDescription>ARM mbed</PackageDescription>
+  <PackageVersion>1.0</PackageVersion>
+  <GNUTargetID>arm-eabi</GNUTargetID>
+  <GeneratedMakFileName>mbed.mak</GeneratedMakFileName>
+  <MinimumEngineVersion>5.1</MinimumEngineVersion>
+  <BSPSourceFolderName>mbed Files</BSPSourceFolderName>
+  <MCUFamilies>
+    <MCUFamily>
+      <ID>MBED_CORE</ID>
+    </MCUFamily>
+  </MCUFamilies>
+  <SupportedMCUs>
+  </SupportedMCUs>
+  <Frameworks />
+  <Examples/>
+  <FileConditions/>
+  <ConditionalFlags/>
+</BoardSupportPackage>

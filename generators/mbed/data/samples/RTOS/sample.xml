@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>LEDBlink (RTOS)</Name>
+  <Description>This sample demonstrates 2 threads controlling separate LEDs using Keil RTX</Description>
+  <ConfigurableProperties>
+    <PropertyGroups>
+      <PropertyGroup>
+        <Properties>
+          <PropertyEntry xsi:type="Integral">
+            <Name>LED #1 Number</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.LED1NUM</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the port number of the LED port</Description>
+            <DefaultValue>1</DefaultValue>
+            <MinValue>0</MinValue>
+            <MaxValue>128</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>LED #2 Number</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.LED2NUM</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the port number of the LED port</Description>
+            <DefaultValue>2</DefaultValue>
+            <MinValue>0</MinValue>
+            <MaxValue>128</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>LED #1 Period (msec)</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.DELAY1MSEC</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+            <DefaultValue>500</DefaultValue>
+            <MinValue>-2147483648</MinValue>
+            <MaxValue>2147483647</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>LED #2 Period (msec)</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.DELAY2MSEC</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+            <DefaultValue>300</DefaultValue>
+            <MinValue>-2147483648</MinValue>
+            <MaxValue>2147483647</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+        </Properties>
+        <CollapsedByDefault>false</CollapsedByDefault>
+      </PropertyGroup>
+    </PropertyGroups>
+  </ConfigurableProperties>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+	<string>com.sysprogs.arm.mbed.rtos</string>
+	<string>com.sysprogs.arm.mbed.rtx</string>
+  </RequiredFrameworks>
+</EmbeddedProjectSample>

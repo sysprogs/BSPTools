@@ -1,0 +1,4 @@
+(DISCO|NUCLEO)_(.*) = STM32\2
+(KL?[0-9].*)=M\1
+(LPC.{4}) = \1
+(NRF5.*) = nRF51
