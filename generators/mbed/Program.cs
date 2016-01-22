@@ -1,5 +1,6 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
+using StandaloneBSPValidator;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,7 +54,7 @@ namespace mbed
                     throw new Exception("BSP generator exited with code " + proc.ExitCode);
             }
 
-            File.Copy(Path.Combine(dataDir, "stubs.cpp"), Path.Combine(mbedRoot, "stubs.cpp"));
+            File.Copy(Path.Combine(dataDir, "stubs.cpp"), Path.Combine(mbedRoot, "stubs.cpp"), true);
             Dictionary<string, string> mcuDefs = new Dictionary<string, string>();
             foreach (var dir in Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi"))
             {
@@ -99,6 +100,18 @@ namespace mbed
                 }
             }
             ProduceBSPArchive(mbedRoot, bsp);
+
+            if (true)
+            {
+                Console.WriteLine("Testing BSP...");
+                var job = XmlTools.LoadObject<TestJob>(Path.Combine(dataDir, "testjob.xml"));
+
+                var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
+                var lbsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(Path.Combine(outputDir, "mbed")), toolchain, false);
+                var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(outputDir, "TestResults"));
+                if (r.Failed != 0 || r.Passed < 86)
+                    throw new Exception("Some of the tests failed. Check test results.");
+            }
         }
 
         static void ProduceBSPArchive(string BSPRoot, BoardSupportPackage bsp)

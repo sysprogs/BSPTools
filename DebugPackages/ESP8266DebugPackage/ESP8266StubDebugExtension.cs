@@ -66,7 +66,6 @@ namespace ESP8266DebugPackage
                         case DialogResult.Yes:
                             Process.Start("http://visualgdb.com/KB/esp8266gdbstub");
                             goto case DialogResult.Cancel;
-                            break;
                         case DialogResult.No:
                             break;
                         case DialogResult.Cancel:
@@ -85,7 +84,11 @@ namespace ESP8266DebugPackage
                     using (var serialPort = new SerialPortStream(debugMethodConfig["com.sysprogs.esp8266.gdbstub.com_port"], int.Parse(debugMethodConfig["com.sysprogs.esp8266.gdbstub.bl_baud"]), System.IO.Ports.Handshake.None))
                     {
                         serialPort.AllowTimingOutWithZeroBytes = true;
-                        ESP8266BootloaderClient client = new ESP8266BootloaderClient(serialPort);
+                        int resetDelay;
+                        if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.reset_delay", out val) || !int.TryParse(val, out resetDelay))
+                            resetDelay = 25;
+
+                        ESP8266BootloaderClient client = new ESP8266BootloaderClient(serialPort, resetDelay);
                         client.Sync();
                         var regions = ESP8266StartupSequence.BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
 

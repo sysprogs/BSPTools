@@ -1,5 +1,6 @@
 ﻿using BSPEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -77,13 +78,13 @@ namespace StandaloneBSPValidator
                 }
         }
 
-        public void AddBSPFilesToProject(Dictionary<string, string> SystemDictionary, Dictionary<string,string> frameworkConfig)
+        public void AddBSPFilesToProject(Dictionary<string, string> SystemDictionary, Dictionary<string,string> frameworkConfig, Dictionary<string, bool> frameworkIDs)
         {
             if (MCU.ExpandedMCU.AdditionalSourceFiles != null && MCU.ExpandedMCU.AdditionalSourceFiles.Length > 0)
             {
                 foreach (var fn in MCU.ExpandedMCU.AdditionalSourceFiles)
                 {
-                    if (MCU.BSP.ShouldSkipFile(fn, SystemDictionary, null))
+                    if (MCU.BSP.ShouldSkipFile(fn, SystemDictionary, null, frameworkIDs))
                         continue;
 
                     var expandedFN = VariableHelper.ExpandVariables(fn, SystemDictionary);
@@ -100,7 +101,7 @@ namespace StandaloneBSPValidator
 
             foreach (var fw in _Frameworks)
             {
-                var files = fw.AdditionalSourceFiles.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
+                var files = fw.AdditionalSourceFiles.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
                 _SourceFiles.AddRange(files);
             }
         }
@@ -171,7 +172,7 @@ namespace StandaloneBSPValidator
 
         public const string MapFileName = "test.map";
 
-        internal ToolFlags GetToolFlags(Dictionary<string, string> systemDict, Dictionary<string, string> frameworkDict)
+        internal ToolFlags GetToolFlags(Dictionary<string, string> systemDict, Dictionary<string, string> frameworkDict, IDictionary frameworkIDs)
         {
             var flags = new ToolFlags { CXXFLAGS = "-fno-exceptions -ffunction-sections -Os", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + MapFileName, CFLAGS = "-ffunction-sections -Os" };
 
@@ -192,7 +193,7 @@ namespace StandaloneBSPValidator
             if (MCU.BSP.BSP.ConditionalFlags != null)
             {
                 foreach (var cf in MCU.BSP.BSP.ConditionalFlags)
-                    if (cf.FlagCondition.IsTrue(primaryDict, frameworkDict))
+                    if (cf.FlagCondition.IsTrue(primaryDict, frameworkDict, frameworkIDs))
                         flags = flags.Merge(LoadedBSP.ConfiguredMCU.ExpandToolFlags(cf.Flags, primaryDict, frameworkDict));
             }
             return flags;

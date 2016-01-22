@@ -8,10 +8,12 @@ namespace ESP8266DebugPackage
     class ESP8266BootloaderClient
     {
         private SerialPortStream _Port;
+        private readonly int _ResetDelay;
 
-        public ESP8266BootloaderClient(SerialPortStream port)
+        public ESP8266BootloaderClient(SerialPortStream port, int resetDelay)
         {
             _Port = port;
+            _ResetDelay = resetDelay;
         }
 
         enum Command : byte
@@ -132,28 +134,36 @@ namespace ESP8266DebugPackage
             for (int i = 0; i < 32; i++)
                 syncMagic.Add(0x55);
 
-            for (int i = 0; ; i++)
+            for (int outerIter = 0; ; outerIter++)
             {
-                try
+                for (int innerIter = 0; innerIter < 5; innerIter++)
                 {
-                    _Port.EscapeFunction(SerialPortStream.CommFunction.CLRDTR);
-                    _Port.EscapeFunction(SerialPortStream.CommFunction.SETRTS);
-                    Thread.Sleep(5);
-                    _Port.EscapeFunction(SerialPortStream.CommFunction.SETDTR);
-                    _Port.EscapeFunction(SerialPortStream.CommFunction.CLRRTS);
-                    Thread.Sleep(5);
-                    _Port.EscapeFunction(SerialPortStream.CommFunction.CLRDTR);
+                    try
+                    {
+                        if (innerIter == 0)
+                        {
+                            _Port.EscapeFunction(SerialPortStream.CommFunction.CLRDTR);
+                            _Port.EscapeFunction(SerialPortStream.CommFunction.SETRTS);
+                            Thread.Sleep(_ResetDelay);
+                            _Port.EscapeFunction(SerialPortStream.CommFunction.SETDTR);
+                            _Port.EscapeFunction(SerialPortStream.CommFunction.CLRRTS);
+                            Thread.Sleep(_ResetDelay);
+                            _Port.EscapeFunction(SerialPortStream.CommFunction.CLRDTR);
+                            Thread.Sleep(_ResetDelay);
+                        }
 
-                    RunCommand(Command.ESP_SYNC, syncMagic.ToArray());
-                    for (int j = 0; j < 7; j++)
-                        RunCommand(Command.ESP_NO_COMMAND);
-                    _Port.SetTimeouts(5000, 0, 5000, 0, 0);
-                    return;
-                }
-                catch
-                {
-                    if (i >= 4)
-                        throw;
+                        _Port.Purge();
+                        RunCommand(Command.ESP_SYNC, syncMagic.ToArray());
+                        for (int j = 0; j < 7; j++)
+                            RunCommand(Command.ESP_NO_COMMAND);
+                        _Port.SetTimeouts(5000, 0, 5000, 0, 0);
+                        return;
+                    }
+                    catch
+                    {
+                        if (outerIter >= 4)
+                            throw;
+                    }
                 }
             }
         }

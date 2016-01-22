@@ -515,7 +515,7 @@ namespace BSPGenerationTools
 
                         foreach (var f in sampleObj.AdditionalSourcesToCopy)
                             if (!File.Exists(f.SourcePath.Replace("$$SYS:BSP_ROOT$$", BSP.Directories.OutputDir)))
-                                throw new Exception("Missing sample file: " + f.SourcePath);
+                                Console.WriteLine("Missing sample file: " + f.SourcePath);
                     }
 
                     if (sampleObj.MCUFilterRegex == null & allFrameworks != null && sampleObj.RequiredFrameworks != null)

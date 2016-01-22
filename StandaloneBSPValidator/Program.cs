@@ -17,17 +17,19 @@ namespace StandaloneBSPValidator
         public bool ValidateRegisters;
         public PropertyDictionary2 SampleConfiguration;
         public PropertyDictionary2 FrameworkConfiguration;
+        public PropertyDictionary2 MCUConfiguration;
     }
 
     public class TestJob
     {
         public string DeviceRegex;
+        public string SkippedDeviceRegex;
         public string ToolchainPath;
         public string BSPPath;
         public TestedSample[] Samples;
     }
 
-    class Program
+    public class Program
     {
         static Dictionary<string, string> GetDefaultPropertyValues(PropertyList propertyList)
         {
@@ -120,11 +122,16 @@ namespace StandaloneBSPValidator
                 foreach (var kv in sample.SampleConfiguration.Entries)
                     configuredSample.Parameters[kv.Key] = kv.Value;
 
+            if (sample.MCUConfiguration != null)
+                foreach (var kv in sample.MCUConfiguration.Entries)
+                    configuredMCU.Configuration[kv.Key] = kv.Value;
+
+
             //configuredSample.Parameters["com.sysprogs.examples.ledblink.LEDPORT"] = "GPIOA";
             //configuredSample.Parameters["com.sysprogs.examples.stm32.LEDPORT"] = "GPIOA";
             //configuredSample.Parameters["com.sysprogs.examples.stm32.freertos.heap_size"] = "0";
 
-            var bspDict = configuredMCU.BuildSystemDictionary();
+            var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager());
             bspDict["PROJECTNAME"] = "test";
 
             if (configuredSample.Frameworks != null)
@@ -137,8 +144,13 @@ namespace StandaloneBSPValidator
 
             var prj = new GeneratedProject(mcuDir, configuredMCU, frameworks);
             prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);
-            prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters);
-            var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters);
+            Dictionary<string, bool> frameworkIDs = new Dictionary<string, bool>();
+            if (frameworks != null)
+                foreach (var fw in frameworks)
+                    frameworkIDs[fw] = true;
+
+            prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
+            var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
 
             using (var sw = new StreamWriter(Path.Combine(mcuDir, "Makefile")))
             {
@@ -240,9 +252,14 @@ namespace StandaloneBSPValidator
 
         }
 
-
-        static void TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
+        public struct TestStatistics
         {
+            public int Passed, Failed;
+        }
+
+        public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
+        {
+            TestStatistics stats = new TestStatistics();
             Directory.CreateDirectory(temporaryDirectory);
             using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
             {
@@ -253,6 +270,12 @@ namespace StandaloneBSPValidator
                 {
                     var rgFilter = new Regex(job.DeviceRegex);
                     MCUs = bsp.MCUs.Where(mcu => rgFilter.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
+                }
+
+                if (job.SkippedDeviceRegex != null)
+                {
+                    var rg = new Regex(job.SkippedDeviceRegex);
+                    MCUs = MCUs.Where(mcu => !rg.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
                 }
 
                 foreach (var sample in job.Samples)
@@ -280,8 +303,12 @@ namespace StandaloneBSPValidator
                     if (succeeded == 0)
                         throw new Exception("Not a single MCU supports " + sample.Name);
                     r.EndSample();
+
+                    stats.Passed += succeeded;
+                    stats.Failed += failed;
                 }
             }
+            return stats;
         }
 
         static void Main(string[] args)

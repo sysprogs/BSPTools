@@ -287,6 +287,15 @@ namespace ESP8266DebugPackage
         }
 
         [DllImport("kernel32.dll")]
+        static extern bool PurgeComm(SafeFileHandle hFile, uint dwFlags);
+
+        public void Purge()
+        {
+            if (!PurgeComm(_Handle, 0x0F))
+                throw new Win32Exception(Marshal.GetLastWin32Error(), "Cannot purge COM port");
+        }
+
+        [DllImport("kernel32.dll")]
         static extern bool GetCommState(SafeFileHandle hFile,  ref DCB lpDCB);
 
         [DllImport("kernel32.dll")]
