@@ -87,8 +87,8 @@
 						<string>stm32746g_discovery_eeprom.*: $$com.sysprogs.bspoptions.stm32746g_discovery.eeprom$$ == 1</string>
 						<string>stm32746g_discovery_lcd.*: $$com.sysprogs.bspoptions.stm32746g_discovery.lcd$$ == 1</string>
 						<string>stm32746g_discovery_qspi.*: $$com.sysprogs.bspoptions.stm32746g_discovery.qspi$$ == 1</string>
-						<string>stm32746g_discovery_sd.*: $$com.sysprogs.bspoptions.stm32746g_discovery.sd$$ == 1</string>
 						<string>stm32746g_discovery_sdram.*: $$com.sysprogs.bspoptions.stm32746g_discovery.sdram$$ == 1</string>
+						<string>stm32746g_discovery_sd.*: $$com.sysprogs.bspoptions.stm32746g_discovery.sd$$ == 1</string>
 						<string>stm32746g_discovery_ts.*: $$com.sysprogs.bspoptions.stm32746g_discovery.ts$$ == 1</string>
 					</SimpleFileConditions>
 				</CopyJob>
@@ -138,7 +138,7 @@
 						<string>stm32756g_eval_lcd.*: $$com.sysprogs.bspoptions.stm32756G_eval.lcd$$ == 1</string>
 						<string>stm32756g_eval_nor.*: $$com.sysprogs.bspoptions.stm32756G_eval.nor$$ == 1</string>
 						<string>stm32756g_eval_qspi.*: $$com.sysprogs.bspoptions.stm32756G_eval.qspi$$ == 1</string>
-						<string>stm32756g_eval_sd.*: $$com.sysprogs.bspoptions.stm32756G_eval.sd$$ == 1</string>
+						<string>stm32756g_eval_sd\..*: $$com.sysprogs.bspoptions.stm32756G_eval.sd$$ == 1</string>
 						<string>stm32756g_eval_sdram.*: $$com.sysprogs.bspoptions.stm32756G_eval.sdram$$ == 1</string>
 						<string>stm32756g_eval_sram.*: $$com.sysprogs.bspoptions.stm32756G_eval.sram$$ == 1</string>
 						<string>stm32756g_eval_ts.*: $$com.sysprogs.bspoptions.stm32756G_eval.ts$$ == 1</string>

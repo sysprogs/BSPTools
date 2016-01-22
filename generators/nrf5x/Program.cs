@@ -114,14 +114,31 @@ namespace nrf5x
             };
 
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
+            public const string RAMSuffixPropertyID = "com.sysprogs.bspoptions.nrf5x.ramsuffix";
 
             public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
             {
+                DoGenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout, generalizedName, "");
+                if (layout.DeviceName.StartsWith("nRF52"))
+                {
+                    foreach (var ram in new int[] { 16, 32, 64 })
+                    {
+                        var layout2 = layout.Clone();
+                        layout2.Memories.First(m => m.Name == "SRAM").Size = (uint)(ram * 1024);
+                        DoGenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout2, generalizedName, "_" + ram + "k");
+                    }
+
+                    mcu.LinkerScriptPath = mcu.LinkerScriptPath.Replace(".lds", "$$" + RAMSuffixPropertyID + "$$.lds");
+                }
+            }
+
+            void DoGenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName, string ldsSuffix)
+            {
                 using (var gen = new LdsFileGenerator(LDSTemplate, layout))
                 {
-                    using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev.lds")))
+                    using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev" + ldsSuffix + ".lds")))
                         gen.GenerateLdsFile(sw);
-                    using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev_reserve.lds")))
+                    using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev_reserve"+ ldsSuffix + ".lds")))
                         gen.GenerateLdsFile(sw);
                 }
 
@@ -153,13 +170,13 @@ namespace nrf5x
 
                     using (var gen = new LdsFileGenerator(softdevTemplate, layoutCopy))
                     {
-                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + ".lds")))
+                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + ldsSuffix + ".lds")))
                             gen.GenerateLdsFile(sw, new string[] { "", "GROUP(" + sd.Name + "_softdevice.o)", "" });
                     }
 
                     using (var gen = new LdsFileGenerator(LDSTemplate, layoutCopy))
                     {
-                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + "_reserve.lds")))
+                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + "_reserve" + ldsSuffix +".lds")))
                             gen.GenerateLdsFile(sw);
                     }
                 }
@@ -348,6 +365,21 @@ namespace nrf5x
                             }
                         }
                     });
+
+                    if (mcu.Name.StartsWith("nRF52"))
+                    {
+                        mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated
+                        {
+                            UniqueID = NordicBSPBuilder.RAMSuffixPropertyID,
+                            Name = "RAM size",
+                            DefaultEntryIndex = 0,
+                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[] {
+                                new PropertyEntry.Enumerated.Suggestion {InternalValue = "_32k", UserFriendlyName = "32 KB (Preview)" },
+                                new PropertyEntry.Enumerated.Suggestion {InternalValue = "_64k", UserFriendlyName = "64 KB (Final)" },
+                            }
+                        });
+                    }
+
                     mcuDefinitions.Add(mcuDef);
                 }
 
@@ -367,7 +399,7 @@ namespace nrf5x
             BoardSupportPackage bsp = new BoardSupportPackage
             {
                 PackageID = "com.sysprogs.arm.nordic.nrf5x",
-                PackageDescription = "Nordic NRF51 Devices",
+                PackageDescription = "Nordic NRF5x Devices",
                 GNUTargetID = "arm-eabi",
                 GeneratedMakFileName = "nrf5x.mak",
                 MCUFamilies = familyDefinitions.ToArray(),

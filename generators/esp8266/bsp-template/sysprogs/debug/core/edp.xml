@@ -348,6 +348,13 @@
 				  <DefaultEntryIndex>0</DefaultEntryIndex>
 				  <AllowFreeEntry>true</AllowFreeEntry>
 				</PropertyEntry>
+				<PropertyEntry xsi:type="Integral">
+				  <Name>Bootloader reset delay (msec)</Name>
+				  <UniqueID>com.sysprogs.esp8266.reset_delay</UniqueID>
+				  <DefaultValue>25</DefaultValue>
+				  <MinValue>0</MinValue>
+				  <MaxValue>10000</MaxValue>
+				</PropertyEntry>
 				<PropertyEntry xsi:type="Enumerated">
 				  <Name>Program SPI FLASH</Name>
 				  <UniqueID>com.sysprogs.esp8266.program_flash</UniqueID>
