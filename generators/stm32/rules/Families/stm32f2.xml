@@ -3,8 +3,8 @@
 	<Name>STM32F2</Name>
 	<DeviceRegex>^STM32F2.*</DeviceRegex>
 	<FamilySubdirectory>STM32F2xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.1.0\Drivers\CMSIS\Device\ST\STM32F2xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.1.0\Drivers\CMSIS\Device\ST\STM32F2xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.3.0\Drivers\CMSIS\Device\ST\STM32F2xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.3.0\Drivers\CMSIS\Device\ST\STM32F2xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
@@ -36,21 +36,26 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.1.0\Drivers\STM32F2xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.3.0\Drivers\STM32F2xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.1.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.3.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
+					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32f2????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>–RTOS\Template\*;*.h</AutoIncludeMask>					
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>Device\ST\STM32f2xx\Source\Templates\system_stm32f2xx.c</FilePath>
-							<AfterLine>#include "stm32f2xx_hal.h"</AfterLine>
-							<InsertedLines/>
+							<AfterLine>#include "stm32f2xx.h"</AfterLine>
+							<InsertedLines>
+								<string>#include &lt;stm32f2xx_hal.h&gt;</string>
+							</InsertedLines>
+
 						</Patch>					
 					</Patches>
 				</CopyJob>
@@ -68,9 +73,9 @@
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.1.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.3.0\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>*system_*.c</FilesToCopy>
+					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>

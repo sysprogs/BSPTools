@@ -3,8 +3,8 @@
 	<Name>STM32F1</Name>
 	<DeviceRegex>^STM32F1.*</DeviceRegex>
 	<FamilySubdirectory>STM32F1xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.1.0\Drivers\CMSIS\Device\ST\STM32F1xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.1.0\Drivers\CMSIS\Device\ST\STM32F1xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.3.0\Drivers\CMSIS\Device\ST\STM32F1xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.3.0\Drivers\CMSIS\Device\ST\STM32F1xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
@@ -130,16 +130,17 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.1.0\Drivers\STM32F1xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.3.0\Drivers\STM32F1xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.1.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.3.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
+					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32f1????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>–RTOS\Template\*;*.h</AutoIncludeMask>
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>Device\ST\STM32F1xx\Source\Templates\system_stm32f1xx.c</FilePath>
@@ -148,9 +149,26 @@
 								<string>#include &lt;stm32f1xx_hal.h&gt;</string>
 							</InsertedLines>
 						</Patch>					
-					</Patches>
+					</Patches>					
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>				
+			<ConfigurableProperties>
+				<PropertyGroups>
+                    <PropertyGroup>
+                        <Properties>
+                            <PropertyEntry xsi:type="Boolean">
+								<Name>Support legacy HAL API</Name>
+                                <UniqueID>com.sysprogs.bspoptions.stm32.hal_legacy</UniqueID>
+                                <ValueForTrue>USE_HAL_LEGACY </ValueForTrue>
+                                <ValueForFalse></ValueForFalse>
+                                <DefaultValue>true</DefaultValue>
+                            </PropertyEntry> 
+						</Properties>
+                        <CollapsedByDefault>false</CollapsedByDefault>
+                    </PropertyGroup>
+                </PropertyGroups>
+			</ConfigurableProperties>      
+			<!-- End EAK-->
 		</Framework>
 		<Framework>
 			<Name>STM32F1 Default System Init File</Name>
@@ -164,9 +182,9 @@
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.1.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.3.0\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>*system_*.c</FilesToCopy>
+					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>

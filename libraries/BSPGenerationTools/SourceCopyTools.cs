@@ -2,7 +2,7 @@
    This software is licensed under the Sysprogs BSP Generator License.
    https://github.com/sysprogs/BSPTools/blob/master/LICENSE
 */
-
+ 
 using BSPEngine;
 using System;
 using System.Collections.Generic;

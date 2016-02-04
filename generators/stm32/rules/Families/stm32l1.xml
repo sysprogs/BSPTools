@@ -3,8 +3,8 @@
 	<Name>STM32L1</Name>
 	<DeviceRegex>^STM32L1.*</DeviceRegex>
 	<FamilySubdirectory>STM32L1xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.2.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.2.0\Drivers\CMSIS\Device\ST\STM32L1xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.4.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.4.0\Drivers\CMSIS\Device\ST\STM32L1xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
@@ -145,16 +145,17 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.2.0\Drivers\STM32L1xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.4.0\Drivers\STM32L1xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.2.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.4.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
+					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32l1????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>–RTOS\Template\*;*.h</AutoIncludeMask>		
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>Device\ST\STM32l1xx\Source\Templates\system_stm32l1xx.c</FilePath>
@@ -165,7 +166,7 @@
 						</Patch>					
 					</Patches>
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>				    
 		</Framework>
 		<Framework>
 			<Name>STM32L1 Default System Init File</Name>
@@ -179,9 +180,9 @@
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.2.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.4.0\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>*system_*.c</FilesToCopy>
+					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>

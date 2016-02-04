@@ -3,16 +3,28 @@
 	<Name>STM32F4</Name>
 	<DeviceRegex>^STM32F4.*</DeviceRegex>
 	<FamilySubdirectory>STM32F4xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
 			<IsPrimary>true</IsPrimary>
 			<UnsupportedMCUs>STM32F479.*</UnsupportedMCUs>
-			<AutoOptions>STM32F405xx;STM32F415xx;STM32F407xx;STM32F417xx;STM32F427xx;STM32F437xx;STM32F429xx;STM32F439xx;STM32F446xx</AutoOptions>
+			<AutoOptions>STM32F405xx;STM32F415xx;STM32F407xx;STM32F417xx;STM32F427xx;STM32F437xx;STM32F429xx;STM32F439xx;STM32F446xx;STM32F469xx</AutoOptions>
 			<Options>
+			<Option>
+					<Value>STM32F410Cx</Value>
+					<Regex>STM32F410C8|STM32F410CB</Regex>
+				</Option>
+			<Option>
+					<Value>STM32F410Tx</Value>
+					<Regex>STM32F410T8|STM32F410TB</Regex>
+				</Option>
+			<Option>
+					<Value>STM32F410Rx</Value>
+					<Regex>STM32F410R8|STM32F410RB</Regex>
+				</Option>
 				<Option>
 					<Value>STM32F401xC</Value>
 					<Regex>STM32F401.B|STM32F401.C</Regex>
@@ -31,8 +43,9 @@
 			<VariableName>com.sysprogs.stm32.legacy_device_family</VariableName>
 			<Required>true</Required>
 			<UnsupportedMCUs>STM32F479.*</UnsupportedMCUs>
-			<AutoOptions>STM32F401xx;STM32F446xx</AutoOptions>
+			<AutoOptions>STM32F401xx;STM32F446xx;STM32F469xx;STM32F410xx</AutoOptions>
 			<Options>
+	
 				<Option>
 					<Value>STM32F40_41xxx</Value>
 					<Regex>STM32F4[01]5..|STM32F4[01]7..</Regex>
@@ -48,6 +61,10 @@
 				<Option>
 					<Value>STM32F411xE</Value>
 					<Regex>STM32F411..</Regex>
+				</Option>
+				<Option>
+					<Value>STM32F469_479xx</Value>
+					<Regex>STM32F4[67]9..</Regex>
 				</Option>
 			</Options>
 		</MCUClassifier>
@@ -73,16 +90,17 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Drivers\STM32F4xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\STM32F4xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32f4????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>–RTOS\Template\*;*.h</AutoIncludeMask>		
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>Device\ST\STM32f4xx\Source\Templates\system_stm32f4xx.c</FilePath>
@@ -108,8 +126,8 @@
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>*system_*.c</FilesToCopy>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS</SourceFolder>
+					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>
@@ -123,16 +141,41 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.5.1\Libraries\STM32F4xx_StdPeriph_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.6.1\Libraries\STM32F4xx_StdPeriph_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*stm32f4xx_fmc.c;*</ProjectInclusionMask>
 					<SimpleFileConditions>
 						<string>\\stm32f4xx_fsmc.c: $$com.sysprogs.stm32.legacy_device_family$$ == STM32F40_41xxx</string>
 						<string>\\stm32f4xx_qspi.c: $$com.sysprogs.stm32.legacy_device_family$$ != STM32F446xx</string>
 					</SimpleFileConditions>
+					<Patches>
+				
+					<Patch xsi:type="InsertLines">
+                        <FilePath>src\stm32f4xx_dsi.c</FilePath>
+                        <AfterLine>#include "stm32f4xx_dsi.h"</AfterLine>
+                        <InsertedLines>
+                             <string>#include "stm32f4xx_rcc.h"</string>
+                        </InsertedLines>
+					</Patch>
+					<Patch xsi:type="InsertLines">
+                        <FilePath>src\stm32f4xx_lptim.c</FilePath>
+                        <AfterLine>#include "stm32f4xx_lptim.h"</AfterLine>
+                        <InsertedLines>
+                             <string>#include "stm32f4xx_rcc.h"</string>
+                        </InsertedLines>
+					</Patch>
+					<Patch xsi:type="InsertLines">
+                        <FilePath>src\stm32f4xx_qspi.c</FilePath>
+                        <AfterLine>#include "stm32f4xx_qspi.h"</AfterLine>
+                        <InsertedLines>
+                             <string>#include "stm32f4xx_rcc.h"</string>
+                        </InsertedLines>
+					</Patch>
+				
+				</Patches>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.5.1\Libraries\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.6.1\Libraries\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
@@ -167,6 +210,7 @@
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
 			</AdditionalSources>
 		</SmartSample>
+			
 	</SmartSamples>
       <AdditionalSystemVars>
         <SysVarEntry>

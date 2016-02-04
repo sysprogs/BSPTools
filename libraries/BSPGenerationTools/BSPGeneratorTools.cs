@@ -67,8 +67,8 @@ namespace BSPGenerationTools
             if (string.IsNullOrEmpty(StartupFile))
                 throw new Exception("Startup file not defined for " + Name);
             if (string.IsNullOrEmpty(MCUDefinitionFile) && requirePeripheralRegisters)
-                throw new Exception("Peripheral register definition not found for " + Name);
-
+                 throw new Exception("Peripheral register definition not found for " + Name);
+ 
             var mcu = new MCU
             {
                 ID = Name,
@@ -203,7 +203,14 @@ namespace BSPGenerationTools
         {
             if (primaryHeaderDir != null && primaryHeaderDir.Contains("$$"))
                 foreach (var entry in SystemVars)
-                    primaryHeaderDir = primaryHeaderDir.Replace(entry.Key, entry.Value);
+                    primaryHeaderDir = primaryHeaderDir.Replace(entry.Key, entry.Value);   
+        }
+
+        internal void ExpandAdditionalVariables(ref string strSources, SysVarEntry[] AddVariables )
+        {
+            if (AddVariables!=null && strSources.Contains("$$"))
+                foreach (var entry in AddVariables)
+                    strSources = strSources.Replace("$$"+entry.Key+ "$$", entry.Value);
         }
     }
 
@@ -216,6 +223,15 @@ namespace BSPGenerationTools
         {
             bspBuilder.ExpandVariables(ref definition.PrimaryHeaderDir);
             bspBuilder.ExpandVariables(ref definition.StartupFileDir);
+
+            foreach (var simple in definition.SmartSamples)
+            {
+                for (int count = 0; count < simple.AdditionalSources?.Count(); count++)
+                {
+                    string addSource = simple.AdditionalSources[count]; ;
+                    bspBuilder.ExpandAdditionalVariables(ref simple.AdditionalSources[count], definition.AdditionalSystemVars);
+                }         
+            }
 
             BSP = bspBuilder;
             Definition = definition;
@@ -511,7 +527,7 @@ namespace BSPGenerationTools
                                     return new AdditionalSourceFile { SourcePath = f };
                                 else
                                     return new AdditionalSourceFile { SourcePath = f.Substring(0, idx).Trim(), TargetFileName = f.Substring(idx + 2).Trim() };
-                            }).ToArray();
+                            }).ToArray();       
 
                         foreach (var f in sampleObj.AdditionalSourcesToCopy)
                             if (!File.Exists(f.SourcePath.Replace("$$SYS:BSP_ROOT$$", BSP.Directories.OutputDir)))
@@ -575,7 +591,7 @@ namespace BSPGenerationTools
                 }
 
                 if (!matched)
-                    throw new Exception("Cannot find a peripheral register set for " + mcu.Name);
+                      throw new Exception("Cannot find a peripheral register set for " + mcu.Name);
             }
 
         }
@@ -617,8 +633,8 @@ namespace BSPGenerationTools
                     var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
                     foreach (var mcu in removed)
                         if (rgUnsupported == null || !rgUnsupported.IsMatch(mcu.Name))
-                            throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized");
-                }
+                             throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized");
+                 }
 
                 removedMCUs.AddRange(removed);
             }
@@ -678,7 +694,7 @@ namespace BSPGenerationTools
                     FlashSize = Int32.Parse(items[headers[flashSizeColumn]]),
                     RAMSize = Int32.Parse(items[headers[ramSizeColumn]]),
                 };
-
+                             
                 if (coreColumn != null)
                     mcu.Core = ParseCoreName(items[headers[coreColumn]]);
 

@@ -26,21 +26,36 @@ namespace stm32_bsp_generator
 
             List<KeyValuePair<Regex, XmlElement>> _KnownSTM32Devices = new List<KeyValuePair<Regex,XmlElement>>();
 
+            public void LoadedDiviceFromCube(ZipFile zf, string familyFile) // Load diveces from Cube
+            {
+                var entry = zf.Entries.First(e => e.FileName == familyFile);
+                MemoryStream db = new MemoryStream();
+                zf.ExtractEntry(entry, db);
+
+                STM32CubeDeviceDatabase.LoadXml(Encoding.UTF8.GetString(db.ToArray()));
+                foreach (XmlElement node in STM32CubeDeviceDatabase.DocumentElement.SelectNodes("device"))
+                {
+                    foreach (var id in node.SelectSingleNode("PN").InnerText.Split(','))
+                        _KnownSTM32Devices.Add(new KeyValuePair<Regex, XmlElement>(new Regex(id.Replace('x', '.')), node));
+                }
+            }
+
             public STM32BSPBuilder(BSPDirectories dirs, string cubeDir)
                 : base(dirs)
             {
                 ShortName = "STM32";
                 var zf = new ZipFile(File.OpenRead(cubeDir + @"\plugins\projectmanager.jar"));
-                var entry = zf.Entries.First(e => e.FileName == "devices/stm32boards.db");
-                MemoryStream db = new MemoryStream();
-                zf.ExtractEntry(entry, db);
 
-                STM32CubeDeviceDatabase.LoadXml(Encoding.UTF8.GetString(db.ToArray()));
-                foreach(XmlElement node in STM32CubeDeviceDatabase.DocumentElement.SelectNodes("family/device"))
-                {
-                    foreach (var id in node.SelectSingleNode("PN").InnerText.Split(','))
-                        _KnownSTM32Devices.Add(new KeyValuePair<Regex, XmlElement>(new Regex(id.Replace('x', '.')), node));
-                }
+                LoadedDiviceFromCube(zf, "devices/STM32F0.db");
+                LoadedDiviceFromCube(zf, "devices/STM32F1.db");
+                LoadedDiviceFromCube(zf, "devices/STM32F2.db");
+                LoadedDiviceFromCube(zf, "devices/STM32F3.db");
+                LoadedDiviceFromCube(zf, "devices/STM32F4.db");
+                LoadedDiviceFromCube(zf, "devices/STM32F7.db");
+                LoadedDiviceFromCube(zf, "devices/STM32L0.db");
+                LoadedDiviceFromCube(zf, "devices/STM32L1.db");
+                LoadedDiviceFromCube(zf, "devices/STM32L4.db");
+                LoadedDiviceFromCube(zf, "devices/STM32W.db");
 
                 foreach (var line in File.ReadAllLines(dirs.RulesDir + @"\stm32memory.csv"))
                 {
@@ -114,7 +129,7 @@ namespace stm32_bsp_generator
             }
 
             XmlDocument STM32CubeDeviceDatabase = new XmlDocument();
-            Regex rgMemoryDef = new Regex(@"I(RAM|ROM[1-9]?)\(0x([0-9A-F]+)-0x([0-9A-F]+)\)");
+            Regex rgMemoryDef = new Regex(@"I(RAM[1-2]?|ROM[1-9]?)\(0x([0-9A-F]+)-0x([0-9A-F]+)\)");
 
             List<Memory> LookupMemorySizesFromSTM32CubeDatabase(string mcuName)
             {
@@ -155,7 +170,7 @@ namespace stm32_bsp_generator
                 return mems;
             }
 
-            public const string PaddedKnownMemoryMismatches = ";STM32F334C6;STM32F334C8;STM32F334K6;STM32F334K8;STM32F334R6;STM32F334R8;STM32F205RB;STM32F205RC;STM32F205VB;STM32F205VC;STM32F205ZC;STM32F302CC;STM32F302RC;STM32F302VC;STM32F303CB;STM32F303RB;STM32F303VB;STM32F328C8;";
+            public const string PaddedKnownMemoryMismatches = ";STM32F334K4;STM32F334C4;STM32F334C6;STM32F334C8;STM32F334K6;STM32F334K8;STM32F334R6;STM32F334R8;STM32F205RB;STM32F205RC;STM32F205VB;STM32F205VC;STM32F205ZC;STM32F302CC;STM32F302RC;STM32F302VC;STM32F303CB;STM32F303RB;STM32F303VB;STM32F328C8;";
 
             public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
@@ -261,8 +276,8 @@ namespace stm32_bsp_generator
                     continue;
 
                 /*if (subfamily != "stm32f301x8")
-                    continue;*/
-
+                 continue;*/
+                 
                 Func<MCUDefinitionWithPredicate> func = () =>
                     {
                         RegisterParserConfiguration cfg = XmlTools.LoadObject<RegisterParserConfiguration>(fam.BSP.Directories.RulesDir + @"\PeripheralRegisters.xml");
@@ -276,7 +291,7 @@ namespace stm32_bsp_generator
                         return r;
                     };
 
-                //func();
+                 //func();
                 tasks.Add(Task.Run(func));
             }
 
@@ -285,6 +300,10 @@ namespace stm32_bsp_generator
             if (errorCnt != 0)
             {
                 throw new Exception("Found " + errorCnt + " errors while parsing headers");
+
+                //   for (int i = 0; i < errors.ErrorCount;i++)
+                //     Console.WriteLine("\n er  " + i + "  -  " + errors.DetalErrors(i));
+
             }
 
             Console.WriteLine("done");
@@ -345,7 +364,7 @@ namespace stm32_bsp_generator
 
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
-
+             
                 foreach (var sample in fam.CopySamples())
                     exampleDirs.Add(sample);
             }

@@ -171,7 +171,7 @@ namespace stm32_bsp_generator
                         return false;
                 }
 
-                mSubreg = _SubregisterRegex.Match(fullName);
+                    mSubreg = _SubregisterRegex.Match(fullName);
                 if (!mSubreg.Success)
                     return false;
 
@@ -452,6 +452,10 @@ namespace stm32_bsp_generator
 
         List<ErrorBase> _Errors = new List<ErrorBase>();
 
+        public string DetalErrors(int num)
+        {
+             return (_Errors[num].FileName +":"+ _Errors[num].LineNumber+ " - "+_Errors[num].ToString() + " : " + _Errors[num].GetType());                  
+        }
         public void AddError(ErrorBase error)
         {
             lock (_Errors)
@@ -525,9 +529,12 @@ namespace stm32_bsp_generator
                 {
                     if (set.Value.Key == "HASH_DIGEST" || set.Value.Key == "HRTIM" || set.Value.Key == "HRTIM_TIM")
                         continue;
+                    if(set.Value.Key == "DMA_request")
+                        continue;
                     throw new Exception("Unknown set type: " + set.Value.Key);
+                
                 }
-
+       
                 List<HardwareRegister> registers = new List<HardwareRegister>(DeepCopy(registerset_types[set.Value.Key]).Registers);
 
                 for (int i = 0; i < registers.Count;i++ )
@@ -546,8 +553,10 @@ namespace stm32_bsp_generator
                     if (!nested_types.ContainsKey(set_type + "_" + register.Name))
                         if (!dict_repeat_reg_addr.ContainsKey(register.Address))
                             dict_repeat_reg_addr[register.Address] = set_name + "_" + register.Name;
-                        else if (!(set_name.StartsWith("FMC_") && dict_repeat_reg_addr[register.Address].StartsWith("FSMC_")) && (set_type != "SC_UART") && (set_type != "SC_SPI") && (set_type != "SC_I2C") && (set_type != "COMP") && (set_type != "OPAMP"))// This register is removed later on anyway as it is an either/or thing
-                            throw new Exception("Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
+                        else if (!(set_name.StartsWith("FMC_") && dict_repeat_reg_addr[register.Address].StartsWith("FSMC_")) &&
+                                !(set_name.StartsWith("ADC1") && dict_repeat_reg_addr[register.Address].StartsWith("ADC1")) &&
+                                (set_type != "SC_UART") && (set_type != "SC_SPI") && (set_type != "SC_I2C") && (set_type != "COMP") && (set_type != "OPAMP"))// This register is removed later on anyway as it is an either/or thing
+                             throw new Exception("Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
 
                     if (subregisters.ContainsKey(set_type + "_" + register.Name))
                     {
@@ -594,7 +603,7 @@ namespace stm32_bsp_generator
                                 throw new Exception("No subregisters found for register " + register2_cpy.Name + "!");
 
                             register2_cpy.Name = reg_name + "_" + register2_cpy.Name; // Make nested name to collapse the hierarchy
-
+ 
                             registers.Insert(i, register2_cpy);
                             if (!dict_repeat_reg_addr.ContainsKey(register2_cpy.Address))
                                 dict_repeat_reg_addr[register2_cpy.Address] = set_name + "_" + register2_cpy.Name;
@@ -698,6 +707,10 @@ namespace stm32_bsp_generator
                         register.SubRegisters = subregisters["EXTI_CR"].ToArray();
                     else if ((set_name.StartsWith("ADC1_2")))// Reuse subregisters
                         register.SubRegisters = subregisters["ADC12_" + register.Name].ToArray();
+                    else if ((set_name.StartsWith("ADC1_")))// Reuse subregisters
+                        register.SubRegisters = subregisters["ADC_" + register.Name].ToArray();
+                    else if ((set_name.StartsWith("ADC12_")))// Reuse subregisters
+                        register.SubRegisters = subregisters["ADC_" + register.Name].ToArray();
                     else if ((set_name.StartsWith("ADC3_4")))// Reuse subregisters
                         register.SubRegisters = subregisters["ADC34_" + register.Name].ToArray();
                     else if (((set_type == "SAI_Block")))// Reuse subregisters
@@ -753,6 +766,8 @@ namespace stm32_bsp_generator
                         continue;
                     else if (set_type == "SPI" && register.Name == "I2SPR")
                         continue;   //Bug: one header is missing the definition
+                    else if (set_type == "RCC" && register.Name == "CRRCR")
+                        continue;   //Bug: one header is missing the definition stm32l041xx.h
                     else if (subregisters.ContainsKey(set_name + "_" + register.Name))
                     {
                         register.SubRegisters = subregisters[set_name + "_" + register.Name].ToArray();
@@ -900,7 +915,9 @@ namespace stm32_bsp_generator
                 HardwareRegisterSet set = new HardwareRegisterSet() { UserFriendlyName = strct.Groups[2].Value, ExpressionPrefix = strct.Groups[2].Value + "->" };
                 int set_size = 0;
 
-                Regex register_regex = new Regex(@"[ ]*(__IO|__I)*[ ]*([^ #\r\n]*)[ ]*([^\[;#\r\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r\n]*)[ ]*(\*/)*[ ]*(\r\n)*");
+                RegexOptions option = RegexOptions.IgnoreCase;
+                Regex register_regex = new Regex(@"[ ]*(__IO|__I)*[ ]*(?:const )*[ ]*([^ #\r\n]*)[ ]*(?:const )*([^\[;#\r\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r\n]*)[ ]*(\*/)*[ ]*(\r\n)*", option);
+ 
                 var regs = register_regex.Matches(strct.Groups[1].Value);
 
                 List<HardwareRegister> hw_regs = new List<HardwareRegister>();
@@ -909,10 +926,10 @@ namespace stm32_bsp_generator
 
                 foreach (Match m in regs)
                 {
-                    string type = m.Groups[2].Value;
+                    string type = m.Groups[2].Value; 
                     if (!dict_type_sizes.ContainsKey(type))
                         throw new Exception("Unknown register type: " + type);
-
+                 
                     int size = dict_type_sizes[type];
                     int array_size = 1;
                     try
@@ -936,11 +953,17 @@ namespace stm32_bsp_generator
                         set_size += array_size * size;
 
                     string name = m.Groups[3].Value;
+                 
                     if (name.StartsWith("RESERVED", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
                     string readonly_type = m.Groups[1].Value;
                     string desc = m.Groups[7].Value.TrimEnd();
+                    bool flNameArrayFromOne = true;
+
+                    if (desc.StartsWith("DSI "))
+                        flNameArrayFromOne = false;
+                    
 
                     for (int i = 1; i <= array_size; i++)
                     {
@@ -955,7 +978,10 @@ namespace stm32_bsp_generator
                                     throw new Exception("Cannot use low-high naming with array sizes greater than 2!");
                             }
                             else
-                                name = m.Groups[3].Value + i.ToString();
+                                if(flNameArrayFromOne)
+                                   name = m.Groups[3].Value + i.ToString();
+                                 else
+                                    name = m.Groups[3].Value + (i-1).ToString();
 
                         if ((type != "uint32_t") && (type != "uint16_t") && (type != "uint8_t"))
                         {
@@ -1147,12 +1173,12 @@ namespace stm32_bsp_generator
                         Regex base_addr_base_regex = new Regex(@"([^ ]+)_BASE");
                         m = base_addr_base_regex.Match(value);
                         if (m.Success)
-                        {
-                            string prevRegset = m.Groups[1].Value;
-                            addresses[regset_name] = addresses[prevRegset.TrimStart('(')];
+                         {
+                          string prevRegset = m.Groups[1].Value;
+                          addresses[regset_name] = addresses[prevRegset.TrimStart('(')];
 
-                            continue;
-                        }
+                          continue;
+                         }
                     }
                     else if (cfg.IsBaseAddrDefinitionIgnored(macroName))
                         continue;
@@ -1232,7 +1258,9 @@ namespace stm32_bsp_generator
                         && line.Contains("0x") 
                         && !line.Contains("CLEAR_REG") 
                         && !line.Contains("USB_EP") 
-                        && !line.Contains("FLASH_FKEY") 
+                        && !line.Contains("FLASH_FKEY")
+                        && !line.Contains("FLASH_KEY")
+                        && !line.Contains("EXTI_EMR")
                         && !line.Contains("FLASH_OPTKEY") 
                         && !line.Contains("(USB_BASE +")
                         && !line.Contains("RTC_BKP_NUMBER")
@@ -1276,7 +1304,7 @@ namespace stm32_bsp_generator
                 for (;;)
                 {
                     if (nextLine >= lines.Length)
-                        break;
+                        break;                   
                     line = lines[nextLine++];
 
                     foreach (var patch in cfg.SubregisterLinePatches)

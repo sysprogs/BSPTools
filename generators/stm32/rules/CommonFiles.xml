@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -31,7 +31,7 @@
 				<PropertyGroups>
 				  <PropertyGroup>
 					<Properties>
-					  <PropertyEntry xsi:type="Enumerated">
+					    <PropertyEntry xsi:type="Enumerated">
 						<Name>USB Device Class</Name>
 						<UniqueID>com.sysprogs.bspoptions.stm32.usb.devclass</UniqueID>
 						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
@@ -95,7 +95,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.6.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
@@ -169,11 +169,11 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.1.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.3.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
 					<SimpleFileConditions>
 						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_1</string>
 						<string>Source\\portable\\MemMang\\heap_2.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_2</string>
@@ -235,7 +235,28 @@
 				  </PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>			
+		
 		</Framework>
+		<Framework>
+					<!--LwIP -->
+			<Name>LwIP</Name>
+			<ID>com.sysprogs.arm.stm32.LwIP</ID>
+			<ProjectFolderName>LwIP</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>		
+			<CopyJobs>			
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.3.0\Middlewares\Third_Party\LwIP</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-test\*;-system\*;-*template.c;-*template.h;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/LwIP/src/include;$$SYS:BSP_ROOT$$/LwIP/system;$$SYS:BSP_ROOT$$/LwIP/src/include/ipv4</AdditionalIncludeDirs>
+					<PreprocessorMacros>LWIP_IPV4</PreprocessorMacros>
+						</CopyJob>
+			</CopyJobs>
+		</Framework>	
 		<Framework>
 			<Name>STM32 Utilities</Name>
 			<ID>com.sysprogs.arm.stm32.utilities</ID>
@@ -246,7 +267,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.1.0\Utilities</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.3.0\Utilities</SourceFolder>
 					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
 					<SimpleFileConditions>
@@ -271,8 +292,23 @@
 				</PropertyGroups>
 			</ConfigurableProperties>			
 		</Framework>
+		
 	</AdditionalFrameworks>
+	
+ 
+		          
+
 	<SmartSamples>
+
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LwIP_HTTP_Server_Raw</SourceFolder>
+			<DestinationFolder>samples\LwIP_HTTP_Server_Raw</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
+			</AdditionalSources>
+		</SmartSample>
+
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>
 			<DestinationFolder>samples\LEDBlink</DestinationFolder>
@@ -280,14 +316,16 @@
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
 			</AdditionalSources>
+
+
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\FreeRTOS</SourceFolder>
 			<DestinationFolder>samples\FreeRTOS</DestinationFolder>
-			<AdditionalSources>
+				<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
 			</AdditionalSources>
-		</SmartSample>
+	</SmartSample>
 	</SmartSamples>
 </FamilyDefinition>

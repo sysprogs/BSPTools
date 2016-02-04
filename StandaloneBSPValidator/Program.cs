@@ -334,6 +334,7 @@ namespace StandaloneBSPValidator
             Regex rgArrayRegister3 = new Regex("^(AFR)(H|L)$");
             Regex rgArrayRegister4 = new Regex("^(HR|CSR)([0-9]+)$");
             Regex rgArrayRegister5 = new Regex("^(TSR|CR)([0-9]+)$");
+            Regex rgArrayRegister6 = new Regex("^(TCCR|WPCR|ISR|IER|FIR)([0-9]+)$");
 
             if (mcuDefinition != null)
             {
