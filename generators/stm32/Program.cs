@@ -380,7 +380,7 @@ namespace stm32_bsp_generator
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
-                PackageVersion = "3.3",
+                PackageVersion = "3.4",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",

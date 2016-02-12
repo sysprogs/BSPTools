@@ -369,6 +369,9 @@ namespace BSPGenerationTools
             if (idx != -1)
                 return new Condition.And { Arguments = new Condition[] { ParseCondition(rawCond.Substring(0, idx).Trim()), ParseCondition(rawCond.Substring(idx + 2).Trim()) } };
 
+            if (rawCond.StartsWith("fw:"))
+                return new Condition.ReferencesFramework { FrameworkID = rawCond.Substring(3).Trim() };
+
             idx = rawCond.IndexOf("==");
             if (idx != -1)
                 return new Condition.Equals { Expression = rawCond.Substring(0, idx).Trim(), ExpectedValue = rawCond.Substring(idx + 2).Trim() };
