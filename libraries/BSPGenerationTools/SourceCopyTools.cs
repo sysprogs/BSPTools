@@ -222,6 +222,14 @@ namespace BSPGenerationTools
             public Regex Regex;
             public Condition Condition;
             public int UseCount;
+
+            public override string ToString()
+            {
+                if (UseCount == 0)
+                    return "UNUSED: " + Regex.ToString();
+                else
+                    return Regex.ToString();
+            }
         }
 
         public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir)
@@ -307,10 +315,9 @@ namespace BSPGenerationTools
                 }
             }
 
-            if (conditions != null)
-                foreach (var cond in conditions)
-                    if (cond.UseCount == 0)
-                        throw new Exception("Unused condition in copy job: " + cond.Regex);
+            var unusedConditions = conditions?.Where(c => c.UseCount == 0)?.ToArray();
+            if ((unusedConditions?.Length ?? 0) != 0)
+                throw new Exception(string.Format("Found {0} unused conditions. Please recheck your rules.", unusedConditions.Length));
 
             if (Patches != null)
                 foreach(var p in Patches)

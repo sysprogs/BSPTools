@@ -36,6 +36,20 @@
 			</CopyJobs>
 		</Framework>
 		<Framework>
+			<Name>Kinetis HAL</Name>
+			<ID>com.sysprogs.arm.kinetis.hal</ID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.kinetis.freertos</string>
+				<string>com.sysprogs.arm.kinetis.mqx</string>
+				<string>com.sysprogs.arm.kinetis.ucosii</string>
+				<string>com.sysprogs.arm.kinetis.ucosiii</string>
+			</IncompatibleFrameworks>
+			<ProjectFolderName>HAL</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+			</CopyJobs>
+		</Framework>
+		<Framework>
 			<Name>Kinetis FreeRTOS</Name>
 			<ID>com.sysprogs.arm.kinetis.freertos</ID>
 			<IncompatibleFrameworks>

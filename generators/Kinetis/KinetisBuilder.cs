@@ -416,11 +416,24 @@ namespace kinetis_bsp_generator {
             var fileConditions = new Dictionary<string, string>();
             foreach (var fileFamilies in filesToFamilies) {
                 var fcKey = fileFamilies.Key;
+                string absPath = Path.Combine(Directories.InputDir, fcKey);
+                if (!File.Exists(absPath) && !Directory.Exists(absPath))
+                {
+                    if (fcKey == @"rtos\\mqx\\config\\mcu\\MK66F18" ||
+                        fcKey == @"rtos\\mqx\\config\\mcu\\MKV10Z1287" || 
+                        fcKey == @"rtos\\uCOSII\\src\\uCOS" ||
+                        fcKey == @"rtos\\uCOSIII\\src\\uCOS" || 
+                        fcKey == @"rtos\\uCOSIII\\src\\uC")
+                        continue;
+
+                    throw new Exception("Non-existing path mentioned in Kinetis CMake files. Please investigate.");
+                }
+
                 if (fileFamilies.Value.Count == 1) {
                     fileConditions.Add(fcKey, fileFamilies.Value.First());
                 }
                 else if (fileFamilies.Value.Count < families.Count) {
-                    fileConditions.Add(fcKey, string.Join("|", fileFamilies.Value));
+                    fileConditions.Add(fcKey, string.Join(" | ", fileFamilies.Value));
                 }
             }
 
@@ -429,7 +442,7 @@ namespace kinetis_bsp_generator {
                 SourceFolder = Directories.InputDir,
                 TargetFolder = "",
                 FilesToCopy = "-platform\\devices\\startup.*;" + string.Join(";", copyPaths),
-                SimpleFileConditions = fileConditions.Select(kv => string.Format("{0}: $$SYS:FAMILY_ID$$ =~ {1}", kv.Key, kv.Value)).ToArray(),
+                SimpleFileConditions = fileConditions.Select(kv => string.Format("{0}: $$SYS:FAMILY_ID$$ =~ {1}", kv.Key.Replace(".", "\\."), kv.Value)).ToArray(),
                 AdditionalIncludeDirs = string.Join(";", allIncludeDirs.ToArray()),
                 ProjectInclusionMask = string.Join(";", allFiles.Where(f => f.EndsWith(".h", StringComparison.CurrentCultureIgnoreCase) || f.EndsWith(".c", StringComparison.CurrentCultureIgnoreCase))),
                 AlreadyCopied = true,
