@@ -224,14 +224,15 @@ namespace BSPGenerationTools
             bspBuilder.ExpandVariables(ref definition.PrimaryHeaderDir);
             bspBuilder.ExpandVariables(ref definition.StartupFileDir);
 
-            foreach (var simple in definition.SmartSamples)
-            {
-                for (int count = 0; count < simple.AdditionalSources?.Count(); count++)
+            if (definition.SmartSamples != null)
+                foreach (var simple in definition.SmartSamples)
                 {
-                    string addSource = simple.AdditionalSources[count]; ;
-                    bspBuilder.ExpandAdditionalVariables(ref simple.AdditionalSources[count], definition.AdditionalSystemVars);
-                }         
-            }
+                    for (int count = 0; count < simple.AdditionalSources?.Count(); count++)
+                    {
+                        string addSource = simple.AdditionalSources[count]; ;
+                        bspBuilder.ExpandAdditionalVariables(ref simple.AdditionalSources[count], definition.AdditionalSystemVars);
+                    }
+                }
 
             BSP = bspBuilder;
             Definition = definition;
