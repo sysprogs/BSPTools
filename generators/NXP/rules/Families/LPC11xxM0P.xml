@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LPC11xxM0PLUS</Name>
+	<DeviceRegex>^LPC11.[6].*</DeviceRegex>
+	<FamilySubdirectory>LPC11u6x</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\lpc11u6x\startup_code</StartupFileDir>
+	<Subfamilies>		
+	</Subfamilies>	
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc11u6x</SourceFolder>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<TargetFolder>lpc_chip</TargetFolder>
+					<PreprocessorMacros>CHIP_LPC11U6X;CORE_M0PLUS</PreprocessorMacros>	
+					<ProjectInclusionMask>-*sys_config.h;*</ProjectInclusionMask>
+					<AutoIncludeMask>Common\*.h;*.h</AutoIncludeMask>						
+				</CopyJob>			
+			</CopyJobs>	
+		</CoreFramework>
+		<Subfamilies>
+	</Subfamilies>
+	
+</FamilyDefinition>

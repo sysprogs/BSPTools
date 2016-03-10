@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LPC12xx</Name>
+	<DeviceRegex>^LPC12.*</DeviceRegex>
+	<FamilySubdirectory>LPC12xx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\lpc12xx\startup_code</StartupFileDir>
+	<Subfamilies>
+	</Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc12xx</SourceFolder>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<PreprocessorMacros>CORE_M0</PreprocessorMacros>	
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>Core\DeviceSupport\NXP\LPC12xx\system_LPC12xx.c</FilePath>
+							<OldLine>void SystemInit (void)</OldLine>
+							<NewLine>void Chip_SystemInit(void)</NewLine>
+						</Patch>	
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>Core\DeviceSupport\NXP\LPC12xx\system_LPC12xx.h</FilePath>
+							<OldLine>extern void SystemInit (void);</OldLine>
+							<NewLine>extern void Chip_SystemInit(void);</NewLine>
+						</Patch>
+					</Patches>						
+				</CopyJob>
+		</CopyJobs>	
+			
+		</CoreFramework>
+</FamilyDefinition>

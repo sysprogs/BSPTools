@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LPC43xx</Name>
+	<DeviceRegex>^LPC43.*</DeviceRegex>
+	<FamilySubdirectory>LPC18xx_43xx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\lpc43xx\startup_code</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc43xx</SourceFolder>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<TargetFolder>lpc_chip_43xx</TargetFolder>
+					<PreprocessorMacros>$$com.sysprogs.nxp.device_family$$;CORE_M4</PreprocessorMacros>
+					<ProjectInclusionMask>-*iap.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>Common\*.h;*.h</AutoIncludeMask>	
+				</CopyJob>			
+			</CopyJobs>	
+		</CoreFramework>
+		<Subfamilies>
+	
+		<MCUClassifier>
+			<VariableName>com.sysprogs.nxp.device_family</VariableName>
+			<Required>true</Required>
+			<Options>				
+				<Option>
+					<Value>CHIP_LPC43XX</Value>
+					<Regex>^LPC43.*</Regex>
+				</Option>			
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>
+</FamilyDefinition>

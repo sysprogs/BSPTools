@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LPC40xx</Name>
+	<DeviceRegex>^LPC40.*</DeviceRegex>
+	<FamilySubdirectory>LPC17xx_40xx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\lpc40xx\startup_code</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc40xx</SourceFolder>
+					<FilesToCopy>-*sys_config.h;-*usbd_lib\*;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<TargetFolder>lpc_chip_40xx</TargetFolder>
+					<PreprocessorMacros>$$com.sysprogs.nxp.device_family$$;CORE_M4;SDC_DMA_ENABLE</PreprocessorMacros>
+					<ProjectInclusionMask>-*eeprom.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>Common\*.h;*.h</AutoIncludeMask>	
+				</CopyJob>			
+			</CopyJobs>	
+		</CoreFramework>
+		<Subfamilies>
+
+		<MCUClassifier>
+			<VariableName>com.sysprogs.nxp.device_family</VariableName>
+			<Required>true</Required>
+			<Options>				
+				<Option>
+					<Value>CHIP_LPC40XX</Value>
+					<Regex>^LPC40.*</Regex>
+				</Option>			
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>
+</FamilyDefinition>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\SystemInit</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<TargetFolder>Common</TargetFolder>
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+			</CopyJob>
+		
+		</CopyJobs>
+	</CoreFramework>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_LPCOpen</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_LPCOpen</DestinationFolder>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_LPC12xx</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_LPC12xx</DestinationFolder>
+		</SmartSample>
+	</SmartSamples>
+</FamilyDefinition>

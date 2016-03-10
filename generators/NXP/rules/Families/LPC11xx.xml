@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LPC11xx</Name>
+	<DeviceRegex>^LPC11[^2][^6].*</DeviceRegex>
+	<FamilySubdirectory>LPC11xx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\lpc11xx\startup_code</StartupFileDir>
+	<Subfamilies>		
+	</Subfamilies>	
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc11xx</SourceFolder>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<TargetFolder>lpc_chip</TargetFolder>
+					<PreprocessorMacros>$$com.sysprogs.nxp.device_family$$;$$com.sysprogs.nxp.core_m0$$</PreprocessorMacros>
+					<ProjectInclusionMask>-*sys_config.h;*</ProjectInclusionMask>
+					<AutoIncludeMask>Common\*.h;*.h</AutoIncludeMask>	
+
+					<SimpleFileConditions>
+						<string>\\i2.*[c]$: $$com.sysprogs.nxp.ph.i2$$ == I2_IS</string>
+						
+					</SimpleFileConditions>
+
+				</CopyJob>		
+			
+		</CopyJobs>	
+		</CoreFramework>
+		<Subfamilies>
+			
+		<MCUClassifier>
+			<VariableName>com.sysprogs.nxp.device_family</VariableName>
+			<Required>true</Required>
+			<Options>
+				
+				<Option>
+					<Value>CHIP_LPC11XXLV</Value>
+					<Regex>^LPC11.*[LV].*</Regex>
+				</Option>
+
+				<Option>
+					<Value>CHIP_LPC1125</Value>
+					<Regex>^LPC112[45].*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC11AXX</Value>
+					<Regex>LPC11A.*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC11EXX</Value>
+					<Regex>LPC11B.*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC11CXX</Value>
+					<Regex>LPC11C.*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC11UXX</Value>
+					<Regex>LPC11U.*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC11CXX</Value>
+					<Regex>LPC11[1D].*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC11EXX</Value>
+					<Regex>^LPC11E.*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC110X</Value>
+					<Regex>^LPC110.*</Regex>
+				</Option>
+				
+				
+			</Options>
+		</MCUClassifier>
+		
+		<MCUClassifier>
+			<VariableName>com.sysprogs.nxp.core_m0</VariableName>
+			<Required>true</Required>
+			<Options>		
+				<Option>
+					<Value>CORE_M0</Value>
+					<Regex>^LPC11.*</Regex>
+				</Option>
+				
+			</Options>
+		</MCUClassifier>
+			<MCUClassifier>
+			<VariableName>com.sysprogs.nxp.ph.i2</VariableName>
+			<Required>true</Required>
+			<Options>		
+				<Option>
+					<Value>I2_IS</Value>
+					<Regex>^LPC11[^0].*</Regex>
+				</Option>
+				<Option>
+					<Value>I2_IS</Value>
+					<Regex>^LPC110.*[(LV)].*</Regex>
+				</Option>
+					<Option>
+					<Value>I2_NO</Value>
+					<Regex>^LPC110.*</Regex>
+				</Option>
+				
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>
+	
+</FamilyDefinition>

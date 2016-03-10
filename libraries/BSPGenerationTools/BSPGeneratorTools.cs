@@ -54,6 +54,14 @@ namespace BSPGenerationTools
         public string LinkerScriptPath;
         public string StartupFile;
         public string MCUDefinitionFile;
+        public override bool Equals(Object obj)
+        {
+            //MCUBuilder m1 = (MCUBuilder)obj;
+            if (Name == ((MCUBuilder)obj).Name)
+                return true;
+            else
+                return false;
+        }
 
         public override string ToString()
         {
@@ -224,14 +232,15 @@ namespace BSPGenerationTools
             bspBuilder.ExpandVariables(ref definition.PrimaryHeaderDir);
             bspBuilder.ExpandVariables(ref definition.StartupFileDir);
 
-            foreach (var simple in definition.SmartSamples)
-            {
-                for (int count = 0; count < simple.AdditionalSources?.Count(); count++)
+            if (definition.SmartSamples !=null)
+                foreach (var simple in definition.SmartSamples)
                 {
-                    string addSource = simple.AdditionalSources[count]; ;
-                    bspBuilder.ExpandAdditionalVariables(ref simple.AdditionalSources[count], definition.AdditionalSystemVars);
-                }         
-            }
+                    for (int count = 0; count < simple.AdditionalSources?.Count(); count++)
+                    {
+                        string addSource = simple.AdditionalSources[count]; ;
+                        bspBuilder.ExpandAdditionalVariables(ref simple.AdditionalSources[count], definition.AdditionalSystemVars);
+                      }         
+                 }
 
             BSP = bspBuilder;
             Definition = definition;
@@ -664,6 +673,24 @@ namespace BSPGenerationTools
                     return CortexCore.M4;
                 case "ARM Cortex-M7":
                     return CortexCore.M7;
+                case "Cortex-M0":
+                    return CortexCore.M0;
+                case "Cortex-M0+":
+                    return CortexCore.M0Plus;
+                case "Cortex-M3":
+                    return CortexCore.M3;
+                case "Cortex-M3 ":
+                    return CortexCore.M3;
+                case "Cortex-M4":
+                    return CortexCore.M4;
+                case "Cortex-M4F": //FPU
+                    return CortexCore.M4;
+                case "Cortex-M4F;M0"://MultiCore
+                    return CortexCore.M4;
+                case "Cortex-M4F; Cortex-M0+"://MultiCore
+                    return CortexCore.M4;
+                case "Cortex-M7":
+                    return CortexCore.M7;
                 default:
                     return CortexCore.Invalid;
             }
@@ -675,8 +702,11 @@ namespace BSPGenerationTools
 
             bool header_row = true;
             Dictionary<string, int> headers = new Dictionary<string, int>();
-            foreach (var line in File.ReadAllLines(filePath))
+            string[] strFileMCU = File.ReadAllLines(filePath);
+
+            for (int il = 0; il < strFileMCU.Length; il++)
             {
+                string line = strFileMCU[il];
                 string[] items = line.Split(',');
 
                 if (header_row)
@@ -694,7 +724,7 @@ namespace BSPGenerationTools
                     FlashSize = Int32.Parse(items[headers[flashSizeColumn]]),
                     RAMSize = Int32.Parse(items[headers[ramSizeColumn]]),
                 };
-                             
+
                 if (coreColumn != null)
                     mcu.Core = ParseCoreName(items[headers[coreColumn]]);
 
@@ -704,7 +734,9 @@ namespace BSPGenerationTools
                     mcu.RAMSize *= 1024;
                 }
 
+                if (rawmcu_list.IndexOf(mcu) < 0)
                 rawmcu_list.Add(mcu);
+
             }
 
             return rawmcu_list;

@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LPC13xx</Name>
+	<DeviceRegex>^LPC13.*</DeviceRegex>
+	<FamilySubdirectory>LPC13xx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\lpc13xx\startup_code</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	   	<CopyJobs>
+			<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc13xx</SourceFolder>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<PreprocessorMacros>$$com.sysprogs.nxp.device_family$$;CORE_M3</PreprocessorMacros>
+					<ProjectInclusionMask>-*sys_config.h;*</ProjectInclusionMask>
+					<AutoIncludeMask>Common\*.h;*.h</AutoIncludeMask>	
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>lpc_chip\chip_13xx\cmsis.h</FilePath>
+							<AfterLine>#include "sys_config.h"</AfterLine>
+							<InsertedLines>
+								<string>#ifdef __cplusplus</string>
+								<string>extern "C" {</string>
+								<string>#endif</string>
+							</InsertedLines>
+						</Patch>					
+					</Patches>
+			</CopyJob>	
+			
+
+		</CopyJobs>	
+		</CoreFramework>
+		<Subfamilies>
+		
+		<MCUClassifier>
+			<VariableName>com.sysprogs.nxp.device_family</VariableName>
+			<Required>true</Required>
+			<Options>
+				<Option>
+					<Value>CHIP_LPC1343</Value>
+					<Regex>^LPC131[13].*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC1343</Value>
+					<Regex>^LPC134[23].*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC1347</Value>
+					<Regex>^LPC131[567].*</Regex>
+				</Option>
+				<Option>
+					<Value>CHIP_LPC1347</Value>
+					<Regex>^LPC134[567].*</Regex>
+				</Option>
+	
+		
+				
+				
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>
+</FamilyDefinition>

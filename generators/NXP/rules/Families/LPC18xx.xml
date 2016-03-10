@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LPC18xx</Name>
+	<DeviceRegex>^LPC18.*</DeviceRegex>
+	<FamilySubdirectory>LPC18xx_43xx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\lpc18xx\startup_code</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc18xx</SourceFolder>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<TargetFolder>lpc_chip_18xx</TargetFolder>
+					<PreprocessorMacros>$$com.sysprogs.nxp.device_family$$;CORE_M3</PreprocessorMacros>
+					<ProjectInclusionMask>-*hsadc_18xx_43xx.c;-*iap.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>Common\*.h;*.h</AutoIncludeMask>	
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>lpc_chip\chip_18xx_43xx\chip_lpc18xx.h</FilePath>
+							<AfterLine>#include "i2cm_18xx_43xx.h"</AfterLine>
+							<InsertedLines>
+								<string>#include &lt;sdio_18xx_43xx.h&gt;</string>
+							</InsertedLines>
+						</Patch>					
+					</Patches>
+				</CopyJob>			
+			</CopyJobs>	
+		</CoreFramework>
+		<Subfamilies>
+		
+		<MCUClassifier>
+			<VariableName>com.sysprogs.nxp.device_family</VariableName>
+			<Required>true</Required>
+			<Options>				
+				<Option>
+					<Value>CHIP_LPC18XX</Value>
+					<Regex>^LPC18.*</Regex>
+				</Option>
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>
+</FamilyDefinition>
