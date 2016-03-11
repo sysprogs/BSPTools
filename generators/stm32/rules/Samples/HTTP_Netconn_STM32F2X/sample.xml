@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>STM32F207ZG-Nucleo HTTP Server</Name>
+	<Description>This example shows how accept HTTP connections over Ethernet using the lwIP library</Description>
+	<MCUFilterRegex>STM32F2.*</MCUFilterRegex>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.stm32.freertos</string>
+		<string>com.sysprogs.arm.stm32.LwIP</string>
+		<string>com.sysprogs.arm.stm32.hal</string>
+	</RequiredFrameworks>
+</EmbeddedProjectSample>

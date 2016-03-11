@@ -515,7 +515,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public IEnumerable<string> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null)
+        public IEnumerable<string> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null, IEnumerable<SysVarEntry> extraVariablesToValidateSamples = null)
         {
             if (Definition.SmartSamples != null)
             {
@@ -539,8 +539,18 @@ namespace BSPGenerationTools
                             }).ToArray();       
 
                         foreach (var f in sampleObj.AdditionalSourcesToCopy)
-                            if (!File.Exists(f.SourcePath.Replace("$$SYS:BSP_ROOT$$", BSP.Directories.OutputDir)))
-                                Console.WriteLine("Missing sample file: " + f.SourcePath);
+                        {
+                            string path = f.SourcePath.Replace("$$SYS:BSP_ROOT$$", BSP.Directories.OutputDir);
+                            if (!File.Exists(path))
+                            {
+                                if (extraVariablesToValidateSamples != null)
+                                    foreach (var v in extraVariablesToValidateSamples)
+                                        path = path.Replace("$$" + v.Key + "$$", v.Value);
+
+                                if (!File.Exists(path))
+                                    Console.WriteLine("Missing sample file: " + f.SourcePath);
+                            }
+                        }
                     }
 
                     if (sampleObj.MCUFilterRegex == null & allFrameworks != null && sampleObj.RequiredFrameworks != null)

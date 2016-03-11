@@ -26,7 +26,7 @@ namespace stm32_bsp_generator
 
             List<KeyValuePair<Regex, XmlElement>> _KnownSTM32Devices = new List<KeyValuePair<Regex,XmlElement>>();
 
-            public void LoadedDiviceFromCube(ZipFile zf, string familyFile) // Load diveces from Cube
+            public void LoadDevicesFromCube(ZipFile zf, string familyFile) // Load diveces from Cube
             {
                 var entry = zf.Entries.First(e => e.FileName == familyFile);
                 MemoryStream db = new MemoryStream();
@@ -46,16 +46,16 @@ namespace stm32_bsp_generator
                 ShortName = "STM32";
                 var zf = new ZipFile(File.OpenRead(cubeDir + @"\plugins\projectmanager.jar"));
 
-                LoadedDiviceFromCube(zf, "devices/STM32F0.db");
-                LoadedDiviceFromCube(zf, "devices/STM32F1.db");
-                LoadedDiviceFromCube(zf, "devices/STM32F2.db");
-                LoadedDiviceFromCube(zf, "devices/STM32F3.db");
-                LoadedDiviceFromCube(zf, "devices/STM32F4.db");
-                LoadedDiviceFromCube(zf, "devices/STM32F7.db");
-                LoadedDiviceFromCube(zf, "devices/STM32L0.db");
-                LoadedDiviceFromCube(zf, "devices/STM32L1.db");
-                LoadedDiviceFromCube(zf, "devices/STM32L4.db");
-                LoadedDiviceFromCube(zf, "devices/STM32W.db");
+                LoadDevicesFromCube(zf, "devices/STM32F0.db");
+                LoadDevicesFromCube(zf, "devices/STM32F1.db");
+                LoadDevicesFromCube(zf, "devices/STM32F2.db");
+                LoadDevicesFromCube(zf, "devices/STM32F3.db");
+                LoadDevicesFromCube(zf, "devices/STM32F4.db");
+                LoadDevicesFromCube(zf, "devices/STM32F7.db");
+                LoadDevicesFromCube(zf, "devices/STM32L0.db");
+                LoadDevicesFromCube(zf, "devices/STM32L1.db");
+                LoadDevicesFromCube(zf, "devices/STM32L4.db");
+                LoadDevicesFromCube(zf, "devices/STM32W.db");
 
                 foreach (var line in File.ReadAllLines(dirs.RulesDir + @"\stm32memory.csv"))
                 {
@@ -340,8 +340,6 @@ namespace stm32_bsp_generator
             var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
             foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
                 frameworks.Add(fw);
-            foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample);
 
             foreach (var fam in allFamilies)
             {
@@ -369,6 +367,9 @@ namespace stm32_bsp_generator
                     exampleDirs.Add(sample);
             }
 
+            foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
+                exampleDirs.Add(sample);
+
             BoardSupportPackage bsp = new BoardSupportPackage
             {
                 PackageID = "com.sysprogs.arm.stm32",
@@ -379,7 +380,7 @@ namespace stm32_bsp_generator
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
-                PackageVersion = "3.3",
+                PackageVersion = "3.4",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",

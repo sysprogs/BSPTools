@@ -216,7 +216,21 @@ for target in Exporter.TARGETS:
     resources = resMap.get(target, None)
     if resources == None:
         continue
-    ET.SubElement(flags, "COMMONFLAGS").text = " ".join(resources.toolchain.cpu)
+
+    flagList = resources.toolchain.cpu[:]
+    if "-mfloat-abi=softfp" in flagList:
+        flagList.remove("-mfloat-abi=softfp")
+        flagList.append("$$com.sysprogs.bspoptions.arm.floatmode$$")
+        propList = provide_node(provide_node(provide_node(provide_node(mcu, "ConfigurableProperties"), "PropertyGroups"), "PropertyGroup"), "Properties")
+        propEl = ET.SubElement(propList, "PropertyEntry", {"xsi:type":"Enumerated"})
+        propEl.extend([make_node("Name", "Floating point support"), make_node("UniqueID", "com.sysprogs.bspoptions.arm.floatmode"), make_node("DefaultEntryIndex", "2")])
+        listEl = ET.SubElement(propEl, "SuggestionList")
+        ET.SubElement(listEl, "Suggestion").extend([make_node("UserFriendlyName", "Software"), make_node("InternalValue", "-mfloat-abi=soft")])
+        ET.SubElement(listEl, "Suggestion").extend([make_node("UserFriendlyName", "Hardware"), make_node("InternalValue", "-mfloat-abi=hard")])
+        ET.SubElement(listEl, "Suggestion").extend([make_node("UserFriendlyName", "Hardware with Software interface"), make_node("InternalValue", "-mfloat-abi=softfp")])
+        ET.SubElement(listEl, "Suggestion").extend([make_node("UserFriendlyName", "Unspecified"), make_node("InternalValue", "")])
+
+    ET.SubElement(flags, "COMMONFLAGS").text = " ".join(flagList)
     ET.SubElement(flags, "LinkerScript").text = "$$SYS:BSP_ROOT$$/" + resources.linker_script.replace("\\", "/")
     mems = parse_linker_script(os.path.join(ROOT, resources.linker_script))
     mcu.append(make_node("RAMSize", str(sum([m.Size for m in mems if ("RAM" in m.Name.upper())]))))

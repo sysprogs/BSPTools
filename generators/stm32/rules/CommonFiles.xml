@@ -250,11 +250,14 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.3.0\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
-					<ProjectInclusionMask>-test\*;-system\*;-*template.c;-*template.h;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
+					<ProjectInclusionMask>system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/LwIP/src/include;$$SYS:BSP_ROOT$$/LwIP/system;$$SYS:BSP_ROOT$$/LwIP/src/include/ipv4</AdditionalIncludeDirs>
 					<PreprocessorMacros>LWIP_IPV4</PreprocessorMacros>
-						</CopyJob>
+					<SimpleFileConditions>
+						<string>system\\OS\\sys_arch.c: fw:com.sysprogs.arm.stm32.freertos</string>
+					</SimpleFileConditions>
+				</CopyJob>
 			</CopyJobs>
 		</Framework>	
 		<Framework>
@@ -292,23 +295,20 @@
 				</PropertyGroups>
 			</ConfigurableProperties>			
 		</Framework>
-		
 	</AdditionalFrameworks>
-	
- 
-		          
-
 	<SmartSamples>
-
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LwIP_HTTP_Server_Raw</SourceFolder>
-			<DestinationFolder>samples\LwIP_HTTP_Server_Raw</DestinationFolder>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
-				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
-			</AdditionalSources>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F2X</SourceFolder>
+			<DestinationFolder>samples\HTTP_Netconn_STM32F2X</DestinationFolder>
 		</SmartSample>
-
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F4X</SourceFolder>
+			<DestinationFolder>samples\HTTP_Netconn_STM32F4X</DestinationFolder>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F7X</SourceFolder>
+			<DestinationFolder>samples\HTTP_Netconn_STM32F7X</DestinationFolder>
+		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>
 			<DestinationFolder>samples\LEDBlink</DestinationFolder>
@@ -316,8 +316,6 @@
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
 			</AdditionalSources>
-
-
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\FreeRTOS</SourceFolder>
