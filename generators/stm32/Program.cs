@@ -167,6 +167,21 @@ namespace stm32_bsp_generator
                 }
 
                 mems.Sort((a, b) => a.Type.CompareTo(b.Type));
+
+                if (mcuName.StartsWith("STM32L4", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    //The definition files in the CubeMX set the main SRAM size 128K while it should actually be 96K. We fix it manually.
+                    if (mems.Count != 2 || mems[1].Name != "SRAM" || mems[1].Size != 131072)
+                        throw new Exception("Unexpected L4 memory size. Definitions finally fixed? Please investigate.");
+
+                    mems[1].Size = 96 * 1024;
+                    mems.Add(new Memory {
+                        Name = "SRAM2",
+                        Size = (128 - 96) * 1024,
+                        Type = MemoryType.RAM,
+                        Start = 0x10000000,
+                    });
+                }
                 return mems;
             }
 
@@ -309,7 +324,39 @@ namespace stm32_bsp_generator
             Console.WriteLine("done");
             return from r in tasks select r.Result;
         }
-        
+
+
+        class SamplePrioritizer
+        {
+            List<KeyValuePair<Regex, int>> _Rules = new List<KeyValuePair<Regex, int>>();
+            public SamplePrioritizer(string rulesFile)
+            {
+                int index = 1;
+                foreach (var line in File.ReadAllLines(rulesFile))
+                {
+                    _Rules.Add(new KeyValuePair<Regex, int>(new Regex(line, RegexOptions.IgnoreCase), index++));
+                }
+            }
+
+            public int GetScore(string path)
+            {
+                string fn = Path.GetFileName(path);
+                foreach (var rule in _Rules)
+                    if (rule.Key.IsMatch(fn))
+                        return rule.Value;
+                return 1000;
+            }
+
+            public int Prioritize(string left, string right)
+            {
+                int sc1 = GetScore(left), sc2 = GetScore(right);
+                if (sc1 != sc2)
+                    return sc1 - sc2;
+                return StringComparer.InvariantCultureIgnoreCase.Compare(left, right);
+            }
+
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -370,6 +417,9 @@ namespace stm32_bsp_generator
             foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
                 exampleDirs.Add(sample);
 
+            var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
+            exampleDirs.Sort((a,b) => prioritizer.Prioritize(a, b));
+
             BoardSupportPackage bsp = new BoardSupportPackage
             {
                 PackageID = "com.sysprogs.arm.stm32",
@@ -380,7 +430,7 @@ namespace stm32_bsp_generator
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
-                PackageVersion = "3.4",
+                PackageVersion = "3.5",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
@@ -388,8 +438,8 @@ namespace stm32_bsp_generator
             };
 
             File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
+            Console.WriteLine("Saving BSP...");
             bspBuilder.Save(bsp, true);
-            Console.WriteLine("Producing compressed BSP file...");
         }
 
 
