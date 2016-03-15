@@ -433,7 +433,7 @@ namespace stm32_bsp_generator
                 PackageVersion = "3.5",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                MinimumEngineVersion = "5.0",
+                MinimumEngineVersion = "5.1",
                 FirstCompatibleVersion = "3.0",
             };
 

@@ -42,8 +42,10 @@ void __attribute__((naked, noreturn)) Reset_Handler()
 {
 	$$EXTRA_RESET_HANDLER_CODE$$
 	//Normally the CPU should will setup the based on the value from the first entry in the vector table.
-	//If you encounter problems with accessing stack variables during initialization, ensure 
-	//asm ("ldr sp, =_estack");
+	//If you encounter problems with accessing stack variables during initialization, ensure the line below is enabled.
+	#ifdef sram_layout
+	asm ("ldr sp, =_estack");
+	#endif
 
 	void **pSource, **pDest;
 	for (pSource = &_sidata, pDest = &_sdata; pDest != &_edata; pSource++, pDest++)

@@ -462,6 +462,7 @@ namespace Nxp_bsp_generator
 
                 famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, commonPseudofamily.Definition.AdditionalSystemVars);
                 famObj.CompilationFlags = famObj.CompilationFlags.Merge(flags);
+                famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
 
                 familyDefinitions.Add(famObj);
                 fam.GenerateLinkerScripts(false);
