@@ -18,6 +18,7 @@ namespace StandaloneBSPValidator
         public PropertyDictionary2 SampleConfiguration;
         public PropertyDictionary2 FrameworkConfiguration;
         public PropertyDictionary2 MCUConfiguration;
+        public string[] AdditionalFrameworks;
     }
 
     public class TestJob
@@ -147,6 +148,9 @@ namespace StandaloneBSPValidator
             Dictionary<string, bool> frameworkIDs = new Dictionary<string, bool>();
             if (frameworks != null)
                 foreach (var fw in frameworks)
+                    frameworkIDs[fw] = true;
+            if (sample.AdditionalFrameworks != null)
+                foreach (var fw in sample.AdditionalFrameworks)
                     frameworkIDs[fw] = true;
 
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
