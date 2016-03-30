@@ -1,0 +1,226 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\LinkerScripts</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>				
+			</CopyJob>				
+
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\SystemInit</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<TargetFolder>StartupFiles</TargetFolder>
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+			</CopyJob>
+		
+		</CopyJobs>
+	</CoreFramework>
+	<AdditionalFrameworks>
+	
+			
+		<Framework>
+			<Name>SDK</Name>
+			<ID>com.sysprogs.arm.ti.cc3200.sdk</ID>
+			<ProjectFolderName>SDK</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk</SourceFolder>
+				<FilesToCopy>-example\*;-netapps\*;-oslib\*;-third_party\*;-simplelink*;*.c;*.h</FilesToCopy>
+				<ProjectInclusionMask>-example\*;-simplelink*;-ti_rtos\*;*</ProjectInclusionMask>
+				<AutoIncludeMask>-example\*;-simplelink*;-ti_rtos\*;*</AutoIncludeMask>	
+				<TargetFolder>SDK</TargetFolder>
+			
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Common</Name>
+			<ID>com.sysprogs.arm.ti.cc3200.common</ID>
+			<ProjectFolderName>Common</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\example\common</SourceFolder>
+				<FilesToCopy>-startup*.c;*.c;*.h</FilesToCopy>
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+				<AutoIncludeMask>*</AutoIncludeMask>	
+				<TargetFolder>Common</TargetFolder>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>network_if.h</FilePath>
+						<OldLine>extern unsigned short itoa(short cNum, char *cString);</OldLine>
+						<NewLine>extern unsigned short itoaNet(short cNum, char *cString);</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>network_if.c</FilePath>
+						<OldLine>unsigned short itoa(short cNum, char *cString)</OldLine>
+						<NewLine>unsigned short itoaNet(short cNum, char *cString)</NewLine>
+					</Patch>
+				</Patches>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Base64 Encoder</Name>
+			<ID>com.sysprogs.arm.ti.cc3200.netapps.base64encoder</ID>
+			<ProjectFolderName>base64encoder</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+		
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\netapps\smtp\client</SourceFolder>
+				<FilesToCopy>base64.c</FilesToCopy>
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+				<AutoIncludeMask>*</AutoIncludeMask>	
+				<TargetFolder>netapps\base64encoder</TargetFolder>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>SimpleLink</Name>
+			<ID>com.sysprogs.arm.ti.cc3200.simplelink</ID>
+			<ProjectFolderName>SimpleLink</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>			
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+		
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\simplelink</SourceFolder>
+				<FilesToCopy>*.c;*.h</FilesToCopy>
+				<ProjectInclusionMask>-cc_pal_pm.c;*;*</ProjectInclusionMask>
+				<AutoIncludeMask>*</AutoIncludeMask>	
+				<TargetFolder>SDK\simplelink</TargetFolder>
+				<PreprocessorMacros>__SL__</PreprocessorMacros>
+				<Patches>
+					<Patch xsi:type="InsertLines">
+						<FilePath>include\simplelink.h</FilePath>
+						<AfterLine>#include "wlan_rx_filters.h"</AfterLine>
+						<InsertedLines>
+							<string>#ifdef __cplusplus //VG added</string>
+							<string> extern "C" { //VG added</string>
+							<string>#endif //VG added</string>
+						</InsertedLines>
+					</Patch>		
+				</Patches>					
+				</CopyJob>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\simplelink_extlib</SourceFolder>
+				<FilesToCopy>*.c;*.h</FilesToCopy>
+				<ProjectInclusionMask>*;*</ProjectInclusionMask>
+				<AutoIncludeMask>*</AutoIncludeMask>	
+				<TargetFolder>SDK\simplelink_extlib</TargetFolder>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Free RTOS</Name>
+			<DefaultEnabled>false</DefaultEnabled>
+			<ID>com.sysprogs.arm.ti.cc3200.free_rtos</ID>
+			<ProjectFolderName>FreeRtos</ProjectFolderName>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\third_party\FreeRTOS</SourceFolder>
+				<FilesToCopy>-source\portable\CCS*;-source\portable\IAR*;*.c;*.h</FilesToCopy>
+				<ProjectInclusionMask>Source\Portable\MemMang\*;*</ProjectInclusionMask>
+				<AutoIncludeMask>*</AutoIncludeMask>	
+				<TargetFolder>SDK\third_party\FreeRTOS</TargetFolder>
+				<PreprocessorMacros>SL_PLATFORM_MULTI_THREADED; USE_FREERTOS;__OSI__</PreprocessorMacros>
+				<SimpleFileConditions>
+						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.arm.ti.cc3200.free_rtos.heap$$ == heap_1</string>
+						<string>Source\\portable\\MemMang\\heap_2.c: $$com.sysprogs.arm.ti.cc3200.free_rtos.heap$$ == heap_2</string>
+						<string>Source\\portable\\MemMang\\heap_3.c: $$com.sysprogs.arm.ti.cc3200.free_rtos.heap$$ == heap_3</string>
+						<string>Source\\portable\\MemMang\\heap_4.c: $$com.sysprogs.arm.ti.cc3200.free_rtos.heap$$ == heap_4</string>
+				</SimpleFileConditions>
+			</CopyJob>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\oslib</SourceFolder>
+				<FilesToCopy>osi_free*.c;*.h</FilesToCopy>
+				<ProjectInclusionMask>osi_free*.c</ProjectInclusionMask>
+				<AutoIncludeMask>*</AutoIncludeMask>	
+				<TargetFolder>SDK\oslib</TargetFolder>
+			</CopyJob>	
+
+			
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>FreeRTOS Heap Implementation</Name>
+						  <UniqueID>com.sysprogs.arm.ti.cc3200.free_rtos.heap</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>heap_1</InternalValue><UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_2</InternalValue><UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_3</InternalValue><UserFriendlyName>Heap3 - use newlib malloc()/free()</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_4</InternalValue><UserFriendlyName>Heap4 - contiguous heap area</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>3</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+
+		</Framework>
+
+	</AdditionalFrameworks>
+	
+	<SmartSamples>
+	
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\blinky</SourceFolder>
+			<DestinationFolder>Samples\blinky</DestinationFolder>
+		</SmartSample>		
+
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\email</SourceFolder>
+			<DestinationFolder>Samples\email</DestinationFolder>
+		</SmartSample>		
+
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\httpserver</SourceFolder>
+			<DestinationFolder>Samples\httpserver</DestinationFolder>
+		</SmartSample>		
+
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\serial_wifi</SourceFolder>
+			<DestinationFolder>Samples\serial_wifi</DestinationFolder>
+		</SmartSample>		
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\out_of_box</SourceFolder>
+			<DestinationFolder>Samples\out_of_box</DestinationFolder>
+		</SmartSample>		
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\tcp_socket</SourceFolder>
+			<DestinationFolder>Samples\tcp_socket</DestinationFolder>
+		</SmartSample>		
+		
+
+	</SmartSamples>
+</FamilyDefinition>

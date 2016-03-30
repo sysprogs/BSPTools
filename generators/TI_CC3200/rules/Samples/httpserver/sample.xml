@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>httpserver</Name>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <BinaryFiles />
+  <IgnoredFiles>
+     <string>html</string>
+  </IgnoredFiles>
+  <RequiredFrameworks>
+
+    <string>com.sysprogs.arm.ti.cc3200.sdk</string>
+    <string>com.sysprogs.arm.ti.cc3200.simplelink</string>
+    <string>com.sysprogs.arm.ti.cc3200.free_rtos</string>
+	<string>com.sysprogs.arm.ti.cc3200.netapps.base64encoder</string>	
+	<string>com.sysprogs.arm.ti.cc3200.netapps.http_server</string>	
+
+</RequiredFrameworks>
+  <AdditionalSourcesFromBSP>
+    <Files />
+    <Subdirs>
+      <VirtualSourceDir>
+        <Name>Common files</Name>
+        <Files>
+           <string>$$SYS:BSP_ROOT$$/common/uart_if.c</string>
+ 		  <string>$$SYS:BSP_ROOT$$/common/gpio_if.c</string>
+  		  <string>$$SYS:BSP_ROOT$$/common/network_common.c</string>
+		  
+        </Files>
+        <Subdirs />
+      </VirtualSourceDir>      
+    </Subdirs>
+  </AdditionalSourcesFromBSP>
+</EmbeddedProjectSample>

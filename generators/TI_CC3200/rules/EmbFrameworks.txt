@@ -1,0 +1,7 @@
+http/client|HTTP Client
+http/server|HTTP Server
+json|JSON library
+mqtt|MQTT client and broker	
+smtp|SMTP client
+tftp|FTP client
+xmpp|XMPP client

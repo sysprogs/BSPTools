@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>email</Name>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <BinaryFiles />
+  <RequiredFrameworks>
+    <string>com.sysprogs.arm.ti.cc3200.common</string>
+    <string>com.sysprogs.arm.ti.cc3200.sdk</string>
+    <string>com.sysprogs.arm.ti.cc3200.simplelink</string>
+    <string>com.sysprogs.arm.ti.cc3200.free_rtos</string>
+	<string>com.sysprogs.arm.ti.cc3200.cl.netapps.smtp</string>	
+	<string>com.sysprogs.arm.ti.cc3200.netapps.base64encoder</string>
+
+  </RequiredFrameworks>
+  <AdditionalSourcesFromBSP>
+    <Files />
+    <Subdirs>
+      <VirtualSourceDir>
+        <Name>Common files</Name>
+        <Files>
+        </Files>
+        <Subdirs />
+      </VirtualSourceDir>      
+    </Subdirs>
+  </AdditionalSourcesFromBSP>
+</EmbeddedProjectSample>
