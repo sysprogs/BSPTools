@@ -254,6 +254,7 @@ namespace CC3200_bsp_generator
                                                         "$$SYS:BSP_ROOT$$/SDK/simplelink",
                                                         "$$SYS:BSP_ROOT$$/SDK/simplelink/include",
                                                         "$$SYS:BSP_ROOT$$/SDK/simplelink_extlib/provisioninglib",
+                                                        "."
                                                         },
                     COMMONFLAGS = "-mcpu=cortex-m4 -mthumb",
                 },
@@ -298,7 +299,7 @@ namespace CC3200_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "3.0"
+                PackageVersion = "1.2"
             };
             bspBuilder.Save(bsp, true);
         }

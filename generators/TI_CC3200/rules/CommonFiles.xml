@@ -55,7 +55,7 @@
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\example\common</SourceFolder>
 				<FilesToCopy>-startup*.c;*.c;*.h</FilesToCopy>
 				<ProjectInclusionMask>*</ProjectInclusionMask>
-				<AutoIncludeMask>*</AutoIncludeMask>	
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
 				<TargetFolder>Common</TargetFolder>
 				<Patches>
 					<Patch xsi:type="ReplaceLine">
@@ -87,7 +87,7 @@
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\netapps\smtp\client</SourceFolder>
 				<FilesToCopy>base64.c</FilesToCopy>
 				<ProjectInclusionMask>*</ProjectInclusionMask>
-				<AutoIncludeMask>*</AutoIncludeMask>	
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
 				<TargetFolder>netapps\base64encoder</TargetFolder>
 			</CopyJob>	
 			</CopyJobs>
@@ -107,7 +107,7 @@
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\simplelink</SourceFolder>
 				<FilesToCopy>*.c;*.h</FilesToCopy>
 				<ProjectInclusionMask>-cc_pal_pm.c;*;*</ProjectInclusionMask>
-				<AutoIncludeMask>*</AutoIncludeMask>	
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
 				<TargetFolder>SDK\simplelink</TargetFolder>
 				<PreprocessorMacros>__SL__</PreprocessorMacros>
 				<Patches>
@@ -125,8 +125,8 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\simplelink_extlib</SourceFolder>
 				<FilesToCopy>*.c;*.h</FilesToCopy>
-				<ProjectInclusionMask>*;*</ProjectInclusionMask>
-				<AutoIncludeMask>*</AutoIncludeMask>	
+				<ProjectInclusionMask>*</ProjectInclusionMask>
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
 				<TargetFolder>SDK\simplelink_extlib</TargetFolder>
 			</CopyJob>	
 			</CopyJobs>
@@ -144,8 +144,8 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\third_party\FreeRTOS</SourceFolder>
 				<FilesToCopy>-source\portable\CCS*;-source\portable\IAR*;*.c;*.h</FilesToCopy>
-				<ProjectInclusionMask>Source\Portable\MemMang\*;*</ProjectInclusionMask>
-				<AutoIncludeMask>*</AutoIncludeMask>	
+				<ProjectInclusionMask>-*FreeRTOSConfig.h;*.c;*.h</ProjectInclusionMask>
+				<AutoIncludeMask>-source\FreeRTOSConfig.h;*.h</AutoIncludeMask>	
 				<TargetFolder>SDK\third_party\FreeRTOS</TargetFolder>
 				<PreprocessorMacros>SL_PLATFORM_MULTI_THREADED; USE_FREERTOS;__OSI__</PreprocessorMacros>
 				<SimpleFileConditions>
@@ -154,15 +154,26 @@
 						<string>Source\\portable\\MemMang\\heap_3.c: $$com.sysprogs.arm.ti.cc3200.free_rtos.heap$$ == heap_3</string>
 						<string>Source\\portable\\MemMang\\heap_4.c: $$com.sysprogs.arm.ti.cc3200.free_rtos.heap$$ == heap_4</string>
 				</SimpleFileConditions>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>source\include\FreeRTOS.h</FilePath>
+						<OldLine>#include "FreeRTOSConfig.h"</OldLine>
+						<NewLine>#include &lt;FreeRTOSConfig.h&gt;</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>source\FreeRTOSConfig.h</FilePath>
+						<OldLine>#define configTOTAL_HEAP_SIZE			( ( size_t ) ( 5000) )</OldLine>
+						<NewLine>#define configTOTAL_HEAP_SIZE			( ( size_t ) ( 16384) )</NewLine>
+					</Patch>
+				</Patches>
 			</CopyJob>	
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\cc3200-sdk\oslib</SourceFolder>
 				<FilesToCopy>osi_free*.c;*.h</FilesToCopy>
 				<ProjectInclusionMask>osi_free*.c</ProjectInclusionMask>
-				<AutoIncludeMask>*</AutoIncludeMask>	
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
 				<TargetFolder>SDK\oslib</TargetFolder>
 			</CopyJob>	
-
 			
 			</CopyJobs>
 			<ConfigurableProperties>
@@ -196,31 +207,48 @@
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\blinky</SourceFolder>
 			<DestinationFolder>Samples\blinky</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/SDK/third_party/FreeRTOS/source/FreeRTOSConfig.h</string>
+			</AdditionalSources>
 		</SmartSample>		
 
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\email</SourceFolder>
 			<DestinationFolder>Samples\email</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/SDK/third_party/FreeRTOS/source/FreeRTOSConfig.h</string>
+			</AdditionalSources>
 		</SmartSample>		
 
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\httpserver</SourceFolder>
 			<DestinationFolder>Samples\httpserver</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/SDK/third_party/FreeRTOS/source/FreeRTOSConfig.h</string>
+			</AdditionalSources>
 		</SmartSample>		
 
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\serial_wifi</SourceFolder>
 			<DestinationFolder>Samples\serial_wifi</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/SDK/third_party/FreeRTOS/source/FreeRTOSConfig.h</string>
+			</AdditionalSources>
 		</SmartSample>		
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\out_of_box</SourceFolder>
 			<DestinationFolder>Samples\out_of_box</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/SDK/third_party/FreeRTOS/source/FreeRTOSConfig.h</string>
+			</AdditionalSources>
 		</SmartSample>		
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\tcp_socket</SourceFolder>
 			<DestinationFolder>Samples\tcp_socket</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/SDK/third_party/FreeRTOS/source/FreeRTOSConfig.h</string>
+			</AdditionalSources>
 		</SmartSample>		
-		
 
 	</SmartSamples>
 </FamilyDefinition>

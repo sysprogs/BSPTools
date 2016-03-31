@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,6 +20,7 @@ namespace StandaloneBSPValidator
         public PropertyDictionary2 FrameworkConfiguration;
         public PropertyDictionary2 MCUConfiguration;
         public string[] AdditionalFrameworks;
+        public string SourceFileExtensions = "cpp;c;s";
     }
 
     public class TestJob
@@ -156,6 +158,10 @@ namespace StandaloneBSPValidator
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
 
+            Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
+            foreach (var ext in sample.SourceFileExtensions.Split(';'))
+                sourceExtensions[ext] = true;
+
             using (var sw = new StreamWriter(Path.Combine(mcuDir, "Makefile")))
             {
                 string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
@@ -163,16 +169,22 @@ namespace StandaloneBSPValidator
                 sw.WriteLine("\t{0}objcopy -O binary $< $@", prefix);
                 sw.WriteLine();
 
-                sw.WriteLine("test.elf: {0}", string.Join(" ", prj.SourceFiles.Select(f => Path.ChangeExtension(Path.GetFileName(f), ".o"))));
+                sw.WriteLine("test.elf: {0}", string.Join(" ", prj.SourceFiles.Where(f => sourceExtensions.ContainsKey(Path.GetExtension(f).TrimStart('.'))).Select(f => Path.ChangeExtension(Path.GetFileName(f), ".o"))));
                 sw.WriteLine("\t{0}g++ {1} $^ -o $@", prefix, flags.EffectiveLDFLAGS);
                 sw.WriteLine();
 
                 foreach (var sf in prj.SourceFiles)
                 {
-                    bool isCpp = Path.GetExtension(sf).ToLower() != ".c";
-                    sw.WriteLine("{0}:", Path.ChangeExtension(Path.GetFileName(sf), ".o"));
-                    sw.WriteLine("\t{0}{1} {2} -c {3} -o {4}", prefix, isCpp ? "g++" : "gcc", flags.GetEffectiveCFLAGS(isCpp), sf, Path.ChangeExtension(Path.GetFileName(sf), ".o"));
-                    sw.WriteLine();
+                    string ext = Path.GetExtension(sf);
+                    if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
+                        sw.WriteLine($"#{sf} is not a recognized source file");
+                    else
+                    {
+                        bool isCpp = ext.ToLower() != ".c";
+                        sw.WriteLine("{0}:", Path.ChangeExtension(Path.GetFileName(sf), ".o"));
+                        sw.WriteLine("\t{0}{1} {2} -c {3} -o {4}", prefix, isCpp ? "g++" : "gcc", flags.GetEffectiveCFLAGS(isCpp), sf, Path.ChangeExtension(Path.GetFileName(sf), ".o"));
+                        sw.WriteLine();
+                    }
                 }
             }
 
@@ -321,6 +333,13 @@ namespace StandaloneBSPValidator
                 throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
 
             var job = XmlTools.LoadObject<TestJob>(args[0]);
+            job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(args[0]));
+            if (job.ToolchainPath.StartsWith("["))
+            {
+                job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
+                if (job.ToolchainPath == null)
+                    throw new Exception("Cannot locate toolchain path from registry");
+            }
 
             var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
             var bsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(job.BSPPath), toolchain, false);
