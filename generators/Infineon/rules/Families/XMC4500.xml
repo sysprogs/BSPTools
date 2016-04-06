@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>XMC4500</Name>
+	<DeviceRegex>^XMC45.*</DeviceRegex>
+	<FamilySubdirectory>XMC4500</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\CMSIS\Infineon\XMC4500_series\Source\GCC\startup_XMC4500.S</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+      </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\CMSIS\Infineon\XMC4500_series</SourceFolder>
+					<FilesToCopy>*.h;*.c</FilesToCopy>
+					<TargetFolder>Infineon</TargetFolder>
+					<AutoIncludeMask>*.h</AutoIncludeMask>
+					<Patches>
++						<Patch xsi:type="InsertLines">
+							<FilePath>source\system_XMC4500.c</FilePath>
+							<AfterLine>extern uint32_t __Vectors;</AfterLine>
+							<InsertedLines>
+								<string>#define __Vectors  g_pfnVectors</string>
+							</InsertedLines>
+						</Patch>					
++						<Patch xsi:type="ReplaceLine">
++							<FilePath>source\system_XMC4500.c</FilePath>
++							<OldLine>extern uint32_t __Vectors;</OldLine>
++							<NewLine>extern uint32_t g_pfnVectors;</NewLine>
+	+					</Patch>
+					</Patches>
+					
+				</CopyJob>			
+			</CopyJobs>	
+		</CoreFramework>
+		<Subfamilies>	
+		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.xmcdev</VariableName>
+			<Required>true</Required>
+			<Options>		
+				<Option>
+					<Value>XMC1_C</Value>
+					<Regex>^XMC1.*</Regex>
+				</Option>
+				<Option>
+					<Value>XMC4_C</Value>
+					<Regex>^XMC4.*</Regex>
+				</Option>
+			</Options>
+			</MCUClassifier>
+	</Subfamilies>
+</FamilyDefinition>

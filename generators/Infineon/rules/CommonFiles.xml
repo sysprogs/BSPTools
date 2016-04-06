@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\CMSIS\Include</SourceFolder>
+					<FilesToCopy>*.h;*.c</FilesToCopy>
+					<TargetFolder>CMSIS</TargetFolder>
+					<AutoIncludeMask>*.h</AutoIncludeMask>	
+				</CopyJob>			
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\XMCLib</SourceFolder>
+					<FilesToCopy>-examples\*;*.h;*.c</FilesToCopy>
+					<TargetFolder>XMCLib</TargetFolder>
+					<AutoIncludeMask>*.h</AutoIncludeMask>	
+					<SimpleFileConditions>
+						<string>src\\xmc1_*: $$com.sysprogs.bspoptions.xmcdev$$ == XMC1_C</string>
+						<string>src\\xmc4_*: $$com.sysprogs.bspoptions.xmcdev$$ == XMC4_C</string>	
+					</SimpleFileConditions>
+
+
+				</CopyJob>		
+		</CopyJobs>
+	</CoreFramework>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlinkCMX4x</SourceFolder>
+			<DestinationFolder>Samples\LEDBlinkCMX4x</DestinationFolder>
+		</SmartSample>
+	</SmartSamples>
+	<Subfamilies>
+	</Subfamilies>
+</FamilyDefinition>

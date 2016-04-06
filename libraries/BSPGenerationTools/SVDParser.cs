@@ -203,10 +203,17 @@ namespace BSPGenerationTools
             {
                 radix = 2;
                 text = text.Substring(1);
-            } else if (text.StartsWith("0"))
+            }
+            else if (text.StartsWith("0b"))
+            {
+                radix = 2;
+                text = text.Substring(2);
+            }
+            else if (text.StartsWith("0"))
             {
                 radix = 8;
             }
+
             return checked((uint)(Convert.ToUInt64(text, radix) * scale));
         }
 
