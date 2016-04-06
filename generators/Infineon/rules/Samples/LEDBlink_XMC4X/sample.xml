@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink</Name>
+	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
+	<MCUFilterRegex>^XMC4.*</MCUFilterRegex>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><InternalValue>P0</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P1</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P2</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P3</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P4</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P5</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P6</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P7</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P8</InternalValue></Suggestion>
+			<Suggestion><InternalValue>P9</InternalValue></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>1</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>14</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>15</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay (msec)</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYMSEC</UniqueID>
+		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+		  <DefaultValue>500</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+</EmbeddedProjectSample>

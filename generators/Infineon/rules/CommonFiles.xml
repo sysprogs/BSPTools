@@ -17,19 +17,17 @@
 						<string>src\\xmc1_*: $$com.sysprogs.bspoptions.xmcdev$$ == XMC1_C</string>
 						<string>src\\xmc4_*: $$com.sysprogs.bspoptions.xmcdev$$ == XMC4_C</string>	
 					</SimpleFileConditions>
-
-
 				</CopyJob>		
 		</CopyJobs>
 	</CoreFramework>
 	<SmartSamples>
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
-			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBLink_XMC1X</SourceFolder>
+			<DestinationFolder>Samples\LEDBLink_XMC1X</DestinationFolder>
 		</SmartSample>
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlinkCMX4x</SourceFolder>
-			<DestinationFolder>Samples\LEDBlinkCMX4x</DestinationFolder>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBLink_XMC4X</SourceFolder>
+			<DestinationFolder>Samples\LEDBLink_XMC4X</DestinationFolder>
 		</SmartSample>
 	</SmartSamples>
 	<Subfamilies>
