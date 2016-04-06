@@ -31,7 +31,12 @@
 							<FilePath>source\system_XMC4400.c</FilePath>
 							<OldLine>extern uint32_t __Vectors;</OldLine>
 							<NewLine>extern uint32_t g_pfnVectors;</NewLine>
-					</Patch>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>include\XMC4400.h</FilePath>
+							<OldLine>  __I  uint32_t  DEBUG;                             /*!&lt; (@ 0x5000C024) Debug Register                                         */</OldLine>
+							<NewLine>  __I  uint32_t  DEBUG_;                             /*!&lt; (@ 0x5000C024) Debug Register                                         */</NewLine>
+						</Patch>
 					</Patches>		
 				</CopyJob>						
 			</CopyJobs>	
