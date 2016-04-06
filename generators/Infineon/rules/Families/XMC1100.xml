@@ -22,20 +22,10 @@
 				</CopyJob>					
 			</CopyJobs>	
 		</CoreFramework>
-		<Subfamilies>
-		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.xmcdev</VariableName>
-			<Required>true</Required>
-			<Options>		
-				<Option>
-					<Value>XMC1_C</Value>
-					<Regex>^XMC1.*</Regex>
-				</Option>
-				<Option>
-					<Value>XMC4_C</Value>
-					<Regex>^XMC4.*</Regex>
-				</Option>
-			</Options>
-			</MCUClassifier>
-	</Subfamilies>
+	<AdditionalSystemVars>
+		<SysVarEntry>
+			<Key>com.sysprogs.bspoptions.xmcdev</Key>
+			<Value>XMC1_C</Value>
+		</SysVarEntry>
+	</AdditionalSystemVars>
 </FamilyDefinition>

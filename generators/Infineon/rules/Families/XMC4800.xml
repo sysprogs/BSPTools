@@ -20,36 +20,26 @@
 					<TargetFolder>Infineon</TargetFolder>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
 					<Patches>
-+						<Patch xsi:type="InsertLines">
+						<Patch xsi:type="InsertLines">
 							<FilePath>source\system_XMC4800.c</FilePath>
 							<AfterLine>extern uint32_t __Vectors;</AfterLine>
 							<InsertedLines>
 								<string>#define __Vectors  g_pfnVectors</string>
 							</InsertedLines>
 						</Patch>					
-+						<Patch xsi:type="ReplaceLine">
-+							<FilePath>source\system_XMC4800.c</FilePath>
-+							<OldLine>extern uint32_t __Vectors;</OldLine>
-+							<NewLine>extern uint32_t g_pfnVectors;</NewLine>
-	+					</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>source\system_XMC4800.c</FilePath>
+							<OldLine>extern uint32_t __Vectors;</OldLine>
+							<NewLine>extern uint32_t g_pfnVectors;</NewLine>
+						</Patch>
 					</Patches>+	
 				</CopyJob>			
 			</CopyJobs>	
 		</CoreFramework>
-		<Subfamilies>	
-		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.xmcdev</VariableName>
-			<Required>true</Required>
-			<Options>		
-				<Option>
-					<Value>XMC1_C</Value>
-					<Regex>^XMC1.*</Regex>
-				</Option>
-				<Option>
-					<Value>XMC4_C</Value>
-					<Regex>^XMC4.*</Regex>
-				</Option>
-			</Options>
-			</MCUClassifier>
-	</Subfamilies>
+		<AdditionalSystemVars>
+			<SysVarEntry>
+				<Key>com.sysprogs.bspoptions.xmcdev</Key>
+				<Value>XMC4_C</Value>
+			</SysVarEntry>
+		</AdditionalSystemVars>
 </FamilyDefinition>
