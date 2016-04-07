@@ -28,7 +28,7 @@ namespace mbed
                 nameRules.Add(new KeyValuePair<Regex, string>(new Regex(line.Substring(0, idx).Trim()), line.Substring(idx + 1).Trim()));
             }
 
-            bool regenerate = false;
+            bool regenerate = true;
             if (regenerate)
             {
                 Process proc;

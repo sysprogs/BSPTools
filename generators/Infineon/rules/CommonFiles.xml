@@ -18,6 +18,14 @@
 						<string>src\\xmc4_*: $$com.sysprogs.bspoptions.xmcdev$$ == XMC4_C</string>	
 					</SimpleFileConditions>
 				</CopyJob>		
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:RULES_DIR$$</SourceFolder>
+					<FilesToCopy>veneers.c</FilesToCopy>
+					<TargetFolder>Common</TargetFolder>
+					<SimpleFileConditions>
+						<string>veneers.c: $$com.sysprogs.bspoptions.xmcdev$$ == XMC1_C</string>
+					</SimpleFileConditions>
+				</CopyJob>		
 		</CopyJobs>
 	</CoreFramework>
 	<SmartSamples>

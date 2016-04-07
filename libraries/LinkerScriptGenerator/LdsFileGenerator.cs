@@ -200,12 +200,21 @@ namespace LinkerScriptGenerator
                 if (!string.IsNullOrEmpty(section.CustomStartLabel))
                     sw.WriteLine("{0}\t{1} = {2};", padding, section.CustomStartLabel, startLabel);
 
-                foreach (var input in section.Inputs)
+                if (section.Inputs != null)
                 {
-                    string namePattern = input.NamePattern;
-                    if (string.IsNullOrEmpty(namePattern))
-                        namePattern = section.Name;
-                    OutputSectionReference(sw, padding + "\t", namePattern, input.Flags);
+                    foreach (var input in section.Inputs)
+                    {
+                        string namePattern = input.NamePattern;
+                        if (string.IsNullOrEmpty(namePattern))
+                            namePattern = section.Name;
+                        OutputSectionReference(sw, padding + "\t", namePattern, input.Flags);
+                    }
+                }
+
+                if (section.CustomContents != null)
+                {
+                    foreach (var line in section.CustomContents)
+                        sw.WriteLine(padding + "\t" + line);
                 }
 
                 if (section.Fill != null)

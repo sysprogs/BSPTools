@@ -75,8 +75,8 @@ namespace BSPGenerationTools
             if (string.IsNullOrEmpty(StartupFile))
                 throw new Exception("Startup file not defined for " + Name);
             if (string.IsNullOrEmpty(MCUDefinitionFile) && requirePeripheralRegisters)
-                 throw new Exception("Peripheral register definition not found for " + Name);
- 
+                throw new Exception("Peripheral register definition not found for " + Name);
+
             var mcu = new MCU
             {
                 ID = Name,
@@ -188,9 +188,14 @@ namespace BSPGenerationTools
 
         public abstract void GetMemoryBases(out uint flashBase, out uint ramBase);
 
+        protected virtual LinkerScriptTemplate GetTemplateForMCU(MCUBuilder mcu)
+        {
+            return LDSTemplate;
+        }
+
         public virtual void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
         {
-            using (var gen = new LdsFileGenerator(LDSTemplate, layout))
+            using (var gen = new LdsFileGenerator(GetTemplateForMCU(mcu), layout))
             {
                 using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_flash.lds")))
                     gen.GenerateLdsFile(sw);
@@ -211,14 +216,14 @@ namespace BSPGenerationTools
         {
             if (primaryHeaderDir != null && primaryHeaderDir.Contains("$$"))
                 foreach (var entry in SystemVars)
-                    primaryHeaderDir = primaryHeaderDir.Replace(entry.Key, entry.Value);   
+                    primaryHeaderDir = primaryHeaderDir.Replace(entry.Key, entry.Value);
         }
 
-        internal void ExpandAdditionalVariables(ref string strSources, SysVarEntry[] AddVariables )
+        internal void ExpandAdditionalVariables(ref string strSources, SysVarEntry[] AddVariables)
         {
-            if (AddVariables!=null && strSources.Contains("$$"))
+            if (AddVariables != null && strSources.Contains("$$"))
                 foreach (var entry in AddVariables)
-                    strSources = strSources.Replace("$$"+entry.Key+ "$$", entry.Value);
+                    strSources = strSources.Replace("$$" + entry.Key + "$$", entry.Value);
         }
     }
 
@@ -232,15 +237,15 @@ namespace BSPGenerationTools
             bspBuilder.ExpandVariables(ref definition.PrimaryHeaderDir);
             bspBuilder.ExpandVariables(ref definition.StartupFileDir);
 
-            if (definition.SmartSamples !=null)
+            if (definition.SmartSamples != null)
                 foreach (var simple in definition.SmartSamples)
                 {
                     for (int count = 0; count < simple.AdditionalSources?.Count(); count++)
                     {
                         string addSource = simple.AdditionalSources[count]; ;
                         bspBuilder.ExpandAdditionalVariables(ref simple.AdditionalSources[count], definition.AdditionalSystemVars);
-                      }         
-                 }
+                    }
+                }
 
             BSP = bspBuilder;
             Definition = definition;
@@ -469,7 +474,7 @@ namespace BSPGenerationTools
             }
         }
 
-        
+
         public IEnumerable<EmbeddedFramework> GenerateFrameworkDefinitions()
         {
             if (Definition.AdditionalFrameworks != null)
@@ -536,7 +541,7 @@ namespace BSPGenerationTools
                                     return new AdditionalSourceFile { SourcePath = f };
                                 else
                                     return new AdditionalSourceFile { SourcePath = f.Substring(0, idx).Trim(), TargetFileName = f.Substring(idx + 2).Trim() };
-                            }).ToArray();       
+                            }).ToArray();
 
                         foreach (var f in sampleObj.AdditionalSourcesToCopy)
                         {
@@ -556,8 +561,8 @@ namespace BSPGenerationTools
                     if (sampleObj.MCUFilterRegex == null & allFrameworks != null && sampleObj.RequiredFrameworks != null)
                     {
                         string[] devices = null;
-                        
-                        foreach(var fw in allFrameworks)
+
+                        foreach (var fw in allFrameworks)
                         {
                             if (fw.MCUFilterRegex == null)
                                 continue;
@@ -610,7 +615,7 @@ namespace BSPGenerationTools
                 }
 
                 if (!matched)
-                      throw new Exception("Cannot find a peripheral register set for " + mcu.Name);
+                    throw new Exception("Cannot find a peripheral register set for " + mcu.Name);
             }
 
         }
@@ -652,8 +657,8 @@ namespace BSPGenerationTools
                     var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
                     foreach (var mcu in removed)
                         if (rgUnsupported == null || !rgUnsupported.IsMatch(mcu.Name))
-                             throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized");
-                 }
+                            throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized");
+                }
 
                 removedMCUs.AddRange(removed);
             }
@@ -745,7 +750,7 @@ namespace BSPGenerationTools
                 }
 
                 if (rawmcu_list.IndexOf(mcu) < 0)
-                rawmcu_list.Add(mcu);
+                    rawmcu_list.Add(mcu);
 
             }
 

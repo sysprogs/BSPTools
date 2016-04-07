@@ -205,6 +205,7 @@ namespace LinkerScriptGenerator
 
         public int Alignment;
         public string CustomStartLabel, CustomEndLabel;
+        public string[] CustomContents;
 
         [XmlIgnore]
         public bool IsUnaligned

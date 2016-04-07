@@ -18,11 +18,36 @@ namespace InfineonXMC_bsp_generator
         class InfineonXMCBSPBuilder : BSPBuilder
         {
             const uint FLASHBase = 0x00000000, SRAMBase = 0x10000000;
+            public LinkerScriptTemplate LDSTemplateX1;
+
 
             public InfineonXMCBSPBuilder(BSPDirectories dirs)
                 : base(dirs)
             {
                 ShortName = "Infineon_XMC";
+
+                LDSTemplateX1 = XmlTools.LoadObject<LinkerScriptTemplate>(@"..\..\..\..\GenericARM.ldsx");
+                var dataSection = LDSTemplateX1.Sections.IndexOf(LDSTemplateX1.Sections.First(s => s.Name == ".data"));
+                LDSTemplateX1.Sections.First(s => s.Name == ".isr_vector").Flags |= SectionFlags.DefineShortLabels | SectionFlags.ProvideLongLabels;
+
+                LDSTemplateX1.Sections.Insert(dataSection, new Section
+                {
+                    Name = ".isr_veneers",
+                    TargetMemory = "SRAM",
+                    Alignment = 4,
+                    CustomContents = new string[] { ". = . + SIZEOF(.isr_vector) * 2;" },
+                    Flags = SectionFlags.DefineShortLabels | SectionFlags.ProvideLongLabels,
+                });
+
+                LDSTemplate = LDSTemplateX1;                
+            }
+
+            protected override LinkerScriptTemplate GetTemplateForMCU(MCUBuilder mcu)
+            {
+                if (mcu.Name.StartsWith("XMC1", StringComparison.InvariantCultureIgnoreCase))
+                    return LDSTemplateX1;
+                else
+                    return LDSTemplate;
             }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)

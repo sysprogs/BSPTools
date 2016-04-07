@@ -19,6 +19,22 @@
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<TargetFolder>Infineon</TargetFolder>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>source\system_XMC1300.c</FilePath>
+							<AfterLine>  SystemCoreSetup();</AfterLine>
+							<InsertedLines>
+								<string>	InitializeInteruptVeneers();</string>
+							</InsertedLines>
+						</Patch>					
+						<Patch xsi:type="InsertLines">
+							<FilePath>include\system_XMC1300.h</FilePath>
+							<AfterLine>void SystemInit(void);</AfterLine>
+							<InsertedLines>
+								<string>void InitializeInteruptVeneers();</string>
+							</InsertedLines>
+						</Patch>					
+					</Patches>
 				</CopyJob>			
 			</CopyJobs>	
 		</CoreFramework>
