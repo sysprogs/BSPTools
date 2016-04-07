@@ -28,14 +28,14 @@ int main(void)
 	config.output_level = XMC_GPIO_OUTPUT_LEVEL_HIGH;
 	config.output_strength = XMC_GPIO_OUTPUT_STRENGTH_MEDIUM;
 
-	XMC_GPIO_Init($$com.sysprogs.examples.ledblink.LEDPORT$$_$$com.sysprogs.examples.ledblink.LEDBIT$$, &config);
+	XMC_GPIO_Init(XMC_GPIO_PORT$$com.sysprogs.examples.ledblink.LEDPORT$$, $$com.sysprogs.examples.ledblink.LEDBIT$$, &config);
 
 	SysTick_Config(SystemCoreClock / SystemTickPeriod);
 	for (;;)
 	{
-		XMC_GPIO_SetOutputHigh($$com.sysprogs.examples.ledblink.LEDPORT$$_$$com.sysprogs.examples.ledblink.LEDBIT$$);
+		XMC_GPIO_SetOutputHigh(XMC_GPIO_PORT$$com.sysprogs.examples.ledblink.LEDPORT$$, $$com.sysprogs.examples.ledblink.LEDBIT$$);
     	Delay($$com.sysprogs.examples.ledblink.DELAYMSEC$$);
-		XMC_GPIO_SetOutputLow($$com.sysprogs.examples.ledblink.LEDPORT$$_$$com.sysprogs.examples.ledblink.LEDBIT$$);
+		XMC_GPIO_SetOutputLow(XMC_GPIO_PORT$$com.sysprogs.examples.ledblink.LEDPORT$$, $$com.sysprogs.examples.ledblink.LEDBIT$$);
     	Delay($$com.sysprogs.examples.ledblink.DELAYMSEC$$);
 	}
 }

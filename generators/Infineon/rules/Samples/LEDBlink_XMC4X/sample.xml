@@ -12,16 +12,16 @@
 		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
 		  <Description>Specifies the port group where the LED is connected</Description>
 		  <SuggestionList>
-			<Suggestion><InternalValue>P0</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P1</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P2</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P3</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P4</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P5</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P6</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P7</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P8</InternalValue></Suggestion>
-			<Suggestion><InternalValue>P9</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P0</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P1</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P2</UserFriendlyName><InternalValue>2</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P3</UserFriendlyName><InternalValue>3</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P4</UserFriendlyName><InternalValue>4</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P5</UserFriendlyName><InternalValue>5</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P6</UserFriendlyName><InternalValue>6</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P7</UserFriendlyName><InternalValue>7</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P8</UserFriendlyName><InternalValue>8</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>P9</UserFriendlyName><InternalValue>9</InternalValue></Suggestion>
 		  </SuggestionList>
 		  <DefaultEntryIndex>1</DefaultEntryIndex>
 		  <AllowFreeEntry>false</AllowFreeEntry>
