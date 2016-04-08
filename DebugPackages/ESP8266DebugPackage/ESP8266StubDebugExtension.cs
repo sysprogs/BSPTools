@@ -88,7 +88,9 @@ namespace ESP8266DebugPackage
                         if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.reset_delay", out val) || !int.TryParse(val, out resetDelay))
                             resetDelay = 25;
 
-                        ESP8266BootloaderClient client = new ESP8266BootloaderClient(serialPort, resetDelay);
+                        string seq;
+                        debugMethodConfig.TryGetValue("com.sysprogs.esp8266.gdbstub.reset_sequence", out seq);
+                        ESP8266BootloaderClient client = new ESP8266BootloaderClient(serialPort, resetDelay, seq);
                         client.Sync();
                         var regions = ESP8266StartupSequence.BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
 
@@ -126,7 +128,7 @@ namespace ESP8266DebugPackage
                 return new CustomStartupSequence
                 {
                     Steps = new List<CustomStartStep> { 
-                        new CustomStartStep("set remotebaud $$com.sysprogs.esp8266.gdbstub.baud$$"),
+                        new CustomStartStep("set serial baud $$com.sysprogs.esp8266.gdbstub.baud$$"),
                         new CustomStartStep(@"target remote \\.\$$com.sysprogs.esp8266.gdbstub.com_port$$"),
                     }
                 };

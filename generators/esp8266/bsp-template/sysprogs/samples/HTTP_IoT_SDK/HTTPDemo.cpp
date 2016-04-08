@@ -33,7 +33,7 @@ static char s_ReplyFormat[] = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\
 static char s_Reply[sizeof(s_ReplyFormat) + 20];
 static int s_RequestNumber;
 
-static void httpdConnectCb(void *arg) 
+static void __attribute__((section(".irom.text"))) httpdConnectCb(void *arg) 
 {
 	struct espconn *pConn = (struct espconn*)arg;
 	os_sprintf(s_Reply, s_ReplyFormat, ++s_RequestNumber);

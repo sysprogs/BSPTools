@@ -5,12 +5,21 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:RULES_DIR$$\GDBStub</SourceFolder>
 				<TargetFolder>GDBStub</TargetFolder>
-				<FilesToCopy>*</FilesToCopy>
+				<FilesToCopy>-.git\*;*</FilesToCopy>
 				<ProjectInclusionMask>*.c;*.h;*.S</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>
 				<SimpleFileConditions>
 					<string>.*: $$com.sysprogs.esp8266.gdbstub$$ == ESP8266_GDBSTUB</string>
 				</SimpleFileConditions>				
+				<Patches>
+					<Patch xsi:type="InsertLines">
+						<FilePath>gdbstub.c</FilePath>
+						<AfterLine>#include "gdbstub.h"</AfterLine>
+						<InsertedLines>
+							<string>#include "c_types.h"</string>
+						</InsertedLines>
+					</Patch>					
+				</Patches>
 			</CopyJob>			
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\OpenOCD</SourceFolder>
@@ -33,9 +42,9 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.4.0</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.5.2</SourceFolder>
 					<TargetFolder>IoT-SDK</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
+					<FilesToCopy>-.git\*;*</FilesToCopy>
 					<ProjectInclusionMask>-include\json\*;include\*</ProjectInclusionMask>
 					<AutoIncludeMask>*eagle_soc.h</AutoIncludeMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include</AdditionalIncludeDirs>
@@ -62,7 +71,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.4.0</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.5.2</SourceFolder>
 					<TargetFolder>IoT-SDK</TargetFolder>
 					<FilesToCopy>examples\driver_lib\*</FilesToCopy>
 					<AlreadyCopied>true</AlreadyCopied>
@@ -82,9 +91,9 @@
 			</IncompatibleFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP8266_RTOS_SDK-1.3.0</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP8266_RTOS_SDK</SourceFolder>
 					<TargetFolder>RTOS-SDK</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
+					<FilesToCopy>-.git\*;*</FilesToCopy>
 					<ProjectInclusionMask>include\espressif\*</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip;$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip/ipv4;$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip/ipv6;$$SYS:BSP_ROOT$$/RTOS-SDK/include;$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include</AdditionalIncludeDirs>
 					<AutoIncludeMask>include\espressif\*</AutoIncludeMask>
@@ -111,20 +120,13 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP8266_RTOS_SDK-1.3.0</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP8266_RTOS_SDK</SourceFolder>
 					<TargetFolder>RTOS-SDK</TargetFolder>
 					<FilesToCopy>examples\driver_lib\*</FilesToCopy>
 					<AlreadyCopied>true</AlreadyCopied>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/examples/driver_lib/include</AdditionalIncludeDirs>
-					<Patches>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>examples\driver_lib\driver\uart.c</FilePath>
-							<OldLine>    UART_intr_handler_register(uart0_rx_intr_handler);</OldLine>
-							<NewLine>    UART_intr_handler_register(uart0_rx_intr_handler, 0);</NewLine>
-						</Patch>
-					</Patches>
 				</CopyJob>			
 			</CopyJobs>
 		</Framework>		

@@ -405,6 +405,12 @@
 				  <DefaultEntryIndex>0</DefaultEntryIndex>
 				  <AllowFreeEntry>true</AllowFreeEntry>
 				</PropertyEntry>
+			  	<PropertyEntry xsi:type="String">
+                  <Name>Bootloader activation sequence</Name>
+                  <UniqueID>com.sysprogs.esp8266.gdbstub.reset_sequence</UniqueID>
+                  <Description>Specifies the xt-ocd configuration file</Description>
+				  <DefaultValue>!DTR;RTS;SLEEP;DTR;!RTS;SLEEP;!DTR;SLEEP</DefaultValue>
+                </PropertyEntry>
 			  </Properties>
             </PropertyGroup>
           </PropertyGroups>

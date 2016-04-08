@@ -10,10 +10,15 @@ namespace ESP8266DebugPackage
         private SerialPortStream _Port;
         private readonly int _ResetDelay;
 
-        public ESP8266BootloaderClient(SerialPortStream port, int resetDelay)
+        public string _ResetSequence;
+
+        public const string DefaultResetSequence = "!DTR;RTS;SLEEP;DTR;!RTS;SLEEP;!DTR;SLEEP";
+
+        public ESP8266BootloaderClient(SerialPortStream port, int resetDelay, string resetSequence)
         {
             _Port = port;
             _ResetDelay = resetDelay;
+            _ResetSequence = resetSequence ?? DefaultResetSequence;
         }
 
         enum Command : byte
@@ -142,14 +147,35 @@ namespace ESP8266DebugPackage
                     {
                         if (innerIter == 0)
                         {
-                            _Port.EscapeFunction(SerialPortStream.CommFunction.CLRDTR);
-                            _Port.EscapeFunction(SerialPortStream.CommFunction.SETRTS);
-                            Thread.Sleep(_ResetDelay);
-                            _Port.EscapeFunction(SerialPortStream.CommFunction.SETDTR);
-                            _Port.EscapeFunction(SerialPortStream.CommFunction.CLRRTS);
-                            Thread.Sleep(_ResetDelay);
-                            _Port.EscapeFunction(SerialPortStream.CommFunction.CLRDTR);
-                            Thread.Sleep(_ResetDelay);
+                            foreach(string cmd in _ResetSequence.Split(';'))
+                            {
+                                switch(cmd)
+                                {
+                                    case "DTR":
+                                        _Port.EscapeFunction(SerialPortStream.CommFunction.SETDTR);
+                                        break;
+                                    case "!DTR":
+                                        _Port.EscapeFunction(SerialPortStream.CommFunction.CLRDTR);
+                                        break;
+                                    case "RTS":
+                                        _Port.EscapeFunction(SerialPortStream.CommFunction.SETRTS);
+                                        break;
+                                    case "!RTS":
+                                        _Port.EscapeFunction(SerialPortStream.CommFunction.CLRRTS);
+                                        break;
+                                    case "SLEEP":
+                                        Thread.Sleep(_ResetDelay);
+                                        break;
+                                    case "":
+                                        break;
+                                    default:
+                                        if (cmd.StartsWith("SLEEP:"))
+                                            Thread.Sleep(int.Parse(cmd.Substring(6)));
+                                        else
+                                            throw new Exception("Invalid reset command: " + cmd);
+                                        break;
+                                }
+                            }
                         }
 
                         _Port.Purge();

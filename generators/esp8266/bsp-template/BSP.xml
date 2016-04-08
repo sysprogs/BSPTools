@@ -200,6 +200,7 @@
           <string>ssl</string>
           <string>pwm</string>
           <string>smartconfig</string>
+          <string>crypto</string>
         </AdditionalLibraries>
       </Flags>
     </ConditionalToolFlags>

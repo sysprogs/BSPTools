@@ -1,0 +1,3 @@
+[submodule "generators/esp8266/rules/gdbstub"]
+	path = generators/esp8266/rules/gdbstub
+	url = https://github.com/espressif/esp-gdbstub.git
