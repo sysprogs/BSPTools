@@ -23,11 +23,104 @@ namespace Nxp_bsp_generator
         class NxpBSPBuilder : BSPBuilder
         {
             const uint FLASHBase = 0x00000000, SRAMBase = 0x10000000;
+            private readonly Dictionary<string, List<Memory>> _Memories;
 
             public NxpBSPBuilder(BSPDirectories dirs)
                 : base(dirs)
             {
                 ShortName = "NXP_LPC";
+                _Memories = ParseMemories(Path.Combine(dirs.RulesDir, "memories.csv"));
+            }
+
+            static Dictionary<string, List<Memory>> ParseMemories(string csvMemoriesFile)
+            {
+                Dictionary<string, List<Memory>> memories = new Dictionary<string, List<Memory>>();
+
+                string[] ram_names = null;
+                foreach (var line in File.ReadAllLines(csvMemoriesFile))
+                {
+                    if (line.Contains("Device Family"))
+                    {
+                        string[] headers = line.Split(new string[] { "," }, StringSplitOptions.None);
+                        ram_names = new string[headers.Length / 2];
+
+                        for (int i = 1; i < headers.Length; i += 2)
+                        {
+                            ram_names[(i - 1) / 2] = headers[i].Substring(0, headers[i].Length - " Address".Length).Replace(" ", "_");
+                        }
+                        continue;
+                    }
+
+                    string[] line_array = line.Split(new string[] { "," }, StringSplitOptions.None);
+                    memories[line_array[0]] = new List<Memory>();
+                    for (int i = 1; i < line_array.Length; i += 2)
+                    {
+                        if (line_array[i].Trim() == "")
+                            continue;
+
+                        memories[line_array[0]].Add(
+                            new Memory()
+                            {
+                                Name = ram_names[(i - 1) / 2],
+                                Start = UInt32.Parse(line_array[i].Substring(2).Replace(" ", ""), System.Globalization.NumberStyles.HexNumber),
+                                Size = UInt32.Parse(line_array[i + 1]) * 1024,
+                                Type = MemoryType.RAM
+                            });
+                    }
+
+                    if (memories[line_array[0]].Count == 1 || memories[line_array[0]][0].Name == "SRAM0")
+                        memories[line_array[0]][0].Name = "SRAM";
+                }
+
+                return memories;
+            }
+
+            List<Memory> FindMemories(string deviceName)
+            {
+                foreach (var deviceMask in _Memories.Keys)
+                {
+                    List<string> separated_device_masks = new List<string>();
+                    if (deviceMask.Contains('|'))
+                    {
+                        string[] masks = deviceMask.Split('|');
+                        separated_device_masks.Add(masks[0]);
+                        for (int j = 1; j < masks.Length; j++)
+                        {
+                            separated_device_masks.Add(masks[0].Substring(0, masks[0].Length - masks[j].Length) + masks[j]);
+                        }
+                    }
+                    else
+                        separated_device_masks.Add(deviceMask);
+
+                    foreach (var separated_device_mask in separated_device_masks)
+                    {
+                        if (separated_device_mask.Contains('x') || separated_device_mask.Contains('X'))
+                        {
+                            bool match = true;
+                            // If the device name is shorter than the mask then assume the ? is not used for this device name
+                            for (int j = 0; j < Math.Min(separated_device_mask.Length, deviceName.Length); j++)
+                            {
+                                if (separated_device_mask[j] == '?')
+                                    continue;
+
+                                if (separated_device_mask[j] != 'x' && separated_device_mask[j] != 'X'
+                                    && separated_device_mask[j] != '?' && separated_device_mask[j] != deviceName[j])
+                                {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if (match)
+                                return _Memories[deviceMask];
+                        }
+                        else if (deviceName.StartsWith(separated_device_mask) || (separated_device_mask.StartsWith(deviceName) && deviceName.Length < separated_device_mask.Length))
+
+                            return _Memories[deviceMask];
+                    }
+                }
+
+                throw new Exception("Device " + deviceName + " memories not found!");
             }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
@@ -39,24 +132,31 @@ namespace Nxp_bsp_generator
             public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 //No additional memory information available for this MCU. Build a basic memory layout from known RAM/FLASH sizes.
-                MemoryLayout layout = new MemoryLayout { DeviceName = mcu.Name, Memories = new List<Memory>() };
-                layout.Memories.Add(new Memory
+                MemoryLayout layout = new MemoryLayout { DeviceName = mcu.Name, Memories = FindMemories(mcu.Name) };
+
+                layout.Memories.Insert(0, new Memory
                 {
                     Name = "FLASH",
                     Access = MemoryAccess.Undefined,
                     Type = MemoryType.FLASH,
                     Start = FLASHBase,
-                    Size = (uint)mcu.FlashSize,
+                    Size = (uint)mcu.FlashSize
                 });
 
-                layout.Memories.Add(new Memory
+                if (mcu.Name.StartsWith("LPC4", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    Name = "SRAM",
-                    Access = MemoryAccess.Undefined,
-                    Type = MemoryType.RAM,
-                    Start = SRAMBase,
-                    Size = (uint)mcu.RAMSize,
-                });
+                    int sram = mcu.RAMSize / 1024;
+                    if ((sram == 24) || (sram == 40) || (sram == 80) || (sram == 96) || (sram == 104) || (sram == 136) || (sram == 168) || (sram == 200) || (sram == 264) || (sram == 282))
+                    {
+                        if ((layout.Memories[0].Size / 1024) == 0)
+                            layout.Memories[0].Size = 64 * 1024;
+                    }
+                    else
+                        throw new Exception("Unknown LPC43xx memory configuration");
+                }
+
+                if (mcu.FlashSize == 0)
+                    layout.Memories[0].Size = 65536;
 
                 return layout;
             }
@@ -487,7 +587,7 @@ namespace Nxp_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "2.0"
+                PackageVersion = "2.1"
             };
 
             bspBuilder.Save(bsp, true);
