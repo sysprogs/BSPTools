@@ -201,63 +201,40 @@ namespace ESP8266DebugPackage
             string bspPath = bspDict["SYS:BSP_ROOT"];
             string toolchainPath = bspDict["SYS:TOOLCHAIN_ROOT"];
 
-            string pythonPath = Path.GetDirectoryName(bspPath) + @"\python27\python.exe";
-            if (!File.Exists(pythonPath))
-                throw new Exception("Python not found: " + pythonPath);
-
-            string esptoolPath = bspPath + @"\esptool.py";
-            if (!File.Exists(esptoolPath))
-                throw new Exception("Esptool not found: " + esptoolPath);
-
             Regex rgBinFile = new Regex("^" + Path.GetFileName(targetPath) + "-0x([0-9a-fA-F]+)\\.bin$", RegexOptions.IgnoreCase);
             foreach (var fn in Directory.GetFiles(Path.GetDirectoryName(targetPath)))
                 if (rgBinFile.IsMatch(Path.GetFileName(fn)))
                     File.Delete(fn);
 
-            string val;
-            string args = string.Format("\"{0}\" elf2image \"{1}\"", esptoolPath, targetPath);
-            if (debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_freq", out val) && !string.IsNullOrEmpty(val))
-                args += " --flash_freq " + val;
-            if (debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out val) && !string.IsNullOrEmpty(val))
-                args += " --flash_mode " + val;
-            if (debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out val) && !string.IsNullOrEmpty(val))
-                args += " --flash_size " + val;
-
-            if (lineHandler != null)
-                lineHandler(pythonPath + " " + args, false);
-
-            var startInfo = new ProcessStartInfo { FileName = pythonPath, Arguments = args, CreateNoWindow = true, UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
-            startInfo.EnvironmentVariables["PATH"] += ";" + toolchainPath + @"\bin";
-
-            var proc = Process.Start(startInfo);
-            if (lineHandler != null)
-            {
-                proc.OutputDataReceived += (p, e) => lineHandler(e.Data, true);
-                proc.ErrorDataReceived += (p, e) => lineHandler(e.Data, true);
-            }
-            proc.BeginOutputReadLine();
-            proc.BeginErrorReadLine();
-
-            if (!proc.WaitForExit(30000))
-            {
-                proc.Kill();
-                throw new Exception("ESPTool appears to be hanging");
-            }
-
-            if (proc.ExitCode != 0)
-                throw new Exception("ESPTool returned an error " + proc.ExitCode);
+            string freq, mode, size;
+            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_freq", out freq);
+            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out mode);
+            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out size);
 
             List<ProgrammableRegion> regions = new List<ProgrammableRegion>();
 
-            foreach (var fn in Directory.GetFiles(Path.GetDirectoryName(targetPath)))
+            using (var elfFile = new ELFFile(targetPath))
             {
-                var m = rgBinFile.Match(Path.GetFileName(fn));
-                if (m.Success)
-                    regions.Add(new ProgrammableRegion { FileName = fn, Offset = int.Parse(m.Groups[1].Value, System.Globalization.NumberStyles.HexNumber), Size = File.ReadAllBytes(fn).Length });
-            }
+                string pathBase = Path.Combine(Path.GetDirectoryName(targetPath), Path.GetFileName(targetPath));
+                var img = ESP8266BinaryImage.BaseImageFromELFFile(elfFile, new ESP8266BinaryImage.ParsedHeader(freq, mode, size));
+                string fn = pathBase + "-0x00000.bin";
+                using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
+                    img.Save(fs);
+                    regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = (int)fs.Length });
+                }
 
-            if (regions.Count == 0)
-                throw new Exception("ESPTool did not produce any binary files");
+
+                foreach (var sec in ESP8266BinaryImage.GetFLASHSections(elfFile))
+                {
+                    fn = string.Format("{0}-0x{1:x5}.bin", pathBase, sec.OffsetInFLASH);
+                    using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                    {
+                        fs.Write(sec.Data, 0, sec.Data.Length);
+                        regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)sec.OffsetInFLASH, Size = sec.Data.Length });
+                    }
+                }
+            }
             return regions;
         }
 
