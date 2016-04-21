@@ -93,6 +93,9 @@ namespace BSPGenerationTools
                 MCUDefinitionFile = MCUDefinitionFile
             };
 
+            if (fam.Definition.HasMixedCores)
+                MCUFamilyBuilder.AddCoreSpecificFlags(true, mcu, Core);
+
             List<SysVarEntry> sysVars = new List<SysVarEntry>();
             foreach (var classifier in fam.Definition.Subfamilies)
             {
@@ -262,14 +265,45 @@ namespace BSPGenerationTools
 
         public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables)
         {
-            if (MCUs.Count == 0)
-                throw new Exception("No MCUs found for " + Definition.Name);
-            var core = MCUs[0].Core;
-            foreach (var mcu in MCUs)
-                if (mcu.Core != core)
-                    throw new Exception("Different MCUs within " + Definition.Name + " have different core types");
-
             var family = new MCUFamily { ID = Definition.Name };
+
+            if (!Definition.HasMixedCores)
+            {
+                if (MCUs.Count == 0)
+                    throw new Exception("No MCUs found for " + Definition.Name);
+
+                var core = MCUs[0].Core;
+
+                foreach (var mcu in MCUs)
+                    if (mcu.Core != core)
+                        throw new Exception("Different MCUs within " + Definition.Name + " have different core types");
+
+                AddCoreSpecificFlags(defineConfigurationVariables, family, core);
+            }
+
+            family.CompilationFlags = family.CompilationFlags.Merge(Definition.CompilationFlags);
+
+            List<string> projectFiles = new List<string>();
+            CopyFamilyFiles(ref family.CompilationFlags, projectFiles);
+
+            family.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
+            family.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
+
+            family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, Definition.AdditionalSystemVars);
+
+            if (Definition.ConfigurableProperties != null)
+            {
+                if (family.ConfigurableProperties == null)
+                    family.ConfigurableProperties = new PropertyList();
+
+                family.ConfigurableProperties.Import(Definition.ConfigurableProperties);
+            }
+
+            return family;
+        }
+
+        internal static void AddCoreSpecificFlags(bool defineConfigurationVariables, MCUFamily family, CortexCore core)
+        {
             string coreName = null;
             switch (core)
             {
@@ -303,7 +337,6 @@ namespace BSPGenerationTools
                     throw new Exception("Unsupported core type");
             }
 
-            family.CompilationFlags = family.CompilationFlags.Merge(Definition.CompilationFlags);
 
             if (defineConfigurationVariables)
             {
@@ -356,24 +389,6 @@ namespace BSPGenerationTools
                 if (coreName != null)
                     family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName } });
             }
-
-            List<string> projectFiles = new List<string>();
-            CopyFamilyFiles(ref family.CompilationFlags, projectFiles);
-
-            family.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
-            family.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
-
-            family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, Definition.AdditionalSystemVars);
-
-            if (Definition.ConfigurableProperties != null)
-            {
-                if (family.ConfigurableProperties == null)
-                    family.ConfigurableProperties = new PropertyList();
-
-                family.ConfigurableProperties.Import(Definition.ConfigurableProperties);
-            }
-
-            return family;
         }
 
         public static bool IsHeaderFile(string fn)
