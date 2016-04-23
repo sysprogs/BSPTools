@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace ESP8266DebugPackage
 {
-    class ESP8266BootloaderClient
+    public class ESP8266BootloaderClient
     {
         private SerialPortStream _Port;
         private readonly int _ResetDelay;
@@ -243,6 +243,13 @@ namespace ESP8266DebugPackage
                 if (result.Value.Length != 2 || result.Value[0] != 0 || result.Value[1] != 0)
                     throw new Exception("Failed to finish FLASH operation");
             }
+        }
+
+        public void EraseFLASH()
+        {
+            StartFLASH(0, 0);
+            StartRAM(0, 0, 0, 0x40100000);
+            EndRAM(0x40004984);
         }
 
         static byte ComputeChecksum(byte[] data, int offset, int length)

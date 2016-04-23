@@ -8,15 +8,15 @@ using System.Text.RegularExpressions;
 
 namespace ESP8266DebugPackage
 {
+    public struct ProgrammableRegion
+    {
+        public int Offset;
+        public int Size;
+        public string FileName;
+    }
+
     class ESP8266StartupSequence : ICustomStartupSequenceBuilder
     {
-        public struct ProgrammableRegion
-        {
-            public int Offset;
-            public int Size;
-            public string FileName;
-        }
-
         struct ParsedFLASHLoader
         {
             public readonly byte[] Data;
@@ -82,6 +82,8 @@ namespace ESP8266DebugPackage
                 cmds.Add(string.Format("set *((unsigned *)0x{0:x})={1}", pResult, uint.MaxValue));
                 cmds.Add(string.Format("set $intclear=-1"));
                 cmds.Add(string.Format("set $intenable=0"));
+                cmds.Add("set $eps2=0x20");
+                cmds.Add("set $icountlevel=0");
                 cmds.Add(string.Format("-exec-continue"));
 
                 return new CustomStartStep(cmds.ToArray())
@@ -121,12 +123,14 @@ namespace ESP8266DebugPackage
                 "$$com.sysprogs.esp8266.interrupt_disable_command$$",
                 "set $ccompare=0",
                 "set $intclear=-1",
-                "set $intenable=0"));
+                "set $intenable=0",
+                "set $eps2=0x20",
+                "set $icountlevel=0"));
 
             var result = new CustomStartupSequence { Steps = cmds };
 
             string val;
-            if (bspDict.TryGetValue("com.sysprogs.esp8266.load_flash", out val) && val == "1")
+            if (bspDict.TryGetValue("com.sysprogs.esp8266.load_flash", out val) && val == "1")  //Not a FLASHless project
             {
                 if (debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.program_flash", out val) && val != "0")
                 {
@@ -143,38 +147,73 @@ namespace ESP8266DebugPackage
                     cmds.Add(parsedLoader.QueueInvocation(0, "$$com.sysprogs.esp8266.xt-ocd.prog_sector_size$$", "$$com.sysprogs.esp8266.xt-ocd.erase_sector_size$$", null, 0, 0, true));
                     foreach (var region in regions)
                         parsedLoader.QueueRegionProgramming(cmds, region);
-
-                    /*using (ELFFile elf = new ELFFile(targetPath))
-                    {
-                        foreach(var sec in elf.AllSections)
-                        {
-                            if (!sec.PresentInMemory || !sec.HasData || sec.Type != ELFFile.SectionType.SHT_PROGBITS)
-                                continue;
-
-                            bool isInRAM = false;
-                            if (sec.VirtualAddress >= 0x3FFE8000 && sec.VirtualAddress < (0x3FFE8000 + 81920))
-                                isInRAM = true;
-                            else if (sec.VirtualAddress >= 0x40100000 && sec.VirtualAddress <= (0x40100000 + 32768))
-                                isInRAM = true;
-
-                            if (isInRAM)
-                            {
-                                cmds.Add(new FLASHProgrammingStep("restore {0} binary 0x{1:x} 0x{2:x} 0x{3:x}", targetPath.Replace('\\', '/'),
-                                    sec.VirtualAddress - sec.OffsetInFile, sec.OffsetInFile, sec.OffsetInFile + sec.Size) { CheckResult = true, ErrorMessage = "Failed to program the " + sec.SectionName + " section" });
-                            }
-                        }
-                    }*/
                 }
 
-                if (debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_start_mode", out val) && val == "soft_reset")
+                if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_start_mode", out val))
+                    val = "soft_reset";
+
+                if (val == "soft_reset")
                 {
+                    try
+                    {
+                        using (var elfFile = new ELFFile(targetPath))
+                        {
+                            string pathBase = Path.Combine(Path.GetDirectoryName(targetPath), Path.GetFileName(targetPath));
+                            string status;
+                            int appMode = ESP8266BinaryImage.DetectAppMode(elfFile, out status);
+                            if (appMode != 0)
+                            {
+                                if (System.Windows.Forms.MessageBox.Show("The soft reset mechanism is not compatible with the OTA images. Use the jump-to-entry reset instead?", "VisualGDB", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
+                                    val = "entry_point";
+                            }
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+                if (val == "soft_reset" || val == "entry_point")
+                {
+                    string entry = "0x40000080";
+
+                    if (val == "entry_point")
+                    {
+                        using (ELFFile elf = new ELFFile(targetPath))
+                        {
+                            foreach (var sec in elf.AllSections)
+                            {
+                                if (!sec.PresentInMemory || !sec.HasData || sec.Type != ELFFile.SectionType.SHT_PROGBITS)
+                                    continue;
+
+                                bool isInRAM = false;
+                                if (sec.VirtualAddress >= 0x3FFE8000 && sec.VirtualAddress < (0x3FFE8000 + 81920))
+                                    isInRAM = true;
+                                else if (sec.VirtualAddress >= 0x40100000 && sec.VirtualAddress <= (0x40100000 + 32768))
+                                    isInRAM = true;
+
+                                if (isInRAM)
+                                {
+                                    cmds.Add(new CustomStartStep(string.Format("restore {0} binary 0x{1:x} 0x{2:x} 0x{3:x}", targetPath.Replace('\\', '/'),
+                                        sec.VirtualAddress - sec.OffsetInFile, sec.OffsetInFile, sec.OffsetInFile + sec.Size))
+                                    { CheckResult = true, ErrorMessage = "Failed to program the " + sec.SectionName + " section" });
+                                }
+                            }
+                        }
+
+                        entry = "$$DEBUG:ENTRY_POINT$$";
+                    }
+
                     cmds.Add(new CustomStartStep("set $ps=0x20",
-                    "set $epc2=0x40000080",
-                    "set $sp=$$DEBUG:INITIAL_STACK_POINTER$$",
-                    "set $vecbase=0x40000000",
-                    "$$com.sysprogs.esp8266.interrupt_disable_command$$",
-                    "set $intclear=-1",
-                    "set $intenable=0"));
+                        "set $epc2=" + entry,
+                        "set $sp=$$DEBUG:INITIAL_STACK_POINTER$$",
+                        "set $vecbase=0x40000000",
+                        "$$com.sysprogs.esp8266.interrupt_disable_command$$",
+                        "set $intclear=-1",
+                        "set $intenable=0",
+                        "set $eps2=0x20",
+                        "set $icountlevel=0"));
                     result.InitialHardBreakpointExpression = "*$$DEBUG:ENTRY_POINT$$";
                 }
                 else
@@ -182,15 +221,17 @@ namespace ESP8266DebugPackage
             }
             else
             {
-                cmds.Add(new CustomStartStep("load"));
-                cmds.Add(new CustomStartStep("set $ps=0x20"));
-                cmds.Add(new CustomStartStep("set $epc2=$$DEBUG:ENTRY_POINT$$"));
-                cmds.Add(new CustomStartStep("set $sp=$$DEBUG:INITIAL_STACK_POINTER$$"));
-                cmds.Add(new CustomStartStep("set $vecbase=0x40000000"));
-                cmds.Add(new CustomStartStep("$$com.sysprogs.esp8266.interrupt_disable_command$$"));
-                cmds.Add(new CustomStartStep("set $ccompare=0"));
-                cmds.Add(new CustomStartStep("set $intclear=-1"));
-                cmds.Add(new CustomStartStep("set $intenable=0"));
+                cmds.Add(new CustomStartStep("load",
+                    "set $ps=0x20",
+                    "set $epc2=$$DEBUG:ENTRY_POINT$$",
+                    "set $sp=$$DEBUG:INITIAL_STACK_POINTER$$",
+                    "set $vecbase=0x40000000",
+                    "$$com.sysprogs.esp8266.interrupt_disable_command$$",
+                    "set $ccompare=0",
+                    "set $intclear=-1",
+                    "set $intenable=0",
+                    "set $eps2=0x20",
+                    "set $icountlevel=0"));
             }
 
             return result;
@@ -216,22 +257,58 @@ namespace ESP8266DebugPackage
             using (var elfFile = new ELFFile(targetPath))
             {
                 string pathBase = Path.Combine(Path.GetDirectoryName(targetPath), Path.GetFileName(targetPath));
-                var img = ESP8266BinaryImage.BaseImageFromELFFile(elfFile, new ESP8266BinaryImage.ParsedHeader(freq, mode, size));
-                string fn = pathBase + "-0x00000.bin";
-                using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-                {
-                    img.Save(fs);
-                    regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = (int)fs.Length });
-                }
+                string status;
+                int appMode = ESP8266BinaryImage.DetectAppMode(elfFile, out status);
+                if (status != null && lineHandler != null)
+                    lineHandler(status, true);
 
-
-                foreach (var sec in ESP8266BinaryImage.GetFLASHSections(elfFile))
+                if (appMode == 0)
                 {
-                    fn = string.Format("{0}-0x{1:x5}.bin", pathBase, sec.OffsetInFLASH);
+                    var img = ESP8266BinaryImage.MakeNonBootloaderImageFromELFFile(elfFile, new ESP8266BinaryImage.ParsedHeader(freq, mode, size));
+
+                    string fn = pathBase + "-0x00000.bin";
                     using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
                     {
-                        fs.Write(sec.Data, 0, sec.Data.Length);
-                        regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)sec.OffsetInFLASH, Size = sec.Data.Length });
+                        img.Save(fs);
+                        regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = (int)fs.Length });
+                    }
+
+                    foreach (var sec in ESP8266BinaryImage.GetFLASHSections(elfFile))
+                    {
+                        fn = string.Format("{0}-0x{1:x5}.bin", pathBase, sec.OffsetInFLASH);
+                        using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        {
+                            fs.Write(sec.Data, 0, sec.Data.Length);
+                            regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)sec.OffsetInFLASH, Size = sec.Data.Length });
+                        }
+                    }
+                }
+                else
+                {
+                    var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, new ESP8266BinaryImage.ParsedHeader(freq, mode, size), appMode);
+
+                    string bspRoot, bootloader;
+                    if (!bspDict.TryGetValue("SYS:BSP_ROOT", out bspRoot) || !bspDict.TryGetValue("com.sysprogs.esp8266.bootloader", out bootloader))
+                        throw new Exception("Cannot determine bootloader image path. Please check your BSP consistency.");
+
+                    string fn = Path.Combine(bspRoot, bootloader);
+                    if (!File.Exists(fn))
+                        throw new Exception(fn + " not found. Cannot program OTA images.");
+
+                    byte[] data = File.ReadAllBytes(fn);
+                    data[2] = (byte)img.Header.Mode;
+                    data[3] = (byte)(((byte)img.Header.Size << 4) | (byte)img.Header.Frequency);
+                    fn = string.Format("{0}-0x00000.bin", pathBase);
+                    File.WriteAllBytes(fn, data);
+
+                    regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = File.ReadAllBytes(fn).Length });
+
+
+                    fn = string.Format("{0}-0x{1:x5}.bin", pathBase, img.BootloaderImageOffset);
+                    using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                    {
+                        img.Save(fs);
+                        regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)img.BootloaderImageOffset, Size = (int)fs.Length });
                     }
                 }
             }

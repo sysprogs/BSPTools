@@ -73,6 +73,20 @@
 			  <DefaultEntryIndex>0</DefaultEntryIndex>
 			  <AllowFreeEntry>false</AllowFreeEntry>
 			</PropertyEntry>
+			<PropertyEntry xsi:type="Enumerated">
+			  <Name>Default linker script</Name>
+			  <UniqueID>com.sysprogs.esp8266.linker_script</UniqueID>
+			  <SuggestionList>
+				<Suggestion><UserFriendlyName>Default (no OTA support)</UserFriendlyName><InternalValue>ld/eagle.app.v6.ld</InternalValue></Suggestion>
+				<Suggestion><UserFriendlyName>OTA 512KB (4mbit) - App1</UserFriendlyName><InternalValue>ld/eagle.app.v6.new.512.app1.ld</InternalValue></Suggestion>
+				<Suggestion><UserFriendlyName>OTA 512KB (4mbit) - App2</UserFriendlyName><InternalValue>ld/eagle.app.v6.new.512.app2.ld</InternalValue></Suggestion>
+				<Suggestion><UserFriendlyName>OTA 1MB (8mbit) - App1</UserFriendlyName><InternalValue>ld/eagle.app.v6.new.1024.app1.ld</InternalValue></Suggestion>
+				<Suggestion><UserFriendlyName>OTA 1MB (8mbit) - App2</UserFriendlyName><InternalValue>ld/eagle.app.v6.new.1024.app2.ld</InternalValue></Suggestion>
+				<Suggestion><UserFriendlyName>OTA 2MB (16mbit)</UserFriendlyName><InternalValue>ld/eagle.app.v6.new.2048.ld</InternalValue></Suggestion>
+			  </SuggestionList>
+			  <DefaultEntryIndex>0</DefaultEntryIndex>
+			  <AllowFreeEntry>false</AllowFreeEntry>
+			</PropertyEntry>
 			<PropertyEntry xsi:type="Boolean">
 			  <Name>Enable UART GDB Stub</Name>
 			  <UniqueID>com.sysprogs.esp8266.gdbstub</UniqueID>
@@ -104,12 +118,12 @@
           <Value>1</Value>
         </SysVarEntry>
         <SysVarEntry>
-          <Key>com.sysprogs.esp8266.linker_script</Key>
-          <Value>ld/eagle.app.v6.ld</Value>
-        </SysVarEntry>
-        <SysVarEntry>
           <Key>com.sysprogs.esp8266.interrupt_disable_command</Key>
           <Value>set *(0x3fffc200)=0</Value>
+        </SysVarEntry>
+        <SysVarEntry>
+          <Key>com.sysprogs.esp8266.bootloader</Key>
+          <Value>IoT-SDK/bin/boot_v1.5.bin</Value>
         </SysVarEntry>
 	  </AdditionalSystemVars>
     </MCU>
@@ -129,10 +143,6 @@
           <Value>0</Value>
         </SysVarEntry>
         <SysVarEntry>
-          <Key>com.sysprogs.esp8266.linker_script</Key>
-          <Value>../sysprogs/ramonly.ld</Value>
-        </SysVarEntry>
-        <SysVarEntry>
           <Key>com.sysprogs.esp8266.interrupt_disable_command</Key>
           <Value>set *(0x3fffc200)=0</Value>
         </SysVarEntry>
@@ -149,6 +159,7 @@
 	<string>sysprogs/samples/LEDBlink_RTOS_SDK</string>
 	<string>sysprogs/samples/HTTP_IoT_SDK</string>
 	<string>sysprogs/samples/HTTP_RTOS_SDK</string>
+	<string>sysprogs/samples/OTA_IoT_SDK</string>
   </Examples>
   <ConditionalFlags>
     <ConditionalToolFlags>
@@ -165,7 +176,6 @@
           <string>$$SYS:BSP_ROOT$$/IoT-SDK/lib</string>
           <string>$$SYS:BSP_ROOT$$/IoT-SDK/ld</string>
         </AdditionalLibraryDirectories>
-        <LinkerScript>$$SYS:BSP_ROOT$$/IoT-SDK/$$com.sysprogs.esp8266.linker_script$$</LinkerScript>
         <COMMONFLAGS>-nostdlib -mlongcalls -mtext-section-literals</COMMONFLAGS>
         <EnableLinkerGroups>true</EnableLinkerGroups>
       </Flags>
@@ -202,6 +212,17 @@
           <string>smartconfig</string>
           <string>crypto</string>
         </AdditionalLibraries>
+        <LinkerScript>$$SYS:BSP_ROOT$$/IoT-SDK/$$com.sysprogs.esp8266.linker_script$$</LinkerScript>
+      </Flags>
+    </ConditionalToolFlags>
+    <ConditionalToolFlags>
+	  <FlagCondition xsi:type="Equals">
+		<Expression>$$com.sysprogs.esp8266.load_flash$$</Expression>
+		<ExpectedValue>0</ExpectedValue>
+		<IgnoreCase>false</IgnoreCase>
+	  </FlagCondition>
+      <Flags>
+        <LinkerScript>$$SYS:BSP_ROOT$$/sysprogs/ramonly.ld</LinkerScript>
       </Flags>
     </ConditionalToolFlags>
     <ConditionalToolFlags>

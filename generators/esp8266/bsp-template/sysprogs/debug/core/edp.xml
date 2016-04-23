@@ -77,7 +77,8 @@
 				  <Name>Start mode</Name>
 				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_start_mode</UniqueID>
 				  <SuggestionList>
-					<Suggestion><UserFriendlyName>Emulate a CPU reset</UserFriendlyName><InternalValue>soft_reset</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Emulate a CPU reset (non-OTA only)</UserFriendlyName><InternalValue>soft_reset</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Jump to entry point</UserFriendlyName><InternalValue>entry_point</InternalValue></Suggestion>
 					<Suggestion><UserFriendlyName>Reset entire chip</UserFriendlyName><InternalValue>hard_reset</InternalValue></Suggestion>
 				  </SuggestionList>
 				  <DefaultEntryIndex>0</DefaultEntryIndex>
@@ -214,7 +215,8 @@
 				  <Name>Start mode</Name>
 				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_start_mode</UniqueID>
 				  <SuggestionList>
-					<Suggestion><UserFriendlyName>Emulate a CPU reset</UserFriendlyName><InternalValue>soft_reset</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Emulate a CPU reset (non-OTA only)</UserFriendlyName><InternalValue>soft_reset</InternalValue></Suggestion>
+					<Suggestion><UserFriendlyName>Jump to entry point</UserFriendlyName><InternalValue>entry_point</InternalValue></Suggestion>
 					<Suggestion><UserFriendlyName>Reset entire chip</UserFriendlyName><InternalValue>hard_reset</InternalValue></Suggestion>
 				  </SuggestionList>
 				  <DefaultEntryIndex>0</DefaultEntryIndex>

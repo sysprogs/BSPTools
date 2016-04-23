@@ -49,14 +49,14 @@
             this.cbQuickInterface = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.txtExtraArgs = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbFeedWatchdog = new System.Windows.Forms.CheckBox();
+            this.cbSuppressInterrupts = new System.Windows.Forms.CheckBox();
+            this.cbCmdline = new System.Windows.Forms.CheckBox();
             this.cbQuickSpeed = new System.Windows.Forms.CheckBox();
             this.numSpeed2 = new System.Windows.Forms.NumericUpDown();
-            this.label2 = new System.Windows.Forms.Label();
-            this.txtExtraArgs = new System.Windows.Forms.TextBox();
-            this.cbSuppressInterrupts = new System.Windows.Forms.CheckBox();
-            this.cbFeedWatchdog = new System.Windows.Forms.CheckBox();
             this.openOCDScriptSelector1 = new OpenOCDPackage.OpenOCDScriptSelector();
-            this.cbCmdline = new System.Windows.Forms.CheckBox();
             this.panel2.SuspendLayout();
             this.pnlFLASH.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -319,6 +319,64 @@
             this.panel3.Size = new System.Drawing.Size(359, 97);
             this.panel3.TabIndex = 45;
             // 
+            // txtExtraArgs
+            // 
+            this.txtExtraArgs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtExtraArgs.Enabled = false;
+            this.txtExtraArgs.Location = new System.Drawing.Point(204, 2);
+            this.txtExtraArgs.Name = "txtExtraArgs";
+            this.txtExtraArgs.Size = new System.Drawing.Size(152, 20);
+            this.txtExtraArgs.TabIndex = 12;
+            this.txtExtraArgs.TextChanged += new System.EventHandler(this.SettingsChangedHandler);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Enabled = false;
+            this.label2.Location = new System.Drawing.Point(201, 28);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(27, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "KHz";
+            // 
+            // cbFeedWatchdog
+            // 
+            this.cbFeedWatchdog.AutoSize = true;
+            this.cbFeedWatchdog.Checked = true;
+            this.cbFeedWatchdog.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbFeedWatchdog.Location = new System.Drawing.Point(6, 73);
+            this.cbFeedWatchdog.Name = "cbFeedWatchdog";
+            this.cbFeedWatchdog.Size = new System.Drawing.Size(241, 17);
+            this.cbFeedWatchdog.TabIndex = 16;
+            this.cbFeedWatchdog.Text = "Feed ESP8266 watchdog timer while stopped";
+            this.cbFeedWatchdog.UseVisualStyleBackColor = true;
+            this.cbFeedWatchdog.CheckedChanged += new System.EventHandler(this.SettingsChangedHandler);
+            // 
+            // cbSuppressInterrupts
+            // 
+            this.cbSuppressInterrupts.AutoSize = true;
+            this.cbSuppressInterrupts.Checked = true;
+            this.cbSuppressInterrupts.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbSuppressInterrupts.Location = new System.Drawing.Point(6, 50);
+            this.cbSuppressInterrupts.Name = "cbSuppressInterrupts";
+            this.cbSuppressInterrupts.Size = new System.Drawing.Size(221, 17);
+            this.cbSuppressInterrupts.TabIndex = 15;
+            this.cbSuppressInterrupts.Text = "Suppress interrupts during single-stepping";
+            this.cbSuppressInterrupts.UseVisualStyleBackColor = true;
+            this.cbSuppressInterrupts.CheckedChanged += new System.EventHandler(this.SettingsChangedHandler);
+            // 
+            // cbCmdline
+            // 
+            this.cbCmdline.AutoSize = true;
+            this.cbCmdline.Location = new System.Drawing.Point(6, 4);
+            this.cbCmdline.Name = "cbCmdline";
+            this.cbCmdline.Size = new System.Drawing.Size(195, 17);
+            this.cbCmdline.TabIndex = 11;
+            this.cbCmdline.Text = "Additional command-line arguments:";
+            this.cbCmdline.UseVisualStyleBackColor = true;
+            this.cbCmdline.CheckedChanged += new System.EventHandler(this.cbCmdline_CheckedChanged);
+            // 
             // cbQuickSpeed
             // 
             this.cbQuickSpeed.AutoSize = true;
@@ -349,53 +407,6 @@
             0});
             this.numSpeed2.ValueChanged += new System.EventHandler(this.SettingsChangedHandler);
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Enabled = false;
-            this.label2.Location = new System.Drawing.Point(201, 28);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(27, 13);
-            this.label2.TabIndex = 10;
-            this.label2.Text = "KHz";
-            // 
-            // txtExtraArgs
-            // 
-            this.txtExtraArgs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtExtraArgs.Enabled = false;
-            this.txtExtraArgs.Location = new System.Drawing.Point(204, 2);
-            this.txtExtraArgs.Name = "txtExtraArgs";
-            this.txtExtraArgs.Size = new System.Drawing.Size(152, 20);
-            this.txtExtraArgs.TabIndex = 12;
-            this.txtExtraArgs.TextChanged += new System.EventHandler(this.SettingsChangedHandler);
-            // 
-            // cbSuppressInterrupts
-            // 
-            this.cbSuppressInterrupts.AutoSize = true;
-            this.cbSuppressInterrupts.Checked = true;
-            this.cbSuppressInterrupts.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbSuppressInterrupts.Location = new System.Drawing.Point(6, 50);
-            this.cbSuppressInterrupts.Name = "cbSuppressInterrupts";
-            this.cbSuppressInterrupts.Size = new System.Drawing.Size(221, 17);
-            this.cbSuppressInterrupts.TabIndex = 15;
-            this.cbSuppressInterrupts.Text = "Suppress interrupts during single-stepping";
-            this.cbSuppressInterrupts.UseVisualStyleBackColor = true;
-            this.cbSuppressInterrupts.CheckedChanged += new System.EventHandler(this.SettingsChangedHandler);
-            // 
-            // cbFeedWatchdog
-            // 
-            this.cbFeedWatchdog.AutoSize = true;
-            this.cbFeedWatchdog.Checked = true;
-            this.cbFeedWatchdog.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbFeedWatchdog.Location = new System.Drawing.Point(6, 73);
-            this.cbFeedWatchdog.Name = "cbFeedWatchdog";
-            this.cbFeedWatchdog.Size = new System.Drawing.Size(241, 17);
-            this.cbFeedWatchdog.TabIndex = 16;
-            this.cbFeedWatchdog.Text = "Feed ESP8266 watchdog timer while stopped";
-            this.cbFeedWatchdog.UseVisualStyleBackColor = true;
-            this.cbFeedWatchdog.CheckedChanged += new System.EventHandler(this.SettingsChangedHandler);
-            // 
             // openOCDScriptSelector1
             // 
             this.openOCDScriptSelector1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -407,17 +418,6 @@
             this.openOCDScriptSelector1.TabIndex = 3;
             this.openOCDScriptSelector1.Visible = false;
             this.openOCDScriptSelector1.ValueChanged += new System.EventHandler(this.SettingsChangedHandler);
-            // 
-            // cbCmdline
-            // 
-            this.cbCmdline.AutoSize = true;
-            this.cbCmdline.Location = new System.Drawing.Point(6, 4);
-            this.cbCmdline.Name = "cbCmdline";
-            this.cbCmdline.Size = new System.Drawing.Size(195, 17);
-            this.cbCmdline.TabIndex = 11;
-            this.cbCmdline.Text = "Additional command-line arguments:";
-            this.cbCmdline.UseVisualStyleBackColor = true;
-            this.cbCmdline.CheckedChanged += new System.EventHandler(this.cbCmdline_CheckedChanged);
             // 
             // OpenOCDDebugConfigurator
             // 

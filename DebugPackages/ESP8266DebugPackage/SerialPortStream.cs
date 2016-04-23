@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace ESP8266DebugPackage
 {
-    class SerialPortStream : Stream, IDisposable
+    public class SerialPortStream : Stream, IDisposable
     {
         #region PInvoke definitions
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
