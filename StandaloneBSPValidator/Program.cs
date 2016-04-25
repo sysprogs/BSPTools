@@ -41,12 +41,14 @@ namespace StandaloneBSPValidator
                 foreach (var grp in propertyList.PropertyGroups)
                     foreach (var prop in grp.Properties)
                     {
+                        string uniqueID = grp.UniqueID + prop.UniqueID;
+
                         if (prop is PropertyEntry.Enumerated)
-                            properties[prop.UniqueID] = (prop as PropertyEntry.Enumerated).SuggestionList[(prop as PropertyEntry.Enumerated).DefaultEntryIndex].InternalValue;
+                            properties[uniqueID] = (prop as PropertyEntry.Enumerated).SuggestionList[(prop as PropertyEntry.Enumerated).DefaultEntryIndex].InternalValue;
                         if (prop is PropertyEntry.Integral)
-                            properties[prop.UniqueID] = (prop as PropertyEntry.Integral).DefaultValue.ToString();
+                            properties[uniqueID] = (prop as PropertyEntry.Integral).DefaultValue.ToString();
                         if (prop is PropertyEntry.Boolean)
-                            properties[prop.UniqueID] = (prop as PropertyEntry.Boolean).DefaultValue ? (prop as PropertyEntry.Boolean).ValueForTrue : (prop as PropertyEntry.Boolean).ValueForFalse;
+                            properties[uniqueID] = (prop as PropertyEntry.Boolean).DefaultValue ? (prop as PropertyEntry.Boolean).ValueForTrue : (prop as PropertyEntry.Boolean).ValueForFalse;
 
                         //TODO: other types
                     }
@@ -98,10 +100,6 @@ namespace StandaloneBSPValidator
 
             string[] frameworks = sampleObj.Sample.RequiredFrameworks;
 
-            Dictionary<string, string> frameworkCfg = new Dictionary<string, string>();
-            if (sample.FrameworkConfiguration != null)
-                foreach (var kv in sample.FrameworkConfiguration.Entries)
-                    frameworkCfg[kv.Key] = kv.Value;
 
             //frameworkCfg["com.sysprogs.bspoptions.stm32.freertos.heap"] = "heap_4";
             //frameworkCfg["com.sysprogs.bspoptions.stm32.freertos.portcore"] = "CM0";
@@ -117,13 +115,9 @@ namespace StandaloneBSPValidator
                 {
                     return configuredMCU.BSP.BSP.Frameworks.First(fwO => fwO.ID == fwId || fwO.ClassID == fwId && fwO.IsCompatibleWithMCU(configuredMCU.ExpandedMCU.ID));
                 }).ToList(),
-                FrameworkParameters = frameworkCfg,
+                FrameworkParameters = new Dictionary<string, string>(),
             };
 
-
-            if (sample.SampleConfiguration != null)
-                foreach (var kv in sample.SampleConfiguration.Entries)
-                    configuredSample.Parameters[kv.Key] = kv.Value;
 
             if (sample.MCUConfiguration != null)
                 foreach (var kv in sample.MCUConfiguration.Entries)
@@ -143,7 +137,26 @@ namespace StandaloneBSPValidator
                     if (fw.AdditionalSystemVars != null)
                         foreach (var kv in fw.AdditionalSystemVars)
                             bspDict[kv.Key] = kv.Value;
+                    if (fw.ConfigurableProperties != null)
+                    {
+                        var defaultFwConfig = GetDefaultPropertyValues(fw.ConfigurableProperties);
+                        if (defaultFwConfig != null)
+                            foreach (var kv in defaultFwConfig)
+                                configuredSample.FrameworkParameters[kv.Key] = kv.Value;
+                    }
                 }
+
+            if (sampleObj.Sample?.DefaultConfiguration?.Entries != null)
+                foreach(var kv in sampleObj.Sample.DefaultConfiguration.Entries)
+                    configuredSample.FrameworkParameters[kv.Key] = kv.Value;
+
+            if (sample.FrameworkConfiguration != null)
+                foreach (var kv in sample.FrameworkConfiguration.Entries)
+                    configuredSample.FrameworkParameters[kv.Key] = kv.Value;
+
+            if (sample.SampleConfiguration != null)
+                foreach (var kv in sample.SampleConfiguration.Entries)
+                    configuredSample.Parameters[kv.Key] = kv.Value;
 
             var prj = new GeneratedProject(mcuDir, configuredMCU, frameworks);
             prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);

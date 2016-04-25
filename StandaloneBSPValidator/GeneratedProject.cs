@@ -187,7 +187,7 @@ namespace StandaloneBSPValidator
                         primaryDict[sv.Key] = sv.Value;
 
                 flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, VariableHelper.ExpandVariables(fwObj.AdditionalIncludeDirs, primaryDict, frameworkDict));
-                flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, VariableHelper.ExpandVariables(fwObj.AdditionalPreprocessorMacros, primaryDict, frameworkDict));
+                flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, VariableHelper.ExpandVariables(fwObj.AdditionalPreprocessorMacros, primaryDict, frameworkDict)?.Where(m => !string.IsNullOrEmpty(m))?.ToArray());
             }
 
             if (MCU.BSP.BSP.ConditionalFlags != null)
