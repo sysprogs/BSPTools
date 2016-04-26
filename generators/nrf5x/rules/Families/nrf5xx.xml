@@ -319,7 +319,7 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries</SourceFolder>
 					<TargetFolder>components\libraries</TargetFolder>
-					<FilesToCopy>-*\hardfault_handler*;*</FilesToCopy>
+					<FilesToCopy>*</FilesToCopy>
 					<GuardedFiles>
 						<string>simple_timer\\app_simple_timer.c=>TIMER_COUNT</string>
 					</GuardedFiles>
@@ -331,6 +331,8 @@
 						<string>bootloader_dfu\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu$$ != none</string>
 						<string>button\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.button$$ == yes</string>
 						<string>crc16\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc16$$ == yes</string>
+						<string>crc32\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc32$$ == yes</string>
+						<string>ecc\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.ecc$$ == yes</string>
 						<string>fds\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fds$$ == yes</string>
 						<string>fifo\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fifo$$ == yes</string>
 						<string>fstorage\\fstorage.c: $$com.sysprogs.bspoptions.nrf5x.libraries.fstorage$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
@@ -361,7 +363,7 @@
 						<string>uart\\app_uart_fifo.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart_fifo</string>
 						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ != </string>
 					</SimpleFileConditions>
-					<ProjectInclusionMask>-ant_fs\*;-console\*;-mem_manager\*;-bootloader_dfu\*init_template*;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*\hardfault_handler*;-ant_fs\*;-console\*;-mem_manager\*;-bootloader_dfu\*init_template*;*</ProjectInclusionMask>
 					<AutoIncludeMask>-ant_fs\*;-console\*;-mem_manager\*;*.h</AutoIncludeMask>
 					<Patches>
 						<Patch xsi:type="ReplaceLine">
@@ -406,6 +408,8 @@
 						</PropertyEntry>						
 						<PropertyEntry xsi:type="Boolean"><Name>button</Name><UniqueID>button</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>crc16</Name><UniqueID>crc16</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>crc32</Name><UniqueID>crc32</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>ecc</Name><UniqueID>ecc</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fds</Name><UniqueID>fds</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fifo</Name><UniqueID>fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fstorage</Name><UniqueID>fstorage</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>

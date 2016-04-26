@@ -355,6 +355,10 @@ namespace nrf5x
 
                 familyDefinitions.Add(famObj);
                 fam.GenerateLinkerScripts(false);
+
+                SysVarEntry defaultConfigFolder51 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s132_pca10036" };
+                SysVarEntry defaultConfigFolder52 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s130_pca10028" };
+
                 foreach (var mcu in fam.MCUs)
                 {
                     var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters);
@@ -394,10 +398,10 @@ namespace nrf5x
                         prop.DefaultEntryIndex = idx;
                         prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
 
-                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s132_pca10036" } });
+                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { defaultConfigFolder51 });
                     }
                     else
-                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s130_pca10028" } });
+                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { defaultConfigFolder52 });
 
                     mcuDefinitions.Add(mcuDef);
                 }
@@ -408,7 +412,7 @@ namespace nrf5x
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
 
-                foreach (var sample in fam.CopySamples())
+                foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { defaultConfigFolder51 }))
                     exampleDirs.Add(sample);
             }
             bspBuilder.GenerateSoftdeviceLibraries();
@@ -425,11 +429,11 @@ namespace nrf5x
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
-                PackageVersion = "2.0",
+                PackageVersion = "3.0",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray(),
-                FirstCompatibleVersion = "2.0",
+                FirstCompatibleVersion = "3.0",
             };
 
             bspBuilder.Save(bsp, true);

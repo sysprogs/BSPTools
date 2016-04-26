@@ -176,8 +176,9 @@ namespace BSPGenerationTools
 
         }
 
-        private static bool IsUserFriendlyName(string text) {
-            return !Regex.Match(text, "0[xX][0-9a-fA-F]+|#*[0-9xX]+").Success;
+        private static bool IsUserFriendlyName(string text)
+        {
+            return !Regex.Match(text, "^(0[xX][0-9a-fA-F]+|#*[0-9xX]+)$").Success;
         }
 
         private static readonly char[] DoNotCareBitsChars = new[] { 'x', 'X' };
