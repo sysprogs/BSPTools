@@ -115,7 +115,7 @@ void user_init()
     static esp_tcp httpdTcp;
     httpdTcp.local_port = 80;
     static struct espconn httpdConn = { .type = ESPCONN_TCP, .state = ESPCONN_NONE };
-	httpdConn.proto.tcp = &httpdTcp;\
+	httpdConn.proto.tcp = &httpdTcp;
     
     static esp_tcp upgradeTcp;
     upgradeTcp.local_port = 88;
@@ -123,9 +123,8 @@ void user_init()
     upgradeConn.proto.tcp = &upgradeTcp;
 
 	espconn_regist_connectcb(&httpdConn, httpdConnectCb);
-	int r = espconn_accept(&httpdConn);
+	espconn_accept(&httpdConn);
     
     espconn_regist_connectcb(&upgradeConn, upgradeCb);
-    r = espconn_accept(&upgradeConn);
-    r = r;
+    espconn_accept(&upgradeConn);
 }

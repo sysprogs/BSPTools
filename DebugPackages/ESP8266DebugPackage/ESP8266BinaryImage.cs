@@ -261,7 +261,7 @@ namespace ESP8266DebugPackage
                 status = $"Unexpected number of SPI FLASH sections: {flashSections.Length}. Assuming this is not an OTA layout.";
                 return 0;
             }
-            else if (flashSections[0].OffsetInFLASH == 0x40000)
+            else if ((flashSections[0].OffsetInFLASH & 0x1FFF) == 0)
             {
                 status = string.Format("Found an SPI FLASH section at 0x{0:x8}. This image is a non-OTA image.", flashSections[0].OffsetInFLASH);
                 return 0;
