@@ -26,10 +26,9 @@ namespace nrf5x
             public NordicBSPBuilder(BSPDirectories dirs)
                 : base(dirs)
             {
-                ShortName = "Tiva";
-                var sqqq = LDSTemplate.Sections.First(s => s.Name == ".data").CustomContents = "|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|".Split('|');
-
-            }
+                ShortName = "nRF5x";
+                LDSTemplate.Sections.First(s => s.Name == ".data").CustomContents = "|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|".Split('|');
+           } 
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
             {
@@ -107,8 +106,8 @@ namespace nrf5x
             public List<SoftDevice> SoftDevices = new List<SoftDevice>
             {
                 //SDK 11
-                  new SoftDevice("S130", 0x1c000, 0x2800, "nrf51", "Bluetooth LE Universal"),
-                  new SoftDevice("S132", 0x1f000, 0x2800, "nrf52", "Bluetooth LE"),
+                  new SoftDevice("S130", 0x1b000, 0x2800, "nrf51", "Bluetooth LE Universal"),
+                  new SoftDevice("S132", 0x1c000, 0x2800, "nrf52", "Bluetooth LE"),
 
                   
             //    new SoftDevice("S110", 0x18000, 0x2000, "nrf51", "Bluetooth LE Peripheral"),
@@ -195,13 +194,11 @@ namespace nrf5x
             {
                 foreach (var sd in SoftDevices)
                 {
-                    string family = "nRF51";
                     string sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                     string abi = "";
                     if (sd.Name == "S132")
                     {
                         sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
-                        family = "nRF52";
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
                     }
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
@@ -373,7 +370,7 @@ namespace nrf5x
                             {
                                 UniqueID = NordicBSPBuilder.SoftdevicePropertyID,
                                 Name = "Softdevice",
-                                DefaultEntryIndex = 0,
+                                DefaultEntryIndex = 1,
                                 SuggestionList = compatibleSoftdevs,
                             }
                         }

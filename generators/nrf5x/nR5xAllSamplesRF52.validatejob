@@ -5,7 +5,7 @@
 	<DeviceRegex>nRF52.*</DeviceRegex>
 	<Samples>
 		<TestedSample>
- 			<Name>Blueooth LE Mouse</Name>
+ 			<Name>Bluetooth LE Mouse</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEMouse</TestDirSuffix>
@@ -25,7 +25,7 @@
 			</MCUConfiguration>
 		</TestedSample>	 
 		<TestedSample>
- 			<Name>Blueooth LE Keyboard</Name>
+ 			<Name>Bluetooth LE Keyboard</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEKeyboard</TestDirSuffix>
@@ -45,7 +45,7 @@
 			</MCUConfiguration>
 		</TestedSample>	 
 		<TestedSample>
- 			<Name>Blueooth LE Beacon</Name>
+ 			<Name>Bluetooth LE Beacon</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEBeacon</TestDirSuffix>
@@ -65,7 +65,7 @@
 			</MCUConfiguration>
 		</TestedSample>	 
 		<TestedSample>
- 			<Name>Blueooth LE Heart Rate Service Client</Name>
+ 			<Name>Bluetooth LE Heart Rate Service Client</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLE_HRSClient</TestDirSuffix>
@@ -86,7 +86,7 @@
 		</TestedSample>	 
 		
 		<TestedSample>
- 			<Name>Blueooth LE Heart Rate Service Peripheral</Name>
+ 			<Name>Bluetooth LE Heart Rate Service Peripheral</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLE_HRSPeripheral</TestDirSuffix>
@@ -106,7 +106,7 @@
 			</MCUConfiguration>
 		</TestedSample>	 
 		<TestedSample>
- 			<Name>Blueooth LE UART</Name>
+ 			<Name>Bluetooth LE UART</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEUART</TestDirSuffix>

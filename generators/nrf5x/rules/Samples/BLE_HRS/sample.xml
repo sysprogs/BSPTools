@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	  <Name>Blueooth LE Heart Rate Service Peripheral</Name>
+	  <Name>Bluetooth LE Heart Rate Service Peripheral</Name>
 	  <Description>This sample demonstrates the Bluetooth LE Heart Rate Service</Description>
 	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>

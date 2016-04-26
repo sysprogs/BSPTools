@@ -4,8 +4,8 @@
 	<Name>nRF5Xxxxx</Name>
 	<DeviceRegex>^nRF5.*</DeviceRegex>
 	<FamilySubdirectory>nRF5x</FamilySubdirectory>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\nRF5x\components\toolchain\arm</StartupFileDir>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\nRF5x\SVD</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\components\toolchain\arm</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\SVD</PrimaryHeaderDir>
 	<Subfamilies></Subfamilies>
 	<CompilationFlags>
 		<COMMONFLAGS>-mabi=aapcs $$com.sysprogs.bspoptions.nrf5x.floatsoft$$</COMMONFLAGS>
@@ -53,7 +53,7 @@
 	<CoreFramework>
 		<CopyJobs>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nrf5x</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
 				<TargetFolder></TargetFolder>
 				<FilesToCopy>-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;examples\*;external\*;svd\*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
@@ -66,7 +66,7 @@
 				<AutoIncludeMask>-*</AutoIncludeMask>
 			</CopyJob>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\toolchain</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\toolchain</SourceFolder>
 				<TargetFolder>components\toolchain</TargetFolder>
 				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c</FilesToCopy>
 				<SimpleFileConditions>					
@@ -76,12 +76,12 @@
 				</SimpleFileConditions>	
 			</CopyJob>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\device</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\device</SourceFolder>
 				<TargetFolder>components\device</TargetFolder>
 				<FilesToCopy>*.h;*.c</FilesToCopy>
 			</CopyJob>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\softdevice\common</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
 				<TargetFolder>components\softdevice\common</TargetFolder>
 				<FilesToCopy>-*\softdevice_handler_appsh.*;*.h;*.c</FilesToCopy>
 				<SimpleFileConditions>
@@ -117,7 +117,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\drivers_nrf</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\drivers_nrf</SourceFolder>
 					<TargetFolder>components\drivers_nrf</TargetFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
@@ -217,7 +217,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\libraries</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries</SourceFolder>
 					<TargetFolder>components\libraries</TargetFolder>
 					<FilesToCopy>util\*</FilesToCopy>
 				</CopyJob>
@@ -231,7 +231,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\ble\peer_manager</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\ble\peer_manager</SourceFolder>
 					<TargetFolder>components\ble\peer_manager</TargetFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 				</CopyJob>
@@ -245,7 +245,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\examples\bsp</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples\bsp</SourceFolder>
 					<TargetFolder>examples\bsp</TargetFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
@@ -317,7 +317,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\libraries</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries</SourceFolder>
 					<TargetFolder>components\libraries</TargetFolder>
 					<FilesToCopy>-*\hardfault_handler*;*</FilesToCopy>
 					<GuardedFiles>
@@ -377,7 +377,7 @@
 					</Patches>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\softdevice\common</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
 					<TargetFolder>components\softdevice\common</TargetFolder>
 					<FilesToCopy>*\softdevice_handler_appsh*</FilesToCopy>
 					<SimpleFileConditions>
@@ -480,7 +480,7 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\ble\common</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\ble\common</SourceFolder>
 					<TargetFolder>components\ble\common</TargetFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<PreprocessorMacros>BLE_STACK_SUPPORT_REQD</PreprocessorMacros>
@@ -495,7 +495,7 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\ble\device_manager</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\ble\device_manager</SourceFolder>
 					<TargetFolder>components\ble\device_manager</TargetFolder>
 					<FilesToCopy>-config\*;*.c;*.h</FilesToCopy>
 					<SimpleFileConditions>
