@@ -393,7 +393,11 @@ namespace nrf5x
                         var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
                         prop.DefaultEntryIndex = idx;
                         prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
+
+                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s132_pca10036" } });
                     }
+                    else
+                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s130_pca10028" } });
 
                     mcuDefinitions.Add(mcuDef);
                 }

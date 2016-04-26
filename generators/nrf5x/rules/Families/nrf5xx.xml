@@ -580,7 +580,7 @@
 	<SmartSamples>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_BSP</SourceFolder>
-			<DestinationFolder>samples\nRF5x\LEDBlink_BSP</DestinationFolder>
+			<DestinationFolder>samples\LEDBlink_BSP</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/config/nrf_drv_config.h</string>
@@ -590,7 +590,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>
-			<DestinationFolder>samples\nRF5x\LEDBlink</DestinationFolder>
+			<DestinationFolder>samples\LEDBlink</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/config/nrf_drv_config.h</string>
@@ -600,10 +600,10 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMouse</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLEMouse</DestinationFolder>
+			<DestinationFolder>samples\BLEMouse</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/ble_app_hids_mouse_s130_spi_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/ble_app_hids_mouse_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/device_manager_cnfg.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/advertising_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/pstorage_platform.h</string>
@@ -612,10 +612,10 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEKeyboard</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLEKeyboard</DestinationFolder>
+			<DestinationFolder>samples\BLEKeyboard</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/config/ble_app_hids_keyboard_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/config/ble_app_hids_keyboard_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/config/device_manager_cnfg.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/config/pstorage_platform.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/main.c</string>
@@ -623,41 +623,41 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEBeacon</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLEBeacon</DestinationFolder>
+			<DestinationFolder>samples\BLEBeacon</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/config/ble_app_beacon_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/config/ble_app_beacon_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/config/pstorage_platform.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/main.c</string>
 			</AdditionalSources>
 		</SmartSample>
 			<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEProximity</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLEProximity</DestinationFolder>
-			<MCUFilterRegex>^nRF51.*$</MCUFilterRegex>
+			<DestinationFolder>samples\BLEProximity</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>		
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/ble/device_manager/config/device_manager_cnfg.h</string>				
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/config/ble_app_proximity_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/config/ble_app_proximity_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/config/pstorage_platform.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/main.c</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEUart</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLEUart</DestinationFolder>
+			<DestinationFolder>samples\BLEUart</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_uart/config/ble_app_uart_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_uart/config/ble_app_uart_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_uart/config/pstorage_platform.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_uart/main.c</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRS</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLE_HRS</DestinationFolder>
+			<DestinationFolder>samples\BLE_HRS</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/config/ble_app_hrs_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/config/ble_app_hrs_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/config/device_manager_cnfg.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/config/pstorage_platform.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/main.c</string>
@@ -665,10 +665,10 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRSClient</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLE_HRSClient</DestinationFolder>
+			<DestinationFolder>samples\BLE_HRSClient</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/config/ble_app_hrs_c_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/config/ble_app_hrs_c_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/config/device_manager_cnfg.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/config/pstorage_platform.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/main.c</string>
@@ -676,10 +676,10 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMultilinkCentral</SourceFolder>
-			<DestinationFolder>samples\nRF5x\BLEMultilinkCentral</DestinationFolder>
-			<MCUFilterRegex>^nRF51.*$</MCUFilterRegex>
+			<DestinationFolder>samples\BLEMultilinkCentral</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/config/ble_app_multilink_central_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/config/ble_app_multilink_central_$$com.sysprogs.nordic.default_config_suffix$$/nrf_drv_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/config/device_manager_cnfg.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/config/pstorage_platform.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/main.c</string>

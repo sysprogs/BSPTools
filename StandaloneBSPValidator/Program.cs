@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 namespace StandaloneBSPValidator
 {
@@ -23,6 +24,22 @@ namespace StandaloneBSPValidator
         public string SourceFileExtensions = "cpp;c;s";
     }
 
+    public class DeviceParameterSet
+    {
+        public string DeviceRegex
+        {
+            get { return DeviceRegexObject?.ToString(); }
+            set { DeviceRegexObject = new Regex(value, RegexOptions.IgnoreCase); }
+        }
+
+        //[XmlIgnore]
+        public Regex DeviceRegexObject;
+
+        public PropertyDictionary2 SampleConfiguration;
+        public PropertyDictionary2 FrameworkConfiguration;
+        public PropertyDictionary2 MCUConfiguration;
+    }
+
     public class TestJob
     {
         public string DeviceRegex;
@@ -30,6 +47,7 @@ namespace StandaloneBSPValidator
         public string ToolchainPath;
         public string BSPPath;
         public TestedSample[] Samples;
+        public DeviceParameterSet[] DeviceParameterSets;
     }
 
     public class Program
@@ -64,7 +82,7 @@ namespace StandaloneBSPValidator
 
         static Regex RgMainMap = new Regex("^[ \t]+0x[0-9a-fA-F]+[ \t]+main$");
 
-        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample)
+        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters)
         {
             if (Directory.Exists(mcuDir))
             {
@@ -119,10 +137,7 @@ namespace StandaloneBSPValidator
             };
 
 
-            if (sample.MCUConfiguration != null)
-                foreach (var kv in sample.MCUConfiguration.Entries)
-                    configuredMCU.Configuration[kv.Key] = kv.Value;
-
+            ApplyConfiguration(configuredMCU.Configuration, extraParameters?.MCUConfiguration, sample.MCUConfiguration);
 
             //configuredSample.Parameters["com.sysprogs.examples.ledblink.LEDPORT"] = "GPIOA";
             //configuredSample.Parameters["com.sysprogs.examples.stm32.LEDPORT"] = "GPIOA";
@@ -150,13 +165,8 @@ namespace StandaloneBSPValidator
                 foreach(var kv in sampleObj.Sample.DefaultConfiguration.Entries)
                     configuredSample.FrameworkParameters[kv.Key] = kv.Value;
 
-            if (sample.FrameworkConfiguration != null)
-                foreach (var kv in sample.FrameworkConfiguration.Entries)
-                    configuredSample.FrameworkParameters[kv.Key] = kv.Value;
-
-            if (sample.SampleConfiguration != null)
-                foreach (var kv in sample.SampleConfiguration.Entries)
-                    configuredSample.Parameters[kv.Key] = kv.Value;
+            ApplyConfiguration(configuredSample.FrameworkParameters, extraParameters?.FrameworkConfiguration, sample.FrameworkConfiguration);
+            ApplyConfiguration(configuredSample.Parameters, extraParameters?.SampleConfiguration, sample.SampleConfiguration);
 
             var prj = new GeneratedProject(mcuDir, configuredMCU, frameworks);
             prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);
@@ -230,6 +240,16 @@ namespace StandaloneBSPValidator
 
             Directory.Delete(mcuDir, true);
             return TestResult.Succeeded;
+        }
+
+        private static void ApplyConfiguration(Dictionary<string, string> dict, PropertyDictionary2 values, PropertyDictionary2 values2 = null)
+        {
+            if (values?.Entries != null)
+                foreach (var kv in values.Entries)
+                    dict[kv.Key] = kv.Value;
+            if (values2?.Entries != null)
+                foreach (var kv in values2.Entries)
+                    dict[kv.Key] = kv.Value;
         }
 
         class TestResults : IDisposable
@@ -316,8 +336,10 @@ namespace StandaloneBSPValidator
                         if (string.IsNullOrEmpty(mcu.ExpandedMCU.ID))
                             throw new Exception("Invalid MCU ID!");
 
+                        var extraParams = job.DeviceParameterSets?.FirstOrDefault(s => s.DeviceRegexObject?.IsMatch(mcu.ExpandedMCU.ID) == true);
+
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
-                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample);
+                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams);
                         if (result == TestResult.Failed)
                             failed++;
                         else if (result == TestResult.Succeeded)
