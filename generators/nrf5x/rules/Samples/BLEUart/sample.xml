@@ -76,7 +76,7 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.fstorage</Key>
-        <Value />
+        <Value>yes</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.gpiote</Key>

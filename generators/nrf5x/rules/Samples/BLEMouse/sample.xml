@@ -50,6 +50,10 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fstorage</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.crc16</Key>
         <Value>yes</Value>
       </KeyValue>

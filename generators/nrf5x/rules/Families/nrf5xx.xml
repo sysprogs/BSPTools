@@ -1,0 +1,691 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<HasMixedCores>true</HasMixedCores>
+	<Name>nRF5Xxxxx</Name>
+	<DeviceRegex>^nRF5.*</DeviceRegex>
+	<FamilySubdirectory>nRF5x</FamilySubdirectory>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\nRF5x\components\toolchain\arm</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\nRF5x\SVD</PrimaryHeaderDir>
+	<Subfamilies></Subfamilies>
+	<CompilationFlags>
+		<COMMONFLAGS>-mabi=aapcs $$com.sysprogs.bspoptions.nrf5x.floatsoft$$</COMMONFLAGS>
+		<PreprocessorMacros>
+			<string>$$com.sysprogs.bspoptions.nrf5x.defmak$$</string>
+			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
+		</PreprocessorMacros>
+		<IncludeDirectories>
+			<string>.</string>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/components/softdevice/$$com.sysprogs.bspoptions.nrf5x.softdevice$$/headers</string>
+		</IncludeDirectories>
+		<AdditionalLibraryDirectories>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/SoftdeviceLibraries</string>
+		</AdditionalLibraryDirectories>
+		<CFLAGS>-std=gnu99</CFLAGS>
+	</CompilationFlags>
+	<ConditionalFlags>
+		<ConditionalToolFlags>
+			<FlagCondition xsi:type="Not">
+				<Argument xsi:type="Equals">
+					<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
+					<ExpectedValue>nosoftdev</ExpectedValue>
+				</Argument>
+			</FlagCondition>
+			<Flags>
+				<PreprocessorMacros>
+					<string>SOFTDEVICE_PRESENT</string>
+				</PreprocessorMacros>
+			</Flags>
+		</ConditionalToolFlags>
+		<ConditionalToolFlags>
+			<FlagCondition xsi:type="Not">
+				<Argument xsi:type="Equals">
+					<Expression>$$com.sysprogs.bspoptions.nrf5x.libraries.timer$$</Expression>
+					<ExpectedValue>none</ExpectedValue>
+				</Argument>
+			</FlagCondition>
+			<Flags>
+				<PreprocessorMacros>
+					<string>SWI_DISABLE0</string>
+				</PreprocessorMacros>
+			</Flags>
+		</ConditionalToolFlags>
+	</ConditionalFlags>
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nrf5x</SourceFolder>
+				<TargetFolder></TargetFolder>
+				<FilesToCopy>-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;examples\*;external\*;svd\*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\SoftdeviceLibraries</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\toolchain</SourceFolder>
+				<TargetFolder>components\toolchain</TargetFolder>
+				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c</FilesToCopy>
+				<SimpleFileConditions>					
+					<string>system_nrf51422.c: $$com.sysprogs.bspoptions.nrf5x.typsf$$ == NRF51422</string>
+					<string>system_nrf51.c: $$com.sysprogs.bspoptions.nrf5x.typsf$$ == NRF51</string>
+					<string>system_nrf52.c: $$com.sysprogs.bspoptions.nrf5x.typsf$$ == NRF52</string>
+				</SimpleFileConditions>	
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\device</SourceFolder>
+				<TargetFolder>components\device</TargetFolder>
+				<FilesToCopy>*.h;*.c</FilesToCopy>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\softdevice\common</SourceFolder>
+				<TargetFolder>components\softdevice\common</TargetFolder>
+				<FilesToCopy>-*\softdevice_handler_appsh.*;*.h;*.c</FilesToCopy>
+				<SimpleFileConditions>
+					<string>.*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
+				</SimpleFileConditions>				
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>
+	<ConfigurableProperties>
+		<PropertyGroups>
+		  <PropertyGroup>
+			<Properties>
+				<PropertyEntry xsi:type="Boolean">
+					<Name>Softdevice firmware is programmed separately</Name>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.softdevice_suffix</UniqueID>
+					<DefaultValue>false</DefaultValue>
+					<ValueForTrue>_reserve</ValueForTrue>
+				</PropertyEntry>
+			</Properties>
+			<CollapsedByDefault>false</CollapsedByDefault>
+		  </PropertyGroup>
+		</PropertyGroups>
+	</ConfigurableProperties>	
+	<AdditionalFrameworks>						
+		<Framework>
+			<Name>NRF5x Peripheral Drivers</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.periph</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.periph</ClassID>
+			<ProjectFolderName>Peripherals</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.nordic.nrf5x.util</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\drivers_nrf</SourceFolder>
+					<TargetFolder>components\drivers_nrf</TargetFolder>
+					<FilesToCopy>*.h;*.c</FilesToCopy>
+					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
+					<GuardedFiles>
+						<string>nrf_drv_gpiote.c=>GPIOTE_ENABLED</string>
+						<string>nrf_drv_lpcomp.c=>LPCOMP_ENABLED</string>
+						<string>nrf_drv_qdec.c=>QDEC_ENABLED</string>
+						<string>nrf_drv_wdt.c=>WDT_ENABLED</string>
+						<string>nrf_drv_rng.c=>RNG_ENABLED</string>
+						<string>nrf_drv_spi.c=>SPI_COUNT</string>
+
+						<string>nrf_drv_twi.c=>TWI_COUNT</string>
+						<string>nrf_drv_timer.c=>TIMER_COUNT</string>
+						<string>nrf_drv_clock.c=>CLOCK_ENABLED</string>
+
+						<string>nrf_drv_adc.c=>ADC_ENABLED</string>
+						
+						<string>nrf_drv_i2s.c=>I2S_ENABLED</string>
+						<string>nrf_drv_pwm.c=>PWM_COUNT</string>
+						<string>nrf_drv_comp.c=>COMP_ENABLED</string>
+
+						
+						<string>nrf_drv_saadc.c=>SAADC_ENABLED</string>
+						<string>nrf_drv_twis.c=>TWIS_COUNT</string>
+					</GuardedFiles>
+					<SimpleFileConditions>					
+						<string>saadc\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
+						<string>comp\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
+						<string>i2s\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
+						<string>pdm\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
+						<string>pwm\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
+						<string>twis_slave\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
+						<string>adc\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF51</string>
+						
+						<string>spi_master\\nrf_drv_spi..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == master</string>
+						<string>spi_master\\spi_5W_master..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == 5W_master</string>
+						<string>spi_slave\\nrf_drv_spis..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == slave</string>
+						<string>.*\\twi_hw_master.c: $$com.sysprogs.bspoptions.nrf5x.twi_driver$$ == hw_master</string>
+						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.uart_driver$$ == yes</string>
+						<string>.*\\twi_sw_master.c: $$com.sysprogs.bspoptions.nrf5x.twi_driver$$ == sw_master</string>
+						<string>.*\\pstorage.c: $$com.sysprogs.bspoptions.nrf5x.pstorage_driver$$ == normal &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
+						<string>.*\\pstorage_nosd.c: $$com.sysprogs.bspoptions.nrf5x.pstorage_driver$$ != none &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ == nosoftdev</string>
+						<string>.*\\pstorage_raw.c: $$com.sysprogs.bspoptions.nrf5x.pstorage_driver$$ == raw &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
+					</SimpleFileConditions>				
+				</CopyJob>			
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>Storage Driver</Name>
+						  <UniqueID>com.sysprogs.bspoptions.nrf5x.pstorage_driver</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Normal</UserFriendlyName><InternalValue>normal</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Raw</UserFriendlyName><InternalValue>raw</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>1</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>SPI Driver</Name>
+						  <UniqueID>com.sysprogs.bspoptions.nrf5x.spi_driver</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Master</UserFriendlyName><InternalValue>master</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Master (5W)</UserFriendlyName><InternalValue>5W_master</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Slave</UserFriendlyName><InternalValue>slave</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>TWI Driver</Name>
+						  <UniqueID>com.sysprogs.bspoptions.nrf5x.twi_driver</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Hardware Master</UserFriendlyName><InternalValue>hw_master</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Software Master</UserFriendlyName><InternalValue>sw_master</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>UART driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.uart_driver</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>
+		</Framework>
+		<Framework>
+			<Name>NRF5x Common Utilities</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.util</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.util</ClassID>
+			<ProjectFolderName>Utils</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\libraries</SourceFolder>
+					<TargetFolder>components\libraries</TargetFolder>
+					<FilesToCopy>util\*</FilesToCopy>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Peer manager</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.peerm</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.peerm</ClassID>
+			<ProjectFolderName>Peer Manager</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\ble\peer_manager</SourceFolder>
+					<TargetFolder>components\ble\peer_manager</TargetFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>NRF5x Evaluation Board Support</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.boards</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.boards</ClassID>
+			<ProjectFolderName>Boards</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\examples\bsp</SourceFolder>
+					<TargetFolder>examples\bsp</TargetFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
+					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
+					<SimpleFileConditions>
+						<string>nrf6310.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == NRF6310</string>
+						<string>pca10000.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ =~ PCA1000[02]</string>
+						<string>pca10001.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10001</string>
+						<string>pca10003.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10003</string>
+						<string>pca10028.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10028</string>
+						<string>pca10031.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10031</string>
+						<string>pca10036.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10036</string>
+						<string>pca10040.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10040</string>
+						<string>pca20006.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA20006</string>
+						<string>wt51822.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == WT51822</string>
+						<string>bsp_btn_ble.c: $$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$ != BSP_SIMPLE</string>
+					</SimpleFileConditions>
+				</CopyJob>
+			</CopyJobs>			
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Name>nRF5x Evaluation Board</Name>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.board.</UniqueID>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>Board Type</Name>
+						  <UniqueID>type</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>PCA10000</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10001</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10002</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10003</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10028</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10031</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10036</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10040</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA20006</InternalValue></Suggestion>
+							<Suggestion><InternalValue>NRF6310</InternalValue></Suggestion>
+							<Suggestion><InternalValue>WT51822</InternalValue></Suggestion>
+							<Suggestion><InternalValue>CUSTOM</InternalValue><UserFriendlyValue>Custom board</UserFriendlyValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>4</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Boolean">
+							<Name>Advanced mode</Name>
+						  <UniqueID>bsp_mode</UniqueID>
+							<DefaultValue>false</DefaultValue>
+							<ValueForFalse>BSP_SIMPLE</ValueForFalse>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Boolean">
+							<Name>Print diagnostics to UART</Name>
+						  <UniqueID>bsp_uart</UniqueID>
+							<DefaultValue>true</DefaultValue>
+							<ValueForTrue>BSP_UART_SUPPORT</ValueForTrue>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+		<Framework>
+			<Name>NRF5x Libraries</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.libraries</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.libraries</ClassID>
+			<ProjectFolderName>Libraries</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\libraries</SourceFolder>
+					<TargetFolder>components\libraries</TargetFolder>
+					<FilesToCopy>-*\hardfault_handler*;*</FilesToCopy>
+					<GuardedFiles>
+						<string>simple_timer\\app_simple_timer.c=>TIMER_COUNT</string>
+					</GuardedFiles>
+					<SimpleFileConditions>
+						<string>bootloader_dfu\\dfu_single_bank\..*: $$com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu$$ =~ single_.*</string>
+						<string>bootloader_dfu\\dfu_dual_bank\..*: $$com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu$$ =~ dual_.*</string>
+						<string>bootloader_dfu\\dfu_transport_ble\..*: $$com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu$$ =~ .*_ble</string>
+						<string>bootloader_dfu\\dfu_transport_serial\..*: $$com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu$$ =~ .*_serial</string>
+						<string>bootloader_dfu\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu$$ != none</string>
+						<string>button\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.button$$ == yes</string>
+						<string>crc16\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc16$$ == yes</string>
+						<string>fds\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fds$$ == yes</string>
+						<string>fifo\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fifo$$ == yes</string>
+						<string>fstorage\\fstorage.c: $$com.sysprogs.bspoptions.nrf5x.libraries.fstorage$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
+						<string>fstorage\\fstorage_nosd.c: $$com.sysprogs.bspoptions.nrf5x.libraries.fstorage$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ == nosoftdev</string>
+						<string>gpiote\\app_gpiote.c: $$com.sysprogs.bspoptions.nrf5x.libraries.gpiote$$ == normal</string>
+						<string>gpiote\\app_gpiote_fast_detect.c: $$com.sysprogs.bspoptions.nrf5x.libraries.gpiote$$ == fast</string>
+						<string>hci\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.hci$$ == yes</string>
+						<string>ic_info\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.ic_info$$ == yes</string>
+						<string>led_softblink\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.led_softblink$$ == yes</string>
+						<string>low_power_pwm\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.low_power_pwm$$ == yes</string>
+						<string>mailbox\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.mailbox$$ == yes</string>
+						<string>pwm\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.pwm$$ == yes</string>
+						<string>scheduler\\app_scheduler.h: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ != none</string>
+						<string>scheduler\\app_scheduler.c: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ == normal</string>
+						<string>scheduler\\app_scheduler_serconn.c: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ == serconn</string>
+						<string>sensorsim\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.sensorsim$$ == yes</string>
+						<string>sha256\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.sha256$$ == yes</string>
+						<string>simple_timer\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.simple_timer$$ == yes</string>
+						<string>slip\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.slip$$ == yes</string>
+						<string>timer\\app_timer..$: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ != none</string>
+						<string>timer\\app_timer_appsh..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == appsh</string>
+						<string>timer\\app_timer_ble_gzll..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == ble_gzll</string>
+						<string>timer\\app_timer_freertos..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
+						<string>timer\\app_timer_rtx..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == rtx</string>
+						<string>twi\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.twi$$ == yes</string>
+						<string>trace\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.trace$$ == yes</string>
+						<string>uart\\app_uart.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart</string>
+						<string>uart\\app_uart_fifo.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart_fifo</string>
+						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ != </string>
+					</SimpleFileConditions>
+					<ProjectInclusionMask>-ant_fs\*;-console\*;-mem_manager\*;-bootloader_dfu\*init_template*;*</ProjectInclusionMask>
+					<AutoIncludeMask>-ant_fs\*;-console\*;-mem_manager\*;*.h</AutoIncludeMask>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>bootloader_dfu\bootloader_util.c</FilePath>
+							<OldLine>static inline void bootloader_util_reset(uint32_t start_addr)</OldLine>
+							<NewLine>static inline void __attribute__((__optimize__(0, "omit-frame-pointer"))) bootloader_util_reset(uint32_t start_addr)</NewLine>
+						</Patch>	
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>ecc\ecc.c</FilePath>
+							<OldLine>#include "uECC.h"</OldLine>
+							<NewLine>//#include "uECC.h"</NewLine>
+						</Patch>						
+					</Patches>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\softdevice\common</SourceFolder>
+					<TargetFolder>components\softdevice\common</TargetFolder>
+					<FilesToCopy>*\softdevice_handler_appsh*</FilesToCopy>
+					<SimpleFileConditions>
+						<string>.*\\softdevice_handler_appsh.*: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ != none</string>
+					</SimpleFileConditions>				
+				</CopyJob>
+			</CopyJobs>			
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Name>nRF5x Libraries</Name>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>bootloader_dfu</Name>
+						  <UniqueID>bootloader_dfu</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Single-bank serial port</UserFriendlyName><InternalValue>single_serial</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Dual-bank serial port</UserFriendlyName><InternalValue>dual_serial</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Single-bank BLE</UserFriendlyName><InternalValue>single_ble</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Dual-bank BLE</UserFriendlyName><InternalValue>dual_ble</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>						
+						<PropertyEntry xsi:type="Boolean"><Name>button</Name><UniqueID>button</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>crc16</Name><UniqueID>crc16</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>fds</Name><UniqueID>fds</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>fifo</Name><UniqueID>fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>fstorage</Name><UniqueID>fstorage</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>gpiote</Name>
+						  <UniqueID>gpiote</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Normal</UserFriendlyName><InternalValue>normal</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Fast-detect</UserFriendlyName>fast<InternalValue></InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>							<PropertyEntry xsi:type="Boolean"><Name>hci</Name><UniqueID>hci</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>ic_info</Name><UniqueID>ic_info</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>led_softblink</Name><UniqueID>led_softblink</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>low_power_pwm</Name><UniqueID>low_power_pwm</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>mailbox</Name><UniqueID>mailbox</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>pwm</Name><UniqueID>pwm</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>slip</Name><UniqueID>slip</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>scheduler</Name>
+						  <UniqueID>scheduler</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Normal</UserFriendlyName><InternalValue>normal</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Serialization mode</UserFriendlyName>serconn<InternalValue></InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>						
+						<PropertyEntry xsi:type="Boolean"><Name>sensorsim</Name><UniqueID>sensorsim</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>sha256</Name><UniqueID>sha256</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>simple_timer</Name><UniqueID>simple_timer</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>timer</Name>
+						  <UniqueID>timer</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue>none</Suggestion>
+							<Suggestion><UserFriendlyName>Using nRF5x scheduler</UserFriendlyName><InternalValue>appsh</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Using ble_gzll</UserFriendlyName><InternalValue>ble_gzll</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Using FreeRTOS</UserFriendlyName><InternalValue>freertos</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Using RTX</UserFriendlyName><InternalValue>rtx</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>						
+						<PropertyEntry xsi:type="Boolean"><Name>trace</Name><UniqueID>trace</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>twi</Name><UniqueID>twi</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>UART Library</Name>
+						  <UniqueID>uart</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Without FIFO</UserFriendlyName><InternalValue>app_uart</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>With FIFO</UserFriendlyName><InternalValue>app_uart_fifo</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+		<Framework>
+			<Name>Bluetooth LE - Common Files</Name>
+			<ID>com.sysprogs.arm.nordic.nrf51.ble_common</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.ble_common</ClassID>
+			<ProjectFolderName>BLE Common</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\ble\common</SourceFolder>
+					<TargetFolder>components\ble\common</TargetFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<PreprocessorMacros>BLE_STACK_SUPPORT_REQD</PreprocessorMacros>
+				</CopyJob>
+			</CopyJobs>			
+		</Framework>
+		<Framework>
+			<Name>Bluetooth LE - Device Manager</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.ble_device_manager</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.ble_device_manager</ClassID>
+			<ProjectFolderName>BLE Device Manager</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\nRF5x\components\ble\device_manager</SourceFolder>
+					<TargetFolder>components\ble\device_manager</TargetFolder>
+					<FilesToCopy>-config\*;*.c;*.h</FilesToCopy>
+					<SimpleFileConditions>
+						<string>device_manager_central.c: $$com.sysprogs.bspoptions.nrf5x.ble.devmgr$$ == central</string>
+						<string>device_manager_peripheral.c: $$com.sysprogs.bspoptions.nrf5x.ble.devmgr$$ == peripheral</string>
+					</SimpleFileConditions>
+				</CopyJob>
+			</CopyJobs>			
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Name>Bluetooth LE</Name>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.ble.</UniqueID>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>Device Manager Mode</Name>
+						  <UniqueID>devmgr</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>Central</UserFriendlyName><InternalValue>central</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Peripheral</UserFriendlyName><InternalValue>peripheral</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>1</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>						
+						</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>
+			</Framework>
+	</AdditionalFrameworks>
+	
+	<Subfamilies>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.defmak</VariableName>
+			<Required>true</Required>
+			<Options>		
+				<Option>
+					<Value>NRF51</Value>
+					<Regex>^nRF51.*</Regex>
+				</Option>
+				<Option>
+					<Value>NRF52</Value>
+					<Regex>^nRF52.*</Regex>			
+				</Option>					
+			</Options>
+		</MCUClassifier>
+		<MCUClassifier>		
+			<VariableName>com.sysprogs.bspoptions.nrf5x.floatsoft</VariableName>
+			<Required>true</Required>
+			<Options>		
+				<Option>
+					<Value>-mfloat-abi=soft</Value>
+					<Regex>^nRF51.*</Regex>
+				</Option>
+				<Option>
+					<Value></Value>
+					<Regex>^nRF52.*</Regex>			
+				</Option>					
+			</Options>
+		</MCUClassifier>
+		<MCUClassifier>		
+			<VariableName>com.sysprogs.bspoptions.nrf5x.typsf</VariableName>
+			<Required>true</Required>
+			<Options>		
+				<Option>
+					<Value>NRF51422</Value>
+					<Regex>^nRF5142.*</Regex>
+				</Option>
+				<Option>
+					<Value>NRF51</Value>
+					<Regex>^nRF51.*</Regex>
+				</Option>
+				<Option>
+					<Value>NRF52</Value>
+					<Regex>^nRF52.*</Regex>			
+				</Option>					
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>
+	
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_BSP</SourceFolder>
+			<DestinationFolder>samples\nRF5x\LEDBlink_BSP</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/config/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/radio_config/radio_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/sdio/config/sdio_config.h</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>
+			<DestinationFolder>samples\nRF5x\LEDBlink</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/config/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/radio_config/radio_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/sdio/config/sdio_config.h</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMouse</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLEMouse</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/ble_app_hids_mouse_s130_spi_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/device_manager_cnfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/advertising_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEKeyboard</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLEKeyboard</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/config/ble_app_hids_keyboard_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/config/device_manager_cnfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_keyboard/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEBeacon</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLEBeacon</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/config/ble_app_beacon_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+			<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEProximity</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLEProximity</DestinationFolder>
+			<MCUFilterRegex>^nRF51.*$</MCUFilterRegex>
+			<AdditionalSources>		
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/ble/device_manager/config/device_manager_cnfg.h</string>				
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/config/ble_app_proximity_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEUart</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLEUart</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_uart/config/ble_app_uart_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_uart/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_uart/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRS</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLE_HRS</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/config/ble_app_hrs_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/config/device_manager_cnfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRSClient</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLE_HRSClient</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/config/ble_app_hrs_c_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/config/device_manager_cnfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMultilinkCentral</SourceFolder>
+			<DestinationFolder>samples\nRF5x\BLEMultilinkCentral</DestinationFolder>
+			<MCUFilterRegex>^nRF51.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/config/ble_app_multilink_central_s130_pca10028/nrf_drv_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/config/device_manager_cnfg.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/config/pstorage_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/main.c</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/ble/ble_services/ble_lbs_c/ble_lbs_c.c</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/components/ble/ble_services/ble_lbs_c/ble_lbs_c.h</string>
+			</AdditionalSources>
+		</SmartSample>
+	</SmartSamples>
+</FamilyDefinition>

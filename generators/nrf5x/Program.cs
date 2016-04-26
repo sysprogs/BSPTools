@@ -4,8 +4,8 @@
 */
 
 using BSPEngine;
-using BSPGenerationTools;
 using LinkerScriptGenerator;
+using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace nrf5x
 {
@@ -26,6 +27,8 @@ namespace nrf5x
                 : base(dirs)
             {
                 ShortName = "Tiva";
+                var sqqq = LDSTemplate.Sections.First(s => s.Name == ".data").CustomContents = "|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|".Split('|');
+
             }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
@@ -103,14 +106,18 @@ namespace nrf5x
 
             public List<SoftDevice> SoftDevices = new List<SoftDevice>
             {
-                new SoftDevice("S110", 0x18000, 0x2000, "nrf51", "Bluetooth LE Peripheral"),
-                new SoftDevice("S120", 0x1d000, 0x2800, "nrf51", "Bluetooth LE Master"),
-                new SoftDevice("S130", 0x1c000, 0x2800, "nrf51", "Bluetooth LE Universal"),
-                new SoftDevice("S210", 0xd000,  0x900, " nrf514", "ANT Master"),
-                new SoftDevice("S310", 0x1d000, 0x2200, "nrf514", "Bluetooth LE/ANT"),
+                //SDK 11
+                  new SoftDevice("S130", 0x1c000, 0x2800, "nrf51", "Bluetooth LE Universal"),
+                  new SoftDevice("S132", 0x1f000, 0x2800, "nrf52", "Bluetooth LE"),
 
-                new SoftDevice("S132", 0x1f000, 0x2800, "nrf52", "Bluetooth LE"),
-                //new SoftDevice("S212", 0x12000, 0x0a00, "nrf52", "ANT"),  //Not included in the SDK v 0.9.2
+                  
+            //    new SoftDevice("S110", 0x18000, 0x2000, "nrf51", "Bluetooth LE Peripheral"),
+            //    new SoftDevice("S120", 0x1d000, 0x2800, "nrf51", "Bluetooth LE Master"),
+            //    new SoftDevice("S210", 0xd000,  0x900, " nrf514", "ANT Master"),
+            //    new SoftDevice("S310", 0x1d000, 0x2200, "nrf514", "Bluetooth LE/ANT"),
+            //    new SoftDevice("S332", 0x1d000, 0x2200, "nrf514", "Bluetooth LE/ANT"),
+
+            //    new SoftDevice("S212", 0x12000, 0x0a00, "nrf52", "ANT"),  //Not included in the SDK v 0.9.2
             };
 
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
@@ -138,7 +145,7 @@ namespace nrf5x
                 {
                     using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev" + ldsSuffix + ".lds")))
                         gen.GenerateLdsFile(sw);
-                    using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev_reserve"+ ldsSuffix + ".lds")))
+                    using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev_reserve" + ldsSuffix + ".lds")))
                         gen.GenerateLdsFile(sw);
                 }
 
@@ -176,7 +183,7 @@ namespace nrf5x
 
                     using (var gen = new LdsFileGenerator(LDSTemplate, layoutCopy))
                     {
-                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + "_reserve" + ldsSuffix +".lds")))
+                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + "_reserve" + ldsSuffix + ".lds")))
                             gen.GenerateLdsFile(sw);
                     }
                 }
@@ -189,25 +196,58 @@ namespace nrf5x
                 foreach (var sd in SoftDevices)
                 {
                     string family = "nRF51";
-                    string sdDir = BSPRoot + @"\nRF51\components\softdevice\" + sd.Name + @"\hex";
+                    string sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                     string abi = "";
-                    if (!Directory.Exists(sdDir))
+                    if (sd.Name == "S132")
                     {
-                        sdDir = BSPRoot + @"\nRF52\components\softdevice\" + sd.Name + @"\hex";
+                        sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                         family = "nRF52";
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
                     }
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
-                    Process.Start(BSPRoot + @"\" + family + @"\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName + abi).WaitForExit();
-                    string softdevLib = string.Format(@"{0}\{1}\SoftdeviceLibraries\{2}_softdevice.o", BSPRoot, family, sd.Name);
+                    Process.Start(BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName + abi).WaitForExit();
+                    string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
-                        throw new Exception("Failed to convert a softdevice");
+                         throw new Exception("Failed to convert a softdevice");
                 }
             }
         }
 
+        static StartupFileGenerator.InterruptVectorTable GenerateStartupFile(string pDir, string pFBase)
+        {
+            var vectorTable = new StartupFileGenerator.InterruptVectorTable
+            {
+                FileName = "startup_" + pFBase + "x.c",
+                Vectors = StartupFileGenerator.ParseInterruptVectors(Path.Combine(pDir, "arm_startup_" + pFBase + ".s"),
+                    "^__Vectors",
+                    @"__Vectors_End",
+                    @"^[ \t]+DCD[ \t]+([^ \t]+)[ \t]+; *([^ \t].*)$",
+                    @"^[ \t]+DCD[ \t]+([^ \t]+)$",
+                    @"^[ \t]+;.*",
+                    null,
+                    1,
+                    2),
+            };
 
+            if (pFBase.ToLower() == "nrf51")
+            {
+                vectorTable.AdditionalResetHandlerLines = new string[]
+                {
+                        "asm volatile(\".equ NRF_POWER_RAMON_ADDRESS,0x40000524\");",
+                        "asm volatile(\".equ NRF_POWER_RAMON_RAMxON_ONMODE_Msk,3\");",
+                        "asm volatile(\"LDR     R0, =NRF_POWER_RAMON_ADDRESS\");",
+                        "asm volatile(\"LDR     R2, [R0]\");",
+                        "asm volatile(\"MOVS    R1, #NRF_POWER_RAMON_RAMxON_ONMODE_Msk\");",
+                        "asm volatile(\"ORR     R2, R2, R1\");",
+                        "asm volatile(\"STR     R2, [R0]\");",
+                };
+            }
 
+            vectorTable.Vectors = new StartupFileGenerator.InterruptVector[] { new StartupFileGenerator.InterruptVector { Name = "_estack" } }.Concat(vectorTable.Vectors).ToArray();
+
+            vectorTable.MatchPredicate = m => m.Name.StartsWith(pFBase);
+            return vectorTable;
+        }
         static void Main(string[] args)
         {
             if (args.Length < 1)
@@ -293,49 +333,22 @@ namespace nrf5x
                 }
 
                 fam.Definition.AdditionalFrameworks = fam.Definition.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
+                // Startup Files
+                var aStartupVectors = new StartupFileGenerator.InterruptVectorTable[] {
+                                                    GenerateStartupFile(fam.Definition.StartupFileDir,"nRF51"),
+                                                    GenerateStartupFile(fam.Definition.StartupFileDir,"nRF52")
+                                                    };
+                fam.AttachStartupFiles(aStartupVectors);
+                //  SVD Files
+                var aMcuDef1 = (new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nRF51.svd"), "nRF51") });
+                aMcuDef1[0].MatchPredicate = m => m.Name.StartsWith("nRF51");
 
-                var vectorTable = new StartupFileGenerator.InterruptVectorTable
-                {
-                    FileName = "startup_" + famBase + "x.c",
-                    Vectors = StartupFileGenerator.ParseInterruptVectors(Path.Combine(fam.Definition.StartupFileDir, "arm_startup_" + famBase + ".s"),
-                        "^__Vectors",
-                        @"__Vectors_End",
-                        @"^[ \t]+DCD[ \t]+([^ \t]+)[ \t]+; *([^ \t].*)$",
-                        @"^[ \t]+DCD[ \t]+([^ \t]+)$",
-                        @"^[ \t]+;.*",
-                        null,
-                        1,
-                        2),
-                };
+                var aMcuDef2 = (new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nRF52.svd"), "nRF52") });
+                aMcuDef2[0].MatchPredicate = m => m.Name.StartsWith("nRF52");
 
-                if (famBase.ToLower() == "nrf51")
-                {
-                    vectorTable.AdditionalResetHandlerLines = new string[]
-                    {
-                        "asm volatile(\".equ NRF_POWER_RAMON_ADDRESS,0x40000524\");",
-                        "asm volatile(\".equ NRF_POWER_RAMON_RAMxON_ONMODE_Msk,3\");",
-                        "asm volatile(\"LDR     R0, =NRF_POWER_RAMON_ADDRESS\");",
-                        "asm volatile(\"LDR     R2, [R0]\");",
-                        "asm volatile(\"MOVS    R1, #NRF_POWER_RAMON_RAMxON_ONMODE_Msk\");",
-                        "asm volatile(\"ORR     R2, R2, R1\");",
-                        "asm volatile(\"STR     R2, [R0]\");",
-                    };
-                }
-
-                vectorTable.Vectors = new StartupFileGenerator.InterruptVector[] { new StartupFileGenerator.InterruptVector { Name = "_estack" } }.Concat(vectorTable.Vectors).ToArray();
-
-                fam.AttachStartupFiles(new StartupFileGenerator.InterruptVectorTable[] { vectorTable });
-                fam.AttachPeripheralRegisters(new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, famBase + (famBase == "nrf51" ? ".svd" : ".xml")), "nRF5" + famBase[4]) });
+                fam.AttachPeripheralRegisters(aMcuDef1.Concat(aMcuDef2));
 
                 var famObj = fam.GenerateFamilyObject(true);
-                if (famBase == "nrf52")
-                {
-                    var prop = famObj.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode") as PropertyEntry.Enumerated;
-                    var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
-
-                    prop.DefaultEntryIndex = idx;
-                    prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
-                }
 
                 famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
                 famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
@@ -378,6 +391,11 @@ namespace nrf5x
                                 new PropertyEntry.Enumerated.Suggestion {InternalValue = "_64k", UserFriendlyName = "64 KB (Final)" },
                             }
                         });
+
+                        var prop = mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode") as PropertyEntry.Enumerated;
+                        var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
+                        prop.DefaultEntryIndex = idx;
+                        prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
                     }
 
                     mcuDefinitions.Add(mcuDef);
