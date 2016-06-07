@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>EFR32 Flex Gecko 1V</Name>
+	<DeviceRegex>^EFR32FG1V.*</DeviceRegex>
+	<FamilySubdirectory>EFR32FG1V</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFR32FG1V\Source\GCC\startup_EFR32FG1V.c</StartupFileDir>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+    </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFR32FG1V</SourceFolder>
+				<FilesToCopy>-*startup_*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Devices</TargetFolder>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+			</CopyJob>		
+		</CopyJobs>	
+		</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+</FamilyDefinition>

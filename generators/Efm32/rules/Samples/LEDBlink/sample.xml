@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink</Name>
+	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
+	<MCUFilterRegex>E.*</MCUFilterRegex>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.silabs.efm32.emlib</string>
+	</RequiredFrameworks>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+	  </Properties>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+
+</EmbeddedProjectSample>

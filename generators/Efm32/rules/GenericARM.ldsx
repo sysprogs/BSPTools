@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<LinkerScriptTemplate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <EntryPoint>Reset_Handler</EntryPoint>
+  <SectionAlignment>4</SectionAlignment>
+  <Sections>
+	<Section>
+		<Name>.isr_vector</Name>
+		<TargetMemory>FLASH</TargetMemory>
+		<Inputs>
+			<SectionReference>
+				<Flags>Keep</Flags>
+			</SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.text</Name>
+		<Flags>DefineShortLabels</Flags>
+		<TargetMemory>FLASH</TargetMemory>
+		<Inputs>
+			<SectionReference>
+				<Flags>AddPrefixForm</Flags>
+			</SectionReference>
+			<SectionReference>
+				<NamePattern>.rodata</NamePattern>
+				<Flags>AddPrefixForm</Flags>
+			</SectionReference>
+			<SectionReference>
+				<NamePattern>.glue_7</NamePattern>
+			</SectionReference>
+			<SectionReference>
+				<NamePattern>.glue_7t</NamePattern>
+			</SectionReference>
+			<SectionReference>
+				<NamePattern>.init</NamePattern>
+				<Flags>Keep</Flags>
+			</SectionReference>
+			<SectionReference>
+				<NamePattern>.fini</NamePattern>
+				<Flags>Keep</Flags>
+			</SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.ARM.extab</Name>
+		<TargetMemory>FLASH</TargetMemory>
+		<Inputs>
+			<SectionReference><NamePattern>.ARM.extab</NamePattern></SectionReference>
+			<SectionReference><NamePattern>.gnu.linkonce.armextab.*</NamePattern></SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.exidx</Name>
+		<TargetMemory>FLASH</TargetMemory>
+		<Flags>ProvideLongLabelsLeadingUnderscores</Flags>
+		<Inputs>
+			<SectionReference><NamePattern>.ARM.exidx*</NamePattern></SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.ARM.attributes</Name>
+		<TargetMemory>FLASH</TargetMemory>
+		<Flags>Unaligned</Flags>
+		<Inputs>
+			<SectionReference/>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.preinit_array</Name>
+		<Flags>ProvideLongLabelsLeadingUnderscores Unaligned</Flags>
+		<TargetMemory>FLASH</TargetMemory>
+		<Inputs>
+			<SectionReference>
+				<Flags>Keep PrefixFormOnly</Flags>
+			</SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.init_array</Name>
+		<Flags>ProvideLongLabelsLeadingUnderscores Unaligned</Flags>
+		<TargetMemory>FLASH</TargetMemory>
+		<Inputs>
+			<SectionReference><Flags>Keep Sort DotPrefixForm</Flags></SectionReference>
+			<SectionReference><Flags>Keep PrefixFormOnly</Flags></SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.fini_array</Name>
+		<Flags>ProvideLongLabelsLeadingUnderscores Unaligned</Flags>
+		<TargetMemory>FLASH</TargetMemory>
+		<Inputs>
+			<SectionReference><Flags>Keep PrefixFormOnly</Flags></SectionReference>
+			<SectionReference><Flags>Keep Sort DotPrefixForm</Flags></SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.data</Name>
+		<Flags>DefineShortLabels ProvideLongLabels InitializerInMainMemory</Flags>
+		<TargetMemory>SRAM</TargetMemory>
+		<Inputs>
+			<SectionReference>
+				<Flags>AddPrefixForm</Flags>
+			</SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.bss</Name>
+		<Flags>DefineShortLabels ProvideLongLabels</Flags>
+		<TargetMemory>SRAM</TargetMemory>
+		<Inputs>
+			<SectionReference>
+				<Flags>AddPrefixForm</Flags>
+			</SectionReference>
+			<SectionReference>
+				<NamePattern>COMMON</NamePattern>
+			</SectionReference>
+		</Inputs>
+	</Section>
+  </Sections>
+</LinkerScriptTemplate>
