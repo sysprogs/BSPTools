@@ -91,7 +91,37 @@ namespace SLab_bsp_generator
 
                     int asize = aDicSizeTypeDefStuct[str1] * Convert.ToInt32(asArray);
                     CustTypReg.SizeInBits = asize;
-                    CustTypReg.Name = CustTypReg.Name.Substring(0, strIdx2);
+                    if(asize <= 32)
+                        CustTypReg.Name = CustTypReg.Name.Substring(0, strIdx2);                  
+                }
+                //Rename big strucures
+             foreach(var v in setsCustomMcu )
+                {
+                List<HardwareRegister> lr = new List<HardwareRegister>();
+                 foreach (var r in   v.Registers)
+                    {
+                        int strIdx1 = r.Name.IndexOf("-");
+                        int strIdx2 = r.Name.IndexOf(":");
+                        if (r.SizeInBits <= 32 || r.Name.Contains("RESERVED"))
+                        {
+                            lr.Add(DeepCopy(r));
+                            continue;
+                        }                     
+                        string typ = r.Name.Substring(strIdx1+1, r.Name.Length - strIdx1 - 1);
+                        foreach (var st in setsCustomMcu)
+                        {
+                            if (st.UserFriendlyName != typ)
+                                continue;
+                            foreach(var stsub in st.Registers)
+                             {
+                                HardwareRegister hr = DeepCopy(r);
+                                hr.Name = hr.Name.Substring(0,strIdx2) +"."+ stsub.Name;
+                                hr.SizeInBits = stsub.SizeInBits;
+                                lr.Add(hr);
+                            }
+                        }                      
+                    }
+                    v.Registers = lr.ToArray();
                 }
                 ///Set Base adress
                 var aHrdRegFile = ProcessRegisterSetBaseAdress(fn, setsCustomMcu);

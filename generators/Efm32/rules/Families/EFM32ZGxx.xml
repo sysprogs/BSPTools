@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>EFM32 Gecko</Name>
-	<DeviceRegex>^EFM32G[0-9].*</DeviceRegex>
-	<FamilySubdirectory>EFM32G</FamilySubdirectory>
+	<Name>EFM32 Zero Gecko</Name>
+	<DeviceRegex>^EFM32ZG.*</DeviceRegex>
+	<FamilySubdirectory>EFM32ZG</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32G\Source\GCC\startup_efm32g.c</StartupFileDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32ZG\Source\GCC\startup_efm32zg.c</StartupFileDir>
 	<ConfigurableProperties>
         <PropertyGroups>
           <PropertyGroup>
@@ -14,10 +14,9 @@
 	  	<CoreFramework>
 	  	<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32G</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32ZG</SourceFolder>
 					<FilesToCopy>-*startup_*;*.h;*.c</FilesToCopy>
 					<TargetFolder>Devices</TargetFolder>
-					
 					<ProjectInclusionMask>*.c</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
 

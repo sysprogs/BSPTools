@@ -20,17 +20,8 @@
 				<ProjectInclusionMask>*.c</ProjectInclusionMask>
 				<AutoIncludeMask>*.h</AutoIncludeMask>	
 				<SimpleFileConditions>
-				</SimpleFileConditions>
-				<Patches>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>Include\efm32hg_acmp.h</FilePath>
-							<OldLine>  __I uint8_t  STATUS;   /**&lt; Status Register  */</OldLine>
-							<NewLine>  __I uint32_t  STATUS;   /**&lt; Status Register  */</NewLine>
-						</Patch>				
-									
-					</Patches>		
-			</CopyJob>		
-			
+				</SimpleFileConditions>				
+			</CopyJob>					
 		</CopyJobs>	
 		</CoreFramework>
 	<Subfamilies>			

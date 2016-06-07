@@ -409,8 +409,8 @@ namespace StandaloneBSPValidator
                             var m = rgArrayRegister.Match(regName);
                             if (m.Success)
                                 regName = string.Format("{0}[{1}].{2}", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1, m.Groups[3]);
-                            else if ((m = rgArrayRegister2.Match(regName)).Success)
-                                regName = string.Format("{0}[{1}]", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1);
+ //EFM32                    else if ((m = rgArrayRegister2.Match(regName)).Success)
+ //EFM32                        regName = string.Format("{0}[{1}]", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1);
                             else if ((m = rgArrayRegister3.Match(regName)).Success)
                                 regName = string.Format("{0}[{1}]", m.Groups[1], m.Groups[2].ToString() == "H" ? 1 : 0);
                             else if ((regset.UserFriendlyName == "HASH" || regset.UserFriendlyName == "HASH_DIGEST") && (m = rgArrayRegister4.Match(regName)).Success)
