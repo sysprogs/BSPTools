@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>EFM32 Leopard Gecko</Name>
+	<DeviceRegex>^EFM32LG.*</DeviceRegex>
+	<FamilySubdirectory>EFM32LG</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32LG\Source\GCC\startup_efm32LG.c</StartupFileDir>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+    </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32LG</SourceFolder>
+				<FilesToCopy>-*startup_*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Devices</TargetFolder>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+			</CopyJob>		
+		</CopyJobs>	
+		</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+</FamilyDefinition>
