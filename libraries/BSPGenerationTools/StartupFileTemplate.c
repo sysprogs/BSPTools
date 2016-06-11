@@ -18,7 +18,7 @@ void __attribute__ ((weak)) $$VECTOR$$() $@+7
 	//Define the following function in your code to handle it:
 	//	extern "C" void $$VECTOR$$();
 	asm("bkpt 255");
-};
+}
 
 #else
 void $$VECTOR$$() $$ALIGN_SPACE_OFFSET$$ __attribute__ ((weak, alias ("Default_Handler")));

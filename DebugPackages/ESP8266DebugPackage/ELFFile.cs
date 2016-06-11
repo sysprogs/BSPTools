@@ -146,6 +146,11 @@ namespace ESP8266DebugPackage
             _File = new BufferedStream(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), 1024 * 1024);
         }
 
+        public ELFFile(byte[] data)
+        {
+            _File = new MemoryStream(data);
+        }
+
         public virtual void Dispose()
         {
             if (_File != null)
