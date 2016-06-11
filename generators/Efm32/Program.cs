@@ -232,7 +232,6 @@ namespace SLab_bsp_generator
 
                 foreach (var sample in fam.CopySamples())
                     exampleDirs.Add(sample);
-
             }
 
             BoardSupportPackage bsp = new BoardSupportPackage

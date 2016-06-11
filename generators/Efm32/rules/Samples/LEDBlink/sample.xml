@@ -10,9 +10,40 @@
 	<PropertyGroups>
 	<PropertyGroup>
 	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Name</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><InternalValue>PortA</InternalValue></Suggestion>
+			<Suggestion><InternalValue>PortB</InternalValue></Suggestion>
+			<Suggestion><InternalValue>PortC</InternalValue></Suggestion>
+			<Suggestion><InternalValue>PortD</InternalValue></Suggestion>
+			<Suggestion><InternalValue>PortE</InternalValue></Suggestion>
+			<Suggestion><InternalValue>PortF</InternalValue></Suggestion>
+			<Suggestion><InternalValue>PortG</InternalValue></Suggestion>
+			<Suggestion><InternalValue>PortH</InternalValue></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>4</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Pin Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>2</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>31</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay ticks</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYTICKS</UniqueID>
+		  <Description>Specifies the delay (in SysTick ticks) between LED toggling events</Description>
+		  <DefaultValue>300</DefaultValue>
+		</PropertyEntry>
 	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
 	</PropertyGroup>
 	</PropertyGroups>
 	</ConfigurableProperties>
-
 </EmbeddedProjectSample>

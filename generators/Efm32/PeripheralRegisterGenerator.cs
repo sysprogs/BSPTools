@@ -184,14 +184,23 @@ namespace SLab_bsp_generator
             return (STANDARD_TYPE_SIZES[pTyp] * pSizeArray);
         }
 
+        class RegexCollection
+        {
+            public Regex argSearchReg = new Regex(@"[ \t]*(__IO|__I|__O)[ \t]+(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
+            public Regex argSearchRegReserv = new Regex(@"[ \t]*(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
+            public Regex argSearchRegTypeDef = new Regex(@"[ \t]*([A-Z0-9_]+)_TypeDef[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
+            public Regex argSearchFrendName = new Regex(@"^[ \t}]*([A-Z_0-9]+)(_TypeDef;).*", RegexOptions.Compiled);
+
+            public Regex argSearchRegShift = new Regex(@"(#define)[ \t_]*([A-Z_]+)(_SHIFT)[ \t]+([0-9]+).*", RegexOptions.Compiled);
+            public Regex argSearchRegMask = new Regex(@"(#define)[ \t_]*([A-Z_]+)(_MASK)[ \t]+([0-9xA-F]*[U]?[L]?).*", RegexOptions.Compiled);
+        }
+
+        static RegexCollection Regexes = new RegexCollection();
+
         public static List<HardwareRegisterSet> ProcessRegisterSetNamesList(string pFileName, ref List<HardwareRegister> lstRegCustomType)
         {
             List<HardwareRegisterSet> oReg = new List<HardwareRegisterSet>();
             bool aStartCheckReg = false;
-            Regex argSearchReg = new Regex(@"[ \t]*(__IO|__I|__O)[ \t]+(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*");
-            Regex argSearchRegReserv = new Regex(@"[ \t]*(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*");
-            Regex argSearchRegTypeDef = new Regex(@"[ \t]*([A-Z0-9_]+)_TypeDef[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*");
-            Regex argSearchFrendName = new Regex(@"^[ \t}]*([A-Z_0-9]+)(_TypeDef;).*");
             List<HardwareRegister> lstReg = new List<HardwareRegister>();
             int sizeArray;
             foreach (var ln in File.ReadAllLines(pFileName))
@@ -205,7 +214,7 @@ namespace SLab_bsp_generator
                 if (!aStartCheckReg)
                     continue;
 
-                Match m = argSearchReg.Match(ln);
+                Match m = Regexes.argSearchReg.Match(ln);
                 if (m.Success)
                 {
                     sizeArray = m.Groups[4].Value == "" ? 1 : Convert.ToInt16(m.Groups[4].Value);
@@ -221,7 +230,7 @@ namespace SLab_bsp_generator
                 }
                 else
                 {
-                    m = argSearchRegReserv.Match(ln); //reserverd array
+                    m = Regexes.argSearchRegReserv.Match(ln); //reserverd array
                     if (m.Success)
                     {
                         sizeArray = m.Groups[3].Value == "" ? 1 : Convert.ToInt32(m.Groups[3].Value);
@@ -232,7 +241,7 @@ namespace SLab_bsp_generator
                         });
                     }
                     // Typedef Array 
-                    m = argSearchRegTypeDef.Match(ln);
+                    m = Regexes.argSearchRegTypeDef.Match(ln);
                     if (m.Success)
                     {
                         sizeArray = m.Groups[3].Value == "" ? 1 : Convert.ToInt16(m.Groups[3].Value);
@@ -250,16 +259,18 @@ namespace SLab_bsp_generator
                         }
                     }
                     //end
-                    m = argSearchFrendName.Match(ln);
+                    m = Regexes.argSearchFrendName.Match(ln);
                     if (m.Success)
                     {
                         HardwareRegisterSet setReg = new HardwareRegisterSet();
                         setReg.UserFriendlyName = m.Groups[1].Value;
                         aStartCheckReg = false;
                         oReg.Add(setReg);
+                        var originalSubRegs = ProcessRegisterSetSubRegisters(pFileName);
+
                         foreach (var HardReg in lstReg)
                         {
-                            var lstSubRegs = ProcessRegisterSetSubRegisters(pFileName);
+                            var lstSubRegs = originalSubRegs.Select(s => CloneSubregister(s)).ToList();
                             List<HardwareSubRegister> lstSubRegToHard = new List<HardwareSubRegister>();
                             string aPrefNameSubReg = setReg.UserFriendlyName + "_" + HardReg.Name + "_";
                             foreach (var SubReg in lstSubRegs)
@@ -279,6 +290,19 @@ namespace SLab_bsp_generator
             }
             return oReg;
         }
+
+        private static HardwareSubRegister CloneSubregister(HardwareSubRegister s)
+        {
+            return new HardwareSubRegister
+            {
+                FirstBit = s.FirstBit,
+                KnownValues = (KnownSubRegisterValue[])s.KnownValues?.Clone(),
+                Name = s.Name,
+                ParentRegister = s.ParentRegister,
+                SizeInBits = s.SizeInBits
+            };
+        }
+
         private static int GetSizeBit(string pHex)
         {
             int aOut = 0;
@@ -295,12 +319,10 @@ namespace SLab_bsp_generator
         public static List<HardwareSubRegister> ProcessRegisterSetSubRegisters(string pFileName)
         {
             List<HardwareSubRegister> aSubRegs = new List<HardwareSubRegister>();
-            Regex argSearchRegShift = new Regex(@"(#define)[ \t_]*([A-Z_]+)(_SHIFT)[ \t]+([0-9]+).*");
-            Regex argSearchRegMask = new Regex(@"(#define)[ \t_]*([A-Z_]+)(_MASK)[ \t]+([0-9xA-F]*[U]?[L]?).*");
             HardwareSubRegister aSubReg = null;
             foreach (var ln in File.ReadAllLines(pFileName))
             {
-                var m = argSearchRegShift.Match(ln);
+                var m = Regexes.argSearchRegShift.Match(ln);
                 if (m.Success)
                 {
                     aSubReg = new HardwareSubRegister();
@@ -308,7 +330,7 @@ namespace SLab_bsp_generator
                     aSubReg.FirstBit = Convert.ToInt32(m.Groups[4].Value);
                     continue;
                 }
-                m = argSearchRegMask.Match(ln);
+                m = Regexes.argSearchRegMask.Match(ln);
                 if (m.Success)
                 {
                     if (aSubReg == null)
