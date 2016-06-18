@@ -6,13 +6,92 @@
 			<FilesToCopy>src\CppUTest\*.cpp;include\CppUTest\*.h</FilesToCopy>
 			<TargetFolder></TargetFolder>
 			<AutoIncludeMask>*.h</AutoIncludeMask>	
+			<Patches>
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\CppUTest\CommandLineTestRunner.cpp</FilePath>
+					<AfterLine>#include "CppUTest/TestRegistry.h"</AfterLine>
+					<InsertedLines>
+						<string>#include "SysprogsTestHooks.h"</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\CppUTest\CommandLineTestRunner.cpp</FilePath>
+					<AfterLine>    TestRegistry::getCurrentRegistry()->removePluginByName(DEF_PLUGIN_MEM_LEAK);</AfterLine>
+					<InsertedLines>
+						<string>    SysprogsTestHook_TestsCompleted();</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
+					<AfterLine>#include "CppUTest/TestRegistry.h"</AfterLine>
+					<InsertedLines>
+						<string>#include "SysprogsTestHooks.h"</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
+					<OldLine>    for (UtestShell *test = tests_; test != NULL; test = test-&gt;getNext()) {</OldLine>
+					<NewLine>    int testCount = 0, testNumber = 0;
+    for (UtestShell *test = tests_; test != NULL; test = test->getNext()) 
+        testCount++;
+    
+    UtestShell **pTests = (UtestShell **)malloc(testCount * sizeof(UtestShell));
+    UtestShell **pEnabledTests = (UtestShell **)malloc(testCount * sizeof(UtestShell));
+    
+    for (UtestShell *test = tests_; test != NULL &amp;&amp; testNumber &lt; testCount; test = test-&gt;getNext(), testNumber++) 
+    {
+        pTests[testNumber] = test;
+        pEnabledTests[testNumber] = test;
+    }
+    
+    testCount = testNumber;
+    SysprogsTestHook_SelectTests(testCount, (void **)pEnabledTests);
+    
+    for (int i = 0; i &lt; testCount; i++) {
+        UtestShell *test = pTests[i];</NewLine>
+				</Patch>	
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
+					<OldLine>        if (testShouldRun(test, result)) {</OldLine>
+					<NewLine>        if (pEnabledTests[i] &amp;&amp; testShouldRun(test, result)) {
+            SysprogsTestHook_TestStarting(test);</NewLine>
+				</Patch>	
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
+					<OldLine>            result.currentTestEnded(test);</OldLine>
+					<NewLine>            result.currentTestEnded(test);
+            SysprogsTestHook_TestEnded();</NewLine>
+				</Patch>	
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
+					<OldLine>    result.testsEnded();</OldLine>
+					<NewLine>    free(pTests);
+    free(pEnabledTests);
+    result.testsEnded();</NewLine>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\CppUTest\Utest.cpp</FilePath>
+					<AfterLine>#include "CppUTest/TestRegistry.h"</AfterLine>
+					<InsertedLines>
+						<string>#include "SysprogsTestHooks.h"</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\CppUTest\Utest.cpp</FilePath>
+					<AfterLine>    hasFailed_ = true;</AfterLine>
+					<InsertedLines>
+						<string>    SysprogsTestHook_TestFailed(this, failure.getMessage().asCharString(), 0);</string>
+					</InsertedLines>
+				</Patch>	
+			</Patches>			
 		</CopyJob>			
 		<CopyJob>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\platforms</SourceFolder>
 			<FilesToCopy>*</FilesToCopy>
 			<TargetFolder>Platforms</TargetFolder>
+			<AutoIncludeMask>-*.h</AutoIncludeMask>	
 			<SimpleFileConditions>
-				<string>UtestPlatformEmbedded.cpp: $$platform$$ == embedded</string>
+				<string>Embedded\.*: $$platform$$ == embedded</string>
 			</SimpleFileConditions>
 
 		</CopyJob>			

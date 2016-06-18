@@ -140,12 +140,13 @@ namespace BSPGenerationTools
         public List<FileCondition> MatchedFileConditions = new List<FileCondition>();
         public readonly BSPDirectories Directories;
 
-        public BSPBuilder(BSPDirectories dirs)
+        public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = @"..\..\..\..\GenericARM.ldsx")
         {
             Directories = dirs;
             SystemVars["$$BSPGEN:INPUT_DIR$$"] = dirs.InputDir;
             SystemVars["$$BSPGEN:RULES_DIR$$"] = dirs.RulesDir;
-            LDSTemplate = XmlTools.LoadObject<LinkerScriptTemplate>(@"..\..\..\..\GenericARM.ldsx");
+            if (linkerScriptTemplate != null)
+                LDSTemplate = XmlTools.LoadObject<LinkerScriptTemplate>(linkerScriptTemplate);
             BSPRoot = dirs.OutputDir;
             if (Directory.Exists(dirs.OutputDir))
             {

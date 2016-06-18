@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainPath>F:\SysGCC\arm-eabi</ToolchainPath>
+	<BSPPath>E:\projects\sysprogs-github\BSPTools\generators\NXP\Output</BSPPath>
+	<DeviceRegex>^LPC.*</DeviceRegex>
+	<Samples>
+		<TestedSample>
+			<Name>LEDBlink</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<SampleConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
+						<Value>1</Value>
+					</KeyValue>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDBIT</Key>
+						<Value>2</Value>
+					</KeyValue>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.DELAYMSEC</Key>
+						<Value>300</Value>
+					</KeyValue>
+				</Entries>
+			</SampleConfiguration>
+
+		</TestedSample>
+	
+	</Samples>
+</TestJob>

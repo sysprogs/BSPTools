@@ -38,5 +38,8 @@
 				<SkippedFrames>3</SkippedFrames>
 			</TestHook>
 		</TestHooks>
+		<AdditionalPreprocessorMacros>
+			<string>CPPUTEST_STD_CPP_LIB_DISABLED</string>
+		</AdditionalPreprocessorMacros>
 	</Embedded>
 </TestFrameworkDefinition>
