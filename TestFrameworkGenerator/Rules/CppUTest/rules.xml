@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<TestFrameworkRules xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CopyJobs>
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
+			<FilesToCopy>src\CppUTest\*.cpp;include\CppUTest\*.h</FilesToCopy>
+			<TargetFolder></TargetFolder>
+			<AutoIncludeMask>*.h</AutoIncludeMask>	
+		</CopyJob>			
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\platforms</SourceFolder>
+			<FilesToCopy>*</FilesToCopy>
+			<TargetFolder>Platforms</TargetFolder>
+			<SimpleFileConditions>
+				<string>UtestPlatformEmbedded.cpp: $$platform$$ == embedded</string>
+			</SimpleFileConditions>
+
+		</CopyJob>			
+	</CopyJobs>
+</TestFrameworkRules>

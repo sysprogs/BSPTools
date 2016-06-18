@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ID>com.sysprogs.unittest.CppUTest</ID>
+	<Name>CppUTest</Name>
+	<Version>3.8</Version>
+	<Embedded>
+		<TestDiscoverers>
+			<TestDiscoverer xsi:type="SymbolBasedScopeDiscoverer">
+				<ScopeSymbolRegex>^externTestGroup(.*)$</ScopeSymbolRegex>
+				<ScopeSymbolGroup>1</ScopeSymbolGroup>
+				<ExpectedSymbolType>1</ExpectedSymbolType>
+				<Discoverers>
+					<TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
+						<TargetDemangledNames>true</TargetDemangledNames>
+						<TestSymbolRegex>^TEST_$(Scope)_(.*)_TestShell_instance$</TestSymbolRegex>
+						<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
+						<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
+						<LocationSymbolFormat/>
+					</TestDiscoverer>
+				</Discoverers>
+			</TestDiscoverer>
+		</TestDiscoverers>
+		<TestSelection xsi:type="HookBasedTestSelection">
+			<HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
+			<TestCountExpression>testCount</TestCountExpression>
+			<AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
+		</TestSelection>
+		<TestReportChannel xsi:type="SemihostingBasedTestChannel">
+		</TestReportChannel>
+		<TestHooks>
+			<TestHook xsi:type="TestsCompletedHook">
+				<Expression>SysprogsTestHook_TestsCompleted</Expression>
+				<Required>true</Required>
+			</TestHook>
+			<TestHook xsi:type="GenericFailHook">
+				<Expression>SysprogsTestHook_TestFailed</Expression>
+				<Required>true</Required>
+				<SkippedFrames>3</SkippedFrames>
+			</TestHook>
+		</TestHooks>
+	</Embedded>
+</TestFrameworkDefinition>
