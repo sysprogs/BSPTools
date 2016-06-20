@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>HAL</Name>
+  <Description>This test project is based on the new HAL framework</Description>
+  <MCUFilterRegex>.*</MCUFilterRegex>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+    <string>com.sysprogs.arm.stm32.hal</string>
+  </RequiredFrameworks>
+  <AdditionalSourcesToCopy>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</SourcePath>
+    </AdditionalSourceFile>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$</SourcePath>
+      <TargetFileName>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</TargetFileName>
+    </AdditionalSourceFile>
+  </AdditionalSourcesToCopy>
+</EmbeddedProjectSample>

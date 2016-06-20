@@ -413,6 +413,7 @@ namespace BSPGenerationTools
         public string DestinationFolder;    //Relative path under BSP
         public string[] AdditionalSources;  //Full paths ($$SYS:BSP_ROOT$$/...) of additional files that will be copied to the project dir. Can use the path/a.c=>b.c syntax to rename the file to b.c
         public string MCUFilterRegex;
+        public bool IsTestProjectSample;
     }
 
     /* Use MCU classifiers to define MCU-specific flags.

@@ -50,7 +50,7 @@ namespace kinetis_bsp_generator {
         private MCUBuilder[] _rejectedMCUs;
         private MCUFamilyBuilder[] _rejectedMCUFamilies;
         private List<EmbeddedFramework> _frameworks = new List<EmbeddedFramework>();
-        private List<string> _exampleDirs = new List<string>();
+        private List<MCUFamilyBuilder.CopiedSample> _exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
         private List<MCU> _mcus = new List<MCU>();
         private List<MCUFamily> _mcuFamilies = new List<MCUFamily>();
         private ToolFlags _flags = new ToolFlags();
@@ -131,9 +131,10 @@ namespace kinetis_bsp_generator {
                 MCUFamilies = _mcuFamilies.ToArray(),
                 SupportedMCUs = _mcus.ToArray(),
                 Frameworks = _frameworks.ToArray(),
-                Examples = _exampleDirs.ToArray(),
+                Examples = _exampleDirs.Where(s => !s.IsTestProjectSample).Select(s=>s.RelativePath).ToArray(),
+                TestExamples = _exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = MatchedFileConditions.ToArray(),
-                PackageVersion = "1.3",
+                PackageVersion = "1.3.2",
                 MinimumEngineVersion = "5.0",
             };
 

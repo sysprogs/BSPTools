@@ -124,7 +124,7 @@
 					<TargetFolder>RTOS\uCOSII</TargetFolder>
 					<ProjectInclusionMask>-src\config\*;*.h;*.c;*\os_cpu_a.S</ProjectInclusionMask>
 					<FilesToCopy>-*\IAR\*;-*\RealView\*;-build\*;-*\build\*;-mqx\examples\*;*</FilesToCopy>
-					<AdditionalIncludeDirs>.;$(BSP_ROOT)/RTOS/uCOSII/src/uCOS-II/Ports/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/Generic/GNU;$(BSP_ROOT)/RTOS/uCOSII/src/uC-CPU/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/GNU</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>.;$$SYS:BSP_ROOT$$/RTOS/uCOSII/src/uCOS-II/Ports/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/Generic/GNU;$$SYS:BSP_ROOT$$/RTOS/uCOSII/src/uC-CPU/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/GNU</AdditionalIncludeDirs>
 					<AutoIncludeMask>-src\config\*;-*\ARM-Cortex-*;*</AutoIncludeMask>
 					<SimpleFileConditions>
 						<string>.*\\ARM-Cortex-M0\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M0</string>
@@ -151,7 +151,7 @@
 					<TargetFolder>RTOS\uCOSIII</TargetFolder>
 					<ProjectInclusionMask>-src\config\*;*.h;*.c;*\os_cpu_a.S;*\cpu_a.S</ProjectInclusionMask>
 					<FilesToCopy>-*\IAR\*;-*\RealView\*;-build\*;-*\build\*;-mqx\examples\*;*</FilesToCopy>
-					<AdditionalIncludeDirs>.;$(BSP_ROOT)/RTOS/uCOSIII/src/uCOS-III/Ports/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/Generic/GNU;$(BSP_ROOT)/RTOS/uCOSIII/src/uC-CPU/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/GNU</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>.;$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/uCOS-III/Ports/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/Generic/GNU;$$SYS:BSP_ROOT$$/RTOS/uCOSIII/src/uC-CPU/ARM-Cortex-$$com.sysprogs.bspoptions.arm.core$$/GNU</AdditionalIncludeDirs>
 					<AutoIncludeMask>-src\config\*;-*\ARM-Cortex-*;*</AutoIncludeMask>
 					<SimpleFileConditions>
 						<string>.*\\ARM-Cortex-M0\\.*: $$com.sysprogs.bspoptions.arm.core$$ == M0</string>
@@ -163,6 +163,11 @@
 
 	</AdditionalFrameworks>
 	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\UnitTest</SourceFolder>
+			<DestinationFolder>Samples\UnitTest</DestinationFolder>
+			<IsTestProjectSample>true</IsTestProjectSample>
+		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
 			<DestinationFolder>Samples\LEDBlink</DestinationFolder>

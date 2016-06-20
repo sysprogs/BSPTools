@@ -536,7 +536,13 @@ namespace BSPGenerationTools
             }
         }
 
-        public IEnumerable<string> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null, IEnumerable<SysVarEntry> extraVariablesToValidateSamples = null)
+        public struct CopiedSample
+        {
+            public string RelativePath;
+            public bool IsTestProjectSample;
+        }
+
+        public IEnumerable<CopiedSample> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null, IEnumerable<SysVarEntry> extraVariablesToValidateSamples = null)
         {
             if (Definition.SmartSamples != null)
             {
@@ -600,7 +606,7 @@ namespace BSPGenerationTools
                         sampleObj.MCUFilterRegex = sample.MCUFilterRegex;
 
                     XmlTools.SaveObject(sampleObj, Path.Combine(destFolder, "sample.xml"));
-                    yield return sample.DestinationFolder;
+                    yield return new CopiedSample { RelativePath = sample.DestinationFolder, IsTestProjectSample = sample.IsTestProjectSample };
                 }
             }
         }

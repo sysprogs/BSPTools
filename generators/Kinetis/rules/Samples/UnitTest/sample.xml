@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name/>
+  <Description>This as very basic unit test project</Description>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+	<string>com.sysprogs.arm.kinetis.platform</string>
+  </RequiredFrameworks>
+</EmbeddedProjectSample>

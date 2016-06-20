@@ -111,8 +111,16 @@ namespace CppUTest
             string outDir = dummyBSPBuilder.Directories.OutputDir;
             string archiveName = $"{fwObj.ID.Split('.').Last()}-{fwObj.Version}.vgdbxtfp";
             Console.WriteLine("Building archive...");
-            TarPacker.PackDirectoryToTGZ(outDir, Path.Combine(dummyBSPBuilder.Directories.OutputDir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxtfp");
+            string archiveFile = Path.Combine(dummyBSPBuilder.Directories.OutputDir, archiveName);
+            TarPacker.PackDirectoryToTGZ(outDir, archiveFile, fn => Path.GetExtension(fn).ToLower() != ".vgdbxtfp");
+            XmlTools.SaveObject(new TestFrameworkSummary
+            {
+                PackageID = fwObj.ID,
+                PackageVersion = fwObj.Version,
+                PackageDescription = fwObj.Name,
+            }, Path.ChangeExtension(archiveFile, ".xml"));
         }
+
 
         private static void CopyAndAdjustSamples(DummyBSPBuilder builder, TestFrameworkDefinition.TestFrameworkSample[] samples)
         {
@@ -141,5 +149,12 @@ namespace CppUTest
     public class TestFrameworkRules
     {
         public CopyJob[] CopyJobs;
+    }
+
+    public class TestFrameworkSummary
+    {
+        public string PackageID;
+        public string PackageDescription;
+        public string PackageVersion;
     }
 }

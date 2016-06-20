@@ -380,7 +380,7 @@ namespace stm32_bsp_generator
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             List<MCU> mcuDefinitions = new List<MCU>();
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<string> exampleDirs = new List<string>();
+            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
             bool noPeripheralRegisters = args.Contains("/noperiph");
 
@@ -418,7 +418,7 @@ namespace stm32_bsp_generator
                 exampleDirs.Add(sample);
 
             var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
-            exampleDirs.Sort((a,b) => prioritizer.Prioritize(a, b));
+            exampleDirs.Sort((a,b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
 
             BoardSupportPackage bsp = new BoardSupportPackage
             {
@@ -429,8 +429,9 @@ namespace stm32_bsp_generator
                 MCUFamilies = familyDefinitions.ToArray(),
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.ToArray(),
-                PackageVersion = "3.5",
+                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                PackageVersion = "3.6",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",

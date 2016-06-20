@@ -71,6 +71,7 @@ namespace StandaloneBSPValidator
                     string sourceFile = VariableHelper.ExpandVariables(fobj.SourcePath, bspDict);
                     string destFile = Path.Combine(_ProjectDir, VariableHelper.ExpandVariables(fobj.TargetFileName ?? Path.GetFileName(sourceFile), bspDict));
                     File.Copy(sourceFile, destFile);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destFile));
 
                     string ext = Path.GetExtension(destFile).ToLower();
                     if (ext != ".h" && ext != ".hpp")
@@ -182,7 +183,7 @@ namespace StandaloneBSPValidator
 
             foreach (var fwObj in _Frameworks)
             {
-                if (fwObj.AdditionalSystemVars != null)
+                if (fwObj.AdditionalSystemVars != null) 
                     foreach (var sv in fwObj.AdditionalSystemVars)
                         primaryDict[sv.Key] = sv.Value;
 

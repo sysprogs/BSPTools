@@ -98,7 +98,7 @@ namespace StandaloneBSPValidator
                 configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
             }
 
-            var samples = mcu.BSP.GetSamplesForMCU(mcu.ExpandedMCU.ID);
+            var samples = mcu.BSP.GetSamplesForMCU(mcu.ExpandedMCU.ID, false);
             LoadedBSP.LoadedSample sampleObj;
             if (string.IsNullOrEmpty(sample.Name))
                 sampleObj = samples[0];
@@ -116,7 +116,7 @@ namespace StandaloneBSPValidator
                     throw new Exception("Cannot find sample: " + sample.Name);
             }
 
-            string[] frameworks = sampleObj.Sample.RequiredFrameworks;
+            string[] frameworks = sampleObj.Sample.RequiredFrameworks ?? new string[0];
 
 
             //frameworkCfg["com.sysprogs.bspoptions.stm32.freertos.heap"] = "heap_4";
@@ -143,7 +143,7 @@ namespace StandaloneBSPValidator
             //configuredSample.Parameters["com.sysprogs.examples.stm32.LEDPORT"] = "GPIOA";
             //configuredSample.Parameters["com.sysprogs.examples.stm32.freertos.heap_size"] = "0";
 
-            var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager());
+            var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager(), null);
             bspDict["PROJECTNAME"] = "test";
 
             if (configuredSample.Frameworks != null)
@@ -409,8 +409,8 @@ namespace StandaloneBSPValidator
                             var m = rgArrayRegister.Match(regName);
                             if (m.Success)
                                 regName = string.Format("{0}[{1}].{2}", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1, m.Groups[3]);
- //EFM32                    else if ((m = rgArrayRegister2.Match(regName)).Success)
- //EFM32                        regName = string.Format("{0}[{1}]", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1);
+                            else if ((m = rgArrayRegister2.Match(regName)).Success)
+                                regName = string.Format("{0}[{1}]", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1);
                             else if ((m = rgArrayRegister3.Match(regName)).Success)
                                 regName = string.Format("{0}[{1}]", m.Groups[1], m.Groups[2].ToString() == "H" ? 1 : 0);
                             else if ((regset.UserFriendlyName == "HASH" || regset.UserFriendlyName == "HASH_DIGEST") && (m = rgArrayRegister4.Match(regName)).Success)
