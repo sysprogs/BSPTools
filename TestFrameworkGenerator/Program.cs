@@ -15,6 +15,8 @@ namespace CppUTest
     {
         class DummyBSPBuilder : BSPBuilder
         {
+            public string FrameworkID;
+
             public DummyBSPBuilder(BSPDirectories dirs) : base(dirs, null)
             {
             }
@@ -28,12 +30,16 @@ namespace CppUTest
             {
                 throw new NotImplementedException();
             }
+
+            public string MakeRelativePath(string path)
+            {
+                if (!path.Contains("$$") && !Path.IsPathRooted(path))
+                    path = $"$$SYS:TESTFW_BASE$$/{FrameworkID}/" + path.Replace('\\', '/');
+                return path.Replace("$$SYS:BSP_ROOT$$/", $"$$SYS:TESTFW_BASE$$/{FrameworkID}/");
+            }
+
         }
 
-        static string MakeRelativePath(string path)
-        {
-            return path.Replace("$$SYS:BSP_ROOT$$/", "");
-        }
 
         static void Main(string[] args)
         {
@@ -47,6 +53,7 @@ namespace CppUTest
 
 
             var fwObj = XmlTools.LoadObject<TestFrameworkDefinition>(Path.Combine(dummyBSPBuilder.Directories.RulesDir, "TestFramework.xml"));
+            dummyBSPBuilder.FrameworkID = fwObj.ID;
             var rules = XmlTools.LoadObject<TestFrameworkRules>(Path.Combine(dummyBSPBuilder.Directories.RulesDir, "rules.xml"));
             List<string> projectFiles = new List<string>();
             ToolFlags flags = new ToolFlags();
@@ -83,17 +90,21 @@ namespace CppUTest
             if (fwObj.Common == null)
                 fwObj.Common = new TestFrameworkDefinition.TestPlatformBuild();
 
-            fwObj.Common.AdditionalSourceFiles = unconditionalFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f=> MakeRelativePath(f)).ToArray();
-            fwObj.Common.AdditionalHeaderFiles = unconditionalFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => MakeRelativePath(f)).ToArray();
+            fwObj.Common.AdditionalSourceFiles = unconditionalFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f=> dummyBSPBuilder.MakeRelativePath(f)).ToArray();
+            fwObj.Common.AdditionalHeaderFiles = unconditionalFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
 
-            fwObj.Common.AdditionalIncludeDirs = flags.IncludeDirectories?.Select(f => MakeRelativePath(f))?.ToArray();
-            fwObj.Common.AdditionalPreprocessorMacros = flags.PreprocessorMacros?.Select(f => MakeRelativePath(f))?.ToArray();
+            fwObj.Common.AdditionalIncludeDirs = flags.IncludeDirectories?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
+            fwObj.Common.AdditionalPreprocessorMacros = flags.PreprocessorMacros?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
 
             if (fwObj.Embedded != null)
             {
-                fwObj.Embedded.AdditionalSourceFiles = embeddedFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f => MakeRelativePath(f)).ToArray();
-                fwObj.Embedded.AdditionalHeaderFiles = embeddedFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => MakeRelativePath(f)).ToArray();
+                fwObj.Embedded.AdditionalSourceFiles = embeddedFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
+                fwObj.Embedded.AdditionalHeaderFiles = embeddedFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
+                fwObj.Embedded.AdditionalIncludeDirs = fwObj.Embedded.AdditionalIncludeDirs?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
             }
+
+            CopyAndAdjustSamples(dummyBSPBuilder, fwObj.Embedded.Samples);
+            CopyAndAdjustSamples(dummyBSPBuilder, fwObj.Common.Samples);
 
             XmlTools.SaveObject(fwObj, Path.Combine(dummyBSPBuilder.Directories.OutputDir, "TestFramework.xml"));
 
@@ -101,6 +112,22 @@ namespace CppUTest
             string archiveName = $"{fwObj.ID.Split('.').Last()}-{fwObj.Version}.vgdbxtfp";
             Console.WriteLine("Building archive...");
             TarPacker.PackDirectoryToTGZ(outDir, Path.Combine(dummyBSPBuilder.Directories.OutputDir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxtfp");
+        }
+
+        private static void CopyAndAdjustSamples(DummyBSPBuilder builder, TestFrameworkDefinition.TestFrameworkSample[] samples)
+        {
+            if (samples == null)
+                return;
+            foreach(var sample in samples)
+            {
+                for (int i = 0; i < sample.Files.Length; i++)
+                {
+                    string targetPath = Path.Combine(builder.Directories.OutputDir, sample.Files[i]);
+                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+                    File.Copy(Path.Combine(builder.Directories.RulesDir, sample.Files[i]), targetPath);
+                    sample.Files[i] = $"$$SYS:TESTFW_BASE$$/{builder.FrameworkID}/" + sample.Files[i].Replace('\\', '/');
+                }
+            }
         }
 
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)

@@ -5,7 +5,8 @@
 			<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
 			<FilesToCopy>src\CppUTest\*.cpp;include\CppUTest\*.h</FilesToCopy>
 			<TargetFolder></TargetFolder>
-			<AutoIncludeMask>*.h</AutoIncludeMask>	
+			<AutoIncludeMask>-*</AutoIncludeMask>
+			<AdditionalIncludeDirs>include</AdditionalIncludeDirs>
 			<Patches>
 				<Patch xsi:type="InsertLines">
 					<FilePath>src\CppUTest\CommandLineTestRunner.cpp</FilePath>
@@ -93,7 +94,6 @@
 			<SimpleFileConditions>
 				<string>Embedded\.*: $$platform$$ == embedded</string>
 			</SimpleFileConditions>
-
 		</CopyJob>			
 	</CopyJobs>
 </TestFrameworkRules>

@@ -12,7 +12,7 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>Emlib</Name>
+			<Name>EFM32 EMLib</Name>
 			<ID>com.sysprogs.arm.silabs.efm32.emlib</ID>
 			<IncompatibleFrameworks>
 			</IncompatibleFrameworks>
@@ -28,7 +28,7 @@
 		</CopyJobs>
 		</Framework>
 			<Framework>
-			<Name>Usb</Name>
+			<Name>EFM32 USB Library</Name>
 			<ID>com.sysprogs.arm.silabs.efm32.usb</ID>
 			<IncompatibleFrameworks>
 			</IncompatibleFrameworks>

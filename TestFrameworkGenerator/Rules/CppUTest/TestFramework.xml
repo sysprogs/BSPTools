@@ -41,5 +41,48 @@
 		<AdditionalPreprocessorMacros>
 			<string>CPPUTEST_STD_CPP_LIB_DISABLED</string>
 		</AdditionalPreprocessorMacros>
+		<AdditionalIncludeDirs>
+			<string>platforms\Embedded</string>
+		</AdditionalIncludeDirs>
+		<RequiredFrameworks>
+			<string>com.sysprogs.embedded.semihosting_and_profiler@1.1</string>
+		</RequiredFrameworks>
+		<InitializationLines>
+			<string>const char *p = "";</string>
+			<string>CommandLineTestRunner::RunAllTests(0, &amp;p);</string>
+		</InitializationLines>
 	</Embedded>
+	<Common>
+		<ConfigurableProperties>
+			<PropertyGroups>
+			  <PropertyGroup>
+				<Properties>
+					<PropertyEntry xsi:type="Integral">
+					  <Name>Test time-out (seconds)</Name>
+					  <UniqueID>com.sysprogs.testsettings.timeout</UniqueID>
+					  <Description>Specifies the maximum delay</Description>
+					  <MinValue>0</MinValue>
+					  <MaxValue>86400</MaxValue>
+					  <DefaultValue>1800</DefaultValue>
+					</PropertyEntry>
+				</Properties>
+				<CollapsedByDefault>false</CollapsedByDefault>
+			  </PropertyGroup>
+			</PropertyGroups>
+		</ConfigurableProperties>
+		<IncludeLines>
+			<string>#include &lt;cpputest/CommandLineTestRunner.h&gt;</string>
+		</IncludeLines>
+		<RequiredFunctions>
+			<string>_ZN21CommandLineTestRunner11RunAllTestsEiPPKc</string>
+		</RequiredFunctions>
+		<Samples>
+			<TestFrameworkSample>
+				<UserFriendlyName>Basic CppUTest Demo</UserFriendlyName>
+				<Files>
+					<string>samples\$$PROJECTNAME$$Tests.cpp</string>
+				</Files>
+			</TestFrameworkSample>
+		</Samples>
+	</Common>
 </TestFrameworkDefinition>

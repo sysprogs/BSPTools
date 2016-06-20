@@ -32,8 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BSPEngine">
-      <HintPath>..\..\BSPEngine.dll</HintPath>
+    <Reference Include="BSPEngine, Version=5.1.0.0, Culture=neutral, PublicKeyToken=8f764369eb712693, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\BSPEngine.dll</HintPath>
     </Reference>
     <Reference Include="SysprogsCore">
       <HintPath>..\..\..\sysprogs\SysprogsCore\bin\Debug\SysprogsCore.dll</HintPath>
