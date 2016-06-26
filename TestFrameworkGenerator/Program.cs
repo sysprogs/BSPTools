@@ -68,6 +68,7 @@ namespace CppUTest
 
             var unconditionalFiles = projectFiles.Where(f => !matchedConditions.ContainsKey(f));
             List<string> embeddedFiles = new List<string>();
+            List<string> linuxFiles = new List<string>();
             foreach(var f in projectFiles)
             {
                 FileCondition cond;
@@ -80,6 +81,9 @@ namespace CppUTest
                     {
                         case "embedded":
                             embeddedFiles.Add(f);
+                            break;
+                        case "linux":
+                            linuxFiles.Add(f);
                             break;
                         default:
                             throw new Exception("Invalid platform condition");
@@ -101,6 +105,13 @@ namespace CppUTest
                 fwObj.Embedded.AdditionalSourceFiles = embeddedFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
                 fwObj.Embedded.AdditionalHeaderFiles = embeddedFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
                 fwObj.Embedded.AdditionalIncludeDirs = fwObj.Embedded.AdditionalIncludeDirs?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
+            }
+
+            if (fwObj.Linux != null)
+            {
+                fwObj.Linux.AdditionalSourceFiles = linuxFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
+                fwObj.Linux.AdditionalHeaderFiles = linuxFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
+                fwObj.Linux.AdditionalIncludeDirs = fwObj.Linux.AdditionalIncludeDirs?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
             }
 
             CopyAndAdjustSamples(dummyBSPBuilder, fwObj.Embedded.Samples);

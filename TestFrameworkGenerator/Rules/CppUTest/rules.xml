@@ -3,7 +3,7 @@
 	<CopyJobs>
 		<CopyJob>
 			<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-			<FilesToCopy>src\CppUTest\*.cpp;include\CppUTest\*.h</FilesToCopy>
+			<FilesToCopy>src\CppUTest\*.cpp;src\CppUTestExt\*.cpp;include\CppUTest\*.h;include\CppUTestExt\*.h</FilesToCopy>
 			<TargetFolder></TargetFolder>
 			<AutoIncludeMask>-*</AutoIncludeMask>
 			<AdditionalIncludeDirs>include</AdditionalIncludeDirs>
@@ -85,14 +85,25 @@
 					</InsertedLines>
 				</Patch>	
 			</Patches>			
-		</CopyJob>			
+			<SimpleFileConditions>
+				<string>[^\\]+\\CppUTestExt\\.*: $$platform$$ == linux</string>
+			</SimpleFileConditions>		</CopyJob>			
 		<CopyJob>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\platforms</SourceFolder>
 			<FilesToCopy>*</FilesToCopy>
 			<TargetFolder>Platforms</TargetFolder>
-			<AutoIncludeMask>-*.h</AutoIncludeMask>	
+			<AutoIncludeMask>*SysprogsTestHooks.h</AutoIncludeMask>	
 			<SimpleFileConditions>
 				<string>Embedded\.*: $$platform$$ == embedded</string>
+			</SimpleFileConditions>
+		</CopyJob>			
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$\src\Platforms\Gcc</SourceFolder>
+			<FilesToCopy>*</FilesToCopy>
+			<TargetFolder>Platforms\Linux</TargetFolder>
+			<AutoIncludeMask>-*.h</AutoIncludeMask>	
+			<SimpleFileConditions>
+				<string>.*: $$platform$$ == linux</string>
 			</SimpleFileConditions>
 		</CopyJob>			
 	</CopyJobs>

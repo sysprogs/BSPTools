@@ -549,6 +549,8 @@ namespace kinetis_bsp_generator {
                 foreach (var mcuBuilder in mcuFamilyBuilder.MCUs) {
                     mcuBuilder.StartupFile = "$$SYS:BSP_ROOT$$/" + mcuFamilyBuilder.FamilyFilePrefix + STARTUP_FILES_FOLDER + "/startup.c";
                     var mcu = mcuBuilder.GenerateDefinition(mcuFamilyBuilder, mcuFamilyBuilder.BSP, _parsePeripheralRegisters);
+                    mcu.FLASHBase = _mcuMemoryLayouts[mcu.ID].Memories.First(m => m.Name == FLASH_MEMORY).Start;
+                    mcu.RAMBase = _mcuMemoryLayouts[mcu.ID].Memories.First(m => m.Name == SRAM_MEMORY).Start;
                     var preprocessorMacroses = mcu.CompilationFlags.PreprocessorMacros.ToList();
                     preprocessorMacroses.Add("CPU_" + mcu.ID);
                     mcu.CompilationFlags.PreprocessorMacros = preprocessorMacroses.ToArray();

@@ -1,4 +1,4 @@
-#include <cpputest/CommandLineTestRunner.h>
+#include <CppUTest/CommandLineTestRunner.h>
 #include <stdio.h>
 
 /*

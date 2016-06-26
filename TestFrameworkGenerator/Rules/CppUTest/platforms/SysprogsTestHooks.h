@@ -15,11 +15,12 @@ enum TestMessageSeverity
 
 enum TestPacketType
 {
-    strpTestStartingByID   = 1,       //Arguments: 32-bit or 64-bit ID
+    strpTestStartingByID   = 1,     //Arguments: 32-bit or 64-bit ID
     strpTestStartingByName,         //Arguments: test name
     strpTestEnded,                  //Arguments: none
     strpOutputMessage,              //Arguments: type, text
     strpTestFailed,                 //Arguments: a sequence of test objects prefixed by 1-byte TestObjectType
+    strpTimestamp,                  //Arguments: 32-bit or 64-bit timestamp
 };
 
 enum TestObjectType
