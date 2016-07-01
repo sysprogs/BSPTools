@@ -55,7 +55,12 @@
 					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
 					<OldLine>        if (testShouldRun(test, result)) {</OldLine>
 					<NewLine>        if (pEnabledTests[i] &amp;&amp; testShouldRun(test, result)) {
-            SysprogsTestHook_TestStarting(test);</NewLine>
+#ifdef ANDROID
+            SysprogsTestHook_TestStartingEx((test-&gt;getGroup() + "::" + test-&gt;getName()).asCharString());
+#else
+            SysprogsTestHook_TestStarting(test);
+#endif
+</NewLine>
 				</Patch>	
 				<Patch xsi:type="ReplaceLine">
 					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>

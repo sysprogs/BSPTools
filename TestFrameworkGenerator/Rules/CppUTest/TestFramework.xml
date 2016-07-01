@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.CppUTest</ID>
 	<Name>CppUTest</Name>
-	<Version>3.8a1</Version>
+	<Version>3.8b1</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
 			<HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -104,4 +104,36 @@
 			</TestFrameworkSample>
 		</Samples>
 	</Common>
+	  <AndroidCommandLine>
+		<InheritsFromLinux>true</InheritsFromLinux>
+		<TestReportChannel xsi:type="LocalSocketTestChannelWithEnv">
+		  <PipeTimestampVariableName>g_SysprogsTestReportTimestamp</PipeTimestampVariableName>
+		  <EnvironmentVariableName>SYSPROGS_TEST_REPORTING_SOCKET</EnvironmentVariableName>
+		  <SocketReadyHook>SysprogsTestHook_ReportingSocketReady</SocketReadyHook>
+		</TestReportChannel>
+		<UsesSTL>true</UsesSTL>
+		<UsesExceptions>true</UsesExceptions>
+	  </AndroidCommandLine>
+	  <AndroidApp>
+		<UsesSTL>true</UsesSTL>
+		<UsesExceptions>true</UsesExceptions>
+		<InheritsFromLinux>true</InheritsFromLinux>
+		<TestReportChannel xsi:type="LocalSocketTestChannelWithHook">
+		  <ChannelSelectionHook>SysprogsTestHook_QueryPipeName</ChannelSelectionHook>
+		  <PipeNameAreaAddress>&amp;pipeName</PipeNameAreaAddress>
+		  <PipeTimestampVariableName>g_SysprogsTestReportTimestamp</PipeTimestampVariableName>
+		  <EnvironmentVariableName>SYSPROGS_TEST_REPORTING_SOCKET</EnvironmentVariableName>
+		  <SocketReadyHook>SysprogsTestHook_ReportingSocketReady</SocketReadyHook>
+		</TestReportChannel>
+		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
+		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
+		  <TestCountExpression>testCount</TestCountExpression>
+		  <TestNameExpression>{((UtestShell *){&amp;})->group_:s}::{((UtestShell *){&amp;})->name_:s}</TestNameExpression>
+		  <AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
+		</TestSelection>
+		<InitializationLines>
+			<string>const char *p = "";</string>
+			<string>CommandLineTestRunner::RunAllTests(0, &amp;p);</string>
+		</InitializationLines>
+	  </AndroidApp>
 </TestFrameworkDefinition>

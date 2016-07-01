@@ -26,6 +26,60 @@ class TestOutputSynchronizer
 #include <stdio.h>
 #include <unistd.h>
 
+#ifdef ANDROID
+#include <string.h>
+#include <unistd.h>
+#include <stddef.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+void __attribute__((noinline)) SysprogsTestHook_ReportingSocketReady()
+{
+}
+
+const char * __attribute__((noinline)) SysprogsTestHook_QueryPipeName()
+{
+    static char pipeName[1024];
+    return pipeName;
+}
+
+static int WaitForConnectionOnLocalSocket(const char* name)
+{
+    struct sockaddr_un sockAddr;
+    
+    int nameLen = strlen(name);
+    if (nameLen >= (int) sizeof(sockAddr.sun_path) - 1)
+        return -1;
+    
+    sockAddr.sun_path[0] = '\0';  /* abstract namespace */
+    strcpy(sockAddr.sun_path + 1, name);
+    sockAddr.sun_family = AF_LOCAL;
+    socklen_t socklen = 1 + nameLen + offsetof(struct sockaddr_un, sun_path);
+    
+    int fd = socket(AF_LOCAL, SOCK_STREAM, PF_UNIX);
+    if (fd < 0) 
+        return -1;
+    
+    if (bind(fd, (const struct sockaddr*) &sockAddr, socklen) < 0) 
+    {
+        close(fd);
+        return -1;
+    }
+    
+    if (listen(fd, 5) < 0) 
+    {
+        close(fd);
+        return -1;
+    }
+    
+    SysprogsTestHook_ReportingSocketReady();
+    int clientSock = accept(fd, NULL, NULL);
+    close(fd);
+
+    return clientSock;
+}
+#endif
+
 class TestOutputPipe
 {
 private:
@@ -38,14 +92,33 @@ public:
         m_Pipe = -1;
         pthread_mutex_init(&m_Mutex, 0);
      
-        char *pPipe = getenv("SYSPROGS_TEST_REPORTING_PIPE");
-        if (!pPipe || !pPipe[0])
+        const char *pPipe = getenv("SYSPROGS_TEST_REPORTING_PIPE");
+        if (pPipe && pPipe[0])
+        {
+            m_Pipe = open(pPipe, O_WRONLY);
+        }
+#ifdef ANDROID
+        else if ((pPipe = getenv("SYSPROGS_TEST_REPORTING_SOCKET")) != NULL)
+        {
+            m_Pipe = WaitForConnectionOnLocalSocket(pPipe);
+        }
+        else if ((pPipe = SysprogsTestHook_QueryPipeName()) != NULL)
+        {
+            m_Pipe = WaitForConnectionOnLocalSocket(pPipe);
+        }
+#endif
+        else
         {
             fprintf(stderr, "SYSPROGS_TEST_REPORTING_PIPE not set. Cannot report test status!\n");
             return;
         }
         
-        m_Pipe = open(pPipe, O_WRONLY);
+    }
+    
+    ~TestOutputPipe()
+    {
+        if (m_Pipe > 0)
+            close(m_Pipe);
     }
     
     
@@ -130,6 +203,14 @@ void __attribute__((noinline)) SysprogsTestHook_TestStarting(void *pTest)
     WriteTestOutput(&hdr, sizeof(hdr), &pTest, sizeof(pTest));
 }
 
+void __attribute__((noinline)) SysprogsTestHook_TestStartingEx(const char *pFullyQualifiedName)
+{
+    TestOutputSynchronizer sync;
+    int nameLength = strlen(pFullyQualifiedName);
+    unsigned char type = strpTestStartingByName;
+    WriteTestPacketSize(nameLength + 1, &type, 1);
+    WriteTestOutput(pFullyQualifiedName, nameLength, 0, 0);
+}
 
 void __attribute__((noinline)) SysprogsTestHook_TestEnded()
 {
