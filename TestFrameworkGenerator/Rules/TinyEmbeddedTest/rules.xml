@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<TestFrameworkRules xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CopyJobs>
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Framework</SourceFolder>
+			<FilesToCopy>*</FilesToCopy>
+			<TargetFolder></TargetFolder>
+			<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
+			<AutoIncludeMask>-*</AutoIncludeMask>	
+		</CopyJob>			
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\..\common</SourceFolder>
+			<FilesToCopy>*</FilesToCopy>
+			<TargetFolder></TargetFolder>
+			<AutoIncludeMask>-*</AutoIncludeMask>	
+		</CopyJob>			
+	</CopyJobs>
+</TestFrameworkRules>

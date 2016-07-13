@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ID>com.sysprogs.unittest.tinyembtest</ID>
+	<Name>TinyEmbeddedTest</Name>
+	<Version>1.0b1</Version>
+	<Embedded>
+		<TestSelection xsi:type="HookBasedTestSelection">
+		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
+		  <TestCountExpression>testCount</TestCountExpression>
+		  <AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
+		</TestSelection>
+		<TestReportChannel xsi:type="SemihostingBasedTestChannel">
+		</TestReportChannel>
+		<AdditionalPreprocessorMacros>
+			<string>SYSPROGS_TEST_PLATFORM_EMBEDDED</string>
+		</AdditionalPreprocessorMacros>
+		<AdditionalIncludeDirs>
+		</AdditionalIncludeDirs>
+		<RequiredFrameworks>
+			<string>com.sysprogs.embedded.semihosting_and_profiler@1.1</string>
+		</RequiredFrameworks>
+		<InitializationLines>
+			<string>RunAllTests();</string>
+		</InitializationLines>
+	</Embedded>
+	<Common>
+		<TestDiscoverers>
+		  <TestDiscoverer xsi:type="SymbolBasedScopeDiscoverer">
+			<TargetDemangledNames>true</TargetDemangledNames>
+			<Discoverers>
+			  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
+				<TargetDemangledNames>true</TargetDemangledNames>
+				<TestSymbolRegex>^testInstance_$(Scope)_(.*)$</TestSymbolRegex>
+				<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
+				<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
+				<LocationSymbolFormat/>
+			  </TestDiscoverer>
+			</Discoverers>
+			<ScopeSymbolRegex>^vtable for TestGroup_(.*)$</ScopeSymbolRegex>
+			<ScopeSymbolGroup>1</ScopeSymbolGroup>
+			<ExpectedSymbolType>1</ExpectedSymbolType>
+		  </TestDiscoverer>
+		</TestDiscoverers>
+		<TestHooks>
+		  <TestHook xsi:type="TestsCompletedHook">
+			<Expression>SysprogsTestHook_TestsCompleted</Expression>
+			<Required>true</Required>
+			<SkippedFrames>0</SkippedFrames>
+		  </TestHook>
+		  <TestHook xsi:type="GenericFailHook">
+			<Expression>SysprogsTestHook_TestFailed</Expression>
+			<Required>true</Required>
+			<SkippedFrames>2</SkippedFrames>
+			<AbortFurtherTests>false</AbortFurtherTests>
+		  </TestHook>
+		</TestHooks>
+		<ConfigurableProperties>
+			<PropertyGroups>
+			  <PropertyGroup>
+				<Properties>
+					<PropertyEntry xsi:type="Integral">
+					  <Name>Test time-out (seconds)</Name>
+					  <UniqueID>com.sysprogs.testsettings.timeout</UniqueID>
+					  <Description>Specifies the maximum delay</Description>
+					  <MinValue>0</MinValue>
+					  <MaxValue>86400</MaxValue>
+					  <DefaultValue>1800</DefaultValue>
+					</PropertyEntry>
+				</Properties>
+				<CollapsedByDefault>false</CollapsedByDefault>
+			  </PropertyGroup>
+			</PropertyGroups>
+		</ConfigurableProperties>
+		<IncludeLines>
+			<string>#include &lt;TinyEmbeddedTest.h&gt;</string>
+		</IncludeLines>
+		<RequiredFunctions>
+			<string>_Z11RunAllTestsv</string>
+		</RequiredFunctions>
+		<Samples>
+			<TestFrameworkSample>
+				<UserFriendlyName>Basic TinyEmbeddedTest Demo</UserFriendlyName>
+				<Files>
+					<string>samples\$$PROJECTNAME$$Tests.cpp</string>
+				</Files>
+			</TestFrameworkSample>
+		</Samples>
+	</Common>
+</TestFrameworkDefinition>
