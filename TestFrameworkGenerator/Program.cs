@@ -33,7 +33,9 @@ namespace CppUTest
 
             public string MakeRelativePath(string path)
             {
-                if (!path.Contains("$$") && !Path.IsPathRooted(path))
+                if (path == ".")
+                    path = $"$$SYS:TESTFW_BASE$$/{FrameworkID}";
+                else if (!path.Contains("$$") && !Path.IsPathRooted(path))
                     path = $"$$SYS:TESTFW_BASE$$/{FrameworkID}/" + path.Replace('\\', '/');
                 return path.Replace("$$SYS:BSP_ROOT$$/", $"$$SYS:TESTFW_BASE$$/{FrameworkID}/");
             }

@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<ID>com.sysprogs.unittest.CppUTest</ID>
-	<Name>CppUTest</Name>
-	<Version>3.8b1</Version>
+	<ID>com.sysprogs.unittest.googletest</ID>
+	<Name>GoogleTest</Name>
+	<Version>20160712</Version>
 	<Embedded>
-		<TestSelection xsi:type="HookBasedTestSelection">
-			<HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
-			<TestCountExpression>testCount</TestCountExpression>
-			<AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
+		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
+		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
+		  <TestCountExpression>testCount</TestCountExpression>
+		  <AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
+		  <TestNameExpression>{((testing::TestInfo*)pTests[0])-&gt;test_case_name_-&gt;_M_dataplus-&gt;_M_p:s}_{((testing::TestInfo*)pTests[0])-&gt;name_-&gt;_M_dataplus-&gt;_M_p:s}</TestNameExpression>
 		</TestSelection>
 		<TestReportChannel xsi:type="SemihostingBasedTestChannel">
 		</TestReportChannel>
 		<AdditionalPreprocessorMacros>
-			<string>CPPUTEST_STD_CPP_LIB_DISABLED</string>
 			<string>SYSPROGS_TEST_PLATFORM_EMBEDDED</string>
 		</AdditionalPreprocessorMacros>
 		<AdditionalIncludeDirs>
@@ -22,15 +22,24 @@
 			<string>com.sysprogs.embedded.semihosting_and_profiler@1.1</string>
 		</RequiredFrameworks>
 		<InitializationLines>
-			<string>const char *p = "";</string>
-			<string>CommandLineTestRunner::RunAllTests(0, &amp;p);</string>
+			<string>char *argv = (char *)"";</string>
+			<string>int argc = 1;</string>
+			<string>testing::InitGoogleTest(&amp;argc, &amp;argv);</string>
+			<string>(void)RUN_ALL_TESTS();</string>
 		</InitializationLines>
 	</Embedded>
 	<Linux>
+		<AdditionalPreprocessorMacros>
+		  <string>GTEST_OS_LINUX</string>
+		</AdditionalPreprocessorMacros>
+		<AdditionalLibraries>
+		  <string>pthread</string>
+		</AdditionalLibraries>
 		<TestSelection xsi:type="ArgumentBasedTestSelection">
-			  <GlobalArgumentTemplate>$(PerTestArguments)</GlobalArgumentTemplate>
-			  <TestIDRegex>(.*)::(.*)</TestIDRegex>
-			  <PerTestArgumentTemplate>"TEST($(1), $(2))"</PerTestArgumentTemplate>
+		  <GlobalArgumentTemplate>--gtest_filter=$(PerTestArguments)</GlobalArgumentTemplate>
+		  <PerTestArgumentSeparator>:</PerTestArgumentSeparator>
+		  <PerTestArgumentTemplate>$(1).$(2)</PerTestArgumentTemplate>
+		  <TestIDRegex>(.*)_(.*)</TestIDRegex>
 		</TestSelection>
 		<TestReportChannel xsi:type="PipeBasedTestChannelWithEnv">
 		  <EnvironmentVariableName>SYSPROGS_TEST_REPORTING_PIPE</EnvironmentVariableName>
@@ -38,27 +47,20 @@
 		</TestReportChannel>
 		<AdditionalPreprocessorMacros/>
 		<InitializationLines>
-			<string>CommandLineTestRunner::RunAllTests(argc, argv);</string>
+			<string>testing::InitGoogleTest(&amp;argc, argv);</string>
+			<string>return RUN_ALL_TESTS();</string>
 		</InitializationLines>		
 	</Linux>
 	<Common>
-		<TestDiscoverers>
-		  <TestDiscoverer xsi:type="SymbolBasedScopeDiscoverer">
-			<TargetDemangledNames>false</TargetDemangledNames>
-			<Discoverers>
-			  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
-				<TargetDemangledNames>true</TargetDemangledNames>
-				<TestSymbolRegex>^TEST_$(Scope)_(.*)_TestShell_instance$</TestSymbolRegex>
-				<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
-				<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
-				<LocationSymbolFormat />
-			  </TestDiscoverer>
-			</Discoverers>
-			<ScopeSymbolRegex>^externTestGroup(.*)$</ScopeSymbolRegex>
-			<ScopeSymbolGroup>1</ScopeSymbolGroup>
-			<ExpectedSymbolType>1</ExpectedSymbolType>
-		  </TestDiscoverer>
-		</TestDiscoverers>
+    <TestDiscoverers>
+	  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
+		<TargetDemangledNames>true</TargetDemangledNames>
+		<TestSymbolRegex>^(.*)_(.*)_Test::TestBody\(\)$</TestSymbolRegex>
+		<UniqueNameFormat>{2}_{3}</UniqueNameFormat>
+		<UserFriendlyNameFormat>{2}::{3}</UserFriendlyNameFormat>
+		<LocationSymbolFormat />
+	  </TestDiscoverer>
+    </TestDiscoverers>
 		<TestHooks>
 		  <TestHook xsi:type="TestsCompletedHook">
 			<Expression>SysprogsTestHook_TestsCompleted</Expression>
@@ -90,14 +92,14 @@
 			</PropertyGroups>
 		</ConfigurableProperties>
 		<IncludeLines>
-			<string>#include &lt;CppUTest/CommandLineTestRunner.h&gt;</string>
+			<string>#include &lt;gtest/gtest.h&gt;</string>
 		</IncludeLines>
 		<RequiredFunctions>
-			<string>_ZN21CommandLineTestRunner11RunAllTestsEiPPKc</string>
+			<string>_ZN7testing8internal12UnitTestImpl11RunAllTestsEv</string>
 		</RequiredFunctions>
 		<Samples>
 			<TestFrameworkSample>
-				<UserFriendlyName>Basic CppUTest Demo</UserFriendlyName>
+				<UserFriendlyName>Basic GoogleTest Demo</UserFriendlyName>
 				<Files>
 					<string>samples\$$PROJECTNAME$$Tests.cpp</string>
 				</Files>
@@ -106,6 +108,12 @@
 	</Common>
 	  <AndroidCommandLine>
 		<InheritsFromLinux>true</InheritsFromLinux>
+		<AdditionalPreprocessorMacros>
+		  <string>GTEST_OS_LINUX_ANDROID</string>
+		</AdditionalPreprocessorMacros>
+		<AdditionalLibraries>
+		  <string>pthread</string>
+		</AdditionalLibraries>
 		<TestReportChannel xsi:type="LocalSocketTestChannelWithEnv">
 		  <PipeTimestampVariableName>g_SysprogsTestReportTimestamp</PipeTimestampVariableName>
 		  <EnvironmentVariableName>SYSPROGS_TEST_REPORTING_SOCKET</EnvironmentVariableName>
@@ -115,6 +123,12 @@
 		<UsesExceptions>true</UsesExceptions>
 	  </AndroidCommandLine>
 	  <AndroidApp>
+		<AdditionalPreprocessorMacros>
+		  <string>GTEST_OS_LINUX_ANDROID</string>
+		</AdditionalPreprocessorMacros>
+		<AdditionalLibraries>
+		  <string>pthread</string>
+		</AdditionalLibraries>
 		<UsesSTL>true</UsesSTL>
 		<UsesExceptions>true</UsesExceptions>
 		<InheritsFromLinux>true</InheritsFromLinux>
@@ -128,12 +142,14 @@
 		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
 		  <TestCountExpression>testCount</TestCountExpression>
-		  <TestNameExpression>{((UtestShell *){&amp;})->group_:s}::{((UtestShell *){&amp;})->name_:s}</TestNameExpression>
 		  <AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
+		  <TestNameExpression>{((testing::TestInfo*)pTests[0])-&gt;test_case_name_-&gt;_M_dataplus-&gt;_M_p:s}_{((testing::TestInfo*)pTests[0])-&gt;name_-&gt;_M_dataplus-&gt;_M_p:s}</TestNameExpression>
 		</TestSelection>
 		<InitializationLines>
-			<string>const char *p = "";</string>
-			<string>CommandLineTestRunner::RunAllTests(0, &amp;p);</string>
+			<string>char *argv = (char *)"";</string>
+			<string>int argc = 1;</string>
+			<string>testing::InitGoogleTest(&amp;argc, &amp;argv);</string>
+			<string>(void)RUN_ALL_TESTS();</string>
 		</InitializationLines>
 	  </AndroidApp>
 </TestFrameworkDefinition>

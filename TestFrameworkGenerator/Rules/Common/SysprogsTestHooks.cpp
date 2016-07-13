@@ -1,7 +1,7 @@
 #include "SysprogsTestHooks.h"
 #include <string.h>
 
-#ifdef CPPUTEST_BAREBONE
+#ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
 
 #include <SysprogsProfilerInterface.h>
 

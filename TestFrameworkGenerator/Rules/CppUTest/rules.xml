@@ -97,10 +97,16 @@
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\platforms</SourceFolder>
 			<FilesToCopy>*</FilesToCopy>
 			<TargetFolder>Platforms</TargetFolder>
-			<AutoIncludeMask>*SysprogsTestHooks.h</AutoIncludeMask>	
+			<AutoIncludeMask>-*</AutoIncludeMask>	
 			<SimpleFileConditions>
 				<string>Embedded\.*: $$platform$$ == embedded</string>
 			</SimpleFileConditions>
+		</CopyJob>			
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\..\common</SourceFolder>
+			<FilesToCopy>*</FilesToCopy>
+			<TargetFolder>Platforms</TargetFolder>
+			<AutoIncludeMask>*SysprogsTestHooks.h</AutoIncludeMask>	
 		</CopyJob>			
 		<CopyJob>
 			<SourceFolder>$$BSPGEN:INPUT_DIR$$\src\Platforms\Gcc</SourceFolder>

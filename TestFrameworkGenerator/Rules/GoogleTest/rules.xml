@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<TestFrameworkRules xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CopyJobs>
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$\googletest</SourceFolder>
+			<FilesToCopy>src\*.*;include\*.*</FilesToCopy>
+			<TargetFolder></TargetFolder>
+			<AutoIncludeMask>-*</AutoIncludeMask>
+			<AdditionalIncludeDirs>include;.</AdditionalIncludeDirs>
+			<ProjectInclusionMask>-*\gtest-all.cc;-*\gtest_main.cc;*.cc;*.h</ProjectInclusionMask>
+			<Patches>
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\gtest.cc</FilePath>
+					<AfterLine>#include &lt;vector&gt;</AfterLine>
+					<InsertedLines>
+						<string>#include "SysprogsTestHooks.h"</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\gtest.cc</FilePath>
+					<AfterLine>  if (!should_run_) return;</AfterLine>
+					<InsertedLines>
+						<string>  SysprogsTestHook_TestStartingEx((std::string(test_case_name()) + "_" + std::string(name())).c_str());</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\gtest.cc</FilePath>
+					<AfterLine>  impl-&gt;set_current_test_info(NULL);</AfterLine>
+					<InsertedLines>
+						<string>  SysprogsTestHook_TestEnded();</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\gtest.cc</FilePath>
+					<AfterLine>  if (result_type != TestPartResult::kSuccess) {</AfterLine>
+					<InsertedLines>
+						<string>      SysprogsTestHook_TestFailed(NULL, message.c_str(), NULL);</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\gtest.cc</FilePath>
+					<AfterLine>  repeater->OnTestProgramEnd(*parent_);</AfterLine>
+					<InsertedLines>
+						<string>  SysprogsTestHook_TestsCompleted();</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\gtest.cc</FilePath>
+					<AfterLine>  int num_selected_tests = 0;</AfterLine>
+					<InsertedLines>
+						<string>  std::vector&lt;TestInfo *&gt; testInfos;</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>src\gtest.cc</FilePath>
+					<OldLine>      test_case->set_should_run(test_case->should_run() || is_selected);</OldLine>
+					<NewLine>      test_case->set_should_run(test_case->should_run() || is_selected);
+      if (test_info-&gt;should_run_)
+        testInfos.push_back(test_info);
+    }
+      
+      for (int i = 0; i &lt; testInfos.size(); i++)
+          testInfos[i]-&gt;should_run_ = false;
+    SysprogsTestHook_SelectTests(testInfos.size(), (void **)testInfos.data());
+      for (int i = 0; i &lt; testInfos.size(); i++)
+          if (testInfos[i])
+            testInfos[i]-&gt;should_run_ = true;
+{</NewLine>
+				</Patch>	
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>src\gtest.cc</FilePath>
+					<OldLine># error "Don't know how to get the current time on your system."</OldLine>
+					<NewLine>return 0;</NewLine>
+				</Patch>	
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>src\gtest.cc</FilePath>
+					<OldLine>  gettimeofday(&amp;now, NULL);</OldLine>
+					<NewLine>#ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
+  return 0;
+#else
+  gettimeofday(&amp;now, NULL);
+#endif
+</NewLine>
+				</Patch>	
+			</Patches>			
+		</CopyJob>
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\platforms</SourceFolder>
+			<FilesToCopy>*</FilesToCopy>
+			<TargetFolder>Platforms</TargetFolder>
+			<AutoIncludeMask>-*</AutoIncludeMask>	
+			<SimpleFileConditions>
+				<string>Embedded\.*: $$platform$$ == embedded</string>
+			</SimpleFileConditions>
+		</CopyJob>			
+		<CopyJob>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\..\common</SourceFolder>
+			<FilesToCopy>*</FilesToCopy>
+			<TargetFolder>Platforms</TargetFolder>
+			<AutoIncludeMask>*SysprogsTestHooks.h</AutoIncludeMask>	
+		</CopyJob>			
+	</CopyJobs>
+</TestFrameworkRules>
