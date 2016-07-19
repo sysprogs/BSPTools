@@ -76,6 +76,11 @@ namespace BSPGenerationTools
                 throw new Exception("Startup file not defined for " + Name);
             if (string.IsNullOrEmpty(MCUDefinitionFile) && requirePeripheralRegisters)
                 throw new Exception("Peripheral register definition not found for " + Name);
+            string macroName;
+            if (bspBuilder.ShortName == "Atmel")
+                macroName = "__" + Name + "__";
+            else
+                macroName = Name;
 
             var mcu = new MCU
             {
@@ -86,7 +91,7 @@ namespace BSPGenerationTools
                 HierarchicalPath = string.Format(@"{0}\{1}", bspBuilder.ShortName, fam.Definition.Name),
                 CompilationFlags = new ToolFlags
                 {
-                    PreprocessorMacros = new string[] { Name },
+                    PreprocessorMacros = new string[] { macroName },
                     LinkerScript = LinkerScriptPath,
                 },
                 AdditionalSourceFiles = new string[] { StartupFile },
@@ -660,7 +665,7 @@ namespace BSPGenerationTools
                 }
 
                 if (!matched)
-                    throw new Exception("Cannot find a startup file for " + mcu.Name);
+                 throw new Exception("Cannot find a startup file for " + mcu.Name);
             }
         }
 

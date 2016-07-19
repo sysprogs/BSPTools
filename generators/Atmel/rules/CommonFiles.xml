@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>	
+		<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam\utils</SourceFolder>
+					<FilesToCopy>-*cmsis*.*;*.c;*.h</FilesToCopy>
+					<TargetFolder>utils</TargetFolder>
+					<AutoIncludeMask>*.h</AutoIncludeMask>	
+				</CopyJob>				
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\common\utils</SourceFolder>
+					<FilesToCopy>-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*avr*;*.c;*.h</FilesToCopy>
+					<TargetFolder>common</TargetFolder>
+					<ProjectInclusionMask>-osprintf*;-stdio*;*.c</ProjectInclusionMask>
+					<AutoIncludeMask>*.h</AutoIncludeMask>	
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>parts.h</FilePath>
+							<OldLine>#define SAM4C   (SAM4C4 || SAM4C8 || SAM4C16 || SAM4C32)</OldLine>
+							<NewLine>#define SAM4C   (SAM4C4 || SAM4C8 || SAM4C16 || SAM4C32 || SAMSP)</NewLine>
+						</Patch>					
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>parts.h</FilePath>
+							<OldLine>#define SAM4CM   (SAM4CMP8 || SAM4CMP16 || SAM4CMP32 || \</OldLine>
+							<NewLine>#define SAM4CM   (SAM4CMP8 || SAM4CMP16 || SAM4CMP32 || SAM4CMSP || \</NewLine>
+						</Patch>					
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>parts.h</FilePath>
+							<OldLine>#define SAM4CMP32 (SAM4CMP32_0 || SAM4CMP32_1)</OldLine>
+							<NewLine>#define SAM4CMP32 (SAM4CMP32_0 || SAM4CMP32_1 || __SAM4CMP32C__)</NewLine>
+						</Patch>					
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>parts.h</FilePath>
+							<OldLine>#define SAM4CMS32 (SAM4CMS32_0 || SAM4CMS32_1)</OldLine>
+							<NewLine>#define SAM4CMS32 (SAM4CMS32_0 || SAM4CMS32_1 || __SAM4CMS32C__)</NewLine>
+						</Patch>		
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>parts.h</FilePath>
+							<OldLine>#define SAM4CP   (SAM4CP16)</OldLine>
+							<NewLine>#define SAM4CP   (SAM4CP16 || SAM4CPSP)</NewLine>
+						</Patch>					
+						
+					</Patches>
+				</CopyJob>				
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\thirdparty\CMSIS\Include</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<TargetFolder>CMSIS</TargetFolder>
+					<ProjectFolderName>CMSIS</ProjectFolderName>
+					<AutoIncludeMask>*.h</AutoIncludeMask>	
+				</CopyJob>		
+			</CopyJobs>
+	</CoreFramework>
+	<AdditionalFrameworks>
+	</AdditionalFrameworks>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\EmptyProject</SourceFolder>
+			<DestinationFolder>Samples\EmptyProject</DestinationFolder>
+		</SmartSample>
+	</SmartSamples>
+</FamilyDefinition>

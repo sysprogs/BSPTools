@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>SAM4cp</Name>
+	<DeviceRegex>^SAM4CP.*</DeviceRegex>
+	<FamilySubdirectory>SAM4cp</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam4cp\include\sam4cp.h</StartupFileDir>
+  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam4cp</SourceFolder>
+				<FilesToCopy>-*gcc*;-*iar*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Utils</TargetFolder>
+				<PreprocessorMacros>SAM4CPSP</PreprocessorMacros>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>-*component*;-*instance*;-*pio*;*.h</AutoIncludeMask>
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+
+				<Patches>
+					<Patch xsi:type="InsertLines">
+							<FilePath>Include\sam4cp.h</FilePath>
+							<AfterLine>#define _SAM4CP_</AfterLine>
+							<InsertedLines>
+								<string>#ifdef __SOFTFP__</string>
+								
+								<string> #if defined (__SAM4CP16B__)</string>
+								<string>  #define __SAM4CP16B_0__</string>
+								<string> #endif</string>
+								
+								<string> #else</string>
+								
+								<string> #if defined (__SAM4CP16B__)</string>
+								<string>  #define __SAM4CP16B_1__</string>
+								<string> #endif</string>
+
+								<string> #endif</string>
+												
+							</InsertedLines>
+
+						</Patch>					
+					</Patches>
+				</CopyJob>	
+			</CopyJobs>	
+	</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+     <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
+          <Value>sam4cp</Value>
+        </SysVarEntry>
+     </AdditionalSystemVars>
+
+</FamilyDefinition>
