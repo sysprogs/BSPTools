@@ -58,6 +58,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="StackAndHeap.c">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StackAndHeap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="StartupFileTemplate.c">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

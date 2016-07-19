@@ -186,6 +186,7 @@ namespace LinkerScriptGenerator
         DefineMediumLabels      = 0x08,     //e.g. _mtb_start
         Unaligned               = 0x10,
         ProvideLongLabelsLeadingUnderscores = 0x20, //e.g. __exidx_start
+        NoLoad = 0x40,
     }
 
     public class FillInfo
@@ -222,6 +223,7 @@ namespace LinkerScriptGenerator
         public string EntryPoint;
         public int SectionAlignment = 4;
         public List<Section> Sections;
+        public List<Section> SectionsAfterEnd;
 
         public LinkerScriptTemplate ShallowCopy()
         {

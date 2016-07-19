@@ -173,6 +173,7 @@
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
+					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
 					<SimpleFileConditions>
 						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_1</string>
@@ -235,7 +236,12 @@
 				  </PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>			
-		
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.rtos_type</Key>
+					<Value>com.sysprogs.freertos</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
 		</Framework>
 		<Framework>
 					<!--LwIP -->
@@ -335,4 +341,12 @@
 			</AdditionalSources>
 	</SmartSample>
 	</SmartSamples>
+	<InitializationCodeInsertionPoints>
+		<CodeInsertionPoint>
+			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\}]+\n([ \t]+)(HAL_Init[ \t]*\([ \t]*\);)</Regex>
+			<InitGroupNumber>3</InitGroupNumber>
+			<IndentationGroupNumber>2</IndentationGroupNumber>
+			<InsertAfterGroup>true</InsertAfterGroup>
+		</CodeInsertionPoint>
+	</InitializationCodeInsertionPoints>
 </FamilyDefinition>

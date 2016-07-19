@@ -521,5 +521,6 @@ namespace BSPGenerationTools
         public PropertyList ConfigurableProperties;
         public ConditionalToolFlags[] ConditionalFlags;
         public FrameworkTemplate[] AdditionalFrameworkTemplates;
+        public CodeInsertionPoint[] InitializationCodeInsertionPoints;
     }
 }

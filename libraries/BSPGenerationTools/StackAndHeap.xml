@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<EmbeddedFramework xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ID>com.sysprogs.arm.fixed_stack_and_heap</ID>
+  <UserFriendlyName>Fixed-size stack and heap</UserFriendlyName>
+  <AdditionalSourceFiles>
+	<string>$$SYS:BSP_ROOT$$/StackAndHeap/StackAndHeap.c</string>
+  </AdditionalSourceFiles>
+  <AdditionalPreprocessorMacros>
+	<string>FIXED_STACK_SIZE=$$com.sysprogs.bspoptions.stackheap.stacksize$$</string>
+	<string>FIXED_HEAP_SIZE=$$com.sysprogs.bspoptions.stackheap.heapsize$$</string>
+  </AdditionalPreprocessorMacros>
+  <ConfigurableProperties>
+	<PropertyGroups>
+	  <PropertyGroup>
+		<Properties>
+          <PropertyEntry xsi:type="Integral">
+            <Name>Fixed stack size</Name>
+            <UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
+            <DefaultValue>8192</DefaultValue>
+            <MinValue>0</MinValue>
+            <MaxValue>16777216</MaxValue>
+            <Increment>1024</Increment>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>Fixed heap size</Name>
+            <UniqueID>com.sysprogs.bspoptions.stackheap.stacksize</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the amount of memory (in bytes) to reserve for the stack</Description>
+            <DefaultValue>4096</DefaultValue>
+            <MinValue>0</MinValue>
+            <MaxValue>16777216</MaxValue>
+            <Increment>1024</Increment>
+          </PropertyEntry>		  
+		</Properties>
+		<CollapsedByDefault>false</CollapsedByDefault>
+	  </PropertyGroup>
+	</PropertyGroups>
+  </ConfigurableProperties>
+  <DefaultEnabled>false</DefaultEnabled>
+  <ProjectFolderName>Stack/Heap</ProjectFolderName>
+</EmbeddedFramework>

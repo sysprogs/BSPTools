@@ -13,6 +13,7 @@ using BSPEngine;
 using LinkerScriptGenerator;
 using System.Xml.Serialization;
 using System.IO.Compression;
+using System.Reflection;
 
 namespace BSPGenerationTools
 {
@@ -170,8 +171,17 @@ namespace BSPGenerationTools
             Directory.CreateDirectory(dirs.OutputDir);
         }
 
-        public void Save(BoardSupportPackage bsp, bool produceBSPArchive)
+        public void Save(BoardSupportPackage bsp, bool produceBSPArchive, bool addFixedStackHeapFramework = true)
         {
+            if (addFixedStackHeapFramework)
+            {
+                string dir = Path.Combine(Directories.OutputDir, "StackAndHeap");
+                Directory.CreateDirectory(dir);
+                File.Copy(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "StackAndHeap.c"), Path.Combine(dir, "StackAndHeap.c"));
+                var framework = XmlTools.LoadObject<EmbeddedFramework>(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "StackAndHeap.xml"));
+                bsp.Frameworks = LoadedBSP.Combine(bsp.Frameworks, new[] { framework });
+            }
+
             XmlTools.SaveObject(bsp, Path.Combine(BSPRoot, "BSP.XML"));
 
             string archiveName = string.Format("{0}-{1}.vgdbxbsp", bsp.PackageID.Split('.').Last(), bsp.PackageVersion);

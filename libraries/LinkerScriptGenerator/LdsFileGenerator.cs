@@ -124,6 +124,9 @@ namespace LinkerScriptGenerator
                 }
             }
 
+            sw.WriteLine("\tPROVIDE(end = .);");
+            sw.WriteLine("");
+
             foreach (var kv in _Memories)
             {
                 if (kv.Value == _MainFLASH || kv.Value == _MainRAM)
@@ -145,8 +148,13 @@ namespace LinkerScriptGenerator
                 //OutputSectionDefinition(sw, "\t", section);
             }
 
-            sw.WriteLine("\tPROVIDE(end = .);");
-            sw.WriteLine("");
+
+            if (_ScriptTemplate.SectionsAfterEnd != null)
+            {
+                foreach (var section in _ScriptTemplate.SectionsAfterEnd)
+                    OutputSectionDefinition(sw, "\t", section);
+            }
+
             sw.WriteLine("}");
             sw.WriteLine("");
         }
@@ -170,10 +178,14 @@ namespace LinkerScriptGenerator
                     //OutputDefinition(sw, loadBase, ".", padding);
                 }
 
+                string modifiers = "";
+                if ((section.Flags & SectionFlags.NoLoad) != SectionFlags.None)
+                    modifiers += " (NOLOAD)";
+
                 if (loadBase != null)
-                    sw.WriteLine("{0}{1} : AT({2})", padding, section.Name, loadBase);
+                    sw.WriteLine("{0}{1}{2} : AT({3})", padding, section.Name, modifiers, loadBase);
                 else
-                    sw.WriteLine("{0}{1} :", padding, section.Name);
+                    sw.WriteLine("{0}{1}{2} :", padding, section.Name, modifiers);
 
                 sw.WriteLine(padding + "{");
 

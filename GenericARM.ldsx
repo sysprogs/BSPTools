@@ -116,4 +116,26 @@
 		</Inputs>
 	</Section>
   </Sections>
+  <SectionsAfterEnd>
+	<Section>
+		<Name>.heap</Name>
+		<Flags>ProvideLongLabels NoLoad</Flags>
+		<TargetMemory>SRAM</TargetMemory>
+		<Inputs>
+			<SectionReference>
+				<Flags>Keep</Flags>
+			</SectionReference>
+		</Inputs>
+	</Section>
+	<Section>
+		<Name>.reserved_for_stack</Name>
+		<Flags>ProvideLongLabels NoLoad</Flags>
+		<TargetMemory>SRAM</TargetMemory>
+		<Inputs>
+			<SectionReference>
+				<Flags>Keep</Flags>
+			</SectionReference>
+		</Inputs>
+	</Section>  
+  </SectionsAfterEnd>
 </LinkerScriptTemplate>
