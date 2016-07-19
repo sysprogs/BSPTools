@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>SAMG55</Name>
+	<DeviceRegex>^SAMG55.*</DeviceRegex>
+	<FamilySubdirectory>SAMG55</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\samg\samg55\include\samg55.h</StartupFileDir>
+  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\samg\samg55</SourceFolder>
+				<FilesToCopy>-*gcc*;-*iar*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Utils</TargetFolder>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>-*component*;-*instance*;-*pio*;*.h</AutoIncludeMask>
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+				<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>Include\samg55n19.h</FilePath>
+							<AfterLine>#include "component/udp.h"</AfterLine>
+							<InsertedLines>
+								<string>#include "component/uhp.h"</string>
+							</InsertedLines>
+						</Patch>					
+						<Patch xsi:type="InsertLines">
+							<FilePath>Include\samg55j18.h</FilePath>
+							<AfterLine>#include "component/udp.h"</AfterLine>
+							<InsertedLines>
+								<string>#include "component/uhp.h"</string>
+							</InsertedLines>
+						</Patch>	
+						<Patch xsi:type="InsertLines">
+							<FilePath>Include\samg55g18.h</FilePath>
+							<AfterLine>#include "component/udp.h"</AfterLine>
+							<InsertedLines>
+								<string>#include "component/uhp.h"</string>
+							</InsertedLines>
+						</Patch>					
+						
+					</Patches>
+			</CopyJob>		
+		</CopyJobs>	
+	</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+	     <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
+          <Value>samg55</Value>
+        </SysVarEntry>
+     </AdditionalSystemVars>
+
+</FamilyDefinition>

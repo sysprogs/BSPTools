@@ -1,0 +1,13 @@
+\Adp
+\Calendar
+\Clock
+\Cpu
+\Crc32
+\Delay
+\Fifo
+\Gpio
+\Hugemem
+\Ioport
+\Isp
+\Serial
+\Sleepmgr

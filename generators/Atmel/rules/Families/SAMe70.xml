@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>SAME70</Name>
+	<DeviceRegex>^SAME70.*</DeviceRegex>
+	<FamilySubdirectory>SAME70</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\same70\include\same70.h</StartupFileDir>
+  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\same70</SourceFolder>
+				<FilesToCopy>-*gcc*;-*iar*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Utils</TargetFolder>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>-*component*;-*instance*;-*pio*;*.h</AutoIncludeMask>
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+			</CopyJob>		
+		</CopyJobs>	
+	</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+	 <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
+          <Value>same70</Value>
+        </SysVarEntry>
+     </AdditionalSystemVars>
+</FamilyDefinition>

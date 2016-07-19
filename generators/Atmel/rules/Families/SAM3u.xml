@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>SAM3u</Name>
+	<DeviceRegex>^SAM3U.*</DeviceRegex>
+	<FamilySubdirectory>SAM3U</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam3u\include\sam3u.h</StartupFileDir>
+  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam3u</SourceFolder>
+				<FilesToCopy>-*gcc*;-*iar*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Utils</TargetFolder>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>*.h</AutoIncludeMask>
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+			</CopyJob>		
+		</CopyJobs>	
+	</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+	     <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
+          <Value>sam3u</Value>
+        </SysVarEntry>
+     </AdditionalSystemVars>
+
+</FamilyDefinition>

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>SAM4c</Name>
+	<DeviceRegex>^SAM4C[^MP].*</DeviceRegex>
+	<FamilySubdirectory>SAM4c</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam4c\include\sam4c.h</StartupFileDir>
+  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam4c</SourceFolder>
+				<FilesToCopy>-*gcc*;-*iar*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Utils</TargetFolder>
+				<PreprocessorMacros>SAMSP</PreprocessorMacros>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>*.h</AutoIncludeMask>
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+
+				<Patches>
+					<Patch xsi:type="InsertLines">
+							<FilePath>Include\sam4c.h</FilePath>
+							<AfterLine>#define _SAM4C_</AfterLine>
+							<InsertedLines>
+								<string>#ifdef __SOFTFP__</string>
+								
+								<string> #if defined (__SAM4C16C__)</string>
+								<string>  #define __SAM4C16C_0__</string>
+								<string> #elif defined (__SAM4C32C__)</string>
+								<string>  #define __SAM4C32C_0__</string>
+								<string> #elif defined (__SAM4C32E__)</string>
+								<string>  #define __SAM4C32E_0__</string>
+								<string> #elif defined (__SAM4C4C__)</string>
+								<string>  #define __SAM4C4C_0__</string>
+								<string> #elif defined (__SAM4C8C__)</string>
+								<string>  #define __SAM4C8C_0__</string>
+								<string> #endif</string>
+								
+								<string> #else</string>
+								
+								<string> #if defined (__SAM4C16C__)</string>
+								<string>  #define __SAM4C16C_1__</string>
+								<string> #elif defined (__SAM4C32C__)</string>
+								<string>  #define __SAM4C32C_1__</string>
+								<string> #elif defined (__SAM4C32E__)</string>
+								<string>  #define __SAM4C32E_1__</string>
+								<string> #elif defined (__SAM4C4C__)</string>
+								<string>  #define __SAM4C4C_1__</string>
+								<string> #elif defined (__SAM4C8C__)</string>
+								<string>  #define __SAM4C8C_1__</string>
+								<string> #endif</string>
+
+								<string> #endif</string>
+												
+							</InsertedLines>
+
+						</Patch>					
+					</Patches>
+				</CopyJob>	
+			</CopyJobs>	
+	</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+     <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
+          <Value>sam4c</Value>
+        </SysVarEntry>
+     </AdditionalSystemVars>
+
+</FamilyDefinition>
