@@ -554,9 +554,12 @@ namespace stm32_bsp_generator
                         if (!dict_repeat_reg_addr.ContainsKey(register.Address))
                             dict_repeat_reg_addr[register.Address] = set_name + "_" + register.Name;
                         else if (!(set_name.StartsWith("FMC_") && dict_repeat_reg_addr[register.Address].StartsWith("FSMC_")) &&
-                                !(set_name.StartsWith("ADC1") && dict_repeat_reg_addr[register.Address].StartsWith("ADC1")) &&
-                                (set_type != "SC_UART") && (set_type != "SC_SPI") && (set_type != "SC_I2C") && (set_type != "COMP") && (set_type != "OPAMP"))// This register is removed later on anyway as it is an either/or thing
-                             throw new Exception("Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
+                                !(set_name.StartsWith("ADC") && dict_repeat_reg_addr[register.Address].StartsWith("ADC1")) &&
+                                 !(set_name.StartsWith("DAC") && dict_repeat_reg_addr[register.Address].StartsWith("DAC")) &&
+                                 !(set_name.StartsWith("COMP") && dict_repeat_reg_addr[register.Address].StartsWith("COMP")) &&
+                                (set_type != "SC_UART") && (set_type != "SC_SPI") && (set_type != "SC_I2C") && (set_type != "COMP") && (set_type != "OPAMP") && (set_type != "OPAMP_Common"))// This register is removed later on anyway as it is an either/or thing
+                                                                                                                                                             //        throw new Exception("Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
+                            Console.WriteLine("560 PrepReg throw new Exception(Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
 
                     if (subregisters.ContainsKey(set_type + "_" + register.Name))
                     {
@@ -768,6 +771,8 @@ namespace stm32_bsp_generator
                         continue;   //Bug: one header is missing the definition
                     else if (set_type == "RCC" && register.Name == "CRRCR")
                         continue;   //Bug: one header is missing the definition stm32l041xx.h
+                    else if (set_type == "DCMI" && ( register.Name == "RISR" || register.Name == "MISR"))
+                        continue;
                     else if (subregisters.ContainsKey(set_name + "_" + register.Name))
                     {
                         register.SubRegisters = subregisters[set_name + "_" + register.Name].ToArray();
@@ -1040,6 +1045,17 @@ namespace stm32_bsp_generator
                     || line.Contains("COMP_BASE + 0x0") //currently not supported
                     || line.Contains("OPAMP_BASE + 0x0") //currently not supported
                     || line.Contains("/* USB device FS") //currently not supported
+                    || line.Contains("/* Legacy define") //currently not supported
+                    || line.Contains("#define ADC1_2_COMMON       ADC12_COMMON") //currently not supported
+                    || (line.Contains("#define ADC3_4_COMMON") && line.Contains("ADC34_COMMON")) //currently not supported
+                    || (line.Contains("#define ADC") && line.Contains("ADC1_COMMON")) //currently not supported
+                    || line.StartsWith("#define COMP12_COMMON       ((COMP_Common_TypeDef *) COMP_BASE) ")
+                     || (line.StartsWith("#define OPAMP") && line.Contains("((OPAMP_Common_TypeDef *) OPAMP"))
+                       || line.StartsWith("/* Aliases to keep compatibility after ")
+                    || (line.StartsWith("#define DFSDM_Channel") && line.Contains("DFSDM1_Channel"))
+                   || (line.StartsWith("#define DFSDM_Filter") && line.Contains(" DFSDM1_Filter"))
+                   || (line.StartsWith("#define DAC ") && line.Contains(" DAC1"))
+
                         )
                     continue;
                 
@@ -1105,6 +1121,9 @@ namespace stm32_bsp_generator
                     || line.StartsWith("#define FLASH_BANK1_END")
                     || line.StartsWith("#define FLASH_BANK2_END")
                     || line.StartsWith("#define USB_PMAADDR")
+                    || line.StartsWith("#define SRAM_BASE")
+                   || line.StartsWith("#define SRAM_BB_BASE")
+                    || line.StartsWith("#define SRAM_SIZE_MAX")
                     )
                     continue;
 
@@ -1128,8 +1147,10 @@ namespace stm32_bsp_generator
                     if (macroName.EndsWith("_BASE"))
                     {
                         string regset_name = macroName.Substring(0, macroName.Length - "_BASE".Length);
-                        Regex base_addr_regex = new Regex(@"\(\(([^\(\)]*)\)([^\(\)]*)\)");
+                        Regex base_addr_regex = new Regex(@"\(\(([^\(\)]*)\)([^\(\)]*)\)");//#define PERIPH_BASE           ((uint32_t)0x40000000U)  
                         m = base_addr_regex.Match(value);
+                        if (!m.Success && !value.Contains("+"))
+                            m = Regex.Match(value, @"()(0x[0-9A-FU]+)");//#define PERIPH_BASE           0x40000000U 
                         if (m.Success)
                         {
                             string addr = m.Groups[2].Value;
@@ -1142,8 +1163,15 @@ namespace stm32_bsp_generator
                         if (m.Success)
                         {
                             string regset2_name = m.Groups[1].Value;
-                            addresses[regset_name] = addresses[regset2_name];
-
+                            if (addresses.ContainsKey(regset2_name))// && addresses.ContainsKey(regset_name))
+                                addresses[regset_name] = addresses[regset2_name];
+                            else
+                            {
+                                if (!addresses.ContainsKey(regset_name))
+                                    Console.WriteLine("ERR1153 !addresses.ContainsKey(regset2_name) " + regset_name);
+                                if (!addresses.ContainsKey(regset2_name))
+                                    Console.WriteLine("ERR1154 !addresses.ContainsKey(regset2_name) " + regset2_name);
+                            }
                             continue;
                         }
 
@@ -1157,15 +1185,23 @@ namespace stm32_bsp_generator
 
                             continue;
                         }
-
+                        int s = 0;
+                        if (line.Contains("#define APBPERIPH_BASE"))
+                            s++;
                         Regex base_addr_equals_plus_regex = new Regex(@"\(([^ ]*)_BASE[ ]+\+[ ]+(.*)\)");
                         m = base_addr_equals_plus_regex.Match(value);
                         if (m.Success)
                         {
                             string regset2_name = m.Groups[1].Value;
                             string addr = m.Groups[2].Value;
-                            addresses[regset_name] = addresses[regset2_name] + ParseHex(addr);
+                            if (addresses.ContainsKey(regset2_name))//&& addresses.ContainsKey(regset_name))
+                                addresses[regset_name] = addresses[regset2_name] + ParseHex(addr);
+                            else
+                            {
+                             if (!addresses.ContainsKey(regset2_name))
+                                    Console.WriteLine("1180 Per Reg!addresses.ContainsKey(regset2_name" + regset2_name + s);
 
+                            }
                             continue;
                         }
 
@@ -1191,17 +1227,19 @@ namespace stm32_bsp_generator
         }
 
 
+
         private static Dictionary<string, List<HardwareSubRegister>> ProcessSubregisters(string fileContents, string fileName, RegisterParserConfiguration cfg, RegisterParserErrors errors)
         {
             Dictionary<string, List<HardwareSubRegister>> result = new Dictionary<string, List<HardwareSubRegister>>();
+            Dictionary<string, uint> aDefPosDict = new Dictionary<string, uint>();
 
             // Process subregisters
-            Regex rgSubregisterList = new Regex(@"/\*[!]?[<]?[\*]+[ ]+Bit[s]? definition for ([^_ ]*)_([^ ]*)[ ]+register[ ]+[*]+/[ ]*");
+            Regex rgSubregisterList = new Regex(@"/\*[!]?[<]?[\*]+[ ]+Bit[s]? definition [genric ]*for ([^_ ]*)_([^ ]*)[ ]+register[ ]+[*]+/[ ]*");
             Regex rgSubregisterListWildcard = new Regex(@"/\*+ +Bit definition for ([A-Z0-9a-z]+)_([A-Z0-9a-z]+) \(x *=[^()]+\) +register +\*+/");
             Regex rgSubregisterListWildcard2 = new Regex(@"/\*+ +Bit definition for ([A-Z0-9a-z]+)_([A-Z0-9a-z]+) registers? +\(x *=[^()]+\) +\*+/");
             Regex rbSubregisterListEth = new Regex(@"/\*+[ ]+Bit definition for (.*) [Rr]egister[ ]+[1-9]*[ ]*\*+/");
             Regex rbSubregisterListUsb = new Regex(@"/\*+ +([^ ]+ .*) register bits? definitions +\*+/", RegexOptions.IgnoreCase);
-            Regex bit_def_regex = new Regex(@"#define[ ]+([^ \(\)]*)[ \t]+[,]?[ ]*\(\(([^\(\)]*)\)([0-9A-Fa-fx]*)\)[ ]*(/\*)?(!<)?[ ]*([^\*/]*)(\*/)?");
+            Regex bit_def_regex = new Regex(@"#define[ ]+([^ \(\)]*)[ \t]+[,]?[ ]*\(\(([^\(\)]*)\)([0-9A-Fa-fx]*)[U]?\)[ ]*(/\*)?(!<)?[ ]*([^\*/]*)(\*/)?");
 
 
             string[] lines = fileContents.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
@@ -1226,6 +1264,11 @@ namespace stm32_bsp_generator
                 else if (((m = rbSubregisterListEth.Match(line)).Success) || (m = rbSubregisterListUsb.Match(line)).Success)
                 {
                     var m4 = bit_def_regex.Match(lines[nextLine]);
+                    if (!m4.Success)
+                        m4 = Regex.Match(lines[nextLine], @"#define[ \t]+([\w\d]+)[ \t]+([0-9A-Fa-fx]*)[U]?");
+                    if (!m4.Success)
+                        errors.AddError(new RegisterParserErrors.BadBitDefinition { LineContents = line, LineNumber = nextLine - 1, FileName = fileName });
+
                     string subreg_def = m4.Groups[1].Value;
                     int index = subreg_def.IndexOf("_");
                     if (index <= 0)
@@ -1268,6 +1311,9 @@ namespace stm32_bsp_generator
                         && !line.Contains("USB_LPMCSR")
                         && !line.Contains("USB_DADDR")
                         && !line.Contains("USB_BASE")
+                        && !line.Contains("USB_CNTR")
+                        && !line.Contains("USB_BCDR")
+                        && !line.Contains("USB_FNR")
                         && !line.Contains("USB_PMAADDR")
                         && !line.Contains("define HRTIM_")  //Not much formal system in comments to parse. Currently ignoring.
                         )
@@ -1310,11 +1356,54 @@ namespace stm32_bsp_generator
                     foreach (var patch in cfg.SubregisterLinePatches)
                         if (patch.Apply(ref line))
                             break;
-
+                    string subreg_name = "";
+                    string reg_type = "";
+                    string address_offset = "";
+                    bool aParseOk = false;
                     m = bit_def_regex.Match(line);
-                    if (m.Success)
+                    if (!m.Success)
                     {
-                        string subreg_name = m.Groups[1].Value;
+                        m = Regex.Match(line, @"#define[ \t]+([\w]+)[ \t]+[\(]?([\w]+)[\)]?");
+                        if (m.Success && !m.Groups[1].Value.EndsWith("_Pos") && !m.Groups[1].Value.EndsWith("_Msk") && !line.Contains("<<"))
+                        {
+                            subreg_name = m.Groups[1].Value;
+                            reg_type = "uint32_t";
+                            if (m.Groups[2].Value.StartsWith("0x"))
+                            {
+                                address_offset = m.Groups[2].Value.Replace("U", "");//#define GPIO_OTYPER_OT_0                (0x00000001U)     
+                                aDefPosDict[m.Groups[1].Value] = UInt32.Parse(address_offset.Replace("x", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                            }
+                            else
+                            {
+                                if (aDefPosDict.ContainsKey(m.Groups[2].Value))
+                                {
+                                    address_offset = FormatToHex(aDefPosDict[m.Groups[2].Value]);
+
+                                    // for Legacy defines */
+                                    aDefPosDict[m.Groups[1].Value] = aDefPosDict[m.Groups[2].Value];
+                                } else
+                                    if (Regex.IsMatch(m.Groups[2].Value, "(0x[0-9A-FU]+)"))
+                                       aDefPosDict.Add(m.Groups[1].Value, (uint)ParseHex(m.Groups[2].Value));
+                                    else {
+                                            Console.WriteLine("No Hex value:{0}, : {1}", m.Groups[1].Value, m.Groups[2].Value);
+                                           continue;
+                                       } 
+                            }
+                                aParseOk = true;
+                            }
+                    }
+                    else
+                    {
+                         subreg_name = m.Groups[1].Value;
+                         reg_type = m.Groups[2].Value;
+                         address_offset = m.Groups[3].Value;
+                        if (!aDefPosDict.ContainsKey(m.Groups[1].Value))
+                            aDefPosDict.Add(m.Groups[1].Value, (uint)ParseHex(m.Groups[3].Value)); 
+                         aParseOk = true;
+                    }
+
+                    if (aParseOk)
+                    {
                         string shortSubregName;
                         if (cfg.IsSubregisterIgnored(subreg_name))
                             continue;
@@ -1339,14 +1428,14 @@ namespace stm32_bsp_generator
                                 subreg_name != "SCB_AIRCR_VECTKEY" &&
                                 subreg_name != "HASH_CR_LKEY" &&
                                 subreg_name != "WDG_KR_KEY" &&
+                                !subreg_name.StartsWith("RCC_CFGR_") &&
                                 subreg_name != "FLASH_OPTR_SRAM2_RST")
                             {
                                 throw new Exception("Potential missed known subregister value!");
                             }
                         }
 
-                        string reg_type = m.Groups[2].Value;
-                        string address_offset = m.Groups[3].Value;
+
                         int offset, size;
                         try
                         {
@@ -1391,12 +1480,29 @@ namespace stm32_bsp_generator
                     }
                     else
                     {
-                        if (line.StartsWith("#define") && line.Contains("0x") && !line.Contains("CLEAR_REG"))
+                        //                        if (line.StartsWith("#define") && line.Contains("0x") && !line.Contains("CLEAR_REG"))
+                        if (line.StartsWith("#define") && line.Contains("0x") && !line.Contains("CLEAR_REG") && !line.Contains("_Pos"))
                             errors.AddError(new RegisterParserErrors.BadSubregisterDefinition { FileName = fileName, LineContents = line, LineNumber = nextLine - 1 });
                         else if (line.Contains("/*                         USB Device General registers                       */"))
                             break;
                         else if (line.StartsWith("/*******") || line.Contains("Bit definition") || line.StartsWith("/*!<Common registers */"))
                             break;
+                        else
+                        {
+                            var m1 = Regex.Match(line, @"#define[ \t]+([\w]+_Pos)[ \t]+\(([0-9A-Fa-f]+)U\)");
+                            if (m1.Success)
+                                aDefPosDict[m1.Groups[1].Value] = UInt32.Parse(m1.Groups[2].Value);
+                            else
+                            {
+                                m1 = Regex.Match(line, @"#define[ \t]+([\w]+)[ \t]+\(0x([0-9A-Fa-fx]+)U << ([\w]+)\)");
+                                if (m1.Success)
+                                {
+                                    UInt32 aValueMask = UInt32.Parse(m1.Groups[2].Value, System.Globalization.NumberStyles.AllowHexSpecifier);
+                                    aValueMask = aValueMask << (int)aDefPosDict[m1.Groups[3].Value];
+                                    aDefPosDict[m1.Groups[1].Value] = aValueMask;
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -1431,6 +1537,8 @@ namespace stm32_bsp_generator
         {
             if (hex.StartsWith("0x"))
                 hex = hex.Substring(2);
+            if (hex.Contains("U"))
+                hex = hex.Replace("U","");
             return ulong.Parse(hex, System.Globalization.NumberStyles.HexNumber);
         }
 

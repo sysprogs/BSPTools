@@ -24,204 +24,124 @@ namespace stm32_bsp_generator
         {
             List<KeyValuePair<Regex, MemoryLayout>> _SpecialMemoryLayouts = new List<KeyValuePair<Regex, MemoryLayout>>();
 
-            List<KeyValuePair<Regex, XmlElement>> _KnownSTM32Devices = new List<KeyValuePair<Regex,XmlElement>>();
-
-            public void LoadDevicesFromCube(ZipFile zf, string familyFile) // Load diveces from Cube
+           public void GetMemoryMcu(MCUFamilyBuilder pfam)
             {
-                var entry = zf.Entries.First(e => e.FileName == familyFile);
-                MemoryStream db = new MemoryStream();
-                zf.ExtractEntry(entry, db);
-
-                STM32CubeDeviceDatabase.LoadXml(Encoding.UTF8.GetString(db.ToArray()));
-                foreach (XmlElement node in STM32CubeDeviceDatabase.DocumentElement.SelectNodes("device"))
+                if (pfam.FamilyFilePrefix.StartsWith("STM32W1"))
                 {
-                    foreach (var id in node.SelectSingleNode("PN").InnerText.Split(','))
-                        _KnownSTM32Devices.Add(new KeyValuePair<Regex, XmlElement>(new Regex(id.Replace('x', '.')), node));
-                }
-            }
+                    string kvStr = "STM32W108HB";
+                    MemoryLayout layoutW1 = new MemoryLayout { DeviceName = "STM32W108xx", Memories = new List<Memory>() };
+                    layoutW1.Memories.Add(new Memory
+                    {
+                        Name = "FLASH",
+                        Access = MemoryAccess.Undefined,// Readable | MemoryAccess.Writable | MemoryAccess.Executable
+                        Type = MemoryType.FLASH,
+                        Start = 0x08000000,
+                        Size = 128 * 1024
+                    });
 
+                    layoutW1.Memories.Add(new Memory
+                    {
+                        Name = "SRAM",
+                        Access = MemoryAccess.Undefined,// MemoryAccess.Writable,
+                        Type = MemoryType.RAM,
+                        Start = 0x20000000,
+                        Size = 8 * 1024
+                    });
+
+                    _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(kvStr.Replace('x', '.') + ".*"), layoutW1));
+
+                }
+                else {
+                    string aDirIcf = pfam.Definition.StartupFileDir;
+                    if (!aDirIcf.EndsWith("gcc"))
+                        throw new Exception("No Gcc sturtup Tamplate");
+                    aDirIcf = aDirIcf.Replace("\\gcc", "\\iar\\linker");
+                    if (!Directory.Exists(aDirIcf))
+                        throw new Exception("No dir " + aDirIcf);
+
+                    foreach (var fnIcf in Directory.GetFiles(aDirIcf, "stm32*_flash.icf"))
+                    {
+                        string kvStr = Path.GetFileName(fnIcf).Replace("_flash.icf", "");
+                        _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(kvStr.Replace('x', '.') + ".*", RegexOptions.IgnoreCase), GetLayoutFromICF(fnIcf, kvStr)));
+                    }
+                }
+
+            }
+            const int  NO_DATA = -1;
+            public MemoryLayout GetLayoutFromICF(string pFileNameICF,string pNameDev)
+            {
+                MemoryLayout layout = new MemoryLayout { DeviceName = pNameDev, Memories = new List<Memory>() };
+                int StartFlash = NO_DATA;
+                int SizeFlash = NO_DATA;
+                /*int StartRAM = NO_DATA;
+                int SizeRAM = NO_DATA;
+                int StartCCM = NO_DATA;
+                int SizeCCM = NO_DATA;
+                */
+                foreach (var ln in File.ReadAllLines(pFileNameICF))
+                {
+                    var m = Regex.Match(ln, @"define symbol __ICFEDIT_region_([\w\d]+)_start__[ ]*=[ ]*([x0-9A-Faf]+)[ ]*;");
+                    if (m.Success)
+                    {
+                        StartFlash = (int)ParseHex(m.Groups[2].Value);
+                        continue;
+                    }
+                     m = Regex.Match(ln, @"define symbol __ICFEDIT_region_([\w\d]+)_end__[ ]*=[ ]*([x0-9A-Faf]+)[ ]*;");
+                    if (m.Success)
+                    {
+                        SizeFlash = (int)ParseHex(m.Groups[2].Value);
+                        MemoryType aTypeData = MemoryType.RAM;
+                        string aNameData = m.Groups[1].Value;
+                        if (m.Groups[1].Value.Contains("ROM"))
+                            aTypeData = MemoryType.FLASH;
+
+                        if (m.Groups[1].Value == "ROM")
+                            aNameData = "FLASH";
+                        else  if (m.Groups[1].Value == "RAM")
+                                aNameData = "SRAM";
+
+                        if (StartFlash != NO_DATA && SizeFlash != NO_DATA)
+                        {
+                            SizeFlash  -= StartFlash;
+                            if ((SizeFlash % 1024) != 0) SizeFlash += 1;
+                            layout.Memories.Add(new Memory
+                            {
+                                Name = aNameData,
+                                Access = MemoryAccess.Undefined,// Readable | MemoryAccess.Writable | MemoryAccess.Executable
+                                Type = aTypeData,
+                                Start = (uint)StartFlash,
+                                Size = (uint)SizeFlash
+                            });
+                        }
+                        else
+                            throw new Exception("Error ld size flash");
+                        StartFlash = NO_DATA;
+                        continue;
+                    }
+                }
+
+                return layout;
+            }
             public STM32BSPBuilder(BSPDirectories dirs, string cubeDir)
                 : base(dirs)
             {
                 ShortName = "STM32";
-                var zf = new ZipFile(File.OpenRead(cubeDir + @"\plugins\projectmanager.jar"));
-
-                LoadDevicesFromCube(zf, "devices/STM32F0.db");
-                LoadDevicesFromCube(zf, "devices/STM32F1.db");
-                LoadDevicesFromCube(zf, "devices/STM32F2.db");
-                LoadDevicesFromCube(zf, "devices/STM32F3.db");
-                LoadDevicesFromCube(zf, "devices/STM32F4.db");
-                LoadDevicesFromCube(zf, "devices/STM32F7.db");
-                LoadDevicesFromCube(zf, "devices/STM32L0.db");
-                LoadDevicesFromCube(zf, "devices/STM32L1.db");
-                LoadDevicesFromCube(zf, "devices/STM32L4.db");
-                LoadDevicesFromCube(zf, "devices/STM32W.db");
-
-                foreach (var line in File.ReadAllLines(dirs.RulesDir + @"\stm32memory.csv"))
-                {
-                    string[] items = line.Split(',');
-                    if (!items[0].StartsWith("STM32"))  // || items[0].StartsWith("STM32F328") || items[0].StartsWith("STM32F334") || items[0].StartsWith("STM32F358")) // TODO: support these as well
-                        continue;
-
-                    MemoryLayout layout = new MemoryLayout { DeviceName = items[0], Memories = new List<Memory>() };
-                    var flash = AddMemory(layout, "FLASH", MemoryType.FLASH, items, 13, true);
-                    var sram = AddMemory(layout, "SRAM", MemoryType.RAM, items, 1, true);
-                    var sram2 = AddMemory(layout, "SRAM2", MemoryType.RAM, items, 3, false);
-                    var sram3 = AddMemory(layout, "SRAM3", MemoryType.RAM, items, 5, false);
-
-                    if (sram3 != null && sram3.Start == sram2.End)
-                    {
-                        sram2.Size += sram3.Size;
-                        if (!layout.Memories.Remove(sram3))
-                            throw new Exception("Cannot remove old memory after merging it");
-                    }
-
-                    if (sram2 != null && sram2.Start == sram.End)
-                    {
-                        sram.Size += sram2.Size;
-                        if (!layout.Memories.Remove(sram2))
-                            throw new Exception("Cannot remove old memory after merging it");
-                    }
-
-                    AddMemory(layout, "CCM", MemoryType.RAM, items, 7, false);
-                    AddMemory(layout, "EEPROM", MemoryType.FLASH, items, 9, false);
-                    AddMemory(layout, "EEPROM2", MemoryType.FLASH, items, 11, false);
-                    var flash2 = AddMemory(layout, "FLASH2", MemoryType.FLASH, items, 15, false);
-                    AddMemory(layout, "BACKUP_SRAM", MemoryType.RAM, items, 17, false);
-
-                    if (flash2 != null && flash2.Start == flash.End)
-                    {
-                        flash.Size += flash2.Size;
-                        if (!layout.Memories.Remove(flash2))
-                            throw new Exception("Cannot remove old memory after merging it");
-                    }
-
-                    if (flash.Start != FLASHBase)
-                        throw new Exception("Unexpected FLASH start!");
-                    if (sram.Start != SRAMBase)
-                        throw new Exception("Unexpected SRAM start!");
-
-                    _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(items[0].Replace('x', '.') + ".*"), layout));
-                }
             }
 
             public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
             {
                 base.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout, generalizedName);
-                if (familyFilePrefix.StartsWith("STM32F7"))
-                {
-                    //We only use this layout for SRAM configurations because the ST system file expects vectors at 0x20010000 and not at 0x20000000.
-                    //If the end user wants to distinguish between different memory types, they will need to modify the linker script.
-                    var updatedLayout = layout.Clone();
-                    var sram = updatedLayout.Memories.First(m => m.Start == SRAMBase);
-                    sram.Start += 0x10000;
-                    sram.Size -= 0x10000;
-
-                    updatedLayout.Memories.Add(new Memory { Name = "DTCM_RAM", Size = 64 * 1024, Start = SRAMBase, Access = MemoryAccess.Readable | MemoryAccess.Writable | MemoryAccess.Executable });
-                    updatedLayout.Memories.Add(new Memory { Name = "ITCM_RAM", Size = 16 * 1024, Start = 0, Access = MemoryAccess.Readable | MemoryAccess.Writable | MemoryAccess.Executable });
-                    using (var gen = new LdsFileGenerator(LDSTemplate, updatedLayout) { RedirectMainFLASHToRAM = true })
-                    {
-                        using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_sram.lds")))
-                            gen.GenerateLdsFile(sw);
-                    }
-
-                }
             }
-
-            XmlDocument STM32CubeDeviceDatabase = new XmlDocument();
-            Regex rgMemoryDef = new Regex(@"I(RAM[1-2]?|ROM[1-9]?)\(0x([0-9A-F]+)-0x([0-9A-F]+)\)");
-
-            List<Memory> LookupMemorySizesFromSTM32CubeDatabase(string mcuName)
-            {
-                var node = _KnownSTM32Devices.FirstOrDefault(kv => kv.Key.IsMatch(mcuName)).Value;
-                if (node == null)
-                {
-                    Console.WriteLine("Cannot find device in STM32 database: " + mcuName);
-                    return null;
-                }
-
-                List<Memory> mems = new List<Memory>();
-                var memNode = node.SelectSingleNode("Mem");
-                if (memNode == null)
-                    memNode = node.SelectSingleNode("Cpu");
-
-                foreach(var mem in memNode.InnerText.Split(' '))
-                {
-                    var m = rgMemoryDef.Match(mem);
-                    if (m.Success)
-                    {
-                        uint start = uint.Parse(m.Groups[2].Value, System.Globalization.NumberStyles.HexNumber), end = uint.Parse(m.Groups[3].Value, System.Globalization.NumberStyles.HexNumber);
-                        string name = m.Groups[1].Value;
-                        if (name == "ROM")
-                            name = "FLASH";
-                        else if (name == "RAM")
-                            name = "SRAM";
-                        else if (name == "RAM2")
-                            name = "CCM";
-                        else
-                            throw new Exception("Unexpected memory name");
-
-                        Memory mobj = new Memory { Name = name , Start = start, Size = end - start + 1, Type = (name == "FLASH") ? MemoryType.FLASH : MemoryType.RAM };
-                        mems.Add(mobj);
-                    }
-                }
-
-                mems.Sort((a, b) => a.Type.CompareTo(b.Type));
-
-                if (mcuName.StartsWith("STM32L4", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    //The definition files in the CubeMX set the main SRAM size 128K while it should actually be 96K. We fix it manually.
-                    if (mems.Count != 2 || mems[1].Name != "SRAM" || mems[1].Size != 131072)
-                        throw new Exception("Unexpected L4 memory size. Definitions finally fixed? Please investigate.");
-
-                    mems[1].Size = 96 * 1024;
-                    mems.Add(new Memory {
-                        Name = "SRAM2",
-                        Size = (128 - 96) * 1024,
-                        Type = MemoryType.RAM,
-                        Start = 0x10000000,
-                    });
-                }
-                return mems;
-            }
-
-            public const string PaddedKnownMemoryMismatches = ";STM32F334K4;STM32F334C4;STM32F334C6;STM32F334C8;STM32F334K6;STM32F334K8;STM32F334R6;STM32F334R8;STM32F205RB;STM32F205RC;STM32F205VB;STM32F205VC;STM32F205ZC;STM32F302CC;STM32F302RC;STM32F302VC;STM32F303CB;STM32F303RB;STM32F303VB;STM32F328C8;";
 
             public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
-                var stm32Mems = LookupMemorySizesFromSTM32CubeDatabase(mcu.Name);
 
                 foreach (var kv in _SpecialMemoryLayouts)
                     if (kv.Key.IsMatch(mcu.Name))
-                    {
-                        if (stm32Mems != null)
-                        {
-                            foreach(var mem in stm32Mems)
-                            {
-                                var foundMem = kv.Value.Memories.FirstOrDefault(m => m.Name == mem.Name);
-                                if (foundMem == null)
-                                    Console.WriteLine("Cannot find {0} in {1}", mem.Name, mcu.Name);
-                                else if (foundMem.Start != mem.Start)
-                                    Console.WriteLine("Memory base mismatch for {0} in {1}", mem.Name, mcu.Name);
-                                else if (foundMem.Size != mem.Size)
-                                {
-                                    if (!PaddedKnownMemoryMismatches.Contains(mcu.Name))
-                                        Console.WriteLine("Memory size mismatch for {0} in {1} (ST has {2}, we have {3})", mem.Name, mcu.Name, mem.SizeWithSuffix, foundMem.SizeWithSuffix);
-                                }
-                            }
-                        }
-
                         return kv.Value;
-                    }
 
                 MemoryLayout layout = new MemoryLayout { DeviceName = mcu.Name, Memories = new List<Memory>() };
 
-                if (stm32Mems != null)
-                {
-                    layout.Memories.AddRange(stm32Mems);
-                }
-                else
-                {
                     layout.Memories.Add(new Memory
                     {
                         Name = "FLASH",
@@ -239,13 +159,7 @@ namespace stm32_bsp_generator
                         Start = SRAMBase,
                         Size = (uint)mcu.RAMSize,
                     });
-                }
 
-
-                if (layout.Memories.First(m => m.Name == "FLASH").Start != FLASHBase)
-                    throw new Exception("Unexpected FLASH start!");
-                if (layout.Memories.First(m => m.Name == "SRAM").Start != SRAMBase)
-                    throw new Exception("Unexpected SRAM start!");
 
                 return layout;
             }
@@ -272,7 +186,8 @@ namespace stm32_bsp_generator
                  yield return new  StartupFileGenerator.InterruptVectorTable{
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
                     MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
-                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn, "g_pfnVectors:", @"/\*{10,999}|^[^/\*]+\*/$", @"^[ \t]+\.word[ \t]+([^ ]+)", null, @"^[ \t]+/\*", ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)", 1, 2)
+                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn, "g_pfnVectors:", @"/\*{10,999}|^[^/\*]+\*/
+                $", @"^[ \t]+\.word[ \t]+([^ ]+)", null, @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*", ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)", 1, 2)
                 };
             }
         }
@@ -306,11 +221,11 @@ namespace stm32_bsp_generator
                         return r;
                     };
 
-                 //func();
-                tasks.Add(Task.Run(func));
+            //  func();
+              tasks.Add(Task.Run(func));
             }
 
-            Task.WaitAll(tasks.ToArray());
+           Task.WaitAll(tasks.ToArray());
             var errorCnt = errors.ErrorCount;
             if (errorCnt != 0)
             {
@@ -390,6 +305,7 @@ namespace stm32_bsp_generator
 
             foreach (var fam in allFamilies)
             {
+                bspBuilder.GetMemoryMcu(fam);
                 var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
                 if (rejectedMCUs.Length != 0)
                 {

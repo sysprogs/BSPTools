@@ -3,8 +3,8 @@
 	<Name>STM32F4</Name>
 	<DeviceRegex>^STM32F4.*</DeviceRegex>
 	<FamilySubdirectory>STM32F4xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.12.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.12.0\Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
@@ -13,6 +13,22 @@
 			<AutoOptions>STM32F405xx;STM32F415xx;STM32F407xx;STM32F417xx;STM32F427xx;STM32F437xx;STM32F429xx;STM32F439xx;STM32F446xx;STM32F469xx;STM32F479xx</AutoOptions>
 			<Options>
 			<Option>
+					<Value>STM32F412Cx</Value>
+					<Regex>STM32F412CG</Regex>
+			</Option>
+			<Option>
+					<Value>STM32F412Zx</Value>
+					<Regex>STM32F412ZG</Regex>
+			</Option>
+			<Option>
+					<Value>STM32F412Rx</Value>
+					<Regex>STM32F412RG</Regex>
+			</Option>
+			<Option>
+					<Value>STM32F412Vx</Value>
+					<Regex>STM32F412VG</Regex>
+			</Option>
+				<Option>
 					<Value>STM32F410Cx</Value>
 					<Regex>STM32F410C8|STM32F410CB</Regex>
 				</Option>
@@ -44,7 +60,10 @@
 			<UnsupportedMCUs>STM32F479.*</UnsupportedMCUs>
 			<AutoOptions>STM32F401xx;STM32F446xx;STM32F469xx;STM32F410xx</AutoOptions>
 			<Options>
-	
+				<Option>
+					<Value>STM32F412xG</Value>
+					<Regex>STM32F412.G</Regex>
+				</Option>
 				<Option>
 					<Value>STM32F40_41xxx</Value>
 					<Regex>STM32F4[01]5..|STM32F4[01]7..</Regex>
@@ -89,12 +108,12 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\STM32F4xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.12.0\Drivers\STM32F4xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.12.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
@@ -125,7 +144,7 @@
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.10.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.12.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>			
@@ -140,7 +159,7 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.6.1\Libraries\STM32F4xx_StdPeriph_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.7.1\Libraries\STM32F4xx_StdPeriph_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*stm32f4xx_fmc.c;*</ProjectInclusionMask>
 					<SimpleFileConditions>
@@ -174,7 +193,7 @@
 				</Patches>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.6.1\Libraries\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F4xx_DSP_StdPeriph_Lib_V1.7.1\Libraries\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
