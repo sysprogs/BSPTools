@@ -175,7 +175,7 @@ namespace ESP8266DebugPackage
         }
 
         const uint SPIFLASHBase = 0x40200000;
-        const uint SPIFLASHLimit = 0x40300000;
+        const uint SPIFLASHLimit = 0x40400000;
         public ulong BootloaderImageOffset { get; private set; }
 
         public static ESP8266BinaryImage MakeNonBootloaderImageFromELFFile(ELFFile file, ParsedHeader header, bool esptoolSectionOrder = false)
