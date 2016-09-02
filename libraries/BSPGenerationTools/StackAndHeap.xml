@@ -15,16 +15,6 @@
 		<Properties>
           <PropertyEntry xsi:type="Integral">
             <Name>Fixed stack size</Name>
-            <UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
-            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-            <Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
-            <DefaultValue>8192</DefaultValue>
-            <MinValue>0</MinValue>
-            <MaxValue>16777216</MaxValue>
-            <Increment>1024</Increment>
-          </PropertyEntry>
-          <PropertyEntry xsi:type="Integral">
-            <Name>Fixed heap size</Name>
             <UniqueID>com.sysprogs.bspoptions.stackheap.stacksize</UniqueID>
             <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
             <Description>Specifies the amount of memory (in bytes) to reserve for the stack</Description>
@@ -33,6 +23,16 @@
             <MaxValue>16777216</MaxValue>
             <Increment>1024</Increment>
           </PropertyEntry>		  
+          <PropertyEntry xsi:type="Integral">
+            <Name>Fixed heap size</Name>
+            <UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
+            <DefaultValue>8192</DefaultValue>
+            <MinValue>0</MinValue>
+            <MaxValue>16777216</MaxValue>
+            <Increment>1024</Increment>
+          </PropertyEntry>
 		</Properties>
 		<CollapsedByDefault>false</CollapsedByDefault>
 	  </PropertyGroup>
