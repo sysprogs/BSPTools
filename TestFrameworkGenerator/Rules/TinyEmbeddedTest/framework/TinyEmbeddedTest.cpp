@@ -22,21 +22,12 @@ void RunAllTests()
     
     SysprogsTestHook_SelectTests(testCount, (void **)pAllInstances);
     
-    index = 0;
-    for (TestGroup *pGroup = TestGroup::s_pFirstTestGroup; pGroup; pGroup = pGroup->m_pNextGroup)
-        for (TestInstance *pTest = pGroup->m_pFirstTest; pTest; pTest = pTest->m_pNextTestInGroup)
-        {
-            if (pAllInstances[index])
-                pAllInstances[index]->m_bShouldRun = true;
-            pAllInstances[index++] = pTest;
-        }
-    
     TestGroup *pGroup = 0;
     
     for (index = testCount - 1; index >= 0; index--)
     {
         TestInstance *pInstance = pAllInstances[index];
-        if (!pInstance->m_bShouldRun)
+        if (!pInstance)
             continue;
         if (pInstance->m_pGroup != pGroup)
         {

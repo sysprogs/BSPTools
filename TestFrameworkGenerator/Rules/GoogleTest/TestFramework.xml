@@ -8,7 +8,7 @@
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
 		  <TestCountExpression>testCount</TestCountExpression>
 		  <AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
-		  <TestNameExpression>{((testing::TestInfo*)pTests[0])-&gt;test_case_name_-&gt;_M_dataplus-&gt;_M_p:s}_{((testing::TestInfo*)pTests[0])-&gt;name_-&gt;_M_dataplus-&gt;_M_p:s}</TestNameExpression>
+		  <TestNameExpression>{((testing::TestInfo*){&amp;})-&gt;test_case_name_-&gt;_M_dataplus-&gt;_M_p:s}_{((testing::TestInfo*){&amp;})-&gt;name_-&gt;_M_dataplus-&gt;_M_p:s}</TestNameExpression>
 		</TestSelection>
 		<TestReportChannel xsi:type="SemihostingBasedTestChannel">
 		</TestReportChannel>
@@ -143,7 +143,7 @@
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
 		  <TestCountExpression>testCount</TestCountExpression>
 		  <AddressOfTestArrayExpression>pTests</AddressOfTestArrayExpression>
-		  <TestNameExpression>{((testing::TestInfo*)pTests[0])-&gt;test_case_name_-&gt;_M_dataplus-&gt;_M_p:s}_{((testing::TestInfo*)pTests[0])-&gt;name_-&gt;_M_dataplus-&gt;_M_p:s}</TestNameExpression>
+		  <TestNameExpression>{((testing::TestInfo*){&amp;})-&gt;test_case_name_-&gt;_M_dataplus-&gt;_M_p:s}_{((testing::TestInfo*){&amp;})-&gt;name_-&gt;_M_dataplus-&gt;_M_p:s}</TestNameExpression>
 		</TestSelection>
 		<InitializationLines>
 			<string>char *argv = (char *)"";</string>

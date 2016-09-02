@@ -8,7 +8,6 @@ class TestInstance
 {
 public:
     TestInstance *m_pNextTestInGroup;
-    bool m_bShouldRun;
     TestGroup *m_pGroup;
     
     virtual void run() = 0;
