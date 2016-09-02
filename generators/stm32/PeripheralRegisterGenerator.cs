@@ -1367,6 +1367,9 @@ namespace stm32_bsp_generator
                         if (m.Success && !m.Groups[1].Value.EndsWith("_Pos") && !m.Groups[1].Value.EndsWith("_Msk") && !line.Contains("<<"))
                         {
                             subreg_name = m.Groups[1].Value;
+                            if (subreg_name == "RTC_BKP_NUMBER")
+                                continue;
+
                             reg_type = "uint32_t";
                             if (m.Groups[2].Value.StartsWith("0x"))
                             {

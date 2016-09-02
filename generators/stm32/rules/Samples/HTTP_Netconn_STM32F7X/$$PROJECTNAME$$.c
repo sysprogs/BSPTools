@@ -1,5 +1,6 @@
 #include "stm32f7xx_hal.h"
 #include "lwip/netif.h"
+#include "lwip/api.h"
 #include "lwip/tcpip.h"
 #include "lwip/dhcp.h"
 #include "cmsis_os.h"
@@ -125,9 +126,9 @@ static void MainThread(void const * argument)
 
 static void Netif_Config(void)
 {
-	struct ip_addr ipaddr;
-	struct ip_addr netmask;
-	struct ip_addr gw;	
+	ip_addr_t ipaddr;
+	ip_addr_t netmask;
+	ip_addr_t gw;	
   
 	IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
 	IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
