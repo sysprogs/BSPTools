@@ -40,6 +40,53 @@ namespace StandaloneBSPValidator
         public PropertyDictionary2 MCUConfiguration;
     }
 
+    public enum RegisterRenamingMode
+    {
+        Normal,
+        HighLow,
+        WithSuffix,
+    }
+
+    public struct RegisterRenamingRule
+    {
+        public string RegisterSetRegex;
+        public string RegisterRegex;
+        public RegisterRenamingMode Mode;
+        public int Offset;
+    }
+
+    public struct LoadedRenamingRule
+    {
+        public Regex RegisterSetRegex;
+        public Regex RegisterRegex;
+        public RegisterRenamingMode Mode;
+        public int Offset;
+
+        public LoadedRenamingRule(RegisterRenamingRule rule)
+        {
+            if (rule.RegisterSetRegex != null)
+                RegisterSetRegex = new Regex($"^{rule.RegisterSetRegex}$");
+            else
+                RegisterSetRegex = null;
+
+            switch(rule.Mode)
+            {
+                case RegisterRenamingMode.HighLow:
+                    RegisterRegex = new Regex($"^({rule.RegisterRegex})(H|L)$");
+                    break;
+                case RegisterRenamingMode.WithSuffix:
+                    RegisterRegex = new Regex($"^({rule.RegisterRegex})([0-9]+)_(.*)$");
+                    break;
+                default:
+                    RegisterRegex = new Regex($"^({rule.RegisterRegex})([0-9]+)$");
+                    break;
+            }
+
+            Mode = rule.Mode;
+            Offset = rule.Offset;
+        }
+    }
+
     public class TestJob
     {
         public string DeviceRegex;
@@ -48,6 +95,7 @@ namespace StandaloneBSPValidator
         public string BSPPath;
         public TestedSample[] Samples;
         public DeviceParameterSet[] DeviceParameterSets;
+        public RegisterRenamingRule[] RegisterRenamingRules;
     }
 
     public class Program
@@ -82,7 +130,7 @@ namespace StandaloneBSPValidator
 
         static Regex RgMainMap = new Regex("^[ \t]+0x[0-9a-fA-F]+[ \t]+main$");
 
-        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters)
+        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules)
         {
             if (Directory.Exists(mcuDir))
             {
@@ -214,7 +262,7 @@ namespace StandaloneBSPValidator
             if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && sample.ValidateRegisters)
             {
                 string firstSrcFileInPrjDir = prj.SourceFiles.First(fn => Path.GetDirectoryName(fn) == mcuDir);
-                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile));
+                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules);
             }
 
             Console.WriteLine("Building {0}...", Path.GetFileName(mcuDir));
@@ -327,6 +375,8 @@ namespace StandaloneBSPValidator
                     MCUs = MCUs.Where(mcu => !rg.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
                 }
 
+                var loadedRules = job.RegisterRenamingRules?.Select(rule => new LoadedRenamingRule(rule))?.ToArray();
+
                 foreach (var sample in job.Samples)
                 {
                     r.BeginSample(sample.Name);
@@ -339,7 +389,7 @@ namespace StandaloneBSPValidator
                         var extraParams = job.DeviceParameterSets?.FirstOrDefault(s => s.DeviceRegexObject?.IsMatch(mcu.ExpandedMCU.ID) == true);
 
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
-                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams);
+                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules);
                         if (result == TestResult.Failed)
                             failed++;
                         else if (result == TestResult.Succeeded)
@@ -382,17 +432,10 @@ namespace StandaloneBSPValidator
             TestBSP(job, bsp, args[1]);
         }
 
-        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition)
+        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, LoadedRenamingRule[] renameRules)
         {
             if (!File.Exists(sourceFile))
                 throw new Exception("File does not exist: " + sourceFile);
-
-            Regex rgArrayRegister = new Regex("^(sTxMailBox|sFIFOMailBox|sFilterRegister)([0-9]+)_(.*)$");
-            Regex rgArrayRegister2 = new Regex("^(IOGXCR|EXTICR|BTCR|BWTR|RAM|FGCLUT|BGCLUT|SDCR|SDTR|DIEPTXF|IT_LINE_SR)([0-9]+)$");
-            Regex rgArrayRegister3 = new Regex("^(AFR)(H|L)$");
-            Regex rgArrayRegister4 = new Regex("^(HR|CSR)([0-9]+)$");
-            Regex rgArrayRegister5 = new Regex("^(TSR|CR)([0-9]+)$");
-            Regex rgArrayRegister6 = new Regex("^(TCCR|WPCR|ISR|IER|FIR)([0-9]+)$");
 
             if (mcuDefinition != null)
             {
@@ -406,17 +449,31 @@ namespace StandaloneBSPValidator
                         foreach (var reg in regset.Registers)
                         {
                             string regName = reg.Name;
-                            var m = rgArrayRegister.Match(regName);
-                            if (m.Success)
-                                regName = string.Format("{0}[{1}].{2}", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1, m.Groups[3]);
-                            else if ((m = rgArrayRegister2.Match(regName)).Success)
-                                regName = string.Format("{0}[{1}]", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1);
-                            else if ((m = rgArrayRegister3.Match(regName)).Success)
-                                regName = string.Format("{0}[{1}]", m.Groups[1], m.Groups[2].ToString() == "H" ? 1 : 0);
-                            else if ((regset.UserFriendlyName == "HASH" || regset.UserFriendlyName == "HASH_DIGEST") && (m = rgArrayRegister4.Match(regName)).Success)
-                                regName = string.Format("{0}[{1}]", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1);
-                            else if ((regset.UserFriendlyName == "EXTI" || regset.UserFriendlyName == "EXTI") && (m = rgArrayRegister5.Match(regName)).Success)
-                                regName = string.Format("{0}[{1}]", m.Groups[1], int.Parse(m.Groups[2].ToString()) - 1);
+
+                            if (renameRules != null)
+                                foreach(var rule in renameRules)
+                                {
+                                    if (rule.RegisterSetRegex?.IsMatch(regset.UserFriendlyName) != false)
+                                    {
+                                        var match = rule.RegisterRegex.Match(regName);
+                                        if (match.Success)
+                                        {
+                                            switch(rule.Mode)
+                                            {
+                                                case RegisterRenamingMode.Normal:
+                                                    regName = string.Format("{0}[{1}]", match.Groups[1], int.Parse(match.Groups[2].ToString()) + rule.Offset);
+                                                    break;
+                                                case RegisterRenamingMode.HighLow:
+                                                    regName = string.Format("{0}[{1}]", match.Groups[1], match.Groups[2].ToString() == "H" ? 1 : 0);
+                                                    break;
+                                                case RegisterRenamingMode.WithSuffix:
+                                                    regName = string.Format("{0}[{1}].{2}", match.Groups[1], int.Parse(match.Groups[2].ToString()) + rule.Offset, match.Groups[3]);
+                                                    break;
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
 
                             if (mcuDefinition.MCUName.StartsWith("MSP432"))
                             {
