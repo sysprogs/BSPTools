@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml.Serialization;
 
 namespace StandaloneBSPValidator
@@ -130,6 +132,111 @@ namespace StandaloneBSPValidator
 
         static Regex RgMainMap = new Regex("^[ \t]+0x[0-9a-fA-F]+[ \t]+main$");
 
+        class BuildTask
+        {
+            public string Executable;
+            public string Arguments;
+            public string[] AllInputs;
+            public string PrimaryOutput;
+
+            public Process Start(string mcuDir, int slot, StreamWriter logWriter)
+            {
+                string args = Arguments;
+                args = args.Replace("$@", PrimaryOutput);
+                args = args.Replace("$<", AllInputs[0]);
+                args = args.Replace("$^", string.Join(" ", AllInputs));
+
+                lock(logWriter)
+                    logWriter.WriteLine($"[{slot}] {Executable} {args}");
+                var proc = Process.Start(new ProcessStartInfo(Executable, args) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = mcuDir, RedirectStandardOutput = true, RedirectStandardError = true });
+                DataReceivedEventHandler handler = (s, e) =>
+                  {
+                      if (e.Data == null)
+                          return;
+                      lock(logWriter)
+                          logWriter.WriteLine($"[{slot}] {e.Data}");
+                  };
+
+                proc.ErrorDataReceived += handler;
+                proc.OutputDataReceived += handler;
+                proc.BeginErrorReadLine();
+                proc.BeginOutputReadLine();
+                return proc;                
+            }
+        }
+
+        class BuildJob
+        {
+            public List<BuildTask> CompileTasks = new List<BuildTask>();
+            public List<BuildTask> OtherTasks = new List<BuildTask>();
+
+            public void GenerateMakeFile(string filePath, string primaryTarget)
+            {
+                using (var sw = new StreamWriter(filePath))
+                {
+                    sw.WriteLine($"all: {primaryTarget}");
+                    sw.WriteLine();
+                    foreach(var task in CompileTasks.Concat(OtherTasks))
+                    {
+                        sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
+                        sw.WriteLine($"\t{task.Executable} {task.Arguments}");
+                        sw.WriteLine();
+                    }
+                }
+            }
+
+            [DllImport("kernel32.dll", EntryPoint = "WaitForMultipleObjects", SetLastError = true)]
+            static extern int WaitForMultipleObjects(int nCount, IntPtr[] lpHandles, Boolean fWaitAll, int dwMilliseconds);
+
+            public bool BuildFast(string projectDir, int processorCount)
+            {
+                Process[] slots = new Process[processorCount];
+                using (var sw = new StreamWriter(Path.Combine(projectDir, "build.log")))
+                {
+                    foreach (var task in CompileTasks)
+                    {
+                        int firstEmptySlot;
+                        for (;;)
+                        {
+                            firstEmptySlot = Enumerable.Range(0, slots.Length).FirstOrDefault(i => slots[i]?.HasExited != false);
+                            if (slots[firstEmptySlot]?.HasExited == false)
+                            {
+                                WaitForMultipleObjects(slots.Length, slots.Select(s => s.Handle).ToArray(), false, Timeout.Infinite);
+                                continue;
+                            }
+                            break;
+                        } 
+
+                        if (slots[firstEmptySlot] != null && slots[firstEmptySlot].ExitCode != 0)
+                            return false;   //Exited with error
+
+                        slots[firstEmptySlot] = task.Start(projectDir, firstEmptySlot, sw);
+                    }
+
+
+                    IntPtr[] remainingProcesses = slots.Where(s => s?.HasExited == false).Select(s => s.Handle).ToArray();
+                    WaitForMultipleObjects(remainingProcesses.Length, remainingProcesses, true, Timeout.Infinite);
+                    foreach(var slot in slots)
+                    {
+                        if (slot != null && slot.ExitCode != 0)
+                            return false;   //Exited with error
+                    }
+
+                    foreach (var task in OtherTasks)
+                    {
+                        var proc = task.Start(projectDir, 0, sw);
+                        proc.WaitForExit();
+                        if (proc.ExitCode != 0)
+                            return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
+
+
         private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules)
         {
             if (Directory.Exists(mcuDir))
@@ -233,31 +340,49 @@ namespace StandaloneBSPValidator
             foreach (var ext in sample.SourceFileExtensions.Split(';'))
                 sourceExtensions[ext] = true;
 
-            using (var sw = new StreamWriter(Path.Combine(mcuDir, "Makefile")))
+            BuildJob job = new BuildJob();
+            string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
+
+            job.OtherTasks.Add(new BuildTask
             {
-                string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
-                sw.WriteLine("test.bin: test.elf");
-                sw.WriteLine("\t{0}objcopy -O binary $< $@", prefix);
-                sw.WriteLine();
+                Executable = prefix + "g++",
+                Arguments = $"{flags.EffectiveLDFLAGS} $^ -o $@",
+                AllInputs = prj.SourceFiles.Where(f => sourceExtensions.ContainsKey(Path.GetExtension(f).TrimStart('.')))
+                .Select(f => Path.ChangeExtension(Path.GetFileName(f), ".o"))
+                .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)))
+                .ToArray(),
+                PrimaryOutput = "test.elf",
+            });
 
-                sw.WriteLine("test.elf: {0}", string.Join(" ", prj.SourceFiles.Where(f => sourceExtensions.ContainsKey(Path.GetExtension(f).TrimStart('.'))).Select(f => Path.ChangeExtension(Path.GetFileName(f), ".o"))));
-                sw.WriteLine("\t{0}g++ {1} $^ -o $@", prefix, flags.EffectiveLDFLAGS);
-                sw.WriteLine();
+            job.OtherTasks.Add(new BuildTask
+            {
+                Executable = prefix + "objcopy",
+                Arguments = "-O binary $< $@",
+                AllInputs = new[] { "test.elf" },
+                PrimaryOutput = "test.bin",
+            });
 
-                foreach (var sf in prj.SourceFiles)
+
+            foreach (var sf in prj.SourceFiles)
+            {
+                string ext = Path.GetExtension(sf);
+                if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
+                    Console.WriteLine($"#{sf} is not a recognized source file");
+                else
                 {
-                    string ext = Path.GetExtension(sf);
-                    if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
-                        sw.WriteLine($"#{sf} is not a recognized source file");
-                    else
+                    bool isCpp = ext.ToLower() != ".c";
+                    string obj = Path.ChangeExtension(Path.GetFileName(sf), ".o");
+                    job.CompileTasks.Add(new BuildTask
                     {
-                        bool isCpp = ext.ToLower() != ".c";
-                        sw.WriteLine("{0}:", Path.ChangeExtension(Path.GetFileName(sf), ".o"));
-                        sw.WriteLine("\t{0}{1} {2} -c {3} -o {4}", prefix, isCpp ? "g++" : "gcc", flags.GetEffectiveCFLAGS(isCpp), sf, Path.ChangeExtension(Path.GetFileName(sf), ".o"));
-                        sw.WriteLine();
-                    }
+                        PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sf), ".o"),
+                        AllInputs = new[] { sf },
+                        Executable = prefix + (isCpp ? "g++" : "gcc"),
+                        Arguments = $"-c $< {flags.GetEffectiveCFLAGS(isCpp)} -o {obj}",
+                    });
                 }
             }
+
+            job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin");
 
             if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && sample.ValidateRegisters)
             {
@@ -265,12 +390,22 @@ namespace StandaloneBSPValidator
                 InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules);
             }
 
-            Console.WriteLine("Building {0}...", Path.GetFileName(mcuDir));
-            var proc = Process.Start(new ProcessStartInfo("cmd.exe", "/c " + Path.Combine(mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, "make.exe") + " -j" + Environment.ProcessorCount + " > build.log 2>&1") { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = mcuDir });
-            proc.WaitForExit();
+            Console.Write("Building {0}...", Path.GetFileName(mcuDir));
+            bool buildSucceeded;
+            if (false)
+            {
+                var proc = Process.Start(new ProcessStartInfo("cmd.exe", "/c " + Path.Combine(mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, "make.exe") + " -j" + Environment.ProcessorCount + " > build.log 2>&1") { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = mcuDir });
+                proc.WaitForExit();
+                buildSucceeded = proc.ExitCode == 0;
+            }
+            else
+            {
+                buildSucceeded = job.BuildFast(mcuDir, Environment.ProcessorCount);
+            }
+
             bool success = false;
             string mapFile = Path.Combine(mcuDir, GeneratedProject.MapFileName);
-            if (proc.ExitCode == 0 && File.Exists(mapFile))
+            if (buildSucceeded && File.Exists(mapFile))
             {
                 success = File.ReadAllLines(Path.Combine(mcuDir, mapFile)).Where(l => RgMainMap.IsMatch(l)).Count() > 0;
 
@@ -389,7 +524,9 @@ namespace StandaloneBSPValidator
                         var extraParams = job.DeviceParameterSets?.FirstOrDefault(s => s.DeviceRegexObject?.IsMatch(mcu.ExpandedMCU.ID) == true);
 
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
+                        DateTime start = DateTime.Now;
                         var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules);
+                        Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
                         if (result == TestResult.Failed)
                             failed++;
                         else if (result == TestResult.Succeeded)
