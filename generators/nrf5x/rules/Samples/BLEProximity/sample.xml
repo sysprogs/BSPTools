@@ -9,7 +9,7 @@
     <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
     <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.ble_device_manager</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_ias</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_ias_c</string>

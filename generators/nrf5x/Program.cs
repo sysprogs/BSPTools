@@ -106,8 +106,8 @@ namespace nrf5x
             public List<SoftDevice> SoftDevices = new List<SoftDevice>
             {
                 //SDK 11
-                  new SoftDevice("S130", 0x1b000, 0x2800, "nrf51", "Bluetooth LE Universal"),
-                  new SoftDevice("S132", 0x1c000, 0x2800, "nrf52", "Bluetooth LE"),
+                  new SoftDevice("S130", 0x1b000, 0x1fe8, "nrf51", "Bluetooth LE Universal"),
+                  new SoftDevice("S132", 0x1f000, 0x2128, "nrf52", "Bluetooth LE"),
 
                   
             //    new SoftDevice("S110", 0x18000, 0x2000, "nrf51", "Bluetooth LE Peripheral"),
@@ -268,7 +268,7 @@ namespace nrf5x
             var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<string> exampleDirs = new List<string>();
+            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
             bool noPeripheralRegisters = true;
 
@@ -356,8 +356,8 @@ namespace nrf5x
                 familyDefinitions.Add(famObj);
                 fam.GenerateLinkerScripts(false);
 
-                SysVarEntry defaultConfigFolder51 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s132_pca10036" };
-                SysVarEntry defaultConfigFolder52 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "s130_pca10028" };
+                SysVarEntry defaultConfigFolder51 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "pca10040/s132" };// s132_pca10036" };
+                SysVarEntry defaultConfigFolder52 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "pca10028/s130" };// s130_pca10028" };
 
                 foreach (var mcu in fam.MCUs)
                 {
@@ -414,6 +414,9 @@ namespace nrf5x
 
                 foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { defaultConfigFolder51 }))
                     exampleDirs.Add(sample);
+//                var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
+//                exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
+
             }
             bspBuilder.GenerateSoftdeviceLibraries();
 
@@ -428,7 +431,8 @@ namespace nrf5x
                 MCUFamilies = familyDefinitions.ToArray(),
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.ToArray(),
+                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 PackageVersion = "3.0",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",

@@ -9,7 +9,7 @@
     <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
     <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.ble_device_manager</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_dis</string>
@@ -115,6 +115,14 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.fstorage</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
         <Value>yes</Value>
       </KeyValue>
 
