@@ -1,4 +1,4 @@
-set ARM_GCC_PREFIX=c:\SysGCC\arm-eabi\bin\arm-eabi-
+set ARM_GCC_PREFIX=arm-eabi-
 cd /d %~dp0
 
 %ARM_GCC_PREFIX%gcc empty.c -c -o %1_softdevice.o -mcpu=cortex-m4 -mthumb %3

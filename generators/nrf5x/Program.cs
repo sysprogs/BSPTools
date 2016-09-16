@@ -386,7 +386,7 @@ namespace nrf5x
                         {
                             UniqueID = NordicBSPBuilder.RAMSuffixPropertyID,
                             Name = "RAM size",
-                            DefaultEntryIndex = 0,
+                            DefaultEntryIndex = 1,
                             SuggestionList = new PropertyEntry.Enumerated.Suggestion[] {
                                 new PropertyEntry.Enumerated.Suggestion {InternalValue = "_32k", UserFriendlyName = "32 KB (Preview)" },
                                 new PropertyEntry.Enumerated.Suggestion {InternalValue = "_64k", UserFriendlyName = "64 KB (Final)" },
@@ -433,7 +433,7 @@ namespace nrf5x
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "3.0",
+                PackageVersion = "12.0",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray(),

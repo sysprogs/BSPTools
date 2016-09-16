@@ -360,7 +360,7 @@
 						<string>uart\\app_uart_fifo.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart_fifo</string>
 						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ != </string>
 					</SimpleFileConditions>
-					<ProjectInclusionMask>-util\app_error_weak*;-*\hardfault_handler*;-ant_fs\*;-console\*;-mem_manager\*;-bootloader_dfu\*init_template*;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-mem_manager\*;-bootloader_dfu\*init_template*;*</ProjectInclusionMask>
 					<AutoIncludeMask>-ant_fs\*;-console\*;-mem_manager\*;*.h</AutoIncludeMask>
 					<Patches>
 						<Patch xsi:type="ReplaceLine">
