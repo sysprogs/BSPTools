@@ -52,6 +52,7 @@ namespace BSPGenerationTools
                         (int)ParseScaledNonNegativeInteger(fld.SelectSingleNode("bitWidth").InnerText);
                     XmlElement vals = (XmlElement)fld.SelectSingleNode("enumeratedValues");
                     var numOfAddedKnownValues = 0;
+                    Regex rgTrivialKnownValue = new Regex("^value[0-9]+$");
                     if (vals != null && subreg.SizeInBits > 1 && subreg.SizeInBits != 32)
                     {
                         if (subreg.SizeInBits > 8)
@@ -59,6 +60,7 @@ namespace BSPGenerationTools
                         else
                         {
                             KnownSubRegisterValue[] values = new KnownSubRegisterValue[1 << subreg.SizeInBits];
+                            bool foundNonTrivialDefinitions = false;
                             foreach (XmlElement ev in vals)
                             {
                                 var knownValueProp = ev.SelectSingleNode("value");
@@ -72,10 +74,12 @@ namespace BSPGenerationTools
                                 {
                                     values[knownValueIndex] = new KnownSubRegisterValue { Name = knowValueName };
                                     ++numOfAddedKnownValues;
+                                    if (!rgTrivialKnownValue.IsMatch(knowValueName))
+                                        foundNonTrivialDefinitions = true;
                                 }
                             }
 
-                            if (numOfAddedKnownValues > 0)
+                            if (numOfAddedKnownValues > 0 && foundNonTrivialDefinitions)
                             {
                                 int found = 0;
                                 for (int j = 0; j < values.Length; j++)

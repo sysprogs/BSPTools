@@ -268,6 +268,8 @@ namespace InfineonXMC_bsp_generator
                 allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
             var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
+            if (rejects.Count > 0)
+                throw new Exception($"Found {rejects.Count} MCUs not assigned to any family");
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             List<MCU> mcuDefinitions = new List<MCU>();
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
@@ -282,7 +284,7 @@ namespace InfineonXMC_bsp_generator
             commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
 
             foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample);
+                exampleDirs.Add(sample.RelativePath);
 
             foreach (var fam in allFamilies)
             {
@@ -316,7 +318,7 @@ namespace InfineonXMC_bsp_generator
                     frameworks.Add(fw);
 
                 foreach (var sample in fam.CopySamples())
-                    exampleDirs.Add(sample);
+                    exampleDirs.Add(sample.RelativePath);
             }
 
             UpdateNameMcuToSeggerFormat(ref mcuDefinitions);
@@ -332,7 +334,7 @@ namespace InfineonXMC_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "1.0"
+                PackageVersion = "2.1.8"
             };
 
             bspBuilder.Save(bsp, true);
