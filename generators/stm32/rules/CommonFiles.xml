@@ -343,6 +343,12 @@
 	</SmartSamples>
 	<InitializationCodeInsertionPoints>
 		<CodeInsertionPoint>
+			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\}]+\n([ \t]+)(HAL_Init[ \t]*\([ \t]*\);)[ \t\r]*\n([ \t]+)(SystemClock_Config[ \t]*\([ \t]*\);)</Regex>
+			<InitGroupNumber>5</InitGroupNumber>
+			<InsertAfterGroup>true</InsertAfterGroup>
+			<IndentationGroupNumber>4</IndentationGroupNumber>
+		</CodeInsertionPoint>	
+		<CodeInsertionPoint>
 			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\}]+\n([ \t]+)(HAL_Init[ \t]*\([ \t]*\);)</Regex>
 			<InitGroupNumber>3</InitGroupNumber>
 			<IndentationGroupNumber>2</IndentationGroupNumber>
