@@ -103,22 +103,9 @@ namespace nrf5x
             }
 
 
-            public List<SoftDevice> SoftDevices = new List<SoftDevice>
-            {
-                //SDK 11
-                  new SoftDevice("S130", 0x1b000, 0x1fe8, "nrf51", "Bluetooth LE Universal"),
-                  new SoftDevice("S132", 0x1f000, 0x2128, "nrf52", "Bluetooth LE"),
+            public List<SoftDevice> SoftDevices = new List<SoftDevice>();
 
-                  
-            //    new SoftDevice("S110", 0x18000, 0x2000, "nrf51", "Bluetooth LE Peripheral"),
-            //    new SoftDevice("S120", 0x1d000, 0x2800, "nrf51", "Bluetooth LE Master"),
-            //    new SoftDevice("S210", 0xd000,  0x900, " nrf514", "ANT Master"),
-            //    new SoftDevice("S310", 0x1d000, 0x2200, "nrf514", "Bluetooth LE/ANT"),
-            //    new SoftDevice("S332", 0x1d000, 0x2200, "nrf514", "Bluetooth LE/ANT"),
-
-            //    new SoftDevice("S212", 0x12000, 0x0a00, "nrf52", "ANT"),  //Not included in the SDK v 0.9.2
-            };
-
+          
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
             public const string RAMSuffixPropertyID = "com.sysprogs.bspoptions.nrf5x.ramsuffix";
 
@@ -201,6 +188,12 @@ namespace nrf5x
                         sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
                     }
+                    if (sd.Name == "s1xx_iot")
+                    {
+                        sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name;
+                        abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
+                    }
+                
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
                     Process.Start(BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName + abi).WaitForExit();
                     string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
@@ -249,17 +242,31 @@ namespace nrf5x
         {
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
+            bool flnRFx_IoTBSP = args.Contains("/sdkiot");
+            NordicBSPBuilder bspBuilder;
 
-            var bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-            List<MCUBuilder> devices = new List<MCUBuilder>();
-            foreach (string part in new string[] { "nRF51822", "nRF51422" })
+            if (flnRFx_IoTBSP)
             {
-                devices.Add(new MCUBuilder { Name = part + "_XXAA", FlashSize = 256 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
-                devices.Add(new MCUBuilder { Name = part + "_XXAB", FlashSize = 128 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
-                devices.Add(new MCUBuilder { Name = part + "_XXAC", FlashSize = 256 * 1024, RAMSize = 32 * 1024, Core = CortexCore.M0 });
+                bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules_iot"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("s1xx_iot", 0x1f000, 0x2800, "nrf52", "IoT"));
             }
+            else
+            {
+                bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S130", 0x1b000, 0x1fe8, "nrf51", "Bluetooth LE Universal"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", 0x1f000, 0x2128, "nrf52", "Bluetooth LE"));
+            }
+            List<MCUBuilder> devices = new List<MCUBuilder>();
 
-            devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 32 * 1024, Core = CortexCore.M4 });
+            if (!flnRFx_IoTBSP)
+                foreach (string part in new string[] { "nRF51822", "nRF51422" })
+                {
+                    devices.Add(new MCUBuilder { Name = part + "_XXAA", FlashSize = 256 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
+                    devices.Add(new MCUBuilder { Name = part + "_XXAB", FlashSize = 128 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
+                    devices.Add(new MCUBuilder { Name = part + "_XXAC", FlashSize = 256 * 1024, RAMSize = 32 * 1024, Core = CortexCore.M0 });
+                }
+
+            devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4 });
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
@@ -331,10 +338,17 @@ namespace nrf5x
 
                 fam.Definition.AdditionalFrameworks = fam.Definition.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
                 // Startup Files
-                var aStartupVectors = new StartupFileGenerator.InterruptVectorTable[] {
+                StartupFileGenerator.InterruptVectorTable[] aStartupVectors;
+                if (flnRFx_IoTBSP)
+                    aStartupVectors = new StartupFileGenerator.InterruptVectorTable[] {
+                                                    GenerateStartupFile(fam.Definition.StartupFileDir,"nRF52")
+                                                    };
+                else
+                    aStartupVectors = new StartupFileGenerator.InterruptVectorTable[] {
                                                     GenerateStartupFile(fam.Definition.StartupFileDir,"nRF51"),
                                                     GenerateStartupFile(fam.Definition.StartupFileDir,"nRF52")
                                                     };
+                
                 fam.AttachStartupFiles(aStartupVectors);
                 //  SVD Files
                 var aMcuDef1 = (new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nRF51.svd"), "nRF51") });
@@ -421,11 +435,23 @@ namespace nrf5x
             bspBuilder.GenerateSoftdeviceLibraries();
 
             Console.WriteLine("Building BSP archive...");
-
+            string strPackageID, strPackageDesc, strPAckVersion;
+            if (flnRFx_IoTBSP)
+            {
+                strPackageID = "com.sysprogs.arm.nordic.nrf5xIoT";
+                strPackageDesc = "Nordic NRF52 IoT";
+                strPAckVersion = "1.0";
+             }
+             else
+             {
+                strPackageID = "com.sysprogs.arm.nordic.nrf5x";
+                strPackageDesc = "Nordic NRF5x Devices";
+                strPAckVersion = "12.0";
+             }
             BoardSupportPackage bsp = new BoardSupportPackage
             {
-                PackageID = "com.sysprogs.arm.nordic.nrf5x",
-                PackageDescription = "Nordic NRF5x Devices",
+                PackageID = strPackageID,
+                PackageDescription = strPackageDesc,
                 GNUTargetID = "arm-eabi",
                 GeneratedMakFileName = "nrf5x.mak",
                 MCUFamilies = familyDefinitions.ToArray(),
@@ -433,7 +459,7 @@ namespace nrf5x
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "12.0",
+                PackageVersion = strPAckVersion,
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray(),

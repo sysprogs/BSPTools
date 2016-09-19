@@ -1,0 +1,1 @@
+StandaloneBSPValidator.exe d:\DataJon\Projects\sysprogs\git\generators\nrf52iot\nR5xAllSamples.validatejob d:\DataJon\Projects\sysprogs\TestOut

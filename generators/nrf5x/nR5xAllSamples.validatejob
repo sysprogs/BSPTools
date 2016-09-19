@@ -2,72 +2,45 @@
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <ToolchainPath>[SysGCC-arm-eabi-5.3.0]</ToolchainPath>
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
-	<DeviceRegex>(nRF51..._XXAC|nRF52).*</DeviceRegex>
+	<DeviceRegex>nRF52.*</DeviceRegex>
 	<Samples>
 		<TestedSample>
-			<Name>Bluetooth LE Mouse</Name>
+			<Name>IoT icmp</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEMouse</TestDirSuffix>
+			<TestDirSuffix>-IoT_icmp</TestDirSuffix>
 		</TestedSample>	 
 		<TestedSample>
-			<Name>Bluetooth LE Proximity Tag</Name>
+			<Name>IoT tcp server</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEProximity</TestDirSuffix>
+			<TestDirSuffix>-IoT_tcp_server</TestDirSuffix>
 		</TestedSample>	 
 		<TestedSample>
-			<Name>Bluetooth LE Keyboard</Name>
+			<Name>IoT Iot_timer</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEKeyboard</TestDirSuffix>
+			<TestDirSuffix>-Iot_timer</TestDirSuffix>
 		</TestedSample>	 
 		<TestedSample>
-			<Name>Bluetooth LE Beacon</Name>
+			<Name>IoT tcp client</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEBeacon</TestDirSuffix>
+			<TestDirSuffix>-IoT_tcp_client</TestDirSuffix>
 		</TestedSample>	 
 		<TestedSample>
-			<Name>Bluetooth LE Heart Rate Service Client</Name>
+			<Name>IoT MQTT publisher</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLE_HRSClient</TestDirSuffix>
+			<TestDirSuffix>-IoT_MQTT_publisher</TestDirSuffix>
 		</TestedSample>	 
 		<TestedSample>
-			<Name>Bluetooth LE Heart Rate Service Peripheral</Name>
+			<Name>IoT MQTT subscriber</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLE_HRSPeripheral</TestDirSuffix>
+			<TestDirSuffix>-IoT_MQTT_subscriber</TestDirSuffix>
 		</TestedSample>	 
-		<TestedSample>
-			<Name>Bluetooth LE Multi-link Central</Name>
-			<SkipIfNotFound>false</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEMLC</TestDirSuffix>
-		</TestedSample>	 
-		<TestedSample>
-			<Name>Bluetooth LE UART</Name>
-			<SkipIfNotFound>false</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEUART</TestDirSuffix>
-		</TestedSample>	 
-		<TestedSample>
-			<Name>LEDBlink</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-LEDBlink</TestDirSuffix>
-			<SampleConfiguration>			
-			</SampleConfiguration>            
-		</TestedSample>
-		<TestedSample>
-			<Name>LEDBlink (BSP)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-LEDBlink(BSP)</TestDirSuffix>
-			<SampleConfiguration>			
-			</SampleConfiguration>            
-		</TestedSample>
+		
 	</Samples>
 	<DeviceParameterSets>
 		<DeviceParameterSet>
@@ -76,7 +49,7 @@
 				<Entries>
 					<KeyValue>
 						<Key>com.sysprogs.bspoptions.nrf5x.softdevice</Key>
-						<Value>s132</Value>
+						<Value>s1xx_iot</Value>
 					</KeyValue>
 					  <KeyValue>
 						<Key>com.sysprogs.bspoptions.arm.floatmode</Key>
@@ -88,7 +61,7 @@
 				<Entries>
 					<KeyValue>
 						<Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
-						<Value>PCA10036</Value>
+						<Value>PCA10040</Value>
 					</KeyValue>
 				</Entries>
 			</FrameworkConfiguration>	
