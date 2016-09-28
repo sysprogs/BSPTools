@@ -81,12 +81,17 @@ void ReportTestFailure(const char *pFormat, ...);
 
 #define LONGS_EQUAL(expected, actual) (((long)(expected) == (long)(actual)) || (ReportTestFailure("Unexpected long value: expected %ld, found %ld", (expected), (actual)), 0))
 #define UNSIGNED_LONGS_EQUAL(expected, actual) (((unsigned long)(expected) == (unsigned long)(actual)) || (ReportTestFailure("Unexpected unsigned long value: expected %uld, found %uld", (expected), (actual)), 0))
+#define UNSIGNED_LONGS_EQUAL_WITHIN(expected, actual, tolerance) (( (((unsigned long)(expected) < (unsigned long)(actual)) ? ((unsigned long)(actual) - (unsigned long)(expected)) : ((unsigned long)(expected) - (unsigned long)(actual))) <= (unsigned long)(tolerance)) || (ReportTestFailure("Unexpected unsigned long value: expected %uld, found %uld", (expected), (actual)), 0))
 
 #define BYTES_EQUAL(expected, actual) (((unsigned char)(expected) == (unsigned char)(actual)) || (ReportTestFailure("Unexpected byte value: expected %d, found %d", (unsigned char)(expected), (unsigned char)(actual)), 0))
 #define POINTERS_EQUAL(expected, actual) (((void *)(expected) == (void *)(actual)) || (ReportTestFailure("Unexpected pointer value: expected %p, found %p", (void *)(expected), (void *)(actual)), 0))
 
-#define DOUBLES_EQUAL(expected, actual, tolerance) ((abs((actual)-(expected)) <= (tolerance)) || (ReportTestFailure("Unexpected double value: expected %lf, found %lf", (double)expected), (double)(actual)), 0))
+#define DOUBLES_EQUAL(expected, actual, tolerance) ((fabs((actual)-(expected)) <= (tolerance)) || (ReportTestFailure("Unexpected double value: expected %lf, found %lf", (double)expected, (double)(actual), 0), 0))
+#define DOUBLES_NOT_EQUAL(expected, actual, tolerance) ((fabs((double)(actual)-(double)(expected)) > (double)(tolerance)) || (ReportTestFailure("Unexpected double value: expected not equal to %f, found %f", (double)(expected), (double)(actual)), 0))
 #define MEMCMP_EQUAL(expected, actual, size) ((!memcmp((expected), (actual), (size))) || (ReportTestFailure("Unexpected memory block contents"), 0))
+
+#define FLOATS_EQUAL(expected, actual, tolerance) ((fabsf((float)(actual)-(float)(expected)) <= (float)(tolerance)) || (ReportTestFailure("Unexpected float value: expected %f, found %f", (float)(expected), (float)(actual)), 0))
+#define FLOATS_NOT_EQUAL(expected, actual, tolerance) ((fabsf((float)(actual)-(float)(expected)) > (float)(tolerance)) || (ReportTestFailure("Unexpected float value: expected not equal to %f, found %f", (float)(expected), (float)(actual)), 0))
 
 #define BITS_EQUAL(expected, actual, mask) ((((expected) & (mask)) == ((actual) & (mask))) || (ReportTestFailure("Unexpected value: expected %x, found %x", (expected) & (mask), (actual) & (mask)), 0))
 #define FAIL(text) ReportTestFailure(text)

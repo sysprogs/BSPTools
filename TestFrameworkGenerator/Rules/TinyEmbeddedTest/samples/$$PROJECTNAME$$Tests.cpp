@@ -39,9 +39,18 @@ TEST(DemoTestGroup, SuccessfulTest1)
     
     LONGS_EQUAL(-2, -2);
     UNSIGNED_LONGS_EQUAL(3, 3);
+    UNSIGNED_LONGS_EQUAL_WITHIN(10, 11, 2);
+    
     BYTES_EQUAL(-1, 255);
     POINTERS_EQUAL(0, 0);
     MEMCMP_EQUAL("string", "string", 6);
+    
+    DOUBLES_EQUAL(1.0, -1.0, 2);
+    DOUBLES_NOT_EQUAL(1.0, -1.0, 1);
+    
+    FLOATS_EQUAL(1.0F, -1.0F, 2);   
+    FLOATS_NOT_EQUAL(1.0F, -1.0F, 1);
+        
     BITS_EQUAL(0x050, 0xF5F, 0x0F0);
 }
 
