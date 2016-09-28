@@ -125,6 +125,10 @@ namespace ESP8266DebugPackage
                     }
                 }
 
+                string tmp = null;
+                if (debugMethodConfig?.TryGetValue("SYS:PROGRAM_WITHOUT_DEBUGGING", out tmp) == true && tmp == "1")
+                    return null;    //Suppress connecting to gdb
+
                 return new CustomStartupSequence
                 {
                     Steps = new List<CustomStartStep> { 

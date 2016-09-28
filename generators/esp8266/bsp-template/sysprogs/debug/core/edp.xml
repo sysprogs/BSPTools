@@ -30,6 +30,7 @@
 	  <ResetCommand>mon reset halt</ResetCommand>
 	  <WriteOnlyPCOverride>$epc2</WriteOnlyPCOverride>
 	  <RequestAdvancedDebugVariables>true</RequestAdvancedDebugVariables>
+	  <NoCompareSections>true</NoCompareSections>
 	  <AdditionalProperties>
           <PropertyGroups>
             <PropertyGroup>
@@ -187,6 +188,7 @@
 	  <ResetCommand>maint packet R</ResetCommand>
 	  <WriteOnlyPCOverride>$epc2</WriteOnlyPCOverride>
 	  <RequestAdvancedDebugVariables>true</RequestAdvancedDebugVariables>
+	  <NoCompareSections>true</NoCompareSections>
 	  <AdditionalProperties>
           <PropertyGroups>
             <PropertyGroup>
@@ -315,6 +317,7 @@
       <UseContinueToStart>true</UseContinueToStart>
       <SendCtrlCToGDBServer>false</SendCtrlCToGDBServer>
 	  <RequireExplicitDisconnect>true</RequireExplicitDisconnect>
+	  <NoCompareSections>true</NoCompareSections>
 	  <AdditionalProperties>
           <PropertyGroups>
             <PropertyGroup>
