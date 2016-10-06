@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink (no FLASH)</Name>
+	<Description>This project demonstrates how to control an LED without programming anything to the SPI FLASH.</Description>
+	<MCUFilterRegex>ESP32_NOFLASH</MCUFilterRegex>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Pin Number</Name>
+		  <UniqueID>com.sysprogs.esp32.ledblink.LEDPIN</UniqueID>
+		  <Description>Specifies pin number where the LED is connected</Description>
+		  <DefaultValue>5</DefaultValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay cycles</Name>
+		  <UniqueID>com.sysprogs.esp32.ledblink.DELAYCYCLES</UniqueID>
+		  <Description>Specifies the delay (in empty loop cycles) between LED toggling events</Description>
+		  <DefaultValue>300000</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<RequiredFrameworks>
+		<string>com.sysprogs.esp32.rtos_sdk</string>
+		<string>com.sysprogs.esp32.rtos_sdk_drivers</string>
+	</RequiredFrameworks>
+</EmbeddedProjectSample>

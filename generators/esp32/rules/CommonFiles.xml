@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+			<!-- <CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\GDBStub</SourceFolder>
+				<TargetFolder>GDBStub</TargetFolder>
+				<FilesToCopy>-.git\*;*</FilesToCopy>
+				<ProjectInclusionMask>*.c;*.h;*.S</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+				<SimpleFileConditions>
+					<string>.*: $$com.sysprogs.esp32.gdbstub$$ == ESP32_GDBSTUB</string>
+				</SimpleFileConditions>				
+				<Patches>
+					<Patch xsi:type="InsertLines">
+						<FilePath>gdbstub.c</FilePath>
+						<AfterLine>#include "gdbstub.h"</AfterLine>
+						<InsertedLines>
+							<string>#include "c_types.h"</string>
+						</InsertedLines>
+					</Patch>					
+				</Patches>
+			</CopyJob>			 -->
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\OpenOCD</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>	
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>ESP32 RTOS SDK</Name>
+			<ID>com.sysprogs.esp32.rtos_sdk</ID>
+			<ProjectFolderName>SDK</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.esp32.idf</string>
+			</IncompatibleFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP31_RTOS_SDK</SourceFolder>
+					<TargetFolder>RTOS-SDK</TargetFolder>
+					<FilesToCopy>-.git\*;*</FilesToCopy>
+					<ProjectInclusionMask>include\*</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include;$$SYS:BSP_ROOT$$/RTOS-SDK/include;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/cjson;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/freertos;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/http;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/lwip;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/lwip/port;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/lwip/posix;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/ssl</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+				</CopyJob>			
+			</CopyJobs>
+				<AdditionalSystemVars>
+					<SysVarEntry>
+					  <Key>com.sysprogs.esp32.sdktype</Key>
+					  <Value>RTOS</Value>
+					</SysVarEntry>
+					<SysVarEntry>
+					  <Key>com.sysprogs.esp32.sdkdir</Key>
+					  <Value>RTOS-SDK</Value>
+					</SysVarEntry>
+				</AdditionalSystemVars>
+		</Framework>	
+		<Framework>
+			<Name>ESP32 Peripheral Drivers (RTOS SDK)</Name>
+			<ID>com.sysprogs.esp32.rtos_sdk_drivers</ID>
+			<ProjectFolderName>Drivers</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.esp32.rtos_sdk</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP31_RTOS_SDK</SourceFolder>
+					<TargetFolder>RTOS-SDK</TargetFolder>
+					<FilesToCopy>driver_lib\*</FilesToCopy>
+					<AlreadyCopied>true</AlreadyCopied>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/driver_lib/include</AdditionalIncludeDirs>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>		
+	</AdditionalFrameworks>
+</FamilyDefinition>

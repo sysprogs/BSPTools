@@ -1,0 +1,1 @@
+ilmerge bin\Release_ESP32\ESP32DebugPackage.dll bin\Release_ESP32\Interop.CERTENROLLLib.dll  bin\Release_ESP32\OpenOCDPackage.dll bin\Release_ESP32\UsbDriverTool.exe /out:bin\ESP32DebugPackage.dll /targetplatform:2.0
