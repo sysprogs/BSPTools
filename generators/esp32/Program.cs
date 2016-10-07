@@ -61,6 +61,27 @@ namespace esp32
             mainFamily.AdditionalHeaderFiles = projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray();
             bsp.FileConditions = bspBuilder.MatchedFileConditions.ToArray();
 
+            foreach(var fn in Directory.GetFiles(Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\nghttp"), "*.?", SearchOption.AllDirectories))
+            {
+                string ext = Path.GetExtension(fn).ToLower();
+                if (ext != ".c" && ext != ".h")
+                    continue;
+
+                var lines = File.ReadAllLines(fn);
+                bool changed = false;
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    if (lines[i].Contains("<config.h>"))
+                    {
+                        lines[i] = lines[i].Replace("<config.h>", "<nghttp-config.h>");
+                        changed = true;
+                    }
+                }
+                if (changed)
+                    File.WriteAllLines(fn, lines);
+            }
+
+            File.WriteAllText(Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\nghttp\port\include\nghttp-config.h"), "#include \"config.h\"\n");
             XmlTools.SaveObject(bsp, Path.Combine(bspBuilder.BSPRoot, "BSP.XML"));
         }
     }

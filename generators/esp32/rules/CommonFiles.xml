@@ -31,53 +31,108 @@
 	</CoreFramework>	
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>ESP32 RTOS SDK</Name>
-			<ID>com.sysprogs.esp32.rtos_sdk</ID>
-			<ProjectFolderName>SDK</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.esp32.idf</string>
-			</IncompatibleFrameworks>
+			<Name>ESP32 IDF Core</Name>
+			<ID>com.sysprogs.esp32.idf.core</ID>
+			<ProjectFolderName>Core</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP31_RTOS_SDK</SourceFolder>
-					<TargetFolder>RTOS-SDK</TargetFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf</SourceFolder>
+					<TargetFolder>esp-idf</TargetFolder>
 					<FilesToCopy>-.git\*;*</FilesToCopy>
-					<ProjectInclusionMask>include\*</ProjectInclusionMask>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include;$$SYS:BSP_ROOT$$/RTOS-SDK/include;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/cjson;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/freertos;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/http;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/lwip;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/lwip/port;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/lwip/posix;$$SYS:BSP_ROOT$$/RTOS-SDK/third_party/include/ssl</AdditionalIncludeDirs>
+					<RenameRules>components\esp32\hwcrypto\aes.c=>esp_aes.c;components\lwip\core\timers.c=>lwip_timers.c</RenameRules>
+					<ProjectInclusionMask>components\esp32\*.c;components\esp32\*.cpp;components\esp32\*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include;$$SYS:BSP_ROOT$$/esp-idf/components/freertos/include/freertos;$$SYS:BSP_ROOT$$/esp-idf/components/json/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/mbedtls/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/nghttp/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/rom</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
+					<PreprocessorMacros>HAVE_CONFIG_H;MBEDTLS_CONFIG_FILE='"mbedtls/esp_config.h"';ESP_PLATFORM</PreprocessorMacros>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\log\log.c</FilePath>
+							<OldLine>inline IRAM_ATTR uint32_t esp_log_early_timestamp()</OldLine>
+							<NewLine>static inline IRAM_ATTR uint32_t esp_log_early_timestamp()</NewLine>
+						</Patch>					
+					</Patches>
 				</CopyJob>			
 			</CopyJobs>
-				<AdditionalSystemVars>
-					<SysVarEntry>
-					  <Key>com.sysprogs.esp32.sdktype</Key>
-					  <Value>RTOS</Value>
-					</SysVarEntry>
-					<SysVarEntry>
-					  <Key>com.sysprogs.esp32.sdkdir</Key>
-					  <Value>RTOS-SDK</Value>
-					</SysVarEntry>
-				</AdditionalSystemVars>
 		</Framework>	
 		<Framework>
-			<Name>ESP32 Peripheral Drivers (RTOS SDK)</Name>
-			<ID>com.sysprogs.esp32.rtos_sdk_drivers</ID>
-			<ProjectFolderName>Drivers</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<RequiredFrameworks>
-				<string>com.sysprogs.esp32.rtos_sdk</string>
-			</RequiredFrameworks>
+			<Name>Expat XML Library</Name>
+			<ID>com.sysprogs.esp32.idf.expat</ID>
+			<ProjectFolderName>Expat</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP31_RTOS_SDK</SourceFolder>
-					<TargetFolder>RTOS-SDK</TargetFolder>
-					<FilesToCopy>driver_lib\*</FilesToCopy>
-					<AlreadyCopied>true</AlreadyCopied>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\expat</SourceFolder>
+					<TargetFolder>esp-idf\components\expat</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/expat/include/expat;$$SYS:BSP_ROOT$$/esp-idf/components/expat/port/include</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
-					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/driver_lib/include</AdditionalIncludeDirs>
+					<AlreadyCopied>true</AlreadyCopied>
 				</CopyJob>			
 			</CopyJobs>
-		</Framework>		
-	</AdditionalFrameworks>
+		</Framework>
+		<Framework>
+			<Name>ESP32 NVS FLASH</Name>
+			<ID>com.sysprogs.esp32.idf.nvs_flash</ID>
+			<ProjectFolderName>NVS FLASH</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\nvs_flash</SourceFolder>
+					<TargetFolder>esp-idf\components\nvs_flash</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/nvs_flash/src;$$SYS:BSP_ROOT$$/esp-idf/components/nvs_flash/include</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>lwIP Library</Name>
+			<ID>com.sysprogs.esp32.idf.lwip</ID>
+			<ProjectFolderName>lwIP</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\lwip</SourceFolder>
+					<TargetFolder>esp-idf\components\lwip</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<RenameRules>core\timers.c=>lwip_timers.c</RenameRules>
+					<ProjectInclusionMask>-netif\ppp\*;-include\lwip\netif\ppp\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/include;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip/port</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		</AdditionalFrameworks>
+	<AdditionalFrameworkTemplates>
+		<FrameworkTemplate>
+			<Range>bt:Bluetooth Stack;driver:Drivers;freertos:FreeRTOS;json:JSON;log:Logging Support;mbedtls:mbed TLS;nghttp:ngHTTP;spi_flash:SPI FLASH;tcpip_adapter:TCP/IP Adapter</Range>
+			<ArgumentSeparator>:</ArgumentSeparator>
+			<Separator>;</Separator>
+			<Template>
+				<Name>ESP32 $$BSPGEN:FRAMEWORKARG1$$</Name>
+				<ID>com.sysprogs.esp32.idf.$$BSPGEN:FRAMEWORK$$</ID>
+				<RequiredFrameworks>
+					<string>com.sysprogs.esp32.idf.core</string>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORKARG1$$</ProjectFolderName>
+				<DefaultEnabled>true</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<TargetFolder>esp-idf\components\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<FilesToCopy>*</FilesToCopy>
+						<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+						<AutoIncludeMask>-*</AutoIncludeMask>
+						<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/$$BSPGEN:FRAMEWORK$$/include</AdditionalIncludeDirs>
+						<AlreadyCopied>true</AlreadyCopied>
+					</CopyJob>			
+				</CopyJobs>
+			</Template>				
+		</FrameworkTemplate>
+	</AdditionalFrameworkTemplates>
 </FamilyDefinition>

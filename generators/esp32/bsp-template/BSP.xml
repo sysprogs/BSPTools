@@ -3,20 +3,17 @@
   <PackageID>com.sysprogs.esp32.core</PackageID>
   <PackageDescription>ESP32 MCUs</PackageDescription>
   <PackageVersion>1.0</PackageVersion>
-  <GNUTargetID>xtensa-esp108-elf</GNUTargetID>
+  <GNUTargetID>xtensa-esp32-elf</GNUTargetID>
   <GeneratedMakFileName>esp32.mak</GeneratedMakFileName>
   <MCUFamilies>
     <MCUFamily>
       <ID>ESP32</ID>
       <UserFriendlyName>ESP32</UserFriendlyName>
       <CompilationFlags>
-        <COMMONFLAGS>-mlongcalls -nostdlib -mtext-section-literals</COMMONFLAGS>
+        <COMMONFLAGS>-mlongcalls -nostdlib -fstrict-volatile-bitfields</COMMONFLAGS>
         <LDFLAGS>-Wl,-EL</LDFLAGS>
-		<AdditionalLibraryDirectories>
-		</AdditionalLibraryDirectories>
 		<IncludeDirectories>
 			<string>.</string>
-			<string>$$SYS:BSP_ROOT$$/sysprogs/include</string>
 		</IncludeDirectories>
       </CompilationFlags>
     </MCUFamily>
@@ -32,8 +29,8 @@
 		<Memories>
 			<MCUMemory>
 				<Name>DATA_FLASH</Name>
-				<Address>1073405952</Address>
-				<Size>204800</Size>
+				<Address>1061158912</Address>
+				<Size>4194304</Size>
 				<Flags>NoSoftwareBreakpoints</Flags>
 			</MCUMemory>
 			<MCUMemory>
@@ -72,20 +69,6 @@
 			  <SuggestionList>
 				<Suggestion><UserFriendlyName>Ignored</UserFriendlyName><InternalValue></InternalValue></Suggestion>
 				<Suggestion><UserFriendlyName>Places code to SPI FLASH</UserFriendlyName><InternalValue>ICACHE_FLASH</InternalValue></Suggestion>
-			  </SuggestionList>
-			  <DefaultEntryIndex>0</DefaultEntryIndex>
-			  <AllowFreeEntry>false</AllowFreeEntry>
-			</PropertyEntry>
-			<PropertyEntry xsi:type="Enumerated">
-			  <Name>Default linker script</Name>
-			  <UniqueID>com.sysprogs.esp32.linker_script</UniqueID>
-			  <SuggestionList>
-				<Suggestion><UserFriendlyName>pro.map1.1.ld</UserFriendlyName><InternalValue>ld/pro.map1.1.ld</InternalValue></Suggestion>
-				<Suggestion><UserFriendlyName>pro.map1.2.ld</UserFriendlyName><InternalValue>ld/pro.map1.2.ld</InternalValue></Suggestion>
-				<Suggestion><UserFriendlyName>pro.map2.2.ld</UserFriendlyName><InternalValue>ld/pro.map2.2.ld</InternalValue></Suggestion>
-				<Suggestion><UserFriendlyName>pro.map2.2.ld</UserFriendlyName><InternalValue>ld/pro.map2.2.ld</InternalValue></Suggestion>
-				<Suggestion><UserFriendlyName>pro.map3.2.ld</UserFriendlyName><InternalValue>ld/pro.map3.2.ld</InternalValue></Suggestion>
-				<Suggestion><UserFriendlyName>pro.map3.2.ld</UserFriendlyName><InternalValue>ld/pro.map3.2.ld</InternalValue></Suggestion>
 			  </SuggestionList>
 			  <DefaultEntryIndex>0</DefaultEntryIndex>
 			  <AllowFreeEntry>false</AllowFreeEntry>
@@ -141,48 +124,40 @@
 	<string>sysprogs/debug/core</string>
   </DebugMethodPackages>
   <Examples>
-	<string>sysprogs/samples/LEDBlink_NoFLASH</string>
-	<string>sysprogs/samples/HTTP_RTOS_SDK</string>
+	<string>sysprogs/samples/NoFLASH</string>
+	<string>sysprogs/samples/01_Hello_world</string>
+	<string>sysprogs/samples/02_LEDBlink</string>
+	<!-- <string>sysprogs/samples/HTTP_IDF</string> -->
   </Examples>
   <ConditionalFlags>
     <ConditionalToolFlags>
-		<FlagCondition xsi:type="And">
-			<Arguments>
-			  <Condition xsi:type="Equals">
-				<Expression>$$com.sysprogs.esp32.sdktype$$</Expression>
-				<ExpectedValue>RTOS</ExpectedValue>
-				<IgnoreCase>false</IgnoreCase>
-			  </Condition>
-			  <Condition xsi:type="Equals">
-				<Expression>$$com.sysprogs.esp32.load_flash$$</Expression>
-				<ExpectedValue>1</ExpectedValue>
-				<IgnoreCase>false</IgnoreCase>
-			  </Condition>
-			</Arguments>
-		</FlagCondition>
+	  <FlagCondition xsi:type="Equals">
+		<Expression>$$com.sysprogs.esp32.load_flash$$</Expression>
+		<ExpectedValue>1</ExpectedValue>
+		<IgnoreCase>false</IgnoreCase>
+	  </FlagCondition>
       <Flags>
         <AdditionalLibraries>
-			<string>c</string>
-			<string>gcc</string>
-			<string>hal</string>
-			<string>m</string>
 			<string>crypto</string>
-			<string>freertos</string>
-			<string>lwip</string>
-			<string>lwip_dep</string>
-			<string>main</string>
+			<string>core</string>
 			<string>net80211</string>
 			<string>phy</string>
-			<string>phyrom</string>
-			<string>pp</string>
 			<string>rtc</string>
+			<string>pp</string>
 			<string>wpa</string>
+			<string>smartconfig</string>
         </AdditionalLibraries>
 		<AdditionalLibraryDirectories>
-			<string>$$SYS:BSP_ROOT$$/RTOS-SDK/lib</string>
+			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/lib</string>
+			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/ld</string>
 		</AdditionalLibraryDirectories>
-		<LDFLAGS>$$SYS:BSP_ROOT$$/RTOS-SDK/ld/pro.rom.addr.ld</LDFLAGS>
-        <LinkerScript>$$SYS:BSP_ROOT$$/RTOS-SDK/$$com.sysprogs.esp32.linker_script$$</LinkerScript>
+		<AdditionalLinkerInputs>
+			<string>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/lib/libc.a</string>
+			<string>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/lib/libm.a</string>
+			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/libhal.a</string>
+		</AdditionalLinkerInputs>
+		<LDFLAGS></LDFLAGS>
+        <LinkerScript>$$SYS:BSP_ROOT$$/sysprogs/esp32-idf-default.ld</LinkerScript>
       </Flags>
     </ConditionalToolFlags>
     <ConditionalToolFlags>

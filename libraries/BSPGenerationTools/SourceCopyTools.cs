@@ -206,6 +206,7 @@ namespace BSPGenerationTools
         public string SourceFolder; //full path
         public string TargetFolder; //if null, defaults to (BSP)\(name of source folder), otherwise specifies relative path within the family subdirectory
         public string FilesToCopy;  //<MASKLIST> of files to copy
+        public string RenameRules;
 
         public string AutoIncludeMask = "*.h";  //<MASKLIST> that will be used to derive include dirs
         public string ProjectInclusionMask = "*"; //<MASKLIST> that will be added in the Solution Explorer
@@ -229,6 +230,17 @@ namespace BSPGenerationTools
                     return "UNUSED: " + Regex.ToString();
                 else
                     return Regex.ToString();
+            }
+        }
+
+        class RenameRule
+        {
+            public string OldName;
+            public string NewName;
+
+            internal bool Matches(string targetFile)
+            {
+                return StringComparer.InvariantCultureIgnoreCase.Compare(targetFile, OldName) == 0;
             }
         }
 
@@ -278,9 +290,18 @@ namespace BSPGenerationTools
             foreach (var dir in filesToCopy.Select(f => Path.Combine(absTarget, Path.GetDirectoryName(f))).Distinct())
                 Directory.CreateDirectory(dir);
 
+            RenameRule[] rules = null;
+            if (RenameRules != null)
+                rules = RenameRules.Split(';').Select(r =>
+                {
+                    int idx = r.IndexOf("=>");
+                    return new RenameRule { OldName = r.Substring(0, idx), NewName = r.Substring(idx + 2) };
+                }).ToArray();
+
             var includeDirs = filesToCopy.Where(f => autoIncludes.IsMatch(f)).Select(f => Path.GetDirectoryName(f).Replace('\\', '/')).Distinct().Select(d => "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + (string.IsNullOrEmpty(d) ? "" : ("/" + d))).ToList();
             foreach (var f in filesToCopy)
             {
+                string renamedRelativePath = f;
                 string pathInsidePackage = Path.Combine(subdir, TargetFolder, f);
                 if (pathInsidePackage.Length > 120)
                 {
@@ -289,6 +310,13 @@ namespace BSPGenerationTools
                 }
 
                 string targetFile = Path.Combine(absTarget, f);
+                var rule = rules?.FirstOrDefault(r => r.Matches(f));
+                if (rule != null)
+                {
+                    targetFile = Path.Combine(Path.GetDirectoryName(targetFile), rule.NewName);
+                    renamedRelativePath = Path.Combine(Path.GetDirectoryName(renamedRelativePath), rule.NewName);
+                }
+
                 if (AlreadyCopied)
                 {
                     if (!File.Exists(targetFile))
@@ -298,7 +326,7 @@ namespace BSPGenerationTools
                     File.Copy(Path.Combine(expandedSourceFolder, f), targetFile, true);
 
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
-                string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + f.Replace('\\', '/');
+                string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
 
                 if (projectContents.IsMatch(f))
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
@@ -472,6 +500,8 @@ namespace BSPGenerationTools
     {
         public string Range;
         public Framework Template;
+        public string ArgumentSeparator = "\0";
+        public string Separator = " ";
 
         //Warning: the expansion is not complete and should be updated as needed
         public IEnumerable<Framework> Expand()
@@ -480,7 +510,7 @@ namespace BSPGenerationTools
             MemoryStream ms = new MemoryStream();
             ser.Serialize(ms, Template);
 
-            foreach (var n in Range.Split(' '))
+            foreach (var n in Range.Split(Separator[0]))
             {
                 ms.Seek(0, SeekOrigin.Begin);
                 Framework deepCopy = (Framework)ser.Deserialize(ms);
@@ -492,14 +522,27 @@ namespace BSPGenerationTools
                     Expand(ref job.SourceFolder, n);
                     Expand(ref job.TargetFolder, n);
                     Expand(ref job.FilesToCopy, n);
+                    Expand(ref job.AdditionalIncludeDirs, n);
                 }
                 yield return deepCopy;
             }
         }
 
-        static void Expand(ref string str, string name)
+        void Expand(ref string str, string name)
         {
-            str = str.Replace("$$BSPGEN:FRAMEWORK$$", name);
+            if (ArgumentSeparator[0] == '\0')
+                str = str.Replace("$$BSPGEN:FRAMEWORK$$", name);
+            else
+            {
+                string[] args = name.Split(ArgumentSeparator[0]);
+                for(int i = 0; i < args.Length; i++)
+                {
+                    if (i == 0)
+                        str = str.Replace("$$BSPGEN:FRAMEWORK$$", args[i]);
+                    else
+                        str = str.Replace($"$$BSPGEN:FRAMEWORKARG{i}$$", args[i]);
+                }
+            }
         }
     }
 
