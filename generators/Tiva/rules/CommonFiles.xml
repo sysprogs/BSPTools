@@ -6,6 +6,7 @@
 				<SourceFolder>$$BSPGEN:RULES_DIR$$\SystemInit</SourceFolder>
 				<FilesToCopy>*</FilesToCopy>
 				<ProjectInclusionMask>*</ProjectInclusionMask>
+				<PreprocessorMacros>PART_$$SYS:MCU_ID$$</PreprocessorMacros>
 			</CopyJob>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\inc</SourceFolder>
