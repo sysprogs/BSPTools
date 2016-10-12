@@ -49,6 +49,14 @@
           <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
           <Value>samg55</Value>
         </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32.dirutils</Key>
+          <Value>sam</Value>
+        </SysVarEntry>
+		     <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix_sam0</Key>
+          <Value>no</Value>
+        </SysVarEntry>
      </AdditionalSystemVars>
 
 </FamilyDefinition>

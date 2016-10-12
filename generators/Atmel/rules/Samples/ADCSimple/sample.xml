@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>LEDBlink</Name>
-	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
-	<MCUFilterRegex>SAM[34EGSV].*</MCUFilterRegex>
+	<Name>ADCSimple</Name>
+	<Description>This is a very basic sample project - a classical ADC Driver on example.</Description>
+	<MCUFilterRegex>SAM.*</MCUFilterRegex>
 	<RequiredFrameworks>
-		<string>com.sysprogs.arm.atmel.service.gpio</string>
-		<string>com.sysprogs.arm.atmel.drivers.sam</string>	
+		<string>com.sysprogs.arm.atmel.drivers.sam0</string>	
 	</RequiredFrameworks>
 	<ConfigurableProperties>
 	<PropertyGroups>
@@ -18,7 +17,11 @@
 	<DefaultConfiguration>
     <Entries>
       <KeyValue>
-        <Key>com.sysprogs.arm.atmel.drivers.sam.pio</Key>
+        <Key>com.sysprogs.arm.atmel.drivers.sam0.adc</Key>
+        <Value>1</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.arm.atmel.drivers.sam0.system</Key>
         <Value>1</Value>
       </KeyValue>
     </Entries>

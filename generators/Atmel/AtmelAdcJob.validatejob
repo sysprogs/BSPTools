@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainPath>[SysGCC-arm-eabi-5.3.0]</ToolchainPath>
+	<BSPPath>$$JOBDIR$$\Output</BSPPath>
+	<DeviceRegex>SAM.*</DeviceRegex>
+	<Samples>
+		<TestedSample>
+			<Name>ADCSimple</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			`<ValidateRegisters>false</ValidateRegisters>
+			<SampleConfiguration>
+				<Entries>
+				</Entries>
+			</SampleConfiguration>
+		</TestedSample>
+	</Samples>
+</TestJob>

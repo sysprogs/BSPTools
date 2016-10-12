@@ -1,12 +1,29 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	
 	<CoreFramework>	
 		<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam\utils</SourceFolder>
 					<FilesToCopy>-*cmsis*.*;*.c;*.h</FilesToCopy>
-					<TargetFolder>utils</TargetFolder>
-					<AutoIncludeMask>*.h</AutoIncludeMask>	
+					<TargetFolder>sam\utils</TargetFolder>
+					<AutoIncludeMask>-*.h</AutoIncludeMask>	
+					<ProjectInclusionMask>*.c</ProjectInclusionMask>
+					 <SimpleFileConditions> 
+						<string>\\.*:$$com.sysprogs.atmel.sam32._header_prefix_sam0$$!=yes</string>
+					 </SimpleFileConditions>
+					 <AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/$$com.sysprogs.atmel.sam32.dirutils$$/utils;$$SYS:BSP_ROOT$$/$$com.sysprogs.atmel.sam32.dirutils$$/utils/header_files;$$SYS:BSP_ROOT$$/$$com.sysprogs.atmel.sam32.dirutils$$/utils/preprocessor</AdditionalIncludeDirs>
+				</CopyJob>				
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam0\utils</SourceFolder>
+					<FilesToCopy>-*doxygen*;-*cmsis*.*;*.c;*.h</FilesToCopy>
+					<TargetFolder>sam0\utils</TargetFolder>
+					<AutoIncludeMask>-*.h</AutoIncludeMask>	
+					<ProjectInclusionMask>*.c</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/$$com.sysprogs.atmel.sam32.dirutils$$/utils/stdio</AdditionalIncludeDirs>
+					 <SimpleFileConditions> 
+						<string>\\.*:$$com.sysprogs.atmel.sam32._header_prefix_sam0$$==yes</string>
+					 </SimpleFileConditions>
 				</CopyJob>				
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\common\utils</SourceFolder>
@@ -54,6 +71,36 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 	</AdditionalFrameworks>
+	<Subfamilies>			
+			<MCUClassifier>
+			<VariableName>com.sysprogs.atmel.typsam0</VariableName>
+			<Required>true</Required>
+			<Options>	
+				<Option>
+					<Value>samb</Value>
+					<Regex>SAMB.*</Regex>					
+				</Option>
+				<Option>
+					<Value>saml</Value>
+					<Regex>SAML.*</Regex>
+				</Option>
+				<Option>
+					<Value>samc</Value>
+					<Regex>SAMC.*</Regex>
+				</Option>
+				<Option>
+					<Value>samd</Value>
+					<Regex>SAMD.*</Regex>
+				</Option>
+				<Option>
+					<Value>samr</Value>
+					<Regex>SAMR.*</Regex>
+				</Option>
+			</Options>
+		</MCUClassifier>
+		</Subfamilies>			
+
+
 	<SmartSamples>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
@@ -62,6 +109,10 @@
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\EmptyProject</SourceFolder>
 			<DestinationFolder>Samples\EmptyProject</DestinationFolder>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\ADCSimple</SourceFolder>
+			<DestinationFolder>Samples\ADCSimple</DestinationFolder>
 		</SmartSample>
 	</SmartSamples>
 </FamilyDefinition>

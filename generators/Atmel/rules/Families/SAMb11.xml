@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>SAMb11</Name>
+	<DeviceRegex>^SAMB11.*</DeviceRegex>
+	<FamilySubdirectory>SAMb11</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam0\utils\cmsis\samb11\include\samb11.h</StartupFileDir>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+    </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam0\utils\cmsis\samb11</SourceFolder>
+				<FilesToCopy>-*gcc*;-*iar*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Utils</TargetFolder>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>-*instance*;-*component*;*.h</AutoIncludeMask>
+				<SimpleFileConditions>
+				</SimpleFileConditions>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+							<FilePath>include\samb11g18a.h</FilePath>
+							<OldLine>#define ARM_SYSCTRL0           ((ArmSysctrl *)0xe000e000LUL)  /**&lt; \brief (ARM_SYSCTRL0) Base Address */</OldLine>
+							<NewLine>#define ARM_SYSCTRL0           ((ArmSysctrl *)0xe000e000UL)  /**&lt; \brief (ARM_SYSCTRL0) Base Address */</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+							<FilePath>include\samb11g18a.h</FilePath>
+							<OldLine>#define ARM_BPU0               ((ArmBpu *)0xe0002000LUL)      /**&lt; \brief (ARM_BPU0  ) Base Address */</OldLine>
+							<NewLine>#define ARM_BPU0               ((ArmBpu *)0xe0002000UL)      /**&lt; \brief (ARM_BPU0  ) Base Address */ </NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+							<FilePath>include\samb11g18a.h</FilePath>
+							<OldLine>#define ARM_DWT0               ((ArmDwt *)0xe0001000LUL)      /**&lt; \brief (ARM_DWT0  ) Base Address */</OldLine>
+							<NewLine>#define ARM_DWT0               ((ArmDwt *)0xe0001000UL)      /**&lt; \brief (ARM_DWT0  ) Base Address */ </NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+							<FilePath>include\samb11g18a.h</FilePath>
+							<OldLine>#define ARM_ROM0               ((ArmRom *)0xe00ff000LUL)      /**&lt; \brief (ARM_ROM0  ) Base Address */</OldLine>
+							<NewLine>#define ARM_ROM0               ((ArmRom *)0xe00ff000UL)      /**&lt; \brief (ARM_ROM0  ) Base Address */ </NewLine>
+					</Patch>
+				</Patches>
+			</CopyJob>		
+		</CopyJobs>	
+		
+		</CoreFramework>
+	<Subfamilies>			
+	</Subfamilies>
+	     <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
+          <Value>samb11</Value>
+        </SysVarEntry>
+       <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix_sam0</Key>
+          <Value>yes</Value>
+        </SysVarEntry>
+       <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix_samser</Key>
+          <Value>samb</Value>
+        </SysVarEntry>
+		      <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32.dirutils</Key>
+          <Value>sam0</Value>
+        </SysVarEntry>
+
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.clock</Key>
+          <Value>clock_samd21_r21_da</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.interrupt</Key>
+          <Value>system_interrupt_samd09</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.power</Key>
+          <Value>power_sam_b</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.reset</Key>
+          <Value>reset_sam_b</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.globaldir</Key>
+          <Value>_sam_b</Value>
+        </SysVarEntry>
+
+     </AdditionalSystemVars>
+
+</FamilyDefinition>

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>SAMl21</Name>
+	<DeviceRegex>^SAML21.*</DeviceRegex>
+	<FamilySubdirectory>SAMl21</FamilySubdirectory>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam0\utils\cmsis\saml21\saml21.h</StartupFileDir>
+	<ConfigurableProperties>
+        <PropertyGroups>
+          <PropertyGroup>
+           </PropertyGroup>
+        </PropertyGroups>
+    </ConfigurableProperties>
+	  	<CoreFramework>
+	  	<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam0\utils\cmsis\saml21</SourceFolder>
+				<FilesToCopy>-*gcc*;-*iar*;*.h;*.c</FilesToCopy>
+				<TargetFolder>Utils</TargetFolder>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>-*instance*;-*component*;-include*;*.h</AutoIncludeMask>
+				<!--AutoIncludeMask>-include*;*.h</AutoIncludeMask-->
+				<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/SAMl21/Utils/include$$com.sysprogs.atmel.sam0.samllet$$</AdditionalIncludeDirs>
+				</CopyJob>		
+		</CopyJobs>	
+		
+		</CoreFramework>
+	<Subfamilies>			
+			<MCUClassifier>
+			<VariableName>com.sysprogs.atmel.sam0.samllet</VariableName>
+			<Required>true</Required>
+			<Options>	
+				<Option>
+					<Value>_b</Value>
+					<Regex>SAML21...B</Regex>
+				</Option>
+				<Option>
+					<Value></Value>
+					<Regex>SAML21...A</Regex>
+				</Option>
+			</Options>
+		</MCUClassifier>
+
+	</Subfamilies>
+	<AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
+          <Value>saml21</Value>
+        </SysVarEntry>
+       <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix_sam0</Key>
+          <Value>yes</Value>
+        </SysVarEntry>
+       <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix_samser</Key>
+          <Value>saml</Value>
+        </SysVarEntry>
+		
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32.dirutils</Key>
+          <Value>sam0</Value>
+        </SysVarEntry>
+ 		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.clock</Key>
+          <Value>clock_saml21</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.interrupt</Key>
+          <Value>system_interrupt_saml21</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.power</Key>
+          <Value>power_sam_l</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.reset</Key>
+          <Value>reset_sam_l</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam0.driver.globaldir</Key>
+          <Value>_sam_l_c</Value>
+        </SysVarEntry>
+		
+		
+     </AdditionalSystemVars>
+
+</FamilyDefinition>

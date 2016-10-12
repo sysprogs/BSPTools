@@ -41,10 +41,16 @@ namespace Atmel_bsp_generator
                 layout.Memories = new List<Memory>();
                 layout.DeviceName = mcu.Name;
                 string shName = mcu.Name;
+                string aDirSam;
                 if (mcu.Name.StartsWith("AT"))
                     shName = mcu.Name.Substring(2, mcu.Name.Length - 2);
-
-                string aFileName = family.BSP.Directories.InputDir + "\\Sam\\Utils\\Cmsis\\" + family.FamilyFilePrefix + "\\Include\\" + shName;
+                if (shName.StartsWith("SAMC") || shName.StartsWith("SAMD") || shName.StartsWith("SAMR") || shName.StartsWith("SAMB") || shName.StartsWith("SAML"))
+                    aDirSam = "\\Sam0";
+                else
+                    aDirSam = "\\Sam";
+                //  EAK                if (shName == "SAMD10D13A" || shName == "SAMD10D14A" || shName == "SAMD10D12A"|| shName == "SAMD11D14A")
+                //  EAK                    shName = shName + "S";//Different Device ID (DID)
+                string aFileName = family.BSP.Directories.InputDir + aDirSam +"\\Utils\\Cmsis\\" + family.FamilyFilePrefix + "\\Include\\" + shName;
 
                 if (family.FamilyFilePrefix.ToUpper().StartsWith("SAMG"))
                     aFileName = family.BSP.Directories.InputDir + "\\Sam\\Utils\\Cmsis\\samg\\" + family.FamilyFilePrefix + "\\Include\\" + shName;
@@ -56,10 +62,15 @@ namespace Atmel_bsp_generator
 
                 int RAMStart = -1;
                 int FLASHStart = -1;
+
+                if (Regex.IsMatch(mcu.Name, "SAML21...B"))
+                    aFileName = aFileName.Replace("\\Include\\S", "\\Include_b\\S");
+
                 foreach (var ln in File.ReadAllLines(aFileName))
                 {
-                    var m = Regex.Match(ln, @"(#define [IH]?RAM[C]?[0]?_ADDR[ \t]*.*0x)([0-9A-Fa-f]+[^uU]+)+.*");
-                  
+//                    var m = Regex.Match(ln, @"(#define [IH]?[HS]?[HMC]*RAM[C]?[0]?_ADDR[ \t]*.*0x)([0-9A-Fa-f]+[^uU]+)+.*");
+                    var m = Regex.Match(ln, @"(#define [ID]*[IH]?[HS]?[HMC]*RAM[C]?[0]?_ADDR[ \t]*.*0x)([0-9A-Fa-f]+[^uU]+[L]?)+.*");
+
                     if (m.Success)
                     {
                         RAMStart = Convert.ToInt32(m.Groups[2].Value, 16);
@@ -68,6 +79,8 @@ namespace Atmel_bsp_generator
                     m = Regex.Match(ln, @"(#define [I]?FLASH[0]?_ADDR[ \t]*.*0x)([0-9A-Fa-f]+[^u|U]+)+.*");
                     if (!m.Success)
                         m = Regex.Match(ln, @"(#define [I]?FLASH[0]?_CNC_ADDR[ \t]*.*0x)([0-9A-Fa-f]+[^u|U]+)+.*");
+                    if (!m.Success)
+                        m = Regex.Match(ln, @"(#define BOOTROM_ADDR[ \t]*.*0x)([0-9A-Fa-f]+[^u|U]+)+.*");//samb11
                     if (m.Success)
                     {
                         FLASHStart = Convert.ToInt32(m.Groups[2].Value, 16);
@@ -117,8 +130,10 @@ namespace Atmel_bsp_generator
             if (strPrefFam == "SAM4cm3")
                 strPrefFam = strPrefFam.Substring(0, strPrefFam.Length - 1);
 
-            foreach (var fl in Directory.GetFiles(Path.GetDirectoryName(startupFileName), strPrefFam + "*.h", SearchOption.TopDirectoryOnly))
+            foreach (var fl in Directory.GetFiles(Path.GetDirectoryName(startupFileName), strPrefFam + "*.h", SearchOption.AllDirectories/* TopDirectoryOnly*/))
             {
+                if (fl.Contains("\\pio\\"))
+                    continue;
                 string aNameFl = fl.Substring(fl.LastIndexOf("\\")+1, fl.Length - fl.LastIndexOf("\\")-1);
                 if (Path.GetFileNameWithoutExtension(aNameFl).ToUpper() == strPrefFam.ToUpper())
                     continue;
@@ -188,7 +203,9 @@ namespace Atmel_bsp_generator
         {
             List<MCUDefinitionWithPredicate> RegistersPeriphs = new List<MCUDefinitionWithPredicate>();
             Dictionary<string, HardwareRegisterSet[]> periphs = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegistersAtmel(dir +"\\"+ fam.Definition.FamilySubdirectory+ "\\Utils\\Include",fam.FamilyFilePrefix);
-
+      //      Dictionary<string, HardwareRegisterSet[]> periphs;
+                if (fam.FamilyFilePrefix.Contains("SAMl21"))
+                 periphs = periphs.Concat(PeripheralRegisterGenerator.GenerateFamilyPeripheralRegistersAtmel(dir + "\\" + fam.Definition.FamilySubdirectory + "\\Utils\\Include_b", fam.FamilyFilePrefix)).ToDictionary(v => v.Key, v => v.Value);
             foreach (var subfamily in periphs.Keys)
             {
                 MCUDefinitionWithPredicate mcu_def = new MCUDefinitionWithPredicate { MCUName = subfamily, RegisterSets = periphs[subfamily], MatchPredicate = m => ( subfamily == m.Name), };
@@ -230,7 +247,7 @@ namespace Atmel_bsp_generator
                     id = Path.GetFileName(dir);
                 }
                 dir= dir.ToLower();
-                
+
                 id = dir.Replace("\\", "_");
                 string a_name = line.Substring(line.LastIndexOf("\\") + 1).ToLower(); ;
 
@@ -238,6 +255,29 @@ namespace Atmel_bsp_generator
                 dir = a_name;
                 string aIncludeMask = "-sam[0-9g]?*;-uc*;*.h";
                 a_SimpleFileConditions.Clear();
+
+                if (a_name.ToLower() == "sleepmgr")
+                {
+                    a_SimpleFileConditions.Add(@"samd\\*: $$com.sysprogs.atmel.sam32._header_prefix_samser$$ == samd");
+                    a_SimpleFileConditions.Add(@"samc\\*: $$com.sysprogs.atmel.sam32._header_prefix_samser$$ == samc");
+                    a_SimpleFileConditions.Add(@"sam\\*: $$com.sysprogs.atmel.sam32._header_prefix_sam0$$ != yes");
+                    aIncludeMask = @"-*/*;*.h";
+                }
+              if (a_name.ToLower() == "serial")
+                {
+                    a_SimpleFileConditions.Add(@"sam0_usart\\*: $$com.sysprogs.atmel.sam32._header_prefix_sam0$$ == yes");
+                    a_SimpleFileConditions.Add(@"sam_uart\\*: $$com.sysprogs.atmel.sam32._header_prefix_sam0$$ != yes");
+                    a_SimpleFileConditions.Add(@"samb_uart\\*: $$com.sysprogs.atmel.sam32._header_prefix_sam0$$ == samb");
+                    aIncludeMask = @"-*/*;*.h";
+                }
+                if (a_name.ToLower() == "adp"|| a_name.ToLower() == "ioport")
+                {
+                    a_SimpleFileConditions.Add(@"sam0\\*: $$com.sysprogs.atmel.sam32._header_prefix_sam0$$ == yes");
+                    a_SimpleFileConditions.Add(@"sam\\*: $$com.sysprogs.atmel.sam32._header_prefix_sam0$$ != yes");
+                    aIncludeMask = @"-*/*;*.h";
+                }
+
+
                 if (a_name.ToLower() == "clock")
                 {
                                a_SimpleFileConditions.Add(@"sam4l\\sysclk.c: $$com.sysprogs.atmel.sam32._header_prefix$$ == sam4l");
@@ -257,7 +297,7 @@ namespace Atmel_bsp_generator
                                a_SimpleFileConditions.Add(@"samv71\\sysclk.c: $$com.sysprogs.atmel.sam32._header_prefix$$ == samv71");
                                a_SimpleFileConditions.Add(@"samg\\sysclk.c: $$com.sysprogs.atmel.sam32._header_prefix$$ == samg51");
 
-                               aIncludeMask = @"-*/*;*.h";
+                                 aIncludeMask = @"-*/*;*.h";
                 }
     
 
@@ -275,7 +315,7 @@ namespace Atmel_bsp_generator
                             {
                                 SourceFolder = @"$$BSPGEN:INPUT_DIR$$\common\services\"+dir,
                                 TargetFolder = @"common\services\"+dir,
-                                FilesToCopy = "-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*mega*;-*avr*;-*sam0*;-*uc3*;*.c;*.h",
+                                FilesToCopy = "-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*mega*;-*avr*;-*uc3*;*.c;*.h",
                                 AutoIncludeMask =aIncludeMask,
                                 ProjectInclusionMask = "*.c",
                                 SimpleFileConditions = a_SimpleFileConditions.ToArray(),
@@ -287,43 +327,240 @@ namespace Atmel_bsp_generator
             return bleFrameworks;
         }
 
-        static List<Framework> GenereteAddFrameWorksDir(BSPDirectories pBspDir, string pstrFile="")
+        static List<Framework> GenereteAddFrameWorksDir(BSPDirectories pBspDir, string pstrTypSam)
         {
             List<Framework> bleFrameworks = new List<Framework>();
             List<PropertyEntry> propFr = new List<PropertyEntry>();
             PropertyList pl = new PropertyList();
 
             List<string> a_SimpleFileConditions = new List<string>();
-            string a_macname = "com.sysprogs.arm.atmel.drivers.";
-            string strIdFr = "com.sysprogs.arm.atmel.drivers";
-            string strClFr = "com.sysprogs.arm.atmel.cl.drivers";
-            string nameFr = "Drivers";
-            string asrcJob = @"$$BSPGEN:INPUT_DIR$$\sam\drivers";
+            string a_macname = "com.sysprogs.arm.atmel.drivers."+ pstrTypSam+".";
+            string strIdFr = "com.sysprogs.arm.atmel.drivers." + pstrTypSam ;
+            string strClFr = "com.sysprogs.arm.atmel.cl.drivers."+ pstrTypSam;
+            string nameFr = pstrTypSam.ToUpper()+"_Drivers";
+            string asrcJob = @"$$BSPGEN:INPUT_DIR$$\"+ pstrTypSam+@"\drivers";
 
-            string astrTargetJob = @"drivers";
+            string astrTargetJob = pstrTypSam + @"\drivers";
             string astrFileJob = "-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*mega*;-*avr*;-*adc_enhanced_mode*;-*quick_start*;*.c;*.h";
-            string aInclJob = "-sam[0-9g]?*;-uc*;*.h";
-
-
-            string[] strPropFrim = Directory.GetDirectories(Path.Combine(pBspDir.InputDir, @"sam\drivers"));
-
-            if(pstrFile!="")
+            string aInclJob = "*.h";// " - sam[0-9g]?*;-uc*;*.h";
+            string aPrjInclMsk = "*.c;*.h";
+            List<string> strIncompFrIDs = new List<string>();
+            if (pstrTypSam.ToUpper() == "SAM")
+                strIncompFrIDs.Add("com.sysprogs.arm.atmel.drivers.sam0");
+            else
             {
-                strPropFrim = File.ReadAllLines(Path.Combine(pBspDir.RulesDir, pstrFile));
-                a_macname = "com.sysprogs.arm.atmel.services.";
-                strIdFr = "com.sysprogs.arm.atmel.services";
-                strClFr = "com.sysprogs.arm.atmel.cl.services";
-                nameFr = "Services";
-                asrcJob = @"$$BSPGEN:INPUT_DIR$$\common\services";
-                astrTargetJob = @"services";
+                aPrjInclMsk = "-*_sam*.h;*.c;*.h";
+
+                aInclJob = "$$SYS:BSP_ROOT$$/sam0/drivers/system/clock/$$com.sysprogs.atmel.sam0.driver.clock$$;" +
+                           "$$SYS:BSP_ROOT$$/sam0/drivers/system/clock/$$com.sysprogs.atmel.sam0.driver.clock$$/module_config;" +
+                           "$$SYS:BSP_ROOT$$/sam0/drivers/system/interrupt/$$com.sysprogs.atmel.sam0.driver.interrupt$$;" +
+                           "$$SYS:BSP_ROOT$$/sam0/drivers/system/interrupt/$$com.sysprogs.atmel.sam0.driver.interrupt$$/module_config;" +
+                            "$$SYS:BSP_ROOT$$/sam0/drivers/system/power/$$com.sysprogs.atmel.sam0.driver.power$$;" +
+                           "$$SYS:BSP_ROOT$$/sam0/drivers/system/reset/$$com.sysprogs.atmel.sam0.driver.reset$$"+
+      
+                           ";$$SYS:BSP_ROOT$$/sam0/drivers/adc/$$com.sysprogs.atmel.sam0.driver.globaldir$$";
+
+               foreach(var dirdr in  Directory.GetDirectories(Path.Combine(pBspDir.InputDir, pstrTypSam + @"\drivers")))
+                    foreach(var dirdr1 in Directory.GetDirectories(dirdr))
+                        if(dirdr1.Contains("_sam"))
+                          {
+                            string aName = dirdr.Substring(dirdr.LastIndexOf("\\") + 1);
+                            aInclJob += @";$$SYS:BSP_ROOT$$/sam0/drivers/" + aName + @"/" + aName+"$$com.sysprogs.atmel.sam0.driver.globaldir$$";
+                            break;
+
+                         }
+                strIncompFrIDs.Add("com.sysprogs.arm.atmel.drivers.sam");
             }
-            foreach (var line in strPropFrim)// bspBuilder.Directories.RulesDir + @"\EmbFrameworks.txt"))
+
+            string[] strPropFrim = Directory.GetDirectories(Path.Combine(pBspDir.InputDir, pstrTypSam + @"\drivers"));
+            string aAddSimpleCond = "";
+            foreach (var line in strPropFrim)
             {
+                bool aflIsCond = false;
 
                 string a_name = line.Substring(line.LastIndexOf("\\") + 1).ToLower();
-                if(a_name.Contains("gpio"))
-                    aInclJob = "*.h";
+               if(a_name.Contains("gpio") && pstrTypSam.ToUpper() == "SAM")
+                  aInclJob = "*.h";
 
+                if (Directory.GetFiles(line, "*.c", SearchOption.AllDirectories).Count() == 0)
+                    continue;
+
+                string[] strDirToDir = Directory.GetDirectories(line, "*", SearchOption.AllDirectories);
+              //  string[] strDirToDir = Directory.GetFiles(line, "*", SearchOption.AllDirectories);
+                //          string aDrivCond = "^" + a_name + @"\\: $$" + a_macname + a_name + "$$ == 1";
+                string aDrivCond =" $$" + a_macname + a_name + "$$ == 1";
+                if (pstrTypSam.ToUpper() == "SAM0")
+                    {
+                    foreach (var dir in strDirToDir)
+                            if (dir.Contains("_sam") )
+                             {
+                                if (dir.Contains("quick"))
+                                     continue;
+                              string aPatchPref = dir.Substring(dir.LastIndexOf(a_name+"\\") + a_name.Length + 1).ToLower();
+                                string prefs = "^sam(";
+                            if (dir.EndsWith("module_config"))
+                                continue;
+                            if (dir.Contains("unit_test"))
+                                continue;
+                            int ac = 0;
+                            int idx1 = dir.LastIndexOf("\\");
+                            int idx2 = dir.LastIndexOf("_sam");
+                            string aflPtch;
+                            if (idx2 < idx1)
+                               aflPtch = dir.Remove(idx1);
+                            else
+                                aflPtch = dir;
+
+                            foreach (var pref in aflPtch.Substring(dir.LastIndexOf("_sam") + 4).Split('_'))
+                                {
+                                if (pref == "")
+                                    continue;
+                          /*      int idx = pref.LastIndexOf("\\");
+                                string regdata;
+                                if (idx > 0)
+                                    regdata = pref.Remove(idx);
+                                else*/
+                                 //   regdata = pref;
+                                    if (pref[0] != '0' && pref[0] != 'd' && pref[0] != 'r' && pref[0] != 'l' && pref[0] != 'b' && pref[0] != 'c')
+                                            throw new Exception(" unknow prefix " + pref + " in " + dir);
+                                     if(ac > 0)
+                                        prefs += "|";
+
+                                if (pref == "0")
+                                    prefs = "sam(?!d20";
+                                else
+                                    prefs += pref;//.Replace(".c", "");
+
+
+
+                                   ac++;
+                                }
+                                       prefs += ")";
+                                      aPatchPref = aPatchPref.Replace(@"\",@"\\");
+                          /*            if(aPatchPref.EndsWith(".c"))//file
+                                        aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @":$$com.sysprogs.atmel.sam32._header_prefix$$ =~ " + prefs;
+                                       else
+                              */              aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @"\\:$$com.sysprogs.atmel.sam32._header_prefix$$ =~ " + prefs;
+
+                                    a_SimpleFileConditions.Add(aAddSimpleCond+ "&& "+ aDrivCond);
+                                     aflIsCond = true;
+                                
+                         }/*
+                     string[] strFileToDir = Directory.GetFiles(line, "*_sam_*.c", SearchOption.AllDirectories);
+                    foreach(var fl in strFileToDir)
+                    {
+                        int ac = 0;
+                 
+       
+                        string aPatchPref = fl.Substring(fl.LastIndexOf(a_name + "\\") + a_name.Length + 1).ToLower();
+                        string prefs = "^sam(";
+
+                        foreach (var pref in fl.Substring(fl.LastIndexOf("_sam") + 4).Split('_'))
+                        {
+                            if (pref == "")
+                                continue;
+                          
+                            if ( pref[0] != 'd' && pref[0] != 'r' && pref[0] != 'l' && pref[0] != 'b' && pref[0] != 'c')
+                                throw new Exception(" unknow prefix " + pref + " in " + dir);
+                            if (ac > 0)
+                                prefs += "|";
+
+                            if (pref == "0")
+                                prefs = "sam(?!d20";
+                            else
+                                prefs += pref.Replace(".c", "");
+
+
+
+                            ac++;
+                        }
+                        prefs += ")";
+                        aPatchPref = aPatchPref.Replace(@"\", @"\\");
+
+                        aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @":$$com.sysprogs.atmel.sam32._header_prefix$$ =~ " + prefs;
+
+                        a_SimpleFileConditions.Add(aAddSimpleCond + "&& " + aDrivCond);
+                        aflIsCond = true;
+
+                    }
+                    */
+                    if (aflIsCond)
+                    {
+                        foreach (var dir in strDirToDir)
+                            if (!dir.Contains("_sam"))
+                            {
+                                if (dir.Contains("quick"))
+                                    continue;
+                                if (dir.Contains("unit") || dir.Contains("docimg"))
+                                    continue;
+                                if (Directory.GetFiles(dir,"*.c", SearchOption.TopDirectoryOnly).Count() == 0)
+                                    continue;
+
+                                string aPatchPref = dir.Substring(dir.LastIndexOf(a_name + "\\") + a_name.Length + 1).ToLower();
+                                aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @"\\:" + aDrivCond;
+                                a_SimpleFileConditions.Add(aAddSimpleCond);
+                            }
+                        string[] strFileToDir = Directory.GetFiles(line, "*.c");
+                        foreach (var file in strFileToDir)
+                        {
+
+                            if (Path.GetFileNameWithoutExtension(file).Contains("_sam_"))
+                            {
+                                string prefs = "sam(";
+                                string aPatchPref = file.Substring(file.LastIndexOf(a_name + "\\") + a_name.Length + 1).ToLower();
+                                foreach (var pref in Path.GetFileNameWithoutExtension(file).Substring(Path.GetFileNameWithoutExtension(file).LastIndexOf("_sam_") + 5).Split('_'))
+                                {
+                                    //   regdata = pref;
+                                    if (pref[0] != '0' && pref[0] != 'd' && pref[0] != 'r' && pref[0] != 'l' && pref[0] != 'b' && pref[0] != 'c')
+                                        throw new Exception(" unknow prefix " + pref + " in ");
+
+
+                                    if (pref == "0")
+                                        prefs = "sam(?!d20";
+                                    else
+                                        prefs += pref;//.Replace(".c", "");
+
+                                }
+                                prefs += ")";
+
+                                aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @":$$com.sysprogs.atmel.sam32._header_prefix$$ =~ " + prefs;
+                                a_SimpleFileConditions.Add(aAddSimpleCond + aDrivCond);
+                                if (prefs == "sam()")
+                                    a_SimpleFileConditions.Add(aAddSimpleCond);
+                            }
+                            else
+                            {
+                                aAddSimpleCond = "^" + a_name + @"\\" + Path.GetFileName(file) + ":" + aDrivCond;
+                                a_SimpleFileConditions.Add(aAddSimpleCond);
+                            }
+                            
+                        }
+                    }
+                }
+                /*   {
+                       if (dir.Contains("quick"))
+                           continue;
+                       string aPatchPref = dir.Substring(dir.LastIndexOf("\\") + 1).ToLower();
+                       if (dir.Contains("_sam_d_r"))
+                       {
+                           aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @"\\:$$com.sysprogs.atmel.typsam0$$ == sam_d_r";
+                           continue;
+                       }
+                       if (dir.Contains("_sam_b"))
+                       {
+                           aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @"\\:$$com.sysprogs.atmel.typsam0$$ == sam_b";
+                           continue;
+                       }
+                       if (dir.Contains("_sam_l_c"))
+                       {
+                           aAddSimpleCond = "^" + a_name + @"\\" + aPatchPref + @"\\:$$com.sysprogs.atmel.typsam0$$ == sam_l_c";
+                           continue;
+                       }
+                       if (dir.Contains("_sam_"))
+                           Console.WriteLine("      throw new Exception( unknow prefix in "+ dir);
+
+                   }
+                   */
                 propFr.Add(new PropertyEntry.Boolean
                 {
                     Name = a_name,
@@ -331,7 +568,12 @@ namespace Atmel_bsp_generator
                     ValueForTrue = "1",
                     ValueForFalse = "0",
                 });
-                a_SimpleFileConditions.Add("^"+a_name + @"\\: $$"+ a_macname+ a_name + "$$ == 1");
+                if(!aflIsCond)
+                  a_SimpleFileConditions.Add("^" + a_name + @"\\:" + aDrivCond);
+                /*
+                a_SimpleFileConditions.Add(aDrivCond) ;
+                if(aAddSimpleCond!= "")
+                    a_SimpleFileConditions.Add(aAddSimpleCond);*/
             }
                 List<PropertyGroup> pg = new List<PropertyGroup>();
                 pg.Add( new PropertyGroup {Name = nameFr, Properties = propFr });
@@ -344,16 +586,22 @@ namespace Atmel_bsp_generator
                 ClassID = strClFr,
                 ProjectFolderName = "Atmel_" + nameFr,
                 DefaultEnabled = false,
+                IncompatibleFrameworks = strIncompFrIDs.ToArray(),
 
                 CopyJobs = new CopyJob[]
                        {
                             new CopyJob
                             {
+                                PreprocessorMacros = "ADC_CALLBACK_MODE=true;  USART_CALLBACK_MODE=true",
                                 SourceFolder = asrcJob ,
-                                TargetFolder = astrTargetJob ,                                
+                                TargetFolder = astrTargetJob ,
                                 FilesToCopy = astrFileJob  ,
                                 SimpleFileConditions = a_SimpleFileConditions.ToArray(),
-                               AutoIncludeMask = aInclJob,
+                               AutoIncludeMask = "-*_sam*.h;*.h",
+                              AdditionalIncludeDirs = aInclJob,
+                                ProjectInclusionMask = aPrjInclMsk
+
+
         }
     },
               ConfigurableProperties = pl,
@@ -404,9 +652,11 @@ namespace Atmel_bsp_generator
             var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
 
             //Embedded Frameworks
-            var AddFrW = GenereteAddFrameWorks(bspBuilder.Directories, "ServicesFrimwork.txt");
-            commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
-            AddFrW = GenereteAddFrameWorksDir(bspBuilder.Directories);
+                 var AddFrW =    GenereteAddFrameWorks(bspBuilder.Directories, "ServicesFrimwork.txt");
+                commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
+                 AddFrW = GenereteAddFrameWorksDir(bspBuilder.Directories, "sam");
+               commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
+             AddFrW =GenereteAddFrameWorksDir(bspBuilder.Directories, "sam0");
             commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
 
            foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
