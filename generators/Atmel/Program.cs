@@ -17,14 +17,19 @@ namespace Atmel_bsp_generator
 {
     class Program
     {
-        class SLabBSPBuilder : BSPBuilder
+        class AtmelBSPBuilder : BSPBuilder
         {
             const uint FLASHBase = 0x00000000, SRAMBase = 0x20000000;
 
-            public SLabBSPBuilder(BSPDirectories dirs)
+            public AtmelBSPBuilder(BSPDirectories dirs)
                 : base(dirs)
             {
                 ShortName = "Atmel";
+            }
+
+            public override string GetMCUTypeMacro(MCUBuilder mcu)
+            {
+                return $"__{mcu.Name.Substring(2)}__";
             }
 
 
@@ -193,7 +198,7 @@ namespace Atmel_bsp_generator
                 yield return new StartupFileGenerator.InterruptVectorTable
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(aStartNewName), ".c"),
-                    MatchPredicate = m =>(Path.GetFileNameWithoutExtension(aNameFl).ToUpper() == m.Name.ToUpper()),
+                    MatchPredicate = m =>(Path.GetFileNameWithoutExtension(aNameFl).ToUpper() == m.Name.Substring(2).ToUpper()),
                     Vectors = vectors.ToArray()
                 };
             }
@@ -218,8 +223,13 @@ namespace Atmel_bsp_generator
         {
             foreach (var amcu in rawmcu_list)
             {
-                if (amcu.Name.StartsWith("AT"))
-                    amcu.Name = amcu.Name.Substring(2, amcu.Name.Length - 2);
+                if (!amcu.Name.StartsWith("AT"))
+                {
+                    if (amcu.Name.StartsWith("SAM"))
+                        amcu.Name = "AT" + amcu.Name;
+                    else
+                        throw new Exception("Unexpected MCU name");
+                }
                 var idx = amcu.Name.IndexOf("-");
                 if (idx > 0)
                     amcu.Name = amcu.Name.Remove(idx);
@@ -342,7 +352,7 @@ namespace Atmel_bsp_generator
 
             string astrTargetJob = pstrTypSam + @"\drivers";
             string astrFileJob = "-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*mega*;-*avr*;-*adc_enhanced_mode*;-*quick_start*;*.c;*.h";
-            string aInclJob = "*.h";// " - sam[0-9g]?*;-uc*;*.h";
+            string aInclJob = "";// " - sam[0-9g]?*;-uc*;*.h";
             string aPrjInclMsk = "*.c;*.h";
             List<string> strIncompFrIDs = new List<string>();
             if (pstrTypSam.ToUpper() == "SAM")
@@ -357,7 +367,6 @@ namespace Atmel_bsp_generator
                            "$$SYS:BSP_ROOT$$/sam0/drivers/system/interrupt/$$com.sysprogs.atmel.sam0.driver.interrupt$$/module_config;" +
                             "$$SYS:BSP_ROOT$$/sam0/drivers/system/power/$$com.sysprogs.atmel.sam0.driver.power$$;" +
                            "$$SYS:BSP_ROOT$$/sam0/drivers/system/reset/$$com.sysprogs.atmel.sam0.driver.reset$$"+
-      
                            ";$$SYS:BSP_ROOT$$/sam0/drivers/adc/$$com.sysprogs.atmel.sam0.driver.globaldir$$";
 
                foreach(var dirdr in  Directory.GetDirectories(Path.Combine(pBspDir.InputDir, pstrTypSam + @"\drivers")))
@@ -380,7 +389,7 @@ namespace Atmel_bsp_generator
 
                 string a_name = line.Substring(line.LastIndexOf("\\") + 1).ToLower();
                if(a_name.Contains("gpio") && pstrTypSam.ToUpper() == "SAM")
-                  aInclJob = "*.h";
+                  aInclJob = "";
 
                 if (Directory.GetFiles(line, "*.c", SearchOption.AllDirectories).Count() == 0)
                     continue;
@@ -579,6 +588,10 @@ namespace Atmel_bsp_generator
                 pg.Add( new PropertyGroup {Name = nameFr, Properties = propFr });
                 pl.PropertyGroups =  pg;
 
+            aInclJob = aInclJob.Trim(';');
+            if (aInclJob == "")
+                aInclJob = null;
+
             bleFrameworks.Add(new Framework
             {
                 Name = nameFr + "Library",
@@ -592,21 +605,19 @@ namespace Atmel_bsp_generator
                        {
                             new CopyJob
                             {
-                                PreprocessorMacros = "ADC_CALLBACK_MODE=true;  USART_CALLBACK_MODE=true",
+                                PreprocessorMacros = "ADC_CALLBACK_MODE=true;USART_CALLBACK_MODE=true",
                                 SourceFolder = asrcJob ,
                                 TargetFolder = astrTargetJob ,
-                                FilesToCopy = astrFileJob  ,
+                                FilesToCopy = astrFileJob,
                                 SimpleFileConditions = a_SimpleFileConditions.ToArray(),
                                AutoIncludeMask = "-*_sam*.h;*.h",
                               AdditionalIncludeDirs = aInclJob,
                                 ProjectInclusionMask = aPrjInclMsk
+                        }
+                    },
+                ConfigurableProperties = pl,
 
-
-        }
-    },
-              ConfigurableProperties = pl,
-
-             });            
+            });
 
             return bleFrameworks;
         }
@@ -627,10 +638,11 @@ namespace Atmel_bsp_generator
             if (args.Length < 1)
                 throw new Exception("Usage: EFM32.exe <Atmel SW package directory>");
 
-            var bspBuilder = new SLabBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
+            var bspBuilder = new AtmelBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
 
             var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuAtmel.csv",
                 "Device Name", "Flash (kBytes)", "SRAM (kBytes)", "CPU", true);
+
             RemoveDuplicateMCU(ref devices);
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
@@ -709,10 +721,10 @@ namespace Atmel_bsp_generator
 
             BoardSupportPackage bsp = new BoardSupportPackage
             {
-                PackageID = "com.sysprogs.arm.atmel.sam",
-                PackageDescription = "Atmel Devices",
+                PackageID = "com.sysprogs.arm.atmel.sam-cortex",
+                PackageDescription = "Atmel ARM Cortex Devices",
                 GNUTargetID = "arm-eabi",
-                GeneratedMakFileName = "atsam.mak",
+                GeneratedMakFileName = "atmel.mak",
                 MCUFamilies = familyDefinitions.ToArray(),
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),

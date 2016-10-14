@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAM4S</Name>
-	<DeviceRegex>^SAM4S.*</DeviceRegex>
+	<DeviceRegex>^ATSAM4S.*</DeviceRegex>
 	<FamilySubdirectory>SAM4S</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam4s\include\sam4s.h</StartupFileDir>

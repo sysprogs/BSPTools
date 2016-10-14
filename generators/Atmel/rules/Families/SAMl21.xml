@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAMl21</Name>
-	<DeviceRegex>^SAML21.*</DeviceRegex>
+	<DeviceRegex>^ATSAML21.*</DeviceRegex>
 	<FamilySubdirectory>SAMl21</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam0\utils\cmsis\saml21\saml21.h</StartupFileDir>

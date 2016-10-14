@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAMG51</Name>
-	<DeviceRegex>^SAMG51.*</DeviceRegex>
+	<DeviceRegex>^ATSAMG51.*</DeviceRegex>
 	<FamilySubdirectory>SAMG51</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\samg\samg51\include\samg51.h</StartupFileDir>

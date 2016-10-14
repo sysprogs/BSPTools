@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>LEDBlink</Name>
+  <Description>This is a very basic sample project - a classical blinking LED example.</Description>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><UserFriendlyName>Port A</UserFriendlyName><InternalValue>A</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port B</UserFriendlyName><InternalValue>B</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port C</UserFriendlyName><InternalValue>C</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port D</UserFriendlyName><InternalValue>D</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port E</UserFriendlyName><InternalValue>E</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port F</UserFriendlyName><InternalValue>F</InternalValue></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>0</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <SuggestionList>
+			<Suggestion><UserFriendlyName>0</UserFriendlyName><InternalValue>00</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>1</UserFriendlyName><InternalValue>01</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>2</UserFriendlyName><InternalValue>02</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>3</UserFriendlyName><InternalValue>03</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>4</UserFriendlyName><InternalValue>04</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>5</UserFriendlyName><InternalValue>05</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>6</UserFriendlyName><InternalValue>06</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>7</UserFriendlyName><InternalValue>07</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>8</UserFriendlyName><InternalValue>08</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>9</UserFriendlyName><InternalValue>09</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>10</UserFriendlyName><InternalValue>10</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>11</UserFriendlyName><InternalValue>11</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>12</UserFriendlyName><InternalValue>12</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>13</UserFriendlyName><InternalValue>13</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>14</UserFriendlyName><InternalValue>14</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>15</UserFriendlyName><InternalValue>15</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>16</UserFriendlyName><InternalValue>16</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>17</UserFriendlyName><InternalValue>17</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>18</UserFriendlyName><InternalValue>18</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>19</UserFriendlyName><InternalValue>19</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>20</UserFriendlyName><InternalValue>20</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>21</UserFriendlyName><InternalValue>21</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>22</UserFriendlyName><InternalValue>22</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>23</UserFriendlyName><InternalValue>23</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>24</UserFriendlyName><InternalValue>24</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>25</UserFriendlyName><InternalValue>25</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>26</UserFriendlyName><InternalValue>26</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>27</UserFriendlyName><InternalValue>27</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>28</UserFriendlyName><InternalValue>28</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>29</UserFriendlyName><InternalValue>29</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>30</UserFriendlyName><InternalValue>30</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>31</UserFriendlyName><InternalValue>31</InternalValue></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>7</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay cycles</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYCYCLES</UniqueID>
+		  <Description>Specifies the delay (in empty loop cycles) between LED toggling events</Description>
+		  <DefaultValue>1000000</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+  <MCUFilterRegex>SAM[^34EGSV].*</MCUFilterRegex>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+    <string>com.sysprogs.arm.atmel.drivers.sam0</string>
+  </RequiredFrameworks>
+  <DefaultConfiguration>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.arm.atmel.drivers.sam0.port</Key>
+        <Value>1</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.arm.atmel.drivers.sam0.system</Key>
+        <Value>1</Value>
+      </KeyValue>
+    </Entries>
+  </DefaultConfiguration>
+</EmbeddedProjectSample>

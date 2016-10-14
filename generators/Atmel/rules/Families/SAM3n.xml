@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAM3n</Name>
-	<DeviceRegex>^SAM3N.*</DeviceRegex>
+	<DeviceRegex>^ATSAM3N.*</DeviceRegex>
 	<FamilySubdirectory>SAM3n</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam3n\include\sam3n1a.h</StartupFileDir>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAMda1</Name>
-	<DeviceRegex>^SAMDA1.*</DeviceRegex>
+	<DeviceRegex>^ATSAMDA1.*</DeviceRegex>
 	<FamilySubdirectory>SAMda1</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam0\utils\cmsis\samda1\include\samda1.h</StartupFileDir>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAMV70</Name>
-	<DeviceRegex>^SAMV70.*</DeviceRegex>
+	<DeviceRegex>^ATSAMV70.*</DeviceRegex>
 	<FamilySubdirectory>SAMV70</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\samv70\include\samv70.h</StartupFileDir>

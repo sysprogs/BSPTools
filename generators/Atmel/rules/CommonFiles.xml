@@ -100,19 +100,18 @@
 		</MCUClassifier>
 		</Subfamilies>			
 
-
 	<SmartSamples>
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
-			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_SAM</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_SAM</DestinationFolder>
 		</SmartSample>
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\EmptyProject</SourceFolder>
-			<DestinationFolder>Samples\EmptyProject</DestinationFolder>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_SAM0</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_SAM0</DestinationFolder>
 		</SmartSample>
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\ADCSimple</SourceFolder>
-			<DestinationFolder>Samples\ADCSimple</DestinationFolder>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_SAM4L</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_SAM4L</DestinationFolder>
 		</SmartSample>
 	</SmartSamples>
 </FamilyDefinition>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAMc20</Name>
-	<DeviceRegex>^SAMC20.*</DeviceRegex>
+	<DeviceRegex>^ATSAMC20.*</DeviceRegex>
 	<FamilySubdirectory>SAMc20</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam0\utils\cmsis\samc20\include\samc20.h</StartupFileDir>
