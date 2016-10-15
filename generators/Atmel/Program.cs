@@ -213,7 +213,7 @@ namespace Atmel_bsp_generator
                  periphs = periphs.Concat(PeripheralRegisterGenerator.GenerateFamilyPeripheralRegistersAtmel(dir + "\\" + fam.Definition.FamilySubdirectory + "\\Utils\\Include_b", fam.FamilyFilePrefix)).ToDictionary(v => v.Key, v => v.Value);
             foreach (var subfamily in periphs.Keys)
             {
-                MCUDefinitionWithPredicate mcu_def = new MCUDefinitionWithPredicate { MCUName = subfamily, RegisterSets = periphs[subfamily], MatchPredicate = m => ( subfamily == m.Name), };
+                MCUDefinitionWithPredicate mcu_def = new MCUDefinitionWithPredicate { MCUName = subfamily, RegisterSets = periphs[subfamily], MatchPredicate = m => ( subfamily == m.Name.Substring(2)), };
                 RegistersPeriphs.Add(mcu_def);
             }
             return RegistersPeriphs;

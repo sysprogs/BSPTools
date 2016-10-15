@@ -33,7 +33,7 @@
 		  <Name>Delay cycles</Name>
 		  <UniqueID>com.sysprogs.examples.ledblink.DELAYCYCLES</UniqueID>
 		  <Description>Specifies the delay (in empty loop cycles) between LED toggling events</Description>
-		  <DefaultValue>1000000</DefaultValue>
+		  <DefaultValue>100000</DefaultValue>
 		</PropertyEntry>
 	  </Properties>
 	  <CollapsedByDefault>false</CollapsedByDefault>
