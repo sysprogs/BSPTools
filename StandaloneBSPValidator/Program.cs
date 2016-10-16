@@ -208,11 +208,15 @@ namespace StandaloneBSPValidator
                         } 
 
                         if (slots[firstEmptySlot] != null && slots[firstEmptySlot].ExitCode != 0)
+                        {
+                            // Wait for other tasks completion
+                            IntPtr[] remaining = slots.Where(s => s?.HasExited == false).Select(s => s.Handle).ToArray();
+                            WaitForMultipleObjects(remaining.Length, remaining, true, Timeout.Infinite);
                             return false;   //Exited with error
-
+                        }
+                            
                         slots[firstEmptySlot] = task.Start(projectDir, firstEmptySlot, sw);
                     }
-
 
                     IntPtr[] remainingProcesses = slots.Where(s => s?.HasExited == false).Select(s => s.Handle).ToArray();
                     WaitForMultipleObjects(remainingProcesses.Length, remainingProcesses, true, Timeout.Infinite);
