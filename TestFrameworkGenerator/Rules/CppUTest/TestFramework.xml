@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.CppUTest</ID>
 	<Name>CppUTest</Name>
-	<Version>3.8b1</Version>
+	<Version>3.8r1</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
 			<HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -54,9 +54,8 @@
 				<LocationSymbolFormat />
 			  </TestDiscoverer>
 			</Discoverers>
-			<ScopeSymbolRegex>^externTestGroup(.*)$</ScopeSymbolRegex>
+			<ScopeSymbolRegex>^_ZTV[0-9]+TEST_GROUP_CppUTestGroup(.*)$</ScopeSymbolRegex>
 			<ScopeSymbolGroup>1</ScopeSymbolGroup>
-			<ExpectedSymbolType>1</ExpectedSymbolType>
 		  </TestDiscoverer>
 		</TestDiscoverers>
 		<TestHooks>
@@ -113,7 +112,23 @@
 		</TestReportChannel>
 		<UsesSTL>true</UsesSTL>
 		<UsesExceptions>true</UsesExceptions>
-	  </AndroidCommandLine>
+		<TestDiscoverers>
+		  <TestDiscoverer xsi:type="SymbolBasedScopeDiscoverer">
+			<TargetDemangledNames>false</TargetDemangledNames>
+			<Discoverers>
+			  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
+				<TargetDemangledNames>true</TargetDemangledNames>
+				<TestSymbolRegex>^TEST_$(Scope)_(.*)_TestShell_instance$</TestSymbolRegex>
+				<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
+				<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
+				<LocationSymbolFormat />
+			  </TestDiscoverer>
+			</Discoverers>
+			<ScopeSymbolRegex>^externTestGroup(.*)$</ScopeSymbolRegex>
+			<ScopeSymbolGroup>1</ScopeSymbolGroup>
+		  </TestDiscoverer>
+		</TestDiscoverers>
+	</AndroidCommandLine>
 	  <AndroidApp>
 		<UsesSTL>true</UsesSTL>
 		<UsesExceptions>true</UsesExceptions>
@@ -135,5 +150,21 @@
 			<string>const char *p = "";</string>
 			<string>CommandLineTestRunner::RunAllTests(0, &amp;p);</string>
 		</InitializationLines>
-	  </AndroidApp>
+		<TestDiscoverers>
+		  <TestDiscoverer xsi:type="SymbolBasedScopeDiscoverer">
+			<TargetDemangledNames>false</TargetDemangledNames>
+			<Discoverers>
+			  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
+				<TargetDemangledNames>true</TargetDemangledNames>
+				<TestSymbolRegex>^TEST_$(Scope)_(.*)_TestShell_instance$</TestSymbolRegex>
+				<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
+				<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
+				<LocationSymbolFormat />
+			  </TestDiscoverer>
+			</Discoverers>
+			<ScopeSymbolRegex>^externTestGroup(.*)$</ScopeSymbolRegex>
+			<ScopeSymbolGroup>1</ScopeSymbolGroup>
+		  </TestDiscoverer>
+		</TestDiscoverers>
+	</AndroidApp>
 </TestFrameworkDefinition>
