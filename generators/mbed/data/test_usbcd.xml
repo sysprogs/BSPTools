@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainPath>B:\Programs\GNU_Tools_ARM_Embedded\5.4_2016q3</ToolchainPath>
+	<SkippedDeviceRegex>^((?!(LPC1768|LPC2368|LPC4088|LPC2460|LPC4088_DM|LPC11UXX|LPC1347|KL25Z|KL26Z|KL27Z|KL43Z|KL46Z|K20D50M|K64F|K22F|TEENSY3_1|EFM32GG_STK3700|EFM32LG_STK3600|EFM32WG_STK3800|EFM32HG_STK3400|MAXWSNENV|MAX32600MBED|MAX32620HSP)).)*$</SkippedDeviceRegex>
+	<Samples>
+		<TestedSample>
+			<Name>USB Communications Device</Name>
+			<SkipIfNotFound>false</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<MCUConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.toolchainoptions.arm.libctype</Key>
+						<Value>--specs=nano.specs</Value>
+					</KeyValue>
+				</Entries>
+			</MCUConfiguration>
+		</TestedSample>
+	</Samples>
+</TestJob>

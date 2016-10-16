@@ -208,11 +208,15 @@ namespace StandaloneBSPValidator
                         } 
 
                         if (slots[firstEmptySlot] != null && slots[firstEmptySlot].ExitCode != 0)
+                        {
+                            // Wait for other tasks completion
+                            IntPtr[] remaining = slots.Where(s => s?.HasExited == false).Select(s => s.Handle).ToArray();
+                            WaitForMultipleObjects(remaining.Length, remaining, true, Timeout.Infinite);
                             return false;   //Exited with error
-
+                        }
+                            
                         slots[firstEmptySlot] = task.Start(projectDir, firstEmptySlot, sw);
                     }
-
 
                     IntPtr[] remainingProcesses = slots.Where(s => s?.HasExited == false).Select(s => s.Handle).ToArray();
                     WaitForMultipleObjects(remainingProcesses.Length, remainingProcesses, true, Timeout.Infinite);
@@ -236,16 +240,36 @@ namespace StandaloneBSPValidator
         }
 
 
-
         private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules)
         {
-            if (Directory.Exists(mcuDir))
+            const int RepeatCount = 20;
+            for (var i = 0; i < RepeatCount; ++i)
             {
+                if (!Directory.Exists(mcuDir))
+                {
+                    break;
+                }
                 Console.WriteLine("Deleting " + mcuDir + "...");
                 Directory.Delete(mcuDir, true);
+                if (i == RepeatCount - 1)
+                {
+                    throw new Exception("Cannot remove folder!");
+                }
+                Thread.Sleep(50);
             }
-
-            Directory.CreateDirectory(mcuDir);
+            for (var i = 0; i < RepeatCount; ++i)
+            {
+                if (Directory.Exists(mcuDir))
+                {
+                    break;
+                }
+                Directory.CreateDirectory(mcuDir);
+                if (i == RepeatCount - 1)
+                {
+                    throw new Exception("Cannot create folder!");
+                }
+                Thread.Sleep(50);
+            }
 
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
             if (configuredMCU.ExpandedMCU.FLASHSize == 0)

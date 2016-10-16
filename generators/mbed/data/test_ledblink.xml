@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<ToolchainPath>F:\SysGCC\arm-eabi</ToolchainPath>
-	<SkippedDeviceRegex>^(STM32F407|LPC810)$</SkippedDeviceRegex>
+	<ToolchainPath>B:\Programs\GNU_Tools_ARM_Embedded\5.4_2016q3</ToolchainPath>
 	<Samples>
 		<TestedSample>
 			<Name>LEDBlink</Name>
@@ -15,7 +14,6 @@
 					</KeyValue>
 				</Entries>
 			</MCUConfiguration>
-
 		</TestedSample>
 	</Samples>
 </TestJob>

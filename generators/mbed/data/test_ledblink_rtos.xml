@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainPath>B:\Programs\GNU_Tools_ARM_Embedded\5.4_2016q3</ToolchainPath>
+	<SkippedDeviceRegex>^(BLUEPILL_F103C8|DISCO_L053C8|K20D50M|LPC11U37H_401|SAMR21G18A|SAML21J18A|SAMD21J18A|SAMD21G18A|NUCLEO_L053R8|NUCLEO_F030R8)$</SkippedDeviceRegex>
+	<Samples>
+		<TestedSample>
+			<Name>LEDBlink (RTOS)</Name>
+			<SkipIfNotFound>false</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<MCUConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.toolchainoptions.arm.libctype</Key>
+						<Value>--specs=nano.specs</Value>
+					</KeyValue>
+				</Entries>
+			</MCUConfiguration>
+		</TestedSample>
+	</Samples>
+</TestJob>
