@@ -530,6 +530,8 @@ namespace BSPGenerationTools
 
         void Expand(ref string str, string name)
         {
+            if (str == null)
+                return;
             if (ArgumentSeparator[0] == '\0')
                 str = str.Replace("$$BSPGEN:FRAMEWORK$$", name);
             else
