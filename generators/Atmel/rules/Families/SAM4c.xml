@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAM4c</Name>
-	<DeviceRegex>^SAM4C[^MP].*</DeviceRegex>
+	<DeviceRegex>^ATSAM4C[^MP].*</DeviceRegex>
 	<FamilySubdirectory>SAM4c</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam4c\include\sam4c.h</StartupFileDir>
@@ -65,6 +65,14 @@
         <SysVarEntry>
           <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
           <Value>sam4c</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32.dirutils</Key>
+          <Value>sam</Value>
+        </SysVarEntry>
+		     <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix_sam0</Key>
+          <Value>no</Value>
         </SysVarEntry>
      </AdditionalSystemVars>
 

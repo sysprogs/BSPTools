@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+			<!-- <CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$\GDBStub</SourceFolder>
+				<TargetFolder>GDBStub</TargetFolder>
+				<FilesToCopy>-.git\*;*</FilesToCopy>
+				<ProjectInclusionMask>*.c;*.h;*.S</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+				<SimpleFileConditions>
+					<string>.*: $$com.sysprogs.esp32.gdbstub$$ == ESP32_GDBSTUB</string>
+				</SimpleFileConditions>				
+				<Patches>
+					<Patch xsi:type="InsertLines">
+						<FilePath>gdbstub.c</FilePath>
+						<AfterLine>#include "gdbstub.h"</AfterLine>
+						<InsertedLines>
+							<string>#include "c_types.h"</string>
+						</InsertedLines>
+					</Patch>					
+				</Patches>
+			</CopyJob>			 -->
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\OpenOCD</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>	
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>ESP32 IDF Core</Name>
+			<ID>com.sysprogs.esp32.idf.core</ID>
+			<ProjectFolderName>Core</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf</SourceFolder>
+					<TargetFolder>esp-idf</TargetFolder>
+					<FilesToCopy>-.git\*;*</FilesToCopy>
+					<RenameRules>components\esp32\hwcrypto\aes.c=>esp_aes.c;components\lwip\core\timers.c=>lwip_timers.c</RenameRules>
+					<ProjectInclusionMask>components\esp32\*.c;components\esp32\*.cpp;components\esp32\*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include;$$SYS:BSP_ROOT$$/esp-idf/components/freertos/include/freertos;$$SYS:BSP_ROOT$$/esp-idf/components/json/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/mbedtls/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/nghttp/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/rom</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<PreprocessorMacros>HAVE_CONFIG_H;MBEDTLS_CONFIG_FILE='"mbedtls/esp_config.h"';ESP_PLATFORM</PreprocessorMacros>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\log\log.c</FilePath>
+							<OldLine>inline IRAM_ATTR uint32_t esp_log_early_timestamp()</OldLine>
+							<NewLine>static inline IRAM_ATTR uint32_t esp_log_early_timestamp()</NewLine>
+						</Patch>					
+					</Patches>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>Expat XML Library</Name>
+			<ID>com.sysprogs.esp32.idf.expat</ID>
+			<ProjectFolderName>Expat</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\expat</SourceFolder>
+					<TargetFolder>esp-idf\components\expat</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/expat/include/expat;$$SYS:BSP_ROOT$$/esp-idf/components/expat/port/include</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>ESP32 NVS FLASH</Name>
+			<ID>com.sysprogs.esp32.idf.nvs_flash</ID>
+			<ProjectFolderName>NVS FLASH</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\nvs_flash</SourceFolder>
+					<TargetFolder>esp-idf\components\nvs_flash</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/nvs_flash/src;$$SYS:BSP_ROOT$$/esp-idf/components/nvs_flash/include</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>lwIP Library</Name>
+			<ID>com.sysprogs.esp32.idf.lwip</ID>
+			<ProjectFolderName>lwIP</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\lwip</SourceFolder>
+					<TargetFolder>esp-idf\components\lwip</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<RenameRules>core\timers.c=>lwip_timers.c</RenameRules>
+					<ProjectInclusionMask>-netif\ppp\*;-include\lwip\netif\ppp\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/include;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip/port</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		</AdditionalFrameworks>
+	<AdditionalFrameworkTemplates>
+		<FrameworkTemplate>
+			<Range>bt:Bluetooth Stack;driver:Drivers;freertos:FreeRTOS;json:JSON;log:Logging Support;mbedtls:mbed TLS;nghttp:ngHTTP;spi_flash:SPI FLASH;tcpip_adapter:TCP/IP Adapter</Range>
+			<ArgumentSeparator>:</ArgumentSeparator>
+			<Separator>;</Separator>
+			<Template>
+				<Name>ESP32 $$BSPGEN:FRAMEWORKARG1$$</Name>
+				<ID>com.sysprogs.esp32.idf.$$BSPGEN:FRAMEWORK$$</ID>
+				<RequiredFrameworks>
+					<string>com.sysprogs.esp32.idf.core</string>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORKARG1$$</ProjectFolderName>
+				<DefaultEnabled>true</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<TargetFolder>esp-idf\components\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<FilesToCopy>*</FilesToCopy>
+						<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+						<AutoIncludeMask>-*</AutoIncludeMask>
+						<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/$$BSPGEN:FRAMEWORK$$/include</AdditionalIncludeDirs>
+						<AlreadyCopied>true</AlreadyCopied>
+					</CopyJob>			
+				</CopyJobs>
+			</Template>				
+		</FrameworkTemplate>
+	</AdditionalFrameworkTemplates>
+</FamilyDefinition>

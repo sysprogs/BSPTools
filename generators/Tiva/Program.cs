@@ -66,26 +66,20 @@ namespace Tiva_bsp_generator
             List<StartupFileGenerator.InterruptVector[]> list = new List<StartupFileGenerator.InterruptVector[]>();
 
             // Read in all the relevant startup files
-            int ic = 0;
             foreach (var startup in startups)
             {
                 if (!(startup.FullName.ToUpperInvariant().Contains(fam.Definition.Name.ToUpperInvariant()) || ((startup.FullName == "TM4C123") && startup.FullName.ToUpperInvariant().Contains("LM4F232"))))
                     continue;
 
-
-                Console.WriteLine(ic++ + " " + startup.FullName);
                 list.Add(StartupFileGenerator.ParseInterruptVectors(startup.FullName, @"void \(\* const g_pfnVectors\[\]\)\(void\) \=", @"[ \t]*\};", @"([^ \t/]+)[,]?[ \t]+// ([^\(]+)", @"[ \t]*\(void \(\*\)\(void\)\)\(\(uint32_t\)pui32Stack \+ sizeof\(pui32Stack\)\)\,", @"\{|^[ /t]*// (.*)", null, 1, 2));
             }
 
             List<StartupFileGenerator.InterruptVector> vectors = new List<StartupFileGenerator.InterruptVector>(list[0]);
             list.RemoveAt(0);
-            ic = 0;
             foreach(var entry in list)
             {
-                ic++;
-                if ((entry.Length != vectors.Count) && (entry.Length != 224))//224 is length of two boot loader demo example interrupt tables, ignoring the extra entries there!
-//                    throw new Exception("Interrupt vector counts different!");
-                Console.WriteLine("throw new Exception(Interrupt vector counts different! "+ic);
+                if ((entry.Length != vectors.Count) && (entry.Length != 224) && entry.Length != 138)//224 is length of two boot loader demo example interrupt tables, ignoring the extra entries there!
+                    throw new Exception("Interrupt vector counts different!");
 
                 for (int i = 0; i < vectors.Count; i++)
                 {
@@ -245,7 +239,7 @@ namespace Tiva_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
 
-                PackageVersion = "2.0"
+                PackageVersion = "2.1.3.156"
             };
 
             bspBuilder.Save(bsp, true);

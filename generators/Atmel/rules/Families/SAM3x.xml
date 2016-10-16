@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>SAM3x</Name>
-	<DeviceRegex>^SAM3X.*</DeviceRegex>
+	<DeviceRegex>^ATSAM3X.*</DeviceRegex>
 	<FamilySubdirectory>SAM3X</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\sam\utils\cmsis\sam3x\include\sam3x.h</StartupFileDir>
@@ -24,6 +24,14 @@
         <SysVarEntry>
           <Key>com.sysprogs.atmel.sam32._header_prefix</Key>
           <Value>sam3xa</Value>
+        </SysVarEntry>
+		<SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32.dirutils</Key>
+          <Value>sam</Value>
+        </SysVarEntry>
+		     <SysVarEntry>
+          <Key>com.sysprogs.atmel.sam32._header_prefix_sam0</Key>
+          <Value>no</Value>
         </SysVarEntry>
      </AdditionalSystemVars>
 

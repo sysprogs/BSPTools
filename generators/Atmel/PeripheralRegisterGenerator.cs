@@ -17,9 +17,22 @@ namespace Atmel_bsp_generator
             {       { "WoReg", 32 },//Write only
                     { "RwReg", 32 },//Read Write
                     { "RoReg", 32 },//Read only
+                    { "RoReg8", 8 },//Read only
                     { "uint32_t", 32 }, { "uint16_t", 16 }, { "uint8_t", 8 }
         };
+        private static List<HardwareRegisterSet> UpdateSetsReg(string aDir, ref List<HardwareRegister> lstRegCustomType)
+        {
+            List<HardwareRegisterSet> setOut = new List<HardwareRegisterSet>();
+           foreach (var fn in Directory.GetFiles(aDir + "\\component", "*.h"))
+            {
+                var aHR = ProcessRegisterSetNamesList(fn, ref lstRegCustomType);
+                if (aHR != null)
+                    setOut.AddRange(aHR);
+            }
+            return setOut;
+        }
         static int aCountProgress = 0;
+        static Dictionary<string, int> aDicSizeTypeDefStuct= new Dictionary<string, int>();
         public static Dictionary<string, HardwareRegisterSet[]> GenerateFamilyPeripheralRegistersAtmel(string familyDirectory, string fam)
         {
 
@@ -30,19 +43,20 @@ namespace Atmel_bsp_generator
             HardwareRegisterSet set = new HardwareRegisterSet();
             List<HardwareRegister> lstRegCustomType = new List<HardwareRegister>();
             List<HardwareRegisterSet> setsCustom = new List<HardwareRegisterSet>();
-
-            Dictionary<string, int> aDicSizeTypeDefStuct = new Dictionary<string, int>();
+            aDicSizeTypeDefStuct.Clear();
             int aSizeStruct = 0;
            
              Console.WriteLine("{0}Process PeripheralRegisters{1} ", ++aCountProgress, fam);
 
-            foreach (var fn in Directory.GetFiles(familyDirectory + "\\component", "*.h"))
-            {
-                var aHRegs = ProcessRegisterSetNamesList(fn, ref lstRegCustomType);
 
-                if (aHRegs != null)
-                    sets.AddRange(aHRegs);
-            }
+            //  var aHRegs = UpdateSetsReg(familyDirectory, ref lstRegCustomType);
+            //      if (aHRegs != null)
+            sets.AddRange(UpdateSetsReg(familyDirectory, ref lstRegCustomType));
+         /*   if (fam.Contains("SAMl21"))
+            {
+                var aAddDir = familyDirectory.Replace("\\Include", "\\Include_b");
+                sets.AddRange(UpdateSetsReg(familyDirectory, ref lstRegCustomType));
+            }*/
 
             List<HardwareRegisterSet> setsCustomMcu = sets;
           
@@ -75,7 +89,7 @@ namespace Atmel_bsp_generator
 
                 int asize = aDicSizeTypeDefStuct[str1] * Convert.ToInt32(asArray);
                 CustTypReg.SizeInBits = asize;
-                if (asize <= 32)
+                if (asize <= 32 && asize != 0)
                     CustTypReg.Name = CustTypReg.Name.Substring(0, strIdx2);
             }
             //Rename big strucures
@@ -86,7 +100,7 @@ namespace Atmel_bsp_generator
                 {
                     int strIdx1 = r.Name.IndexOf("-");
                     int strIdx2 = r.Name.IndexOf(":");
-                    if (r.SizeInBits <= 32 || r.Name.Contains("RESERVED"))
+                    if (((r.SizeInBits <= 32 || r.Name.Contains("RESERVED") )&& r.SizeInBits != 0))
                     {
                         lr.Add(DeepCopy(r));
                         continue;
@@ -109,8 +123,6 @@ namespace Atmel_bsp_generator
             }
 
 
-
-
             foreach (var fn in Directory.GetFiles(familyDirectory, "*.h"))
             {
                 string aFileNameout = fn;
@@ -122,8 +134,27 @@ namespace Atmel_bsp_generator
                 ///Set Base adress
                 var aHrdRegFile = ProcessRegisterSetBaseAdress(fn, sets);//etsCustomMcu);
                 if (aHrdRegFile.Count > 0)
-                  peripherals.Add(Path.GetFileNameWithoutExtension(aFileNameout).ToUpper(), aHrdRegFile.ToArray());
+                    peripherals.Add(Path.GetFileNameWithoutExtension(aFileNameout).ToUpper(), aHrdRegFile.ToArray());
             }
+
+            /*if (fam.Contains("SAMl21"))
+            {
+                var aAddDir = familyDirectory.Replace("\\Include", "\\Include_b");
+
+                foreach (var fn in Directory.GetFiles(aAddDir, "*.h"))
+                {
+                    string aFileNameout = fn;
+                    if (fn.EndsWith("_1.h"))
+                        continue;
+                    if (fn.EndsWith("_0.h"))
+                        aFileNameout = fn.Replace("_0.h", ".h");
+
+                    ///Set Base adress
+                    var aHrdRegFile = ProcessRegisterSetBaseAdress(fn, sets);//etsCustomMcu);
+                    if (aHrdRegFile.Count > 0)
+                        peripherals.Add(Path.GetFileNameWithoutExtension(aFileNameout).ToUpper(), aHrdRegFile.ToArray());
+                }
+            }*/
             return peripherals;
         }
 
@@ -145,6 +176,7 @@ namespace Atmel_bsp_generator
                 if (m.Success)
                 {
                     var str = m.Groups[3].Value.Replace("U", "");
+                    str = str.Replace("L", "");
                     var aAdrBase = Convert.ToInt32(str, 16);
                     aDicBaseAdr.Add(m.Groups[1].Value, aAdrBase);
                     aLstTypBase.Add(new AdrTypReg() { mStrTypAdr = m.Groups[2].Value, mStrNameBaseAdr = m.Groups[1].Value });
@@ -196,6 +228,9 @@ namespace Atmel_bsp_generator
             Regex argSearchFrendName = new Regex(@"^[ \t]*}[ ]*([\w]*).*");
             List<HardwareRegister> lstReg = new List<HardwareRegister>();
             int sizeArray;
+            bool aflUnion = false;
+            Match m1;
+            int aSizeUnion=0 ;
             foreach (var ln in File.ReadAllLines(pFileName))
             {
                 if (ln.Contains("typedef struct"))
@@ -204,7 +239,29 @@ namespace Atmel_bsp_generator
                     aStartCheckReg = true;
                     continue;
                 }
+                if (ln.Contains("typedef union {"))
+                { 
+                    aflUnion = true;
+                    continue;
+                }
+                if (aflUnion)
+                {
+                    m1 = Regex.Match(ln, @"[ ]*(uint[\d]+_t).*");
+                    if (m1.Success)
+                    { aSizeUnion = GetSizeInBitsPoor(m1.Groups[1].Value); continue; }
 
+                    m1 = Regex.Match(ln, @"^}[ ]*([\w_]+).*");
+                    if (m1.Success)
+                    {
+                        if (aSizeUnion == 0)
+                            throw new Exception(m1.Groups[1].Value + " is 0 in " + ln);
+
+                        if (!aDicSizeTypeDefStuct.ContainsKey(m1.Groups[1].Value))
+                            aDicSizeTypeDefStuct.Add(m1.Groups[1].Value, aSizeUnion);
+                        aflUnion = false;
+                    }
+                    continue;
+                }
                 if (!aStartCheckReg)
                     continue;
 
@@ -214,13 +271,18 @@ namespace Atmel_bsp_generator
                     sizeArray = 0;
                     if (m.Groups[1].Value == "__I" || m.Groups[1].Value == "__O" || m.Groups[1].Value == "__IO")
                     {//SAM4
-                        m = Regex.Match(ln, @"[ \t]*[_IO \t]+(uint32_t|uint16_t|uint8_t)[ \t]+([a-zA-Z0-9_]+)[[]*([0-9]+)*[]]*[;]?.*");
+                        m = Regex.Match(ln, @"[ \t]*[_IO]+[ \t]+(uint32_t|uint16_t|uint8_t|[\w_]+)[ \t]+([a-zA-Z0-9_]+)[[]*([0-9]+)*[]]*[;]?.*");
                         if (!m.Success)
                             throw new Exception("unkonow format registr :" + ln);
                     }
+                    if (m.Groups[3].Value.StartsWith("0x"))
+                    {
+                        string aDigStr = m.Groups[3].Value.Replace("0x", "");
+                        sizeArray = Convert.ToInt32(aDigStr, 16);
 
-                    if (IsDigit(m.Groups[3].Value))
-                        sizeArray = m.Groups[3].Value == "" ? 1 : Convert.ToInt16(m.Groups[3].Value);
+                    }else
+                        if (IsDigit(m.Groups[3].Value))
+                            sizeArray = m.Groups[3].Value == "" ? 1 : Convert.ToInt16(m.Groups[3].Value);
                     else
                     {
                         string astrDefArray = m.Groups[3].Value;
@@ -237,10 +299,14 @@ namespace Atmel_bsp_generator
                     string aType = m.Groups[1].Value;
                     for (int a_cnt = 0; a_cnt < sizeArray; a_cnt++)
                     {
-                       HardwareRegister setReg = new HardwareRegister
-                        {
-                            Name = (sizeArray > 1) ? m.Groups[2].Value + "[" + a_cnt + "]" : m.Groups[2].Value,
-                        };
+
+                        HardwareRegister setReg = new HardwareRegister();
+
+                        if (aType == "PortGroup")
+                            setReg.Name = m.Groups[2].Value + "[" + a_cnt + "]";
+                        else
+                            setReg.Name = (sizeArray > 1) ? m.Groups[2].Value + "[" + a_cnt + "]" : m.Groups[2].Value;
+                        
                         setReg.ReadOnly = (aType == "RoReg" || m.Groups[0].Value.Contains("__I ")) ? true : false;
 
                         if (!STANDARD_TYPE_SIZES.ContainsKey(aType))
@@ -304,9 +370,9 @@ namespace Atmel_bsp_generator
         public static List<HardwareSubRegister> ProcessRegisterSetSubRegisters(string pFileName)
         {
             List<HardwareSubRegister> aSubRegs = new List<HardwareSubRegister>();
-            Regex argSearchReg = new Regex(@"(#define) ([A-Z_0-9]+)[ \t]+\(0x([0-9a-f]+)[u< ]+([\w]+).*");
+            Regex argSearchReg = new Regex(@"(#define) ([A-Z_0-9]+)[ \t]+\(0x([0-9a-f]+)[u]+[l]?[ <]+([\w]+).*");
             Regex argSearchRegShift = new Regex(@"(#define)[ \t_]*([A-Z_0-9]+)(_Pos)[ \t]+([0-9]+).*");
-            Regex argSearchRegMask = new Regex(@"(#define)[ \t_]*([A-Z_0-9]+)(_Msk)[ \t]+\(0x([0-9a-f]+)[u< ]+([\w]+).*");
+            Regex argSearchRegMask = new Regex(@"(#define)[ \t_]*([A-Z_0-9]+)(_Msk)[ \t]+\(0x([0-9a-f]+)[u]+[l]?[ <]+([\w]+).*");
             HardwareSubRegister aSubReg = null;
             Dictionary<string, int> aDicPos = new Dictionary<string, int>();
 
