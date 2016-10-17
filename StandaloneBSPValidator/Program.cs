@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Serialization;
+using VandorData;
 
 namespace StandaloneBSPValidator
 {
@@ -91,6 +92,7 @@ namespace StandaloneBSPValidator
 
     public class TestJob
     {
+        public string TypeTests;
         public string DeviceRegex;
         public string SkippedDeviceRegex;
         public string ToolchainPath;
@@ -214,9 +216,10 @@ namespace StandaloneBSPValidator
                             WaitForMultipleObjects(remaining.Length, remaining, true, Timeout.Infinite);
                             return false;   //Exited with error
                         }
-                            
+
                         slots[firstEmptySlot] = task.Start(projectDir, firstEmptySlot, sw);
                     }
+
 
                     IntPtr[] remainingProcesses = slots.Where(s => s?.HasExited == false).Select(s => s.Handle).ToArray();
                     WaitForMultipleObjects(remainingProcesses.Length, remainingProcesses, true, Timeout.Infinite);
@@ -234,11 +237,150 @@ namespace StandaloneBSPValidator
                             return false;
                     }
                 }
-
+                
                 return true;
             }
         }
 
+
+        ///--------------------
+
+        static public void  GetDependes(VendorSample vs, string aDirOut, string pDirDependes)
+        {
+            List<string> lstDep = new List<string>();
+
+            foreach ( var filedep in Directory.GetFiles(pDirDependes, "*.d"))
+            {
+                foreach ( var lndep in File.ReadAllLines(filedep))
+                    if(lndep.StartsWith(" ") & lndep.EndsWith(" \\"))
+                      {
+                        string strDep = lndep.Replace(" \\","").Replace(" ","");
+
+                        if (!lstDep.Contains(strDep))
+                            lstDep.Add(strDep);                        
+                    }
+            }
+            vs.AllDependencies = lstDep.ToArray();
+
+            string aNameSample = "sample" + vs.UserFriendlyName  + ".xml";
+        //    Directory.Delete(aDirOut,);
+            if (!Directory.Exists(aDirOut))
+                Directory.CreateDirectory(aDirOut);
+
+            XmlTools.SaveObject(vs, Path.Combine(aDirOut, aNameSample));
+
+        }
+        
+        private static TestResult TestSample(LoadedBSP.LoadedMCU mcu, VendorSample vs, string mcuDir,string pDirSamplesOut,bool pSoftFPU)
+        {
+
+            var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
+            if (configuredMCU.ExpandedMCU.FLASHSize == 0)
+            {
+                configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
+            }
+            var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager(), null);
+            bspDict["PROJECTNAME"] = "test";
+            var prj = new GeneratedProject( mcu, vs, mcuDir, bspDict);
+
+           var mcuFlags = configuredMCU.ExpandToolFlags(bspDict, null);
+
+           ToolFlags flags = new ToolFlags { CXXFLAGS = "  ",COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
+           if(pSoftFPU)
+                flags.COMMONFLAGS = mcuFlags.COMMONFLAGS;
+            else
+                flags.COMMONFLAGS = mcuFlags.COMMONFLAGS.Replace("soft", "hard");
+
+            flags.LinkerScript = mcuFlags.LinkerScript;
+
+            flags.IncludeDirectories = vs.IncludeDirectories;
+            flags.PreprocessorMacros = vs.PreprocessorMacros;
+
+           Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
+            sourceExtensions.Add("c", true);
+            sourceExtensions.Add("cpp", true);
+
+            BuildJob job = new BuildJob();
+            string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
+
+            job.OtherTasks.Add(new BuildTask
+            {
+                Executable = prefix + "g++",
+                Arguments = $"{flags.EffectiveLDFLAGS} $^ -o $@",
+                AllInputs = prj.SourceFiles.Where(f => sourceExtensions.ContainsKey(Path.GetExtension(f).TrimStart('.')))
+                .Select(f => Path.ChangeExtension(Path.GetFileName(f), ".o"))
+                .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)))
+                .ToArray(),
+                PrimaryOutput = "test.elf",
+            });
+
+            job.OtherTasks.Add(new BuildTask
+            {
+                Executable = prefix + "objcopy",
+                Arguments = "-O binary $< $@",
+                AllInputs = new[] { "test.elf" },
+                PrimaryOutput = "test.bin",
+            });
+
+
+            foreach (var sf in prj.SourceFiles)
+            {
+                string ext = Path.GetExtension(sf);
+                if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
+                    Console.WriteLine($"#{sf} is not a recognized source file");
+                else
+                {
+                    bool isCpp = ext.ToLower() != ".c";
+                    string obj = Path.ChangeExtension(Path.GetFileName(sf), ".o");
+                    job.CompileTasks.Add(new BuildTask
+                    {
+                        PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sf), ".o"),
+                        AllInputs = new[] { sf },
+                        Executable = prefix + (isCpp ? "g++" : "gcc"),
+                        Arguments = $"-c $< {flags.GetEffectiveCFLAGS(isCpp)} -o {obj}",
+                    });
+                }
+            }
+
+            job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin");
+
+            Console.Write("Building {0}...", Path.GetFileName(mcuDir));
+
+            bool buildSucceeded;
+            if (false)
+            {
+                var proc = Process.Start(new ProcessStartInfo("cmd.exe", "/c " + Path.Combine(mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, "make.exe") + " -j" + Environment.ProcessorCount + " > build.log 2>&1") { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = mcuDir });
+                proc.WaitForExit();
+                buildSucceeded = proc.ExitCode == 0;
+            }
+            else
+            {
+                buildSucceeded = job.BuildFast(mcuDir, 1);// Environment.ProcessorCount);
+            }
+
+            bool success = false;
+            string mapFile = Path.Combine(mcuDir, GeneratedProject.MapFileName);
+            if (buildSucceeded && File.Exists(mapFile))
+            {
+                success = File.ReadAllLines(Path.Combine(mcuDir, mapFile)).Where(l => RgMainMap.IsMatch(l)).Count() > 0;
+
+                if (success)
+                {
+                    string binFile = Path.Combine(mcuDir, "test.bin");
+                    using (var fs = File.Open(binFile, FileMode.Open))
+                        if (fs.Length < 512)
+                            success = false;
+                }
+            }
+
+            if (!success)
+                return TestResult.Failed;
+            else
+                GetDependes(vs, pDirSamplesOut, mcuDir);
+
+            Directory.Delete(mcuDir, true);
+            return TestResult.Succeeded;
+        }
 
         private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules)
         {
@@ -484,6 +626,7 @@ namespace StandaloneBSPValidator
                     if (failed != "")
                         failed = ", failed on: ";
                     _Writer.WriteLine("{0} succeeded on {1} devices{2}", kv.Key, kv.Value.Where(kv2 => kv2.Value == TestResult.Succeeded).Count(), failed);
+                    _Writer.WriteLine("Total test: {0}, failed: {1}", kv.Value.Count(), kv.Value.Where(kv2 => kv2.Value == TestResult.Failed).Count());
                 }
                 _Writer.Dispose();
             }
@@ -493,6 +636,11 @@ namespace StandaloneBSPValidator
                 _Writer.WriteLine("Testing {0}...", name);
                 _CurSample = name;
                 _ThisTestResults = new Dictionary<string, TestResult>();
+            }
+
+            internal void ExceptionSample(string strExc,string data)
+            {
+                _Writer.WriteLine("\t{0}: {1}", strExc, data);
             }
 
             internal void LogTestResult(string mcuID, TestResult result)
@@ -513,7 +661,71 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
+        public static TestStatistics TestSamplesSDK(TestJob job, LoadedBSP bsp, string temporaryDirectory)
+        {
+            TestStatistics stats = new TestStatistics();
+            int cnt = 0, failed = 0, succeeded = 0;
+            LoadedBSP.LoadedMCU[] MCUs = bsp.MCUs.ToArray();
+            string aDirSampleAll = Path.Combine(temporaryDirectory, "!SamplesSDK");
+            if (!Directory.Exists(aDirSampleAll))
+                Directory.CreateDirectory(aDirSampleAll);
+            using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
+            {
+                string aDirSampleSdkSrh = job.DeviceRegex;// DeviceRegex in job is a path to samples 
+                string[] aSamples = Directory.GetFiles(aDirSampleSdkSrh, "sample*.xml", SearchOption.AllDirectories);
+                int aCountExample = aSamples.Count();
+                LoadedBSP.LoadedMCU mcu;
+                r.BeginSample("Start test projects");
+              foreach (var flsample in aSamples)
+                {
+                    var vs = XmlTools.LoadObject<VendorSample>(flsample);
+                    string aSuffixDir = Path.GetDirectoryName(flsample);
+
+                    aSuffixDir = aSuffixDir.Replace(aDirSampleSdkSrh ,""); //Directory of subfamaly
+
+                    string aDirSampleSave =  aDirSampleAll + aSuffixDir;
+                    try
+                    {
+                        vs.DeviceID = vs.DeviceID.Replace('x', '.');
+
+                        var rgFilterID = new Regex(vs.DeviceID,RegexOptions.IgnoreCase);
+                        mcu = bsp.MCUs.Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
+                    }
+                    catch (Exception ex)
+                    {
+                        r.ExceptionSample(ex.Message,"mcu " + vs.DeviceID + " not found in bsp");
+                        Console.WriteLine("bsp have not mcu:" + vs.DeviceID);
+                        continue;
+                    }
+                    bool aflSoftFPU = true;
+                    string mcuDir = Path.Combine(temporaryDirectory, vs.UserFriendlyName);
+                    if (!Directory.Exists(mcuDir))
+                        Directory.CreateDirectory(mcuDir);
+                    if (vs.UserFriendlyName.ToUpper().Contains("RTOS"))
+                         aflSoftFPU = false;
+                    DateTime start = DateTime.Now;
+                    var result = TestSample(mcu,vs, mcuDir, aDirSampleSave,aflSoftFPU);
+
+                    Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
+
+                    if (result == TestResult.Failed)
+                        failed++;
+                    else if (result == TestResult.Succeeded)
+                        succeeded++;
+
+                   r.LogTestResult(aSuffixDir+"\\"+vs.UserFriendlyName, result);
+                    cnt++;
+                    Console.WriteLine("{0}: {1}% done ({2}/{3} projects, {4} failed)", vs.UserFriendlyName, (cnt * 100) / aCountExample, cnt, aCountExample, failed);
+                }
+               r.EndSample();
+            }
+
+            stats.Passed += succeeded;
+            stats.Failed += failed;
+            return stats;
+        }
+
+    public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
         {
             TestStatistics stats = new TestStatistics();
             Directory.CreateDirectory(temporaryDirectory);
@@ -550,7 +762,7 @@ namespace StandaloneBSPValidator
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
                         DateTime start = DateTime.Now;
                         var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules);
-                        Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
+                       Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
                         if (result == TestResult.Failed)
                             failed++;
                         else if (result == TestResult.Succeeded)
@@ -590,7 +802,11 @@ namespace StandaloneBSPValidator
             var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
             var bsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(job.BSPPath), toolchain, false);
 
-            TestBSP(job, bsp, args[1]);
+
+            if (job.TypeTests == "SDK_EXAMPLE" )
+                TestSamplesSDK( job, bsp, args[1]);
+           else
+                TestBSP(job, bsp, args[1]);
         }
 
         static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, LoadedRenamingRule[] renameRules)

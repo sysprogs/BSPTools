@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
+using VandorData;
 namespace StandaloneBSPValidator
 {
+   
     class GeneratedProject
     {
         readonly string _ProjectDir;
@@ -47,7 +48,28 @@ namespace StandaloneBSPValidator
                     _Frameworks.Add(fw);
                 }
         }
+        public GeneratedProject(LoadedBSP.LoadedMCU mcu, VendorSample vs, string projectDir, Dictionary<string, string> pDictVar)
+        {
+            _ProjectDir = projectDir;
 
+            foreach (var ifl in mcu.ExpandedMCU.AdditionalSourceFiles)
+            {
+                string aVar = ifl;
+                int idx1 = ifl.IndexOf("$$");
+                if (idx1 >= 0)
+                {
+                    int idx2 = ifl.IndexOf("$$", idx1+2);
+                    aVar = ifl.Substring(idx1 + 2, idx2-2);
+                    string p = pDictVar[aVar];
+                    aVar = ifl.Replace("$$" + aVar + "$$",p);
+                }
+                if(!SourceFiles.Contains(aVar))// && !aVar.Contains("system"))
+                    _SourceFiles.Add(aVar);
+            }
+            _SourceFiles.AddRange(vs.SourceFiles);
+            
+
+        }
 
         public void DoGenerateProjectFromEmbeddedSample(ConfiguredSample sample, bool plainC, Dictionary<string, string> bspDict)
         {
@@ -104,6 +126,14 @@ namespace StandaloneBSPValidator
             {
                 var files = fw.AdditionalSourceFiles.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
                 _SourceFiles.AddRange(files);
+            }
+        }
+        public void AddBSPFilesToProject(List<string> pSrcFile,string pDirPrj)
+        {
+            foreach(var sp in pSrcFile)
+            {
+                 string fullPath = Path.Combine(pDirPrj,sp);
+                 _SourceFiles.Add(fullPath);
             }
         }
 
