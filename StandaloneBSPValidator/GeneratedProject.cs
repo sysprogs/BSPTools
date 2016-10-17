@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using VandorData;
+
 namespace StandaloneBSPValidator
 {
-   
     class GeneratedProject
     {
         readonly string _ProjectDir;
@@ -48,6 +47,7 @@ namespace StandaloneBSPValidator
                     _Frameworks.Add(fw);
                 }
         }
+
         public GeneratedProject(LoadedBSP.LoadedMCU mcu, VendorSample vs, string projectDir, Dictionary<string, string> pDictVar)
         {
             _ProjectDir = projectDir;

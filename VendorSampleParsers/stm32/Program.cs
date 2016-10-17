@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,14 +9,13 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using VandorData;
 
 namespace GeneratorSampleStm32
 {
 
     class Program
     {
-        static public List<string> ToAbcolutPath(string dir, List<string> lstDir)
+        static public List<string> ToAbsolutePath(string dir, List<string> lstDir)
         {
             List<string> srcAbc = new List<string>();
 
@@ -39,25 +39,24 @@ namespace GeneratorSampleStm32
             return srcAbc;
         }
 
-        static public List<VendorSample> GetInfoProjectFromMDK(string pDirPrj, List<string> addInc)
+        static public List<ConstructedVendorSample> GetInfoProjectFromMDK(string pDirPrj, List<string> extraIncludeDirs)
         {
-
-            List<VendorSample> aLstVSampleOut = new List<VendorSample>();
+            List<ConstructedVendorSample> aLstVSampleOut = new List<ConstructedVendorSample>();
             int aCntTarget = 0;
             string aFilePrj = pDirPrj + "\\Project.uvprojx";
             string aNamePrj = pDirPrj.Replace("\\MDK-ARM", "");
             aNamePrj = aNamePrj.Substring(aNamePrj.LastIndexOf("\\") + 1);
-            List<string> aSrcFile = new List<string>();
-            List<string> aIncFile = new List<string>();
+            List<string> sourceFiles = new List<string>();
+            List<string> headerFiles = new List<string>();
             bool flGetProperty = false;
             string aTarget = "";
-            VendorSample aSimpleOut = new VendorSample();
+            ConstructedVendorSample aSimpleOut = new ConstructedVendorSample();
             foreach (var ln in File.ReadAllLines(aFilePrj))
             {
                 if (ln.Contains("<Target>"))
                 {
                     if (aCntTarget == 0)
-                        aSimpleOut = new VendorSample();
+                        aSimpleOut = new ConstructedVendorSample();
                     aCntTarget++;
                 }
                 if (ln.Contains("</Target>"))
@@ -65,7 +64,6 @@ namespace GeneratorSampleStm32
                         throw new Exception("wrong tag Targets");
                     else
                         aCntTarget--;
-
 
                 if (ln.Contains("<Cads>"))
                     flGetProperty = true;
@@ -83,14 +81,17 @@ namespace GeneratorSampleStm32
                 if (m.Success)
                     aTarget = m.Groups[1].Value;
 
-                MatchCollection m1 = Regex.Matches(ln, @"[ ]*<FilePath>([\w:\\./]*)</FilePath>[ ]*");
+                MatchCollection m1 = Regex.Matches(ln, @"[ ]*<FilePath>([\w\-:\\./]*)</FilePath>[ ]*");
                 foreach (Match mc in m1)
                 {
-                    string aFileSource = mc.Groups[1].Value;
-                    if (aFileSource.StartsWith(@"./") || aFileSource.StartsWith(@".\"))
-                        aFileSource = pDirPrj + aFileSource.Substring(1);
-                    if (!aSrcFile.Contains(aFileSource))
-                        aSrcFile.Add(aFileSource);
+                    string filePath = mc.Groups[1].Value;
+                    if (filePath.StartsWith(@"./") || filePath.StartsWith(@".\"))
+                        filePath = pDirPrj + filePath.Substring(1);
+                    if (filePath.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+
+                    if (!sourceFiles.Contains(filePath))
+                        sourceFiles.Add(filePath);
                 }
 
                 if (flGetProperty)
@@ -110,62 +111,81 @@ namespace GeneratorSampleStm32
                     aSimpleOut.Path = pDirPrj;
                     aSimpleOut.Description = "This example " + aNamePrj + " for " + aTarget;
                     aSimpleOut.UserFriendlyName = aNamePrj + "_" + aTarget;
-
-                    aSimpleOut.SourceFiles = ToAbcolutPath(pDirPrj, aSrcFile).ToArray();
+                    aSimpleOut.SourceFiles = ToAbsolutePath(pDirPrj, sourceFiles).ToArray();
 
                     foreach (var fl in aSimpleOut.IncludeDirectories)
-                        aIncFile.Add(fl);
-                    aIncFile.AddRange(addInc);
-                    aSimpleOut.IncludeDirectories = ToAbcolutPath(pDirPrj, aIncFile).ToArray();
+                        headerFiles.Add(fl);
+                    headerFiles.AddRange(extraIncludeDirs);
+                    aSimpleOut.IncludeDirectories = ToAbsolutePath(pDirPrj, headerFiles).ToArray();
 
                     aLstVSampleOut.Add(aSimpleOut);
                 }
             }
-
             return aLstVSampleOut;
-
         }
-        //-------------------
+
+        static string ExtractFirstSubdir(string dir) => dir.Split('\\')[1];
+
         static void Main(string[] args)
         {
-            if (args.Length < 1)
-                throw new Exception("Usage: stm32.exe <SW package directory> <STM32Cube directory>");
+            if (args.Length < 2)
+                throw new Exception("Usage: stm32.exe <SW package directory> <temporary directory>");
+            string SDKdir = args[0];
+            string outputDir = @"..\..\Output";
+            string tempDir = args[1];
 
-            string constDirPrefix = "Cube_FW_";
-            string aDirSDK = args[0];
-            List<string> addInc = new List<string>();
-            addInc.Add(aDirSDK + @"\STM32Cube_FW_F0_V1.6.0\Drivers\CMSIS\Include");
-            string aOutDir = @"..\..\Output";
-
-            if (Directory.Exists(aOutDir))
-                Directory.Delete(aOutDir, true);
-
-            Directory.CreateDirectory(aOutDir);
-
-            int aCountSampl = 0;
-            Console.WriteLine("Start generate samples");
-            foreach (var aCurSDK in Directory.GetDirectories(aDirSDK, "*Cube*"))
+            bool reparseSampleDefinitions = true;
+            ConstructedVendorSampleDirectory sampleDir;
+            if (reparseSampleDefinitions)
             {
-                int aIdx1 = aCurSDK.IndexOf(constDirPrefix);
-                string aSuffixDir = "";
-                if (aIdx1 > 0)
-                    aSuffixDir = aCurSDK.Substring(aIdx1 + constDirPrefix.Length, 2);
+                if (Directory.Exists(outputDir))
+                    Directory.Delete(outputDir, true);
+                Directory.CreateDirectory(outputDir);
 
-                if (!Directory.Exists(Path.Combine(aOutDir, aSuffixDir)))
-                  Directory.CreateDirectory(Path.Combine(aOutDir, aSuffixDir));
+                var samples = ParseVendorSamples(SDKdir);
+                sampleDir = new ConstructedVendorSampleDirectory
+                {
+                    Samples = samples.ToArray()
+                };
 
-                foreach (var dir in Directory.GetDirectories(aCurSDK, "Mdk-arm", SearchOption.AllDirectories))
+                XmlTools.SaveObject(sampleDir, Path.Combine(outputDir, "samples.xml"));
+            }
+            else
+            {
+                sampleDir = XmlTools.LoadObject<ConstructedVendorSampleDirectory>(Path.Combine(outputDir, "samples.xml"));
+            }
+
+            StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, @"..\..\..\..\generators\stm32\output", tempDir);
+            XmlTools.SaveObject(sampleDir, Path.Combine(outputDir, "samples.xml"));
+        }
+
+        static List<ConstructedVendorSample> ParseVendorSamples(string SDKdir)
+        { 
+            string stm32RulesDir = @"..\..\..\..\generators\stm32\rules\families";
+
+            string[] familyDirs = Directory.GetFiles(stm32RulesDir, "stm32*.xml").Select(f => ExtractFirstSubdir(XmlTools.LoadObject<FamilyDefinition>(f).PrimaryHeaderDir)).ToArray();
+            List<ConstructedVendorSample> allSamples = new List<ConstructedVendorSample>();
+
+            foreach (var fam in familyDirs)
+            {
+                List<string> addInc = new List<string>();
+                addInc.Add($@"{SDKdir}\{fam}\Drivers\CMSIS\Include");
+
+                int aCountSampl = 0;
+                Console.Write($"Discovering samples for {fam}...");
+
+                foreach (var dir in Directory.GetDirectories(Path.Combine(SDKdir, fam), "Mdk-arm", SearchOption.AllDirectories))
                 {
                     if (!dir.Contains("Projects") || !(dir.Contains("Examples") || dir.Contains("Applications")))
                         continue;
 
-                    var aSimples = GetInfoProjectFromMDK(dir, addInc);
-                    aCountSampl += aSimples.Count;
-                    foreach (var aSmpl in aSimples)
-                        XmlTools.SaveObject(aSmpl, Path.Combine(aOutDir, aSuffixDir, "sample_" + aSmpl.UserFriendlyName + ".XML"));
+                    var aSamples = GetInfoProjectFromMDK(dir, addInc);
+                    aCountSampl += aSamples.Count;
+                    allSamples.AddRange(aSamples);
                 }
-                Console.WriteLine("Complit {0} - {1} samples", aSuffixDir, aCountSampl);
+                Console.WriteLine($" {aCountSampl} samples found");
             }
+            return allSamples;
         }
     }
 }
