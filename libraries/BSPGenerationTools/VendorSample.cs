@@ -6,12 +6,9 @@ using System.Text;
 
 namespace BSPGenerationTools
 {
-    public class ConstructedVendorSample : VendorSample
+    public class ConstructedVendorSampleDirectory : VendorSampleDirectory
     {
-    }
-
-    public class ConstructedVendorSampleDirectory
-    {
-        public ConstructedVendorSample[] Samples;
+        public string SourceDirectory;
+        public string ToolchainDirectory;
     }
 }

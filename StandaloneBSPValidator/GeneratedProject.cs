@@ -48,27 +48,12 @@ namespace StandaloneBSPValidator
                 }
         }
 
-        public GeneratedProject(LoadedBSP.LoadedMCU mcu, VendorSample vs, string projectDir, Dictionary<string, string> pDictVar)
+        public GeneratedProject(LoadedBSP.LoadedMCU mcu, VendorSample vs, string projectDir, Dictionary<string, string> bspDict)
         {
             _ProjectDir = projectDir;
 
-            foreach (var ifl in mcu.ExpandedMCU.AdditionalSourceFiles)
-            {
-                string aVar = ifl;
-                int idx1 = ifl.IndexOf("$$");
-                if (idx1 >= 0)
-                {
-                    int idx2 = ifl.IndexOf("$$", idx1+2);
-                    aVar = ifl.Substring(idx1 + 2, idx2-2);
-                    string p = pDictVar[aVar];
-                    aVar = ifl.Replace("$$" + aVar + "$$",p);
-                }
-                if(!SourceFiles.Contains(aVar))// && !aVar.Contains("system"))
-                    _SourceFiles.Add(aVar);
-            }
-            _SourceFiles.AddRange(vs.SourceFiles);
-            
-
+            _SourceFiles.AddRange(mcu.ExpandedMCU.AdditionalSourceFiles.Select(s => VariableHelper.ExpandVariables(s, bspDict)));
+            _SourceFiles.AddRange(vs.SourceFiles.Select(s=>VariableHelper.ExpandVariables(s, bspDict)));
         }
 
         public void DoGenerateProjectFromEmbeddedSample(ConfiguredSample sample, bool plainC, Dictionary<string, string> bspDict)

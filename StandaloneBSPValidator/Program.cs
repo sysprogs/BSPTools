@@ -241,28 +241,40 @@ namespace StandaloneBSPValidator
             }
         }
 
-
-        ///--------------------
-
-        static void FillSampleDependenciesFromDepFiles(ConstructedVendorSample vs, string sampleBuildDir)
+        static IEnumerable<string> SplitDependencyFile(string fileName)
         {
-            List<string> lstDep = new List<string>();
-
-            foreach (var filedep in Directory.GetFiles(sampleBuildDir, "*.d"))
+            var text = File.ReadAllText(fileName);
+            int i = 0;
+            while (i < text.Length)
             {
-                foreach (var lndep in File.ReadAllLines(filedep))
-                    if (lndep.StartsWith(" ") & lndep.EndsWith(" \\"))
-                    {
-                        string strDep = lndep.Replace(" \\", "").Replace(" ", "");
+                while (i < text.Length && (char.IsWhiteSpace(text[i]) || text[i] == '\\'))
+                    i++;
 
-                        if (!lstDep.Contains(strDep))
-                            lstDep.Add(strDep);
-                    }
+                if (i >= text.Length)
+                    break;
+
+                int start = i;
+                if (text[i] != '\"')
+                {
+                    while (i < text.Length && !char.IsWhiteSpace(text[i]))
+                        i++;
+                }
+                else
+                {
+                    while (i < text.Length && text[i] != '\"')
+                        i++;
+                }
+
+                yield return text.Substring(start, i - start);
             }
-            vs.AllDependencies = lstDep.ToArray();
         }
 
-        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, ConstructedVendorSample vs, string mcuDir, bool pSoftFPU)
+        static void FillSampleDependenciesFromDepFiles(BSPEngine.VendorSample vs, string sampleBuildDir)
+        {
+            vs.AllDependencies = Directory.GetFiles(sampleBuildDir, "*.d").SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":"))).Distinct().ToArray();
+        }
+
+        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, bool pSoftFPU, VendorSampleDirectory sampleDir)
         {
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
             if (configuredMCU.ExpandedMCU.FLASHSize == 0)
@@ -271,6 +283,7 @@ namespace StandaloneBSPValidator
             }
             var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager(), null);
             bspDict["PROJECTNAME"] = "test";
+            bspDict["SYS:VSAMPLE_DIR"] = sampleDir.Path;
             var prj = new GeneratedProject(mcu, vs, mcuDir, bspDict);
 
             var mcuFlags = configuredMCU.ExpandToolFlags(bspDict, null);
@@ -285,6 +298,8 @@ namespace StandaloneBSPValidator
 
             flags.IncludeDirectories = vs.IncludeDirectories;
             flags.PreprocessorMacros = vs.PreprocessorMacros;
+
+            flags = LoadedBSP.ConfiguredMCU.ExpandToolFlags(flags, bspDict, null);
 
             Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
             sourceExtensions.Add("c", true);
@@ -420,7 +435,7 @@ namespace StandaloneBSPValidator
             return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions);
         }
 
-        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, ConstructedVendorSample vendorSample = null)
+        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, BSPEngine.VendorSample vendorSample = null)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
@@ -585,7 +600,7 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestVendorSamples(ConstructedVendorSampleDirectory sampleDir, string bspDir, string temporaryDirectory)
+        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory)
         {
             const string defaultToolchainID = "SysGCC-arm-eabi-5.3.0";
             var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
@@ -601,10 +616,11 @@ namespace StandaloneBSPValidator
             string outputDir = Path.Combine(temporaryDirectory, "VendorSamples");
             if (!Directory.Exists(outputDir))
                 Directory.CreateDirectory(outputDir);
+            int sampleCount = samples.Samples.Length;
             using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
             {
                 LoadedBSP.LoadedMCU mcu;
-                foreach (var vs in sampleDir.Samples)
+                foreach (var vs in samples.Samples)
                 {
                     try
                     {
@@ -618,6 +634,7 @@ namespace StandaloneBSPValidator
                         Console.WriteLine("bsp have not mcu:" + vs.DeviceID);
                         continue;
                     }
+
                     bool aflSoftFPU = true;
                     string mcuDir = Path.Combine(temporaryDirectory, "VendorSamples", vs.UserFriendlyName);
                     if (!Directory.Exists(mcuDir))
@@ -625,7 +642,7 @@ namespace StandaloneBSPValidator
                     if (vs.UserFriendlyName.ToUpper().Contains("RTOS"))
                         aflSoftFPU = false;
                     DateTime start = DateTime.Now;
-                    var result = TestVendorSample(mcu, vs, mcuDir, aflSoftFPU);
+                    var result = TestVendorSample(mcu, vs, mcuDir, aflSoftFPU, samples);
 
                     Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
 
@@ -636,13 +653,16 @@ namespace StandaloneBSPValidator
 
                     r.LogTestResult(vs.UserFriendlyName, result);
                     cnt++;
-                    Console.WriteLine("{0}: {1}% done ({2}/{3} projects, {4} failed)", vs.UserFriendlyName, (cnt * 100) / sampleDir.Samples.Length, cnt, sampleDir.Samples.Length, failed);
+                    Console.WriteLine("{0}: {1}% done ({2}/{3} projects, {4} failed)", vs.UserFriendlyName, (cnt * 100) / sampleCount, cnt, sampleCount, failed);
                 }
-                r.EndSample();
             }
 
             stats.Passed += succeeded;
             stats.Failed += failed;
+            if (samples is ConstructedVendorSampleDirectory)
+            {
+                (samples as ConstructedVendorSampleDirectory).ToolchainDirectory = toolchainPath;
+            }
             return stats;
         }
 

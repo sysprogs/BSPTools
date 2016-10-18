@@ -50,6 +50,7 @@
     <Compile Include="SVDParser.cs" />
     <Compile Include="TarPacker.cs" />
     <Compile Include="VendorSample.cs" />
+    <Compile Include="VendorSampleRelocator.cs" />
     <Compile Include="ZipFile.cs" />
   </ItemGroup>
   <ItemGroup>

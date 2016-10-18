@@ -15,48 +15,59 @@ namespace GeneratorSampleStm32
 
     class Program
     {
-        static public List<string> ToAbsolutePath(string dir, List<string> lstDir)
+        static public List<string> ToAbsolutePath(string dir, string topLevelDir, List<string> lstDir)
         {
             List<string> srcAbc = new List<string>();
 
             foreach (var sf in lstDir)
             {
-                bool a_flCorrectDir = false;
-                string aDirAbc = dir;
                 string fn = sf;
                 fn = fn.Replace(@"/RVDS/", @"/GCC/");
                 fn = fn.Replace(@"\RVDS\", @"\GCC\");
-                while (fn.StartsWith(@"../") || fn.StartsWith(@"..\"))
+
+                if (!Path.IsPathRooted(fn))
+                    fn = Path.GetFullPath(Path.Combine(dir, fn));
+
+                if (!File.Exists(fn) && !Directory.Exists(fn))
                 {
-                    a_flCorrectDir = true;
-                    aDirAbc = aDirAbc.Substring(0, aDirAbc.LastIndexOf("\\"));
-                    fn = fn.Substring(3, fn.Length - 3);
+                    if (Path.GetFileName(fn).ToLower() == "readme.txt" || Path.GetFileName(fn).ToLower() == "ipv4")
+                        continue;
+
+                    if (fn.EndsWith("\\component", StringComparison.InvariantCultureIgnoreCase) && Directory.Exists(fn + "s"))
+                        fn += "s";
+                    else
+                    {
+                        string fn2 = Path.Combine(topLevelDir, sf);
+                        if (Directory.Exists(fn2))
+                            fn = fn2;
+                        else
+                            Console.WriteLine("Missing file/directory: " + fn);
+                    }
                 }
-                if (a_flCorrectDir)
-                    fn = aDirAbc + "\\" + fn;
+
                 srcAbc.Add(fn);
             }
             return srcAbc;
         }
 
-        static public List<ConstructedVendorSample> GetInfoProjectFromMDK(string pDirPrj, List<string> extraIncludeDirs)
+        static public List<VendorSample> GetInfoProjectFromMDK(string pDirPrj, string topLevelDir, List<string> extraIncludeDirs)
         {
-            List<ConstructedVendorSample> aLstVSampleOut = new List<ConstructedVendorSample>();
+            List<VendorSample> aLstVSampleOut = new List<VendorSample>();
             int aCntTarget = 0;
             string aFilePrj = pDirPrj + "\\Project.uvprojx";
             string aNamePrj = pDirPrj.Replace("\\MDK-ARM", "");
             aNamePrj = aNamePrj.Substring(aNamePrj.LastIndexOf("\\") + 1);
             List<string> sourceFiles = new List<string>();
-            List<string> headerFiles = new List<string>();
+            List<string> includeDirs = new List<string>();
             bool flGetProperty = false;
             string aTarget = "";
-            ConstructedVendorSample aSimpleOut = new ConstructedVendorSample();
+            VendorSample aSimpleOut = new VendorSample();
             foreach (var ln in File.ReadAllLines(aFilePrj))
             {
                 if (ln.Contains("<Target>"))
                 {
                     if (aCntTarget == 0)
-                        aSimpleOut = new ConstructedVendorSample();
+                        aSimpleOut = new VendorSample();
                     aCntTarget++;
                 }
                 if (ln.Contains("</Target>"))
@@ -108,15 +119,15 @@ namespace GeneratorSampleStm32
 
                 if (ln.Contains("</Target>") && aCntTarget == 0)
                 {
-                    aSimpleOut.Path = pDirPrj;
+                    aSimpleOut.Path = Path.GetDirectoryName(pDirPrj);
                     aSimpleOut.Description = "This example " + aNamePrj + " for " + aTarget;
                     aSimpleOut.UserFriendlyName = aNamePrj + "_" + aTarget;
-                    aSimpleOut.SourceFiles = ToAbsolutePath(pDirPrj, sourceFiles).ToArray();
+                    aSimpleOut.SourceFiles = ToAbsolutePath(pDirPrj, topLevelDir, sourceFiles).ToArray();
 
                     foreach (var fl in aSimpleOut.IncludeDirectories)
-                        headerFiles.Add(fl);
-                    headerFiles.AddRange(extraIncludeDirs);
-                    aSimpleOut.IncludeDirectories = ToAbsolutePath(pDirPrj, headerFiles).ToArray();
+                        includeDirs.Add(fl);
+                    includeDirs.AddRange(extraIncludeDirs);
+                    aSimpleOut.IncludeDirectories = ToAbsolutePath(pDirPrj, topLevelDir, includeDirs).ToArray();
 
                     aLstVSampleOut.Add(aSimpleOut);
                 }
@@ -132,9 +143,10 @@ namespace GeneratorSampleStm32
                 throw new Exception("Usage: stm32.exe <SW package directory> <temporary directory>");
             string SDKdir = args[0];
             string outputDir = @"..\..\Output";
+            const string bspDir = @"..\..\..\..\generators\stm32\output";
             string tempDir = args[1];
 
-            bool reparseSampleDefinitions = true;
+            bool reparseSampleDefinitions = false;
             ConstructedVendorSampleDirectory sampleDir;
             if (reparseSampleDefinitions)
             {
@@ -145,7 +157,8 @@ namespace GeneratorSampleStm32
                 var samples = ParseVendorSamples(SDKdir);
                 sampleDir = new ConstructedVendorSampleDirectory
                 {
-                    Samples = samples.ToArray()
+                    SourceDirectory = SDKdir,
+                    Samples = samples.ToArray(),
                 };
 
                 XmlTools.SaveObject(sampleDir, Path.Combine(outputDir, "samples.xml"));
@@ -155,21 +168,31 @@ namespace GeneratorSampleStm32
                 sampleDir = XmlTools.LoadObject<ConstructedVendorSampleDirectory>(Path.Combine(outputDir, "samples.xml"));
             }
 
-            StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, @"..\..\..\..\generators\stm32\output", tempDir);
+            StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir);
             XmlTools.SaveObject(sampleDir, Path.Combine(outputDir, "samples.xml"));
+
+            /*var relocator = new VendorSampleRelocator();
+            relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir);*/
+
+            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
+            expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
+            StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir);
+
+            //VendorSampleRelocator.ValidateVendorSampleDependencies(sampleDir, @"f:\sysgcc");
         }
 
-        static List<ConstructedVendorSample> ParseVendorSamples(string SDKdir)
+        static List<VendorSample> ParseVendorSamples(string SDKdir)
         { 
             string stm32RulesDir = @"..\..\..\..\generators\stm32\rules\families";
 
             string[] familyDirs = Directory.GetFiles(stm32RulesDir, "stm32*.xml").Select(f => ExtractFirstSubdir(XmlTools.LoadObject<FamilyDefinition>(f).PrimaryHeaderDir)).ToArray();
-            List<ConstructedVendorSample> allSamples = new List<ConstructedVendorSample>();
+            List<VendorSample> allSamples = new List<VendorSample>();
 
             foreach (var fam in familyDirs)
             {
                 List<string> addInc = new List<string>();
                 addInc.Add($@"{SDKdir}\{fam}\Drivers\CMSIS\Include");
+                string topLevelDir = $@"{SDKdir}\{fam}";
 
                 int aCountSampl = 0;
                 Console.Write($"Discovering samples for {fam}...");
@@ -179,7 +202,7 @@ namespace GeneratorSampleStm32
                     if (!dir.Contains("Projects") || !(dir.Contains("Examples") || dir.Contains("Applications")))
                         continue;
 
-                    var aSamples = GetInfoProjectFromMDK(dir, addInc);
+                    var aSamples = GetInfoProjectFromMDK(dir, topLevelDir, addInc);
                     aCountSampl += aSamples.Count;
                     allSamples.AddRange(aSamples);
                 }
