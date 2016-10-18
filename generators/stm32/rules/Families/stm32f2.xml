@@ -47,7 +47,7 @@
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32f2????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>–RTOS\Template\*;*.h</AutoIncludeMask>					
+					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>					
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>Device\ST\STM32f2xx\Source\Templates\system_stm32f2xx.c</FilePath>
