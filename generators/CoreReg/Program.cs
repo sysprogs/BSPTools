@@ -15,15 +15,14 @@ namespace CoreReg
     class Program
     {
 
-        static public void SaveReg(HardwareRegisterSet registers, string pOutFolder, string pNameF)
+        static public void SaveReg(HardwareRegisterSet registers, string pOutFolder, CortexCore core)
         {
-
-            string aOutF = pOutFolder + "/" + pNameF + ".xml";
-            Directory.CreateDirectory(Path.GetDirectoryName(aOutF));
-            {
-                XmlTools.SaveObject(registers, aOutF);
-            }
+            registers.UserFriendlyName = "ARM Cortex " + (core.ToString().Replace("Plus", "+"));
+            string outputFile = $@"{pOutFolder}\core_{core}.xml";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+            XmlTools.SaveObject(registers, outputFile);
         }
+
         static public List<HardwareRegister> LoadAddReg(string pNameF)
         {
             List<HardwareRegister> aRegisters = new List<HardwareRegister>();
@@ -51,7 +50,7 @@ namespace CoreReg
             string aDirCoreReg = @"..\..\OutCorexx"; //bspDir.OutputDir
 
             var setsCortexM0 = SVDParser.ParseSVDFileToHardSet(Path.Combine(bspDir.RulesDir, @"XMC1100.svd"), "Cortex-M0 Private Peripheral Block");
-            SaveReg(setsCortexM0, bspDir.OutputDir, "core_M0");
+            SaveReg(setsCortexM0, aDirCoreReg, CortexCore.M0);
             if (setsCortexM0 == null)
                 throw new Exception("No ppb reg M0");
 
@@ -60,7 +59,7 @@ namespace CoreReg
             if (setsCortexM4 == null)
                 throw new Exception("No ppb reg M4");
 
-            SaveReg(setsCortexM4, aDirCoreReg, "core_M4");
+            SaveReg(setsCortexM4, aDirCoreReg, CortexCore.M4);
 
             // Cortex M3---
             registers = new List<HardwareRegister>(setsCortexM4.Registers);
@@ -73,7 +72,7 @@ namespace CoreReg
             registers.Remove(registers.FirstOrDefault(f => "FPDSCR" == f.Name));
             setsCortexM4.Registers = registers.ToArray();
 
-            SaveReg(setsCortexM4, aDirCoreReg, "core_M3");
+            SaveReg(setsCortexM4, aDirCoreReg, CortexCore.M3);
 
             // Cortex M0Plus---
             registers.Clear();
@@ -81,7 +80,7 @@ namespace CoreReg
             registers.AddRange(LoadAddReg(Path.Combine(bspDir.RulesDir, "core_m0mpu.txt")));
             setsCortexM4.Registers = registers.ToArray();
 
-            SaveReg(setsCortexM4, aDirCoreReg, "core_M0Plus");
+            SaveReg(setsCortexM4, aDirCoreReg, CortexCore.M0Plus);
 
             // Cortex M7---
             setsCortexM4 = SVDParser.ParseSVDFileToHardSet(Path.Combine(bspDir.InputDir, @"CMSIS\Infineon\SVD\XMC4100.svd"), "Cortex-M4 Private Peripheral Block");
@@ -90,7 +89,7 @@ namespace CoreReg
             registers.AddRange(LoadAddReg(Path.Combine(bspDir.RulesDir, "core_m7ppb.txt")));
             setsCortexM4.Registers = registers.ToArray();
 
-            SaveReg(setsCortexM4, aDirCoreReg, "core_M7");
+            SaveReg(setsCortexM4, aDirCoreReg, CortexCore.M7);
         }
 
     }

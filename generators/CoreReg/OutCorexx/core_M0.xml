@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <HardwareRegisterSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <UserFriendlyName>PPB</UserFriendlyName>
+  <UserFriendlyName>ARM Cortex M0</UserFriendlyName>
   <Registers>
     <HardwareRegister>
       <Name>SYST_CSR</Name>
@@ -538,36 +538,6 @@
           <SizeInBits>1</SizeInBits>
         </HardwareSubRegister>
       </SubRegisters>
-    </HardwareRegister>
-    <HardwareRegister>
-      <Name>MPU_TYPE</Name>
-      <SizeInBits>32</SizeInBits>
-      <Address>0xE000ED90</Address>
-      <ReadOnly>true</ReadOnly>
-    </HardwareRegister>
-    <HardwareRegister>
-      <Name>MPU_CTRL</Name>
-      <SizeInBits>32</SizeInBits>
-      <Address>0xE000ED94</Address>
-      <ReadOnly>false</ReadOnly>
-    </HardwareRegister>
-    <HardwareRegister>
-      <Name>MPU_RNR</Name>
-      <SizeInBits>32</SizeInBits>
-      <Address>0xE000ED98</Address>
-      <ReadOnly>false</ReadOnly>
-    </HardwareRegister>
-    <HardwareRegister>
-      <Name>MPU_RBAR</Name>
-      <SizeInBits>32</SizeInBits>
-      <Address>0xE000ED9C</Address>
-      <ReadOnly>false</ReadOnly>
-    </HardwareRegister>
-    <HardwareRegister>
-      <Name>MPU_RASR</Name>
-      <SizeInBits>32</SizeInBits>
-      <Address>0xE000EDA0</Address>
-      <ReadOnly>false</ReadOnly>
     </HardwareRegister>
   </Registers>
 </HardwareRegisterSet>

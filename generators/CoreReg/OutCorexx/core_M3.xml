@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <HardwareRegisterSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <UserFriendlyName>PPB</UserFriendlyName>
+  <UserFriendlyName>ARM Cortex M3</UserFriendlyName>
   <Registers>
     <HardwareRegister>
       <Name>ACTLR</Name>
