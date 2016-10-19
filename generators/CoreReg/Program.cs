@@ -81,7 +81,7 @@ namespace CoreReg
             registers.AddRange(LoadAddReg(Path.Combine(bspDir.RulesDir, "core_m0mpu.txt")));
             setsCortexM4.Registers = registers.ToArray();
 
-            SaveReg(setsCortexM4, aDirCoreReg, "core_M0");
+            SaveReg(setsCortexM4, aDirCoreReg, "core_M0Plus");
 
             // Cortex M7---
             setsCortexM4 = SVDParser.ParseSVDFileToHardSet(Path.Combine(bspDir.InputDir, @"CMSIS\Infineon\SVD\XMC4100.svd"), "Cortex-M4 Private Peripheral Block");
