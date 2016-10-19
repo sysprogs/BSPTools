@@ -48,11 +48,11 @@ namespace StandaloneBSPValidator
                 }
         }
 
-        public GeneratedProject(LoadedBSP.LoadedMCU mcu, VendorSample vs, string projectDir, Dictionary<string, string> bspDict)
+        public GeneratedProject(LoadedBSP.ConfiguredMCU mcu, VendorSample vs, string projectDir, Dictionary<string, string> bspDict, string[] frameworks)
+            : this(projectDir, mcu, frameworks)
         {
             _ProjectDir = projectDir;
 
-            _SourceFiles.AddRange(mcu.ExpandedMCU.AdditionalSourceFiles.Select(s => VariableHelper.ExpandVariables(s, bspDict)));
             _SourceFiles.AddRange(vs.SourceFiles.Select(s=>VariableHelper.ExpandVariables(s, bspDict)));
         }
 

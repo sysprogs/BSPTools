@@ -284,20 +284,22 @@ namespace StandaloneBSPValidator
             var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager(), null);
             bspDict["PROJECTNAME"] = "test";
             bspDict["SYS:VSAMPLE_DIR"] = sampleDir.Path;
-            var prj = new GeneratedProject(mcu, vs, mcuDir, bspDict);
+            var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
 
-            var mcuFlags = configuredMCU.ExpandToolFlags(bspDict, null);
+            var frameworkCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.Configuration);
+            var frameworkIDs = vs.Configuration.Frameworks?.ToDictionary(fw => fw, fw => true);
+            prj.AddBSPFilesToProject(bspDict, frameworkCfg, frameworkIDs);
+            var flags = prj.GetToolFlags(bspDict, frameworkCfg, frameworkIDs);
 
-            ToolFlags flags = new ToolFlags { CXXFLAGS = "  ", COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
-            if (pSoftFPU)
-                flags.COMMONFLAGS = mcuFlags.COMMONFLAGS;
-            else
-                flags.COMMONFLAGS = mcuFlags.COMMONFLAGS.Replace("soft", "hard");
+            //ToolFlags flags = new ToolFlags { CXXFLAGS = "  ", COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
+            if (!pSoftFPU)
+                flags.COMMONFLAGS = flags.COMMONFLAGS.Replace("soft", "hard");
 
-            flags.LinkerScript = mcuFlags.LinkerScript;
+            flags.CFLAGS += " -MD";
+            flags.CXXFLAGS += " -MD";
 
-            flags.IncludeDirectories = vs.IncludeDirectories;
-            flags.PreprocessorMacros = vs.PreprocessorMacros;
+            flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories);
+            flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
 
             flags = LoadedBSP.ConfiguredMCU.ExpandToolFlags(flags, bspDict, null);
 
@@ -600,7 +602,7 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory)
+        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1)
         {
             const string defaultToolchainID = "SysGCC-arm-eabi-5.3.0";
             var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
@@ -617,11 +619,13 @@ namespace StandaloneBSPValidator
             if (!Directory.Exists(outputDir))
                 Directory.CreateDirectory(outputDir);
             int sampleCount = samples.Samples.Length;
+            Random rng = new Random();
             using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
             {
-                LoadedBSP.LoadedMCU mcu;
                 foreach (var vs in samples.Samples)
                 {
+                    LoadedBSP.LoadedMCU mcu;
+
                     try
                     {
                         var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.'), RegexOptions.IgnoreCase);
@@ -632,6 +636,12 @@ namespace StandaloneBSPValidator
                     {
                         r.ExceptionSample(ex.Message, "mcu " + vs.DeviceID + " not found in bsp");
                         Console.WriteLine("bsp have not mcu:" + vs.DeviceID);
+                        continue;
+                    }
+
+                    if (testProbability < 1 && rng.NextDouble() > testProbability)
+                    {
+                        cnt++;
                         continue;
                     }
 
@@ -662,6 +672,7 @@ namespace StandaloneBSPValidator
             if (samples is ConstructedVendorSampleDirectory)
             {
                 (samples as ConstructedVendorSampleDirectory).ToolchainDirectory = toolchainPath;
+                (samples as ConstructedVendorSampleDirectory).BSPDirectory = Path.GetFullPath(bspDir);
             }
             return stats;
         }

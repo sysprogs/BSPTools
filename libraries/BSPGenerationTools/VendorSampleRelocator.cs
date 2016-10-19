@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BSPGenerationTools
 {
@@ -45,7 +47,7 @@ namespace BSPGenerationTools
             }
         }
 
-        const string SampleRootDirMarker = "$$SYS:VSAMPLE_DIR$$";
+        protected const string SampleRootDirMarker = "$$SYS:VSAMPLE_DIR$$";
 
         class PathMapper
         {
@@ -64,8 +66,11 @@ namespace BSPGenerationTools
                 path = Path.GetFullPath(path).Replace('/', '\\');
                 if (path.StartsWith(_SampleDir.ToolchainDirectory, StringComparison.InvariantCultureIgnoreCase))
                     return null;
+                if (path.StartsWith(_SampleDir.BSPDirectory, StringComparison.InvariantCultureIgnoreCase))
+                    return null;
                 if (path.StartsWith(_SampleDir.SourceDirectory, StringComparison.InvariantCultureIgnoreCase))
                     return SampleRootDirMarker + "/" + path.Substring(_SampleDir.SourceDirectory.Length + 1).Replace('\\', '/');
+
                 throw new Exception("Don't know how to map " + path);
             }
 
@@ -75,9 +80,119 @@ namespace BSPGenerationTools
             }
         }
 
+        protected struct ParsedDependency
+        {
+            public string OriginalFile;
+            public string MappedFile;
+
+            public override string ToString()
+            {
+                return MappedFile;
+            }
+        }
+
+        protected class AutoDetectedFramework
+        {
+            public Regex FileRegex;
+            public Regex DisableTriggerRegex;   //Matching trigger will be disabled for files matching FileRegex and DisableTriggerRegex
+            public string FrameworkID;
+
+            public Dictionary<string, string> Configuration;
+
+            public bool FindAndFilterOut<_Ty>(ref _Ty[] sources, Func<_Ty, string> conv = null)
+            {
+                if (sources == null)
+                    return false;
+                if (conv == null)
+                    conv = t => t.ToString();
+
+                int len = sources.Length;
+                sources = sources.Where(s => !FileRegex.IsMatch(conv(s))).ToArray();
+                return sources.Length != len;
+            }
+        }
+
+        protected class PathMapping
+        {
+            public Regex OldPath;
+            public string NewPath;
+
+            public PathMapping(string oldPath, string newPath)
+            {
+                OldPath = new Regex(oldPath, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                NewPath = newPath;
+            }
+
+            internal void MapArray(ref string[] sources)
+            {
+                if (sources == null)
+                    return;
+                for (int i = 0; i < sources.Length; i++)
+                {
+                    var m = TryMap(sources[i]);
+                    if (m != null)
+                        sources[i] = m;
+                }
+            }
+
+            internal string TryMap(string path)
+            {
+                var m = OldPath.Match(path);
+                if (!m.Success)
+                    return null;
+                return string.Format(NewPath, m.Groups.OfType<object>().ToArray());
+            }
+        }
+
+        protected AutoDetectedFramework[] AutoDetectedFrameworks;
+        protected PathMapping[] AutoPathMappings;
+
+        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref ParsedDependency[] dependencies)
+        {
+            List<AutoDetectedFramework> matchedFrameworks = new List<AutoDetectedFramework>();
+
+            foreach (var fw in AutoDetectedFrameworks)
+            {
+                if (sources?.FirstOrDefault(s => fw.FileRegex.IsMatch(s) && !fw.DisableTriggerRegex.IsMatch(s)) != null)
+                {
+                    fw.FindAndFilterOut(ref sources);
+                    fw.FindAndFilterOut(ref headers);
+                    fw.FindAndFilterOut(ref includeDirs);
+                    fw.FindAndFilterOut(ref dependencies, d => d.MappedFile);
+
+                    matchedFrameworks.Add(fw);
+                }
+            }
+
+            foreach(var map in AutoPathMappings)
+            {
+                map.MapArray(ref sources);
+                map.MapArray(ref headers);
+                map.MapArray(ref includeDirs);
+
+                for (int i = 0; i < dependencies.Length; i++)
+                    if (dependencies[i].MappedFile != null && map.TryMap(dependencies[i].MappedFile) != null)
+                        dependencies[i].MappedFile = null;
+            }
+
+            dependencies = dependencies.Where(d => d.MappedFile != null).ToArray();
+
+            return new VendorSampleConfiguration
+            {
+                Frameworks = matchedFrameworks.Select(f => f.FrameworkID).Distinct().ToArray(),
+                Configuration = new PropertyDictionary2 { Entries = matchedFrameworks.SelectMany(f => f.Configuration).Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value }).ToArray() }
+            };
+        }
+
+        protected virtual void FilterPreprocessorMacros(ref string[] macros)
+        {
+        }
+
+        protected virtual string BuildVirtualSamplePath(string originalPath) => null;
+
         public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, string bspDirectory)
         {
-            List<BSPEngine.VendorSample> finalSamples = new List<BSPEngine.VendorSample>();
+            List<VendorSample> finalSamples = new List<VendorSample>();
 
             string outputDir = Path.Combine(bspDirectory, "VendorSamples");
             if (Directory.Exists(outputDir))
@@ -94,21 +209,22 @@ namespace BSPGenerationTools
             {
                 if (s.AllDependencies == null)
                     continue;
+                var deps = s.AllDependencies.Concat(s.SourceFiles).Distinct().Select(d => new ParsedDependency { OriginalFile = d, MappedFile = mapper.MapPath(d) }).Where(d => d.MappedFile != null).ToArray();
 
-                mapper.MapPathList(ref s.SourceFiles);
                 mapper.MapPathList(ref s.HeaderFiles);
                 mapper.MapPathList(ref s.IncludeDirectories);
+                mapper.MapPathList(ref s.SourceFiles);
 
-                foreach (var dep in s.AllDependencies)
-                {
-                    var mappedPath = mapper.MapPath(dep);
-                    if (mappedPath == null)
-                        continue;
+                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps);
+                FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
-                    copiedFiles[dep] = mappedPath.Replace(SampleRootDirMarker, outputDir);
-                }
+                foreach (var dep in deps)
+                    copiedFiles[dep.OriginalFile] = dep.MappedFile.Replace(SampleRootDirMarker, outputDir);
 
-                mapper.MapPathList(ref s.AllDependencies);
+                s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
+
+                s.Path = mapper.MapPath(s.Path);
+                s.VirtualPath = BuildVirtualSamplePath(s.Path);
                 finalSamples.Add(s);
             }
 
@@ -123,7 +239,12 @@ namespace BSPGenerationTools
 
             Console.WriteLine("Updating BSP...");
             VendorSampleDirectory finalDir = new VendorSampleDirectory { Samples = finalSamples.ToArray() };
-            XmlTools.SaveObject(finalDir, Path.Combine(outputDir, "VendorSamples.xml"));
+
+            using (var fs = File.Create(Path.Combine(outputDir, "VendorSamples.xml.gz")))
+            using (var gs = new GZipStream(fs, CompressionMode.Compress))
+            {
+                XmlTools.SaveObjectToStream(finalDir, gs);
+            }
         }
     }
 }

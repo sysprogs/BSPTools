@@ -3,6 +3,7 @@ using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -120,14 +121,26 @@ namespace GeneratorSampleStm32
                 if (ln.Contains("</Target>") && aCntTarget == 0)
                 {
                     aSimpleOut.Path = Path.GetDirectoryName(pDirPrj);
-                    aSimpleOut.Description = "This example " + aNamePrj + " for " + aTarget;
-                    aSimpleOut.UserFriendlyName = aNamePrj + "_" + aTarget;
+                    aSimpleOut.UserFriendlyName = aNamePrj;
+                    aSimpleOut.BoardName = aTarget;
                     aSimpleOut.SourceFiles = ToAbsolutePath(pDirPrj, topLevelDir, sourceFiles).ToArray();
 
                     foreach (var fl in aSimpleOut.IncludeDirectories)
                         includeDirs.Add(fl);
                     includeDirs.AddRange(extraIncludeDirs);
                     aSimpleOut.IncludeDirectories = ToAbsolutePath(pDirPrj, topLevelDir, includeDirs).ToArray();
+
+                    string readmeFile = Path.Combine(pDirPrj, @"..\readme.txt");
+                    if (File.Exists(readmeFile))
+                    {
+                        string readmeContents = File.ReadAllText(readmeFile);
+                        Regex rgTitle = new Regex(@"@page[ \t]+[^ \t]+[ \t]+([^ \t][^@]*)\r\n *\r\n", RegexOptions.Singleline);
+                        m = rgTitle.Match(readmeContents);
+                        if (m.Success)
+                        {
+                            aSimpleOut.Description = m.Groups[1].Value;
+                        }
+                    }
 
                     aLstVSampleOut.Add(aSimpleOut);
                 }
@@ -136,6 +149,57 @@ namespace GeneratorSampleStm32
         }
 
         static string ExtractFirstSubdir(string dir) => dir.Split('\\')[1];
+
+        class STM32SampleRelocator : VendorSampleRelocator
+        {
+            public STM32SampleRelocator()
+            {
+                /*
+                    Known problems with trying to map frameworks:
+                      HAL:
+                        * Much longer build times
+                        * LL-only samples don't provide cfg files for HAL
+                        * HAL-only samples don't provide stm32_assert.h needed by LL
+                      lwIP:
+                        * Different SDKs have slightly different file layouts
+                        * Some samples don't provide sys_xxx() functions
+                */
+
+                AutoDetectedFrameworks = new AutoDetectedFramework[]
+                {/*
+                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.hal",
+                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Drivers/[^/\\]+_HAL_Driver", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        DisableTriggerRegex = new Regex(@"_ll_[^/\\]+\.c", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        Configuration = new Dictionary<string, string>() }
+                        */
+
+                    /*new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.LwIP",
+                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/Third_Party/LwIP", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        DisableTriggerRegex = new Regex(@"^$", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        Configuration = new Dictionary<string, string>() }*/
+                };
+
+                AutoPathMappings = new PathMapping[]
+                {
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/STM32Cube_FW_([^_]+)_[^/\\]+/Drivers/STM32[^/\\]+xx_HAL_Driver/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32{1}xx_HAL_Driver/{2}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/STM32Cube_FW_([^_]+)_[^/\\]+/Drivers/CMSIS/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/CMSIS_HAL/{2}"),
+
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/STM32Cube_FW_([^_]+)_[^/\\]+/Middlewares/ST/STM32_USB_(Host|Device)_Library/(.*)", "$$SYS:BSP_ROOT$$/STM32_USB_{2}_Library/{3}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/STM32Cube_FW_([^_]+)_[^/\\]+/Middlewares/Third_Party/(FreeRTOS)/(.*)", "$$SYS:BSP_ROOT$$/{2}/{3}"),
+                };
+            }
+
+            protected override void FilterPreprocessorMacros(ref string[] macros)
+            {
+                base.FilterPreprocessorMacros(ref macros);
+                macros = macros.Where(m => !m.StartsWith("STM32") || m.Contains("_")).Concat(new string[] { "$$com.sysprogs.stm32.hal_device_family$$" }).ToArray();
+            }
+
+            protected override string BuildVirtualSamplePath(string originalPath)
+            {
+                return string.Join("\\", originalPath.Split('/').Skip(2).Reverse().Skip(1).Reverse());
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -146,9 +210,40 @@ namespace GeneratorSampleStm32
             const string bspDir = @"..\..\..\..\generators\stm32\output";
             string tempDir = args[1];
 
-            bool reparseSampleDefinitions = false;
+            string sampleListFile = Path.Combine(outputDir, "samples.xml");
+
+            var sampleDir = BuildOrLoadSampleDirectory(SDKdir, outputDir, sampleListFile);
+
+            if (sampleDir.Samples.FirstOrDefault(s => s.AllDependencies != null) == null)
+            {
+                //Perform Pass 1 testing - test the raw VendorSamples in-place
+                StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir);
+                XmlTools.SaveObject(sampleDir, sampleListFile);
+            }
+
+            //Insert the samples into the generated BSP
+            var relocator = new STM32SampleRelocator();
+            relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir);
+
+            var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspDir, "bsp.xml"));
+            bsp.VendorSampleDirectoryPath = "VendorSamples";
+            bsp.VendorSampleCatalogName = "STM32 CubeMX Samples";
+            XmlTools.SaveObject(bsp, Path.Combine(bspDir, "bsp.xml"));
+
+            string archiveName = string.Format("{0}-{1}.vgdbxbsp", bsp.PackageID.Split('.').Last(), bsp.PackageVersion);
+            string statFile = Path.ChangeExtension(archiveName, ".xml");
+            TarPacker.PackDirectoryToTGZ(bspDir, Path.Combine(bspDir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp" && Path.GetFileName(fn) != statFile);
+
+            // Finally verify that everything builds
+            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
+            expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
+            StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir, 0.1);
+        }
+
+        private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile)
+        {
             ConstructedVendorSampleDirectory sampleDir;
-            if (reparseSampleDefinitions)
+            if (!File.Exists(sampleListFile) && !File.Exists(sampleListFile + ".gz"))
             {
                 if (Directory.Exists(outputDir))
                     Directory.Delete(outputDir, true);
@@ -161,28 +256,18 @@ namespace GeneratorSampleStm32
                     Samples = samples.ToArray(),
                 };
 
-                XmlTools.SaveObject(sampleDir, Path.Combine(outputDir, "samples.xml"));
+                XmlTools.SaveObject(sampleDir, sampleListFile);
             }
             else
             {
-                sampleDir = XmlTools.LoadObject<ConstructedVendorSampleDirectory>(Path.Combine(outputDir, "samples.xml"));
+                sampleDir = XmlTools.LoadObject<ConstructedVendorSampleDirectory>(sampleListFile);
             }
 
-            StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir);
-            XmlTools.SaveObject(sampleDir, Path.Combine(outputDir, "samples.xml"));
-
-            /*var relocator = new VendorSampleRelocator();
-            relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir);*/
-
-            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
-            expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir);
-
-            //VendorSampleRelocator.ValidateVendorSampleDependencies(sampleDir, @"f:\sysgcc");
+            return sampleDir;
         }
 
         static List<VendorSample> ParseVendorSamples(string SDKdir)
-        { 
+        {
             string stm32RulesDir = @"..\..\..\..\generators\stm32\rules\families";
 
             string[] familyDirs = Directory.GetFiles(stm32RulesDir, "stm32*.xml").Select(f => ExtractFirstSubdir(XmlTools.LoadObject<FamilyDefinition>(f).PrimaryHeaderDir)).ToArray();
