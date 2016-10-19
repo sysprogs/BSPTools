@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<ToolchainPath>B:\Programs\GNU_Tools_ARM_Embedded\5.4_2016q3</ToolchainPath>
-	<SkippedDeviceRegex>^(BLUEPILL_F103C8|DISCO_L053C8|K20D50M|LPC11U37H_401|SAMR21G18A|SAML21J18A|SAMD21J18A|SAMD21G18A|NUCLEO_L053R8|NUCLEO_F030R8)$</SkippedDeviceRegex>
+	<ToolchainPath>B:\Programs\SysGCC\arm-eabi</ToolchainPath>
+	<SkippedDeviceRegex>^(BLUEPILL_F103C8|DISCO_L053C8|K20D50M|LPC11U37H_401|SAMR21G18A|SAML21J18A|SAMD21J18A|SAMD21G18A|NUCLEO_L053R8|NUCLEO_F030R8|NUCLEO_L031K6|EFM32ZG_STK3200|NUCLEO_F031K6|NUCLEO_F042K6|NUCLEO_L011K4|LPC810)$</SkippedDeviceRegex>
 	<Samples>
 		<TestedSample>
 			<Name>LEDBlink (RTOS)</Name>
@@ -10,9 +10,17 @@
 			<MCUConfiguration>
 				<Entries>
 					<KeyValue>
-						<Key>com.sysprogs.toolchainoptions.arm.libctype</Key>
-						<Value>--specs=nano.specs</Value>
-					</KeyValue>
+				        <Key>com.sysprogs.toolchainoptions.arm.libctype</Key>
+				        <Value>--specs=nano.specs</Value>
+				    </KeyValue>
+				    <KeyValue>
+				        <Key>com.sysprogs.toolchainoptions.arm.compactcpp</Key>
+				        <Value>compactcpp</Value>
+				    </KeyValue>
+				    <KeyValue>
+				        <Key>com.sysprogs.toolchainoptions.arm.libnosys</Key>
+				        <Value>--specs=nosys.specs</Value>
+				    </KeyValue>
 				</Entries>
 			</MCUConfiguration>
 		</TestedSample>

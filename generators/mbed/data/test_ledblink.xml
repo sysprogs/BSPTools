@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<ToolchainPath>B:\Programs\GNU_Tools_ARM_Embedded\5.4_2016q3</ToolchainPath>
+	<ToolchainPath>B:\Programs\SysGCC\arm-eabi</ToolchainPath>
 	<Samples>
 		<TestedSample>
 			<Name>LEDBlink</Name>
@@ -9,9 +9,17 @@
 			<MCUConfiguration>
 				<Entries>
 					<KeyValue>
-						<Key>com.sysprogs.toolchainoptions.arm.libctype</Key>
-						<Value>--specs=nano.specs</Value>
-					</KeyValue>
+				        <Key>com.sysprogs.toolchainoptions.arm.libctype</Key>
+				        <Value>--specs=nano.specs</Value>
+				    </KeyValue>
+				    <KeyValue>
+				        <Key>com.sysprogs.toolchainoptions.arm.compactcpp</Key>
+				        <Value>compactcpp</Value>
+				    </KeyValue>
+				    <KeyValue>
+				        <Key>com.sysprogs.toolchainoptions.arm.libnosys</Key>
+				        <Value>--specs=nosys.specs</Value>
+				    </KeyValue>
 				</Entries>
 			</MCUConfiguration>
 		</TestedSample>

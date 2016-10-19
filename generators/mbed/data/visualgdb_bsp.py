@@ -148,22 +148,30 @@ def parse_linker_script(lds_file):
 
 def main():
     ignore_targets = {
-        # 'K22F': 'Test passed, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'K64F': 'Test passed, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'KL43Z': 'Test passed, FLASH and ROM size can\'t be parsed from a linker script',
-        'KL05Z': 'Test failed: not fitted in FLASH region',
-        # 'LPC4330_M4': 'Test passed, FLASH and ROM size can\'t be parsed from a linker script',
-        'LPC11U24': 'Test failed: not fitted in FLASH region',
-        'LPC812': 'Test failed: not fitted in FLASH region',
-        'LPC2368': 'Test failed: undefined reference to __get_PRIMASK',
-        'LPC2460': 'Test failed: undefined reference to __get_PRIMASK',
-        'NUCLEO_F031K6': 'Test failed: not fitted in FLASH region',
-        'EFM32ZG_STK3200': 'Test failed: not fitted in FLASH region',
-        'NUCLEO_F042K6': 'Test failed: not fitted in FLASH region',
-        'NUCLEO_L011K4': 'Test failed: not fitted in FLASH region',
-        'NUCLEO_L031K6': 'Test failed: not fitted in FLASH region',
-        'SAMG55J19': 'Test failed:\'osc_wait_ready\' was not declared in this scope',
-        # 'ARM_BEETLE_SOC': 'Internal error: Cannot write to a closed TextWriter??? Builds perfectly in the Visual Studio.',
+        # 'K22F': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'K64F': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'KL43Z': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+
+        # 'LPC4330_M4': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'SAMR21G18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'SAML21J18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'SAMG55J19': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'SAMD21J18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'SAMD21G18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'MTS_GAMBIT': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        # 'LPC4330_M4': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+
+        # 'KL05Z': 'Test failed: not fitted in FLASH region',
+
+        # 'LPC11U24': 'Test failed: not fitted in FLASH region',
+        # 'LPC812': 'Test failed: not fitted in FLASH region',
+        # 'LPC2368': 'Test failed: undefined reference to __get_PRIMASK',
+        # 'LPC2460': 'Test failed: undefined reference to __get_PRIMASK',
+        # 'NUCLEO_F031K6': 'Test failed: not fitted in FLASH region',
+        # 'EFM32ZG_STK3200': 'Test failed: not fitted in FLASH region',
+        # 'NUCLEO_F042K6': 'Test failed: not fitted in FLASH region',
+        # 'NUCLEO_L011K4': 'Test failed: not fitted in FLASH region',
+        # 'SAMG55J19': 'Test failed:\'osc_wait_ready\' was not declared in this scope',
     }
     source_condition_map = {}
     header_condition_map = {}
@@ -174,17 +182,30 @@ def main():
     lib_builder_map = {}
 
     library_names = {
-        "cpputest": "CppUTest",
-        "usb_host": "USB Host support",
-        "usb": "USB Device support",
-        "ublox": "U-blox drivers",
-        "rtos": "RTOS abstraction layer",
-        "dsp": "DSP Library",
-        "rpc": "RPC Support",
-        "fat": "FAT File System support",
-        "eth": "Ethernet support",
-        "rtx": "Keil RTX RTOS",
+        'cpputest': "CppUTest",
+        'usb_host': "USB Host support",
+        'usb': "USB Device support",
+        'ublox': "U-blox drivers",
+        'rtos': "RTOS abstraction layer",
+        'dsp': "DSP Library",
+        'rpc': "RPC Support",
+        'fat': "FAT File System support",
+        'eth': "Ethernet support",
+        'rtx': "Keil RTX RTOS",
     }
+
+    # Add O_BINARY  definition
+    o_bin_file_lines = []
+    with open(os.path.join(MBED_BASE, 'common', 'retarget.cpp'), 'r') as r:
+        o_bin_def = '#ifndef O_BINARY\n#define O_BINARY 0x10000\n#endif\n\n'
+        pattern = re.compile('^#if defined.*')
+        o_bin_file_lines = r.readlines()
+        for i, l in enumerate(o_bin_file_lines):
+            if pattern.match(l):
+                o_bin_file_lines.insert(i, o_bin_def)
+                break
+    with open(os.path.join(MBED_BASE, 'common', 'retarget.cpp'), 'w+') as r:
+        r.writelines(o_bin_file_lines)
 
     print("Parsing targets...")
     xml = ElementTree.parse(join(dirname(__file__), 'bsp_template.xml'))
