@@ -493,8 +493,8 @@ namespace stm32_bsp_generator
 
             throw new Exception("Family peripheral header file not found!");
         }
-
-        public static HardwareRegisterSet[] GenerateFamilyPeripheralRegisters(string PeripheralHeaderFile, RegisterParserConfiguration cfg, RegisterParserErrors errors)
+        const string DirCoreReg = @"../../../CoreReg/OutCorexx";
+        public static HardwareRegisterSet[] GenerateFamilyPeripheralRegisters(string PeripheralHeaderFile, RegisterParserConfiguration cfg, RegisterParserErrors errors, BSPGenerationTools.CortexCore atCore)
         {
             string file = File.ReadAllText(PeripheralHeaderFile);
 
@@ -510,6 +510,33 @@ namespace stm32_bsp_generator
             KnownValueDatabase knonwValues = new KnownValueDatabase();
 
             Dictionary<string, string> dict_repeat_reg_addr = new Dictionary<string, string>();
+
+            HardwareRegisterSet regCore = null;
+            string aFileCore = "";
+
+            switch (atCore)
+            {
+                case BSPGenerationTools.CortexCore.M0:
+                    aFileCore = Path.Combine(DirCoreReg, "core_M0.xml");
+                    break;
+                case BSPGenerationTools.CortexCore.M0Plus:
+                    aFileCore = Path.Combine(DirCoreReg, "core_M0Plus.xml");
+                    break;
+                case BSPGenerationTools.CortexCore.M3:
+                    aFileCore = Path.Combine(DirCoreReg, "core_M3.xml");
+                    break;
+                case BSPGenerationTools.CortexCore.M4:
+                    aFileCore = Path.Combine(DirCoreReg, "core_M4.xml");
+                    break;
+                case BSPGenerationTools.CortexCore.M7:
+                    aFileCore = Path.Combine(DirCoreReg, "core_M7.xml");
+                    break;
+                default:
+                  throw new Exception("Unsupported core type");
+
+            }
+            regCore = XmlTools.LoadObject<HardwareRegisterSet>(aFileCore);
+            sets.Add(regCore);
 
             foreach (var set in registerset_names)
             {

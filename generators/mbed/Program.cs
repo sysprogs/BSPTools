@@ -52,7 +52,7 @@ namespace mbed
                     Directory.Delete(sampleDir, true);
                 PathTools.CopyDirectoryRecursive(Path.Combine(dataDir, "samples"), sampleDir);
 
-                ProcessStartInfo bspGenInfo = new ProcessStartInfo(@"python.exe", Path.Combine(dataDir, "visualgdb_bsp.py"));
+                ProcessStartInfo bspGenInfo = new ProcessStartInfo(@"E:\ware\Python27\python.exe", Path.Combine(dataDir, "visualgdb_bsp.py"));
                 bspGenInfo.UseShellExecute = false;
                 bspGenInfo.EnvironmentVariables["PYTHONPATH"] = mbedRoot;
                 proc = Process.Start(bspGenInfo);

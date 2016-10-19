@@ -23,6 +23,20 @@
 					</InsertedLines>
 				</Patch>	
 				<Patch xsi:type="InsertLines">
+					<FilePath>src\CppUTest\MemoryLeakWarningPlugin.cpp</FilePath>
+					<AfterLine>#include "CppUTest/SimpleMutex.h"</AfterLine>
+					<InsertedLines>
+						<string>#include "SysprogsTestHooks.h"</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
+					<FilePath>src\CppUTest\MemoryLeakWarningPlugin.cpp</FilePath>
+					<AfterLine>        result.addFailure(f);</AfterLine>
+					<InsertedLines>
+						<string>        SysprogsTestHook_TestFailed(&amp;test, f.getMessage().asCharString(), 0);</string>
+					</InsertedLines>
+				</Patch>	
+				<Patch xsi:type="InsertLines">
 					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
 					<AfterLine>#include "CppUTest/TestRegistry.h"</AfterLine>
 					<InsertedLines>

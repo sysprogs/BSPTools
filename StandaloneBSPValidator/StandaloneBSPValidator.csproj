@@ -48,6 +48,12 @@
     <Compile Include="GeneratedProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libraries\BSPGenerationTools\BSPGenerationTools.csproj">
+      <Project>{9fe2706c-e100-4ef2-8498-c25c7ff3b122}</Project>
+      <Name>BSPGenerationTools</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

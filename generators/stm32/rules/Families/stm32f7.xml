@@ -46,7 +46,7 @@
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32f7????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>–RTOS\Template\*;*.h</AutoIncludeMask>		
+					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>		
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>Device\ST\STM32f7xx\Source\Templates\system_stm32f7xx.c</FilePath>

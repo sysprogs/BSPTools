@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPGenerationTools;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,7 @@ namespace StandaloneBSPValidator
             else
                 RegisterSetRegex = null;
 
-            switch(rule.Mode)
+            switch (rule.Mode)
             {
                 case RegisterRenamingMode.HighLow:
                     RegisterRegex = new Regex($"^({rule.RegisterRegex})(H|L)$");
@@ -98,6 +99,7 @@ namespace StandaloneBSPValidator
         public TestedSample[] Samples;
         public DeviceParameterSet[] DeviceParameterSets;
         public RegisterRenamingRule[] RegisterRenamingRules;
+        public string[] NonValidatedRegisters;
     }
 
     public class Program
@@ -146,22 +148,22 @@ namespace StandaloneBSPValidator
                 args = args.Replace("$<", AllInputs[0]);
                 args = args.Replace("$^", string.Join(" ", AllInputs));
 
-                lock(logWriter)
+                lock (logWriter)
                     logWriter.WriteLine($"[{slot}] {Executable} {args}");
                 var proc = Process.Start(new ProcessStartInfo(Executable, args) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = mcuDir, RedirectStandardOutput = true, RedirectStandardError = true });
                 DataReceivedEventHandler handler = (s, e) =>
-                  {
-                      if (e.Data == null)
-                          return;
-                      lock(logWriter)
-                          logWriter.WriteLine($"[{slot}] {e.Data}");
-                  };
+                {
+                    if (e.Data == null)
+                        return;
+                    lock (logWriter)
+                        logWriter.WriteLine($"[{slot}] {e.Data}");
+                };
 
                 proc.ErrorDataReceived += handler;
                 proc.OutputDataReceived += handler;
                 proc.BeginErrorReadLine();
                 proc.BeginOutputReadLine();
-                return proc;                
+                return proc;
             }
         }
 
@@ -176,7 +178,7 @@ namespace StandaloneBSPValidator
                 {
                     sw.WriteLine($"all: {primaryTarget}");
                     sw.WriteLine();
-                    foreach(var task in CompileTasks.Concat(OtherTasks))
+                    foreach (var task in CompileTasks.Concat(OtherTasks))
                     {
                         sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
                         sw.WriteLine($"\t{task.Executable} {task.Arguments}");
@@ -205,7 +207,7 @@ namespace StandaloneBSPValidator
                                 continue;
                             }
                             break;
-                        } 
+                        }
 
                         if (slots[firstEmptySlot] != null && slots[firstEmptySlot].ExitCode != 0)
                         {
@@ -214,13 +216,14 @@ namespace StandaloneBSPValidator
                             WaitForMultipleObjects(remaining.Length, remaining, true, Timeout.Infinite);
                             return false;   //Exited with error
                         }
-                            
+
                         slots[firstEmptySlot] = task.Start(projectDir, firstEmptySlot, sw);
                     }
 
+
                     IntPtr[] remainingProcesses = slots.Where(s => s?.HasExited == false).Select(s => s.Handle).ToArray();
                     WaitForMultipleObjects(remainingProcesses.Length, remainingProcesses, true, Timeout.Infinite);
-                    foreach(var slot in slots)
+                    foreach (var slot in slots)
                     {
                         if (slot != null && slot.ExitCode != 0)
                             return false;   //Exited with error
@@ -239,8 +242,76 @@ namespace StandaloneBSPValidator
             }
         }
 
+        static IEnumerable<string> SplitDependencyFile(string fileName)
+        {
+            var text = File.ReadAllText(fileName);
+            int i = 0;
+            while (i < text.Length)
+            {
+                while (i < text.Length && (char.IsWhiteSpace(text[i]) || text[i] == '\\'))
+                    i++;
 
-        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules)
+                if (i >= text.Length)
+                    break;
+
+                int start = i;
+                if (text[i] != '\"')
+                {
+                    while (i < text.Length && !char.IsWhiteSpace(text[i]))
+                        i++;
+                }
+                else
+                {
+                    while (i < text.Length && text[i] != '\"')
+                        i++;
+                }
+
+                yield return text.Substring(start, i - start);
+            }
+        }
+
+        static void FillSampleDependenciesFromDepFiles(BSPEngine.VendorSample vs, string sampleBuildDir)
+        {
+            vs.AllDependencies = Directory.GetFiles(sampleBuildDir, "*.d").SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":"))).Distinct().ToArray();
+        }
+
+        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, bool pSoftFPU, VendorSampleDirectory sampleDir)
+        {
+            var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
+            if (configuredMCU.ExpandedMCU.FLASHSize == 0)
+            {
+                configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
+            }
+            var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager(), null);
+            bspDict["PROJECTNAME"] = "test";
+            bspDict["SYS:VSAMPLE_DIR"] = sampleDir.Path;
+            var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
+
+            var frameworkCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.Configuration);
+            var frameworkIDs = vs.Configuration.Frameworks?.ToDictionary(fw => fw, fw => true);
+            prj.AddBSPFilesToProject(bspDict, frameworkCfg, frameworkIDs);
+            var flags = prj.GetToolFlags(bspDict, frameworkCfg, frameworkIDs);
+
+            //ToolFlags flags = new ToolFlags { CXXFLAGS = "  ", COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
+            if (!pSoftFPU)
+                flags.COMMONFLAGS = flags.COMMONFLAGS.Replace("soft", "hard");
+
+            flags.CFLAGS += " -MD";
+            flags.CXXFLAGS += " -MD";
+
+            flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories);
+            flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
+
+            flags = LoadedBSP.ConfiguredMCU.ExpandToolFlags(flags, bspDict, null);
+
+            Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
+            sourceExtensions.Add("c", true);
+            sourceExtensions.Add("cpp", true);
+
+            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, vs);
+        }
+
+        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg)
         {
             const int RepeatCount = 20;
             for (var i = 0; i < RepeatCount; ++i)
@@ -341,7 +412,7 @@ namespace StandaloneBSPValidator
                 }
 
             if (sampleObj.Sample?.DefaultConfiguration?.Entries != null)
-                foreach(var kv in sampleObj.Sample.DefaultConfiguration.Entries)
+                foreach (var kv in sampleObj.Sample.DefaultConfiguration.Entries)
                     configuredSample.FrameworkParameters[kv.Key] = kv.Value;
 
             ApplyConfiguration(configuredSample.FrameworkParameters, extraParameters?.FrameworkConfiguration, sample.FrameworkConfiguration);
@@ -364,6 +435,11 @@ namespace StandaloneBSPValidator
             foreach (var ext in sample.SourceFileExtensions.Split(';'))
                 sourceExtensions[ext] = true;
 
+            return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg);
+        }
+
+        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, BSPEngine.VendorSample vendorSample = null)
+        {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
 
@@ -391,7 +467,10 @@ namespace StandaloneBSPValidator
             {
                 string ext = Path.GetExtension(sf);
                 if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
-                    Console.WriteLine($"#{sf} is not a recognized source file");
+                {
+                    if (ext != ".txt")
+                        Console.WriteLine($"#{sf} is not a recognized source file");
+                }
                 else
                 {
                     bool isCpp = ext.ToLower() != ".c";
@@ -408,10 +487,10 @@ namespace StandaloneBSPValidator
 
             job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin");
 
-            if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && sample.ValidateRegisters)
+            if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && validateRegisters)
             {
                 string firstSrcFileInPrjDir = prj.SourceFiles.First(fn => Path.GetDirectoryName(fn) == mcuDir);
-                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules);
+                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules, nonValidateReg);
             }
 
             Console.Write("Building {0}...", Path.GetFileName(mcuDir));
@@ -444,6 +523,11 @@ namespace StandaloneBSPValidator
 
             if (!success)
                 return TestResult.Failed;
+
+            if (vendorSample != null)
+            {
+                FillSampleDependenciesFromDepFiles(vendorSample, mcuDir);
+            }
 
             Directory.Delete(mcuDir, true);
             return TestResult.Succeeded;
@@ -484,6 +568,7 @@ namespace StandaloneBSPValidator
                     if (failed != "")
                         failed = ", failed on: ";
                     _Writer.WriteLine("{0} succeeded on {1} devices{2}", kv.Key, kv.Value.Where(kv2 => kv2.Value == TestResult.Succeeded).Count(), failed);
+                    _Writer.WriteLine("Total test: {0}, failed: {1}", kv.Value.Count(), kv.Value.Where(kv2 => kv2.Value == TestResult.Failed).Count());
                 }
                 _Writer.Dispose();
             }
@@ -493,6 +578,11 @@ namespace StandaloneBSPValidator
                 _Writer.WriteLine("Testing {0}...", name);
                 _CurSample = name;
                 _ThisTestResults = new Dictionary<string, TestResult>();
+            }
+
+            internal void ExceptionSample(string strExc, string data)
+            {
+                _Writer.WriteLine("\t{0}: {1}", strExc, data);
             }
 
             internal void LogTestResult(string mcuID, TestResult result)
@@ -511,6 +601,81 @@ namespace StandaloneBSPValidator
         public struct TestStatistics
         {
             public int Passed, Failed;
+        }
+
+        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1)
+        {
+            const string defaultToolchainID = "SysGCC-arm-eabi-5.3.0";
+            var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
+            if (toolchainPath == null)
+                throw new Exception("Cannot locate toolchain path from registry");
+
+            var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(toolchainPath), new ToolchainRelocationManager());
+            var bsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir)), toolchain, false);
+
+            TestStatistics stats = new TestStatistics();
+            int cnt = 0, failed = 0, succeeded = 0;
+            LoadedBSP.LoadedMCU[] MCUs = bsp.MCUs.ToArray();
+            string outputDir = Path.Combine(temporaryDirectory, "VendorSamples");
+            if (!Directory.Exists(outputDir))
+                Directory.CreateDirectory(outputDir);
+            int sampleCount = samples.Samples.Length;
+            Random rng = new Random();
+            using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
+            {
+                foreach (var vs in samples.Samples)
+                {
+                    LoadedBSP.LoadedMCU mcu;
+
+                    try
+                    {
+                        var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.'), RegexOptions.IgnoreCase);
+                        mcu = bsp.MCUs.Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
+                        vs.DeviceID = mcu.ExpandedMCU.ID;
+                    }
+                    catch (Exception ex)
+                    {
+                        r.ExceptionSample(ex.Message, "mcu " + vs.DeviceID + " not found in bsp");
+                        Console.WriteLine("bsp have not mcu:" + vs.DeviceID);
+                        continue;
+                    }
+
+                    if (testProbability < 1 && rng.NextDouble() > testProbability)
+                    {
+                        cnt++;
+                        continue;
+                    }
+
+                    bool aflSoftFPU = true;
+                    string mcuDir = Path.Combine(temporaryDirectory, "VendorSamples", vs.UserFriendlyName);
+                    if (!Directory.Exists(mcuDir))
+                        Directory.CreateDirectory(mcuDir);
+                    if (vs.UserFriendlyName.ToUpper().Contains("RTOS"))
+                        aflSoftFPU = false;
+                    DateTime start = DateTime.Now;
+                    var result = TestVendorSample(mcu, vs, mcuDir, aflSoftFPU, samples);
+
+                    Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
+
+                    if (result == TestResult.Failed)
+                        failed++;
+                    else if (result == TestResult.Succeeded)
+                        succeeded++;
+
+                    r.LogTestResult(vs.UserFriendlyName, result);
+                    cnt++;
+                    Console.WriteLine("{0}: {1}% done ({2}/{3} projects, {4} failed)", vs.UserFriendlyName, (cnt * 100) / sampleCount, cnt, sampleCount, failed);
+                }
+            }
+
+            stats.Passed += succeeded;
+            stats.Failed += failed;
+            if (samples is ConstructedVendorSampleDirectory)
+            {
+                (samples as ConstructedVendorSampleDirectory).ToolchainDirectory = toolchainPath;
+                (samples as ConstructedVendorSampleDirectory).BSPDirectory = Path.GetFullPath(bspDir);
+            }
+            return stats;
         }
 
         public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
@@ -535,6 +700,7 @@ namespace StandaloneBSPValidator
                 }
 
                 var loadedRules = job.RegisterRenamingRules?.Select(rule => new LoadedRenamingRule(rule))?.ToArray();
+                var noValidateReg = job.NonValidatedRegisters;
 
                 foreach (var sample in job.Samples)
                 {
@@ -549,7 +715,7 @@ namespace StandaloneBSPValidator
 
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
                         DateTime start = DateTime.Now;
-                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules);
+                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules, noValidateReg);
                         Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
                         if (result == TestResult.Failed)
                             failed++;
@@ -592,8 +758,17 @@ namespace StandaloneBSPValidator
 
             TestBSP(job, bsp, args[1]);
         }
-
-        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, LoadedRenamingRule[] renameRules)
+        static bool IsNoValid(string pNameFrend, string[] NonValid)
+        {
+            if (NonValid != null)
+                foreach (var st in NonValid)
+                {
+                    if (Regex.IsMatch(pNameFrend, st))
+                        return true;
+                }
+            return false;
+        }
+        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, LoadedRenamingRule[] renameRules, string[] pNonValidatedRegisters)
         {
             if (!File.Exists(sourceFile))
                 throw new Exception("File does not exist: " + sourceFile);
@@ -610,16 +785,18 @@ namespace StandaloneBSPValidator
                         foreach (var reg in regset.Registers)
                         {
                             string regName = reg.Name;
+                            if (IsNoValid(regset.UserFriendlyName, pNonValidatedRegisters))
+                                continue;
 
                             if (renameRules != null)
-                                foreach(var rule in renameRules)
+                                foreach (var rule in renameRules)
                                 {
                                     if (rule.RegisterSetRegex?.IsMatch(regset.UserFriendlyName) != false)
                                     {
                                         var match = rule.RegisterRegex.Match(regName);
                                         if (match.Success)
                                         {
-                                            switch(rule.Mode)
+                                            switch (rule.Mode)
                                             {
                                                 case RegisterRenamingMode.Normal:
                                                     regName = string.Format("{0}[{1}]", match.Groups[1], int.Parse(match.Groups[2].ToString()) + rule.Offset);

@@ -214,7 +214,7 @@ namespace stm32_bsp_generator
                         var r = new MCUDefinitionWithPredicate
                             {
                                 MCUName = subfamily,
-                                RegisterSets = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegisters(fn, cfg, errors),
+                                RegisterSets = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegisters(fn, cfg, errors,fam.MCUs[0].Core),
                                 MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
                             };
                         Console.Write(".");
@@ -347,7 +347,7 @@ namespace stm32_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "3.7r2",
+                PackageVersion = "4.0",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",

@@ -157,6 +157,56 @@ namespace BSPGenerationTools
             return new MCUDefinitionWithPredicate { MCUName = deviceName, RegisterSets = sets.ToArray() };
         }
 
+        public static HardwareRegisterSet ParseSVDFileToHardSet(string file,string pDesPerpherals)
+        {
+            var doc = new XmlDocument();
+            doc.Load(file);
+
+       //     List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
+            Dictionary<string, XmlElement> periphNodes = new Dictionary<string, XmlElement>();
+
+            foreach (XmlElement periph in doc.DocumentElement.SelectNodes("peripherals/peripheral"))
+            {
+                string name = periph.SelectSingleNode("name").InnerText;
+                string description = periph.SelectSingleNode("description").InnerText;
+                if (pDesPerpherals != description)
+                    continue;
+                uint baseAddr = ParseScaledNonNegativeInteger(periph.SelectSingleNode("baseAddress").InnerText);
+                uint? defaultRegisterSize = null;
+                var defaultRegisterSizeProp = periph.SelectSingleNode("size");
+                if (defaultRegisterSizeProp != null)
+                {
+                    defaultRegisterSize = ParseScaledNonNegativeInteger(defaultRegisterSizeProp.InnerText);
+                }
+
+                periphNodes[name] = periph;
+                List<HardwareRegister> registers = new List<HardwareRegister>();
+                var basePeriph = periph.GetAttribute("derivedFrom");
+                List<XmlNode> regNodes = periph.SelectNodes("registers/*").Cast<XmlNode>().ToList();
+
+                if (!string.IsNullOrEmpty(basePeriph))
+                {
+                    regNodes.InsertRange(0, periphNodes[basePeriph].SelectNodes("registers/*").Cast<XmlNode>());
+                }
+
+                foreach (XmlElement reg in regNodes)
+                {
+                    if (reg.Name == "register")
+                        ProcessRegister(reg, registers, null, baseAddr, defaultRegisterSize);
+                    else if (reg.Name == "cluster")
+                        ProcessCluster(reg, registers, null, baseAddr, defaultRegisterSize);
+                }
+
+
+                return (new HardwareRegisterSet { UserFriendlyName = name, Registers = registers.ToArray() });
+
+            }
+
+            return null;
+            //return new MCUDefinitionWithPredicate { MCUName = deviceName, RegisterSets = sets.ToArray() };
+        }
+
+
         private static void ProcessCluster(XmlElement cluster, List<HardwareRegister> registers, string prefix, uint baseAddr, uint? defaultRegisterSize)
         {
             int count = 1, step = 0;

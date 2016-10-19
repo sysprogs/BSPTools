@@ -48,6 +48,13 @@ namespace StandaloneBSPValidator
                 }
         }
 
+        public GeneratedProject(LoadedBSP.ConfiguredMCU mcu, VendorSample vs, string projectDir, Dictionary<string, string> bspDict, string[] frameworks)
+            : this(projectDir, mcu, frameworks)
+        {
+            _ProjectDir = projectDir;
+
+            _SourceFiles.AddRange(vs.SourceFiles.Select(s=>VariableHelper.ExpandVariables(s, bspDict)));
+        }
 
         public void DoGenerateProjectFromEmbeddedSample(ConfiguredSample sample, bool plainC, Dictionary<string, string> bspDict)
         {
@@ -104,6 +111,14 @@ namespace StandaloneBSPValidator
             {
                 var files = fw.AdditionalSourceFiles.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
                 _SourceFiles.AddRange(files);
+            }
+        }
+        public void AddBSPFilesToProject(List<string> pSrcFile,string pDirPrj)
+        {
+            foreach(var sp in pSrcFile)
+            {
+                 string fullPath = Path.Combine(pDirPrj,sp);
+                 _SourceFiles.Add(fullPath);
             }
         }
 
