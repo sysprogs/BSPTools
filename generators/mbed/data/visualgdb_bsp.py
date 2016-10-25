@@ -10,11 +10,13 @@ import tools.project
 
 from os.path import join, abspath, dirname, basename
 from tools.settings import ROOT
-from tools.paths import MBED_BASE
+from xml.dom import minidom
+# from tools.paths import MBED_BASE
 from tools.export import EXPORTERS
 from tools.libraries import LIBRARIES
 from tools.targets import TARGET_MAP
 from tools.toolchains import TOOLCHAIN_CLASSES
+from tools.paths import MBED_DRIVERS, MBED_PLATFORM, MBED_HAL, MBED_HEADER, MBED_CMSIS_PATH, MBED_TARGETS_PATH
 
 FILE_ROOT = abspath(join(dirname(tools.project.__file__), ".."))
 sys.path.insert(0, FILE_ROOT)
@@ -50,7 +52,8 @@ Exporter = EXPORTERS['gcc_arm']
 
 def scan_dir_contents(path, _toolchain, exclude_paths=None):
     res = _toolchain.scan_resources(path, exclude_paths=exclude_paths)
-    res.relative_to(FILE_ROOT, False)
+    res.relative_to(ROOT, False)
+    res.win_to_unix()
     return res
 
 
@@ -196,7 +199,7 @@ def main():
 
     # Add O_BINARY  definition
     o_bin_file_lines = []
-    with open(os.path.join(MBED_BASE, 'common', 'retarget.cpp'), 'r') as r:
+    with open(os.path.join(ROOT, 'platform', 'retarget.cpp'), 'r') as r:
         o_bin_def = '#ifndef O_BINARY\n#define O_BINARY 0x10000\n#endif\n\n'
         pattern = re.compile('^#if defined.*')
         o_bin_file_lines = r.readlines()
@@ -204,7 +207,7 @@ def main():
             if pattern.match(l):
                 o_bin_file_lines.insert(i, o_bin_def)
                 break
-    with open(os.path.join(MBED_BASE, 'common', 'retarget.cpp'), 'w+') as r:
+    with open(os.path.join(ROOT, 'platform', 'retarget.cpp'), 'w+') as r:
         r.writelines(o_bin_file_lines)
 
     print("Parsing targets...")
@@ -221,8 +224,15 @@ def main():
     for target in Exporter.TARGETS:
         print('\t' + target + '...')
         toolchain = TOOLCHAIN_CLASSES['GCC_ARM'](TARGET_MAP[target.upper()])
-        res = scan_dir_contents(MBED_BASE, toolchain)
+        res = scan_dir_contents(MBED_DRIVERS, toolchain)
+        for d in [MBED_PLATFORM, MBED_HAL, MBED_CMSIS_PATH, MBED_TARGETS_PATH]:
+            res += scan_dir_contents(d, toolchain)
+        res.headers += [os.path.relpath(MBED_HEADER, ROOT)]
+        res.inc_dirs += ['./']
         res.toolchain = toolchain
+        res.win_to_unix()
+
+
         for (items, object_map, is_path) in [
             [res.c_sources + res.cpp_sources + res.s_sources, source_condition_map, True],
             [res.headers, header_condition_map, True],
@@ -300,8 +310,9 @@ def main():
                 [make_node("UserFriendlyName", "Unspecified"), make_node("InternalValue", "")])
 
         ElementTree.SubElement(flags, "COMMONFLAGS").text = " ".join(flagList)
-        ElementTree.SubElement(flags, "LinkerScript").text = "$$SYS:BSP_ROOT$$/" + res.linker_script.replace("\\", "/")
-        mems = parse_linker_script(os.path.join(FILE_ROOT, res.linker_script))
+        ElementTree.SubElement(flags, "LinkerScript").text = "$$SYS:BSP_ROOT$$/" + res.linker_script
+        
+        mems = parse_linker_script(os.path.join(ROOT, res.linker_script))
         mcu.append(make_node("RAMSize", str(sum([m.Size for m in mems if ("RAM" in m.Name.upper())]))))
         mcu.append(make_node("FLASHSize", str(sum([m.Size for m in mems if ("FLASH" in m.Name.upper())]))))
 
@@ -397,6 +408,10 @@ def main():
 
     xml.getroot().attrib["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
     xml.getroot().attrib["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema"
-    xml.write(join(FILE_ROOT, "BSP.xml"), xml_declaration=True, encoding='utf-8', method="xml")
+    root_node = minidom.parseString(ElementTree.tostring(xml.getroot()))
+    xml_str = '\n'.join([line for line in root_node.toprettyxml(indent=' '*2).split('\n') if line.strip()])
+    with open(join(FILE_ROOT, "BSP.xml"), "w") as xml_file:
+        xml_file.write(xml_str.encode('utf-8'))
+
 
 main()

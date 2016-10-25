@@ -32,27 +32,27 @@ namespace mbed
             if (regenerate)
             {
                 Process proc;
-                if (Directory.Exists(mbedRoot))
-                {
-                    // Prevent pull fail due to modified files
-                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "reset --hard") { WorkingDirectory = mbedRoot, UseShellExecute = false });
-                    proc.WaitForExit();
-                    if (proc.ExitCode != 0)
-                        throw new Exception("Git reset command exited with code " + proc.ExitCode);
-                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin latest") { WorkingDirectory = mbedRoot, UseShellExecute = false });
-                }
-                else
-                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/ARMmbed/mbed-os.git -b latest mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
-                proc.WaitForExit();
-                if (proc.ExitCode != 0)
-                    throw new Exception("Git exited with code " + proc.ExitCode);
+                //if (Directory.Exists(mbedRoot))
+                //{
+                //    // Prevent pull fail due to modified files
+                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "reset --hard") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                //    proc.WaitForExit();
+                //    if (proc.ExitCode != 0)
+                //        throw new Exception("Git reset command exited with code " + proc.ExitCode);
+                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin latest") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                //}
+                //else
+                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/ARMmbed/mbed-os.git -b latest mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
+                //proc.WaitForExit();
+                //if (proc.ExitCode != 0)
+                //    throw new Exception("Git exited with code " + proc.ExitCode);
 
                 string sampleDir = Path.Combine(mbedRoot, "samples");
                 if (Directory.Exists(sampleDir))
                     Directory.Delete(sampleDir, true);
                 PathTools.CopyDirectoryRecursive(Path.Combine(dataDir, "samples"), sampleDir);
 
-                ProcessStartInfo bspGenInfo = new ProcessStartInfo(@"E:\ware\Python27\python.exe", Path.Combine(dataDir, "visualgdb_bsp.py"));
+                ProcessStartInfo bspGenInfo = new ProcessStartInfo(@"python.exe", Path.Combine(dataDir, "visualgdb_bsp.py"));
                 bspGenInfo.UseShellExecute = false;
                 bspGenInfo.EnvironmentVariables["PYTHONPATH"] = mbedRoot;
                 proc = Process.Start(bspGenInfo);
