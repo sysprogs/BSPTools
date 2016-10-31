@@ -7,6 +7,9 @@ import os
 import re
 import xml.etree.ElementTree as ElementTree
 import tools.project
+import json
+import tools.build_api as ba
+import tools.config
 
 from os.path import join, abspath, dirname, basename
 from tools.settings import ROOT
@@ -176,6 +179,10 @@ def main():
         # 'NUCLEO_L011K4': 'Test failed: not fitted in FLASH region',
         # 'SAMG55J19': 'Test failed:\'osc_wait_ready\' was not declared in this scope',
     }
+    # additional_defines = {}
+    # with open(os.path.join(ROOT, 'additional_defines.json')) as j:
+    #     additional_defines = json.loads(j.read())
+
     source_condition_map = {}
     header_condition_map = {}
     symbol_condition_map = {}
@@ -223,21 +230,60 @@ def main():
     targets_count = 0
     for target in Exporter.TARGETS:
         print('\t' + target + '...')
-        toolchain = TOOLCHAIN_CLASSES['GCC_ARM'](TARGET_MAP[target.upper()])
-        res = scan_dir_contents(MBED_DRIVERS, toolchain)
-        for d in [MBED_PLATFORM, MBED_HAL, MBED_CMSIS_PATH, MBED_TARGETS_PATH]:
-            res += scan_dir_contents(d, toolchain)
-        res.headers += [os.path.relpath(MBED_HEADER, ROOT)]
-        res.inc_dirs += ['./']
+        # toolchain = TOOLCHAIN_CLASSES['GCC_ARM'](TARGET_MAP[target.upper()])
+        # config = tools.config.Config(target)
+        # toolchain.config = config
+        #
+        # res = scan_dir_contents(MBED_DRIVERS, toolchain)
+        # res.toolchain = toolchain
+        # for d in [MBED_PLATFORM, MBED_HAL, MBED_CMSIS_PATH, MBED_TARGETS_PATH, os.path.join(ROOT, 'features'), os.path.join(ROOT, 'events')]:
+        #     res += scan_dir_contents(d, toolchain)
+        # res.headers += [os.path.relpath(MBED_HEADER, ROOT)]
+        # res.inc_dirs += ['./']
+
+        toolchain = ba.prepare_toolchain(ROOT, target, 'GCC_ARM')
+
+        # Scan src_path for config files
+        res = toolchain.scan_resources(ROOT, exclude_paths=[os.path.join(ROOT, 'rtos'), os.path.join(ROOT, 'features')])
         res.toolchain = toolchain
+        # for path in src_paths[1:]:
+        #     resources.add(toolchain.scan_resources(path))
+
+        # Add features while we find new ones
+        features = toolchain.config.get_features()
+        for feature in features:
+            if feature in res.features:
+                res += res.features[feature]
+        res.headers += [MBED_HEADER, ROOT]
+        res.inc_dirs += ['./']
+        res += toolchain.scan_resources(os.path.join(ROOT, 'events'))
+
+        toolchain.config.load_resources(res)
+
+        scfg = toolchain.config.get_config_data()
+        toolchain.set_config_data(toolchain.config.get_config_data())
+
+        toolchain.config.validate_config()
+
+        cfg, macros = toolchain.config.get_config_data()
+        features = toolchain.config.get_features()
+        res.relative_to(ROOT, False)
         res.win_to_unix()
 
 
-        for (items, object_map, is_path) in [
+
+        # a, b, c = ba.get_config(ROOT, target, 'GCC_ARM')
+        # if len(c) != 0:
+        #     print('a')
+
+        syms = toolchain.get_symbols()
+
+        for items, object_map, is_path in [
             [res.c_sources + res.cpp_sources + res.s_sources, source_condition_map, True],
             [res.headers, header_condition_map, True],
             [res.inc_dirs, include_dir_condition_map, True],
-            [toolchain.get_symbols(), symbol_condition_map, False]]:
+            [toolchain.get_symbols(), symbol_condition_map, False],
+            [['MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE=9600'], symbol_condition_map, False]]:
             for fn in items:
                 if is_path:
                     fn = "$$SYS:BSP_ROOT$$/" + fn.replace("\\", "/")
@@ -250,8 +296,10 @@ def main():
             if isinstance(sources, str):
                 sources = [sources]
             for src in sources:
-                lib_builder_map.setdefault(lib['id'], LibraryBuilder(lib)).append_resources(
-                    target, scan_dir_contents(src, toolchain))
+                lib_resources = toolchain.scan_resources(src)
+                lib_resources.relative_to(ROOT, False)
+                lib_resources.win_to_unix()
+                lib_builder_map.setdefault(lib['id'], LibraryBuilder(lib)).append_resources(target, lib_resources)
                 src_dir_to_lib_map[src] = lib['id']
 
     for fw in lib_builder_map.values():
@@ -311,7 +359,7 @@ def main():
 
         ElementTree.SubElement(flags, "COMMONFLAGS").text = " ".join(flagList)
         ElementTree.SubElement(flags, "LinkerScript").text = "$$SYS:BSP_ROOT$$/" + res.linker_script
-        
+
         mems = parse_linker_script(os.path.join(ROOT, res.linker_script))
         mcu.append(make_node("RAMSize", str(sum([m.Size for m in mems if ("RAM" in m.Name.upper())]))))
         mcu.append(make_node("FLASHSize", str(sum([m.Size for m in mems if ("FLASH" in m.Name.upper())]))))
@@ -402,7 +450,7 @@ def main():
             #    add_file_condition(lib, fw, condList, "libraries/net/cellular/UbloxUSBModem/.*", "com.sysprogs.arm.mbed.ublox.UbloxUSBModem", "Ublox Cellular Modem Support")
 
     samples = xml.find("Examples")
-    for (root, dirs, files) in os.walk(os.path.join(FILE_ROOT, "samples")):
+    for (root, dirs, files) in os.walk(os.path.join(ROOT, "samples")):
         for subdir in dirs:
             samples.append(make_node("string", "samples/" + basename(subdir)))
 

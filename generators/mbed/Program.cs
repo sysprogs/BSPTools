@@ -111,7 +111,7 @@ namespace mbed
 
             if (true)
             { 
-                var testfFiles = new Tuple<string, int>[]{ Tuple.Create("test_usbcd.xml", 17), Tuple.Create("test_ledblink.xml", 97), Tuple.Create("test_ledblink_rtos.xml", 67), };
+                var testfFiles = new Tuple<string, int>[]{ Tuple.Create("test_ledblink.xml", 97), Tuple.Create("test_ledblink_rtos.xml", 67), Tuple.Create("test_usbcd.xml", 17),   };
                 foreach(var test in testfFiles)
                 {
                     Console.WriteLine("Testing BSP...");
