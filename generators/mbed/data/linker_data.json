@@ -3,1106 +3,948 @@
     "DISCO_L053C8": {
       "RAM": "8000",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32L0/TARGET_DISCO_L053C8/device/TOOLCHAIN_GCC_ARM/STM32L053X8.ld"
     }
   },
   {
     "NRF51_MICROBIT_BOOT": {
       "RAM": "8192",
       "FLASH": "163840",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S110/NRF51822.ld"
     }
   },
   {
     "ARCH_BLE": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "RBLAB_NRF51822": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "LPC1549": {
-      "RAM": "20480",
+      "RAM": "36608",
       "FLASH": "262144",
-      "Script": "targets/TARGET_NXP/TARGET_LPC15XX/device/TOOLCHAIN_GCC_ARM/LPC1549.ld"
     }
   },
   {
     "RZ_A1H": {
       "RAM": "8388608",
-      "FLASH": "134201344",
-      "Script": "targets/TARGET_RENESAS/TARGET_RZ_A1H/device/TOOLCHAIN_GCC_ARM/RZA1H.ld"
+      "FLASH": "167772160",
     }
   },
   {
     "OC_MBUINO": {
       "RAM": "8000",
       "FLASH": "32768",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_OC_MBUINO/LPC11U24.ld"
     }
   },
   {
     "NUMAKER_PFM_NUC472": {
       "RAM": "1114112",
-      "FLASH": "523264",
-      "Script": "targets/TARGET_NUVOTON/TARGET_NUC472/device/TOOLCHAIN_GCC_ARM/NUC472.ld"
+      "FLASH": "524288",
     }
   },
   {
     "EFM32PG_STK3401": {
       "RAM": "32768",
       "FLASH": "262144",
-      "Script": "targets/TARGET_Silicon_Labs/TARGET_EFM32/TARGET_EFM32PG_STK3401/device/TOOLCHAIN_GCC_ARM/efm32pg1b.ld"
     }
   },
   {
     "K66F": {
-      "RAM": "0",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_K66F/device/TOOLCHAIN_GCC_ARM/MK66FN2M0xxx18.ld"
+      "RAM": "262144",
+      "FLASH": "2097152",
     }
   },
   {
     "NUCLEO_F302R8": {
       "RAM": "15992",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32F3/TARGET_NUCLEO_F302R8/device/TOOLCHAIN_GCC_ARM/STM32F302X8.ld"
     }
   },
   {
     "RBLAB_BLENANO": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NRF51822_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NUCLEO_F207ZG": {
       "RAM": "130684",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32F2/TARGET_NUCLEO_F207ZG/device/TOOLCHAIN_GCC_ARM/STM32F207ZGTx_FLASH.ld"
     }
   },
   {
     "KL05Z": {
       "RAM": "3904",
-      "FLASH": "31728",
-      "Script": "targets/TARGET_Freescale/TARGET_KLXX/TARGET_KL05Z/device/TOOLCHAIN_GCC_ARM/MKL05Z4.ld"
+      "FLASH": "32768",
     }
   },
   {
     "NRF51_MICROBIT": {
       "RAM": "8192",
       "FLASH": "163840",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S110/NRF51822.ld"
     }
   },
   {
     "DISCO_F746NG": {
       "RAM": "327224",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32F7/TARGET_DISCO_F746NG/device/TOOLCHAIN_GCC_ARM/STM32F746NG.ld"
     }
   },
   {
     "NUCLEO_F334R8": {
-      "RAM": "15992",
+      "RAM": "11896",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32F3/TARGET_NUCLEO_F334R8/device/TOOLCHAIN_GCC_ARM/STM32F334x8.ld"
     }
   },
   {
     "NUCLEO_F411RE": {
       "RAM": "130664",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F411RE/device/TOOLCHAIN_GCC_ARM/STM32F411XE.ld"
     }
   },
   {
     "WALLBOT_BLE": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "ARCH_PRO": {
       "RAM": "65336",
       "FLASH": "524288",
-      "Script": "targets/TARGET_NXP/TARGET_LPC176X/device/TOOLCHAIN_GCC_ARM/LPC1768.ld"
     }
   },
   {
     "NUCLEO_L053R8": {
       "RAM": "8000",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32L0/TARGET_NUCLEO_L053R8/device/TOOLCHAIN_GCC_ARM/STM32L053X8.ld"
     }
   },
   {
     "WALLBOT_BLE_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "DISCO_F303VC": {
       "RAM": "40568",
       "FLASH": "262144",
-      "Script": "targets/TARGET_STM/TARGET_STM32F3/TARGET_DISCO_F303VC/device/TOOLCHAIN_GCC_ARM/STM32F303XC.ld"
     }
   },
   {
     "DISCO_F401VC": {
       "RAM": "65132",
       "FLASH": "262144",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_DISCO_F401VC/device/TOOLCHAIN_GCC_ARM/STM32F401XC.ld"
     }
   },
   {
     "K20D50M": {
       "RAM": "16136",
-      "FLASH": "130048",
-      "Script": "targets/TARGET_Freescale/TARGET_K20XX/TARGET_K20D50M/device/TOOLCHAIN_GCC_ARM/MK20D5.ld"
+      "FLASH": "131072",
     }
   },
   {
     "DISCO_F407VG": {
       "RAM": "130680",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F407VG/device/TOOLCHAIN_GCC_ARM/STM32F407XG.ld"
     }
   },
   {
     "MTM_MTCONNECT04S": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "NUCLEO_L031K6": {
       "RAM": "8000",
       "FLASH": "32768",
-      "Script": "targets/TARGET_STM/TARGET_STM32L0/TARGET_NUCLEO_L031K6/device/TOOLCHAIN_GCC_ARM/STM32L031K6.ld"
     }
   },
   {
     "KL43Z": {
-      "RAM": "0",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_KL43Z/device/TOOLCHAIN_GCC_ARM/MKL43Z256xxx4.ld"
+      "RAM": "32768",
+      "FLASH": "261632",
     }
   },
   {
     "K22F": {
-      "RAM": "0",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_K22F/device/TOOLCHAIN_GCC_ARM/MK22FN512xxx12.ld"
+      "RAM": "131072",
+      "FLASH": "524288",
     }
   },
   {
     "TY51822R3_BOOT": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "NUCLEO_F756ZG": {
       "RAM": "327224",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32F7/TARGET_F746_F756/device/TOOLCHAIN_GCC_ARM/STM32F746ZG.ld"
     }
   },
   {
     "ARCH_GPRS": {
       "RAM": "10048",
       "FLASH": "131072",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U37_501/LPC11U37.ld"
     }
   },
   {
     "NRF51822_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NUCLEO_F303ZE": {
-      "RAM": "65132",
+      "RAM": "81516",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F3/TARGET_NUCLEO_F303ZE/device/TOOLCHAIN_GCC_ARM/STM32F303XE.ld"
     }
   },
   {
     "RBLAB_NRF51822_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "KL82Z": {
-      "RAM": "2048",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_KL82Z/device/TOOLCHAIN_GCC_ARM/MKL82Z128xxx7.ld"
+      "RAM": "100352",
+      "FLASH": "130432",
     }
   },
   {
     "NUCLEO_F401RE": {
       "RAM": "97900",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F401RE/device/TOOLCHAIN_GCC_ARM/STM32F401XE.ld"
     }
   },
   {
     "NUCLEO_F303RE": {
-      "RAM": "65132",
+      "RAM": "81516",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F3/TARGET_NUCLEO_F303RE/device/TOOLCHAIN_GCC_ARM/STM32F303XE.ld"
     }
   },
   {
     "MOTE_L152RC": {
       "RAM": "32452",
       "FLASH": "262144",
-      "Script": "targets/TARGET_STM/TARGET_STM32L1/TARGET_MOTE_L152RC/device/TOOLCHAIN_GCC_ARM/STM32L152XC.ld"
     }
   },
   {
     "LPC11U24": {
       "RAM": "10048",
       "FLASH": "32768",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U24_401/LPC11U24.ld"
     }
   },
   {
     "DISCO_L476VG": {
       "RAM": "130680",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32L4/TARGET_DISCO_L476VG/device/TOOLCHAIN_GCC_ARM/STM32L476XX.ld"
     }
   },
   {
     "LPC11U34_421": {
       "RAM": "10048",
       "FLASH": "49152",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U34_421/LPC11U34.ld"
     }
   },
   {
     "UBLOX_C027": {
       "RAM": "65336",
       "FLASH": "524288",
-      "Script": "targets/TARGET_NXP/TARGET_LPC176X/device/TOOLCHAIN_GCC_ARM/LPC1768.ld"
     }
   },
   {
     "NRF51822_Y5_MBUG": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NRF51822": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NUCLEO_F429ZI": {
-      "RAM": "196180",
+      "RAM": "261716",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_F429_F439/device/TOOLCHAIN_GCC_ARM/STM32F429ZI.ld"
     }
   },
   {
     "ARCH_BLE_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "RBLAB_BLENANO_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "TY51822R3_OTA": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "SEEED_TINY_BLE": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NUCLEO_F091RC": {
       "RAM": "32576",
       "FLASH": "262144",
-      "Script": "targets/TARGET_STM/TARGET_STM32F0/TARGET_NUCLEO_F091RC/device/TOOLCHAIN_GCC_ARM/STM32F091XC.ld"
     }
   },
   {
     "LPC11U24_301": {
       "RAM": "8000",
       "FLASH": "32768",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U24_301/LPC11U24.ld"
     }
   },
   {
     "DISCO_F334C8": {
       "RAM": "15992",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32F3/TARGET_DISCO_F334C8/device/TOOLCHAIN_GCC_ARM/STM32F334X8.ld"
     }
   },
   {
     "RBLAB_NRF51822_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "TEENSY3_1": {
       "RAM": "65088",
-      "FLASH": "261120",
-      "Script": "targets/TARGET_Freescale/TARGET_K20XX/TARGET_TEENSY3_1/device/TOOLCHAIN_GCC_ARM/MK20DX256.ld"
+      "FLASH": "262144",
     }
   },
   {
     "LPC4088_DM": {
       "RAM": "98072",
       "FLASH": "524288",
-      "Script": "targets/TARGET_NXP/TARGET_LPC408X/device/TOOLCHAIN_GCC_ARM/LPC4088.ld"
     }
   },
   {
     "NUMAKER_PFM_M453": {
       "RAM": "32768",
-      "FLASH": "261120",
-      "Script": "targets/TARGET_NUVOTON/TARGET_M451/device/TOOLCHAIN_GCC_ARM/M453.ld"
+      "FLASH": "262144",
     }
   },
   {
     "NRF51_DK_LEGACY": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "DELTA_DFCM_NNN40_OTA": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "TY51822R3": {
       "RAM": "20744",
       "FLASH": "151552",
-      "Script": "targets/TARGET_NORDIC/TARGET_NRF5/TARGET_MCU_NRF51822_UNIFIED/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "NRF51_DONGLE_LEGACY": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "DISCO_F769NI": {
       "RAM": "523784",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_STM/TARGET_STM32F7/TARGET_DISCO_F769NI/device/TOOLCHAIN_GCC_ARM/STM32F769NI.ld"
     }
   },
   {
     "DISCO_F051R8": {
       "RAM": "8000",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32F0/TARGET_DISCO_F051R8/device/TOOLCHAIN_GCC_ARM/STM32F0xx.ld"
     }
   },
   {
     "DELTA_DFBM_NQ620": {
       "RAM": "53512",
       "FLASH": "409600",
-      "Script": "targets/TARGET_NORDIC/TARGET_NRF5/TARGET_MCU_NRF52832/device/TOOLCHAIN_GCC_ARM/NRF52832.ld"
     }
   },
   {
     "ELMO_F411RE": {
       "RAM": "130664",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_ELMO_F411RE/device/TOOLCHAIN_GCC_ARM/STM32F411XE.ld"
     }
   },
   {
     "WALLBOT_BLE_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "B96B_F446VE": {
       "RAM": "130620",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_B96B_F446VE/device/TOOLCHAIN_GCC_ARM/STM32F446XE.ld"
     }
   },
   {
     "XDOT_L151CC": {
       "RAM": "32452",
       "FLASH": "262144",
-      "Script": "targets/TARGET_STM/TARGET_STM32L1/TARGET_XDOT_L151CC/device/TOOLCHAIN_GCC_ARM/STM32L151XC.ld"
     }
   },
   {
     "LPC1347": {
       "RAM": "12096",
       "FLASH": "65536",
-      "Script": "targets/TARGET_NXP/TARGET_LPC13XX/device/TOOLCHAIN_GCC_ARM/LPC1347.ld"
     }
   },
   {
     "LPC4330_M4": {
       "RAM": "270060",
-      "FLASH": "0",
-      "Script": "targets/TARGET_NXP/TARGET_LPC43XX/device/TOOLCHAIN_GCC_ARM/LPC4330.ld"
+      "FLASH": "33554432",
     }
   },
   {
     "NUCLEO_L486RG": {
       "RAM": "130680",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32L4/TARGET_L476_L486/device/TOOLCHAIN_GCC_ARM/STM32L476XX.ld"
     }
   },
   {
     "LPC11C24": {
       "RAM": "8000",
       "FLASH": "32768",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11XX_11CXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11CXX/LPC11C24.ld"
     }
   },
   {
     "MTS_MDOT_F405RG": {
-      "RAM": "130680",
+      "RAM": "196216",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_MTS_MDOT_F405RG/device/TOOLCHAIN_GCC_ARM/STM32F405.ld"
     }
   },
   {
     "MAX32620HSP": {
       "RAM": "262144",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_Maxim/TARGET_MAX32620/device/TOOLCHAIN_GCC_ARM/max32620.ld"
     }
   },
   {
     "DELTA_DFCM_NNN40": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "SEEED_TINY_BLE_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "LPC824": {
       "RAM": "8000",
       "FLASH": "32768",
-      "Script": "targets/TARGET_NXP/TARGET_LPC82X/TARGET_LPC824/device/TOOLCHAIN_GCC_ARM/LPC824.ld"
     }
   },
   {
     "NUCLEO_L476RG": {
       "RAM": "130680",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32L4/TARGET_L476_L486/device/TOOLCHAIN_GCC_ARM/STM32L476XX.ld"
     }
   },
   {
     "SAMD21J18A": {
-      "RAM": "0",
-      "FLASH": "0",
-      "Script": "targets/TARGET_Atmel/TARGET_SAM_CortexM0P/TARGET_SAMD21J18A/device/TOOLCHAIN_GCC_ARM/samd21j18a.ld"
+      "RAM": "32588",
+      "FLASH": "262144",
     }
   },
   {
     "NUCLEO_F746ZG": {
       "RAM": "327224",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32F7/TARGET_F746_F756/device/TOOLCHAIN_GCC_ARM/STM32F746ZG.ld"
     }
   },
   {
     "SAML21J18A": {
-      "RAM": "0",
-      "FLASH": "0",
-      "Script": "targets/TARGET_Atmel/TARGET_SAM_CortexM0P/TARGET_SAML21J18A/device/TOOLCHAIN_GCC_ARM/saml21j18a.ld"
+      "RAM": "32588",
+      "FLASH": "262144",
     }
   },
   {
     "ARCH_LINK_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NRF51_DK_BOOT": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "NRF51_DONGLE": {
       "RAM": "20744",
       "FLASH": "151552",
-      "Script": "targets/TARGET_NORDIC/TARGET_NRF5/TARGET_MCU_NRF51822_UNIFIED/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "EFM32HG_STK3400": {
       "RAM": "8192",
       "FLASH": "65536",
-      "Script": "targets/TARGET_Silicon_Labs/TARGET_EFM32/TARGET_EFM32HG_STK3400/device/TOOLCHAIN_GCC_ARM/efm32hg.ld"
     }
   },
   {
     "EFM32LG_STK3600": {
       "RAM": "32768",
       "FLASH": "262144",
-      "Script": "targets/TARGET_Silicon_Labs/TARGET_EFM32/TARGET_EFM32LG_STK3600/device/TOOLCHAIN_GCC_ARM/efm32lg.ld"
     }
   },
   {
     "VK_RZ_A1H": {
       "RAM": "41943040",
-      "FLASH": "33423360",
-      "Script": "targets/TARGET_RENESAS/TARGET_VK_RZ_A1H/device/TOOLCHAIN_GCC_ARM/VKRZA1H.ld"
+      "FLASH": "66994176",
     }
   },
   {
     "LPC11U35_401": {
       "RAM": "10048",
       "FLASH": "65536",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U35_401/LPC11U35.ld"
     }
   },
   {
     "DELTA_DFCM_NNN40_BOOT": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "LPCCAPPUCCINO": {
       "RAM": "10048",
       "FLASH": "131072",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPCCAPPUCCINO/LPC11U37.ld"
     }
   },
   {
     "NUCLEO_L432KC": {
       "RAM": "65144",
       "FLASH": "262144",
-      "Script": "targets/TARGET_STM/TARGET_STM32L4/TARGET_NUCLEO_L432KC/device/TOOLCHAIN_GCC_ARM/STM32L432XX.ld"
     }
   },
   {
     "NCS36510": {
-      "RAM": "0",
-      "FLASH": "0",
-      "Script": "targets/TARGET_ONSEMI/TARGET_NCS36510/device/TOOLCHAIN_GCC_ARM/NCS36510.ld"
+      "RAM": "49152",
+      "FLASH": "323584",
     }
   },
   {
     "LPC11U37H_401": {
       "RAM": "12096",
       "FLASH": "131072",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U37H_401/LPC11U37.ld"
     }
   },
   {
     "NRF51_MICROBIT_B_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "XBED_LPC1768": {
       "RAM": "65336",
       "FLASH": "516096",
-      "Script": "targets/TARGET_NXP/TARGET_LPC176X/device/TOOLCHAIN_GCC_ARM/TARGET_XBED_LPC1768/XBED_LPC1768.ld"
     }
   },
   {
     "NUCLEO_L152RE": {
       "RAM": "81604",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32L1/TARGET_NUCLEO_L152RE/device/TOOLCHAIN_GCC_ARM/STM32L152XE.ld"
     }
   },
   {
     "NUCLEO_F439ZI": {
-      "RAM": "196180",
+      "RAM": "261716",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_F429_F439/device/TOOLCHAIN_GCC_ARM/STM32F429ZI.ld"
     }
   },
   {
     "UBLOX_EVK_ODIN_W2": {
-      "RAM": "196180",
+      "RAM": "261716",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_UBLOX_EVK_ODIN_W2/device/TOOLCHAIN_GCC_ARM/STM32F439ZI.ld"
     }
   },
   {
     "LPC812": {
       "RAM": "3904",
       "FLASH": "16384",
-      "Script": "targets/TARGET_NXP/TARGET_LPC81X/TARGET_LPC812/device/TOOLCHAIN_GCC_ARM/LPC812.ld"
     }
   },
   {
     "NZ32_SC151": {
       "RAM": "32452",
       "FLASH": "262144",
-      "Script": "targets/TARGET_STM/TARGET_STM32L1/TARGET_NZ32_SC151/device/TOOLCHAIN_GCC_ARM/STM32L151XC.ld"
     }
   },
   {
     "NRF51_MICROBIT_B_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NUCLEO_F070RB": {
       "RAM": "16192",
       "FLASH": "131072",
-      "Script": "targets/TARGET_STM/TARGET_STM32F0/TARGET_NUCLEO_F070RB/device/TOOLCHAIN_GCC_ARM/STM32F070XB.ld"
     }
   },
   {
     "LPC1114": {
       "RAM": "3904",
       "FLASH": "32768",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11XX_11CXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11XX/LPC1114.ld"
     }
   },
   {
     "MAXWSNENV": {
       "RAM": "32768",
       "FLASH": "262144",
-      "Script": "targets/TARGET_Maxim/TARGET_MAX32610/device/TOOLCHAIN_GCC_ARM/max32610.ld"
     }
   },
   {
     "NUCLEO_F072RB": {
       "RAM": "16192",
       "FLASH": "131072",
-      "Script": "targets/TARGET_STM/TARGET_STM32F0/TARGET_NUCLEO_F072RB/device/TOOLCHAIN_GCC_ARM/STM32F072XB.ld"
     }
   },
   {
     "MAX32600MBED": {
       "RAM": "32768",
       "FLASH": "262144",
-      "Script": "targets/TARGET_Maxim/TARGET_MAX32600/device/TOOLCHAIN_GCC_ARM/max32600.ld"
     }
   },
   {
     "SEEED_TINY_BLE_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "MICRONFCBOARD": {
       "RAM": "10048",
       "FLASH": "49152",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_APPNEARME_MICRONFCBOARD/LPC11U34.ld"
     }
   },
   {
     "MTS_DRAGONFLY_F411RE": {
       "RAM": "130664",
       "FLASH": "458752",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_MTS_DRAGONFLY_F411RE/device/TOOLCHAIN_GCC_ARM/NUCLEO_F411RE.ld"
     }
   },
   {
     "EFM32WG_STK3800": {
       "RAM": "32768",
       "FLASH": "262144",
-      "Script": "targets/TARGET_Silicon_Labs/TARGET_EFM32/TARGET_EFM32WG_STK3800/device/TOOLCHAIN_GCC_ARM/efm32wg.ld"
     }
   },
   {
     "NUCLEO_F446ZE": {
       "RAM": "130620",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F446ZE/device/TOOLCHAIN_GCC_ARM/STM32F446XE.ld"
     }
   },
   {
     "HEXIWEAR": {
-      "RAM": "0",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_MCU_K64F/device/TOOLCHAIN_GCC_ARM/MK64FN1M0xxx12.ld"
+      "RAM": "262144",
+      "FLASH": "1048576",
     }
   },
   {
     "DISCO_F469NI": {
       "RAM": "327244",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_DISCO_F469NI/device/TOOLCHAIN_GCC_ARM/STM32F469XI.ld"
     }
   },
   {
     "LPC11U35_Y5_MBUG": {
       "RAM": "10048",
       "FLASH": "65536",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U35_Y5_MBUG/LPC11U35.ld"
     }
   },
   {
     "NUCLEO_F446RE": {
       "RAM": "130620",
       "FLASH": "524288",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F446RE/device/TOOLCHAIN_GCC_ARM/STM32F446XE.ld"
     }
   },
   {
     "NUCLEO_F410RB": {
       "RAM": "32312",
       "FLASH": "131072",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F410RB/device/TOOLCHAIN_GCC_ARM/STM32F410RB.ld"
     }
   },
   {
     "NUCLEO_F042K6": {
       "RAM": "5952",
       "FLASH": "32768",
-      "Script": "targets/TARGET_STM/TARGET_STM32F0/TARGET_NUCLEO_F042K6/device/TOOLCHAIN_GCC_ARM/STM32F042X6.ld"
     }
   },
   {
     "NUCLEO_F103RB": {
       "RAM": "20244",
       "FLASH": "131072",
-      "Script": "targets/TARGET_STM/TARGET_STM32F1/TARGET_NUCLEO_F103RB/device/TOOLCHAIN_GCC_ARM/STM32F103XB.ld"
     }
   },
   {
     "EFM32ZG_STK3200": {
       "RAM": "4096",
       "FLASH": "32768",
-      "Script": "targets/TARGET_Silicon_Labs/TARGET_EFM32/TARGET_EFM32ZG_STK3200/device/TOOLCHAIN_GCC_ARM/efm32zg.ld"
     }
   },
   {
     "EFM32GG_STK3700": {
       "RAM": "131072",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_Silicon_Labs/TARGET_EFM32/TARGET_EFM32GG_STK3700/device/TOOLCHAIN_GCC_ARM/efm32gg.ld"
     }
   },
   {
     "MTS_MDOT_F411RE": {
       "RAM": "130664",
       "FLASH": "458752",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_MTS_MDOT_F411RE/device/TOOLCHAIN_GCC_ARM/STM32F411XE.ld"
     }
   },
   {
     "KL27Z": {
-      "RAM": "0",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_KL27Z/device/TOOLCHAIN_GCC_ARM/MKL27Z64xxx4.ld"
+      "RAM": "16384",
+      "FLASH": "64496",
     }
   },
   {
     "ARCH_LINK": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NRF51_MICROBIT_B": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NUCLEO_F030R8": {
       "RAM": "8000",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32F0/TARGET_NUCLEO_F030R8/device/TOOLCHAIN_GCC_ARM/STM32F030X8.ld"
     }
   },
   {
     "BLUEPILL_F103C8": {
       "RAM": "20244",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32F1/TARGET_BLUEPILL_F103C8/device/TOOLCHAIN_GCC_ARM/STM32F103XB.ld"
     }
   },
   {
     "NRF51_DK_OTA": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "RBLAB_BLENANO_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "DISCO_F100RB": {
       "RAM": "7728",
       "FLASH": "131072",
-      "Script": "targets/TARGET_STM/TARGET_STM32F1/TARGET_DISCO_F100RB/device/TOOLCHAIN_GCC_ARM/STM32F100.ld"
     }
   },
   {
     "NUCLEO_F303K8": {
-      "RAM": "11896",
+      "RAM": "15992",
       "FLASH": "65536",
-      "Script": "targets/TARGET_STM/TARGET_STM32F3/TARGET_NUCLEO_F303K8/device/TOOLCHAIN_GCC_ARM/STM32F303X8.ld"
     }
   },
   {
     "K64F": {
-      "RAM": "0",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_MCU_K64F/device/TOOLCHAIN_GCC_ARM/MK64FN1M0xxx12.ld"
+      "RAM": "262144",
+      "FLASH": "1048576",
     }
   },
   {
     "ARM_BEETLE_SOC": {
       "RAM": "131072",
-      "FLASH": "261120",
-      "Script": "targets/TARGET_ARM_SSG/TARGET_BEETLE/device/TOOLCHAIN_GCC_ARM/BEETLE.ld"
+      "FLASH": "262144",
     }
   },
   {
     "LPC11U35_501": {
       "RAM": "10048",
       "FLASH": "65536",
-      "Script": "targets/TARGET_NXP/TARGET_LPC11UXX/device/TOOLCHAIN_GCC_ARM/TARGET_LPC11U35_501/LPC11U35.ld"
     }
   },
   {
     "ARCH_LINK_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "DISCO_F429ZI": {
-      "RAM": "196180",
+      "RAM": "261716",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_DISCO_F429ZI/device/TOOLCHAIN_GCC_ARM/STM32F429ZI.ld"
     }
   },
   {
     "ARCH_BLE_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "NUCLEO_L073RZ": {
       "RAM": "20288",
       "FLASH": "196608",
-      "Script": "targets/TARGET_STM/TARGET_STM32L0/TARGET_NUCLEO_L073RZ/device/TOOLCHAIN_GCC_ARM/STM32L073XZ.ld"
     }
   },
   {
     "MTS_GAMBIT": {
-      "RAM": "0",
-      "FLASH": "16",
-      "Script": "targets/TARGET_Freescale/TARGET_KSDK2_MCUS/TARGET_MCU_K64F/device/TOOLCHAIN_GCC_ARM/MK64FN1M0xxx12.ld"
+      "RAM": "262144",
+      "FLASH": "1048576",
     }
   },
   {
     "HRM1017": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "LPC4088": {
       "RAM": "98072",
       "FLASH": "524288",
-      "Script": "targets/TARGET_NXP/TARGET_LPC408X/device/TOOLCHAIN_GCC_ARM/LPC4088.ld"
     }
   },
   {
     "NRF52_DK": {
       "RAM": "53512",
       "FLASH": "409600",
-      "Script": "targets/TARGET_NORDIC/TARGET_NRF5/TARGET_MCU_NRF52832/device/TOOLCHAIN_GCC_ARM/NRF52832.ld"
     }
   },
   {
     "SAMD21G18A": {
-      "RAM": "0",
-      "FLASH": "0",
-      "Script": "targets/TARGET_Atmel/TARGET_SAM_CortexM0P/TARGET_SAMD21G18A/device/TOOLCHAIN_GCC_ARM/samd21g18a.ld"
+      "RAM": "32588",
+      "FLASH": "262144",
     }
   },
   {
     "NRF51_DONGLE_OTA": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "SAMR21G18A": {
-      "RAM": "0",
-      "FLASH": "0",
-      "Script": "targets/TARGET_Atmel/TARGET_SAM_CortexM0P/TARGET_SAMR21G18A/device/TOOLCHAIN_GCC_ARM/samr21g18a.ld"
+      "RAM": "32768",
+      "FLASH": "262144",
     }
   },
   {
     "NUCLEO_F767ZI": {
       "RAM": "523784",
       "FLASH": "2097152",
-      "Script": "targets/TARGET_STM/TARGET_STM32F7/TARGET_NUCLEO_F767ZI/device/TOOLCHAIN_GCC_ARM/STM32F767ZI.ld"
     }
   },
   {
     "NRF51_DONGLE_BOOT": {
       "RAM": "22528",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "NRF51_MICROBIT_OTA": {
       "RAM": "8192",
       "FLASH": "163840",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S110/NRF51822.ld"
     }
   },
   {
     "KL46Z": {
       "RAM": "32576",
-      "FLASH": "261120",
-      "Script": "targets/TARGET_Freescale/TARGET_KLXX/TARGET_KL46Z/device/TOOLCHAIN_GCC_ARM/MKL46Z4.ld"
+      "FLASH": "262144",
     }
   },
   {
     "ARCH_MAX": {
-      "RAM": "130680",
+      "RAM": "196216",
       "FLASH": "1048576",
-      "Script": "targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F407VG/device/TOOLCHAIN_GCC_ARM/STM32F407XG.ld"
     }
   },
   {
     "NRF51_DK": {
       "RAM": "20744",
       "FLASH": "151552",
-      "Script": "targets/TARGET_NORDIC/TARGET_NRF5/TARGET_MCU_NRF51822_UNIFIED/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NORDIC_32K/NRF51822.ld"
     }
   },
   {
     "HRM1017_BOOT": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "HRM1017_OTA": {
       "RAM": "6144",
       "FLASH": "147456",
-      "Script": "targets/TARGET_NORDIC/TARGET_MCU_NRF51822/device/TOOLCHAIN_GCC_ARM/TARGET_MCU_NRF51_16K_S130/NRF51822.ld"
     }
   },
   {
     "KL25Z": {
       "RAM": "16192",
-      "FLASH": "130048",
-      "Script": "targets/TARGET_Freescale/TARGET_KLXX/TARGET_KL25Z/device/TOOLCHAIN_GCC_ARM/MKL25Z4.ld"
+      "FLASH": "131072",
     }
   },
   {
     "NUCLEO_F031K6": {
       "RAM": "3920",
       "FLASH": "32768",
-      "Script": "targets/TARGET_STM/TARGET_STM32F0/TARGET_NUCLEO_F031K6/device/TOOLCHAIN_GCC_ARM/STM32F031X6.ld"
     }
   },
   {
     "SSCI824": {
       "RAM": "8000",
       "FLASH": "32768",
-      "Script": "targets/TARGET_NXP/TARGET_LPC82X/TARGET_SSCI824/device/TOOLCHAIN_GCC_ARM/LPC824.ld"
     }
   },
   {
     "LPC1768": {
       "RAM": "65336",
       "FLASH": "524288",
-      "Script": "targets/TARGET_NXP/TARGET_LPC176X/device/TOOLCHAIN_GCC_ARM/LPC1768.ld"
     }
   }
 ]
