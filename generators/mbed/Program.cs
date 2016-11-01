@@ -42,7 +42,7 @@ namespace mbed
                 //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin latest") { WorkingDirectory = mbedRoot, UseShellExecute = false });
                 //}
                 //else
-                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/ARMmbed/mbed-os.git -b latest mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
+                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/oter/mbed-os.git -b fix_5.2 mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
                 //proc.WaitForExit();
                 //if (proc.ExitCode != 0)
                 //    throw new Exception("Git exited with code " + proc.ExitCode);
@@ -111,7 +111,7 @@ namespace mbed
 
             if (true)
             { 
-                var testfFiles = new Tuple<string, int>[]{ Tuple.Create("test_ledblink.xml", 97), Tuple.Create("test_ledblink_rtos.xml", 67), Tuple.Create("test_usbcd.xml", 17),   };
+                var testfFiles = new Tuple<string, int>[]{Tuple.Create("test_ledblink_rtos.xml", 67), Tuple.Create("test_ledblink.xml", 97), Tuple.Create("test_usbcd.xml", 17),   };
                 foreach(var test in testfFiles)
                 {
                     Console.WriteLine("Testing BSP...");

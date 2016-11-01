@@ -5,11 +5,14 @@
 import sys
 import os
 import re
+import copy
 import xml.etree.ElementTree as ElementTree
 import tools.project
 import json
 import tools.build_api as ba
 import tools.config
+import tools.libraries
+import tools.toolchains
 
 from os.path import join, abspath, dirname, basename
 from tools.settings import ROOT
@@ -26,21 +29,24 @@ sys.path.insert(0, FILE_ROOT)
 
 
 class LibraryBuilder(object):
-    def __init__(self, lib):
+    def __init__(self, lib, target):
         self.source_condition_map = {}
         self.header_condition_map = {}
         self.include_dir_condition_map = {}
         self.ID = lib['id']
-        self.Macros = lib.get('macros', None)
+        self.macros_condition_map = {}
+        if lib.get('macros', None) is not None:
+            self.append_resources(target, tools.toolchains.Resources(), lib.get('macros', None))
         self.SupportedTargets = {}
         self.Dependencies = lib['dependencies']
 
-    def append_resources(self, target, res):
+    def append_resources(self, target, res, macros):
         found = False
         for items, cond_map, is_path in [
-                [res.c_sources + res.cpp_sources + res.s_sources, self.source_condition_map, True],
-                [res.headers, self.header_condition_map, True],
-                [res.inc_dirs, self.include_dir_condition_map, True]]:
+            [res.c_sources + res.cpp_sources + res.s_sources, self.source_condition_map, True],
+            [res.headers, self.header_condition_map, True],
+            [res.inc_dirs, self.include_dir_condition_map, True],
+            [macros, self.macros_condition_map, False]]:
                 for fn in items:
                     if is_path:
                         fn = "$$SYS:BSP_ROOT$$/" + fn.replace("\\", "/")
@@ -51,13 +57,6 @@ class LibraryBuilder(object):
 
 
 Exporter = EXPORTERS['gcc_arm']
-
-
-def scan_dir_contents(path, _toolchain, exclude_paths=None):
-    res = _toolchain.scan_resources(path, exclude_paths=exclude_paths)
-    res.relative_to(ROOT, False)
-    res.win_to_unix()
-    return res
 
 
 def make_node(name, text):
@@ -154,34 +153,67 @@ def parse_linker_script(lds_file):
 
 def main():
     ignore_targets = {
-        # 'K22F': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'K64F': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'KL43Z': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
+        'ELEKTOR_COCORICO': 'Wrong target configuration, no \'device_has\' attribute',
+        'KL26Z': 'undefined reference to \'init_data_bss\'',
+        'LPC11U37_501': 'fatal error: device.h: No such file or directory',
+        'LPC11U68': 'multiple definition of \'__aeabi_atexit\'',
+        'SAMG55J19': 'error: \'s\' undeclared here: #define OPTIMIZE_HIGH __attribute__((optimize(s)))',
+        'LPC810': 'region \'FLASH\' overflowed by 2832 bytes',
+        'LPC2368': 'undefined reference to \'__get_PRIMASK\'',
+        'LPC2460': 'undefined reference to \'__get_PRIMASK\'',
+        'MTM_MTCONNECT04S_BOOT': 'fatal error: device.h: No such file or directory',
+        'MTM_MTCONNECT04S_OTA': 'fatal error: device.h: No such file or directory',
 
-        # 'LPC4330_M4': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'SAMR21G18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'SAML21J18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'SAMG55J19': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'SAMD21J18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'SAMD21G18A': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'MTS_GAMBIT': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-        # 'LPC4330_M4': 'Test OK, FLASH and ROM size can\'t be parsed from a linker script',
-
-        # 'KL05Z': 'Test failed: not fitted in FLASH region',
-
-        # 'LPC11U24': 'Test failed: not fitted in FLASH region',
-        # 'LPC812': 'Test failed: not fitted in FLASH region',
-        # 'LPC2368': 'Test failed: undefined reference to __get_PRIMASK',
-        # 'LPC2460': 'Test failed: undefined reference to __get_PRIMASK',
-        # 'NUCLEO_F031K6': 'Test failed: not fitted in FLASH region',
-        # 'EFM32ZG_STK3200': 'Test failed: not fitted in FLASH region',
-        # 'NUCLEO_F042K6': 'Test failed: not fitted in FLASH region',
-        # 'NUCLEO_L011K4': 'Test failed: not fitted in FLASH region',
-        # 'SAMG55J19': 'Test failed:\'osc_wait_ready\' was not declared in this scope',
+        'NRF51_MICROBIT_BOOT': 'Hex file problem',
+        'ARCH_BLE': 'Hex file problem',
+        'RBLAB_NRF51822': 'Hex file problem',
+        'RBLAB_BLENANO': 'Hex file problem',
+        'NRF51822_BOOT': 'Hex file problem',
+        'NRF51_MICROBIT': 'Hex file problem',
+        'WALLBOT_BLE': 'Hex file problem',
+        'WALLBOT_BLE_OTA': 'Hex file problem',
+        'MTM_MTCONNECT04S': 'Hex file problem',
+        'MTM_MTCONNECT04S_BOOT': 'Hex file problem',
+        'TY51822R3_BOOT': 'Hex file problem',
+        'NRF51822_OTA': 'Hex file problem',
+        'RBLAB_NRF51822_OTA': 'Hex file problem',
+        'NRF51822_Y5_MBUG': 'Hex file problem',
+        'NRF51822': 'Hex file problem',
+        'ARCH_BLE_BOOT': 'Hex file problem',
+        'RBLAB_BLENANO_BOOT': 'Hex file problem',
+        'TY51822R3_OTA': 'Hex file problem',
+        'SEEED_TINY_BLE': 'Hex file problem',
+        'RBLAB_NRF51822_BOOT': 'Hex file problem',
+        'NRF51_DK_LEGACY': 'Hex file problem',
+        'DELTA_DFCM_NNN40_OTA': 'Hex file problem',
+        'TY51822R3': 'Hex file problem',
+        'NRF51_DONGLE_LEGACY': 'Hex file problem',
+        'DELTA_DFBM_NQ620': 'Hex file problem',
+        'WALLBOT_BLE_BOOT': 'Hex file problem',
+        'DELTA_DFCM_NNN40': 'Hex file problem',
+        'SEEED_TINY_BLE_OTA': 'Hex file problem',
+        'ARCH_LINK_OTA': 'Hex file problem',
+        'NRF51_DK_BOOT': 'Hex file problem',
+        'NRF51_DONGLE': 'Hex file problem',
+        'DELTA_DFCM_NNN40_BOOT': 'Hex file problem',
+        'NRF51_MICROBIT_B_OTA': 'Hex file problem',
+        'NRF51_MICROBIT_B_BOOT': 'Hex file problem',
+        'SEEED_TINY_BLE_BOOT': 'Hex file problem',
+        'ARCH_LINK': 'Hex file problem',
+        'NRF51_MICROBIT_B': 'Hex file problem',
+        'NRF51_DK_OTA': 'Hex file problem',
+        'RBLAB_BLENANO_OTA': 'Hex file problem',
+        'ARCH_LINK_BOOT': 'Hex file problem',
+        'ARCH_BLE_OTA': 'Hex file problem',
+        'HRM1017': 'Hex file problem',
+        'NRF52_DK': 'Hex file problem',
+        'NRF51_DONGLE_OTA': 'Hex file problem',
+        'NRF51_DONGLE_BOOT': 'Hex file problem',
+        'NRF51_MICROBIT_OTA': 'Hex file problem',
+        'NRF51_DK': 'Hex file problem',
+        'HRM1017_BOOT': 'Hex file problem',
+        'HRM1017_OTA': 'Hex file problem',
     }
-    # additional_defines = {}
-    # with open(os.path.join(ROOT, 'additional_defines.json')) as j:
-    #     additional_defines = json.loads(j.read())
 
     source_condition_map = {}
     header_condition_map = {}
@@ -202,6 +234,7 @@ def main():
         'fat': "FAT File System support",
         'eth': "Ethernet support",
         'rtx': "Keil RTX RTOS",
+        'features': 'Device features'
     }
 
     # Add O_BINARY  definition
@@ -221,13 +254,14 @@ def main():
     xml = ElementTree.parse(join(dirname(__file__), 'bsp_template.xml'))
     mcus = xml.find("SupportedMCUs")
     family = xml.find("MCUFamilies/MCUFamily")
-    exclude_paths = [d for d in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, d))]
-    search_paths = ['targets', 'events', 'drivers']
-    for p in search_paths:
-        if p in exclude_paths:
-            exclude_paths.remove(p)
+    # exclude_paths = [d for d in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, d))]
+    # search_paths = ['targets', 'events', 'drivers']
+    # for p in search_paths:
+    #     if p in exclude_paths:
+    #         exclude_paths.remove(p)
 
     targets_count = 0
+    ignored_list = []
     for target in Exporter.TARGETS:
         print('\t' + target + '...')
         # toolchain = TOOLCHAIN_CLASSES['GCC_ARM'](TARGET_MAP[target.upper()])
@@ -249,41 +283,30 @@ def main():
         # for path in src_paths[1:]:
         #     resources.add(toolchain.scan_resources(path))
 
-        # Add features while we find new ones
-        features = toolchain.config.get_features()
-        for feature in features:
-            if feature in res.features:
-                res += res.features[feature]
         res.headers += [MBED_HEADER, ROOT]
-        res.inc_dirs += ['./']
-        res += toolchain.scan_resources(os.path.join(ROOT, 'events'))
+        # res += toolchain.scan_resources(os.path.join(ROOT, 'events'))
+        if len(res.hex_files) != 0:
+            print('Target ' + target + ' ignored due to hex file availability')
+            ignored_list.append(target)
+            continue
 
         toolchain.config.load_resources(res)
 
-        scfg = toolchain.config.get_config_data()
+        target_lib_macros = toolchain.config.config_to_macros(toolchain.config.get_config_data())
+        if len(target_lib_macros) != 5:
+            print('debug')
         toolchain.set_config_data(toolchain.config.get_config_data())
-
         toolchain.config.validate_config()
 
-        cfg, macros = toolchain.config.get_config_data()
-        features = toolchain.config.get_features()
         res.relative_to(ROOT, False)
         res.win_to_unix()
-
-
-
-        # a, b, c = ba.get_config(ROOT, target, 'GCC_ARM')
-        # if len(c) != 0:
-        #     print('a')
-
-        syms = toolchain.get_symbols()
 
         for items, object_map, is_path in [
             [res.c_sources + res.cpp_sources + res.s_sources, source_condition_map, True],
             [res.headers, header_condition_map, True],
             [res.inc_dirs, include_dir_condition_map, True],
             [toolchain.get_symbols(), symbol_condition_map, False],
-            [['MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE=9600'], symbol_condition_map, False]]:
+            [target_lib_macros, symbol_condition_map, False]]:
             for fn in items:
                 if is_path:
                     fn = "$$SYS:BSP_ROOT$$/" + fn.replace("\\", "/")
@@ -296,11 +319,60 @@ def main():
             if isinstance(sources, str):
                 sources = [sources]
             for src in sources:
-                lib_resources = toolchain.scan_resources(src)
-                lib_resources.relative_to(ROOT, False)
-                lib_resources.win_to_unix()
-                lib_builder_map.setdefault(lib['id'], LibraryBuilder(lib)).append_resources(target, lib_resources)
-                src_dir_to_lib_map[src] = lib['id']
+                lib_toolchain = ba.prepare_toolchain(ROOT, target, 'GCC_ARM')
+                # ignore rtx while scanning rtos
+                exclude_paths = [os.path.join(ROOT, 'rtos', 'rtx')] if lib['id'] != 'rtos' else []
+                lib_res = lib_toolchain.scan_resources(src, exclude_paths=exclude_paths)
+                lib_toolchain.config.load_resources(lib_res)
+                lib_macros = lib_toolchain.config.config_to_macros(lib_toolchain.config.get_config_data())
+                new_lib = copy.copy(lib)
+                macros = new_lib.get('macros', None)
+                if macros is None:
+                    macros = lib_macros
+                else:
+                    macros += lib_macros
+                new_lib['macros'] = macros
+                lib_res.relative_to(ROOT, False)
+                lib_res.win_to_unix()
+                lib_builder_map.setdefault(new_lib['id'], LibraryBuilder(new_lib, target)).append_resources(
+                    target, lib_res, macros)
+                src_dir_to_lib_map[src] = new_lib['id']
+        # Add features while we find new ones
+
+        # Add specific features as a library
+        features_path = os.path.join(ROOT, 'features')
+        features_toolchain = ba.prepare_toolchain(features_path, target, 'GCC_ARM')
+        features_resources = features_toolchain.scan_resources(features_path)
+        features_toolchain.config.load_resources(features_resources)
+        new_macros = features_toolchain.config.config_to_macros(features_toolchain.config.get_config_data())
+        features_macros = [x for x in new_macros if x not in target_lib_macros]
+        # if 'MBED_CONF_LWIP_ADDR_TIMEOUT=5' in features_macros:
+        #     features_macros.remove('MBED_CONF_LWIP_ADDR_TIMEOUT=5')
+        #     features_macros.append('MBED_CONF_LWIP_ADDR_TIMEOUT=$$com.sysprogs.bspoptions.lwip.addr_timeout$$')
+        if 'MBED_CONF_LWIP_IPV6_ENABLED=0' in features_macros:
+            features_macros.remove('MBED_CONF_LWIP_IPV6_ENABLED=0')
+            features_macros.append('MBED_CONF_LWIP_IPV6_ENABLED=$$com.sysprogs.bspoptions.lwip.ipv6_en$$')
+        if 'MBED_CONF_LWIP_IPV4_ENABLED=1' in features_macros:
+            features_macros.remove('MBED_CONF_LWIP_IPV4_ENABLED=1')
+            features_macros.append('MBED_CONF_LWIP_IPV4_ENABLED=$$com.sysprogs.bspoptions.lwip.ipv4_en$$')
+
+        if len(features_macros) != 0:
+            print('Debug')
+        features_resources.relative_to(ROOT, False)
+        features_resources.win_to_unix()
+        features_lib = {
+            'id': 'features',
+            'source_dir': os.path.join(ROOT, 'features'),
+            'build_dir': tools.libraries.RTOS_LIBRARIES,
+            'dependencies': [tools.libraries.MBED_LIBRARIES, tools.libraries.MBED_RTX, tools.libraries.RTOS_LIBRARIES],
+            'macros': features_macros
+        }
+        for feature in toolchain.config.get_features():
+            if feature in features_resources.features:
+                features_resources += features_resources.features[feature]
+        lib_builder_map.setdefault('features', LibraryBuilder(features_lib, target)).append_resources(
+            target, features_resources, features_macros)
+        src_dir_to_lib_map[features_path] = 'features'
 
     for fw in lib_builder_map.values():
         fw.DependencyIDs = set([])
@@ -309,19 +381,49 @@ def main():
             if id is not None:
                 fw.DependencyIDs.add(id)
 
+    # Add
+
     # Set flags different for each target
     for target in Exporter.TARGETS:
-        mcu = ElementTree.Element("MCU")
-        mcu.append(make_node("ID", target))
-        mcu.append(make_node("HierarchicalPath", "Mbed"))
-        mcu.append(make_node("FamilyID", family.find("ID").text))
+        mcu = ElementTree.Element('MCU')
+        mcu.append(make_node('ID', target))
+        mcu.append(make_node('HierarchicalPath', 'Mbed'))
+        mcu.append(make_node('FamilyID', family.find('ID').text))
+
+        props_list = provide_node(provide_node(provide_node(provide_node(mcu, "ConfigurableProperties"),
+                                                            "PropertyGroups"), "PropertyGroup"), "Properties")
+
+        if 'FEATURE_LWIP=1' in symbol_condition_map:
+            if target in symbol_condition_map['FEATURE_LWIP=1']:
+                prop_node = ElementTree.SubElement(props_list, "PropertyEntry", {"xsi:type": "Enumerated"})
+                prop_node.extend([make_node('Name', 'LWIP IPV6 config'),
+                                  make_node('UniqueID', 'com.sysprogs.bspoptions.lwip.ipv6_en'),
+                                  make_node('DefaultEntryIndex', '1')])
+                list_node = ElementTree.SubElement(prop_node, 'SuggestionList')
+                ElementTree.SubElement(list_node, "Suggestion").extend([make_node("UserFriendlyName", "enable"),
+                                                                        make_node("InternalValue", '1')])
+                ElementTree.SubElement(list_node, "Suggestion").extend([make_node("UserFriendlyName", "disable"),
+                                                                        make_node("InternalValue", '0')])
+
+                prop_node = ElementTree.SubElement(props_list, "PropertyEntry", {"xsi:type": "Enumerated"})
+                prop_node.extend([make_node("Name", "LWIP IPV4 config"),
+                                  make_node("UniqueID", "com.sysprogs.bspoptions.lwip.ipv4_en"),
+                                  make_node("DefaultEntryIndex", "0")])
+                list_node = ElementTree.SubElement(prop_node, "SuggestionList")
+                ElementTree.SubElement(list_node, "Suggestion").extend([make_node("UserFriendlyName", "enable"),
+                                                                        make_node("InternalValue", '1')])
+                ElementTree.SubElement(list_node, "Suggestion").extend([make_node("UserFriendlyName", "disable"),
+                                                                        make_node("InternalValue", '0')])
+
         flags = append_node(mcu, "CompilationFlags")
         for (node, dict) in [[append_node(mcu, "AdditionalSourceFiles"), source_condition_map],
                              [append_node(mcu, "AdditionalHeaderFiles"), header_condition_map],
                              [append_node(flags, "IncludeDirectories"), include_dir_condition_map],
                              [append_node(flags, "PreprocessorMacros"), symbol_condition_map]]:
             for (filename, targets) in dict.items():
-                if len(targets) < targets_count and target in targets:
+                if len(list(set(targets))) > targets_count:
+                    print('Shit')
+                if len(list(set(targets))) < targets_count and target in targets:
                     node.append(make_node("string", filename))
 
         res = resources_map.get(target, None)
@@ -339,22 +441,19 @@ def main():
         if "-mfloat-abi=softfp" in flagList:
             flagList.remove("-mfloat-abi=softfp")
             flagList.append("$$com.sysprogs.bspoptions.arm.floatmode$$")
-            propList = provide_node(
-                provide_node(provide_node(provide_node(mcu, "ConfigurableProperties"), "PropertyGroups"),
-                             "PropertyGroup"), "Properties")
-            propEl = ElementTree.SubElement(propList, "PropertyEntry", {"xsi:type": "Enumerated"})
-            propEl.extend([make_node("Name", "Floating point support"),
+            prop_node = ElementTree.SubElement(props_list, "PropertyEntry", {"xsi:type": "Enumerated"})
+            prop_node.extend([make_node("Name", "Floating point support"),
                            make_node("UniqueID", "com.sysprogs.bspoptions.arm.floatmode"),
                            make_node("DefaultEntryIndex", "2")])
-            listEl = ElementTree.SubElement(propEl, "SuggestionList")
-            ElementTree.SubElement(listEl, "Suggestion").extend(
+            list_node = ElementTree.SubElement(prop_node, "SuggestionList")
+            ElementTree.SubElement(list_node, "Suggestion").extend(
                 [make_node("UserFriendlyName", "Software"), make_node("InternalValue", "-mfloat-abi=soft")])
-            ElementTree.SubElement(listEl, "Suggestion").extend(
+            ElementTree.SubElement(list_node, "Suggestion").extend(
                 [make_node("UserFriendlyName", "Hardware"), make_node("InternalValue", "-mfloat-abi=hard")])
-            ElementTree.SubElement(listEl, "Suggestion").extend(
+            ElementTree.SubElement(list_node, "Suggestion").extend(
                 [make_node("UserFriendlyName", "Hardware with Software interface"),
                  make_node("InternalValue", "-mfloat-abi=softfp")])
-            ElementTree.SubElement(listEl, "Suggestion").extend(
+            ElementTree.SubElement(list_node, "Suggestion").extend(
                 [make_node("UserFriendlyName", "Unspecified"), make_node("InternalValue", "")])
 
         ElementTree.SubElement(flags, "COMMONFLAGS").text = " ".join(flagList)
@@ -364,16 +463,16 @@ def main():
         mcu.append(make_node("RAMSize", str(sum([m.Size for m in mems if ("RAM" in m.Name.upper())]))))
         mcu.append(make_node("FLASHSize", str(sum([m.Size for m in mems if ("FLASH" in m.Name.upper())]))))
 
-        memList = ElementTree.SubElement(ElementTree.SubElement(mcu, "MemoryMap"), "Memories")
+        mem_list = ElementTree.SubElement(ElementTree.SubElement(mcu, "MemoryMap"), "Memories")
         for mem in mems:
-            memEl = ElementTree.SubElement(memList, "MCUMemory")
-            memEl.append(make_node("Name", mem.Name))
-            memEl.append(make_node("Address", str(mem.Start)))
-            memEl.append(make_node("Size", str(mem.Size)))
+            mem_el = ElementTree.SubElement(mem_list, "MCUMemory")
+            mem_el.append(make_node("Name", mem.Name))
+            mem_el.append(make_node("Address", str(mem.Start)))
+            mem_el.append(make_node("Size", str(mem.Size)))
             if mem.Name.upper() == "FLASH":
-                memEl.append(make_node("Flags", "IsDefaultFLASH"))
+                mem_el.append(make_node("Flags", "IsDefaultFLASH"))
             if mem.Name.upper() == "RAM":
-                memEl.append(make_node("LoadedFromMemory", "FLASH"))
+                mem_el.append(make_node("LoadedFromMemory", "FLASH"))
 
         mcus.append(mcu)
 
@@ -384,7 +483,8 @@ def main():
                          [append_node(flags, "IncludeDirectories"), include_dir_condition_map],
                          [append_node(flags, "PreprocessorMacros"), symbol_condition_map]]:
         for (filename, targets) in dict.items():
-            if len(targets) == targets_count:
+            if len(list(set(targets))) == targets_count:
+                # print('Addedd: ' + filename)
                 node.append(make_node("string", filename))
 
     family.find("AdditionalSourceFiles").append(make_node("string", "$$SYS:BSP_ROOT$$/stubs.cpp"))
@@ -407,13 +507,12 @@ def main():
         ElementTree.SubElement(fw, "AdditionalIncludeDirs").extend(
             [make_node("string", fn) for (fn, cond) in lib.include_dir_condition_map.items() if
              len(cond) == len(lib.SupportedTargets)])
+        ElementTree.SubElement(fw, "AdditionalPreprocessorMacros").extend(
+            [make_node("string", fn) for fn in lib.macros_condition_map.keys()])
         if len(lib.DependencyIDs) > 0:
             ElementTree.SubElement(fw, "RequiredFrameworks").extend(
                 [make_node("string", "com.sysprogs.arm.mbed." + id) for id in lib.DependencyIDs])
         # ET.SubElement(ET.SubElement(fw, "AdditionalSystemVars"), "SysVarEntry").extend([make_node("Key", "com.sysprogs.arm.mbed." + lib.ID + ".included"), make_node("Value", "1")])
-        if lib.Macros is not None:
-            ElementTree.SubElement(fw, "AdditionalPreprocessorMacros").extend(
-                [make_node("string", m) for m in lib.Macros])
 
         for (fn, cond) in lib.source_condition_map.items() + lib.header_condition_map.items():
             if len(cond) == len(lib.SupportedTargets):
@@ -427,7 +526,7 @@ def main():
             condNode.append(make_node("Regex", "|".join(cond)))
             fileCondNode.append(make_node("FilePath", fn))
 
-        for (dir, cond) in lib.include_dir_condition_map.items():
+        for (inc_dir, cond) in lib.include_dir_condition_map.items():
             if len(cond) == len(lib.SupportedTargets):
                 continue
             if len(cond) > len(lib.SupportedTargets):
@@ -442,7 +541,24 @@ def main():
                 [make_node("Expression", "$$SYS:MCU_ID$$"), make_node("Regex", "|".join(cond))])
             flagsNode = ElementTree.SubElement(flagCondNode, "Flags")
             includeDirListNode = ElementTree.SubElement(flagsNode, "IncludeDirectories")
-            includeDirListNode.append(make_node("string", dir))
+            includeDirListNode.append(make_node("string", inc_dir))
+
+        for (inc_dir, cond) in lib.macros_condition_map.items():
+            # if len(cond) == len(lib.SupportedTargets):
+            #     continue
+            if len(cond) > len(lib.SupportedTargets):
+                raise AssertionError("Source file condition list longer than the framework condition list. "
+                                     "Check how the framework conditions are formed.")
+            flagCondNode = ElementTree.SubElement(flagCondList, "ConditionalToolFlags")
+            condListNode = ElementTree.SubElement(
+                ElementTree.SubElement(flagCondNode, "FlagCondition", {"xsi:type": "And"}), "Arguments")
+            ElementTree.SubElement(condListNode, "Condition", {"xsi:type": "ReferencesFramework"}).append(
+                make_node("FrameworkID", "com.sysprogs.arm.mbed." + lib.ID))
+            ElementTree.SubElement(condListNode, "Condition", {"xsi:type": "MatchesRegex"}).extend(
+                [make_node("Expression", "$$SYS:MCU_ID$$"), make_node("Regex", "|".join(cond))])
+            flagsNode = ElementTree.SubElement(flagCondNode, "Flags")
+            includeDirListNode = ElementTree.SubElement(flagsNode, "AdditionalPreprocessorMacros")
+            includeDirListNode.append(make_node("string", inc_dir))
 
             # if lib.ID == "ublox":
             #    add_file_condition(lib, fw, condList, "libraries/net/cellular/CellularModem/.*", "com.sysprogs.arm.mbed.ublox.CellularModem", "Cellular Modem Support")
