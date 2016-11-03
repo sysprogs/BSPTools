@@ -52,7 +52,7 @@ namespace mbed
                     proc.WaitForExit();
                     if (proc.ExitCode != 0)
                         throw new Exception("Git reset command exited with code " + proc.ExitCode);
-                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin latest") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin fix_5.2") { WorkingDirectory = mbedRoot, UseShellExecute = false });
                 }
                 else
                     proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/oter/mbed-os.git -b fix_5.2 mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
