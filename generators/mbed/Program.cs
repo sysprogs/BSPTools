@@ -45,20 +45,20 @@ namespace mbed
             if (regenerate)
             {
                 Process proc;
-                //if (Directory.Exists(mbedRoot))
-                //{
-                //    // Prevent pull fail due to modified files
-                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "reset --hard") { WorkingDirectory = mbedRoot, UseShellExecute = false });
-                //    proc.WaitForExit();
-                //    if (proc.ExitCode != 0)
-                //        throw new Exception("Git reset command exited with code " + proc.ExitCode);
-                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin latest") { WorkingDirectory = mbedRoot, UseShellExecute = false });
-                //}
-                //else
-                //    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/oter/mbed-os.git -b fix_5.2 mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
-                //proc.WaitForExit();
-                //if (proc.ExitCode != 0)
-                //    throw new Exception("Git exited with code " + proc.ExitCode);
+                if (Directory.Exists(mbedRoot))
+                {
+                    // Prevent pull fail due to modified files
+                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "reset --hard") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                    proc.WaitForExit();
+                    if (proc.ExitCode != 0)
+                        throw new Exception("Git reset command exited with code " + proc.ExitCode);
+                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin latest") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                }
+                else
+                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/oter/mbed-os.git -b fix_5.2 mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
+                proc.WaitForExit();
+                if (proc.ExitCode != 0)
+                    throw new Exception("Git exited with code " + proc.ExitCode);
 
                 string sampleDir = Path.Combine(mbedRoot, "samples");
                 if (Directory.Exists(sampleDir))
