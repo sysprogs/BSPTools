@@ -12,6 +12,19 @@ using System.Threading.Tasks;
 
 namespace mbed
 {
+    public class TestInfo
+    {
+        public TestInfo(string Filename, int Passed, int Failed)
+        {
+            this.Filename = Filename;
+            this.Passed = Passed;
+            this.Failed = Failed;
+        }
+        public string Filename { get; set; }
+        public int Passed { get; set; }
+        public int Failed { get; set; }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -109,22 +122,28 @@ namespace mbed
             }
             ProduceBSPArchive(mbedRoot, bsp);
 
-            if (true)
+            var testfFiles = new TestInfo[] { new TestInfo("test_usbcd.xml", 0, 0), new TestInfo("test_ledblink_rtos.xml", 0, 0), new TestInfo("test_ledblink.xml", 0, 0), };
+            bool performTests = true;
+            if (performTests)
             { 
-                var testfFiles = new Tuple<string, int>[]{Tuple.Create("test_ledblink_rtos.xml", 67), Tuple.Create("test_ledblink.xml", 97), Tuple.Create("test_usbcd.xml", 17),   };
                 foreach(var test in testfFiles)
                 {
                     Console.WriteLine("Testing BSP...");
-                    var job = XmlTools.LoadObject<TestJob>(Path.Combine(dataDir, test.Item1));
+                    var job = XmlTools.LoadObject<TestJob>(Path.Combine(dataDir, test.Filename));
                     var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
                     var lbsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(Path.Combine(outputDir, "mbed")), toolchain, false);
                     var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(outputDir, "TestResults"));
-                    if (r.Failed != 0 /*|| r.Passed < test_file.Item2*/)
-                    {
-                        Console.WriteLine("Tests failed in " + test + ": " + r.Failed.ToString());
-                        //throw new Exception("Some of the tests failed. Check test results.");
-                    }
-                }  
+                    test.Passed = r.Passed;
+                    test.Failed = r.Failed;
+                }
+
+                foreach (var test in testfFiles)
+                {
+                    Console.WriteLine("Results for the test: " + test.Filename);
+                    Console.WriteLine("Passed: " + test.Passed.ToString());
+                    Console.WriteLine("Failed: " + test.Failed.ToString());
+                    Console.WriteLine();
+                } 
             }
         }
 

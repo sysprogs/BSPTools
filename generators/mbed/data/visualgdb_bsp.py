@@ -2,30 +2,26 @@
     This file generates a BSP file that makes VisualGDB recognize the Mbed library and automatically create Visual Studio
     projects for it
 """
-import sys
+import copy
+import json
 import os
 import re
-import copy
 import xml.etree.ElementTree as ElementTree
-import tools.project
-import json
+from os.path import join, dirname, basename
+from xml.dom import minidom
+
 import tools.build_api as ba
 import tools.config
 import tools.libraries
+import tools.project
 import tools.toolchains
-
-from os.path import join, abspath, dirname, basename
-from tools.settings import ROOT
-from xml.dom import minidom
-# from tools.paths import MBED_BASE
 from tools.export import EXPORTERS
 from tools.libraries import LIBRARIES
-from tools.targets import TARGET_MAP
-from tools.toolchains import TOOLCHAIN_CLASSES
-from tools.paths import MBED_DRIVERS, MBED_PLATFORM, MBED_HAL, MBED_HEADER, MBED_CMSIS_PATH, MBED_TARGETS_PATH
+from tools.paths import MBED_HEADER
+from tools.settings import ROOT
 
-FILE_ROOT = abspath(join(dirname(tools.project.__file__), ".."))
-sys.path.insert(0, FILE_ROOT)
+# FILE_ROOT = abspath(join(dirname(tools.project.__file__), ".."))
+# sys.path.insert(0, FILE_ROOT)
 
 
 class LibraryBuilder(object):
@@ -62,7 +58,6 @@ Exporter = EXPORTERS['gcc_arm']
 def make_node(name, text):
     str_node = ElementTree.Element(name)
     str_node.text = text
-    str_node.tail = "\n"
     return str_node
 
 
@@ -150,9 +145,11 @@ def parse_linker_script(lds_file):
                         result.append(mem)
     return result
 
+script_path = join(dirname(__file__))
 
 def main():
     ignore_targets = {
+        # Not compiled with the mbed-cli
         'ELEKTOR_COCORICO': 'Wrong target configuration, no \'device_has\' attribute',
         'KL26Z': 'undefined reference to \'init_data_bss\'',
         'LPC11U37_501': 'fatal error: device.h: No such file or directory',
@@ -164,6 +161,7 @@ def main():
         'MTM_MTCONNECT04S_BOOT': 'fatal error: device.h: No such file or directory',
         'MTM_MTCONNECT04S_OTA': 'fatal error: device.h: No such file or directory',
 
+        # Hex merge problem targets
         'NRF51_MICROBIT_BOOT': 'Hex file problem',
         'ARCH_BLE': 'Hex file problem',
         'RBLAB_NRF51822': 'Hex file problem',
@@ -213,7 +211,33 @@ def main():
         'NRF51_DK': 'Hex file problem',
         'HRM1017_BOOT': 'Hex file problem',
         'HRM1017_OTA': 'Hex file problem',
+
+        # LED Blink problem targets
+        'LPC1549': 'error: \'sleep\' was not declared in this scope',
+        'NUMAKER_PFM_M453': 'multiple definition of \'__wrap__sbrk\'',
+        'NUMAKER_PFM_NUC472': 'fatal error: mbedtls/config.h: No such file or directory',
+        'RZ_A1H': 'error: \'sleep\' was not declared in this scope',
+        'VK_RZ_A1H': 'error: \'sleep\' was not declared in this scope',
+
+        # LED Blink RTOS problem targets
+        'KL05Z': 'region \'RAM\' overflowed by 3020 bytes',
+        'EFM32HG_STK3400': 'region RAM overflowed with stack',
+        'VK_RZ_A1H': 'multiple definition of \'eth_arch_enetif_init\'',
+        'LPC812': 'region \'RAM\' overflowed by 3108 bytes',
+        'MAXWSNENV': 'undefined reference to *',
+        'ARM_BEETLE_SOC': 'undefined reference to *',
+
+        # USB Device problem targets
+        'LPC1347': 'region \'RAM\' overflowed by 156 bytes',
+        'MAX32620HSP': 'undefined reference to *',
+        'EFM32HG_STK3400': ' region \'RAM\' overflowed by 516 bytes',
+        'MAXWSNENV': 'undefined reference to *',
+        'KL27Z': 'undefined reference to \'USBHAL\' + region \'m_data\' overflowed by 88 bytes',
+
     }
+
+    with open(os.path.join(script_path, 'linker_data.json')) as linker_data:
+        linker_data = json.load(linker_data)
 
     source_condition_map = {}
     header_condition_map = {}
@@ -237,43 +261,14 @@ def main():
         'features': 'Device features'
     }
 
-    # Add O_BINARY  definition
-    o_bin_file_lines = []
-    with open(os.path.join(ROOT, 'platform', 'retarget.cpp'), 'r') as r:
-        o_bin_def = '#ifndef O_BINARY\n#define O_BINARY 0x10000\n#endif\n\n'
-        pattern = re.compile('^#if defined.*')
-        o_bin_file_lines = r.readlines()
-        for i, l in enumerate(o_bin_file_lines):
-            if pattern.match(l):
-                o_bin_file_lines.insert(i, o_bin_def)
-                break
-    with open(os.path.join(ROOT, 'platform', 'retarget.cpp'), 'w+') as r:
-        r.writelines(o_bin_file_lines)
-
     print("Parsing targets...")
-    xml = ElementTree.parse(join(dirname(__file__), 'bsp_template.xml'))
+    xml = ElementTree.parse(os.path.join(script_path, 'bsp_template.xml'))
     mcus = xml.find("SupportedMCUs")
     family = xml.find("MCUFamilies/MCUFamily")
-    # exclude_paths = [d for d in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, d))]
-    # search_paths = ['targets', 'events', 'drivers']
-    # for p in search_paths:
-    #     if p in exclude_paths:
-    #         exclude_paths.remove(p)
 
     targets_count = 0
-    ignored_list = []
     for target in Exporter.TARGETS:
         print('\t' + target + '...')
-        # toolchain = TOOLCHAIN_CLASSES['GCC_ARM'](TARGET_MAP[target.upper()])
-        # config = tools.config.Config(target)
-        # toolchain.config = config
-        #
-        # res = scan_dir_contents(MBED_DRIVERS, toolchain)
-        # res.toolchain = toolchain
-        # for d in [MBED_PLATFORM, MBED_HAL, MBED_CMSIS_PATH, MBED_TARGETS_PATH, os.path.join(ROOT, 'features'), os.path.join(ROOT, 'events')]:
-        #     res += scan_dir_contents(d, toolchain)
-        # res.headers += [os.path.relpath(MBED_HEADER, ROOT)]
-        # res.inc_dirs += ['./']
 
         toolchain = ba.prepare_toolchain(ROOT, target, 'GCC_ARM')
 
@@ -285,16 +280,10 @@ def main():
 
         res.headers += [MBED_HEADER, ROOT]
         # res += toolchain.scan_resources(os.path.join(ROOT, 'events'))
-        if len(res.hex_files) != 0:
-            print('Target ' + target + ' ignored due to hex file availability')
-            ignored_list.append(target)
-            continue
 
         toolchain.config.load_resources(res)
 
         target_lib_macros = toolchain.config.config_to_macros(toolchain.config.get_config_data())
-        if len(target_lib_macros) != 5:
-            print('debug')
         toolchain.set_config_data(toolchain.config.get_config_data())
         toolchain.config.validate_config()
 
@@ -337,7 +326,6 @@ def main():
                 lib_builder_map.setdefault(new_lib['id'], LibraryBuilder(new_lib, target)).append_resources(
                     target, lib_res, macros)
                 src_dir_to_lib_map[src] = new_lib['id']
-        # Add features while we find new ones
 
         # Add specific features as a library
         features_path = os.path.join(ROOT, 'features')
@@ -356,8 +344,6 @@ def main():
             features_macros.remove('MBED_CONF_LWIP_IPV4_ENABLED=1')
             features_macros.append('MBED_CONF_LWIP_IPV4_ENABLED=$$com.sysprogs.bspoptions.lwip.ipv4_en$$')
 
-        if len(features_macros) != 0:
-            print('Debug')
         features_resources.relative_to(ROOT, False)
         features_resources.win_to_unix()
         features_lib = {
@@ -381,10 +367,19 @@ def main():
             if id is not None:
                 fw.DependencyIDs.add(id)
 
-    # Add
-
     # Set flags different for each target
     for target in Exporter.TARGETS:
+        res = resources_map.get(target, None)
+        if res is None:
+            print('Target ignored: ' + target + ': No resources')
+            continue
+        if res.linker_script is None:
+            print('Target ignored: ' + target + ': No linker script')
+            continue
+        if target in ignore_targets:
+            print('Target ' + target + ' ignored: ' + ignore_targets[target])
+            continue
+
         mcu = ElementTree.Element('MCU')
         mcu.append(make_node('ID', target))
         mcu.append(make_node('HierarchicalPath', 'Mbed'))
@@ -421,21 +416,8 @@ def main():
                              [append_node(flags, "IncludeDirectories"), include_dir_condition_map],
                              [append_node(flags, "PreprocessorMacros"), symbol_condition_map]]:
             for (filename, targets) in dict.items():
-                if len(list(set(targets))) > targets_count:
-                    print('Shit')
                 if len(list(set(targets))) < targets_count and target in targets:
                     node.append(make_node("string", filename))
-
-        res = resources_map.get(target, None)
-        if res is None:
-            print('Target ignored: ' + target + ': No resources')
-            continue
-        if res.linker_script is None:
-            print('Target ignored: ' + target + ': No linker script')
-            continue
-        if target in ignore_targets:
-            print('Target ' + target + ' ignored: ' + ignore_targets[target])
-            continue
 
         flagList = res.toolchain.cpu[:]
         if "-mfloat-abi=softfp" in flagList:
@@ -460,8 +442,15 @@ def main():
         ElementTree.SubElement(flags, "LinkerScript").text = "$$SYS:BSP_ROOT$$/" + res.linker_script
 
         mems = parse_linker_script(os.path.join(ROOT, res.linker_script))
-        mcu.append(make_node("RAMSize", str(sum([m.Size for m in mems if ("RAM" in m.Name.upper())]))))
-        mcu.append(make_node("FLASHSize", str(sum([m.Size for m in mems if ("FLASH" in m.Name.upper())]))))
+        ram_size = str(sum([m.Size for m in mems if ("RAM" in m.Name.upper())]))
+        flash_size = str(sum([m.Size for m in mems if ("FLASH" in m.Name.upper())]))
+        if target in linker_data:
+            ram_size = linker_data[target]['RAM']
+            flash_size = linker_data[target]['FLASH']
+        else:
+            print('No RAM and FLASH size for a target ' + target)
+        mcu.append(make_node("RAMSize", ram_size))
+        mcu.append(make_node("FLASHSize", flash_size))
 
         mem_list = ElementTree.SubElement(ElementTree.SubElement(mcu, "MemoryMap"), "Memories")
         for mem in mems:
@@ -484,12 +473,11 @@ def main():
                          [append_node(flags, "PreprocessorMacros"), symbol_condition_map]]:
         for (filename, targets) in dict.items():
             if len(list(set(targets))) == targets_count:
-                # print('Addedd: ' + filename)
                 node.append(make_node("string", filename))
 
     family.find("AdditionalSourceFiles").append(make_node("string", "$$SYS:BSP_ROOT$$/stubs.cpp"))
-    condList = xml.find("FileConditions")
-    flagCondList = xml.find("ConditionalFlags")
+    cond_list = xml.find("FileConditions")
+    flag_cond_list = xml.find("ConditionalFlags")
 
     # Add frameworks
     for lib in lib_builder_map.values():
@@ -520,11 +508,11 @@ def main():
             if len(cond) > len(lib.SupportedTargets):
                 raise AssertionError("Source file condition list longer than the framework condition list. "
                                      "Check how the framework conditions are formed.")
-            fileCondNode = ElementTree.SubElement(condList, "FileCondition")
-            condNode = ElementTree.SubElement(fileCondNode, "ConditionToInclude", {"xsi:type": "MatchesRegex"})
-            condNode.append(make_node("Expression", "$$SYS:MCU_ID$$"))
-            condNode.append(make_node("Regex", "|".join(cond)))
-            fileCondNode.append(make_node("FilePath", fn))
+            file_cond_node = ElementTree.SubElement(cond_list, "FileCondition")
+            h_cond_node = ElementTree.SubElement(file_cond_node, "ConditionToInclude", {"xsi:type": "MatchesRegex"})
+            h_cond_node.append(make_node("Expression", "$$SYS:MCU_ID$$"))
+            h_cond_node.append(make_node("Regex", "|".join(cond)))
+            file_cond_node.append(make_node("FilePath", fn))
 
         for (inc_dir, cond) in lib.include_dir_condition_map.items():
             if len(cond) == len(lib.SupportedTargets):
@@ -532,49 +520,43 @@ def main():
             if len(cond) > len(lib.SupportedTargets):
                 raise AssertionError("Source file condition list longer than the framework condition list. "
                                      "Check how the framework conditions are formed.")
-            flagCondNode = ElementTree.SubElement(flagCondList, "ConditionalToolFlags")
-            condListNode = ElementTree.SubElement(
-                ElementTree.SubElement(flagCondNode, "FlagCondition", {"xsi:type": "And"}), "Arguments")
-            ElementTree.SubElement(condListNode, "Condition", {"xsi:type": "ReferencesFramework"}).append(
+            flag_cond_node = ElementTree.SubElement(flag_cond_list, "ConditionalToolFlags")
+            cond_list_node = ElementTree.SubElement(
+                ElementTree.SubElement(flag_cond_node, "FlagCondition", {"xsi:type": "And"}), "Arguments")
+            ElementTree.SubElement(cond_list_node, "Condition", {"xsi:type": "ReferencesFramework"}).append(
                 make_node("FrameworkID", "com.sysprogs.arm.mbed." + lib.ID))
-            ElementTree.SubElement(condListNode, "Condition", {"xsi:type": "MatchesRegex"}).extend(
+            ElementTree.SubElement(cond_list_node, "Condition", {"xsi:type": "MatchesRegex"}).extend(
                 [make_node("Expression", "$$SYS:MCU_ID$$"), make_node("Regex", "|".join(cond))])
-            flagsNode = ElementTree.SubElement(flagCondNode, "Flags")
-            includeDirListNode = ElementTree.SubElement(flagsNode, "IncludeDirectories")
-            includeDirListNode.append(make_node("string", inc_dir))
+            flags_node = ElementTree.SubElement(flag_cond_node, "Flags")
+            include_dir_list_node = ElementTree.SubElement(flags_node, "IncludeDirectories")
+            include_dir_list_node.append(make_node("string", inc_dir))
 
-        for (inc_dir, cond) in lib.macros_condition_map.items():
-            # if len(cond) == len(lib.SupportedTargets):
-            #     continue
+        for (macro, cond) in lib.macros_condition_map.items():
+            if len(cond) == len(lib.SupportedTargets):
+                continue
             if len(cond) > len(lib.SupportedTargets):
-                raise AssertionError("Source file condition list longer than the framework condition list. "
-                                     "Check how the framework conditions are formed.")
-            flagCondNode = ElementTree.SubElement(flagCondList, "ConditionalToolFlags")
-            condListNode = ElementTree.SubElement(
-                ElementTree.SubElement(flagCondNode, "FlagCondition", {"xsi:type": "And"}), "Arguments")
-            ElementTree.SubElement(condListNode, "Condition", {"xsi:type": "ReferencesFramework"}).append(
+                raise AssertionError('A number of macros is larger than number of supported targets')
+            macro_cond_node = ElementTree.SubElement(flag_cond_list, "ConditionalToolFlags")
+            macro_list_node = ElementTree.SubElement(
+                ElementTree.SubElement(macro_cond_node, "FlagCondition", {"xsi:type": "And"}), "Arguments")
+            ElementTree.SubElement(macro_list_node, "Condition", {"xsi:type": "ReferencesFramework"}).append(
                 make_node("FrameworkID", "com.sysprogs.arm.mbed." + lib.ID))
-            ElementTree.SubElement(condListNode, "Condition", {"xsi:type": "MatchesRegex"}).extend(
+            ElementTree.SubElement(macro_list_node, "Condition", {"xsi:type": "MatchesRegex"}).extend(
                 [make_node("Expression", "$$SYS:MCU_ID$$"), make_node("Regex", "|".join(cond))])
-            flagsNode = ElementTree.SubElement(flagCondNode, "Flags")
-            includeDirListNode = ElementTree.SubElement(flagsNode, "AdditionalPreprocessorMacros")
-            includeDirListNode.append(make_node("string", inc_dir))
+            macro_flags_node = ElementTree.SubElement(macro_cond_node, 'Flags')
+            macros_node = ElementTree.SubElement(macro_flags_node, 'PreprocessorMacros')
+            macros_node.append(make_node('string', macro))
 
-            # if lib.ID == "ublox":
-            #    add_file_condition(lib, fw, condList, "libraries/net/cellular/CellularModem/.*", "com.sysprogs.arm.mbed.ublox.CellularModem", "Cellular Modem Support")
-            #    add_file_condition(lib, fw, condList, "libraries/net/cellular/CellularUSBModem/.*", "com.sysprogs.arm.mbed.ublox.CellularUSBModem", "USB Cellular Modem Support")
-            #    add_file_condition(lib, fw, condList, "libraries/net/cellular/UbloxUSBModem/.*", "com.sysprogs.arm.mbed.ublox.UbloxUSBModem", "Ublox Cellular Modem Support")
-
-    samples = xml.find("Examples")
-    for (root, dirs, files) in os.walk(os.path.join(ROOT, "samples")):
+    samples = xml.find('Examples')
+    for (root, dirs, files) in os.walk(os.path.join(ROOT, 'samples')):
         for subdir in dirs:
-            samples.append(make_node("string", "samples/" + basename(subdir)))
+            samples.append(make_node('string', 'samples/' + basename(subdir)))
 
-    xml.getroot().attrib["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-    xml.getroot().attrib["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema"
+    xml.getroot().attrib['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance'
+    xml.getroot().attrib['xmlns:xsd'] = 'http://www.w3.org/2001/XMLSchema'
     root_node = minidom.parseString(ElementTree.tostring(xml.getroot()))
     xml_str = '\n'.join([line for line in root_node.toprettyxml(indent=' '*2).split('\n') if line.strip()])
-    with open(join(FILE_ROOT, "BSP.xml"), "w") as xml_file:
+    with open(join(ROOT, 'BSP.xml'), 'w') as xml_file:
         xml_file.write(xml_str.encode('utf-8'))
 
 
