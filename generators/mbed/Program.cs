@@ -12,6 +12,19 @@ using System.Threading.Tasks;
 
 namespace mbed
 {
+    public class TestInfo
+    {
+        public TestInfo(string Filename, int Passed, int Failed)
+        {
+            this.Filename = Filename;
+            this.Passed = Passed;
+            this.Failed = Failed;
+        }
+        public string Filename { get; set; }
+        public int Passed { get; set; }
+        public int Failed { get; set; }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -33,9 +46,16 @@ namespace mbed
             {
                 Process proc;
                 if (Directory.Exists(mbedRoot))
-                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin latest") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                {
+                    // Prevent pull fail due to modified files
+                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "reset --hard") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                    proc.WaitForExit();
+                    if (proc.ExitCode != 0)
+                        throw new Exception("Git reset command exited with code " + proc.ExitCode);
+                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "pull origin fix_5.2") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                }
                 else
-                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/ARMmbed/mbed-os.git -b latest mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
+                    proc = Process.Start(new ProcessStartInfo(@"git.exe", "clone https://github.com/oter/mbed-os.git -b fix_5.2 mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
                 proc.WaitForExit();
                 if (proc.ExitCode != 0)
                     throw new Exception("Git exited with code " + proc.ExitCode);
@@ -45,7 +65,7 @@ namespace mbed
                     Directory.Delete(sampleDir, true);
                 PathTools.CopyDirectoryRecursive(Path.Combine(dataDir, "samples"), sampleDir);
 
-                ProcessStartInfo bspGenInfo = new ProcessStartInfo(@"E:\ware\Python27\python.exe", Path.Combine(dataDir, "visualgdb_bsp.py"));
+                ProcessStartInfo bspGenInfo = new ProcessStartInfo(@"python.exe", Path.Combine(dataDir, "visualgdb_bsp.py"));
                 bspGenInfo.UseShellExecute = false;
                 bspGenInfo.EnvironmentVariables["PYTHONPATH"] = mbedRoot;
                 proc = Process.Start(bspGenInfo);
@@ -102,22 +122,28 @@ namespace mbed
             }
             ProduceBSPArchive(mbedRoot, bsp);
 
-            if (true)
+            var testfFiles = new TestInfo[] { new TestInfo("test_usbcd.xml", 0, 0), new TestInfo("test_ledblink_rtos.xml", 0, 0), new TestInfo("test_ledblink.xml", 0, 0), };
+            bool performTests = true;
+            if (performTests)
             { 
-                var testfFiles = new Tuple<string, int>[]{ Tuple.Create("test_usbcd.xml", 17), Tuple.Create("test_ledblink.xml", 97), Tuple.Create("test_ledblink_rtos.xml", 67), };
                 foreach(var test in testfFiles)
                 {
                     Console.WriteLine("Testing BSP...");
-                    var job = XmlTools.LoadObject<TestJob>(Path.Combine(dataDir, test.Item1));
+                    var job = XmlTools.LoadObject<TestJob>(Path.Combine(dataDir, test.Filename));
                     var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
                     var lbsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(Path.Combine(outputDir, "mbed")), toolchain, false);
                     var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(outputDir, "TestResults"));
-                    if (r.Failed != 0 /*|| r.Passed < test_file.Item2*/)
-                    {
-                        Console.WriteLine("Tests failed in " + test + ": " + r.Failed.ToString());
-                        //throw new Exception("Some of the tests failed. Check test results.");
-                    }
-                }  
+                    test.Passed = r.Passed;
+                    test.Failed = r.Failed;
+                }
+
+                foreach (var test in testfFiles)
+                {
+                    Console.WriteLine("Results for the test: " + test.Filename);
+                    Console.WriteLine("Passed: " + test.Passed.ToString());
+                    Console.WriteLine("Failed: " + test.Failed.ToString());
+                    Console.WriteLine();
+                } 
             }
         }
 
