@@ -6,6 +6,7 @@ import copy
 import json
 import os
 import re
+import sys
 import xml.etree.ElementTree as ElementTree
 from os.path import join, dirname, basename
 from xml.dom import minidom
@@ -368,6 +369,8 @@ def main():
                 fw.DependencyIDs.add(id)
 
     # Set flags different for each target
+    include_ignored_targets = '--alltargets' in sys.argv
+	
     for target in Exporter.TARGETS:
         res = resources_map.get(target, None)
         if res is None:
@@ -376,7 +379,7 @@ def main():
         if res.linker_script is None:
             print('Target ignored: ' + target + ': No linker script')
             continue
-        if target in ignore_targets:
+        if not include_ignored_targets and target in ignore_targets:
             print('Target ' + target + ' ignored: ' + ignore_targets[target])
             continue
 
