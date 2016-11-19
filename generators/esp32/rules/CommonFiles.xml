@@ -45,13 +45,6 @@
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include;$$SYS:BSP_ROOT$$/esp-idf/components/freertos/include/freertos;$$SYS:BSP_ROOT$$/esp-idf/components/json/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/mbedtls/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/nghttp/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/rom</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 					<PreprocessorMacros>HAVE_CONFIG_H;MBEDTLS_CONFIG_FILE='"mbedtls/esp_config.h"';ESP_PLATFORM</PreprocessorMacros>
-					<Patches>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>components\log\log.c</FilePath>
-							<OldLine>inline IRAM_ATTR uint32_t esp_log_early_timestamp()</OldLine>
-							<NewLine>static inline IRAM_ATTR uint32_t esp_log_early_timestamp()</NewLine>
-						</Patch>					
-					</Patches>
 				</CopyJob>			
 			</CopyJobs>
 		</Framework>	

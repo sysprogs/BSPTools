@@ -315,25 +315,9 @@ namespace ESP8266DebugPackage
             return regions;
         }
 
-        public string ID
-        {
-            get { return "com.sysprogs.esp8266.load_sequence"; }
-        }
-
-
-        public string FirstStepName
-        {
-            get { return "Preparing image"; }
-        }
-
-        public string SecondStepName
-        {
-            get { return "Loading image"; }
-        }
-
-        public string Title
-        {
-            get { return "Loading ESP8266 firmware"; }
-        }
+        public string ID => "com.sysprogs.esp8266.load_sequence";
+        public string FirstStepName => "Preparing image";
+        public string SecondStepName => "Loading image";
+        public string Title => "Loading ESP8266 firmware";
     }
 }

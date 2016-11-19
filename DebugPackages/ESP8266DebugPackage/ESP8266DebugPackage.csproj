@@ -30,11 +30,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_ESP32|AnyCPU'">
-    <AssemblyName>ESP32DebugPackage</AssemblyName>
-    <OutputPath>bin\Release_ESP32\</OutputPath>
-    <DefineConstants>ESP32</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BSPEngine">
       <HintPath>..\..\BSPEngine.dll</HintPath>
@@ -48,6 +43,7 @@
   <ItemGroup>
     <Compile Include="CRC32.cs" />
     <Compile Include="ELFFile.cs" />
+    <Compile Include="ESP32StartupSequence.cs" />
     <Compile Include="ESP8266BinaryImage.cs" />
     <Compile Include="ESP8266BootloaderClient.cs" />
     <Compile Include="ESP8266DebugConfigurator.cs">

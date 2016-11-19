@@ -22,8 +22,28 @@ namespace ESP8266DebugPackage
     {
         public struct Segment
         {
+            public string Hint;
             public uint Address;
             public byte[] Data;
+
+            const uint IROM_MAP_START = 0x400d0000;
+            const uint IROM_MAP_END = 0x40400000;
+            const uint DROM_MAP_START = 0x3F400000;
+            const uint DROM_MAP_END = 0x3F700000;
+
+            public bool IsESP32FLASHSegment
+            {
+                get
+                {
+                    return (IROM_MAP_START <= Address && Address < IROM_MAP_END) || (DROM_MAP_START <= Address && Address < DROM_MAP_END);
+                }
+            }
+
+
+            public override string ToString()
+            {
+                return $"{Hint} @0x{Address:x8}";
+            }
 
             public void Save(Stream stream)
             {
@@ -124,7 +144,7 @@ namespace ESP8266DebugPackage
 
             var segments = Segments;
 
-            if (BootloaderImageOffset != 0)
+            if (!ESP32Mode && BootloaderImageOffset != 0)
             {
                 rawHdr = new byte[] { 0xea, (byte)Segments.Count, 0, AppNumber };
                 stream.Write(rawHdr, 0, rawHdr.Length);
@@ -139,8 +159,33 @@ namespace ESP8266DebugPackage
             stream.Write(rawHdr, 0, rawHdr.Length);
             stream.Write(BitConverter.GetBytes(EntryPoint), 0, 4);
 
-            foreach (var segment in segments)
+            if (ESP32Mode)
+                stream.Write(new byte[16], 0, 16);
+
+            var sortedSegments = new List<Segment>(segments);
+            sortedSegments.Sort((a, b) => (int)a.Address.CompareTo(b.Address));
+
+            const uint IROM_ALIGN = 65536;
+            const uint SEG_HEADER_LEN = 8;
+            int paddingSegmentCount = 0;
+
+            foreach (var segment in sortedSegments)
             {
+                if (segment.IsESP32FLASHSegment)
+                {
+                    uint align_past = (segment.Address % IROM_ALIGN) - SEG_HEADER_LEN;
+                    var pad_len = (IROM_ALIGN - ((stream.Position - offBase) % IROM_ALIGN)) + align_past - SEG_HEADER_LEN;
+
+                    while (pad_len < 0)
+                        pad_len += IROM_ALIGN;
+                    if (pad_len > 0)
+                    {
+                        var paddingSegment = new Segment { Address = 0, Data = new byte[pad_len], Hint = "padding" };
+                        paddingSegmentCount++;
+                        paddingSegment.Save(stream);
+                    }
+                }
+
                 segment.Save(stream);
                 UpdateChecksum(ref checksum, segment.Data);
             }
@@ -149,7 +194,10 @@ namespace ESP8266DebugPackage
             stream.Write(new byte[alignment], 0, alignment);
             stream.WriteByte(checksum);
 
-            if (BootloaderImageOffset != 0)
+            stream.Position = offBase + 1;
+            stream.WriteByte((byte)(segments.Count + paddingSegmentCount));
+
+            if (!ESP32Mode && BootloaderImageOffset != 0)
             {
                 long endOff = stream.Position;
                 stream.Position = offBase;
@@ -183,11 +231,20 @@ namespace ESP8266DebugPackage
             ESP8266BinaryImage image = new ESP8266BinaryImage();
             image.EntryPoint = file.ELFHeader.e_entry;
             image.Header = header;
-            InsertRAMSections(file, esptoolSectionOrder, image);
+            InsertSections(file, esptoolSectionOrder, image, true);
             return image;
         }
 
-        private static void InsertRAMSections(ELFFile file, bool esptoolSectionOrder, ESP8266BinaryImage image)
+        public static ESP8266BinaryImage MakeESP32ImageFromELFFile(ELFFile file, ParsedHeader header)
+        {
+            ESP8266BinaryImage image = new ESP8266BinaryImage(true);
+            image.EntryPoint = file.ELFHeader.e_entry;
+            image.Header = header;
+            InsertSections(file, false, image, false);
+            return image;
+        }
+
+        private static void InsertSections(ELFFile file, bool esptoolSectionOrder, ESP8266BinaryImage image, bool ramSectionsOnly)
         {
             List<ELFFile.ParsedSection> sections = new List<ELFFile.ParsedSection>();
             if (esptoolSectionOrder)
@@ -200,9 +257,15 @@ namespace ESP8266DebugPackage
 
             foreach (var sec in sections)
             {
-                if (sec.HasData && sec.PresentInMemory && sec.VirtualAddress < SPIFLASHBase)
+                if (!sec.HasData || !sec.PresentInMemory)
                 {
-                    var segment = new Segment { Address = sec.VirtualAddress, Data = file.LoadSection(sec) };
+                    if (sec.SectionName != ".rtc.text")
+                        continue;
+                }
+
+                if (!ramSectionsOnly || (sec.VirtualAddress < SPIFLASHBase))
+                {
+                    var segment = new Segment { Address = sec.VirtualAddress, Data = file.LoadSection(sec), Hint = sec.SectionName };
                     int align = ((segment.Data.Length + 3) & ~3) - segment.Data.Length;
                     if (align > 0)
                         Array.Resize(ref segment.Data, segment.Data.Length + align);
@@ -212,6 +275,12 @@ namespace ESP8266DebugPackage
         }
 
         const int BootloaderImageHeaderSize = 0x10;
+        public readonly bool ESP32Mode;
+
+        public ESP8266BinaryImage(bool esp32Mode = false)
+        {
+            ESP32Mode = esp32Mode;
+        }
 
         public static ESP8266BinaryImage MakeBootloaderBasedImageFromELFFile(ELFFile file, ParsedHeader header, int appNumber, bool esptoolSectionOrder = false)
         {
@@ -230,7 +299,7 @@ namespace ESP8266DebugPackage
             image.BootloaderImageOffset = flashSections[0].OffsetInFLASH - BootloaderImageHeaderSize;
             image.AppNumber = (byte)appNumber;
 
-            InsertRAMSections(file, esptoolSectionOrder, image);
+            InsertSections(file, esptoolSectionOrder, image, true);
             return image;
         }
 

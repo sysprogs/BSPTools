@@ -39,6 +39,10 @@ namespace esp32
             var bspBuilder = new ESP32BSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
             PathTools.CopyDirectoryRecursive(@"..\..\bsp-template", bspBuilder.Directories.OutputDir);
 
+            string registerSetFile = Path.Combine(bspBuilder.Directories.OutputDir, "registers.xml");
+            var registers = PeripheralRegisterParser.ParsePeripheralRegisters(Path.Combine(bspBuilder.Directories.InputDir, "esp-idf"));
+            XmlTools.SaveObject(new MCUDefinition { MCUName = "ESP32", RegisterSets = registers }, registerSetFile);
+
             var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.BSPRoot, "bsp.xml"));
 
             var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
@@ -80,6 +84,9 @@ namespace esp32
                 if (changed)
                     File.WriteAllLines(fn, lines);
             }
+
+            foreach (var mcu in bsp.SupportedMCUs)
+                mcu.MCUDefinitionFile = Path.GetFileName(registerSetFile);
 
             File.WriteAllText(Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\nghttp\port\include\nghttp-config.h"), "#include \"config.h\"\n");
             XmlTools.SaveObject(bsp, Path.Combine(bspBuilder.BSPRoot, "BSP.XML"));

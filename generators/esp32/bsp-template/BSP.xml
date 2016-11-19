@@ -64,28 +64,32 @@
 		<PropertyGroup>
 		  <Properties>
 			 <PropertyEntry xsi:type="Enumerated">
-			  <Name>ICACHE_FLASH_ATTR macro</Name>
-			  <UniqueID>com.sysprogs.esp32.icache_flash</UniqueID>
+			  <Name>Partition table file</Name>
+			  <UniqueID>com.sysprogs.esp32.partition_table_file</UniqueID>
 			  <SuggestionList>
-				<Suggestion><UserFriendlyName>Ignored</UserFriendlyName><InternalValue></InternalValue></Suggestion>
-				<Suggestion><UserFriendlyName>Places code to SPI FLASH</UserFriendlyName><InternalValue>ICACHE_FLASH</InternalValue></Suggestion>
+				<Suggestion><UserFriendlyName>Single App</UserFriendlyName><InternalValue>$$SYS:BSP_ROOT$$/sysprogs/extras/partitions_singleapp.bin</InternalValue></Suggestion>
 			  </SuggestionList>
 			  <DefaultEntryIndex>0</DefaultEntryIndex>
-			  <AllowFreeEntry>false</AllowFreeEntry>
+			  <AllowFreeEntry>true</AllowFreeEntry>
 			</PropertyEntry>
-			<!-- <PropertyEntry xsi:type="Boolean">
-			  <Name>Enable UART GDB Stub</Name>
-			  <UniqueID>com.sysprogs.esp32.gdbstub</UniqueID>
-			  <DefaultValue>false</DefaultValue>
-			  <ValueForTrue>ESP32_GDBSTUB</ValueForTrue>
+			 <PropertyEntry xsi:type="Enumerated">
+			  <Name>Bootloader file</Name>
+			  <UniqueID>com.sysprogs.esp32.bootloader_file</UniqueID>
+			  <SuggestionList>
+				<Suggestion><UserFriendlyName>Prebuilt</UserFriendlyName><InternalValue>$$SYS:BSP_ROOT$$/sysprogs/extras/bootloader.bin</InternalValue></Suggestion>
+			  </SuggestionList>
+			  <DefaultEntryIndex>0</DefaultEntryIndex>
+			  <AllowFreeEntry>true</AllowFreeEntry>
 			</PropertyEntry>
-			<PropertyEntry xsi:type="Boolean">
-			  <Name>GDB Stub Initial Breakpoint</Name>
-			  <UniqueID>com.sysprogs.esp32.gdbstub.break</UniqueID>
-			  <DefaultValue>true</DefaultValue>
-			  <ValueForTrue>GDBSTUB_BREAK_ON_INIT=1</ValueForTrue>
-			  <ValueForFalse>GDBSTUB_BREAK_ON_INIT=0</ValueForFalse>
-			</PropertyEntry> -->
+			 <PropertyEntry xsi:type="Enumerated">
+			  <Name>App offset in FLASH</Name>
+			  <UniqueID>com.sysprogs.esp32.app_offset</UniqueID>
+			  <SuggestionList>
+				<Suggestion><UserFriendlyName>0x10000</UserFriendlyName><InternalValue>0x10000</InternalValue></Suggestion>
+			  </SuggestionList>
+			  <DefaultEntryIndex>0</DefaultEntryIndex>
+			  <AllowFreeEntry>true</AllowFreeEntry>
+			</PropertyEntry>
 		  </Properties>
 		  <CollapsedByDefault>false</CollapsedByDefault>
 		</PropertyGroup>
@@ -93,7 +97,6 @@
 	  </ConfigurableProperties>
 	  <CompilationFlags>
 		<PreprocessorMacros>
- 			<string>$$com.sysprogs.esp32.icache_flash$$</string>
 <!--			<string>$$com.sysprogs.esp32.gdbstub$$</string>
 			<string>$$com.sysprogs.esp32.gdbstub.break$$</string> -->
 		</PreprocessorMacros>
@@ -138,14 +141,15 @@
 	  </FlagCondition>
       <Flags>
         <AdditionalLibraries>
-			<string>crypto</string>
+			<string>coexist</string>
 			<string>core</string>
 			<string>net80211</string>
 			<string>phy</string>
-			<string>rtc</string>
 			<string>pp</string>
-			<string>wpa</string>
+			<string>rtc</string>
 			<string>smartconfig</string>
+			<string>wpa</string>
+			<string>wps</string>
         </AdditionalLibraries>
 		<AdditionalLibraryDirectories>
 			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/lib</string>

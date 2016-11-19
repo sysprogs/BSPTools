@@ -68,11 +68,16 @@ namespace ESPImageTool
             int otaPort = 0;
             int baud = 115200;
             bool erase = false;
+            bool esp32mode = false;
             List<string> files = new List<string>();
             string frequency = null, mode = null, size = null;
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i] == "--boot")
+                if (args[i] == "--esp32")
+                {
+                    esp32mode = true;
+                }
+                else if (args[i] == "--boot")
                 {
                     if (i >= (args.Length - 1))
                         throw new Exception("--boot must be followed by the bootloader image");
@@ -140,56 +145,70 @@ namespace ESPImageTool
                 using (var elfFile = new ELFFile(elf))
                 {
                     string status;
-                    int appMode = ESP8266BinaryImage.DetectAppMode(elfFile, out status);
-                    Console.WriteLine(status);
-
-                    if (appMode == 0)
+                    if (esp32mode)
                     {
-                        var img = ESP8266BinaryImage.MakeNonBootloaderImageFromELFFile(elfFile, hdr);
+                        var img = ESP8266BinaryImage.MakeESP32ImageFromELFFile(elfFile, hdr);
 
-                        string fn = pathBase + "-0x00000.bin";
+                        string fn = pathBase + "-esp32.bin";
                         using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
                         {
                             img.Save(fs);
                             regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = (int)fs.Length });
                         }
-
-                        foreach (var sec in ESP8266BinaryImage.GetFLASHSections(elfFile))
-                        {
-                            fn = string.Format("{0}-0x{1:x5}.bin", pathBase, sec.OffsetInFLASH);
-                            using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-                            {
-                                fs.Write(sec.Data, 0, sec.Data.Length);
-                                regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)sec.OffsetInFLASH, Size = sec.Data.Length });
-                            }
-                        }
                     }
                     else
                     {
-                        string fn;
-                        var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, hdr, appMode);
+                        int appMode = ESP8266BinaryImage.DetectAppMode(elfFile, out status);
+                        Console.WriteLine(status);
 
-                        if (bootloader == null)
-                            Console.WriteLine("Warning: no bootloader specified. Skipping bootloader...");
+                        if (appMode == 0)
+                        {
+                            var img = ESP8266BinaryImage.MakeNonBootloaderImageFromELFFile(elfFile, hdr);
+
+                            string fn = pathBase + "-0x00000.bin";
+                            using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                            {
+                                img.Save(fs);
+                                regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = (int)fs.Length });
+                            }
+
+                            foreach (var sec in ESP8266BinaryImage.GetFLASHSections(elfFile))
+                            {
+                                fn = string.Format("{0}-0x{1:x5}.bin", pathBase, sec.OffsetInFLASH);
+                                using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                                {
+                                    fs.Write(sec.Data, 0, sec.Data.Length);
+                                    regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)sec.OffsetInFLASH, Size = sec.Data.Length });
+                                }
+                            }
+                        }
                         else
                         {
-                            if (!File.Exists(bootloader))
-                                throw new Exception(bootloader + " not found. Cannot program OTA images.");
+                            string fn;
+                            var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, hdr, appMode);
 
-                            byte[] data = File.ReadAllBytes(bootloader);
-                            data[2] = (byte)img.Header.Mode;
-                            data[3] = (byte)(((byte)img.Header.Size << 4) | (byte)img.Header.Frequency);
-                            fn = string.Format("{0}-boot.bin", pathBase);
-                            File.WriteAllBytes(fn, data);
+                            if (bootloader == null)
+                                Console.WriteLine("Warning: no bootloader specified. Skipping bootloader...");
+                            else
+                            {
+                                if (!File.Exists(bootloader))
+                                    throw new Exception(bootloader + " not found. Cannot program OTA images.");
 
-                            regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = File.ReadAllBytes(fn).Length });
-                        }
+                                byte[] data = File.ReadAllBytes(bootloader);
+                                data[2] = (byte)img.Header.Mode;
+                                data[3] = (byte)(((byte)img.Header.Size << 4) | (byte)img.Header.Frequency);
+                                fn = string.Format("{0}-boot.bin", pathBase);
+                                File.WriteAllBytes(fn, data);
 
-                        fn = string.Format("{0}-user{1}.bin", pathBase, appMode);
-                        using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-                        {
-                            img.Save(fs);
-                            regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)img.BootloaderImageOffset, Size = (int)fs.Length });
+                                regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = File.ReadAllBytes(fn).Length });
+                            }
+
+                            fn = string.Format("{0}-user{1}.bin", pathBase, appMode);
+                            using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                            {
+                                img.Save(fs);
+                                regions.Add(new ProgrammableRegion { FileName = fn, Offset = (int)img.BootloaderImageOffset, Size = (int)fs.Length });
+                            }
                         }
                     }
                 }
