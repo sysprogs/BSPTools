@@ -98,7 +98,7 @@ namespace ESP8266DebugPackage
         public CustomStartupSequence BuildSequence(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
         {
             List<CustomStartStep> cmds = new List<CustomStartStep>();
-            cmds.Add(new CustomStartStep("mon esp108 chip_reset", "mon sleep 300"));
+            cmds.Add(new CustomStartStep("mon esp108 chip_reset"));
 
             string bspPath = bspDict["SYS:BSP_ROOT"];
 
@@ -106,24 +106,29 @@ namespace ESP8266DebugPackage
             if (bspDict.TryGetValue("com.sysprogs.esp32.load_flash", out val) && val == "1")
             {
                 //Not a FLASHless project, FLASH loading required
-                string loader = bspPath + @"\sysprogs\flashprog\ESP32FlashProg.bin";
-                if (!File.Exists(loader))
-                    throw new Exception("FLASH loader not found: " + loader);
+                if (debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.program_flash", out val) && val != "0")
+                {
+                    string loader = bspPath + @"\sysprogs\flashprog\ESP32FlashProg.bin";
+                    if (!File.Exists(loader))
+                        throw new Exception("FLASH loader not found: " + loader);
 
-                var parsedLoader = new ParsedFLASHLoader(loader);
+                    var parsedLoader = new ParsedFLASHLoader(loader);
 
-                //List<ProgrammableRegion> regions = new List<ProgrammableRegion>();
-                //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\bootloader\bootloader.bin", Offset = 0x1000, Size = 4224 });
-                //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\blink.bin", Offset = 0x10000, Size = 245328 });
-                //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\partitions_singleapp.bin", Offset = 0x4000, Size = 96 });
+                    //List<ProgrammableRegion> regions = new List<ProgrammableRegion>();
+                    //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\bootloader\bootloader.bin", Offset = 0x1000, Size = 4224 });
+                    //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\blink.bin", Offset = 0x10000, Size = 245328 });
+                    //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\partitions_singleapp.bin", Offset = 0x4000, Size = 96 });
 
-                var regions = BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
+                    var regions = BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
 
-                int eraseBlockSize = int.Parse(debugMethodConfig["com.sysprogs.esp8266.xt-ocd.erase_sector_size"]);
-                cmds.Add(parsedLoader.QueueInvocation(0, "$$com.sysprogs.esp8266.xt-ocd.prog_sector_size$$", "0", null, 0, 0, true));
-                for (int pass = 0; pass < 2; pass++)
-                    foreach (var region in regions)
-                        parsedLoader.QueueRegionProgramming(cmds, region, eraseBlockSize, pass == 0);
+                    int eraseBlockSize = int.Parse(debugMethodConfig["com.sysprogs.esp8266.xt-ocd.erase_sector_size"]);
+                    cmds.Add(parsedLoader.QueueInvocation(0, "$$com.sysprogs.esp8266.xt-ocd.prog_sector_size$$", "0", null, 0, 0, true));
+                    for (int pass = 0; pass < 2; pass++)
+                        foreach (var region in regions)
+                            parsedLoader.QueueRegionProgramming(cmds, region, eraseBlockSize, pass == 0);
+                }
+
+                cmds.Add(new CustomStartStep("mon esp108 chip_reset"));
             }
             else
             {

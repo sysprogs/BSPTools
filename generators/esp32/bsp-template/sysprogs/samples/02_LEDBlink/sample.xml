@@ -33,5 +33,7 @@
 		<string>com.sysprogs.esp32.idf.nghttp</string>
 		<string>com.sysprogs.esp32.idf.spi_flash</string>
 		<string>com.sysprogs.esp32.idf.tcpip_adapter</string>
+		<string>com.sysprogs.esp32.idf.newlib</string>
+		<string>com.sysprogs.esp32.idf.vfs</string>
 	</RequiredFrameworks>
 </EmbeddedProjectSample>

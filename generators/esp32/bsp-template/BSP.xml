@@ -130,7 +130,7 @@
 	<string>sysprogs/samples/NoFLASH</string>
 	<string>sysprogs/samples/01_Hello_world</string>
 	<string>sysprogs/samples/02_LEDBlink</string>
-	<!-- <string>sysprogs/samples/HTTP_IDF</string> -->
+	<string>sysprogs/samples/03_HTTPServer</string>
   </Examples>
   <ConditionalFlags>
     <ConditionalToolFlags>
@@ -172,7 +172,11 @@
 	  </FlagCondition>
       <Flags>
         <LinkerScript>$$SYS:BSP_ROOT$$/sysprogs/ramonly.ld</LinkerScript>
-      </Flags>
+        <AdditionalLibraryDirectories>
+          <string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/ld</string>
+        </AdditionalLibraryDirectories>
+		<COMMONFLAGS>-mtext-section-literals</COMMONFLAGS>
+	  </Flags>
     </ConditionalToolFlags>  
   </ConditionalFlags>
 </BoardSupportPackage>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>HTTP Server (RTOS SDK)</Name>
+	<Name>HTTP Server</Name>
 	<Description>This project demonstrates a very basic HTTP server using the lwIP API under FreeRTOS.</Description>
 	<MCUFilterRegex>ESP32$</MCUFilterRegex>
 	<ConfigurableProperties>
@@ -19,7 +19,7 @@
 		  <Name>WiFi Network Name</Name>
 		  <UniqueID>com.sysprogs.esp32.http.ssid</UniqueID>
 		  <Description>Specifies the wireless network name (SSID)</Description>
-		  <DefaultValue>ESP32_VisualGDB_RTOS</DefaultValue>
+		  <DefaultValue>ESP32_VisualGDB</DefaultValue>
 		</PropertyEntry>
 	  </Properties>
 	  <CollapsedByDefault>false</CollapsedByDefault>
@@ -42,5 +42,8 @@
 		<string>com.sysprogs.esp32.idf.nghttp</string>
 		<string>com.sysprogs.esp32.idf.spi_flash</string>
 		<string>com.sysprogs.esp32.idf.tcpip_adapter</string>
+		<string>com.sysprogs.esp32.idf.newlib</string>
+		<string>com.sysprogs.esp32.idf.vfs</string>
+		<string>com.sysprogs.esp32.idf.wpa_supplicant</string>
 	</RequiredFrameworks>
 </EmbeddedProjectSample>

@@ -40,9 +40,9 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf</SourceFolder>
 					<TargetFolder>esp-idf</TargetFolder>
 					<FilesToCopy>-.git\*;*</FilesToCopy>
-					<RenameRules>components\esp32\hwcrypto\aes.c=>esp_aes.c;components\lwip\core\timers.c=>lwip_timers.c</RenameRules>
+					<RenameRules>components\esp32\hwcrypto\aes.c=>esp_aes.c;components\lwip\core\timers.c=>lwip_timers.c;components\wpa_supplicant\src\crypto\sha256.c=>sha256_wpa.c;components\wpa_supplicant\src\crypto\sha1.c=>sha1_wpa.c;components\wpa_supplicant\src\crypto\md5.c=>md5_wpa.c;components\wpa_supplicant\src\crypto\bignum.c=>bignum_wpa.c</RenameRules>
 					<ProjectInclusionMask>components\esp32\*.c;components\esp32\*.cpp;components\esp32\*.h</ProjectInclusionMask>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include;$$SYS:BSP_ROOT$$/esp-idf/components/freertos/include/freertos;$$SYS:BSP_ROOT$$/esp-idf/components/json/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/mbedtls/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/nghttp/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/rom</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include;$$SYS:BSP_ROOT$$/esp-idf/components/freertos/include/freertos;$$SYS:BSP_ROOT$$/esp-idf/components/json/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/mbedtls/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/nghttp/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/rom;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/xtensa</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 					<PreprocessorMacros>HAVE_CONFIG_H;MBEDTLS_CONFIG_FILE='"mbedtls/esp_config.h"';ESP_PLATFORM</PreprocessorMacros>
 				</CopyJob>			
@@ -94,7 +94,43 @@
 					<FilesToCopy>*</FilesToCopy>
 					<RenameRules>core\timers.c=>lwip_timers.c</RenameRules>
 					<ProjectInclusionMask>-netif\ppp\*;-include\lwip\netif\ppp\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/include;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip/port</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip/port</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>Newlib Library</Name>
+			<ID>com.sysprogs.esp32.idf.newlib</ID>
+			<ProjectFolderName>Newlib</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\newlib</SourceFolder>
+					<TargetFolder>esp-idf\components\newlib</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<RenameRules>core\timers.c=>lwip_timers.c</RenameRules>
+					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/include;$$SYS:BSP_ROOT$$/esp-idf/components/newlib/platform_include</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>WPA Support</Name>
+			<ID>com.sysprogs.esp32.idf.wpa_supplicant</ID>
+			<ProjectFolderName>WPA</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\wpa_supplicant</SourceFolder>
+					<TargetFolder>esp-idf\components\wpa_supplicant</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<RenameRules>src\crypto\sha256.c=>sha256_wpa.c;src\crypto\sha1.c=>sha1_wpa.c;src\crypto\md5.c=>md5_wpa.c;src\crypto\bignum.c=>bignum_wpa.c</RenameRules>
+					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/wpa_supplicant/include;$$SYS:BSP_ROOT$$/esp-idf/components/wpa_supplicant/port/include</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 					<AlreadyCopied>true</AlreadyCopied>
 				</CopyJob>			
@@ -103,7 +139,7 @@
 		</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
-			<Range>bt:Bluetooth Stack;driver:Drivers;freertos:FreeRTOS;json:JSON;log:Logging Support;mbedtls:mbed TLS;nghttp:ngHTTP;spi_flash:SPI FLASH;tcpip_adapter:TCP/IP Adapter</Range>
+			<Range>bt:Bluetooth Stack;driver:Drivers;freertos:FreeRTOS;json:JSON;log:Logging Support;mbedtls:mbed TLSnghttp:ngHTTP;spi_flash:SPI FLASH;tcpip_adapter:TCP/IP Adapter;vfs:VFS Support</Range>
 			<ArgumentSeparator>:</ArgumentSeparator>
 			<Separator>;</Separator>
 			<Template>

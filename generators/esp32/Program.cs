@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using LinkerScriptGenerator;
 using BSPEngine;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace esp32
 {
@@ -89,6 +90,43 @@ namespace esp32
                 mcu.MCUDefinitionFile = Path.GetFileName(registerSetFile);
 
             File.WriteAllText(Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\nghttp\port\include\nghttp-config.h"), "#include \"config.h\"\n");
+
+            string linkerScript = Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\esp32\ld\esp32.common.ld");
+            var lines2 = File.ReadAllLines(linkerScript).ToList();
+            Regex rgLibrary = new Regex(@"(.*)\*lib([0-9a-zA-Z_]+).a:\(([^()]+)\)");
+            Regex rgFileInLibrary = new Regex(@"(.*)\*lib([0-9a-zA-Z_]+).a:([0-9a-zA-Z]+\.o)\(([^()]+)\)");
+            for (int i = 0; i < lines2.Count; i++)
+            {
+                var m = rgLibrary.Match(lines2[i]);
+                if (m.Success)
+                {
+                    string dir = Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\" + m.Groups[2].Value);
+                    if (Directory.Exists(dir))
+                    {
+                        string[] fns = Directory.GetFiles(dir)
+                            .Select(f => Path.GetFileName(f))
+                            .Where(f => f.EndsWith(".S", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase))
+                            .Select(f=>Path.ChangeExtension(f, ".o"))
+                            .OrderBy(f=>f)
+                            .ToArray();
+
+                        int j = 0;
+
+                        foreach (var fn in fns)
+                            lines2.Insert(i + ++j, $"{m.Groups[1].Value}*{fn}({m.Groups[3].Value})");
+                        lines2.RemoveAt(i--);
+                        continue;
+                    }
+                }
+                m = rgFileInLibrary.Match(lines2[i]);
+                if (m.Success)
+                {
+                    lines2[i] = $"{m.Groups[1].Value}*{m.Groups[3].Value}({m.Groups[4].Value})";
+                }
+
+            }
+            File.WriteAllLines(linkerScript, lines2);
+
             XmlTools.SaveObject(bsp, Path.Combine(bspBuilder.BSPRoot, "BSP.XML"));
         }
     }
