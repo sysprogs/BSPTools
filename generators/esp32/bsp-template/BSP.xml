@@ -30,31 +30,25 @@
 			<MCUMemory>
 				<Name>DATA_FLASH</Name>
 				<Address>1061158912</Address>
-				<Size>4194304</Size>
+				<Size>8388608</Size>
 				<Flags>NoSoftwareBreakpoints</Flags>
 			</MCUMemory>
 			<MCUMemory>
 				<Name>INSTR_FLASH</Name>
-				<Address>1074536448</Address>
-				<Size>11788288</Size>
+				<Address>1074593792</Address>
+				<Size>3342336</Size>
 				<Flags>IsDefaultFLASH NoSoftwareBreakpoints</Flags>
 			</MCUMemory>
 			<MCUMemory>
-				<Name>SRAM0</Name>
-				<Address>1074200576</Address>
-				<Size>196608</Size>
-				<LoadedFromMemory>DATA_FLASH</LoadedFromMemory>
-			</MCUMemory>
-			<MCUMemory>
-				<Name>SRAM1</Name>
-				<Address>1073610752</Address>
+				<Name>INSTR_RAM</Name>
+				<Address>1074266112</Address>
 				<Size>131072</Size>
-				<LoadedFromMemory>DATA_FLASH</LoadedFromMemory>
+				<LoadedFromMemory>INSTR_FLASH</LoadedFromMemory>
 			</MCUMemory>
 			<MCUMemory>
-				<Name>SRAM2</Name>
-				<Address>1073405952</Address>
-				<Size>204800</Size>
+				<Name>DATA_RAM</Name>
+				<Address>1073414144</Address>
+				<Size>327680</Size>
 				<LoadedFromMemory>DATA_FLASH</LoadedFromMemory>
 			</MCUMemory>
 		</Memories>

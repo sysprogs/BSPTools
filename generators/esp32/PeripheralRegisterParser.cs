@@ -98,6 +98,10 @@ namespace esp32
                     if (m.Success)
                     {
                         var set = registerSets[m.Groups[2].Value];
+                        string name = m.Groups[1].Value;
+                        if (name.Contains("("))
+                            continue;   //One of the multiplexed registers. Skip for now.
+
                         currentRegister = new ConstructedRegister
                         {
                             Name = m.Groups[1].Value,
