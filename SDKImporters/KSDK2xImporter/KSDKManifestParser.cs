@@ -12,12 +12,7 @@ using System.Xml.Serialization;
 
 namespace KSDK2xImporter
 {
-    public interface IWarningSink
-    {
-        void LogWarning(string warning);
-    }
-
-    public class KSDKManifestParser
+    public class KSDKManifestParser : ISDKImporter
     {
         class ParsedDevice
         {
@@ -201,7 +196,6 @@ namespace KSDK2xImporter
                 }
             }
         }
-
 
         public static ParsedSDK ParseKSDKManifest(string sdkDirectory, IWarningSink sink)
         {
@@ -435,7 +429,7 @@ namespace KSDK2xImporter
                     mcus.Add(new MCU
                     {
                         ID = pkgName,
-                        UserFriendlyName = pkgName,
+                        UserFriendlyName = $"{pkgName} (KSDK 2.x)",
                         FamilyID = mcuFamily.ID,
                         FLASHSize = FLASHSize,
                         RAMSize = RAMSize,
@@ -560,6 +554,18 @@ namespace KSDK2xImporter
             };
         }
 
+        public string GenerateBSPForSDK(string directory, IWarningSink sink)
+        {
+            var bsp = ParseKSDKManifest(directory, sink);
+            bsp.Save(directory);
+
+            return bsp.BSP.PackageID;            
+        }
+
+        public string Name => "Kinetis KSDK 2.x";
+        public string CommandName => "Import a Kinetis KSDK 2.x";
+        public string Target => "arm-eabi";
+        public string OpenFileFilter => "KSDK Manifest Files|*manifest.xml";
 
         static int CountMatches(string[] left, string[] right)
         {
