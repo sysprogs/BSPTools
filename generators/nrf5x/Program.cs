@@ -28,7 +28,7 @@ namespace nrf5x
             {
                 ShortName = "nRF5x";
                 LDSTemplate.Sections.First(s => s.Name == ".data").CustomContents = "|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|".Split('|');
-           } 
+            }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
             {
@@ -105,7 +105,7 @@ namespace nrf5x
 
             public List<SoftDevice> SoftDevices = new List<SoftDevice>();
 
-          
+
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
             public const string RAMSuffixPropertyID = "com.sysprogs.bspoptions.nrf5x.ramsuffix";
 
@@ -193,12 +193,12 @@ namespace nrf5x
                         sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name;
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
                     }
-                
+
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
                     Process.Start(BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName + abi).WaitForExit();
                     string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
-                         throw new Exception("Failed to convert a softdevice");
+                        throw new Exception("Failed to convert a softdevice");
                 }
             }
         }
@@ -242,10 +242,16 @@ namespace nrf5x
         {
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
-            bool flnRFx_IoTBSP = args.Contains("/sdkiot");
+            bool usingIoTSDK = false;
+            if (Directory.Exists(Path.Combine(args[0], @"components\iot\ble_6lowpan")))
+            {
+                usingIoTSDK = true;
+                Console.WriteLine("Detected IoT SDK");
+            }
+
             NordicBSPBuilder bspBuilder;
 
-            if (flnRFx_IoTBSP)
+            if (usingIoTSDK)
             {
                 bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules_iot"));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("s1xx_iot", 0x1f000, 0x2800, "nrf52", "IoT"));
@@ -258,7 +264,7 @@ namespace nrf5x
             }
             List<MCUBuilder> devices = new List<MCUBuilder>();
 
-            if (!flnRFx_IoTBSP)
+            if (!usingIoTSDK)
                 foreach (string part in new string[] { "nRF51822", "nRF51422" })
                 {
                     devices.Add(new MCUBuilder { Name = part + "_XXAA", FlashSize = 256 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
@@ -339,7 +345,7 @@ namespace nrf5x
                 fam.Definition.AdditionalFrameworks = fam.Definition.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
                 // Startup Files
                 StartupFileGenerator.InterruptVectorTable[] aStartupVectors;
-                if (flnRFx_IoTBSP)
+                if (usingIoTSDK)
                     aStartupVectors = new StartupFileGenerator.InterruptVectorTable[] {
                                                     GenerateStartupFile(fam.Definition.StartupFileDir,"nRF52")
                                                     };
@@ -348,7 +354,7 @@ namespace nrf5x
                                                     GenerateStartupFile(fam.Definition.StartupFileDir,"nRF51"),
                                                     GenerateStartupFile(fam.Definition.StartupFileDir,"nRF52")
                                                     };
-                
+
                 fam.AttachStartupFiles(aStartupVectors);
                 //  SVD Files
                 var aMcuDef1 = (new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nRF51.svd"), "nRF51") });
@@ -428,26 +434,30 @@ namespace nrf5x
 
                 foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { defaultConfigFolder51 }))
                     exampleDirs.Add(sample);
-//                var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
-//                exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
+                //                var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
+                //                exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
 
             }
             bspBuilder.GenerateSoftdeviceLibraries();
 
             Console.WriteLine("Building BSP archive...");
             string strPackageID, strPackageDesc, strPAckVersion;
-            if (flnRFx_IoTBSP)
+            if (usingIoTSDK)
             {
-                strPackageID = "com.sysprogs.arm.nordic.nrf5xIoT";
+                strPackageID = "com.sysprogs.arm.nordic.nrf5x-iot";
                 strPackageDesc = "Nordic NRF52 IoT";
-                strPAckVersion = "1.0";
-             }
-             else
-             {
+                strPAckVersion = "0.9";
+
+                foreach (var mcu in mcuDefinitions)
+                    mcu.UserFriendlyName = mcu.ID + " (IoT)";
+            }
+            else
+            {
                 strPackageID = "com.sysprogs.arm.nordic.nrf5x";
                 strPackageDesc = "Nordic NRF5x Devices";
                 strPAckVersion = "12.0";
-             }
+            }
+
             BoardSupportPackage bsp = new BoardSupportPackage
             {
                 PackageID = strPackageID,
@@ -463,7 +473,6 @@ namespace nrf5x
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray(),
-                FirstCompatibleVersion = "3.0",
             };
 
             bspBuilder.Save(bsp, true);

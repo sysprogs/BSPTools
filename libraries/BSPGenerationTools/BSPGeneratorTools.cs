@@ -32,6 +32,7 @@ namespace BSPGenerationTools
         public class MCU
         {
             public string Name;
+            public string UserFriendlyName;
             public int FLASHSize;
             public int RAMSize;
         }
@@ -192,8 +193,9 @@ namespace BSPGenerationTools
                 MinimumEngineVersion = bsp.MinimumEngineVersion,
                 FileName = archiveName,
             };
+
             foreach (var mcu in bsp.SupportedMCUs)
-                lst.MCUs.Add(new BSPSummary.MCU { Name = mcu.ID, FLASHSize = mcu.FLASHSize, RAMSize = mcu.RAMSize });
+                lst.MCUs.Add(new BSPSummary.MCU { Name = mcu.ID, FLASHSize = mcu.FLASHSize, RAMSize = mcu.RAMSize, UserFriendlyName = mcu.UserFriendlyName });
 
             XmlTools.SaveObject(lst, Path.Combine(BSPRoot, Path.ChangeExtension(archiveName, ".xml")));
         }

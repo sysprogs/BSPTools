@@ -15,8 +15,6 @@
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
 			<string>NRF_DFU_SETTINGS_VERSION=1</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.apiversion$$</string>
-			
-			 
 		</PreprocessorMacros>
 		<IncludeDirectories>
 			<string>.</string>
@@ -28,7 +26,11 @@
 		<AdditionalLibraryDirectories>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/SoftdeviceLibraries</string>
 		</AdditionalLibraryDirectories>
-		<CFLAGS>-std=gnu99 </CFLAGS>
+		<AdditionalLinkerInputs>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/components/iot/ble_6lowpan/lib/ble_6lowpan.a</string>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/components/iot/ble_6lowpan/lib/ble_6lowpan_debug.a</string>
+		</AdditionalLinkerInputs>
+		<CFLAGS>-std=gnu99</CFLAGS>
 	</CompilationFlags>
 	<ConditionalFlags>
 		<ConditionalToolFlags>
@@ -353,7 +355,6 @@
 				</PropertyGroups>
 			</ConfigurableProperties>			
 		</Framework>
-
 		<Framework>
 			<Name>NRF5x IoT</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.iot</ID>
@@ -377,7 +378,6 @@
 						<string>utils\\ipv6_utils.c=>IPV6_DEFAULT_HOP_LIMIT</string>
 						<string>udp\\udp6.c=>UDP6_MAX_SOCKET_COUNT</string>
 						<string>tls\\mbedtls\\tls_interface.c=>NRF_TLS_MAX_INSTANCE_COUNT</string>
-
 					</GuardedFiles>
 					<SimpleFileConditions>						
 						<string>ble_6lowpan\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.ble_6lowpan$$ == yes</string>
@@ -391,12 +391,9 @@
 						<string>iot_dfu\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.iot_dfu$$ == yes</string>
 						<string>coap\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.coap$$ == yes</string>
 						<string>medium\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.medium$$ == yes</string>
-
 						<string>ipv6_stack\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.ipv6_stack$$ == yes</string>
-						
-
 						</SimpleFileConditions>
-					<ProjectInclusionMask>*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*.a;-*.lib;*</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<PreprocessorMacros>NRF_TLS_MAX_INSTANCE_COUNT=$$com.sysprogs.bspoptions.nrf5x.iot.tls_instance$$</PreprocessorMacros>
 				</CopyJob>
