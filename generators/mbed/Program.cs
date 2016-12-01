@@ -81,7 +81,8 @@ namespace mbed
 
             File.Copy(Path.Combine(dataDir, "stubs.cpp"), Path.Combine(mbedRoot, "stubs.cpp"), true);
             Dictionary<string, string> mcuDefs = new Dictionary<string, string>();
-            foreach (var dir in Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi"))
+            var linkedBSPs = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi", "*.bsplink").Select(f => File.ReadAllText(f));
+            foreach (var dir in Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi").Concat(linkedBSPs))
             {
                 var anotherBSP = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(dir, "bsp.xml"));
                 foreach (var mcu in anotherBSP.SupportedMCUs)
@@ -141,7 +142,7 @@ namespace mbed
                             throw new Exception("Cannot locate toolchain path from registry");
                     }
                     var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
-                    var lbsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(Path.Combine(outputDir, "mbed")), toolchain, false);
+                    var lbsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(Path.Combine(outputDir, "mbed"))), toolchain);
                     var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(outputDir, "TestResults"));
                     test.Passed = r.Passed;
                     test.Failed = r.Failed;
