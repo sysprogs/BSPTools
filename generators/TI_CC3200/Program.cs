@@ -274,13 +274,16 @@ namespace CC3200_bsp_generator
                 },
                 AdditionalSourceFiles = additionalSources.ToArray(),
             };
-
+            bool noPeripheralRegisters = args.Contains("/noperiph");
+            string astrPathDefinition = "";
+            if (!noPeripheralRegisters)
+                astrPathDefinition = @"$$SYS:BSP_ROOT$$/DefinitionFiles/CC3200.xml";
             fam.ConfigurableProperties = new PropertyList();
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             familyDefinitions.Add(fam);
             List<MCU> mcuDefinitions = new List<MCU>();
-            mcuDefinitions.Add(new MCU { MCUDefinitionFile = "$$SYS:BSP_ROOT$$/DefinitionFiles/CC3200.xml", FamilyID = "CC3200", ID = "XCC3200JR", RAMBase = 0x20004000, RAMSize = 240 * 1024, CompilationFlags = new ToolFlags { LinkerScript = "$$SYS:BSP_ROOT$$/LinkerScripts/XCC3200JR.lds" }, HierarchicalPath = @"TI ARM\CC3200" });
-            mcuDefinitions.Add(new MCU { MCUDefinitionFile = "$$SYS:BSP_ROOT$$/DefinitionFiles/CC3200.xml", FamilyID = "CC3200", ID = "XCC3200HZ", RAMBase = 0x20004000, RAMSize = 176 * 1024, CompilationFlags = new ToolFlags { LinkerScript = "$$SYS:BSP_ROOT$$/LinkerScripts/XCC3200HZ.lds" }, HierarchicalPath = @"TI ARM\CC3200" });
+            mcuDefinitions.Add(new MCU { MCUDefinitionFile = astrPathDefinition, FamilyID = "CC3200", ID = "XCC3200JR", RAMBase = 0x20004000, RAMSize = 240 * 1024, CompilationFlags = new ToolFlags { LinkerScript = "$$SYS:BSP_ROOT$$/LinkerScripts/XCC3200JR.lds" }, HierarchicalPath = @"TI ARM\CC3200" });
+            mcuDefinitions.Add(new MCU { MCUDefinitionFile = astrPathDefinition, FamilyID = "CC3200", ID = "XCC3200HZ", RAMBase = 0x20004000, RAMSize = 176 * 1024, CompilationFlags = new ToolFlags { LinkerScript = "$$SYS:BSP_ROOT$$/LinkerScripts/XCC3200HZ.lds" }, HierarchicalPath = @"TI ARM\CC3200" });
 
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
             List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
@@ -305,7 +308,8 @@ namespace CC3200_bsp_generator
                 commonPseudofamily.MCUs.Add(new MCUBuilder { Name = mcuDef.ID });
 
             commonPseudofamily.Definition.FamilySubdirectory = "";
-            commonPseudofamily.AttachPeripheralRegisters(ParsePeripheralRegisters(Path.Combine(DirSDK, @"cc3200-sdk\inc")));
+            if (!noPeripheralRegisters)
+                commonPseudofamily.AttachPeripheralRegisters(ParsePeripheralRegisters(Path.Combine(DirSDK, @"cc3200-sdk\inc")));
 
             BoardSupportPackage bsp = new BoardSupportPackage
             {
