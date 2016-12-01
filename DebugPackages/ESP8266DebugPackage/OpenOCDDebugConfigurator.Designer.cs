@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OpenOCDDebugConfigurator));
             this.panel2 = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -49,6 +50,7 @@
             this.cbQuickInterface = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.btnTest = new System.Windows.Forms.Button();
             this.txtExtraArgs = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.cbFeedWatchdog = new System.Windows.Forms.CheckBox();
@@ -57,6 +59,7 @@
             this.cbQuickSpeed = new System.Windows.Forms.CheckBox();
             this.numSpeed2 = new System.Windows.Forms.NumericUpDown();
             this.openOCDScriptSelector1 = new OpenOCDPackage.OpenOCDScriptSelector();
+            this.lblStartDriverTool = new System.Windows.Forms.LinkLabel();
             this.panel2.SuspendLayout();
             this.pnlFLASH.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -74,7 +77,7 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 147);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(359, 147);
+            this.panel2.Size = new System.Drawing.Size(359, 143);
             this.panel2.TabIndex = 42;
             // 
             // label10
@@ -306,6 +309,7 @@
             // 
             // panel3
             // 
+            this.panel3.Controls.Add(this.btnTest);
             this.panel3.Controls.Add(this.txtExtraArgs);
             this.panel3.Controls.Add(this.label2);
             this.panel3.Controls.Add(this.cbFeedWatchdog);
@@ -318,6 +322,20 @@
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(359, 97);
             this.panel3.TabIndex = 45;
+            // 
+            // btnTest
+            // 
+            this.btnTest.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.btnTest.Image = ((System.Drawing.Image)(resources.GetObject("btnTest.Image")));
+            this.btnTest.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnTest.Location = new System.Drawing.Point(266, 28);
+            this.btnTest.Name = "btnTest";
+            this.btnTest.Size = new System.Drawing.Size(90, 23);
+            this.btnTest.TabIndex = 201;
+            this.btnTest.Text = "Test settings";
+            this.btnTest.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnTest.UseVisualStyleBackColor = true;
+            this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
             // 
             // txtExtraArgs
             // 
@@ -419,16 +437,29 @@
             this.openOCDScriptSelector1.Visible = false;
             this.openOCDScriptSelector1.ValueChanged += new System.EventHandler(this.SettingsChangedHandler);
             // 
+            // lblStartDriverTool
+            // 
+            this.lblStartDriverTool.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblStartDriverTool.AutoSize = true;
+            this.lblStartDriverTool.Location = new System.Drawing.Point(3, 295);
+            this.lblStartDriverTool.Name = "lblStartDriverTool";
+            this.lblStartDriverTool.Size = new System.Drawing.Size(78, 13);
+            this.lblStartDriverTool.TabIndex = 46;
+            this.lblStartDriverTool.TabStop = true;
+            this.lblStartDriverTool.Text = "Start driver tool";
+            this.lblStartDriverTool.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblStartDriverTool_LinkClicked);
+            // 
             // OpenOCDDebugConfigurator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.lblStartDriverTool);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.openOCDScriptSelector1);
             this.Controls.Add(this.panel1);
             this.Name = "OpenOCDDebugConfigurator";
-            this.Size = new System.Drawing.Size(359, 297);
+            this.Size = new System.Drawing.Size(359, 315);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.pnlFLASH.ResumeLayout(false);
@@ -439,6 +470,7 @@
             this.panel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSpeed2)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -473,5 +505,7 @@
         private System.Windows.Forms.CheckBox cbFeedWatchdog;
         private System.Windows.Forms.CheckBox cbSuppressInterrupts;
         private System.Windows.Forms.CheckBox cbCmdline;
+        private System.Windows.Forms.Button btnTest;
+        private System.Windows.Forms.LinkLabel lblStartDriverTool;
     }
 }

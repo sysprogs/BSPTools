@@ -611,7 +611,7 @@ namespace StandaloneBSPValidator
                 throw new Exception("Cannot locate toolchain path from registry");
 
             var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(toolchainPath), new ToolchainRelocationManager());
-            var bsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir)), toolchain, false);
+            var bsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir))), toolchain);
 
             TestStatistics stats = new TestStatistics();
             int cnt = 0, failed = 0, succeeded = 0;
@@ -754,7 +754,7 @@ namespace StandaloneBSPValidator
             }
 
             var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
-            var bsp = LoadedBSP.Load(Environment.ExpandEnvironmentVariables(job.BSPPath), toolchain, false);
+            var bsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(job.BSPPath)), toolchain);
 
             TestBSP(job, bsp, args[1]);
         }

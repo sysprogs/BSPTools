@@ -60,7 +60,7 @@ static void __attribute__((section(".irom.text"))) upgradeCb(void *arg)
     espconn_sent(pConn, (uint8_t *)s_UpgradeMessage, strlen(s_UpgradeMessage));
 	espconn_disconnect(pConn);
     
-    upgrade_server_info *pUpgrade = (upgrade_server_info *)pvPortZalloc(sizeof(upgrade_server_info));
+    upgrade_server_info *pUpgrade = (upgrade_server_info *)pvPortZalloc(sizeof(upgrade_server_info), "", 0);
 	pUpgrade->pespconn = pConn;
     memcpy(pUpgrade->ip, pConn->proto.tcp->remote_ip, 4);
     pUpgrade->check_cb = ota_finished_callback;

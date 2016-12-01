@@ -234,6 +234,7 @@
       <Flags>
 		<PreprocessorMacros>
 			<string>GDBSTUB_FREERTOS=1</string>
+			<string>USE_FREERTOS</string>
 		</PreprocessorMacros>
         <AdditionalLibraryDirectories>
           <string>$$SYS:BSP_ROOT$$/RTOS-SDK/lib</string>

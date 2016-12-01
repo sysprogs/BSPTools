@@ -30,10 +30,10 @@ void ets_timer_setfn(ETSTimer *t, ETSTimerFunc *fn, void *parg);
 int os_printf(const char *format, ...)  __attribute__ ((format (printf, 1, 2)));
 int os_snprintf(char *str, size_t size, const char *format, ...) __attribute__ ((format (printf, 3, 4)));
 void pvPortFree(void *ptr);
-void *pvPortMalloc(size_t xWantedSize);
-void *pvPortZalloc(size_t);
+void *pvPortMalloc(size_t xWantedSize, char *file, int line);
+void *pvPortZalloc(size_t size, char *file, int line);
 void uart_div_modify(int no, unsigned int freq);
-void vPortFree(void *ptr);
+void vPortFree(void *ptr, char *file, int line);
 void *vPortMalloc(size_t xWantedSize);
 int os_printf_plus(const char *format, ...)  __attribute__ ((format (printf, 1, 2)));
 

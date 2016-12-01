@@ -27,6 +27,13 @@
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>
 			</CopyJob>			
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\USBDriverTool</SourceFolder>
+				<TargetFolder>sysprogs\debug\core\drivers</TargetFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+			</CopyJob>			
 		</CopyJobs>
 	</CoreFramework>	
 	<AdditionalFrameworks>
@@ -42,12 +49,21 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.5.2</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP8266_NONOS_SDK</SourceFolder>
 					<TargetFolder>IoT-SDK</TargetFolder>
 					<FilesToCopy>-.git\*;*</FilesToCopy>
 					<ProjectInclusionMask>-include\json\*;include\*</ProjectInclusionMask>
 					<AutoIncludeMask>*eagle_soc.h</AutoIncludeMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include</AdditionalIncludeDirs>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>include\c_types.h</FilePath>
+							<OldLine>#endif /* !__cplusplus */</OldLine>
+							<NewLine>#else
+#define BOOL            unsigned char
+#endif /* !__cplusplus */</NewLine>
+						</Patch>					
+					</Patches>
 				</CopyJob>			
 			</CopyJobs>
 				<AdditionalSystemVars>
@@ -71,13 +87,13 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_iot_sdk_v1.5.2</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP8266_NONOS_SDK</SourceFolder>
 					<TargetFolder>IoT-SDK</TargetFolder>
-					<FilesToCopy>examples\driver_lib\*</FilesToCopy>
+					<FilesToCopy>driver_lib\*</FilesToCopy>
 					<AlreadyCopied>true</AlreadyCopied>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/IoT-SDK/examples/driver_lib/include</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/IoT-SDK/driver_lib/include</AdditionalIncludeDirs>
 				</CopyJob>			
 			</CopyJobs>
 		</Framework>
@@ -97,6 +113,22 @@
 					<ProjectInclusionMask>include\espressif\*</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip;$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip/ipv4;$$SYS:BSP_ROOT$$/RTOS-SDK/include/lwip/ipv6;$$SYS:BSP_ROOT$$/RTOS-SDK/include;$$SYS:BSP_ROOT$$/RTOS-SDK/extra_include</AdditionalIncludeDirs>
 					<AutoIncludeMask>include\espressif\*</AutoIncludeMask>
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>driver_lib\include\gpio.h</FilePath>
+							<AfterLine>#define __GPIO_H__</AfterLine>
+							<InsertedLines>
+								<string>#include &lt;gpio_register.h&gt;</string>
+							</InsertedLines>
+						</Patch>					
+						<Patch xsi:type="InsertLines">
+							<FilePath>include\espressif\esp8266\pin_mux_register.h</FilePath>
+							<AfterLine>#define _PIN_MUX_H_</AfterLine>
+							<InsertedLines>
+								<string>#include &lt;eagle_soc.h&gt;</string>
+							</InsertedLines>
+						</Patch>					
+					</Patches>	
 				</CopyJob>			
 			</CopyJobs>
 				<AdditionalSystemVars>
@@ -122,13 +154,85 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\ESP8266_RTOS_SDK</SourceFolder>
 					<TargetFolder>RTOS-SDK</TargetFolder>
-					<FilesToCopy>examples\driver_lib\*</FilesToCopy>
+					<FilesToCopy>driver_lib\*</FilesToCopy>
 					<AlreadyCopied>true</AlreadyCopied>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/examples/driver_lib/include</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/RTOS-SDK/driver_lib/include</AdditionalIncludeDirs>
 				</CopyJob>			
 			</CopyJobs>
+		</Framework>		
+		<Framework>
+			<Name>ESP8266 MQTT client for IoT SDK (tuanpmt/esp_mqtt)</Name>
+			<ID>com.sysprogs.esp8266.mqtt_iot</ID>
+			<ProjectFolderName>MQTT</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.esp8266.iot_sdk</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp_mqtt</SourceFolder>
+					<TargetFolder>Frameworks\MQTT\IoT</TargetFolder>
+					<FilesToCopy>-.git\*;*</FilesToCopy>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<ProjectInclusionMask>modules\*.c;modules\*.h;mqtt\*.c;mqtt\*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/Frameworks/MQTT/IoT/modules/include;$$SYS:BSP_ROOT$$/Frameworks/MQTT/IoT/mqtt/include</AdditionalIncludeDirs>
+					<PreprocessorMacros>PROTOCOL_NAME$$com.sysprogs.bspoptions.esp8266.mqtt.protocol$$;MQTT_RECONNECT_TIMEOUT=$$com.sysprogs.bspoptions.esp8266.mqtt.reconnect_timeout$$;MQTT_BUF_SIZE=$$com.sysprogs.bspoptions.esp8266.mqtt.buf_size$$;$$com.sysprogs.bspoptions.esp8266.mqtt.debug_mode$$</PreprocessorMacros>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>mqtt\mqtt.c</FilePath>
+							<OldLine>#include "queue.h"</OldLine>
+							<NewLine>#include "include/queue.h"</NewLine>
+						</Patch>					
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>mqtt\queue.c</FilePath>
+							<OldLine>#include "queue.h"</OldLine>
+							<NewLine>#include "include/queue.h"</NewLine>
+						</Patch>					
+					</Patches>				
+				</CopyJob>			
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+							<Name>MQTT Protocol Version</Name>
+							<UniqueID>com.sysprogs.bspoptions.esp8266.mqtt.protocol</UniqueID>
+							<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+							<SuggestionList>
+							  <Suggestion>
+								<InternalValue>v31</InternalValue>
+							  </Suggestion>
+							  <Suggestion>
+								<InternalValue>v311</InternalValue>
+							  </Suggestion>
+							</SuggestionList>
+							<DefaultEntryIndex>0</DefaultEntryIndex>
+							<AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Integral">
+							<Name>Reconnection Timeout</Name>
+							<UniqueID>com.sysprogs.bspoptions.esp8266.mqtt.reconnect_timeout</UniqueID>
+							<DefaultValue>1000</DefaultValue>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Integral">
+							<Name>MQTT Buffer Size</Name>
+							<UniqueID>com.sysprogs.bspoptions.esp8266.mqtt.buf_size</UniqueID>
+							<DefaultValue>4096</DefaultValue>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Boolean">
+							<Name>Enable Debug Logging</Name>
+							<UniqueID>com.sysprogs.bspoptions.esp8266.mqtt.debug_mode</UniqueID>
+							<ValueForTrue>MQTT_DEBUG_ON</ValueForTrue>
+							<ValueForFalse></ValueForFalse>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>		
 		</Framework>		
 	</AdditionalFrameworks>
 </FamilyDefinition>

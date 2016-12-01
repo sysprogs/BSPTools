@@ -141,6 +141,7 @@ namespace ESP8266DebugPackage
             byte checksum = 0xef;
             long offBase = stream.Position;
             byte[] rawHdr;
+            int paddingSegmentCount = 0;
 
             var segments = Segments;
 
@@ -160,42 +161,54 @@ namespace ESP8266DebugPackage
             stream.Write(BitConverter.GetBytes(EntryPoint), 0, 4);
 
             if (ESP32Mode)
+            {
                 stream.Write(new byte[16], 0, 16);
 
-            var sortedSegments = new List<Segment>(segments);
-            sortedSegments.Sort((a, b) => (int)a.Address.CompareTo(b.Address));
+                var sortedSegments = new List<Segment>(segments);
+                sortedSegments.Sort((a, b) => (int)a.Address.CompareTo(b.Address));
 
-            const uint IROM_ALIGN = 65536;
-            const uint SEG_HEADER_LEN = 8;
-            int paddingSegmentCount = 0;
+                const uint IROM_ALIGN = 65536;
+                const uint SEG_HEADER_LEN = 8;
 
-            foreach (var segment in sortedSegments)
-            {
-                if (segment.IsESP32FLASHSegment)
+                foreach (var segment in sortedSegments)
                 {
-                    uint align_past = (segment.Address % IROM_ALIGN) - SEG_HEADER_LEN;
-                    var pad_len = (IROM_ALIGN - ((stream.Position - offBase) % IROM_ALIGN)) + align_past - SEG_HEADER_LEN;
-
-                    while (pad_len < 0)
-                        pad_len += IROM_ALIGN;
-                    if (pad_len > 0)
+                    if (segment.IsESP32FLASHSegment)
                     {
-                        var paddingSegment = new Segment { Address = 0, Data = new byte[pad_len], Hint = "padding" };
-                        paddingSegmentCount++;
-                        paddingSegment.Save(stream);
-                    }
-                }
+                        uint align_past = (segment.Address % IROM_ALIGN) - SEG_HEADER_LEN;
+                        var pad_len = (IROM_ALIGN - ((stream.Position - offBase) % IROM_ALIGN)) + align_past - SEG_HEADER_LEN;
 
-                segment.Save(stream);
-                UpdateChecksum(ref checksum, segment.Data);
+                        while (pad_len < 0)
+                            pad_len += IROM_ALIGN;
+                        if (pad_len > 0)
+                        {
+                            var paddingSegment = new Segment { Address = 0, Data = new byte[pad_len], Hint = "padding" };
+                            paddingSegmentCount++;
+                            paddingSegment.Save(stream);
+                        }
+                    }
+
+                    segment.Save(stream);
+                    UpdateChecksum(ref checksum, segment.Data);
+                }
+            }
+            else
+            {
+                foreach (var segment in segments)
+                {
+                    segment.Save(stream);
+                    UpdateChecksum(ref checksum, segment.Data);
+                }
             }
 
             int alignment = (int)(15 - ((stream.Position - offBase) % 16));
             stream.Write(new byte[alignment], 0, alignment);
             stream.WriteByte(checksum);
 
-            stream.Position = offBase + 1;
-            stream.WriteByte((byte)(segments.Count + paddingSegmentCount));
+            if (ESP32Mode)
+            {
+                stream.Position = offBase + 1;
+                stream.WriteByte((byte)(segments.Count + paddingSegmentCount));
+            }
 
             if (!ESP32Mode && BootloaderImageOffset != 0)
             {

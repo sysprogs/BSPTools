@@ -9,6 +9,7 @@ using BSPEngine;
 using OpenOCDPackage;
 using System.IO;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace ESP8266DebugPackage
 {
@@ -17,13 +18,17 @@ namespace ESP8266DebugPackage
         Dictionary<string, ComboBox> _ComboBoxes = new Dictionary<string, ComboBox>();
         readonly QuickSetupDatabase _QuickSetupData;
         private Dictionary<string, string> _Configuration;
+        private DebugMethod _Method;
+        private readonly string _OpenOCDDirectory;
 
         public OpenOCDDebugConfigurator(DebugMethod method, QuickSetupDatabase quickSetup)
         {
             InitializeComponent();
             _QuickSetupData = quickSetup;
+            _Method = method;
+            _OpenOCDDirectory = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\..\..\..\OpenOCD");
             openOCDScriptSelector1.SubdirectoryName = "interface";
-            openOCDScriptSelector1.OverrideOpenOCDDirectory(Path.GetFullPath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\..\..\..\OpenOCD"));
+            openOCDScriptSelector1.OverrideOpenOCDDirectory(_OpenOCDDirectory);
             foreach (var prop in method.AdditionalProperties.PropertyGroups[0].Properties)
             {
                 if (prop is PropertyEntry.Enumerated)
@@ -235,6 +240,42 @@ namespace ESP8266DebugPackage
         {
             txtExtraArgs.Enabled = cbCmdline.Checked;
             SettingsChangedHandler(sender, e);
+        }
+
+        private void btnTest_Click(object sender, EventArgs e)
+        {
+            var iface = cbQuickInterface.SelectedItem as QuickSetupDatabase.ProgrammingInterface;
+            if (iface != null && iface.UsbIdentities != null && iface.UsbIdentities.Length > 0)
+                if (!UsbDriverHelper.TryCheckDeviceAndInstallDriversInteractively(iface.UsbIdentities, iface.UniversalDriverId))
+                    return;
+
+            Process process = new Process();
+            process.StartInfo.FileName = _OpenOCDDirectory + @"\bin\openocd.exe";
+            process.StartInfo.WorkingDirectory = _OpenOCDDirectory + @"\share\openocd\scripts";
+            process.StartInfo.Arguments = CommandLineTools.BuildCommandLine(_Method.GDBServerArguments, new Dictionary<string, string>(), Configuration);
+
+            using (var frm = new CommandTestForm(process))
+            {
+                frm.ShowDialog();
+                string output = frm.AllOutput;
+                if (output.Contains("An adapter speed is not selected in the init script") && !cbQuickSpeed.Checked)
+                    if (MessageBox.Show("OpenOCD could not determine JTAG speed. Do you want to specify it explicitly?", "VisualGDB", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    {
+                        cbQuickSpeed.Checked = true;
+                        numSpeed2.Focus();
+                    }
+            }
+        }
+
+        private void lblStartDriverTool_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            try
+            {
+                var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\drivers\UsbDriverTool.exe";
+                Process.Start(path);
+            }
+            catch { }
+
         }
     }
 }
