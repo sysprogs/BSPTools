@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.googletest</ID>
 	<Name>GoogleTest</Name>
-	<Version>20160712</Version>
+	<Version>20160712r2</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -41,6 +41,17 @@
 		  <PerTestArgumentTemplate>$(1).$(2)</PerTestArgumentTemplate>
 		  <TestIDRegex>(.*)_(.*)</TestIDRegex>
 		</TestSelection>
+		<AdvancedTestDiscoverers>
+		  <TestDiscoverer xsi:type="OutputBasedTestDiscoverer">
+			<CommandLineArguments>--gtest_list_tests</CommandLineArguments>
+			<TargetDemangledNames>true</TargetDemangledNames>
+			<TestGroupRegex>^(|[^/]+/)([^ \t/]+)\.$</TestGroupRegex>
+			<TestRegex>^[ \t]+([^ \t/]+)(|/[^ \t/]+)($| )</TestRegex>
+			<UniqueNameFormat>{1}{2}_{4}{5}</UniqueNameFormat>
+			<UserFriendlyNameFormat>{1}{2}::{4}{5}</UserFriendlyNameFormat>
+			<LocationSymbolFormat>{2}_{4}_Test::TestBody()</LocationSymbolFormat>
+		  </TestDiscoverer>
+		</AdvancedTestDiscoverers>	
 		<TestReportChannel xsi:type="PipeBasedTestChannelWithEnv">
 		  <EnvironmentVariableName>SYSPROGS_TEST_REPORTING_PIPE</EnvironmentVariableName>
 		  <PipeTimestampVariableName>g_SysprogsTestReportTimestamp</PipeTimestampVariableName>

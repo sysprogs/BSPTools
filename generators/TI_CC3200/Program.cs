@@ -277,7 +277,7 @@ namespace CC3200_bsp_generator
             bool noPeripheralRegisters = args.Contains("/noperiph");
             string astrPathDefinition = "";
             if (!noPeripheralRegisters)
-                astrPathDefinition = @"$$SYS:BSP_ROOT$$/DefinitionFiles/CC3200.xml";
+                astrPathDefinition = @"DeviceDefinitions/CC_3200.xml";
             fam.ConfigurableProperties = new PropertyList();
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             familyDefinitions.Add(fam);
