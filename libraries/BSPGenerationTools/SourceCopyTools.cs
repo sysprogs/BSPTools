@@ -432,6 +432,7 @@ namespace BSPGenerationTools
         public PropertyList ConfigurableProperties; //Framework options - will be shown on the sample page of the wizard and on the Embedded Frameworks page
         public SysVarEntry[] AdditionalSystemVars;  //Additional vars that can be referenced in sample templates
         public string[] IncompatibleFrameworks; //Mutually exclusive frameworks (e.g. HAL is incompatible with StdPeriph)
+        public ConfigurationFileTemplate[] ConfigurationFileTemplates;
     }
 
     //Smart, i.e. configurable via wizard. We will eventually support 'dumb' samples just cloned from the BSP "as is".

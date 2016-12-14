@@ -528,7 +528,8 @@ namespace BSPGenerationTools
                         DefaultEnabled = fw.DefaultEnabled,
                         RequiredFrameworks = fw.RequiredFrameworks,
                         IncompatibleFrameworks = fw.IncompatibleFrameworks,
-                        ClassID = fw.ClassID
+                        ClassID = fw.ClassID,
+                        ConfigurationFileTemplates = fw.ConfigurationFileTemplates,
                     };
 
                     if (fw.Filter != null)
