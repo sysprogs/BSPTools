@@ -13,13 +13,14 @@
     <string>com.sysprogs.arm.nordic.nrfx.ble_bas_c</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_hrs_c</string>
     <string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
   </RequiredFrameworks>
   <ConditionalErrors>
 	<ConditionalError>
 		<ErrorCondition xsi:type="Not">
 			<Argument xsi:type="MatchesRegex">
 				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>S(120|130|310|132)</Regex>
+				<Regex>S(110|130|310|132|140)</Regex>
 				<IgnoreCase>false</IgnoreCase>
 			</Argument>
 		</ErrorCondition>

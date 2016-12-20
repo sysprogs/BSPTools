@@ -27,7 +27,10 @@ namespace nrf5x
                 : base(dirs)
             {
                 ShortName = "nRF5x";
-                LDSTemplate.Sections.First(s => s.Name == ".data").CustomContents = "|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|".Split('|');
+                string extraSections = "|. = ALIGN(4);|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|. = ALIGN(4);|";
+                extraSections += "|. = ALIGN(4);|PROVIDE(__start_pwr_mgmt_data = .);|KEEP(*(.pwr_mgmt_data))|PROVIDE(__stop_pwr_mgmt_data = .);|. = ALIGN(4);|";
+
+                LDSTemplate.Sections.First(s => s.Name == ".data").CustomContents = extraSections.Split('|');
             }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
@@ -107,22 +110,10 @@ namespace nrf5x
 
 
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
-            public const string RAMSuffixPropertyID = "com.sysprogs.bspoptions.nrf5x.ramsuffix";
 
             public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
             {
                 DoGenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout, generalizedName, "");
-                if (layout.DeviceName.StartsWith("nRF52"))
-                {
-                    foreach (var ram in new int[] { 16, 32, 64 })
-                    {
-                        var layout2 = layout.Clone();
-                        layout2.Memories.First(m => m.Name == "SRAM").Size = (uint)(ram * 1024);
-                        DoGenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout2, generalizedName, "_" + ram + "k");
-                    }
-
-                    mcu.LinkerScriptPath = mcu.LinkerScriptPath.Replace(".lds", "$$" + RAMSuffixPropertyID + "$$.lds");
-                }
             }
 
             void DoGenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName, string ldsSuffix)
@@ -183,7 +174,7 @@ namespace nrf5x
                 {
                     string sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                     string abi = "";
-                    if (sd.Name == "S132")
+                    if (sd.Name == "S132" || sd.Name == "S140")
                     {
                         sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
@@ -259,8 +250,9 @@ namespace nrf5x
             else
             {
                 bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S130", 0x1b000, 0x1fe8, "nrf51", "Bluetooth LE Universal"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", 0x1f000, 0x2128, "nrf52", "Bluetooth LE"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S130", 0x1b000, 0x13c8, "nrf51", "Bluetooth LE Universal"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", 0x20000, 0x2168, "nrf52832", "Bluetooth LE"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", 0x21000, 0x2780, "nrf52840", "Bluetooth LE"));
             }
             List<MCUBuilder> devices = new List<MCUBuilder>();
 
@@ -273,6 +265,7 @@ namespace nrf5x
                 }
 
             devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4 });
+            devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4 });
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
@@ -402,17 +395,6 @@ namespace nrf5x
 
                     if (mcu.Name.StartsWith("nRF52"))
                     {
-                        mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated
-                        {
-                            UniqueID = NordicBSPBuilder.RAMSuffixPropertyID,
-                            Name = "RAM size",
-                            DefaultEntryIndex = 1,
-                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[] {
-                                new PropertyEntry.Enumerated.Suggestion {InternalValue = "_32k", UserFriendlyName = "32 KB (Preview)" },
-                                new PropertyEntry.Enumerated.Suggestion {InternalValue = "_64k", UserFriendlyName = "64 KB (Final)" },
-                            }
-                        });
-
                         var prop = mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode") as PropertyEntry.Enumerated;
                         var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
                         prop.DefaultEntryIndex = idx;
@@ -455,7 +437,7 @@ namespace nrf5x
             {
                 strPackageID = "com.sysprogs.arm.nordic.nrf5x";
                 strPackageDesc = "Nordic NRF5x Devices";
-                strPAckVersion = "12.0";
+                strPAckVersion = "13.0-alpha";
             }
 
             BoardSupportPackage bsp = new BoardSupportPackage

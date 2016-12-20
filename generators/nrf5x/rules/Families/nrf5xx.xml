@@ -73,9 +73,10 @@
 				<TargetFolder>components\toolchain</TargetFolder>
 				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c</FilesToCopy>
 				<SimpleFileConditions>					
-					<string>system_nrf51422.c: $$com.sysprogs.bspoptions.nrf5x.typsf$$ == NRF51422</string>
-					<string>system_nrf51.c: $$com.sysprogs.bspoptions.nrf5x.typsf$$ == NRF51</string>
-					<string>system_nrf52.c: $$com.sysprogs.bspoptions.nrf5x.typsf$$ == NRF52</string>
+					<string>system_nrf51422.c: $$SYS:MCU_ID$$ =~ ^nRF5142.*</string>
+					<string>system_nrf51.c: $$SYS:MCU_ID$$ =~ ^nRF518.*</string>
+					<string>system_nrf52.c: $$SYS:MCU_ID$$ =~ ^nRF52832.*</string>
+					<string>system_nrf52840.c: $$SYS:MCU_ID$$ =~ ^nRF52840.*</string>
 				</SimpleFileConditions>	
 			</CopyJob>
 			<CopyJob>
@@ -136,8 +137,6 @@
 						<string>nrf_drv_timer.c=>TIMER_COUNT</string>
 						<string>nrf_drv_clock.c=>CLOCK_ENABLED</string>
 
-						<string>nrf_drv_adc.c=>ADC_ENABLED</string>
-						
 						<string>nrf_drv_i2s.c=>I2S_ENABLED</string>
 						<string>nrf_drv_pwm.c=>PWM_COUNT</string>
 						<string>nrf_drv_comp.c=>COMP_ENABLED</string>						
@@ -151,7 +150,6 @@
 						<string>pdm\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
 						<string>pwm\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
 						<string>twis_slave\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
-						<string>adc\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF51</string>
 						
 						<string>spi_master\\nrf_drv_spi..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == master</string>
 						<string>spi_master\\spi_5W_master..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == 5W_master</string>
@@ -237,15 +235,27 @@
 			</CopyJobs>
 		</Framework>
 		<Framework>
+			<Name>GATT</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.gatt</ID>
+			<ProjectFolderName>GATT</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\ble\nrf_ble_gatt</SourceFolder>
+					<TargetFolder>components\ble\nrf_ble_gatt</TargetFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
 			<Name>NRF5x Evaluation Board Support</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.boards</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.boards</ClassID>
 			<ProjectFolderName>Boards</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples\bsp</SourceFolder>
-					<TargetFolder>examples\bsp</TargetFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\boards</SourceFolder>
+					<TargetFolder>components\boards</TargetFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
 					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
@@ -258,11 +268,17 @@
 						<string>pca10031.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10031</string>
 						<string>pca10036.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10036</string>
 						<string>pca10040.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10040</string>
+						<string>pca10056.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10056</string>
 						<string>pca20006.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA20006</string>
 						<string>wt51822.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == WT51822</string>
-						<string>bsp_btn_ble.c: $$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$ != BSP_SIMPLE</string>
-						<string>bsp_nfc.c: $$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$ != BSP_SIMPLE</string>
 					</SimpleFileConditions>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries\bsp</SourceFolder>
+					<TargetFolder>components\libraries\bsp</TargetFolder>
+					<ProjectInclusionMask>-bsp_btn_ant.*;*.c;*.h</ProjectInclusionMask>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<AlreadyCopied>true</AlreadyCopied>
 				</CopyJob>
 			</CopyJobs>			
 			<ConfigurableProperties>
@@ -283,6 +299,7 @@
 							<Suggestion><InternalValue>PCA10031</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA10036</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA10040</InternalValue></Suggestion>
+							<Suggestion><InternalValue>PCA10056</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA20006</InternalValue></Suggestion>
 							<Suggestion><InternalValue>NRF6310</InternalValue></Suggestion>
 							<Suggestion><InternalValue>WT51822</InternalValue></Suggestion>
@@ -324,6 +341,10 @@
 						<string>simple_timer\\app_simple_timer.c=>TIMER_COUNT</string>
 					</GuardedFiles>
 					<SimpleFileConditions>
+						<string>atomic\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.atomic$$ == yes</string> 
+						<string>atomic_fifo\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo$$ == yes</string> 
+						<string>balloc\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.balloc$$ == yes</string> 
+						<string>block_dev\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.block_dev$$ == yes</string> 
 						<string>bootloader\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu$$ != none</string> 
 						<string>crypto\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crypto$$ == yes</string>
 						<string>log\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.log$$ == yes</string>
@@ -332,20 +353,22 @@
 						<string>crc16\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc16$$ == yes</string>
 						<string>crc32\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc32$$ == yes</string>
 						<string>ecc\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.ecc$$ == yes</string>
+						<string>experimental_eddystone\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.experimental_eddystone$$ == yes</string>
 						<string>fds\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fds$$ == yes</string>
 						<string>fifo\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fifo$$ == yes</string>
 						<string>fstorage\\fstorage.c: $$com.sysprogs.bspoptions.nrf5x.libraries.fstorage$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
 						<string>fstorage\\fstorage_nosd.c: $$com.sysprogs.bspoptions.nrf5x.libraries.fstorage$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ == nosoftdev</string>
 						<string>gpiote\\app_gpiote.c: $$com.sysprogs.bspoptions.nrf5x.libraries.gpiote$$ == normal</string>
 						<string>hci\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.hci$$ == yes</string>
-						<string>ic_info\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.ic_info$$ == yes</string>
 						<string>led_softblink\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.led_softblink$$ == yes</string>
 						<string>low_power_pwm\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.low_power_pwm$$ == yes</string>
-						<string>mailbox\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.mailbox$$ == yes</string>
 						<string>pwm\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.pwm$$ == yes</string>
+						<string>pwr_mgmt\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.pwr_mgmt$$ == yes</string> 
+						<string>queue\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.queue$$ == yes</string> 
 						<string>scheduler\\app_scheduler.h: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ != none</string>
 						<string>scheduler\\app_scheduler.c: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ == normal</string>
 						<string>scheduler\\app_scheduler_serconn.c: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ == serconn</string>
+						<string>sdcard\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.sdcard$$ == yes</string> 
 						<string>sensorsim\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.sensorsim$$ == yes</string>
 						<string>sha256\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.sha256$$ == yes</string>
 						<string>simple_timer\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.simple_timer$$ == yes</string>
@@ -359,9 +382,12 @@
 						<string>uart\\app_uart.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart</string>
 						<string>uart\\app_uart_fifo.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart_fifo</string>
 						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ != </string>
+						<string>usbd\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.usbd$$ == yes</string>
+<!-- 						<string>bsp\\bsp_btn_ble.c: $$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$ != BSP_SIMPLE</string>
+						<string>bsp\\bsp_nfc.c: $$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$ != BSP_SIMPLE</string> -->
 					</SimpleFileConditions>
-					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-mem_manager\*;-bootloader_dfu\*init_template*;*</ProjectInclusionMask>
-					<AutoIncludeMask>-ant_fs\*;-console\*;-mem_manager\*;*.h</AutoIncludeMask>
+					<ProjectInclusionMask>-bsp\*;-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-mem_manager\*;-bootloader_dfu\*init_template*;*</ProjectInclusionMask>
+					<AutoIncludeMask>-bsp\*;-ant_fs\*;-console\*;-mem_manager\*;*.h</AutoIncludeMask>
 					<Patches>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>ecc\ecc.c</FilePath>
@@ -385,6 +411,10 @@
 					<Name>nRF5x Libraries</Name>
 					<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
 					<Properties>
+						<PropertyEntry xsi:type="Boolean"><Name>atomic</Name><UniqueID>atomic</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>atomic_fifo</Name><UniqueID>atomic_fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>balloc</Name><UniqueID>balloc</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>block_dev</Name><UniqueID>block_dev</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>bootloader_dfu</Name>
 						  <UniqueID>bootloader_dfu</UniqueID>
@@ -402,6 +432,7 @@
 						<PropertyEntry xsi:type="Boolean"><Name>crc16</Name><UniqueID>crc16</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>crc32</Name><UniqueID>crc32</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>ecc</Name><UniqueID>ecc</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>experimental_eddystone</Name><UniqueID>experimental_eddystone</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fds</Name><UniqueID>fds</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fifo</Name><UniqueID>fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fstorage</Name><UniqueID>fstorage</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
@@ -414,12 +445,13 @@
 						  </SuggestionList>
 						  <DefaultEntryIndex>0</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>							<PropertyEntry xsi:type="Boolean"><Name>hci</Name><UniqueID>hci</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>ic_info</Name><UniqueID>ic_info</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						</PropertyEntry>							
+						<PropertyEntry xsi:type="Boolean"><Name>hci</Name><UniqueID>hci</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>led_softblink</Name><UniqueID>led_softblink</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>low_power_pwm</Name><UniqueID>low_power_pwm</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>mailbox</Name><UniqueID>mailbox</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>pwm</Name><UniqueID>pwm</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>pwr_mgmt</Name><UniqueID>pwr_mgmt</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>queue</Name><UniqueID>queue</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>slip</Name><UniqueID>slip</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>scheduler</Name>
@@ -432,6 +464,7 @@
 						  <DefaultEntryIndex>0</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>						
+						<PropertyEntry xsi:type="Boolean"><Name>sdcard</Name><UniqueID>sdcard</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>sensorsim</Name><UniqueID>sensorsim</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>log</Name><UniqueID>log</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>sha256</Name><UniqueID>sha256</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
@@ -463,6 +496,7 @@
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>
 						</Properties>
+						<PropertyEntry xsi:type="Boolean"><Name>usbd</Name><UniqueID>USB Device</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
@@ -490,11 +524,11 @@
 			<Required>true</Required>
 			<Options>		
 				<Option>
-					<Value>NRF_SD_BLE_API_VERSION=2</Value>
+					<Value>NRF_SD_BLE_API_VERSION=3</Value>
 					<Regex>^nRF51.*</Regex>
 				</Option>
 				<Option>
-					<Value>NRF_SD_BLE_API_VERSION=3</Value>
+					<Value>NRF_SD_BLE_API_VERSION=5</Value>
 					<Regex>^nRF52.*</Regex>			
 				</Option>					
 			</Options>
@@ -533,6 +567,10 @@
 					<Value>NRF52832</Value>
 					<Regex>^nRF52832.*</Regex>			
 				</Option>					
+				<Option>
+					<Value>NRF52840_XXAA</Value>
+					<Regex>^nRF52840.*</Regex>			
+				</Option>					
 			</Options>
 		</MCUClassifier>
 		<MCUClassifier>		
@@ -549,24 +587,6 @@
 				</Option>					
 			</Options>
 		</MCUClassifier>
-		<MCUClassifier>		
-			<VariableName>com.sysprogs.bspoptions.nrf5x.typsf</VariableName>
-			<Required>true</Required>
-			<Options>		
-				<Option>
-					<Value>NRF51422</Value>
-					<Regex>^nRF5142.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF51</Value>
-					<Regex>^nRF51.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52</Value>
-					<Regex>^nRF52.*</Regex>			
-				</Option>					
-			</Options>
-		</MCUClassifier>
 	</Subfamilies>	
 	<SmartSamples>
 		<SmartSample>
@@ -575,7 +595,6 @@
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/bsp/bsp.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/radio_config/radio_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/sdio/config/sdio_config.h</string>
 			</AdditionalSources>
@@ -597,7 +616,6 @@
 			<AdditionalSources>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/hal/nrf_peripherals.h</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/config/advertising_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/main.c</string>
 			</AdditionalSources>
 		</SmartSample>
