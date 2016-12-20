@@ -526,7 +526,7 @@ namespace Nxp_bsp_generator
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             List<MCU> mcuDefinitions = new List<MCU>();
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<string> exampleDirs = new List<string>();
+            List<MCUFamilyBuilder.CopiedSample> examples = new List<MCUFamilyBuilder.CopiedSample>();
          
             
             bool noPeripheralRegisters = args.Contains("/noperiph");
@@ -538,7 +538,7 @@ namespace Nxp_bsp_generator
             commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
 
             foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample);
+                examples.Add(sample);
 
             foreach (var fam in allFamilies)
             {
@@ -573,7 +573,7 @@ namespace Nxp_bsp_generator
                     frameworks.Add(fw);
 
                 foreach (var sample in fam.CopySamples())
-                    exampleDirs.Add(sample);
+                    examples.Add(sample);
             }
 
             BoardSupportPackage bsp = new BoardSupportPackage
@@ -585,7 +585,7 @@ namespace Nxp_bsp_generator
                 MCUFamilies = familyDefinitions.ToArray(),
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.ToArray(),
+                Examples = examples.Select(s=>s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 PackageVersion = "2.1"
             };

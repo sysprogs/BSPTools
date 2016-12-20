@@ -323,7 +323,7 @@ namespace CC3200_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "1.3"
+                PackageVersion = "1.4"
             };
             bspBuilder.Save(bsp, true);
         }

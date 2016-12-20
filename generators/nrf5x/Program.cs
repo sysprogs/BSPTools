@@ -40,7 +40,7 @@ namespace nrf5x
             {
                 if ((pathInsidePackage.EndsWith(".ld") || pathInsidePackage.EndsWith(".eww") || pathInsidePackage.EndsWith(".uvmpw")) || (pathInsidePackage.Contains("experimental") || pathInsidePackage.Contains("\\ant\\") || pathInsidePackage.Contains("\\ser_")))
                     return false;
-                if (pathInsidePackage.Contains("nrf_drv_config.h"))
+                if (pathInsidePackage.Contains("nrf_drv_config.h") || pathInsidePackage.Contains("app_usbd_string_config.h"))
                     return false;
                 return base.OnFilePathTooLong(pathInsidePackage);
             }

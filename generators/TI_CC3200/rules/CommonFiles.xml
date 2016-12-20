@@ -19,8 +19,6 @@
 		</CopyJobs>
 	</CoreFramework>
 	<AdditionalFrameworks>
-	
-			
 		<Framework>
 			<Name>SDK</Name>
 			<ID>com.sysprogs.arm.ti.cc3200.sdk</ID>
@@ -37,7 +35,6 @@
 				<ProjectInclusionMask>-example\*;-simplelink*;-ti_rtos\*;*</ProjectInclusionMask>
 				<AutoIncludeMask>-example\*;-simplelink*;-ti_rtos\*;*</AutoIncludeMask>	
 				<TargetFolder>SDK</TargetFolder>
-			
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
@@ -118,6 +115,14 @@
 							<string>#ifdef __cplusplus //VG added</string>
 							<string> extern "C" { //VG added</string>
 							<string>#endif //VG added</string>
+						</InsertedLines>
+					</Patch>		
+					<Patch xsi:type="InsertLines">
+						<FilePath>include\socket.h</FilePath>
+						<AfterLine>#define __SL_SOCKET_H__</AfterLine>
+						<InsertedLines>
+							<string>//Unless we define this, including "sys/types.h" will automatically include "sys/select.h" with incompatible declarations of select() and other functions</string>
+							<string>#define _SYS_SELECT_H</string>
 						</InsertedLines>
 					</Patch>		
 				</Patches>					
