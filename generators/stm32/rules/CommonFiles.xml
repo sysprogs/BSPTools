@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.12.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -95,7 +95,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.12.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
@@ -169,7 +169,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.4.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -244,6 +244,194 @@
 			</AdditionalSystemVars>
 		</Framework>
 		<Framework>
+			<Name>LibJPEG</Name>
+			<ID>com.sysprogs.arm.stm32.LibJPEG</ID>
+			<ConfigurationFileTemplates>
+                <ConfigurationFileTemplate>
+                        <SourcePath>$$SYS:BSP_ROOT$$/LibJPEG/include/jconfig_template.h</SourcePath>
+                        <TargetFileName>jconfig.h</TargetFileName>
+                        <ExpandMacros>false</ExpandMacros>
+                 </ConfigurationFileTemplate>
+               <ConfigurationFileTemplate>
+                        <SourcePath>$$SYS:BSP_ROOT$$/LibJPEG/include/jmorecfg_template.h</SourcePath>
+                        <TargetFileName>jmorecfg.h</TargetFileName>
+                        <ExpandMacros>false</ExpandMacros>
+                 </ConfigurationFileTemplate>
+                <ConfigurationFileTemplate>
+                        <SourcePath>$$SYS:BSP_ROOT$$/LibJPEG/include/jdatasrc_conf_template.h</SourcePath>
+                        <TargetFileName>jdatasrc_conf.h</TargetFileName>
+                        <ExpandMacros>false</ExpandMacros>
+                 </ConfigurationFileTemplate>
+				  <ConfigurationFileTemplate>
+                       <SourcePath>$$SYS:BSP_ROOT$$/LibJPEG/source/jdatasrc_conf_template.c</SourcePath>
+                        <TargetFileName>jdatasrc_conf.c</TargetFileName>
+                        <ExpandMacros>false</ExpandMacros>
+                 </ConfigurationFileTemplate>
+			</ConfigurationFileTemplates>				
+			<ProjectFolderName>LibJPEG</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+				<string>com.sysprogs.arm.stm32.fatfs</string>
+			</RequiredFrameworks>		
+			<CopyJobs>			
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.5.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.txt;*.bmp;*.jpg</FilesToCopy>
+					<ProjectInclusionMask>-*jpegtran.c;-*jmemmac.c;-*jmemdos.c;-*jmemname.c;-*jmemansi.c;-*jdatasrc_conf_template.c;source\j*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/LibJPEG/include</AdditionalIncludeDirs>
+					<PreprocessorMacros></PreprocessorMacros>
+					<SimpleFileConditions>
+					</SimpleFileConditions>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>source\jdatasrc_conf_template.c</FilePath>
+							<OldLine>#include "jdatasrc_conf_template.h"</OldLine>
+							<NewLine>#include "jdatasrc_conf.h"</NewLine>
+						</Patch>
+					</Patches>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:RULES_DIR$$\\config</SourceFolder>
+					<FilesToCopy>jconfig.h</FilesToCopy>
+					<TargetFolder>BSP\ConfigTemplates</TargetFolder>
+					<ProjectInclusionMask>*.h</ProjectInclusionMask>				
+				</CopyJob>
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>PolarSSL</Name>
+			<ID>com.sysprogs.arm.stm32.PolarSSL</ID>
+			     <ConfigurationFileTemplates>
+                    <ConfigurationFileTemplate>
+                        <SourcePath>$$SYS:BSP_ROOT$$/PolarSSL/include/polarssl/_config.h</SourcePath>
+                        <TargetFileName>config.h</TargetFileName>
+                        <ExpandMacros>false</ExpandMacros>
+                        </ConfigurationFileTemplate>
+					</ConfigurationFileTemplates>	
+			<ProjectFolderName>PolarSSL</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>		
+			<CopyJobs>			
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\Third_Party\PolarSSL</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-programs\*;-tests\*;-visualc\*;-scripts\*;-doxygen\*;*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/PolarSSL/include;$$SYS:BSP_ROOT$$/PolarSSL/include/polarssl</AdditionalIncludeDirs>
+					<PreprocessorMacros></PreprocessorMacros>
+					<SimpleFileConditions>
+					</SimpleFileConditions>
+						<Patches>
+							<Patch xsi:type="InsertLines">
+							<FilePath>library\net.c</FilePath>
+							<AfterLine>#include "config.h"</AfterLine>
+							<InsertedLines>
+								<string>#if !LWIP_SOCKET</string>
+								<string>#error To use PolarSSL, please set LWIP_SOCKET to 1 in your lwipopts.h</string>
+								<string>#endif</string>
+							</InsertedLines>
+						</Patch>			
+
+						<Patch xsi:type="InsertLines">
+							<FilePath>library\bignum.c</FilePath>
+							<AfterLine>    while( c != 0 );</AfterLine>
+							<InsertedLines>
+								<string>    /*</string>
+								<string></string>
+								<string>		WARNING!</string>
+								<string>		If you get an 'r7 cannot be used in asm here' error, open the File Properties for this</string>
+								<string>		file and set C/C++->Optimization->Omit Frame Pointer to 'yes'</string>
+								<string></string>
+								<string>*/</string>								
+							</InsertedLines>
+						</Patch>			
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>library\x509parse.c</FilePath>
+							<OldLine>#include &lt;dirent.h&gt;</OldLine>
+							<NewLine>//#include &lt;dirent.h&gt;</NewLine>
+						</Patch>						
+					</Patches>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>FatFs</Name>
+			<ID>com.sysprogs.arm.stm32.FatFs</ID>
+               <ConfigurationFileTemplates>
+                    <ConfigurationFileTemplate>
+                        <SourcePath>$$SYS:BSP_ROOT$$/FatFs/src/ffconf_template.h</SourcePath>
+                        <TargetFileName>ffconf.h</TargetFileName>
+                        <ExpandMacros>false</ExpandMacros>
+                        </ConfigurationFileTemplate>
+					</ConfigurationFileTemplates>				  
+			<ProjectFolderName>FatFs</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>		
+			<CopyJobs>			
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.5.0\Middlewares\Third_Party\FatFs</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FatFs/src;$$SYS:BSP_ROOT$$/STM32F7xxxx/BSP/STM32756G_EVAL</AdditionalIncludeDirs>
+					<PreprocessorMacros></PreprocessorMacros>
+					<SimpleFileConditions>
+						<string>src\\drivers\\sd_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.sd_d$$ == 1</string>
+						<string>src\\drivers\\sdram_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.sdram_d$$ == 1</string>
+						<string>src\\drivers\\sram_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.sram_d$$ == 1</string>
+						<string>src\\drivers\\usbh_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.usbh_d$$ == 1</string>
+					</SimpleFileConditions>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:RULES_DIR$$\\config</SourceFolder>
+					<FilesToCopy>ffconf.h</FilesToCopy>
+					<TargetFolder>BSP\ConfigTemplates</TargetFolder>
+					<ProjectInclusionMask>*.h</ProjectInclusionMask>				
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+				  	<Properties>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>SD Disc IO Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.sd_d</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>SDRAM Disc IO Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.sdram_d</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>SRAM Disc IO Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.sram_d</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+  					  <PropertyEntry xsi:type="Boolean">
+						<Name>USBH Disc IO Support</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.usbh_d</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+
+					<CollapsedByDefault>false</CollapsedByDefault>
+					</Properties>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+
+		</Framework>	
+		<Framework>
 					<!--LwIP -->
 			<Name>LwIP</Name>
 			<ID>com.sysprogs.arm.stm32.LwIP</ID>
@@ -251,20 +439,49 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.hal</string>
-			</RequiredFrameworks>		
+			</RequiredFrameworks>			
+			
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.4.0\Middlewares\Third_Party\LwIP</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.5.0\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/LwIP/src/include;$$SYS:BSP_ROOT$$/LwIP/system;$$SYS:BSP_ROOT$$/LwIP/src/include/ipv4</AdditionalIncludeDirs>
-					<PreprocessorMacros>LWIP_IPV4</PreprocessorMacros>
+					<PreprocessorMacros>LWIP_IPV4;LWIP_TIMEVAL_PRIVATE=0</PreprocessorMacros>
 					<SimpleFileConditions>
 						<string>system\\OS\\sys_arch.c: fw:com.sysprogs.arm.stm32.freertos</string>
+						<string>src\\netif\\ppp\\polarssl\\: $$com.sysprogs.bspoptions.stm32.lwip.pssl$$ == 1</string>
 					</SimpleFileConditions>
+						<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>src\include\lwip\sockets.h</FilePath>
+							<AfterLine>#endif /* LWIP_TIMEVAL_PRIVATE */</AfterLine>
+							<InsertedLines>
+								<string>#if LWIP_TIMEVAL_PRIVATE == 0 </string>
+								<string>#include  &lt;sys/types.h&gt;</string>
+								<string>#endif /* LWIP_TIMEVAL_PRIVATE */</string>															
+							</InsertedLines>
+						</Patch>											
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
+				<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+				  	<Properties>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>PolarSSL - LwIp</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.lwip.pssl</UniqueID>
+						<ValueForTrue>1</ValueForTrue>
+						<ValueForFalse>0</ValueForFalse>
+					  </PropertyEntry>
+					  
+					<CollapsedByDefault>false</CollapsedByDefault>
+					</Properties>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>	
 		</Framework>	
 		<Framework>
 			<Name>STM32 Utilities</Name>
@@ -276,7 +493,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.4.0\Utilities</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Utilities</SourceFolder>
 					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
 					<SimpleFileConditions>

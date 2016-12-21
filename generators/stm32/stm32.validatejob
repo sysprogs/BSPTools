@@ -2,7 +2,7 @@
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <ToolchainPath>[SysGCC-arm-eabi-5.3.0]</ToolchainPath>
     <BSPPath>$$JOBDIR$$\Output</BSPPath>
-	<DeviceRegex>.*</DeviceRegex>
+	<DeviceRegex>STM32.*</DeviceRegex>
 	<Samples>
 		 <TestedSample>
  			<Name>LEDBlink (HAL)</Name>
