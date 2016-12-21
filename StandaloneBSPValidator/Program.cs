@@ -812,7 +812,8 @@ namespace StandaloneBSPValidator
                                         }
                                     }
                                 }
-
+                            if (regset.UserFriendlyName.StartsWith("ARM Cortex M"))
+                                continue;
                             if (mcuDefinition.MCUName.StartsWith("MSP432"))
                             {
                                 if (regName.Contains("RESERVED"))
