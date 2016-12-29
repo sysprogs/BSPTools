@@ -45,18 +45,17 @@ static void initialize_wifi(void)
     
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config));
-    strcpy(wifi_config.ap.ssid, "$$com.sysprogs.esp32.http.ssid$$");
-    wifi_config.ap.ssid_len = strlen(wifi_config.ap.ssid);
+    strcpy((char *)wifi_config.ap.ssid, "$$com.sysprogs.esp32.http.ssid$$");
+    wifi_config.ap.ssid_len = strlen((char *)wifi_config.ap.ssid);
     wifi_config.ap.max_connection = 4;
     
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
-    asm("nop");
 }
 
 
-static const char szHeader[] = "HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n<html><body><h1>Hello, world</h1>You have requested the following URL: ";
+static const char szHeader[] = "HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n<html><body><h1>Hello, world</h1>Greetings from ESP32! You have requested the following URL: ";
 static const char szFooter[] = "</body></html>";
 
 void ServerTask(void *pvParameters)

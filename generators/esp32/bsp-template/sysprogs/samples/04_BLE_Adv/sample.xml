@@ -1,34 +1,14 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>HTTP Server</Name>
-	<Description>This project demonstrates a very basic HTTP server using the lwIP API under FreeRTOS.</Description>
+	<Name>BLE Advertisement</Name>
+	<Description>This project demonstrates basic Bluetooth LE functionality</Description>
 	<MCUFilterRegex>ESP32$</MCUFilterRegex>
 	<ConfigurableProperties>
-	<PropertyGroups>
-	<PropertyGroup>
-	  <Properties>
-		<PropertyEntry xsi:type="Integral">
-		  <Name>Subnet number (192.168.N.1)</Name>
-		  <UniqueID>com.sysprogs.esp32.http.subnet</UniqueID>
-		  <Description>Specifies the subnet number used by the demo</Description>
-		  <DefaultValue>123</DefaultValue>
-		  <MinValue>0</MinValue>
-		  <MaxValue>255</MaxValue>
-		</PropertyEntry>
-		<PropertyEntry xsi:type="String">
-		  <Name>WiFi Network Name</Name>
-		  <UniqueID>com.sysprogs.esp32.http.ssid</UniqueID>
-		  <Description>Specifies the wireless network name (SSID)</Description>
-		  <DefaultValue>ESP32_VisualGDB</DefaultValue>
-		</PropertyEntry>
-	  </Properties>
-	  <CollapsedByDefault>false</CollapsedByDefault>
-	</PropertyGroup>
-	</PropertyGroups>
 	</ConfigurableProperties>
 	<CLanguageStandard>gnu99</CLanguageStandard>
 	<CPPLanguageStandard>gnu++11</CPPLanguageStandard>
 	<RequiredFrameworks>
+		<string>com.sysprogs.esp32.idf.bt</string>
 		<string>com.sysprogs.esp32.idf.core</string>
 		<string>com.sysprogs.esp32.idf.expat</string>
 		<string>com.sysprogs.esp32.idf.nvs_flash</string>

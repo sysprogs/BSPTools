@@ -14,16 +14,18 @@
 		<string>com.sysprogs.esp32.idf.expat</string>
 		<string>com.sysprogs.esp32.idf.nvs_flash</string>
 		<string>com.sysprogs.esp32.idf.lwip</string>
-		<string>com.sysprogs.esp32.idf.bt</string>
+		<string>com.sysprogs.esp32.idf.newlib</string>
+		<string>com.sysprogs.esp32.idf.wpa_supplicant</string>
+		<string>com.sysprogs.esp32.idf.app_update</string>
 		<string>com.sysprogs.esp32.idf.driver</string>
+		<string>com.sysprogs.esp32.idf.ethernet</string>
 		<string>com.sysprogs.esp32.idf.freertos</string>
 		<string>com.sysprogs.esp32.idf.json</string>
 		<string>com.sysprogs.esp32.idf.log</string>
 		<string>com.sysprogs.esp32.idf.mbedtls</string>
-		<string>com.sysprogs.esp32.idf.nghttp</string>
 		<string>com.sysprogs.esp32.idf.spi_flash</string>
 		<string>com.sysprogs.esp32.idf.tcpip_adapter</string>
-		<string>com.sysprogs.esp32.idf.newlib</string>
+		<string>com.sysprogs.esp32.idf.ulp</string>
 		<string>com.sysprogs.esp32.idf.vfs</string>
 	</RequiredFrameworks>
 </EmbeddedProjectSample>

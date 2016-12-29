@@ -30,6 +30,5 @@ extern "C"
 void app_main()
 {
     nvs_flash_init();
-    system_init();
     xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
 }

@@ -216,6 +216,9 @@ namespace BSPGenerationTools
         public bool AlreadyCopied;  //The files have been copied (and patched) by some previous jobs. This job is defined only to add the files to the project.
         public string[] GuardedFiles;
 
+        public string AdditionalProjectFiles;
+
+
         public Patch[] Patches;
 
         class ParsedCondition
@@ -343,6 +346,15 @@ namespace BSPGenerationTools
                 }
             }
 
+            if (AdditionalProjectFiles != null)
+            {
+                foreach(var spec in AdditionalProjectFiles.Split(';'))
+                {
+                    string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + spec;
+                    projectFiles.Add(encodedPath);
+                }
+            }
+
             var unusedConditions = conditions?.Where(c => c.UseCount == 0)?.ToArray();
             if ((unusedConditions?.Length ?? 0) != 0)
                 throw new Exception(string.Format("Found {0} unused conditions. Please recheck your rules.", unusedConditions.Length));
@@ -350,14 +362,17 @@ namespace BSPGenerationTools
             if (Patches != null)
                 foreach(var p in Patches)
                 {
-                    List<string> allLines = File.ReadAllLines(Path.Combine(absTarget, p.FilePath)).ToList();
-                    p.Apply(allLines);
+                    foreach (var fn in p.FilePath.Split(';'))
+                    {
+                        List<string> allLines = File.ReadAllLines(Path.Combine(absTarget, fn)).ToList();
+                        p.Apply(allLines);
 
-                    string targetPath = p.TargetPath;
-                    if (targetPath == null)
-                        targetPath = p.FilePath;
-                    Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(absTarget, targetPath)));
-                    File.WriteAllLines(Path.Combine(absTarget, targetPath), allLines);
+                        string targetPath = p.TargetPath;
+                        if (targetPath == null)
+                            targetPath = fn;
+                        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(absTarget, targetPath)));
+                        File.WriteAllLines(Path.Combine(absTarget, targetPath), allLines);
+                    }
                 }
 
             if (GuardedFiles != null)

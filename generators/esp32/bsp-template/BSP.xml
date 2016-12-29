@@ -125,6 +125,7 @@
 	<string>sysprogs/samples/01_Hello_world</string>
 	<string>sysprogs/samples/02_LEDBlink</string>
 	<string>sysprogs/samples/03_HTTPServer</string>
+	<string>sysprogs/samples/04_BLE_Adv</string>
   </Examples>
   <ConditionalFlags>
     <ConditionalToolFlags>
@@ -155,7 +156,39 @@
 			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/libhal.a</string>
 		</AdditionalLinkerInputs>
 		<LDFLAGS></LDFLAGS>
+      </Flags>
+    </ConditionalToolFlags>
+    <ConditionalToolFlags>
+	  <FlagCondition xsi:type="And">
+		<Arguments>
+			<Condition xsi:type="Not">
+				  <Argument xsi:type="ReferencesFramework">
+					<FrameworkID>com.sysprogs.esp32.idf.bt</FrameworkID>
+				  </Argument>
+			</Condition>
+			<Condition xsi:type="Equals">
+				<Expression>$$com.sysprogs.esp32.load_flash$$</Expression>
+				<ExpectedValue>1</ExpectedValue>
+				<IgnoreCase>false</IgnoreCase>
+			</Condition>
+		</Arguments>
+	  </FlagCondition>
+      <Flags>
         <LinkerScript>$$SYS:BSP_ROOT$$/sysprogs/esp32-idf-default.ld</LinkerScript>
+      </Flags>
+    </ConditionalToolFlags>
+    <ConditionalToolFlags>
+	  <FlagCondition xsi:type="ReferencesFramework">
+		<FrameworkID>com.sysprogs.esp32.idf.bt</FrameworkID>
+	  </FlagCondition>
+      <Flags>
+        <AdditionalLibraries>
+			<string>btdm_app</string>
+        </AdditionalLibraries>
+		<AdditionalLibraryDirectories>
+			<string>$$SYS:BSP_ROOT$$/esp-idf/components/bt/lib</string>
+		</AdditionalLibraryDirectories>
+        <LinkerScript>$$SYS:BSP_ROOT$$/sysprogs/esp32-idf-bt.ld</LinkerScript>
       </Flags>
     </ConditionalToolFlags>
     <ConditionalToolFlags>
