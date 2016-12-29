@@ -278,6 +278,7 @@ namespace StandaloneBSPValidator
         private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, bool pSoftFPU, VendorSampleDirectory sampleDir)
         {
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
+            configuredMCU.Configuration["com.sysprogs.toolchainoptions.arm.libnosys"] = "--specs=nosys.specs";
             if (configuredMCU.ExpandedMCU.FLASHSize == 0)
             {
                 configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";

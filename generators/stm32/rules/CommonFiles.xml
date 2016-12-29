@@ -471,12 +471,11 @@
 				  <PropertyGroup>
 				  	<Properties>
 					  <PropertyEntry xsi:type="Boolean">
-						<Name>PolarSSL - LwIp</Name>
+						<Name>Include PPP support via PolarSSL</Name>
 						<UniqueID>com.sysprogs.bspoptions.stm32.lwip.pssl</UniqueID>
 						<ValueForTrue>1</ValueForTrue>
 						<ValueForFalse>0</ValueForFalse>
 					  </PropertyEntry>
-					  
 					<CollapsedByDefault>false</CollapsedByDefault>
 					</Properties>
 				  </PropertyGroup>

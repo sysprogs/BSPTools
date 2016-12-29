@@ -243,26 +243,25 @@ namespace GeneratorSampleStm32
         private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile)
         {
             ConstructedVendorSampleDirectory sampleDir;
-            if (!File.Exists(sampleListFile) && !File.Exists(sampleListFile + ".gz"))
-            {
-                if (Directory.Exists(outputDir))
-                    Directory.Delete(outputDir, true);
-                Directory.CreateDirectory(outputDir);
-
-                var samples = ParseVendorSamples(SDKdir);
-                sampleDir = new ConstructedVendorSampleDirectory
-                {
-                    SourceDirectory = SDKdir,
-                    Samples = samples.ToArray(),
-                };
-
-                XmlTools.SaveObject(sampleDir, sampleListFile);
-            }
-            else
+            if (File.Exists(sampleListFile) || File.Exists(sampleListFile + ".gz"))
             {
                 sampleDir = XmlTools.LoadObject<ConstructedVendorSampleDirectory>(sampleListFile);
+                if (sampleDir.SourceDirectory == SDKdir)
+                    return sampleDir;
             }
 
+            if (Directory.Exists(outputDir))
+                Directory.Delete(outputDir, true);
+            Directory.CreateDirectory(outputDir);
+
+            var samples = ParseVendorSamples(SDKdir);
+            sampleDir = new ConstructedVendorSampleDirectory
+            {
+                SourceDirectory = SDKdir,
+                Samples = samples.ToArray(),
+            };
+
+            XmlTools.SaveObject(sampleDir, sampleListFile);
             return sampleDir;
         }
 

@@ -41,7 +41,7 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
-					<PreprocessorMacros>stm32_$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
+					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32w1????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<Patches>
 						<Patch xsi:type="InsertLines">
