@@ -141,6 +141,35 @@
 			</CopyJobs>
 		</Framework>	
 		<Framework>
+			<Name>mbed TLS</Name>
+			<ID>com.sysprogs.esp32.idf.mbedtls</ID>
+			<ProjectFolderName>mbed TLS</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf\components\mbedtls</SourceFolder>
+					<TargetFolder>esp-idf\components\mbedtls</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-test\*;-library\net.c;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/mbedtls/include</AdditionalIncludeDirs>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AlreadyCopied>true</AlreadyCopied>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>port\net.c</FilePath>
+							<OldLine>#include &lt;sys/socket.h&gt;</OldLine>
+							<NewLine>#include &lt;posix/sys/socket.h&gt;</NewLine>
+						</Patch>					
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>port\net.c</FilePath>
+							<OldLine>#include &lt;netdb.h&gt;</OldLine>
+							<NewLine>#include &lt;lwip/netdb.h&gt;</NewLine>
+						</Patch>					
+					</Patches>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>	
+		<Framework>
 			<Name>WPA Support</Name>
 			<ID>com.sysprogs.esp32.idf.wpa_supplicant</ID>
 			<ProjectFolderName>WPA</ProjectFolderName>
@@ -283,12 +312,12 @@
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
-			</ConfigurableProperties>			
+			</ConfigurableProperties>	
 		</Framework>	
 		</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
-			<Range>app_update:App Update Support;driver:Drivers;ethernet:Ethernet;freertos:FreeRTOS;json:JSON;log:Logging Support;mbedtls:mbed TLSnghttp:ngHTTP;spi_flash:SPI FLASH;tcpip_adapter:TCP/IP Adapter;ulp:ULP Support;vfs:VFS Support</Range>
+			<Range>app_update:App Update Support;driver:Drivers;ethernet:Ethernet;freertos:FreeRTOS;json:JSON;log:Logging Support;nghttp:ngHTTP;spi_flash:SPI FLASH;tcpip_adapter:TCP/IP Adapter;ulp:ULP Support;vfs:VFS Support</Range>
 			<ArgumentSeparator>:</ArgumentSeparator>
 			<Separator>;</Separator>
 			<Template>
