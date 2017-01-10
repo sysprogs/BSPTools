@@ -257,14 +257,20 @@ int VCP_read(void *pBuffer, int size)
 	return todo;
 }
 
+#ifdef USE_USB_HS
+enum { kMaxOutPacketSize = CDC_DATA_HS_OUT_PACKET_SIZE };
+#else
+enum { kMaxOutPacketSize = CDC_DATA_FS_OUT_PACKET_SIZE };
+#endif
+
 int VCP_write(const void *pBuffer, int size)
 {
-	if (size > CDC_DATA_HS_OUT_PACKET_SIZE)
+	if (size > kMaxOutPacketSize)
 	{
 		int offset;
 		for (offset = 0; offset < size; offset++)
 		{
-			int todo = MIN(CDC_DATA_HS_OUT_PACKET_SIZE,
+			int todo = MIN(kMaxOutPacketSize,
 				size - offset);
 			int done = VCP_write(((char *)pBuffer) + offset, todo);
 			if (done != todo)

@@ -39,12 +39,6 @@
 		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
 		  <DefaultValue>500</DefaultValue>
 		</PropertyEntry>
-		<PropertyEntry xsi:type="Integral">
-		  <Name>Crystal Frequency</Name>
-		  <UniqueID>com.sysprogs.examples.ledblink.OSCILLATOR_FREQ</UniqueID>
-		  <Description>Specifies the frequency in Hz of the crystal oscillator on your board</Description>
-		  <DefaultValue>8000000</DefaultValue>
-		</PropertyEntry>
 	  </Properties>
 	  <CollapsedByDefault>false</CollapsedByDefault>
 	</PropertyGroup>
