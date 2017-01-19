@@ -379,7 +379,7 @@
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FatFs/src;$$SYS:BSP_ROOT$$/STM32F7xxxx/BSP/STM32756G_EVAL</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FatFs/src;$$SYS:BSP_ROOT$$/FatFs/src/drivers</AdditionalIncludeDirs>
 					<PreprocessorMacros></PreprocessorMacros>
 					<SimpleFileConditions>
 						<string>src\\drivers\\sd_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.sd_d$$ == 1</string>
