@@ -265,14 +265,14 @@ enum { kMaxOutPacketSize = CDC_DATA_FS_OUT_PACKET_SIZE };
 
 int VCP_write(const void *pBuffer, int size)
 {
-	if (size > kMaxOutPacketSize)
+    if (size > kMaxOutPacketSize)
 	{
 		int offset;
-		for (offset = 0; offset < size; offset++)
+    	int done = 0;
+    	for (offset = 0; offset < size; offset += done)
 		{
-			int todo = MIN(kMaxOutPacketSize,
-				size - offset);
-			int done = VCP_write(((char *)pBuffer) + offset, todo);
+    		int todo = MIN(kMaxOutPacketSize, size - offset);
+			done = VCP_write(((char *)pBuffer) + offset, todo);
 			if (done != todo)
 				return offset + done;
 		}
