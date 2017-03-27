@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <ToolchainPath>[SysGCC-arm-eabi-6.2.0]</ToolchainPath>
+    <BSPPath>$$JOBDIR$$\Output</BSPPath>
+	<DeviceRegex>STM32.*</DeviceRegex>
+	<Samples>
+		 <TestedSample>
+ 			<Name>LEDBlink (FreeRTOS)</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<DeviceRegex>STM32F407VG|STM32F746NG|STM32F411RE</DeviceRegex>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-FreeRTOS</TestDirSuffix>
+			<SampleConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
+						<Value>GPIOA</Value>
+					</KeyValue>
+				</Entries>
+			</SampleConfiguration>
+		 </TestedSample> 
+		 <TestedSample>
+ 			<Name>STM32F207ZG-Nucleo HTTP Server</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<DeviceRegex>STM32F207ZG</DeviceRegex>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-Netconn</TestDirSuffix>
+		 </TestedSample>
+		 <TestedSample>
+ 			<Name>STM32F429ZI-Nucleo HTTP Server</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<DeviceRegex>STM32F429ZI</DeviceRegex>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-Netconn</TestDirSuffix>
+		 </TestedSample>
+		 <TestedSample>
+ 			<Name>STM32F7-Discovery HTTP Server</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<DeviceRegex>STM32F746NG</DeviceRegex>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-Netconn</TestDirSuffix>
+		 </TestedSample>
+		 <TestedSample>
+ 			<Name>STM32F7-Discovery LCD Demo</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<DeviceRegex>STM32F746NG</DeviceRegex>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-LCD</TestDirSuffix>
+		 </TestedSample>
+		 <TestedSample>
+ 			<Name>USB Communications Device</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<DeviceRegex>STM32(F042C6|F102R8|F205RG|F302CC|F407VG|F746NG|L031K6|L151V8|L431RC)</DeviceRegex>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-CDC</TestDirSuffix>
+		 </TestedSample>
+	 </Samples>
+	<DeviceParameterSets>
+		<DeviceParameterSet>
+			<DeviceRegex>.*</DeviceRegex>
+			<MCUConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.toolchainoptions.arm.libnosys</Key>
+						<Value>--specs=nosys.specs</Value>
+					</KeyValue>
+				</Entries>
+			</MCUConfiguration>	
+		</DeviceParameterSet>
+	</DeviceParameterSets>
+</TestJob>

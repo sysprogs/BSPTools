@@ -18,6 +18,7 @@ namespace StandaloneBSPValidator
     {
         public string Name;
         public string TestDirSuffix;
+        public string DeviceRegex;
         public bool SkipIfNotFound;
         public bool ValidateRegisters;
         public PropertyDictionary2 SampleConfiguration;
@@ -129,7 +130,7 @@ namespace StandaloneBSPValidator
         {
             Succeeded,
             Failed,
-            Skipped
+            Skipped,
         }
 
         static Regex RgMainMap = new Regex("^[ \t]+0x[0-9a-fA-F]+[ \t]+main$");
@@ -707,7 +708,15 @@ namespace StandaloneBSPValidator
                 {
                     r.BeginSample(sample.Name);
                     int cnt = 0, failed = 0, succeeded = 0;
-                    foreach (var mcu in MCUs)
+
+                    var effectiveMCUs = MCUs;
+                    if (!string.IsNullOrEmpty(sample.DeviceRegex))
+                    {
+                        Regex rgDevice = new Regex(sample.DeviceRegex);
+                        effectiveMCUs = MCUs.Where(mcu => rgDevice.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
+                    }
+
+                    foreach (var mcu in effectiveMCUs)
                     {
                         if (string.IsNullOrEmpty(mcu.ExpandedMCU.ID))
                             throw new Exception("Invalid MCU ID!");
@@ -726,10 +735,10 @@ namespace StandaloneBSPValidator
                         r.LogTestResult(mcu.ExpandedMCU.ID, result);
 
                         cnt++;
-                        Console.WriteLine("{0}: {1}% done ({2}/{3} devices, {4} failed)", sample.Name, (cnt * 100) / MCUs.Length, cnt, MCUs.Length, failed);
+                        Console.WriteLine("{0}: {1}% done ({2}/{3} devices, {4} failed)", sample.Name, (cnt * 100) / effectiveMCUs.Length, cnt, effectiveMCUs.Length, failed);
                     }
 
-                    if (succeeded == 0)
+                    if ((succeeded + failed) == 0)
                         throw new Exception("Not a single MCU supports " + sample.Name);
                     r.EndSample();
 
