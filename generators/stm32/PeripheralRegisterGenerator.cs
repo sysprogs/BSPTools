@@ -1074,14 +1074,16 @@ namespace stm32_bsp_generator
                     || line.Contains("/* USB device FS") //currently not supported
                     || line.Contains("/* Legacy define") //currently not supported
                     || line.Contains("#define ADC1_2_COMMON       ADC12_COMMON") //currently not supported
+                    || (line.Contains("#define ADC") && line.Contains("ADC123_COMMON")) //currently not supported
                     || (line.Contains("#define ADC3_4_COMMON") && line.Contains("ADC34_COMMON")) //currently not supported
                     || (line.Contains("#define ADC") && line.Contains("ADC1_COMMON")) //currently not supported
                     || line.StartsWith("#define COMP12_COMMON       ((COMP_Common_TypeDef *) COMP_BASE) ")
-                     || (line.StartsWith("#define OPAMP") && line.Contains("((OPAMP_Common_TypeDef *) OPAMP"))
-                       || line.StartsWith("/* Aliases to keep compatibility after ")
+                    || line.StartsWith("#define ADC123_COMMON       ((ADC_Common_TypeDef *) ADC_BASE)") //2017
+                    || (line.StartsWith("#define OPAMP") && line.Contains("((OPAMP_Common_TypeDef *) OPAMP"))
+                    || line.StartsWith("/* Aliases to keep compatibility after ")
                     || (line.StartsWith("#define DFSDM_Channel") && line.Contains("DFSDM1_Channel"))
-                   || (line.StartsWith("#define DFSDM_Filter") && line.Contains(" DFSDM1_Filter"))
-                   || (line.StartsWith("#define DAC ") && line.Contains(" DAC1"))
+                    || (line.StartsWith("#define DFSDM_Filter") && line.Contains(" DFSDM1_Filter"))
+                    || (line.StartsWith("#define DAC ") && line.Contains(" DAC1"))
 
                         )
                     continue;
@@ -1107,7 +1109,8 @@ namespace stm32_bsp_generator
                     continue;
                 }
 
-                throw new Exception("Unrecognized peripheral declaration line!");
+                Console.WriteLine(" throw new Exception(Unrecognized peripheral declaration line! >:"+line);
+
             }
 
             return names;
@@ -1142,6 +1145,7 @@ namespace stm32_bsp_generator
                     line.StartsWith("#define USB_OTG_HOST_CHANNEL_SIZE") ||
                     line.StartsWith("#define USB_OTG_FIFO_SIZE") ||
                     line.StartsWith("#define FLASH_END") ||
+                    line.StartsWith("#define FLASH_OTP_END") ||
                     line.StartsWith("#define CCMDATARAM_END ") ||
                     line.StartsWith("#define DATA_EEPROM")
                     || line.StartsWith("#define FLASH_EEPROM_END")
@@ -1343,6 +1347,7 @@ namespace stm32_bsp_generator
                         && !line.Contains("USB_FNR")
                         && !line.Contains("USB_PMAADDR")
                         && !line.Contains("define HRTIM_")  //Not much formal system in comments to parse. Currently ignoring.
+                        && !line.Contains("_RST_VALUE")
                         )
                     {
                         if (result.Count > 0 && !insideIgnoredBlock)
@@ -1382,7 +1387,10 @@ namespace stm32_bsp_generator
 
                     foreach (var patch in cfg.SubregisterLinePatches)
                         if (patch.Apply(ref line))
+                        {
+                          //  Console.WriteLine("\r\n patch SubregisterLinePatches " + line);
                             break;
+                        }
                     string subreg_name = "";
                     string reg_type = "";
                     string address_offset = "";
@@ -1415,7 +1423,7 @@ namespace stm32_bsp_generator
                                     if (Regex.IsMatch(m.Groups[2].Value, "(0x[0-9A-FU]+)"))
                                        aDefPosDict.Add(m.Groups[1].Value, (uint)ParseHex(m.Groups[2].Value));
                                     else {
-                                            Console.WriteLine("No Hex value:{0}, : {1}", m.Groups[1].Value, m.Groups[2].Value);
+                                        //    Console.WriteLine("No Hex value:{0}, : {1}", m.Groups[1].Value, m.Groups[2].Value);
                                            continue;
                                        } 
                             }

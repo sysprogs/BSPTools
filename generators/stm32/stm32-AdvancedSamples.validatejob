@@ -50,7 +50,7 @@
 		 <TestedSample>
  			<Name>USB Communications Device</Name>
 			<SkipIfNotFound>true</SkipIfNotFound>
-			<DeviceRegex>STM32(F042C6|F102R8|F205RG|F302CC|F407VG|F746NG|L031K6|L151V8|L431RC)</DeviceRegex>
+			<DeviceRegex>STM32(F042C6|F102R8|F205RG|F302CC|F407VG|F746NG|L031K6|L151V8|L475VG)</DeviceRegex>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-CDC</TestDirSuffix>
 		 </TestedSample>

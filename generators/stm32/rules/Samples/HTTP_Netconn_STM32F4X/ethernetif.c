@@ -28,7 +28,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "lwip/opt.h"
-#include "lwip/lwip_timers.h"
+#include "lwip/timeouts.h"
 #include "netif/etharp.h"
 #include "ethernetif.h"
 #include <string.h>
@@ -469,5 +469,8 @@ err_t ethernetif_init(struct netif *netif)
 
   return ERR_OK;
 }
-
+u32_t sys_now(void)
+{
+	return 0;
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

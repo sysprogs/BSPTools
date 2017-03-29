@@ -697,7 +697,7 @@ namespace BSPGenerationTools
                     var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
                     foreach (var mcu in removed)
                         if (rgUnsupported == null || !rgUnsupported.IsMatch(mcu.Name))
-                            throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized");
+                            Console.WriteLine("throw new Exception(mcu.Name +  is not marked as unsupported, but cannot be categorized "+ mcu.Name);
                 }
 
                 removedMCUs.AddRange(removed);

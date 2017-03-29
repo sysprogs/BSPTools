@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.15.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -95,7 +95,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.15.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
@@ -169,7 +169,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.15.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -184,6 +184,7 @@
 						<string>Source\\portable\\GCC\\ARM_CM0\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM0</string>
 						<string>Source\\portable\\GCC\\ARM_CM3\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM3</string>
 						<string>Source\\portable\\GCC\\ARM_CM3_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM3_MPU</string>
+						<string>Source\\portable\\GCC\\ARM_CM4_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4_MPU</string>
 						<string>Source\\portable\\GCC\\ARM_CM4F\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4F</string>
 						<string>Source\\portable\\GCC\\ARM_CM7\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7/r0p1</string>
 					</SimpleFileConditions>
@@ -225,6 +226,7 @@
 							<Suggestion><InternalValue>CM0</InternalValue><UserFriendlyName>ARM Cortex M0</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>CM3</InternalValue><UserFriendlyName>ARM Cortex M3 or M4 with Software FP</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>CM3_MPU</InternalValue><UserFriendlyName>ARM Cortex M3 with MPU</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM4_MPU</InternalValue><UserFriendlyName>ARM Cortex M4 with MPU</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>CM4F</InternalValue><UserFriendlyName>ARM Cortex M4 with Hardware FP</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>CM7/r0p1</InternalValue><UserFriendlyName>ARM Cortex M7</UserFriendlyName></Suggestion>
 						  </SuggestionList>
@@ -257,16 +259,16 @@
                         <TargetFileName>jmorecfg.h</TargetFileName>
                         <ExpandMacros>false</ExpandMacros>
                  </ConfigurationFileTemplate>
-                <ConfigurationFileTemplate>
+                <!--jan17 ConfigurationFileTemplate>
                         <SourcePath>$$SYS:BSP_ROOT$$/LibJPEG/include/jdatasrc_conf_template.h</SourcePath>
                         <TargetFileName>jdatasrc_conf.h</TargetFileName>
                         <ExpandMacros>false</ExpandMacros>
-                 </ConfigurationFileTemplate>
-				  <ConfigurationFileTemplate>
+                 </ConfigurationFileTemplate-->
+				  <!--jan17 ConfigurationFileTemplate>
                        <SourcePath>$$SYS:BSP_ROOT$$/LibJPEG/source/jdatasrc_conf_template.c</SourcePath>
                         <TargetFileName>jdatasrc_conf.c</TargetFileName>
                         <ExpandMacros>false</ExpandMacros>
-                 </ConfigurationFileTemplate>
+                 </ConfigurationFileTemplate-->
 			</ConfigurationFileTemplates>				
 			<ProjectFolderName>LibJPEG</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
@@ -276,7 +278,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.5.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.6.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt;*.bmp;*.jpg</FilesToCopy>
 					<ProjectInclusionMask>-*jpegtran.c;-*jmemmac.c;-*jmemdos.c;-*jmemname.c;-*jmemansi.c;-*jdatasrc_conf_template.c;source\j*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -285,11 +287,11 @@
 					<SimpleFileConditions>
 					</SimpleFileConditions>
 					<Patches>
-						<Patch xsi:type="ReplaceLine">
+						<!--jan17 Patch xsi:type="ReplaceLine">
 							<FilePath>source\jdatasrc_conf_template.c</FilePath>
 							<OldLine>#include "jdatasrc_conf_template.h"</OldLine>
 							<NewLine>#include "jdatasrc_conf.h"</NewLine>
-						</Patch>
+						</Patch-->
 					</Patches>
 				</CopyJob>
 				<CopyJob>
@@ -317,7 +319,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Middlewares\Third_Party\PolarSSL</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.4.0\Middlewares\Third_Party\PolarSSL</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-programs\*;-tests\*;-visualc\*;-scripts\*;-doxygen\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -375,7 +377,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.5.0\Middlewares\Third_Party\FatFs</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.6.0\Middlewares\Third_Party\FatFs</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -392,6 +394,7 @@
 					<SourceFolder>$$BSPGEN:RULES_DIR$$\\config</SourceFolder>
 					<FilesToCopy>ffconf.h</FilesToCopy>
 					<TargetFolder>BSP\ConfigTemplates</TargetFolder>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32F7xxxx/BSP/STM32756G_EVAL</AdditionalIncludeDirs>
 					<ProjectInclusionMask>*.h</ProjectInclusionMask>				
 				</CopyJob>
 			</CopyJobs>
@@ -443,9 +446,9 @@
 			
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.5.0\Middlewares\Third_Party\LwIP</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.6.0\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
-					<ProjectInclusionMask>system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
+					<ProjectInclusionMask>-doc\*;system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/LwIP/src/include;$$SYS:BSP_ROOT$$/LwIP/system;$$SYS:BSP_ROOT$$/LwIP/src/include/ipv4</AdditionalIncludeDirs>
 					<PreprocessorMacros>LWIP_IPV4;LWIP_TIMEVAL_PRIVATE=0</PreprocessorMacros>
@@ -492,7 +495,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.14.0\Utilities</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.15.0\Utilities</SourceFolder>
 					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
 					<SimpleFileConditions>

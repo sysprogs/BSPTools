@@ -60,6 +60,9 @@
 #define IP_FRAG                 0
 #define ARP_QUEUEING            0
 
+#define LWIP_COMPAT_MUTEX  1
+#define LWIP_COMPAT_MUTEX_ALLOWED
+
 /**
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
  * use lwIP facilities.
@@ -146,7 +149,7 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* ---------- Statistics options ---------- */
 #define LWIP_STATS 0
-#define LWIP_PROVIDE_ERRNO 1
+
 
 /* ---------- link callback options ---------- */
 /* LWIP_NETIF_LINK_CALLBACK==1: Support a callback function from an interface

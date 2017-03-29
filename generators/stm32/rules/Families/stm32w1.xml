@@ -3,8 +3,8 @@
 	<Name>STM32W1</Name>
 	<DeviceRegex>^STM32W1.*</DeviceRegex>
 	<FamilySubdirectory>STM32W1xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\CMSIS\Device\ST\STM32W108xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\CMSIS\Device\ST\STM32W108xx\Source\Templates\gcc_ride7</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32W108xx_SimpleMAC_V2.0.1\Libraries\CMSIS\Device\ST\STM32W108xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32W108xx_SimpleMAC_V2.0.1\Libraries\CMSIS\Device\ST\STM32W108xx\Source\Templates\gcc_ride7</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.legacy_device_family</VariableName>
@@ -34,11 +34,11 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\STM32W108xx_StdPeriph_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32W108xx_SimpleMAC_V2.0.1\Libraries\STM32W108xx_StdPeriph_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32W108xx_StdPeriph_Lib_V1.0.1\Libraries\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32W108xx_SimpleMAC_V2.0.1\Libraries\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>

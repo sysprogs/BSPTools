@@ -229,10 +229,10 @@ namespace stm32_bsp_generator
             var errorCnt = errors.ErrorCount;
             if (errorCnt != 0)
             {
-                throw new Exception("Found " + errorCnt + " errors while parsing headers");
+               // throw new Exception("Found " + errorCnt + " errors while parsing headers");
 
-                //   for (int i = 0; i < errors.ErrorCount;i++)
-                //     Console.WriteLine("\n er  " + i + "  -  " + errors.DetalErrors(i));
+                   for (int i = 0; i < errors.ErrorCount;i++)
+                     Console.WriteLine("\n er  " + i + "  -  " + errors.DetalErrors(i));
 
             }
 
