@@ -8,6 +8,7 @@ import os
 import re
 import sys
 import xml.etree.ElementTree as ElementTree
+from subprocess import call;
 from os.path import join, dirname, basename
 from xml.dom import minidom
 
@@ -16,10 +17,12 @@ import tools.config
 import tools.libraries
 import tools.project
 import tools.toolchains
+import tempfile;
 from tools.export import EXPORTERS
 from tools.libraries import LIBRARIES
 from tools.paths import MBED_HEADER
 from tools.settings import ROOT
+import bootloader_scanner
 
 # FILE_ROOT = abspath(join(dirname(tools.project.__file__), ".."))
 # sys.path.insert(0, FILE_ROOT)
@@ -100,51 +103,31 @@ def add_file_condition(lib_builder, fw_node, cond_list, file_regex, condition_id
         condition_node.append(make_node("ExpectedValue", "1"))
         file_condition_node.append(make_node("FilePath", s))
 
-
-def parse_mem_size(size_str):
-    size_reg_ex = re.compile("[( ]*([0-9a-fA-FxKkMm]+) *([+-]) *([0-9a-fA-FxKkMm]+)[) ]*")
-    size_str = size_str.strip('()\n')
-
-    match = size_reg_ex.match(size_str)
-    if match is not None:
-        if match.group(2) == '+':
-            return parse_mem_size(match.group(1)) + parse_mem_size(match.group(3))
-        else:
-            return parse_mem_size(match.group(1)) - parse_mem_size(match.group(3))
-
-    multiplier = 1
-    if size_str[-1].upper() == 'K':
-        multiplier = 1024
-        size_str = size_str[:-1]
-    elif size_str[-1].upper() == 'M':
-        multiplier = 1024 * 1024
-        size_str = size_str[:-1]
-
-    if size_str[0:2] == "0x":
-        return int(size_str, 16) * multiplier
-    else:
-        return int(size_str, 10) * multiplier
-
-
 def parse_linker_script(lds_file):
-    inside_memory_block = False
-    rg_mem_def = re.compile(' *([^ ]+) *\([^()]+\) *: *ORIGIN *= *([^ ,]+), *LENGTH *= *([^/]*)($|/\\*)')
+	emptyFile = tempfile.tempdir + "/0.c"
+	open(emptyFile, 'a').close()
+	mapFile = tempfile.tempdir + "/tmp.map"
+	call(["arm-eabi-gcc", "-T" + lds_file.replace('\\', '/'), emptyFile.replace('\\', '/'), "-Wl,-Map," + mapFile.replace('\\', '/')])
+	inSection = False
+	result = []
+	rgMemoryLine = re.compile("^([^ \t]+)[ \t]+0x([0-9a-fA-F]+)[ \t]+0x([0-9a-fA-F]+)");
+	with open(mapFile) as f:
+		for line in f.readlines():
+			if "Memory Configuration" in line:
+				inSection = True
+			elif inSection:
+				m = rgMemoryLine.search(line)
+				if m:
+				    name = m.group(1)
+				    if name != "*default*":
+				        result.append(MemoryDefinition(name, int(m.group(2),16), int(m.group(3), 16)))
+				elif "Linker script and memory map" in line:
+					break
+	return result
 
-    result = []
-    with open(lds_file) as f:
-        for line in f:
-            if not inside_memory_block and line.strip() == "MEMORY":
-                inside_memory_block = True
-            elif inside_memory_block and line.strip() == "}":
-                break
-            elif inside_memory_block:
-                match = rg_mem_def.match(line)
-                if match is not None:
-                    mem = MemoryDefinition(match.group(1), parse_mem_size(match.group(2)),
-                                           parse_mem_size(match.group(3)))
-                    if mem.Size != 0:
-                        result.append(mem)
-    return result
+	os.remove(emptyFile)
+	os.remove(mapFile)
+
 
 script_path = join(dirname(__file__))
 
@@ -247,6 +230,7 @@ def main():
     src_dir_to_lib_map = {}
     resources_map = {}
     lib_builder_map = {}
+    hexFileMap = open(join(ROOT, 'hexfiles.txt'), "w")
 
     library_names = {
         'cpputest': "CppUTest",
@@ -271,13 +255,19 @@ def main():
     for target in Exporter.TARGETS:
         print('\t' + target + '...')
 
-        toolchain = ba.prepare_toolchain(ROOT, target, 'GCC_ARM')
+        toolchain = ba.prepare_toolchain(ROOT, "", target, 'GCC_ARM')
 
         # Scan src_path for config files
         res = toolchain.scan_resources(ROOT, exclude_paths=[os.path.join(ROOT, 'rtos'), os.path.join(ROOT, 'features')])
         res.toolchain = toolchain
         # for path in src_paths[1:]:
         #     resources.add(toolchain.scan_resources(path))
+
+        hexFiles = bootloader_scanner.LocateHexFiles(toolchain, res)
+        if hexFiles:
+            hexFileMap.write(target + "\n")
+            hexFileMap.writelines(["\t" + f + "\n" for f in hexFiles])
+            hexFileMap.flush()
 
         res.headers += [MBED_HEADER, ROOT]
         # res += toolchain.scan_resources(os.path.join(ROOT, 'events'))
@@ -309,7 +299,7 @@ def main():
             if isinstance(sources, str):
                 sources = [sources]
             for src in sources:
-                lib_toolchain = ba.prepare_toolchain(ROOT, target, 'GCC_ARM')
+                lib_toolchain = ba.prepare_toolchain(ROOT, "", target, 'GCC_ARM')
                 # ignore rtx while scanning rtos
                 exclude_paths = [os.path.join(ROOT, 'rtos', 'rtx')] if lib['id'] != 'rtos' else []
                 lib_res = lib_toolchain.scan_resources(src, exclude_paths=exclude_paths)
@@ -330,7 +320,7 @@ def main():
 
         # Add specific features as a library
         features_path = os.path.join(ROOT, 'features')
-        features_toolchain = ba.prepare_toolchain(features_path, target, 'GCC_ARM')
+        features_toolchain = ba.prepare_toolchain(features_path, "", target, 'GCC_ARM')
         features_resources = features_toolchain.scan_resources(features_path)
         features_toolchain.config.load_resources(features_resources)
         new_macros = features_toolchain.config.config_to_macros(features_toolchain.config.get_config_data())
@@ -561,6 +551,7 @@ def main():
     xml_str = '\n'.join([line for line in root_node.toprettyxml(indent=' '*2).split('\n') if line.strip()])
     with open(join(ROOT, 'BSP.xml'), 'w') as xml_file:
         xml_file.write(xml_str.encode('utf-8'))
+
 
 
 main()
