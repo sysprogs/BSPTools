@@ -6,6 +6,9 @@ def LocateNordicSoftdeviceAndBootloader(t_self, resources):
             if hexf.find(softdevice_and_offset_entry['name']) != -1:
                 result.append(hexf)
 
+            if len(result) == 0:
+                continue
+
             if t_self.target.MERGE_BOOTLOADER is True:
                 for hexf in resources.hex_files:
                     if hexf.find(t_self.target.OVERRIDE_BOOTLOADER_FILENAME) != -1:
