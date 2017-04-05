@@ -194,7 +194,7 @@ namespace BSPGenerationTools
             filesDone++;
         }
 
-        static void ArchiveDirectoryToTARRecursively(Stream tarStream, string absoluteDirectory, string relativeDirectoryInUnixFormat, ref int filesDone, ref long bytesDone, byte[] paddingBuffer, byte[] tempBuffer, FileNameFilter filter)
+        static void ArchiveDirectoryToTARRecursively(Stream tarStream, string absoluteDirectory, string relativeDirectoryInUnixFormat, ref int filesDone, ref long bytesDone, byte[] paddingBuffer, byte[] tempBuffer, FileNameFilter filter, FileNameFilter subdirFilter = null)
         {
             WIN32_FIND_DATA findData;
             List<SubdirInfo> subdirs = new List<SubdirInfo>();
@@ -247,14 +247,17 @@ namespace BSPGenerationTools
                     rel += "/";
                 rel += subdir.Name;
 
+                if (subdirFilter?.Invoke(subdir.Name) == false)
+                    continue;
+
                 tarStream.Write(TarPacker.CreateHeader(rel, true, 0, subdir.Date, out paddingSize), 0, 512);
-                ArchiveDirectoryToTARRecursively(tarStream, Path.Combine(absoluteDirectory, subdir.Name), rel, ref filesDone, ref bytesDone, paddingBuffer, tempBuffer, filter);
+                ArchiveDirectoryToTARRecursively(tarStream, Path.Combine(absoluteDirectory, subdir.Name), rel, ref filesDone, ref bytesDone, paddingBuffer, tempBuffer, filter, subdirFilter);
             }
         }
 
         public delegate bool FileNameFilter(string fn);
 
-        public static void PackDirectoryToTGZ(string dir, string archive, FileNameFilter filter)
+        public static void PackDirectoryToTGZ(string dir, string archive, FileNameFilter filter, FileNameFilter subdirFilter = null)
         {
             byte[] padding = new byte[1024];
             byte[] tmp = new byte[1024 * 1024];
@@ -265,7 +268,7 @@ namespace BSPGenerationTools
             using (var fs = File.Create(archive))
             using (var gs = new GZipStream(fs, CompressionMode.Compress))
             {
-                ArchiveDirectoryToTARRecursively(gs, dir, "", ref filesDone, ref bytesDone, padding, tmp, filter);
+                ArchiveDirectoryToTARRecursively(gs, dir, "", ref filesDone, ref bytesDone, padding, tmp, filter, subdirFilter);
                 gs.Write(padding, 0, 1024);
             }
 

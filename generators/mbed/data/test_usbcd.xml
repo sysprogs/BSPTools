@@ -7,6 +7,7 @@
 			<Name>USB Communications Device</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-CDC</TestDirSuffix>
 			<MCUConfiguration>
 				<Entries>
 					<KeyValue>

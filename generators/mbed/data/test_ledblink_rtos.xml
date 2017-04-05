@@ -7,6 +7,7 @@
 			<Name>LEDBlink (RTOS)</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-RTOS</TestDirSuffix>
 			<MCUConfiguration>
 				<Entries>
 					<KeyValue>

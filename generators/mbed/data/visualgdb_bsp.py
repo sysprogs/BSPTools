@@ -107,7 +107,9 @@ def parse_linker_script(lds_file):
 	emptyFile = tempfile.tempdir + "/0.c"
 	open(emptyFile, 'a').close()
 	mapFile = tempfile.tempdir + "/tmp.map"
-	call(["arm-eabi-gcc", "-T" + lds_file.replace('\\', '/'), emptyFile.replace('\\', '/'), "-Wl,-Map," + mapFile.replace('\\', '/')])
+	args = ["arm-eabi-gcc", "-T" + lds_file.replace('\\', '/'), emptyFile.replace('\\', '/'), "-Wl,-Map," + mapFile.replace('\\', '/'), "-Wl,--defsym,__Vectors=0", "-Wl,--defsym,Stack_Size=0"]
+	print(" ".join(args))
+	call(args)
 	inSection = False
 	result = []
 	rgMemoryLine = re.compile("^([^ \t]+)[ \t]+0x([0-9a-fA-F]+)[ \t]+0x([0-9a-fA-F]+)");
@@ -123,10 +125,12 @@ def parse_linker_script(lds_file):
 				        result.append(MemoryDefinition(name, int(m.group(2),16), int(m.group(3), 16)))
 				elif "Linker script and memory map" in line:
 					break
-	return result
 
 	os.remove(emptyFile)
 	os.remove(mapFile)
+	if len(result) == 0:
+	    raise Exception("Failed to detect memory configuration");
+	return result
 
 
 script_path = join(dirname(__file__))
@@ -230,6 +234,7 @@ def main():
     src_dir_to_lib_map = {}
     resources_map = {}
     lib_builder_map = {}
+    target_config_map = {}
     hexFileMap = open(join(ROOT, 'hexfiles.txt'), "w")
 
     library_names = {
@@ -251,8 +256,11 @@ def main():
     mcus = xml.find("SupportedMCUs")
     family = xml.find("MCUFamilies/MCUFamily")
 
+    supported_targets = Exporter.TARGETS
+    #supported_targets = [t for t in Exporter.TARGETS if "NUCLEO_F207ZG" in t]
+
     targets_count = 0
-    for target in Exporter.TARGETS:
+    for target in supported_targets:
         print('\t' + target + '...')
 
         toolchain = ba.prepare_toolchain(ROOT, "", target, 'GCC_ARM')
@@ -274,9 +282,13 @@ def main():
 
         toolchain.config.load_resources(res)
 
-        target_lib_macros = toolchain.config.config_to_macros(toolchain.config.get_config_data())
-        toolchain.set_config_data(toolchain.config.get_config_data())
+        config_data = toolchain.config.get_config_data()
+        #target_lib_macros = toolchain.config.config_to_macros(config_data)
+        target_lib_macros = [v.macro_name + "=$$com.sysprogs.mbed.config." + k + "$$" for (k,v) in config_data[0].items()]
+        target_lib_macro_names = set([v.split('=')[0] for v in target_lib_macros])
+        toolchain.set_config_data(config_data)
         toolchain.config.validate_config()
+        target_config_map[target] = config_data[0]
 
         res.relative_to(ROOT, False)
         res.win_to_unix()
@@ -324,7 +336,8 @@ def main():
         features_resources = features_toolchain.scan_resources(features_path)
         features_toolchain.config.load_resources(features_resources)
         new_macros = features_toolchain.config.config_to_macros(features_toolchain.config.get_config_data())
-        features_macros = [x for x in new_macros if x not in target_lib_macros]
+
+        features_macros = [x for x in new_macros if x.split('=')[0] not in target_lib_macro_names]
         # if 'MBED_CONF_LWIP_ADDR_TIMEOUT=5' in features_macros:
         #     features_macros.remove('MBED_CONF_LWIP_ADDR_TIMEOUT=5')
         #     features_macros.append('MBED_CONF_LWIP_ADDR_TIMEOUT=$$com.sysprogs.bspoptions.lwip.addr_timeout$$')
@@ -361,7 +374,7 @@ def main():
     # Set flags different for each target
     include_ignored_targets = '--alltargets' in sys.argv
 	
-    for target in Exporter.TARGETS:
+    for target in supported_targets:
         res = resources_map.get(target, None)
         if res is None:
             print('Target ignored: ' + target + ': No resources')
@@ -402,6 +415,12 @@ def main():
                                                                         make_node("InternalValue", '1')])
                 ElementTree.SubElement(list_node, "Suggestion").extend([make_node("UserFriendlyName", "disable"),
                                                                         make_node("InternalValue", '0')])
+        for (k,v) in target_config_map[target].items():
+                prop_node = ElementTree.SubElement(props_list, "PropertyEntry", {"xsi:type": "String"})
+                prop_node.extend([make_node('Name', v.macro_name),
+                    make_node('Description', v.help_text),
+                    make_node('UniqueID', 'com.sysprogs.mbed.config.' + k),
+                    make_node('DefaultValue', str(v.value))])
 
         flags = append_node(mcu, "CompilationFlags")
         for (node, dict) in [[append_node(mcu, "AdditionalSourceFiles"), source_condition_map],
@@ -488,8 +507,9 @@ def main():
         ElementTree.SubElement(fw, "AdditionalIncludeDirs").extend(
             [make_node("string", fn) for (fn, cond) in lib.include_dir_condition_map.items() if
              len(cond) == len(lib.SupportedTargets)])
+
         ElementTree.SubElement(fw, "AdditionalPreprocessorMacros").extend(
-            [make_node("string", fn) for fn in lib.macros_condition_map.keys()])
+            [make_node("string", macro) for (macro, targets) in lib.macros_condition_map.items() if len(targets) >= targets_count])
         if len(lib.DependencyIDs) > 0:
             ElementTree.SubElement(fw, "RequiredFrameworks").extend(
                 [make_node("string", "com.sysprogs.arm.mbed." + id) for id in lib.DependencyIDs])
@@ -529,6 +549,20 @@ def main():
                 continue
             if len(cond) > len(lib.SupportedTargets):
                 raise AssertionError('A number of macros is larger than number of supported targets')
+
+            #Don't redefine the macro as a part of the framework definition if it's already defined by the MCU definition
+            macroName = macro.split('=')[0]
+            if macroName == 'MBED_BUILD_TIMESTAMP':
+                continue
+            targetsWhereThisMacroIsAlwaysDefined = set()
+            for (macro, targets) in symbol_condition_map.items():
+                if macro.split('=')[0] == macroName:
+                    targetsWhereThisMacroIsAlwaysDefined.update(targets)
+
+            cond = [t for t in cond if not t in targetsWhereThisMacroIsAlwaysDefined]
+            if len(cond) == 0:
+                continue
+
             macro_cond_node = ElementTree.SubElement(flag_cond_list, "ConditionalToolFlags")
             macro_list_node = ElementTree.SubElement(
                 ElementTree.SubElement(macro_cond_node, "FlagCondition", {"xsi:type": "And"}), "Arguments")

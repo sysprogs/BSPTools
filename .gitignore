@@ -36,3 +36,4 @@ obj
 *.user
 *.suo
 Output
+/generators/mbed/data/*.pyc

@@ -143,7 +143,9 @@ namespace mbed
             Directory.CreateDirectory(outputDir);
             string mbedRoot = Path.Combine(outputDir, "mbed");
 
-            bool regenerate = false;
+            string toolchainDir = "e:\\sysgcc\\arm-eabi";
+
+            bool regenerate = true;
             if (regenerate)
             {
                 string gitExe = (Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\BSPGenerators")?.GetValue("git") as string) ?? "git.exe";
@@ -165,6 +167,22 @@ namespace mbed
                 if (proc.ExitCode != 0)
                     throw new Exception("Git exited with code " + proc.ExitCode);
 
+                foreach(var lds in Directory.GetFiles(mbedRoot, "*.ld", SearchOption.AllDirectories))
+                {
+                    if (File.ReadAllText(lds).Contains("\n#if"))
+                    {
+                        ProcessStartInfo preprocessInfo = new ProcessStartInfo($@"{toolchainDir}\bin\arm-eabi-cpp.exe", $"-P -C {lds} -o {lds}.preprocessed");
+                        preprocessInfo.UseShellExecute = false;
+                        preprocessInfo.EnvironmentVariables["PATH"] += $@";{toolchainDir}\bin";
+                        proc = Process.Start(preprocessInfo);
+                        proc.WaitForExit();
+
+                        File.Copy(lds + ".preprocessed", lds, true);
+                        File.Delete(lds + ".preprocessed");
+                    }
+                }
+
+
                 string sampleDir = Path.Combine(mbedRoot, "samples");
                 if (Directory.Exists(sampleDir))
                     Directory.Delete(sampleDir, true);
@@ -173,7 +191,7 @@ namespace mbed
                 ProcessStartInfo bspGenInfo = new ProcessStartInfo(pythonExe, Path.Combine(dataDir, "visualgdb_bsp.py") + " --alltargets");
                 bspGenInfo.UseShellExecute = false;
                 bspGenInfo.EnvironmentVariables["PYTHONPATH"] = mbedRoot;
-                bspGenInfo.EnvironmentVariables["PATH"] += @";e:\sysgcc\arm-eabi\bin";
+                bspGenInfo.EnvironmentVariables["PATH"] += $@";{toolchainDir}\bin";
                 proc = Process.Start(bspGenInfo);
                 proc.WaitForExit();
 
@@ -254,6 +272,8 @@ namespace mbed
 
             foreach (var mcu in bsp.SupportedMCUs)
             {
+                mcu.CompilationFlags.PreprocessorMacros = mcu.CompilationFlags.PreprocessorMacros.Where(m => !m.StartsWith("MBED_BUILD_TIMESTAMP=")).ToArray();
+
                 foreach (var rule in nameRules)
                 {
                     var m = rule.Key.Match(mcu.ID);
@@ -283,7 +303,7 @@ namespace mbed
                 }
 
                 List<ConvertedHexFile> hexFileList;
-                if (bootloaderFilesForTargets.TryGetValue(mcu.ID, out hexFileList))
+                if (bootloaderFilesForTargets.TryGetValue(mcu.ID, out hexFileList) && !mcu.CompilationFlags.LinkerScript.Contains("_patched.ld"))
                 {
                     hexFileList.Sort((a, b) => a.LoadAddress.CompareTo(b.LoadAddress));
                     var linkerScript = mcu.CompilationFlags.LinkerScript;
@@ -330,7 +350,7 @@ namespace mbed
             {
                 foreach (var test in testfFiles)
                 {
-                    Console.WriteLine("Testing BSP...");
+                    Console.WriteLine($"Testing {test.Filename}...");
                     var job = XmlTools.LoadObject<TestJob>(Path.Combine(dataDir, test.Filename));
                     if (job.ToolchainPath.StartsWith("["))
                     {

@@ -120,6 +120,8 @@ namespace StandaloneBSPValidator
                             properties[uniqueID] = (prop as PropertyEntry.Integral).DefaultValue.ToString();
                         if (prop is PropertyEntry.Boolean)
                             properties[uniqueID] = (prop as PropertyEntry.Boolean).DefaultValue ? (prop as PropertyEntry.Boolean).ValueForTrue : (prop as PropertyEntry.Boolean).ValueForFalse;
+                        if (prop is PropertyEntry.String)
+                            properties[uniqueID] = (prop as PropertyEntry.String).DefaultValue;
 
                         //TODO: other types
                     }
