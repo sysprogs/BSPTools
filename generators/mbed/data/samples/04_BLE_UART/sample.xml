@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>Bluetooth LE UART Console</Name>
+  <Description>This is a basic Bluetooth LE virtual UART console that works on Nordic nRF5x devices with the Nordic UART app</Description>
+  <ConfigurableProperties>
+  </ConfigurableProperties>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+	<string>com.sysprogs.arm.mbed.feature.BLE</string>
+  </RequiredFrameworks>
+</EmbeddedProjectSample>

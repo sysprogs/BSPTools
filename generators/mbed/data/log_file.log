@@ -1,0 +1,11 @@
+Processing target: ARCH_BLE [0%]
+Traceback (most recent call last):
+  File "E:\projects\sysprogs-github\BSPTools\generators\mbed\data\visualgdb_bsp.py", line 25, in <module>
+    import defines_parser
+  File "E:\projects\sysprogs-github\BSPTools\generators\mbed\data\defines_parser.py", line 51, in <module>
+    proc = sp.Popen('mbed compile -c -t GCC_ARM -m ' + target, stdout=sys.stdout, stderr=sys.stderr)
+  File "E:\ware\Python27\lib\subprocess.py", line 711, in __init__
+    errread, errwrite)
+  File "E:\ware\Python27\lib\subprocess.py", line 959, in _execute_child
+    startupinfo)
+WindowsError: [Error 2] The system cannot find the file specified

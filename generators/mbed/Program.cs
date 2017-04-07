@@ -128,221 +128,272 @@ namespace mbed
 
     class Program
     {
-        struct ConvertedHexFile
+        static _Ty[] Intersect<_Ty>(IEnumerable<IEnumerable<_Ty>> allInputs)
         {
-            public uint LoadAddress;
-            public int Size;
-            public string RelativePath;
-            public string SectionName;
+            _Ty[] result = null;
+
+            foreach (var inp in allInputs)
+            {
+                if (result == null)
+                    result = inp.ToArray();
+                else
+                    result = result.Intersect(inp).ToArray();
+            }
+
+            return result ?? new _Ty[0];
+        }
+
+        public static _Ty[] Union<_Ty>(IEnumerable<IEnumerable<_Ty>> allInputs, IEqualityComparer<_Ty> comparer = null)
+        {
+            _Ty[] result = null;
+
+            foreach (var inp in allInputs)
+            {
+                if (result == null)
+                    result = inp.ToArray();
+                else
+                    result = result.Union(inp, comparer).ToArray();
+            }
+
+            return result ?? new _Ty[0];
+        }
+
+        class ConditionalConfigAggregator
+        {
+            public Dictionary<string, ParsedTargetList.BuildConfiguration> AddedSettingsPerTargets = new Dictionary<string, ParsedTargetList.BuildConfiguration>();
+
+            public ConditionalConfigAggregator(ParsedTargetList.DerivedConfiguration cfg)
+            {
+                if (cfg.Feature != null)
+                {
+                    ID = "com.sysprogs.arm.mbed.feature." + cfg.Feature;
+                    Name = cfg.Feature + " Support";
+                }
+                else
+                {
+                    ID = "com.sysprogs.arm.mbed." + Path.GetFileName(cfg.Library);
+                    Name = cfg.LibraryName ?? (Path.GetFileName(cfg.Library) + " Library");
+                }
+            }
+
+            public readonly string ID, Name;
+        }
+
+        class PropertyComparerByID : IEqualityComparer<PropertyEntry>
+        {
+            public bool Equals(PropertyEntry x, PropertyEntry y)
+            {
+                return x.UniqueID == y.UniqueID;
+            }
+
+            public int GetHashCode(PropertyEntry obj)
+            {
+                return obj.UniqueID.GetHashCode();
+            }
         }
 
         static void Main(string[] args)
         {
-            string outputDir = Path.GetFullPath(@"..\..\Output");
-            string dataDir = Path.GetFullPath(@"..\..\data");
-            Directory.CreateDirectory(outputDir);
-            string mbedRoot = Path.Combine(outputDir, "mbed");
+            var generator = new MbedBSPGenerator("5.4.2");
+            generator.UpdateGitAndRescanTargets();
 
-            string toolchainDir = "e:\\sysgcc\\arm-eabi";
+            ParsedTargetList parsedTargets = XmlTools.LoadObject<ParsedTargetList>(Path.Combine(generator.outputDir, "mbed", "ParsedTargets.xml"));
+            generator.PatchBuggyFiles();
 
-            bool regenerate = true;
-            if (regenerate)
+            BoardSupportPackage bsp = new BoardSupportPackage
             {
-                string gitExe = (Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\BSPGenerators")?.GetValue("git") as string) ?? "git.exe";
-                string pythonExe = (Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\BSPGenerators")?.GetValue("python") as string) ?? "python.exe";
+                PackageID = "com.sysprogs.arm.mbed",
+                PackageDescription = "ARM mbed",
+                PackageVersion = generator.Version,
+                GNUTargetID = "arm-eabi",
+                GeneratedMakFileName = "mbed.mak",
+                BSPSourceFolderName = "mbed Files"
+            };
 
-                Process proc;
-                if (Directory.Exists(mbedRoot))
+            MCUFamily commonFamily = new MCUFamily
+            {
+                ID = "MBED_CORE",
+                AdditionalSourceFiles = generator.ConvertPaths(Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.SourceFiles))),
+                AdditionalHeaderFiles = generator.ConvertPaths(Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.HeaderFiles))),
+                SymbolsRequiredByLinkerScript = new[] { "__Vectors", "Stack_Size" },
+                CompilationFlags = new ToolFlags
                 {
-                    // Prevent pull fail due to modified files
-                    proc = Process.Start(new ProcessStartInfo(gitExe, "reset --hard") { WorkingDirectory = mbedRoot, UseShellExecute = false });
-                    proc.WaitForExit();
-                    if (proc.ExitCode != 0)
-                        throw new Exception("Git reset command exited with code " + proc.ExitCode);
-                    proc = Process.Start(new ProcessStartInfo(gitExe, "pull origin 5.4.2") { WorkingDirectory = mbedRoot, UseShellExecute = false });
+                    IncludeDirectories = generator.ConvertPaths(Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.IncludeDirectories))),
+                    PreprocessorMacros = Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.EffectivePreprocessorMacros))
                 }
-                else
-                    proc = Process.Start(new ProcessStartInfo(gitExe, "clone https://github.com/ARMmbed/mbed-os.git -b 5.4.2 mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
-                proc.WaitForExit();
-                if (proc.ExitCode != 0)
-                    throw new Exception("Git exited with code " + proc.ExitCode);
+            };
 
-                foreach(var lds in Directory.GetFiles(mbedRoot, "*.ld", SearchOption.AllDirectories))
+            bsp.MCUFamilies = new[] { commonFamily };
+
+            List<MCU> mcus = new List<MCU>();
+            Dictionary<string, ConditionalConfigAggregator> libraryAndFeatureConfigs = new Dictionary<string, ConditionalConfigAggregator>();
+
+            Console.WriteLine("Generating target definitions...");
+
+            foreach (var target in parsedTargets.Targets)
+            {
+                if (string.IsNullOrEmpty(target.BaseConfiguration.LinkerScript))
                 {
-                    if (File.ReadAllText(lds).Contains("\n#if"))
-                    {
-                        ProcessStartInfo preprocessInfo = new ProcessStartInfo($@"{toolchainDir}\bin\arm-eabi-cpp.exe", $"-P -C {lds} -o {lds}.preprocessed");
-                        preprocessInfo.UseShellExecute = false;
-                        preprocessInfo.EnvironmentVariables["PATH"] += $@";{toolchainDir}\bin";
-                        proc = Process.Start(preprocessInfo);
-                        proc.WaitForExit();
-
-                        File.Copy(lds + ".preprocessed", lds, true);
-                        File.Delete(lds + ".preprocessed");
-                    }
-                }
-
-
-                string sampleDir = Path.Combine(mbedRoot, "samples");
-                if (Directory.Exists(sampleDir))
-                    Directory.Delete(sampleDir, true);
-                PathTools.CopyDirectoryRecursive(Path.Combine(dataDir, "samples"), sampleDir);
-
-                ProcessStartInfo bspGenInfo = new ProcessStartInfo(pythonExe, Path.Combine(dataDir, "visualgdb_bsp.py") + " --alltargets");
-                bspGenInfo.UseShellExecute = false;
-                bspGenInfo.EnvironmentVariables["PYTHONPATH"] = mbedRoot;
-                bspGenInfo.EnvironmentVariables["PATH"] += $@";{toolchainDir}\bin";
-                proc = Process.Start(bspGenInfo);
-                proc.WaitForExit();
-
-                if (proc.ExitCode != 0)
-                    throw new Exception("BSP generator exited with code " + proc.ExitCode);
-            }
-
-            List<KeyValuePair<Regex, string>> nameRules = new List<KeyValuePair<Regex, string>>();
-            foreach (var line in File.ReadAllLines(Path.Combine(dataDir, "DeviceNameRules.txt")))
-            {
-                int idx = line.IndexOf('=');
-                nameRules.Add(new KeyValuePair<Regex, string>(new Regex(line.Substring(0, idx).Trim()), line.Substring(idx + 1).Trim()));
-            }
-
-            Dictionary<string, List<ConvertedHexFile>> bootloaderFilesForTargets = new Dictionary<string, List<ConvertedHexFile>>();
-            List<ConvertedHexFile> lst = null;
-            foreach (var line in File.ReadAllLines(Path.Combine(mbedRoot, "hexfiles.txt")))
-            {
-                if (!line.StartsWith("\t"))
-                    bootloaderFilesForTargets[line] = lst = new List<ConvertedHexFile>();
-                else
-                {
-                    var hexFile = line.Trim();
-                    var parsedFile = IntelHexParser.Parse(hexFile);
-                    string sectionName = Path.GetFileNameWithoutExtension(hexFile).Replace('.', '_');
-                    string generatedCFile = Path.ChangeExtension(hexFile, ".c");
-                    using (var fs = File.CreateText(generatedCFile))
-                    {
-                        fs.WriteLine($"//Converted from " + Path.GetFileName(hexFile));
-                        fs.WriteLine($"//Must be loaded at 0x{parsedFile.LoadAddress:x8}");
-                        fs.WriteLine($"const char __attribute__((used, section(\".{sectionName}\"))) {sectionName}[] = " + "{");
-                        fs.Write("\t");
-                        int cnt = 0;
-                        foreach (var b in parsedFile.Data)
-                        {
-                            if (cnt != 0 && (cnt % 16) == 0)
-                            {
-                                fs.WriteLine();
-                                fs.Write("\t");
-                            }
-                            cnt++;
-                            fs.Write($"0x{b:x2}, ");
-                        }
-                        fs.WriteLine();
-                        fs.WriteLine("};");
-                        fs.WriteLine();
-                    }
-
-                    if (!generatedCFile.StartsWith(mbedRoot, StringComparison.InvariantCultureIgnoreCase))
-                        throw new Exception("HEX file outside mbed root");
-                    lst.Add(new ConvertedHexFile { LoadAddress = parsedFile.LoadAddress, RelativePath = generatedCFile.Substring(mbedRoot.Length + 1), SectionName = sectionName, Size = parsedFile.Data.Length });
-                }
-            }
-
-            File.Copy(Path.Combine(dataDir, "stubs.cpp"), Path.Combine(mbedRoot, "stubs.cpp"), true);
-
-            Dictionary<string, string> mcuDefs = new Dictionary<string, string>();
-            var linkedBSPs = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi", "*.bsplink").Select(f => File.ReadAllText(f));
-            foreach (var dir in Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi").Concat(linkedBSPs))
-            {
-                if (Path.GetFileName(dir).ToLower() == "mbed")
+                    Console.WriteLine($"Skipping {target.ID}: no linker script defined");
                     continue;
-                var anotherBSP = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(dir, "bsp.xml"));
-                foreach (var mcu in anotherBSP.SupportedMCUs)
-                {
-                    if (mcu.MCUDefinitionFile != null)
-                        mcuDefs[mcu.ID] = Path.Combine(dir, mcu.MCUDefinitionFile);
                 }
+
+                var mcu = new MCU
+                {
+                    FamilyID = commonFamily.ID,
+                    ID = target.ID,
+                    AdditionalSourceFiles = generator.ConvertPaths(target.BaseConfiguration.SourceFiles),
+                    AdditionalHeaderFiles = generator.ConvertPaths(target.BaseConfiguration.HeaderFiles),
+                    CompilationFlags = new ToolFlags
+                    {
+                        IncludeDirectories = generator.ConvertPaths(target.BaseConfiguration.IncludeDirectories),
+                        PreprocessorMacros = target.BaseConfiguration.EffectivePreprocessorMacros,
+                        LinkerScript = generator.ConvertPaths(new[] { target.BaseConfiguration.LinkerScript })[0],
+                        COMMONFLAGS = target.CFLAGS.Replace(';', ' '),
+                    },
+                    ConfigurableProperties = new PropertyList
+                    {
+                        PropertyGroups = new List<PropertyGroup>
+                        {
+                            new PropertyGroup
+                            {
+                                UniqueID = "com.sysprogs.mbed.",
+                                Properties = target.BaseConfiguration.EffectiveConfigurableProperties.ToList()
+                            }
+                        }
+                    }
+
+                };
+
+                generator.DetectAndApplyMemorySizes(mcu, target.BaseConfiguration.LinkerScript);
+
+                if (mcu.CompilationFlags.COMMONFLAGS.Contains("-mfloat-abi"))
+                {
+                    string[] flags = mcu.CompilationFlags.COMMONFLAGS.Split(' ');
+                    string defaultValue = flags.First(f => f.StartsWith("-mfloat-abi"));
+
+                    var property = new PropertyEntry.Enumerated
+                    {
+                        Name = "Floating point support",
+                        UniqueID = "floatmode",
+                        SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
+                        {
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=soft", UserFriendlyName = "Software"},
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=hard", UserFriendlyName = "Hardware"},
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=softfp", UserFriendlyName = "Hardware with Software interface"},
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Unspecified"},
+                        },
+                    };
+
+                    property.DefaultEntryIndex = Enumerable.Range(0, property.SuggestionList.Length).First(i => property.SuggestionList[i].InternalValue == defaultValue);
+                    flags[Array.IndexOf(flags, defaultValue)] = "$$" + mcu.ConfigurableProperties.PropertyGroups[0].UniqueID + property.UniqueID + "$$";
+                    mcu.CompilationFlags.COMMONFLAGS = string.Join(" ", flags);
+                    mcu.ConfigurableProperties.PropertyGroups[0].Properties.Add(property);
+                }
+
+                mcu.AdditionalSourceFiles = mcu.AdditionalSourceFiles.Except(commonFamily.AdditionalSourceFiles).ToArray();
+                mcu.AdditionalHeaderFiles = mcu.AdditionalHeaderFiles.Except(commonFamily.AdditionalHeaderFiles).ToArray();
+                mcu.CompilationFlags.IncludeDirectories = mcu.CompilationFlags.IncludeDirectories.Except(commonFamily.CompilationFlags.IncludeDirectories).ToArray();
+                mcu.CompilationFlags.PreprocessorMacros = mcu.CompilationFlags.PreprocessorMacros.Except(commonFamily.CompilationFlags.PreprocessorMacros).ToArray();
+
+                foreach (var cfg in target.DerivedConfigurations)
+                {
+                    cfg.MergeScatteredConfigurations();
+
+                    ConditionalConfigAggregator agg;
+                    if (!libraryAndFeatureConfigs.TryGetValue(cfg.CanonicalKey, out agg))
+                        agg = libraryAndFeatureConfigs[cfg.CanonicalKey] = new ConditionalConfigAggregator(cfg);
+
+                    agg.AddedSettingsPerTargets[target.ID] = cfg.Configuration.Subtract(target.BaseConfiguration, cfg.CanonicalKey, cfg.Library != null);
+                }
+
+                generator.ConvertSoftdevicesAndPatchTarget(mcu, target.BaseConfiguration.HexFiles);
+                generator.CopyAndAttachRegisterDefinitions(mcu);
+                mcus.Add(mcu);
             }
 
-            string bspFile = Path.Combine(mbedRoot, "BSP.xml");
-            var bsp = XmlTools.LoadObject<BoardSupportPackage>(bspFile);
-            var defDir = Directory.CreateDirectory(Path.Combine(mbedRoot, "DeviceDefinitions"));
-            foreach (var fam in bsp.MCUFamilies)
-                fam.AdditionalHeaderFiles = fam.AdditionalHeaderFiles.Where(f => !f.EndsWith("/.")).ToArray();
+            bsp.SupportedMCUs = mcus.ToArray();
+            List<FileCondition> fileConditions = new List<FileCondition>();
+            List<ConditionalToolFlags> conditionalFlags = new List<ConditionalToolFlags>();
+            List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+            Console.WriteLine("Merging library build settings...");
 
-            PatchBuggyFiles(mbedRoot);
-
-            foreach (var mcu in bsp.SupportedMCUs)
+            foreach (var agg in libraryAndFeatureConfigs.Values)
             {
-                mcu.CompilationFlags.PreprocessorMacros = mcu.CompilationFlags.PreprocessorMacros.Where(m => !m.StartsWith("MBED_BUILD_TIMESTAMP=")).ToArray();
-
-                foreach (var rule in nameRules)
+                EmbeddedFramework framework = new EmbeddedFramework
                 {
-                    var m = rule.Key.Match(mcu.ID);
-                    if (m.Success)
+                    ID = agg.ID,
+                    UserFriendlyName = agg.Name,
+                    AdditionalSourceFiles = generator.ConvertPaths(Union(agg.AddedSettingsPerTargets.Values.Select(t => t.SourceFiles))),
+                    AdditionalHeaderFiles = generator.ConvertPaths(Union(agg.AddedSettingsPerTargets.Values.Select(t => t.HeaderFiles))),
+                    AdditionalIncludeDirs = generator.ConvertPaths(Intersect(agg.AddedSettingsPerTargets.Values.Select(t => t.IncludeDirectories))),
+                    AdditionalPreprocessorMacros = Intersect(agg.AddedSettingsPerTargets.Values.Select(t => t.EffectivePreprocessorMacros)),
+                };
+
+                var properties = Union(agg.AddedSettingsPerTargets.Values.Select(t => t.EffectiveConfigurableProperties), new PropertyComparerByID()).ToList();
+                if (properties.Count > 0)
+                    framework.ConfigurableProperties = new PropertyList
                     {
-                        string devRegex = rule.Value;
-                        for (int i = 1; i < m.Groups.Count; i++)
-                            devRegex = devRegex.Replace(@"\" + i, m.Groups[i].Value);
-
-                        Regex devRegexObj = new Regex(devRegex);
-                        string definition = null;
-                        foreach (var dev in mcuDefs)
+                        PropertyGroups = new List<PropertyGroup>
                         {
-                            if (devRegexObj.IsMatch(dev.Key))
-                                definition = dev.Value;
+                            new PropertyGroup
+                            {
+                                UniqueID = "com.sysprogs.mbed.",
+                                Properties =properties
+                            }
                         }
+                    };
 
-                        if (definition == null)
-                            Console.WriteLine("Warning: cannot find device register definition for " + devRegex);
-                        else
-                        {
-                            mcu.MCUDefinitionFile = "DeviceDefinitions/" + Path.GetFileName(definition);
-                            File.Copy(definition + ".gz", Path.Combine(mbedRoot, mcu.MCUDefinitionFile + ".gz"), true);
-                        }
-                        break;
-                    }
+                foreach (var file in framework.AdditionalSourceFiles.Concat(framework.AdditionalHeaderFiles))
+                {
+                    var targetsWhereIncluded = agg.AddedSettingsPerTargets
+                        .Where(v => generator.ConvertPaths(v.Value.SourceFiles.Concat(v.Value.HeaderFiles)).Contains(file))
+                        .Select(kv => kv.Key)
+                        .ToArray();
+
+                    if (targetsWhereIncluded.Length == agg.AddedSettingsPerTargets.Count)
+                        continue;   //The file is included on all targets
+
+                    fileConditions.Add(new FileCondition { FilePath = file, ConditionToInclude = new Condition.MatchesRegex { Expression = "$$SYS:MCU_ID$$", Regex = "^(" + string.Join("|", targetsWhereIncluded) + ")$" } });
                 }
 
-                List<ConvertedHexFile> hexFileList;
-                if (bootloaderFilesForTargets.TryGetValue(mcu.ID, out hexFileList) && !mcu.CompilationFlags.LinkerScript.Contains("_patched.ld"))
+
+                foreach (var kv in agg.AddedSettingsPerTargets)
                 {
-                    hexFileList.Sort((a, b) => a.LoadAddress.CompareTo(b.LoadAddress));
-                    var linkerScript = mcu.CompilationFlags.LinkerScript;
-                    var patchedLinkerScript = Path.ChangeExtension(mcu.CompilationFlags.LinkerScript, "").TrimEnd('.') + "_patched.ld";
-                    List<string> linkerScriptLines = File.ReadAllLines(linkerScript.Replace("$$SYS:BSP_ROOT$$", mbedRoot)).ToList();
+                    var extraIncludeDirs = generator.ConvertPaths(kv.Value.IncludeDirectories).Except(framework.AdditionalIncludeDirs).ToArray();
+                    var extraPreprocessorMacros = kv.Value.EffectivePreprocessorMacros.Except(framework.AdditionalPreprocessorMacros).ToArray();
+                    if (extraIncludeDirs.Length == 0 && extraPreprocessorMacros.Length == 0)
+                        continue;
 
-                    int firstMemorySectionLine = Enumerable.Range(0, linkerScript.Length)
-                        .SkipWhile(i => linkerScriptLines[i].Trim() != "MEMORY")
-                        .SkipWhile(i => !linkerScriptLines[i].Contains("{"))
-                        .First();
+                    ToolFlags flags = new ToolFlags();
+                    if (extraIncludeDirs.Length > 0)
+                        flags.IncludeDirectories = extraIncludeDirs;
+                    if (extraPreprocessorMacros.Length > 0)
+                        flags.PreprocessorMacros = extraPreprocessorMacros;
 
-                    int offset = 1;
-                    foreach (var hex in hexFileList)
-                        linkerScriptLines.Insert(firstMemorySectionLine + offset++, $"  {hex.SectionName} (rx) : ORIGIN = 0x{hex.LoadAddress:x8}, LENGTH = 0x{hex.Size}");
-
-                    mcu.CompilationFlags.LinkerScript = patchedLinkerScript;
-
-                    int sectionsLine = Enumerable.Range(0, linkerScript.Length)
-                                  .SkipWhile(i => linkerScriptLines[i].Trim() != "SECTIONS")
-                                  .SkipWhile(i => !linkerScriptLines[i].Contains("{"))
-                                  .First();
-
-                    offset = 1;
-
-                    foreach (var hex in hexFileList)
+                    conditionalFlags.Add(new ConditionalToolFlags
                     {
-                        char br1 = '{', br2 = '}';
-                        string contents = $".{hex.SectionName} :\n{br1}\n\tKEEP(*(.{hex.SectionName}))\n{br2} > {hex.SectionName}\n";
-                        foreach (var line in contents.Split('\n'))
-                            linkerScriptLines.Insert(sectionsLine + offset++, "\t" + line);
-                    }
-
-                    File.WriteAllLines(patchedLinkerScript.Replace("$$SYS:BSP_ROOT$$", mbedRoot), linkerScriptLines);
-
-                    mcu.AdditionalSourceFiles = mcu.AdditionalSourceFiles.Concat(hexFileList.Select(h => "$$SYS:BSP_ROOT$$/" + h.RelativePath.Replace('\\', '/'))).ToArray();
+                        Flags = flags,
+                        FlagCondition = new Condition.And
+                        {
+                            Arguments = new Condition[]
+                            {
+                                new Condition.ReferencesFramework{FrameworkID = framework.ID},
+                                new Condition.Equals{Expression = "$$SYS:MCU_ID$$", ExpectedValue = kv.Key}
+                            }
+                        }
+                    });
                 }
+
+                frameworks.Add(framework);
             }
 
-            ProduceBSPArchive(mbedRoot, bsp);
+            bsp.FileConditions = fileConditions.ToArray();
+            bsp.ConditionalFlags = conditionalFlags.ToArray();
+            bsp.Frameworks = frameworks.ToArray();
+            bsp.Examples = generator.DetectSampleDirs();
+
+            generator.ProduceBSPArchive(bsp);
 
             var testfFiles = new TestInfo[] { new TestInfo("test_usbcd.xml", 0, 0), new TestInfo("test_ledblink_rtos.xml", 0, 0), new TestInfo("test_ledblink.xml", 0, 0), };
             bool performTests = true;
@@ -351,7 +402,7 @@ namespace mbed
                 foreach (var test in testfFiles)
                 {
                     Console.WriteLine($"Testing {test.Filename}...");
-                    var job = XmlTools.LoadObject<TestJob>(Path.Combine(dataDir, test.Filename));
+                    var job = XmlTools.LoadObject<TestJob>(Path.Combine(generator.dataDir, test.Filename));
                     if (job.ToolchainPath.StartsWith("["))
                     {
                         job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
@@ -359,8 +410,8 @@ namespace mbed
                             throw new Exception("Cannot locate toolchain path from registry");
                     }
                     var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
-                    var lbsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(Path.Combine(outputDir, "mbed"))), toolchain);
-                    var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(outputDir, "TestResults"));
+                    var lbsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(Path.Combine(generator.outputDir, "mbed"))), toolchain);
+                    var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(generator.outputDir, "TestResults"));
                     test.Passed = r.Passed;
                     test.Failed = r.Failed;
                 }
@@ -373,68 +424,6 @@ namespace mbed
                     Console.WriteLine();
                 }
             }
-        }
-
-        private static void PatchBuggyFiles(string mbedRoot)
-        {
-            //1. Missing bsp.h for Nordic
-            File.WriteAllText(Path.Combine(mbedRoot, @"targets\TARGET_NORDIC\bsp.h"), "#pragma once\n#define BSP_INDICATE_FATAL_ERROR 0\n");
-
-            //2. Reference to missing O_BINARY
-            string patchedFile = Path.Combine(mbedRoot, @"platform\mbed_retarget.cpp");
-            var lines = File.ReadAllLines(patchedFile).ToList();
-            int idx2 = Enumerable.Range(0, lines.Count).First(l => lines[l].Contains("posix &= ~O_BINARY"));
-            if (!lines[idx2 - 1].Contains("O_BINARY"))
-            {
-                lines[idx2 - 1] += " && defined(O_BINARY)";
-                File.WriteAllLines(patchedFile, lines);
-            }
-
-            //3. Missing sys/types.h
-            patchedFile = Path.Combine(mbedRoot, @"targets\TARGET_NORDIC\TARGET_MCU_NRF51822\TARGET_DELTA_DFCM_NNN40\rtc_api.c");
-            lines = File.ReadAllLines(patchedFile).ToList();
-            if (lines.FirstOrDefault(l=>l.Contains("sys/types.h")) == null)
-            {
-                int idx = Enumerable.Range(0, lines.Count)
-                    .SkipWhile(i => !lines[i].StartsWith("#include"))
-                    .SkipWhile(i => lines[i].StartsWith("#include"))
-                    .First();
-
-                lines.Insert(idx, "#include <sys/types.h>");
-                File.WriteAllLines(patchedFile, lines);
-            }
-        }
-
-        static void ProduceBSPArchive(string BSPRoot, BoardSupportPackage bsp)
-        {
-            bsp.PackageVersion = string.Format("{0:d4}{1:d2}{2:d2}", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-            bsp.PackageVersion += "-beta";
-            XmlTools.SaveObject(bsp, Path.Combine(BSPRoot, "BSP.XML"));
-
-            string archiveName = string.Format("{0}-{1}.vgdbxbsp", bsp.PackageID.Split('.').Last(), bsp.PackageVersion);
-            Console.WriteLine("Creating BSP archive...");
-
-            TarPacker.PackDirectoryToTGZ(BSPRoot, Path.Combine(Path.GetDirectoryName(BSPRoot), archiveName), fn =>
-            {
-                string relPath = fn.Substring(BSPRoot.Length + 1);
-                if (relPath.StartsWith(".git"))
-                    return false;
-                return true;
-            }, subdir => !subdir.StartsWith(".git", StringComparison.CurrentCultureIgnoreCase));
-
-            BSPSummary lst = new BSPSummary
-            {
-                BSPName = bsp.PackageDescription,
-                BSPID = bsp.PackageID,
-                BSPVersion = bsp.PackageVersion,
-                MinimumEngineVersion = bsp.MinimumEngineVersion,
-                FileName = archiveName,
-            };
-
-            foreach (var mcu in bsp.SupportedMCUs)
-                lst.MCUs.Add(new BSPSummary.MCU { Name = mcu.ID, FLASHSize = mcu.FLASHSize, RAMSize = mcu.RAMSize });
-
-            XmlTools.SaveObject(lst, Path.Combine(Path.GetDirectoryName(BSPRoot), Path.ChangeExtension(archiveName, ".xml")));
         }
     }
 }

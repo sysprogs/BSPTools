@@ -54,7 +54,5 @@
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
 	<string>com.sysprogs.arm.mbed.rtos</string>
-  <string>com.sysprogs.arm.mbed.rtx</string>
-  <string>com.sysprogs.arm.mbed.features</string>
   </RequiredFrameworks>
 </EmbeddedProjectSample>
