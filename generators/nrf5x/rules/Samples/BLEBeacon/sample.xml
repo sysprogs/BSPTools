@@ -26,7 +26,7 @@
     <Entries>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
-        <Value>PCA10028</Value>
+        <Value>PCA10040</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>

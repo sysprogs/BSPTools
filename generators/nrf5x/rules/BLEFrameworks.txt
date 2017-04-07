@@ -1,8 +1,6 @@
 ble_advertising|Connectable Advertising Support
 ble_db_discovery|Database Discovery Module
-ble_debug_assert_handler|Assert Handler
 ble_dtm|RF/PHY Testing using DTM commands
-ble_error_log|Error Logging Support
 ble_racp|Record Access Control Point library
 ble_radio_notification|Radio Notifications
 ble_services\ble_ancs_c|Apple Notification Service Client

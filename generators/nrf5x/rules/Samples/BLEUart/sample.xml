@@ -11,6 +11,7 @@
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_nus</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
   </RequiredFrameworks>
   <ConditionalErrors>
 	<ConditionalError>
@@ -44,7 +45,7 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
-        <Value>PCA10028</Value>
+        <Value>PCA10040</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
@@ -135,12 +136,16 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.twi	</Key>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.twi</Key>
         <Value />
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.uart</Key>
         <Value>app_uart_fifo</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
+        <Value>yes</Value>
       </KeyValue>
     </Entries>
 	</DefaultConfiguration>

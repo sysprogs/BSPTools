@@ -47,7 +47,7 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
-        <Value>PCA10028</Value>
+        <Value>PCA10040</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
@@ -138,7 +138,7 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.twi	</Key>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.twi</Key>
         <Value />
       </KeyValue>
       <KeyValue>

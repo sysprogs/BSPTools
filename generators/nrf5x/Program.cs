@@ -186,7 +186,9 @@ namespace nrf5x
                     }
 
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
-                    Process.Start(BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", sd.Name + " " + hexFileName + abi).WaitForExit();
+                    var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName + abi, UseShellExecute = false };
+                    info.EnvironmentVariables["PATH"] += @";e:\sysgcc\arm-eabi\bin";
+                    Process.Start(info).WaitForExit();
                     string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
                         throw new Exception("Failed to convert a softdevice");
@@ -234,6 +236,7 @@ namespace nrf5x
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
             bool usingIoTSDK = false;
+
             if (Directory.Exists(Path.Combine(args[0], @"components\iot\ble_6lowpan")))
             {
                 usingIoTSDK = true;
@@ -250,12 +253,13 @@ namespace nrf5x
             else
             {
                 bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S130", 0x1b000, 0x13c8, "nrf51", "Bluetooth LE Universal"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", 0x20000, 0x2168, "nrf52832", "Bluetooth LE"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", 0x21000, 0x2780, "nrf52840", "Bluetooth LE"));
+                //bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S130", 0x1b000, 0x13c8, "nrf51", "Bluetooth LE Universal"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", 0x1f000, 0x1FC0, "nrf52832", "Bluetooth LE"));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", 0x22000, 0x2088, "nrf52840", "Bluetooth LE"));
             }
             List<MCUBuilder> devices = new List<MCUBuilder>();
 
+#if NRF51_SUPPORT
             if (!usingIoTSDK)
                 foreach (string part in new string[] { "nRF51822", "nRF51422" })
                 {
@@ -263,6 +267,7 @@ namespace nrf5x
                     devices.Add(new MCUBuilder { Name = part + "_XXAB", FlashSize = 128 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
                     devices.Add(new MCUBuilder { Name = part + "_XXAC", FlashSize = 256 * 1024, RAMSize = 32 * 1024, Core = CortexCore.M0 });
                 }
+#endif
 
             devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4 });
             devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4 });
@@ -437,7 +442,7 @@ namespace nrf5x
             {
                 strPackageID = "com.sysprogs.arm.nordic.nrf5x";
                 strPackageDesc = "Nordic NRF5x Devices";
-                strPAckVersion = "13.0-alpha";
+                strPAckVersion = "13.0";
             }
 
             BoardSupportPackage bsp = new BoardSupportPackage

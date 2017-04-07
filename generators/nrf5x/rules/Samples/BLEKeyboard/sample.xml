@@ -4,18 +4,18 @@
 	  <Description>This sample demonstrates a Bluetooth LE keyboard controlled via the on-board buttons.</Description>
 	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
-	<string>com.sysprogs.arm.nordic.nrf5x.util</string>
-	<string>com.sysprogs.arm.nordic.nrf5x.periph</string>
-	<string>com.sysprogs.arm.nordic.nrf5x.boards</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.periph</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.util</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
     <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
-
     <string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_dis</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_hids</string>
-	<string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
-	</RequiredFrameworks>
+  </RequiredFrameworks>
   <ConditionalErrors>
 	<ConditionalError>
 		<ErrorCondition xsi:type="Not">
@@ -31,8 +31,24 @@
   <DefaultConfiguration>
     <Entries>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.pstorage_driver</Key>
+        <Value>normal</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.spi_driver</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.twi_driver</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.uart_driver</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
-        <Value>PCA10028</Value>
+        <Value>PCA10040</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
@@ -43,6 +59,22 @@
         <Value>BSP_UART_SUPPORT</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.balloc</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.block_dev</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.bootloader_dfu</Key>
         <Value>none</Value>
       </KeyValue>
@@ -51,11 +83,23 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fstorage</Key>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.crc16</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.crc16</Key>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.crc32</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ecc</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.eddystone</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
@@ -63,27 +107,55 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fstorage</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.gpiote</Key>
-        <Value />
+        <Value>none</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.hci</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ic_info</Key>
-        <Value>yes</Value>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.led_softblink</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.low_power_pwm</Key>
+        <Value />
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.pwm</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.pwr_mgmt</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.queue</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.slip</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.scheduler</Key>
         <Value>normal</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.sdcard</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.sensorsim</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
@@ -96,29 +168,20 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.timer</Key>
-        <Value>appsh</Value>
+        <Value />
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.trace</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.twi</Key>
+        <Value />
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.uart</Key>
-        <Value>yes</Value>
+        <Value>app_uart</Value>
       </KeyValue>
-      <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.util</Key>
-        <Value>yes</Value>
-      </KeyValue>
-	        <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
-        <Value>yes</Value>
-      </KeyValue>
-
-      <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.ble.devmgr</Key>
-        <Value>peripheral</Value>
-      </KeyValue>
-    </Entries>
-	</DefaultConfiguration>
+	</Entries>
+  </DefaultConfiguration>
 </EmbeddedProjectSample>

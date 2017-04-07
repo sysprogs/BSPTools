@@ -73,7 +73,6 @@
 				<TargetFolder>components\toolchain</TargetFolder>
 				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c</FilesToCopy>
 				<SimpleFileConditions>					
-					<string>system_nrf51422.c: $$SYS:MCU_ID$$ =~ ^nRF5142.*</string>
 					<string>system_nrf51.c: $$SYS:MCU_ID$$ =~ ^nRF518.*</string>
 					<string>system_nrf52.c: $$SYS:MCU_ID$$ =~ ^nRF52832.*</string>
 					<string>system_nrf52840.c: $$SYS:MCU_ID$$ =~ ^nRF52840.*</string>
@@ -353,7 +352,7 @@
 						<string>crc16\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc16$$ == yes</string>
 						<string>crc32\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc32$$ == yes</string>
 						<string>ecc\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.ecc$$ == yes</string>
-						<string>experimental_eddystone\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.experimental_eddystone$$ == yes</string>
+						<string>eddystone\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.eddystone$$ == yes</string>
 						<string>fds\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fds$$ == yes</string>
 						<string>fifo\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fifo$$ == yes</string>
 						<string>fstorage\\fstorage.c: $$com.sysprogs.bspoptions.nrf5x.libraries.fstorage$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
@@ -374,8 +373,6 @@
 						<string>simple_timer\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.simple_timer$$ == yes</string>
 						<string>slip\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.slip$$ == yes</string>
 						<string>timer\\app_timer..$: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ != none</string>
-						<string>timer\\app_timer_appsh..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == appsh</string>
-						<string>timer\\app_timer_ble_gzll..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == ble_gzll</string>
 						<string>timer\\app_timer_freertos..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
 						<string>timer\\app_timer_rtx..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == rtx</string>
 						<string>twi\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.twi$$ == yes</string>
@@ -395,6 +392,7 @@
 							<NewLine>//#include "uECC.h"</NewLine>
 						</Patch>						
 					</Patches>
+					<PreprocessorMacros>NRF_LOG_BACKEND_SERIAL_USES_RTT=$$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$</PreprocessorMacros>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
@@ -432,7 +430,7 @@
 						<PropertyEntry xsi:type="Boolean"><Name>crc16</Name><UniqueID>crc16</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>crc32</Name><UniqueID>crc32</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>ecc</Name><UniqueID>ecc</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>experimental_eddystone</Name><UniqueID>experimental_eddystone</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>eddystone</Name><UniqueID>eddystone</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fds</Name><UniqueID>fds</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fifo</Name><UniqueID>fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fstorage</Name><UniqueID>fstorage</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
@@ -467,6 +465,7 @@
 						<PropertyEntry xsi:type="Boolean"><Name>sdcard</Name><UniqueID>sdcard</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>sensorsim</Name><UniqueID>sensorsim</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>log</Name><UniqueID>log</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>Log uses Segger RTT</Name><UniqueID>segger_rtt</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue><ValueForFalse>0</ValueForFalse></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>sha256</Name><UniqueID>sha256</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>simple_timer</Name><UniqueID>simple_timer</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Enumerated">
@@ -474,8 +473,7 @@
 						  <UniqueID>timer</UniqueID>
 						  <SuggestionList>
 							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue>none</Suggestion>
-							<Suggestion><UserFriendlyName>Using nRF5x scheduler</UserFriendlyName><InternalValue>appsh</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Using ble_gzll</UserFriendlyName><InternalValue>ble_gzll</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Using nRF5x scheduler</UserFriendlyName><InternalValue>normal</InternalValue></Suggestion>
 							<Suggestion><UserFriendlyName>Using FreeRTOS</UserFriendlyName><InternalValue>freertos</InternalValue></Suggestion>
 							<Suggestion><UserFriendlyName>Using RTX</UserFriendlyName><InternalValue>rtx</InternalValue></Suggestion>
 						  </SuggestionList>

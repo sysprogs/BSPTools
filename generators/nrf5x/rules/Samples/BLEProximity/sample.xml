@@ -18,7 +18,7 @@
     <string>com.sysprogs.arm.nordic.nrf5x.ble_db_discovery</string>
 	<string>com.sysprogs.arm.nordic.nrf5x.ble_advertising</string>
 	<string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
-	
+    <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
 	</RequiredFrameworks>
   <ConditionalErrors>
 	<ConditionalError>
@@ -36,11 +36,15 @@
     <Entries>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
-        <Value>PCA10028</Value>
+        <Value>PCA10040</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
         <Value />
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.uart_driver</Key>
+        <Value>yes</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
@@ -104,7 +108,7 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.uart</Key>
-        <Value>yes</Value>
+        <Value>app_uart</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.util</Key>
@@ -124,6 +128,10 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.fstorage</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
         <Value>yes</Value>
       </KeyValue>
     </Entries>
