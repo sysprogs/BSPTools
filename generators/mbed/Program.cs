@@ -195,6 +195,7 @@ namespace mbed
         static void Main(string[] args)
         {
             var generator = new MbedBSPGenerator("5.4.2");
+            string suffix = "R2";
             generator.UpdateGitAndRescanTargets();
 
             ParsedTargetList parsedTargets = XmlTools.LoadObject<ParsedTargetList>(Path.Combine(generator.outputDir, "mbed", "ParsedTargets.xml"));
@@ -204,7 +205,7 @@ namespace mbed
             {
                 PackageID = "com.sysprogs.arm.mbed",
                 PackageDescription = "ARM mbed",
-                PackageVersion = generator.Version,
+                PackageVersion = generator.Version + suffix,
                 GNUTargetID = "arm-eabi",
                 GeneratedMakFileName = "mbed.mak",
                 BSPSourceFolderName = "mbed Files"

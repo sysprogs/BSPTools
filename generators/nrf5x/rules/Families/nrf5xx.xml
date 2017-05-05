@@ -401,6 +401,23 @@
 					<SimpleFileConditions>
 						<string>.*\\softdevice_handler_appsh.*: $$com.sysprogs.bspoptions.nrf5x.libraries.scheduler$$ != none</string>
 					</SimpleFileConditions>				
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>softdevice_handler\softdevice_handler.c</FilePath>
+							<AfterLine>    err_code = sd_ble_enable(&amp;app_ram_base);</AfterLine>
+							<InsertedLines>
+								<string></string>
+								<string>    if (app_ram_base &gt; *ram_start &amp;&amp; err_code == NRF_ERROR_NO_MEM)</string>
+								<string>    {</string>
+								<string>        //It the breakpoint below gets triggered, your application reserves too little RAM for the current softdevice configuration.</string>
+								<string>        //In this case, make a project-wide copy of the linker script and adjust the origin and length of the SRAM memory</string>
+								<string>        //according to the value in app_ram_base.</string>
+								<string>        //See the following tutorial for details: https://visualgdb.com/tutorials/arm/nrf51/softdevice_memory</string>
+								<string>        asm("bkpt 255");</string>
+								<string>    }</string>
+							</InsertedLines>
+						</Patch>						
+					</Patches>
 				</CopyJob>
 			</CopyJobs>			
 			<ConfigurableProperties>

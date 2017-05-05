@@ -16,6 +16,23 @@ namespace esp32
             public uint? Offset;
             public uint? Mask;
 
+            public bool MaskIsSequential
+            {
+                get
+                {
+                    if (!Mask.HasValue || Mask.Value == 0)
+                        return false;
+                    var mask = Mask.Value;
+                    while (mask != 0)
+                    {
+                        if ((mask & 1) == 0)
+                            return false;
+                        mask >>= 1;
+                    }
+                    return true;
+                }
+            }
+
             static int MaskToBits(uint mask)
             {
                 int bits = 0;
@@ -54,7 +71,7 @@ namespace esp32
                     Name = Name,
                     Address = $"0x{Address:x8}",
                     SizeInBits = 32,
-                    SubRegisters = Fields.Values.OrderBy(f => f.Offset.Value).Select(f => f.ToSubregister()).ToArray()
+                    SubRegisters = Fields.Values.Where(f => f.MaskIsSequential).OrderBy(f => f.Offset.Value).Select(f => f.ToSubregister()).ToArray()
                 };
             }
         }
@@ -70,7 +87,7 @@ namespace esp32
                 return new HardwareRegisterSet
                 {
                     UserFriendlyName = Name,
-                    Registers = Registers.OrderBy(r=>r.Address).Select(r=>r.ToRegister()).ToArray()
+                    Registers = Registers.OrderBy(r => r.Address).Select(r => r.ToRegister()).ToArray()
                 };
             }
         }
@@ -89,7 +106,7 @@ namespace esp32
                     Address = ulong.Parse(match.Groups[2].Value, System.Globalization.NumberStyles.HexNumber)
                 };
 
-            foreach(var fn in Directory.GetFiles(Path.Combine(sdkDir, @"components\esp32\include\soc"), "*_reg.h"))
+            foreach (var fn in Directory.GetFiles(Path.Combine(sdkDir, @"components\esp32\include\soc"), "*_reg.h"))
             {
                 ConstructedRegister currentRegister = null;
                 foreach (var line in File.ReadAllLines(fn))
@@ -145,7 +162,7 @@ namespace esp32
                             value = uint.Parse(m.Groups[3].Value);
 
 
-                        switch(m.Groups[2].Value)
+                        switch (m.Groups[2].Value)
                         {
                             case "V":
                                 fld.Mask = value;

@@ -101,6 +101,18 @@ namespace mbed
                 File.WriteAllLines(patchedFile, lines);
             }
 
+            //7. Enable exporting LPC targets
+            patchedFile = Path.Combine(mbedRoot, @"tools\export\exporters.py");
+            lines = File.ReadAllLines(patchedFile).ToList();
+            string str = "obj.post_binary_hook['function'] in whitelist:";
+            idx2 = Enumerable.Range(0, lines.Count).FirstOrDefault(i => lines[i].Contains(str));
+            if (idx2 > 0)
+            {
+                int subIdx = lines[idx2].IndexOf(str);
+                lines[idx2] = lines[idx2].Substring(0, subIdx) + "True:";
+                File.WriteAllLines(patchedFile, lines);
+            }
+
             string sampleDir = Path.Combine(mbedRoot, "samples");
             if (Directory.Exists(sampleDir))
                 Directory.Delete(sampleDir, true);
@@ -334,11 +346,19 @@ namespace mbed
                             .ToArray();
 
             mcu.MemoryMap = new AdvancedMemoryMap { Memories = memories };
-            var flash = memories.First(m => m.Name == "FLASH" || m.Name == "m_text" || m.Name == "ROM" || m.Name == "rom");
-            var ram = memories.First(m => m.Name == "RAM" || m.Name == "m_data" || m.Name == "RAM_INTERN" || m.Name == "SRAM1" || m.Name == "ram");
+            var flash = memories.FirstOrDefault(m => m.Name.ToUpper() == "FLASH" || m.Name == "m_text" || m.Name == "ROM" || m.Name == "rom" || m.Name == "MFlash256");
+            var ram = memories.First(m => m.Name.ToUpper() == "RAM" || m.Name == "m_data" || m.Name == "RAM_INTERN" || m.Name == "SRAM1" || m.Name == "RAM0" || m.Name.StartsWith("Ram0_"));
 
-            mcu.FLASHSize = (int)flash.Size;
-            mcu.FLASHBase = (uint)flash.Address;
+            if (flash == null)
+            {
+                if (mcu.ID != "LPC4330_M4")
+                    throw new Exception("Could not locate FLASH memory");
+            }
+            else
+            {
+                mcu.FLASHSize = (int)flash.Size;
+                mcu.FLASHBase = (uint)flash.Address;
+            }
 
             mcu.RAMSize = (int)ram.Size;
             mcu.RAMBase = (uint)ram.Address;
