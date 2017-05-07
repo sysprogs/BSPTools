@@ -16,14 +16,14 @@
 	  	<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc18xx</SourceFolder>
-					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;-*common\*;-*lwip\*;-*freertos\*;-*filesystems\*;-*swim\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>lpc_chip_18xx</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.nxp.device_family$$;CORE_M3</PreprocessorMacros>
 					<ProjectInclusionMask>-*hsadc_18xx_43xx.c;-*iap.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>Common\*.h;*.h</AutoIncludeMask>	
 					<Patches>
 						<Patch xsi:type="InsertLines">
-							<FilePath>lpc_chip\chip_18xx_43xx\chip_lpc18xx.h</FilePath>
+							<FilePath>lpc_chip\chip_18xx_43xx\inc\chip_lpc18xx.h</FilePath>
 							<AfterLine>#include "i2cm_18xx_43xx.h"</AfterLine>
 							<InsertedLines>
 								<string>#include &lt;sdio_18xx_43xx.h&gt;</string>

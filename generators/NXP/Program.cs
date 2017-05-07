@@ -146,7 +146,7 @@ namespace Nxp_bsp_generator
                 if (mcu.Name.StartsWith("LPC4", StringComparison.CurrentCultureIgnoreCase))
                 {
                     int sram = mcu.RAMSize / 1024;
-                    if ((sram == 24) || (sram == 40) || (sram == 80) || (sram == 96) || (sram == 104) || (sram == 136) || (sram == 168) || (sram == 200) || (sram == 264) || (sram == 282))
+                    if ((sram == 24) || (sram == 40) || (sram == 80) || (sram == 96) || (sram == 104) || (sram == 136) || (sram == 168) || (sram == 200) || (sram == 264) || (sram == 282)||(sram == 154))
                     {
                         if ((layout.Memories[0].Size / 1024) == 0)
                             layout.Memories[0].Size = 64 * 1024;
@@ -374,6 +374,12 @@ namespace Nxp_bsp_generator
                 }else if (subfamily.StartsWith("ORIGINAL"))
                       {
                         int idx = subfamily.IndexOf("lpc");
+                    if (idx < 0)
+                    {
+                        Console.WriteLine("subfamily not lpc");
+                        continue;
+                    }
+                    else
                         subfamily = subfamily.Substring(idx, subfamily.Length - idx);
                       }
                        else

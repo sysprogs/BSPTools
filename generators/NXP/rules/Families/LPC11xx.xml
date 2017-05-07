@@ -37,6 +37,7 @@
 		<MCUClassifier>
 			<VariableName>com.sysprogs.nxp.device_family</VariableName>
 			<Required>true</Required>
+			<UnsupportedMCUs>LPC11H.*</UnsupportedMCUs>
 			<Options>
 				
 				<Option>

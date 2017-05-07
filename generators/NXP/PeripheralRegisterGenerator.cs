@@ -59,86 +59,53 @@ namespace Nxp_bsp_generator
 
         public static void CleanConvertedUserManuals(string sortedDataDir)
         {
-            foreach(var file in new DirectoryInfo(sortedDataDir).GetFiles("*.um", SearchOption.AllDirectories))
+            foreach (var file in new DirectoryInfo(sortedDataDir).GetFiles("*.um", SearchOption.AllDirectories))
             {
                 CleanPDFConvertedToText(file.FullName);
             }
         }
-        public static Dictionary<string, HardwareRegisterSet[]> GenerateFamilyPeripheralRegistersAdd(string familyDirectory)
-        {
-            
-            // Create the hardware register sets for each subfamily
-            Dictionary<string, HardwareRegisterSet[]> peripherals = new Dictionary<string, HardwareRegisterSet[]>();
-            // Create a hardware register set for each base address with the correctly calculated addresses
-            List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
-            HardwareRegisterSet set = new HardwareRegisterSet();
-            set.UserFriendlyName = "ASSS1";
-             
-            sets.Add(set);
-            set.UserFriendlyName = "ASSS2";
-            sets.Add(set);
-            peripherals.Add("LPC99XX1", sets.ToArray());
-            peripherals.Add("LPC99XX2", sets.ToArray());
-            peripherals.Add("LPC99XX3", sets.ToArray());
 
-            return peripherals;
-
-        }
         public static Dictionary<string, HardwareRegisterSet[]> GenerateFamilyPeripheralRegisters(string familyDirectory)
         {
-
-    
-            
             string family_name = Path.GetFileName(familyDirectory).Substring("lpc".Length);
             string headers_dir = familyDirectory + "\\lpc_chip\\chip_" + family_name;
 
             // Find the peripheral headers directory
             string chip_header = Path.Combine(headers_dir, "chip.h");
-            if(!File.Exists(chip_header))
+            if (!File.Exists(chip_header))
             {
-                chip_header = familyDirectory + "\\Core\\DeviceSupport\\NXP\\lpc" + family_name + "\\LPC" + family_name + ".h";
+                chip_header = Path.Combine(headers_dir, "inc", "chip.h");
                 if (!File.Exists(chip_header))
-                    throw new Exception("Peripheral headers not found!");
+                {
+
+                    chip_header = familyDirectory + "\\Core\\DeviceSupport\\NXP\\lpc" + family_name + "\\LPC" + family_name + ".h";
+                    if (!File.Exists(chip_header))
+                    {
+                        chip_header = familyDirectory + "\\lpc_chip\\lpc_chip_11u6x\\inc\\chip.h";
+                        if (!File.Exists(chip_header))
+                            throw new Exception("Peripheral headers not found!");
+                    }
+                }
                 headers_dir = Path.GetDirectoryName(chip_header);
             }
 
             // Create the subfamilies based on manually written csv helper file (transcribed from chip.h headers instead of parsing them)
             List<Family> subfamilies = new List<Family>();
-            foreach(var csv_file in new DirectoryInfo(familyDirectory).GetFiles("*.csv"))
+            foreach (var csv_file in new DirectoryInfo(familyDirectory).GetFiles("*.csv"))
             {
                 subfamilies.Add(ProcessRegisterSetAddresses(csv_file.FullName));
             }
 
             // Create the hardware register sets for each subfamily
             Dictionary<string, HardwareRegisterSet[]> peripherals = new Dictionary<string, HardwareRegisterSet[]>();
-            foreach(var subfamily in subfamilies)
+            foreach (var subfamily in subfamilies)
             {
                 Regex indexed_name = new Regex(@"^(.*?)_([0-9]+)(_([0-9]+))?$");
 
-                //if (subfamily.Name != "LPC15XX")
-                //    continue;
-
-                //List<string> skip = new List<string>(new string[] { "LPC12XX", "LPC110X", "LPC1125", "LPC11AXX", "LPC11CXX", "LPC11EXX", "LPC11UXX", "LPC11XXLV", "LPC1347", "LPC15XX", "LPC1343"/*, "LPC175X_6X", "LPC8XX", "LPC177X_8X", "LPC12XX", "LPC40XX"*/ });// 12xx have other issues as well
-                //if (skip.Contains(subfamily.Name))
-                //    continue;
 
                 // Parse all the peripheral headers of the subfamily and create the hardware register sets
                 Dictionary<string, string> nested_types;
-                Dictionary<string, HardwareRegisterSet> registerset_types = ProcessRegisterSetTypes(headers_dir, subfamily,out nested_types);
-                //Just for visual checking of the parsing
-                //List<string> test_lines = new List<string>();
-                //test_lines.Add("------------ " + subfamily.Name);
-                //foreach(HardwareRegisterSet parsed_set in registerset_types.Values)
-                //{
-                //    test_lines.Add("--- " + parsed_set.UserFriendlyName);
-                //    foreach(HardwareRegister parsed_reg in parsed_set.Registers)
-                //    {
-                //        if (!parsed_reg.Name.StartsWith("DATA_") && !parsed_reg.Name.StartsWith("B_") && !parsed_reg.Name.StartsWith("W_"))
-                //            test_lines.Add("------ " + parsed_reg.Name);
-                //    }
-                //}
-                //test_lines.Add("------------");
-                //File.AppendAllLines("E:\\KET\\Temp\\nxp_test_parsing.txt", test_lines.ToArray());
+                Dictionary<string, HardwareRegisterSet> registerset_types = ProcessRegisterSetTypes(headers_dir, subfamily, out nested_types);
 
                 // Parse the text versions of the user manuals for the subregisters
                 Dictionary<string, List<HardwareSubRegister>> subregisters = ProcessSubregisters(familyDirectory, subfamily);
@@ -162,7 +129,7 @@ namespace Nxp_bsp_generator
                 List<string> nonexisting_regs = new List<string>();
 
                 #region LPC8XX
-                if(subfamily.Name == "LPC8XX")
+                if (subfamily.Name == "LPC8XX")
                 {
                     nonexisting_regs.AddRange(new string[] {
                         //I2C
@@ -225,15 +192,15 @@ namespace Nxp_bsp_generator
                         dict_set_reg_to_reg.Add("LPC_SCT_T+OUT_SET_" + (i + 1).ToString(), "OUT" + i.ToString() + "_SET");
                         dict_set_reg_to_reg.Add("LPC_SCT_T+OUT_CLR_" + (i + 1).ToString(), "OUT" + i.ToString() + "_CLR");
                     }
-                    for(int i=0;i<=15;i++)
+                    for (int i = 0; i <= 15; i++)
                     {
                         dict_set_reg_to_reg.Add("LPC_SCT_T+EVENT_STATE_" + (i + 1).ToString(), "EV" + i.ToString() + "_STATE");
-                        dict_set_reg_to_reg.Add("LPC_SCT_T+MATCH_U_" + (i+1).ToString(), "MATCH" + i.ToString());
+                        dict_set_reg_to_reg.Add("LPC_SCT_T+MATCH_U_" + (i + 1).ToString(), "MATCH" + i.ToString());
                         dict_set_reg_to_reg.Add("LPC_SCT_T+MATCHREL_U_" + (i + 1).ToString(), "MATCHREL" + i.ToString());
                         dict_set_reg_to_reg.Add("LPC_SCT_T+CAP_U_" + (i + 1).ToString(), "CAP" + i.ToString());
                         dict_set_reg_to_reg.Add("LPC_SCT_T+CAPCTRL_U_" + (i + 1).ToString(), "CAPCTRL" + i.ToString());
                     }
-                    for(int i=0;i<=5;i++)
+                    for (int i = 0; i <= 5; i++)
                         dict_set_reg_to_reg.Add("LPC_SCT_T+EVENT_CTRL_" + (i + 1).ToString(), "EV" + i.ToString() + "_CTRL");
                     dict_set_reg_to_reg.Add("LPC_SPI_T+TXCTRL", "TXCTL");
                     dict_set_reg_to_reg.Add("LPC_USART_T+RXDATA_STAT", "RXDATSTAT");
@@ -509,14 +476,14 @@ namespace Nxp_bsp_generator
                         dict_set_reg_to_reg.Add("LPC_GPIO_T+B_0_" + i.ToString(), "B" + i.ToString());
                     for (int i = 0; i <= 31; i++)
                         dict_set_reg_to_reg.Add("LPC_GPIO_T+B_1_" + i.ToString(), "B" + (i + 32).ToString());
-                    for (int i = 0; i <= 31;i++)
-                        dict_set_reg_to_reg.Add("LPC_GPIO_T+W_0_" + i.ToString(), "W"+i.ToString());
                     for (int i = 0; i <= 31; i++)
-                        dict_set_reg_to_reg.Add("LPC_GPIO_T+W_1_" + i.ToString(), "W" + (i+32).ToString());
+                        dict_set_reg_to_reg.Add("LPC_GPIO_T+W_0_" + i.ToString(), "W" + i.ToString());
+                    for (int i = 0; i <= 31; i++)
+                        dict_set_reg_to_reg.Add("LPC_GPIO_T+W_1_" + i.ToString(), "W" + (i + 32).ToString());
                     dict_set_reg_to_reg.Add("LPC_I2C_T+ADR1", "ADR");
                     dict_set_reg_to_reg.Add("LPC_I2C_T+ADR2", "ADR");
                     dict_set_reg_to_reg.Add("LPC_I2C_T+ADR3", "ADR");
-                    for (int i = 0; i <= 3;i++ )
+                    for (int i = 0; i <= 3; i++)
                         dict_set_reg_to_reg.Add("LPC_I2C_T+MASK_" + i, "MASK");
                     dict_set_reg_to_reg.Add("LPC_IOCON_T+PIO0_0", "D");
                     dict_set_reg_to_reg.Add("LPC_IOCON_T+PIO0_1", "D");
@@ -628,7 +595,7 @@ namespace Nxp_bsp_generator
                 #region LPC11CXX
                 else if (subfamily.Name == "LPC11CXX")
                 {
-                    nonexisting_regs.AddRange(new string[] { 
+                    nonexisting_regs.AddRange(new string[] {
                             "IOCON_PIO2_6",
                             "IOCON_PIO2_0",
                             "IOCON_RESET_PIO0_0",
@@ -1043,8 +1010,8 @@ namespace Nxp_bsp_generator
                     //for (int i = 0; i <= 15; i++)
                     //    dict_set_reg_to_reg.Add("LPC_IOCON_TypeDef+PIO2_" + i, "IOCON");
                     for (int i = 0; i <= 6; i++)
-                        dict_set_reg_to_reg.Add("LPC_SYSCON_TypeDef+FILTERCLKCFG" + i, "IOCONFIGCLKDIV" + i);                                                          
-                    dict_set_reg_to_reg.Add("LPC_UART0_TypeDef+ADRMATCH", "RS485ADRMATCH");                                                                              
+                        dict_set_reg_to_reg.Add("LPC_SYSCON_TypeDef+FILTERCLKCFG" + i, "IOCONFIGCLKDIV" + i);
+                    dict_set_reg_to_reg.Add("LPC_UART0_TypeDef+ADRMATCH", "RS485ADRMATCH");
                     dict_set_reg_to_reg.Add("LPC_WWDT_TypeDef+WDCLKSEL", "CLKSEL");
 
                     dict_setname_reg_to_reg.Add("RTC+IMSC", "ICSC");
@@ -1094,7 +1061,7 @@ namespace Nxp_bsp_generator
                 #endregion
                 #region LPC13XX
                 #region LPC1343
-                else if(subfamily.Name == "LPC1343")
+                else if (subfamily.Name == "LPC1343")
                 {
                     nonexisting_regs.AddRange(new string[] {
                             //IOCON
@@ -1828,7 +1795,7 @@ namespace Nxp_bsp_generator
                     dict_set_reg_to_reg.Add("LPC_GPDMA_T+SOFTLSREQ", "DMACSoftLSReq");
                     dict_set_reg_to_reg.Add("LPC_GPDMA_T+CONFIG", "Config");
                     dict_set_reg_to_reg.Add("LPC_GPDMA_T+SYNC", "Sync");
-                    for (int i = 0; i <= 7;i++ )
+                    for (int i = 0; i <= 7; i++)
                     {
                         dict_set_reg_to_reg.Add("LPC_GPDMA_T+CH_" + i + "_SRCADDR", "CxSrcAddr");
                         dict_set_reg_to_reg.Add("LPC_GPDMA_T+CH_" + i + "_DESTADDR", "CxDestAddr");
@@ -2002,7 +1969,7 @@ namespace Nxp_bsp_generator
                     dict_set_reg_to_reg.Add("LPC_ENET_T+RXFILTER_HashFilterL", "HASHFILTERL");
                     dict_set_reg_to_reg.Add("LPC_ENET_T+RXFILTER_HashFilterH", "HASHFILTERH");
                     dict_set_reg_to_reg.Add("LPC_ENET_T+CONTROL_COMMAND", "COMMAND");
-                    dict_set_reg_to_reg.Add("LPC_ENET_T+CONTROL_STATUS", "STATUS");                    
+                    dict_set_reg_to_reg.Add("LPC_ENET_T+CONTROL_STATUS", "STATUS");
                     dict_set_reg_to_reg.Add("LPC_ENET_T+CONTROL_FLOWCONTROLCOUNTER", "FLOWCONTROLCOUNTER");
                     dict_set_reg_to_reg.Add("LPC_ENET_T+CONTROL_FLOWCONTROLSTATUS", "FLOWCONTROLSTATUS");
                     dict_set_reg_to_reg.Add("LPC_ENET_T+CONTROL_TSV0", "TSV0");
@@ -2039,19 +2006,19 @@ namespace Nxp_bsp_generator
                         dict_set_reg_to_reg.Add("LPC_GPIOINT_T+IO" + i + "_ENF", "ENF" + i);
                     }
 
-                    string[] type_a = new string[] { "0_12","0_13","0_23","0_24","0_25","0_26","1_30","1_31" };
+                    string[] type_a = new string[] { "0_12", "0_13", "0_23", "0_24", "0_25", "0_26", "1_30", "1_31" };
                     for (int i = 0; i < type_a.Length; i++)
                         dict_set_reg_to_reg.Add("LPC_IOCON_T+p_" + type_a[i], "A");
 
-                    string[] type_i = new string[] { "0_27","0_28", "5_2","5_3"};
+                    string[] type_i = new string[] { "0_27", "0_28", "5_2", "5_3" };
                     for (int i = 0; i < type_i.Length; i++)
                         dict_set_reg_to_reg.Add("LPC_IOCON_T+p_" + type_i[i], "I");
 
-                    string[] type_u = new string[] { "0_29", "0_30", "0_31"};
+                    string[] type_u = new string[] { "0_29", "0_30", "0_31" };
                     for (int i = 0; i < type_u.Length; i++)
                         dict_set_reg_to_reg.Add("LPC_IOCON_T+p_" + type_u[i], "U");
 
-                    string[] type_w = new string[] { "0_7","0_8","0_9" };
+                    string[] type_w = new string[] { "0_7", "0_8", "0_9" };
                     for (int i = 0; i < type_w.Length; i++)
                         dict_set_reg_to_reg.Add("LPC_IOCON_T+p_" + type_w[i], "W");
 
@@ -2233,7 +2200,7 @@ namespace Nxp_bsp_generator
                     dict_setname_reg_to_reg.Add("I2C2+MASK_2", "MASK2{3}");
                     dict_setname_reg_to_reg.Add("I2C2+MASK_3", "MASK3{3}");
                     dict_setname_reg_to_reg.Add("EEPROM+INTEN", "INTEN{4}");
-                    dict_setname_reg_to_reg.Add("EEPROM+INTSTAT", "STAT{4}");                    
+                    dict_setname_reg_to_reg.Add("EEPROM+INTSTAT", "STAT{4}");
                 }
                 #endregion
                 #region LPC40XX
@@ -2736,10 +2703,10 @@ namespace Nxp_bsp_generator
                     dict_set_reg_to_reg.Add("LPC_EMC_T+STATICWAITPAG2", "STATICWAITPAGE2");
                     dict_set_reg_to_reg.Add("LPC_EMC_T+STATICWAITPAG3", "STATICWAITPAGE3");
                     for (int i = 0; i <= 3; i++)
-                        for (int j = 0; j <= 3; j++ )
+                        for (int j = 0; j <= 3; j++)
                             dict_set_reg_to_reg.Add("LPC_GIMA_T+CAP0_IN_" + i + "_" + j, "CAP" + i + "_" + j + "_IN");
-                    for (int i = 0; i <= 7;i++ )
-                        dict_set_reg_to_reg.Add("LPC_GIMA_T+CTIN_IN_" + i, "CTIN_" + i + "_IN");                        
+                    for (int i = 0; i <= 7; i++)
+                        dict_set_reg_to_reg.Add("LPC_GIMA_T+CTIN_IN_" + i, "CTIN_" + i + "_IN");
                     dict_set_reg_to_reg.Add("LPC_GPDMA_T+CH_0_SRCADDR", "SRCADDR0");
                     dict_set_reg_to_reg.Add("LPC_GPDMA_T+CH_1_SRCADDR", "SRCADDR1");
                     dict_set_reg_to_reg.Add("LPC_GPDMA_T+CH_2_SRCADDR", "SRCADDR2");
@@ -3279,16 +3246,16 @@ namespace Nxp_bsp_generator
                 List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
                 foreach (var peripheral in subfamily.SetBaseAddresses)
                 {
-                    if(peripheral.Type == "LPC_USART_T" && !registerset_types.ContainsKey(peripheral.Type))
-                          peripheral.Type = "LPC_USART0_T";
+                    if (peripheral.Type == "LPC_USART_T" && !registerset_types.ContainsKey(peripheral.Type))
+                        peripheral.Type = "LPC_USART0_T";
 
-                    
-                    if(!registerset_types.ContainsKey(peripheral.Type))
+
+                    if (!registerset_types.ContainsKey(peripheral.Type))
                     {
                         HardwareRegisterSet set1 = new HardwareRegisterSet();
                         continue;
                     }
-                    
+
 
                     HardwareRegisterSet set = DeepCopy(registerset_types[peripheral.Type]);
                     set.UserFriendlyName = peripheral.Name;
@@ -3301,7 +3268,7 @@ namespace Nxp_bsp_generator
                         // Fix the register addresses
                         register.Address = FormatToHex(ParseHex(register.Address) + peripheral.Address);
 
-                        if(dict_setname_reg_to_reg.ContainsKey(set.UserFriendlyName + "+" + register.Name))
+                        if (dict_setname_reg_to_reg.ContainsKey(set.UserFriendlyName + "+" + register.Name))
                         {
                             string key = set.UserFriendlyName + "+" + register.Name;
                             if (subregisters[dict_setname_reg_to_reg[key]] != null)
@@ -3324,13 +3291,13 @@ namespace Nxp_bsp_generator
                         else
                         {
                             // 1. Maybe the indexing is done differently
-                            if(register.Name.Contains('_'))
+                            if (register.Name.Contains('_'))
                             {
                                 Match indexed_name_m;
-                                if((indexed_name_m = indexed_name.Match(register.Name)).Success)
+                                if ((indexed_name_m = indexed_name.Match(register.Name)).Success)
                                 {
                                     // only try to fix indexing with a sinle index
-                                    if(indexed_name_m.Groups[3].ToString() == "")
+                                    if (indexed_name_m.Groups[3].ToString() == "")
                                     {
                                         string no_underscore_indexed_reg = indexed_name_m.Groups[1].ToString() + indexed_name_m.Groups[2].ToString();
                                         if (subregisters.ContainsKey(no_underscore_indexed_reg))
@@ -3386,9 +3353,9 @@ namespace Nxp_bsp_generator
                                     }
                                 }
 
-                                foreach(var fuzzy_reg in fuzzy_reg_names)
+                                foreach (var fuzzy_reg in fuzzy_reg_names)
                                 {
-                                    if(subregisters.ContainsKey(fuzzy_reg))
+                                    if (subregisters.ContainsKey(fuzzy_reg))
                                     {
                                         if (subregisters[fuzzy_reg] != null)
                                             register.SubRegisters = subregisters[fuzzy_reg].ToArray();
@@ -3407,9 +3374,9 @@ namespace Nxp_bsp_generator
                 peripherals.Add(subfamily.Name, sets.ToArray());
 
                 // Verify that all parsed types have been used
-                if(used_types.Count != registerset_types.Count)
+                if (used_types.Count != registerset_types.Count)
                 {
-                    foreach(var type in registerset_types.Keys)
+                    foreach (var type in registerset_types.Keys)
                     {
                         if (!used_types.Contains(type) && !nested_types.Values.Contains(type))
                             Console.WriteLine("Unused hardware register set type: " + type + " in " + subfamily.Name);
@@ -3417,7 +3384,7 @@ namespace Nxp_bsp_generator
                 }
 
                 // Verify that all parsed subregister lists have been used
-                if(used_subregisters.Count != subregisters.Count)
+                if (used_subregisters.Count != subregisters.Count)
                 {
                     int unused_subregs = 0;
                     foreach (var reg_abbr in subregisters.Keys)
@@ -3428,12 +3395,12 @@ namespace Nxp_bsp_generator
                             unused_subregs++;
                         }
                     }
-                    Console.WriteLine((100.0*(float)(subregisters.Count - unused_subregs) / (float)subregisters.Count).ToString() + "%, " + subregisters.Count + " of parsed subregisters used. Unused " + unused_subregs.ToString() + " in " + subfamily.Name + ".");
+                    Console.WriteLine((100.0 * (float)(subregisters.Count - unused_subregs) / (float)subregisters.Count).ToString() + "%, " + subregisters.Count + " of parsed subregisters used. Unused " + unused_subregs.ToString() + " in " + subfamily.Name + ".");
                 }
             }
 
             return peripherals;
-    
+
         }
 
         private static Family ProcessRegisterSetAddresses(string addressesFile)
@@ -3442,12 +3409,12 @@ namespace Nxp_bsp_generator
             {
                 Name = Path.GetFileNameWithoutExtension(addressesFile),
                 SetBaseAddresses = new List<Peripheral>(),
-                Defines = new Dictionary<string, int>() { { "CHIP_" + Path.GetFileNameWithoutExtension(addressesFile).ToUpper(), 1} },
+                Defines = new Dictionary<string, int>() { { "CHIP_" + Path.GetFileNameWithoutExtension(addressesFile).ToUpper(), 1 } },
                 HeadersToIgnore = new List<string>(),
                 AdditionalStructDependencies = new List<string>(),
-                TypePreferences =new Dictionary<string,TypePreference>()
+                TypePreferences = new Dictionary<string, TypePreference>()
             };
-            
+
             foreach (var line in File.ReadLines(addressesFile))
             {
                 if (line.StartsWith("//"))
@@ -3457,23 +3424,23 @@ namespace Nxp_bsp_generator
                 if (line.Contains('='))
                 {
                     string[] vals = line.Split(new char[] { ',' });
-                    foreach(var val in vals)
+                    foreach (var val in vals)
                     {
                         string[] split = val.Split(new char[] { '=' });
                         family.Defines.Add(split[0], Int32.Parse(split[1]));
                     }
                 }
                 // Include files to exclude from parsing
-                else if(line.Contains('!'))
+                else if (line.Contains('!'))
                 {
                     string[] vals = line.Split(new char[] { ',' });
                     foreach (var val in vals)
                     {
-                        family.HeadersToIgnore.Add(val.Replace("!",""));
+                        family.HeadersToIgnore.Add(val.Replace("!", ""));
                     }
                 }
                 // Additional structs to parse
-                else if(line.Contains('+'))
+                else if (line.Contains('+'))
                 {
                     string[] vals = line.Split(new char[] { ',' });
                     foreach (var val in vals)
@@ -3487,8 +3454,8 @@ namespace Nxp_bsp_generator
                     string[] vals = line.Split(new char[] { ')' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (var val in vals)
                     {
-                        string[] split = val.Replace("(","").Split(new char[] { ',' });
-                        family.TypePreferences.Add(split[1], new TypePreference() { FileName = split[0], Type = split[1], FirstOccurence = (split[2] == "1")});
+                        string[] split = val.Replace("(", "").Split(new char[] { ',' });
+                        family.TypePreferences.Add(split[1], new TypePreference() { FileName = split[0], Type = split[1], FirstOccurence = (split[2] == "1") });
                     }
                 }
                 else//Set addresses
@@ -3501,7 +3468,7 @@ namespace Nxp_bsp_generator
                     string set_type = vals[1];
                     ulong address = ParseHex(vals[2]);
 
-                    family.SetBaseAddresses.Add(new Peripheral {Name = set_name, Type = set_type, Address = address});
+                    family.SetBaseAddresses.Add(new Peripheral { Name = set_name, Type = set_type, Address = address });
                 }
             }
 
@@ -3517,7 +3484,11 @@ namespace Nxp_bsp_generator
                 "clock_15xx.h", "i2cm_15xx.h", "i2cs_15xx.h", "rom_adc_15xx.h", "rom_can_15xx.h", "rom_dma_15xx.h", "rom_i2c_15xx.h", "rom_pwr_15xx.h", "rom_spi_15xx.h", "rom_uart_15xx.h", "sct_pwm_15xx.h",
                 "chip_lpc175x_6x.h", "chip_lpc177x_8x.h", "chip_lpc407x_8x.h", "clock_17xx_40xx.h", "sdmmc_17xx_40xx.h", "spifi_17xx_40xx.h",
                 "aes_18xx_43xx.h", "chip_clocks.h", "chip_lpc18xx.h", "chip_lpc43xx.h", "clock_18xx_43xx.h", "i2cm_18xx_43xx.h", "i2c_18xx_43xx.h", "iap_18xx_43xx.h", "sct_pwm_18xx_43xx.h", "sdmmc_18xx_43xx.h",
-                "clock_8xx.h", "error_8xx.h", "i2c_8xx.h", "romapi_8xx.h", "rom_i2c_8xx.h", "rom_pwr_8xx.h", "rom_uart_8xx.h"
+                "clock_8xx.h", "error_8xx.h", "i2c_8xx.h", "romapi_8xx.h", "rom_i2c_8xx.h", "rom_pwr_8xx.h", "rom_uart_8xx.h" ,
+                "clock_11u6x.h","core_cm4_simd.h","core_cmFunc.h","core_cmInstr.h","eeprom.h","error.h","iap.h","lpc_types.h","rom_dma_11u6x.h",
+                "stopwatch.h","clock_11u6x.h","core_cm4_simd.h","core_cmFunc.h","core_cmInstr.h","arm_common_tables.h","cmsis_18xx.h","cmsis_43xx.h",
+                "cmsis_43xx_m0app.h","cmsis_43xx_m0sub.h","fpu_init.h","packing.h","rtc_ut.h","sdio_18xx_43xx.h","clock_112x.h",
+                "arm_common_tables.h","irc_8xx.h","sct_pwm_8xx.h"
             };
 
             Dictionary<string, HardwareRegisterSet> types = new Dictionary<string, HardwareRegisterSet>();
@@ -3525,12 +3496,12 @@ namespace Nxp_bsp_generator
             nested_types = new Dictionary<string, string>();
 
             Dictionary<string, ulong> dict_type_sizes = new Dictionary<string, ulong>();
-            foreach(var standard_type in STANDARD_TYPE_SIZES.Keys)
+            foreach (var standard_type in STANDARD_TYPE_SIZES.Keys)
             {
                 dict_type_sizes.Add(standard_type, STANDARD_TYPE_SIZES[standard_type]);
             }
 
-            foreach(var header in new DirectoryInfo(headerDir).GetFiles("*.h"))
+            foreach (var header in new DirectoryInfo(headerDir).GetFiles("*.h"))
             {
                 if (family.HeadersToIgnore.Contains(header.Name))
                     continue;
@@ -3559,15 +3530,19 @@ namespace Nxp_bsp_generator
                     string struct_contents = struct_m.Groups[1].ToString();
 
                     ulong struct_size;
+
+                    if (struct_name == "LPC_ROM_API_T")
+                        continue;
+
                     HardwareRegisterSet set = new HardwareRegisterSet()
                     {
                         UserFriendlyName = struct_name,
                         // 3. Add the registers to the register set
-                        Registers = ProcessStructContents(header.Name, family, ref other_types, dict_type_sizes, struct_name, struct_contents, false, out struct_size, ref nested_types)
+                        Registers = ProcessStructContents(header, family, ref other_types, dict_type_sizes, struct_name, struct_contents, false, out struct_size, ref nested_types)
                     };
 
                     if (set.Registers.Length == 0)
-                        throw new Exception("Failed to parse any of the struct's registers!");
+                        Console.WriteLine(" throw new Exception(Failed to parse any of the struct's registers! " + struct_name + " " + header.FullName);
 
                     try
                     {
@@ -3576,12 +3551,13 @@ namespace Nxp_bsp_generator
                         else
                             other_types.Add(struct_name, set);
                         dict_type_sizes[struct_name] = struct_size;
-                    } catch(ArgumentException ex)
+                    }
+                    catch (ArgumentException ex)
                     {
                         if (family.TypePreferences.ContainsKey(struct_name) &&
-                            (family.TypePreferences[struct_name].FileName == header.Name) )
+                            (family.TypePreferences[struct_name].FileName == header.Name))
                         {
-                            if(!family.TypePreferences[struct_name].FirstOccurence)
+                            if (!family.TypePreferences[struct_name].FirstOccurence)
                                 types[struct_name] = set;
                         }
                         else
@@ -3635,7 +3611,7 @@ namespace Nxp_bsp_generator
                 struct_type.Value.Registers = registers.ToArray();
             }
 
-            foreach(var struct_type in types)
+            foreach (var struct_type in types)
             {
                 List<HardwareRegister> registers = new List<HardwareRegister>(struct_type.Value.Registers);
 
@@ -3649,10 +3625,10 @@ namespace Nxp_bsp_generator
                     {
                         string reg_name = register.Name;
                         HardwareRegister[] registers2 = null;
-                        if(types.ContainsKey(nested_types[key]))
-                            registers2  = types[nested_types[key]].Registers;
+                        if (types.ContainsKey(nested_types[key]))
+                            registers2 = types[nested_types[key]].Registers;
                         else if (other_types.ContainsKey(nested_types[key]))
-                            registers2  = other_types[nested_types[key]].Registers;
+                            registers2 = other_types[nested_types[key]].Registers;
 
                         registers.Remove(register);
 
@@ -3742,8 +3718,8 @@ namespace Nxp_bsp_generator
                     Regex next_subchapter_regex = new Regex(@"^[ ]*" + (reg_chapter + 1) + @"\.1[\.]?[0-9]*[\.]?[0-9]*[\.]?[0-9]*[ ]+([^\r\n]+)\r", RegexOptions.Multiline);
                     Match next_subchapter_m = next_subchapter_regex.Match(file, file_index);
                     int next_subchapter_match_index = next_subchapter_m.Success ? next_subchapter_m.Index : (file.Length - 1);
-                    int next_subreg_match_index = subreg_desc_m.NextMatch().Success? subreg_desc_m.NextMatch().Index : (file.Length - 1);
-                    int next_reg_match_index = reg_desc_m.NextMatch().Success? reg_desc_m.NextMatch().Index : (file.Length-1);
+                    int next_subreg_match_index = subreg_desc_m.NextMatch().Success ? subreg_desc_m.NextMatch().Index : (file.Length - 1);
+                    int next_reg_match_index = reg_desc_m.NextMatch().Success ? reg_desc_m.NextMatch().Index : (file.Length - 1);
 
                     int end_index = next_subchapter_match_index;
                     if (next_subreg_match_index < end_index)
@@ -3756,7 +3732,7 @@ namespace Nxp_bsp_generator
                     {
                         //Fix I2C naming
                         reg_name = reg_name.Replace(" I  C", " I2C");
-                        if(reg_name.StartsWith("I  C"))
+                        if (reg_name.StartsWith("I  C"))
                             reg_name = reg_name.Replace("I  C", "I2C");
                         //Remove line ends
                         reg_name = reg_name.Replace("\n", "");
@@ -3781,7 +3757,7 @@ namespace Nxp_bsp_generator
                         {
                             // Reduce the prospective table size even more
                             found_end_index = page_end_regex.Match(file, file_index, found_end_index - file_index).Success ? Math.Min(found_end_index, page_end_regex.Match(file, file_index, found_end_index - file_index).Index) : found_end_index;
-                            
+
                             List<HardwareSubRegister> reg_subs = ProcessTableRows(file, ref file_index, found_end_index, ProcessTableHeaderRow(file, ref file_index, found_end_index));
                             // Add the subregisters to all the registers they belong to
                             foreach (var reg in regs)
@@ -3793,7 +3769,7 @@ namespace Nxp_bsp_generator
                                     subs[key].AddRange(reg_subs);// If the table continues on another page then the subregisters are split between two tables, merge the subregisters here
                             }
                         }
-                        else if(!reg_name.Contains("allocation"))
+                        else if (!reg_name.Contains("allocation"))
                         {
                             Console.WriteLine("Register name not parsed in " + subfamily.Name + " for " + reg_name);
                         }
@@ -3834,7 +3810,7 @@ namespace Nxp_bsp_generator
             }
 
             Dictionary<string, List<HardwareSubRegister>> prepared_subs = new Dictionary<string, List<HardwareSubRegister>>();
-            foreach(var subkey in subs.Keys)
+            foreach (var subkey in subs.Keys)
             {
                 if (!prepared_subs.ContainsKey(subkey.Key))
                     prepared_subs.Add(subkey.Key, subs[subkey]);
@@ -3881,7 +3857,7 @@ namespace Nxp_bsp_generator
 
             // Assume the list has already been sorted by the indexes using the same sorting algorithm
             // Only compare properties that are known to be used, i.e. not parentregister or knownvalues
-            for(int i=0; i< list1.Count; i++)
+            for (int i = 0; i < list1.Count; i++)
             {
                 if (list1[i].FirstBit != list2[i].FirstBit)
                     return false;
@@ -4246,7 +4222,7 @@ namespace Nxp_bsp_generator
                         {
                             regs.Add(new KeyValuePair<string, string>(reg_abbr + i.ToString() + reg_abbr_continued, regname));
                         }
-                    }},            
+                    }},
                     new TableNameProcesser(){// Blanket!
                     RegexPattern = table_beginning + register_long_name + @"[0-9]?[s]? ([0-9]+) to ([0-9]+) \(([A-Z0-9_\/\[\]]+)" + dashcoloncomma + @"(.*?)\)" + bit_desc ,
                     ProcessTableHeaderMatch = delegate (Match m, ref string regname, ref List<KeyValuePair<string, string>> regs)
@@ -4406,7 +4382,7 @@ namespace Nxp_bsp_generator
             Regex test_regex = new Regex(table_beginning + register_long_name + @" [0-9]? (register)?", RegexOptions.Singleline);
             var mat = test_regex.Match(file, start_index, Math.Max(end_index - start_index, 0));
 
-            if(min_processer == null)
+            if (min_processer == null)
                 return false;
 
             min_processer.ProcessTableHeaderMatch(min_match, ref reg_name, ref registers);
@@ -4508,7 +4484,7 @@ namespace Nxp_bsp_generator
             bool none_found = true; // Used for checking only
 
             int bit_index = -1;
-            if(headerColumns.ContainsKey("Bit"))
+            if (headerColumns.ContainsKey("Bit"))
                 bit_index = headerColumns["Bit"];
             int symbol_index;
             if (headerColumns.ContainsKey("Symbol"))
@@ -4526,9 +4502,9 @@ namespace Nxp_bsp_generator
 
             string bit_spacing_sub_regex = @"[ ]{" + ((bit_index == -1) ? 0 : (bit_index - 1)) + "," + ((bit_index == -1) ? symbol_index : (bit_index + 1)) + @"}";
             // symbol spacing logic assumes that 5 is the maximum length of the bit value
-            Regex row_regex = new Regex(@"\r\n" + bit_spacing_sub_regex + @"([0-9]{1,2})([\:][ ]?([0-9]{1,2})?)?[\[]?[0-9]?[\]]?[\[]?[0-9]?[\]]?[ ]{" + Math.Max(1, (bit_index != -1)? (symbol_index - bit_index - 5) : 1) + "," + (symbol_index - bit_index) + @"}([a-zA-Z0-9_\-\.]+)", RegexOptions.Singleline);
+            Regex row_regex = new Regex(@"\r\n" + bit_spacing_sub_regex + @"([0-9]{1,2})([\:][ ]?([0-9]{1,2})?)?[\[]?[0-9]?[\]]?[\[]?[0-9]?[\]]?[ ]{" + Math.Max(1, (bit_index != -1) ? (symbol_index - bit_index - 5) : 1) + "," + (symbol_index - bit_index) + @"}([a-zA-Z0-9_\-\.]+)", RegexOptions.Singleline);
             // symbol spacing logic assumes that 3 is the maximum length of the bit value on the first row
-            Regex split_row_regex = new Regex(@"\r\n" + bit_spacing_sub_regex + @"([0-9]{1,2})\:[ ]{" + Math.Max(1, (bit_index != -1)? (symbol_index - bit_index - 3) : 1) + "," + (symbol_index - bit_index) + @"}([a-zA-Z0-9_\-\.]+).*?\r\n" + bit_spacing_sub_regex + @"([0-9]+)[ ]*[\r]?[\n]?", RegexOptions.Singleline);
+            Regex split_row_regex = new Regex(@"\r\n" + bit_spacing_sub_regex + @"([0-9]{1,2})\:[ ]{" + Math.Max(1, (bit_index != -1) ? (symbol_index - bit_index - 3) : 1) + "," + (symbol_index - bit_index) + @"}([a-zA-Z0-9_\-\.]+).*?\r\n" + bit_spacing_sub_regex + @"([0-9]+)[ ]*[\r]?[\n]?", RegexOptions.Singleline);
             Match row_m = row_regex.Match(file, start_index, end_index - start_index);
             Match split_row_m = split_row_regex.Match(file, start_index, end_index - start_index);
 
@@ -4541,7 +4517,7 @@ namespace Nxp_bsp_generator
                 if (is_bit_range && (TableNameProcesser.GetName(row_m, 3) != ""))
                     bit_start = TableNameProcesser.GetNumber(row_m, 3);
 
-                 if (split_row_m.Success && ((split_row_m.Index < row_m.Index) || ((split_row_m.Index == row_m.Index) && (split_row_m.Length > row_m.Length))))
+                if (split_row_m.Success && ((split_row_m.Index < row_m.Index) || ((split_row_m.Index == row_m.Index) && (split_row_m.Length > row_m.Length))))
                 {
                     row_m = split_row_m;
                     subreg_name = TableNameProcesser.GetName(row_m, 2);
@@ -4559,7 +4535,7 @@ namespace Nxp_bsp_generator
                         SizeInBits = is_bit_range ? (bit - bit_start + 1) : 1
                     });
 
-                start_index = row_m.Index + row_m.Length - ((row_m.Groups[0].ToString().EndsWith("\r\n"))? 2 : 0);
+                start_index = row_m.Index + row_m.Length - ((row_m.Groups[0].ToString().EndsWith("\r\n")) ? 2 : 0);
                 none_found = false;
 
                 row_m = row_regex.Match(file, start_index, end_index - start_index);
@@ -4573,9 +4549,106 @@ namespace Nxp_bsp_generator
                 return null;
             return subregs;
         }
+        private static List<string> lstParsHeader = new List<string>();
+        private static bool ParserDefines(string headerName, ref Dictionary<string, int> p_defines)
+        {
+            bool flEnum = false;
+            int aEnimValue = 0;
+            //if (lstParsHeader.Contains(headerName))
+              //        return false;
+           // return true;
 
+            lstParsHeader.Add(headerName);
+          //  p_defines.Clear();
+            foreach (var ln in File.ReadAllLines(headerName))
+            {
+            //    Match m1 = Regex.Match(ln, "#include[ \"<>]+([\\w.]+)");
+             //   if(m1.Success)
+             //       ParserDefines(Path.Combine(Path.GetDirectoryName(headerName),m1.Groups[1].Value),ref  p_defines);
+                if (Regex.IsMatch(ln, @"typedef[ \t]+enum[ \w\t]+{"))
+                {
+                    flEnum = true;
+                    aEnimValue = 0;
+                    continue;
+                }
+                try
+                {
+                    if (ln == "" || Regex.IsMatch(ln,@"[ \t]+$")|| Regex.IsMatch(ln, @"^[ \t]*/") || ln.Contains("<<") || (ln.Contains("*/") &&!ln.Contains("/*")))
+                        continue;
+                    if (flEnum)
+                    {
+                        if (Regex.IsMatch(ln, "[\t ]*#if.*"))
+                        {
+                            flEnum = false;
+                            continue;
+                        }
+
+                            Match m = Regex.Match(ln, @"([\w]+)[ ]*=[ ]*([\w]+)[,]?");
+
+                        if (m.Success)
+                        {
+                            if (p_defines.ContainsKey(m.Groups[1].Value))
+                                continue;
+
+                            if (m.Groups[2].Value.StartsWith("0x")) //Hex
+                            {
+                                aEnimValue = Convert.ToInt32(m.Groups[2].Value, 16);
+                                p_defines.Add(m.Groups[1].Value, aEnimValue++);
+                            }
+                            else if (Int32.TryParse(m.Groups[2].Value, out aEnimValue))//Sample :	SSP0_RX_DMA = 654,				/*!< SSP0 receive DMA channel */
+                            {
+                                 p_defines.Add(m.Groups[1].Value, aEnimValue++);
+                            }
+                            else
+                            {
+                                aEnimValue = p_defines[m.Groups[2].Value]; //Sample :	DMA_CH13 = DMAREQ_USART4_TX,
+                                if (!p_defines.ContainsKey(m.Groups[1].Value))
+                                    p_defines.Add(m.Groups[1].Value, aEnimValue++);
+                            }
+                            continue;
+                        }
+
+                        m = Regex.Match(ln, @"([\w]+)[,]?");
+                        if (m.Success && !ln.Contains("}"))
+                        {
+                            if (!p_defines.ContainsKey(m.Groups[1].Value))
+                                p_defines.Add(m.Groups[1].Value, aEnimValue++);
+                        }
+                        else if (Regex.IsMatch(ln, "[ ]*}.*")) //end enuem
+                            flEnum = false;
+                        else throw new Exception("Enum incorrect");
+                    }
+                    else
+                    {
+                        Match m = Regex.Match(ln, @"#define[ ]+([\w]+)[ (]+([\d]+)");
+                        if (m.Success)
+                        {
+                            if (!p_defines.ContainsKey(m.Groups[1].Value))
+                                p_defines.Add(m.Groups[1].Value, Int32.Parse(m.Groups[2].Value));
+                        }
+                        else
+                        {
+                            m = Regex.Match(ln, @"#define[ ]+([\w]+)[\t (]+([\w]+)[ +]+([\d]+)");
+                            if (m.Success && !p_defines.ContainsKey(m.Groups[1].Value))
+                                    p_defines.Add(m.Groups[1].Value, p_defines[m.Groups[2].Value] + Int32.Parse(m.Groups[3].Value));
+                        }
+                    }
+                }
+                catch (KeyNotFoundException exKey)
+                {
+                    if (!ln.Contains("COUNTUP_TO LIMIT_THEN_COUNTDOWN_TO_ZERO") && !ln.Contains("MODE") && !ln.Contains("_ALARM") && !ln.Contains("_FIRST")
+                         && !ln.Contains("DATACTRL_DIR_TOCARD") && !ln.Contains("DATACTRL_DIR_FROMCARD") && !ln.Contains("RTC_INT_COUNTER_") &&!ln.Contains("COMMAND") && !ln.Contains("|") && !ln.Contains("("))
+                            Console.WriteLine("No Key defines or enum {0} {1} {2}", ln, headerName, exKey.Message);
+                }
+                catch (FormatException exParse)
+                {
+                    Console.WriteLine("Format Exception {0} {1} {2}", ln, headerName, exParse.Message);
+                }
+            }
+            return true;
+        }
         // Function modified from Kinetis
-        private static HardwareRegister[] ProcessStructContents(string headerName, 
+        private static HardwareRegister[] ProcessStructContents(FileInfo file,
             Family family,
             ref Dictionary<string, HardwareRegisterSet> other_types, Dictionary<string, ulong> dict_type_sizes,
             string structName, string structContents, bool insideUnion,
@@ -4585,12 +4658,16 @@ namespace Nxp_bsp_generator
             if (structContents.Contains("#endif"))
                 structContents = PreprocessIfDefs(structContents, family.Defines);
 
+            string headerName = file.Name;
+
+            ParserDefines(file.FullName, ref family.Defines);
+
             List<HardwareRegister> regs = new List<HardwareRegister>();
 
             ulong hex_offset = 0;
             structSize = 0;
 
-            Regex reg_regex = new Regex(@"^[ \t]*(const|__I|__O|__IO)?[ \t]*([a-zA-Z0-9_]+)[ ]+([^ \n\r\[\]]+)(\[([a-zA-Z0-9_ \+]*)\])?(\[([a-zA-Z0-9_ \+]*)\])?;", RegexOptions.Multiline);
+            Regex reg_regex = new Regex(@"^[ \t]*(const|__I|__O|__IO|volatile)?[ \t]*([a-zA-Z0-9_]+)[ ]+([^ \n\r\[\]]+)(\[([a-zA-Z0-9_ \+]*)\])?(\[([a-zA-Z0-9_ \+]*)\])?;", RegexOptions.Multiline);
             Regex union_regex = new Regex(@"union {(.+?)}[ ]*([^ \n\r\[\]]*)(\[([a-zA-Z0-9_ \+]*)\])?(\[([a-zA-Z0-9_ \+]*)\])?;$", RegexOptions.Singleline);
             Regex union_beginning_regex = new Regex(@"union ({)", RegexOptions.Singleline);
             Regex inner_struct_regex = new Regex(@"struct[ \n\r]*{(.+?)}[ ]*([^ \n\r\[\]]*)(\[([a-zA-Z0-9_ \+]*)\])?(\[([a-zA-Z0-9_ \+]*)\])?;", RegexOptions.Singleline);
@@ -4623,6 +4700,7 @@ namespace Nxp_bsp_generator
                             break;
                         case "__O":
                         case "__IO":
+                        case "volatile":
                         case "":
                             reg_readonly = false;
                             break;
@@ -4690,14 +4768,14 @@ namespace Nxp_bsp_generator
 
                     ulong size;
                     Dictionary<string, string> union_nested_types = new Dictionary<string, string>();
-                    HardwareRegister[] union_regs = ProcessStructContents(headerName, family, ref other_types, dict_type_sizes, structName, union_contents, true, out size, ref union_nested_types);
+                    HardwareRegister[] union_regs = ProcessStructContents(file, family, ref other_types, dict_type_sizes, structName, union_contents, true, out size, ref union_nested_types);
 
                     for (int i = 1; i <= union_array_size; i++)
                     {
                         for (int j = 1; j <= union_array_size2; j++)
                         {
                             string prefix = "";
-                            if(union_name != "")
+                            if (union_name != "")
                                 prefix = union_name + "_";
 
                             string suffix = "";
@@ -4734,7 +4812,7 @@ namespace Nxp_bsp_generator
 
                     ulong inner_struct_size;
                     Dictionary<string, string> inner_nested_types = new Dictionary<string, string>();
-                    HardwareRegister[] struct_regs = ProcessStructContents(headerName, family, ref other_types, dict_type_sizes, structName, inner_struct_contents, false, out inner_struct_size, ref inner_nested_types);
+                    HardwareRegister[] struct_regs = ProcessStructContents(file, family, ref other_types, dict_type_sizes, structName, inner_struct_contents, false, out inner_struct_size, ref inner_nested_types);
 
                     for (int i = 1; i <= inner_struct_array_size; i++)
                     {
@@ -4788,7 +4866,7 @@ namespace Nxp_bsp_generator
         }
 
         // This is the most difficult and only define statement inside a struct that is not automatically parsed in ssp_13xx.h
-        private static List<string> SPECIAL_ALWAYS_TRUE_BLOCK_BEGIN = new List<string>() { "#if !defined(CHIP_LPC110X) && !defined(CHIP_LPC11XXLV) && !defined(CHIP_LPC11AXX) && \\"};
+        private static List<string> SPECIAL_ALWAYS_TRUE_BLOCK_BEGIN = new List<string>() { "#if !defined(CHIP_LPC110X) && !defined(CHIP_LPC11XXLV) && !defined(CHIP_LPC11AXX) && \\" };
         private static List<string> SPECIAL_SKIP_LINE = new List<string>() { "!defined(CHIP_LPC11CXX) && !defined(CHIP_LPC11EXX) && !defined(CHIP_LPC11UXX)" };
 
         // This function cannot handle complex ifdef statements or nested ifdefs, will throw if sth like that is detected
@@ -4798,7 +4876,7 @@ namespace Nxp_bsp_generator
 
             bool inside_block = false, add_block = false;
             bool one_block_added = false;
-            foreach (var line in code.Split(new string[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var line in code.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries))
             {
                 Regex if_regex = new Regex(@"^#if (defined\()?([^ \(\)]+)(\))?( \|\| defined\()?([^ \(\)]*)(\))?$");
                 Regex ifdef_regex = new Regex(@"^#ifdef ([^ \(\)]+)$");
@@ -4810,7 +4888,7 @@ namespace Nxp_bsp_generator
                     continue;
 
                 Match m;
-                if(((m = if_regex.Match(line)).Success) || SPECIAL_ALWAYS_TRUE_BLOCK_BEGIN.Contains(line.Trim()))
+                if (((m = if_regex.Match(line)).Success) || SPECIAL_ALWAYS_TRUE_BLOCK_BEGIN.Contains(line.Trim()))
                 {
                     string def = m.Groups[2].ToString();
                     string def2 = m.Groups[5].ToString();
@@ -4825,7 +4903,7 @@ namespace Nxp_bsp_generator
                         add_block = one_block_added = false;
                     continue;
                 }
-                else if((m = ifdef_regex.Match(line)).Success)
+                else if ((m = ifdef_regex.Match(line)).Success)
                 {
                     string def = m.Groups[1].ToString();
 
@@ -4863,7 +4941,7 @@ namespace Nxp_bsp_generator
                         throw new Exception("#else found before #if(def)!");
 
                     inside_block = true;
-                    if(!one_block_added)
+                    if (!one_block_added)
                         add_block = true;
                     continue;
                 }
@@ -4878,7 +4956,7 @@ namespace Nxp_bsp_generator
                 if (line.Contains("#ifdef") || line.Contains("#if") || line.Contains("#elif") || line.Contains("#else") || line.Contains("#endif"))
                     throw new Exception("Regexes failed to catch a define!");
 
-                if(!inside_block || (inside_block && add_block))
+                if (!inside_block || (inside_block && add_block))
                     code_lines.Add(line);
             }
 
@@ -4890,7 +4968,7 @@ namespace Nxp_bsp_generator
             int index = openingBracketIndex;
 
             char opening_bracket, closing_bracket;
-            switch(str[openingBracketIndex])
+            switch (str[openingBracketIndex])
             {
                 case '{':
                     opening_bracket = '{';
@@ -4902,7 +4980,7 @@ namespace Nxp_bsp_generator
 
             int num_opening_brackets = 1;
             int num_closing_brackets = 0;
-            while(num_closing_brackets != num_opening_brackets)
+            while (num_closing_brackets != num_opening_brackets)
             {
                 index = str.IndexOfAny(new char[] { opening_bracket, closing_bracket }, index + 1);
                 if (str[index] == opening_bracket)
@@ -4931,11 +5009,16 @@ namespace Nxp_bsp_generator
                     {
                         parsed_value_string = parsed_value_string.Replace(key, knownDefines[key].ToString());
                     }
-
-                    if (parsed_value_string.EndsWith(" + 1"))
+                    Match m = Regex.Match(parsed_value_string, @"([\d]+)[ +]+([\d]+)");
+                    if (m.Success)
+                        parsed_value = Int32.Parse(m.Groups[1].Value) + Int32.Parse(m.Groups[2].Value);
+                    else
+                        parsed_value = Int32.Parse(parsed_value_string);
+                   /* if (parsed_value_string.EndsWith(" + 1"))
                         parsed_value = Int32.Parse(parsed_value_string.Substring(0, parsed_value_string.Length - " + 1".Length)) + 1;
                     else
                         parsed_value = string.IsNullOrEmpty(parsed_value_string) ? 1 : Int32.Parse(parsed_value_string);
+                        */
                 }
                 catch (FormatException ex2)
                 {

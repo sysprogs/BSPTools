@@ -16,7 +16,7 @@
 	  	<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\lpc43xx</SourceFolder>
-					<FilesToCopy>-*sys_config.h;-*startup_code\*;*.h;*.c</FilesToCopy>
+					<FilesToCopy>-*sys_config.h;-*startup_code\*;-*common\*;-*lwip\*;-*freertos\*;-*filesystems\*;-*swim\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>lpc_chip_43xx</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.nxp.device_family$$;CORE_M4</PreprocessorMacros>
 					<ProjectInclusionMask>-*iap.c;*</ProjectInclusionMask>

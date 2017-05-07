@@ -435,6 +435,7 @@ namespace StandaloneBSPValidator
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
 
+            flags.COMMONFLAGS += " -save-temps ";
             Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var ext in sample.SourceFileExtensions.Split(';'))
                 sourceExtensions[ext] = true;
