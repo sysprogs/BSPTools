@@ -56,13 +56,24 @@ namespace Tiva_bsp_generator
                 List<HardwareRegister> registers = new List<HardwareRegister>(DeepCopy(types[type]).Registers);
                 used_types.Add(type);
 
+                bool isGPIOPort = set_name.StartsWith("GPIO_PORT");
+
                 for (int i = 0; i < registers.Count; i++)
                 {
                     var register = registers[i];
+
                     string hex_offset = register.Address;
                     if (!string.IsNullOrEmpty(hex_offset))
                     {
                         ulong offset = ParseHex(hex_offset);
+
+                        if (isGPIOPort && register.Name == "DATA")
+                        {
+                            //Reading at DATA + (mask << 2) will return a properly masked value. 
+                            //In order to get the entire register, we should add 0xFF << 2 to the address.
+                            offset += 0xff << 2;
+                        }
+
                         hex_offset = register.Address = FormatToHex((addresses[set_name].Value + offset));
                     }
                     else
