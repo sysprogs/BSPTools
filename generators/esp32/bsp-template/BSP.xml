@@ -142,9 +142,11 @@
 			<string>phy</string>
 			<string>pp</string>
 			<string>rtc</string>
+			<string>rtc_clk</string>
 			<string>smartconfig</string>
 			<string>wpa</string>
 			<string>wps</string>
+			<string>stdc++</string>
         </AdditionalLibraries>
 		<AdditionalLibraryDirectories>
 			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/lib</string>

@@ -20,6 +20,8 @@ namespace ESP8266DebugPackage
             public readonly byte[] Data;
             public readonly uint LoadAddress;
             public readonly uint EntryPoint;
+            public readonly uint InfiniteLoop;
+            public readonly uint Reset;
             public readonly uint DataBuffer;
             public readonly int DataBufferSize;
             public readonly uint EndOfStack;
@@ -29,17 +31,23 @@ namespace ESP8266DebugPackage
             public ParsedFLASHLoader(string fn)
             {
                 Data = File.ReadAllBytes(fn);
-                if (BitConverter.ToUInt32(Data, 0) != 0x32334C46)
+                if (BitConverter.ToUInt32(Data, 0) != 0x32332B46)
                     throw new Exception("Signature mismatch");
                 LoadAddress = BitConverter.ToUInt32(Data, 4);
                 FullPath = fn;
                 EntryPoint = BitConverter.ToUInt32(Data, 8);
-                DataBuffer = BitConverter.ToUInt32(Data, 12);
-                DataBufferSize = BitConverter.ToInt32(Data, 16);
-                EndOfStack = BitConverter.ToUInt32(Data, 20) + BitConverter.ToUInt32(Data, 24);
+                InfiniteLoop = BitConverter.ToUInt32(Data, 12);
+                Reset = BitConverter.ToUInt32(Data, 16);
+                DataBuffer = BitConverter.ToUInt32(Data, 20);
+                DataBufferSize = BitConverter.ToInt32(Data, 24);
+                EndOfStack = BitConverter.ToUInt32(Data, 28) + BitConverter.ToUInt32(Data, 32);
 
                 if (EntryPoint <= LoadAddress || EntryPoint >= LoadAddress + Data.Length)
                     throw new Exception("Invalid entry point for FLASH loader");
+                if (InfiniteLoop <= LoadAddress || InfiniteLoop >= LoadAddress + Data.Length)
+                    throw new Exception("Invalid infinite loop stub for FLASH loader");
+                if (Reset <= LoadAddress || Reset >= LoadAddress + Data.Length)
+                    throw new Exception("Invalid reset function for FLASH loader");
             }
 
             public CustomStartStep QueueInvocation(int cmd, string arg1, string arg2, string dataFile, int dataOffset, int dataSize, bool loadSelf = false, string error = null)
@@ -61,7 +69,7 @@ namespace ESP8266DebugPackage
                     cmds.Add(string.Format("restore {0} binary 0x{1:x} 0x{2:x} 0x{3:x}", dataFile.Replace('\\', '/'), DataBuffer - dataOffset, dataOffset, dataOffset + dataSize));
                 }
 
-                cmds.Add($"mon esp108 run_alg 0x{EntryPoint:x8} $$com.sysprogs.esp32.openocd.alg_timeout$$ a1=0x{EndOfStack:x8} a10={cmd} a11={arg1} a12={arg2} a0 pc");
+                cmds.Add($"mon esp108 run_alg 0x{EntryPoint:x8} 0x{InfiniteLoop:x8} $$com.sysprogs.esp32.openocd.alg_timeout$$ a1=0x{EndOfStack:x8} a10={cmd} a11={arg1} a12={arg2} a0 pc");
 
                 return new CustomStartStep(cmds.ToArray())
                 {
@@ -71,6 +79,11 @@ namespace ESP8266DebugPackage
                     ProgressWeight = dataSize,
                     CanRetry = true,
                 };
+            }
+
+            public CustomStartStep QueueResetStep()
+            {
+                return new CustomStartStep($"mon esp108 run_alg 0x{EntryPoint:x8} 0x{InfiniteLoop:x8} 1000 a1=0x{EndOfStack:x8} a10=3 a0 pc");
             }
 
             public void QueueRegionProgramming(List<CustomStartStep> cmds, ProgrammableRegion region, int eraseBlockSize, bool eraseStage)
@@ -98,7 +111,7 @@ namespace ESP8266DebugPackage
         public CustomStartupSequence BuildSequence(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
         {
             List<CustomStartStep> cmds = new List<CustomStartStep>();
-            cmds.Add(new CustomStartStep("mon esp108 chip_reset"));
+            cmds.Add(new CustomStartStep("mon reset halt"));
 
             string bspPath = bspDict["SYS:BSP_ROOT"];
 
@@ -126,9 +139,11 @@ namespace ESP8266DebugPackage
                     for (int pass = 0; pass < 2; pass++)
                         foreach (var region in regions)
                             parsedLoader.QueueRegionProgramming(cmds, region, eraseBlockSize, pass == 0);
-                }
 
-                cmds.Add(new CustomStartStep("mon esp108 chip_reset"));
+                    cmds.Add(parsedLoader.QueueResetStep());
+                }
+                else
+                    cmds.Add(new CustomStartStep("mon esp108 chip_reset"));
             }
             else
             {
