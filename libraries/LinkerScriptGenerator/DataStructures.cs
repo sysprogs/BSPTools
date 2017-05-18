@@ -218,12 +218,19 @@ namespace LinkerScriptGenerator
         }
     }
 
+    public struct SymbolAlias
+    {
+        public string Name;
+        public string Target;
+    }
+
     public class LinkerScriptTemplate
     {
         public string EntryPoint;
         public int SectionAlignment = 4;
         public List<Section> Sections;
         public List<Section> SectionsAfterEnd;
+        public SymbolAlias[] SymbolAliases;
 
         public LinkerScriptTemplate ShallowCopy()
         {

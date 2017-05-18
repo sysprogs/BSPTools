@@ -72,6 +72,7 @@ namespace LinkerScriptGenerator
             sw.WriteLine(" */");
             sw.WriteLine("");
 
+
             if (string.IsNullOrEmpty(_ScriptTemplate.EntryPoint))
                 throw new Exception("Entry Point should be defined in the script template");
 
@@ -84,6 +85,10 @@ namespace LinkerScriptGenerator
 
             OutputMemoryDefinition(sw);
             OutputSectionDefinitions(sw);
+
+            if (_ScriptTemplate.SymbolAliases != null)
+                foreach(var alias in _ScriptTemplate.SymbolAliases)
+                    sw.WriteLine($"PROVIDE({alias.Name} = {alias.Target});");
         }
 
         private void OutputSectionDefinitions(StreamWriter sw)

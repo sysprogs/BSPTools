@@ -138,4 +138,18 @@
 		</Inputs>
 	</Section>  
   </SectionsAfterEnd>
+  <SymbolAliases>
+	<SymbolAlias>
+		<Name>__isr_vector</Name>
+		<Target>g_pfnVectors</Target>
+	</SymbolAlias>
+	<SymbolAlias>
+		<Name>__StackLimit</Name>
+		<Target>_estack</Target>
+	</SymbolAlias>
+	<SymbolAlias>
+		<Name>__StackTop</Name>
+		<Target>__reserved_for_stack_start__</Target>
+	</SymbolAlias>
+  </SymbolAliases>
 </LinkerScriptTemplate>
