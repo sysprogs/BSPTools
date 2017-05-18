@@ -593,7 +593,7 @@ namespace Nxp_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = examples.Select(s=>s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "2.1"
+                PackageVersion = "2.2"
             };
 
             bspBuilder.Save(bsp, true);
