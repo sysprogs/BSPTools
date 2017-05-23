@@ -277,6 +277,17 @@ namespace KSDK2xImporter
                                         {
                                             const string optionID = "com.sysprogs.imported.ksdk2x.linker_script";
                                             mcuFamily.CompilationFlags.LinkerScript = $"$$SYS:BSP_ROOT$$/$${optionID}$$";
+                                            if (object.ReferenceEquals(null, mcuFamily.ConfigurableProperties))
+                                            {
+                                                mcuFamily.ConfigurableProperties = new PropertyList();
+                                            }
+                                            if (object.ReferenceEquals(null, mcuFamily.ConfigurableProperties.PropertyGroups))
+                                            {
+                                                mcuFamily.ConfigurableProperties.PropertyGroups = new List<PropertyGroup>()
+                                                {
+                                                    new PropertyGroup{}
+                                                };
+                                            }
                                             mcuFamily.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated
                                             {
                                                 UniqueID = optionID,
