@@ -21,24 +21,6 @@ namespace ESP8266DebugPackage
         private DebugMethod _Method;
         private readonly string _OpenOCDDirectory;
 
-        public class DebugInterface
-        {
-            public string Name;
-            public string ID;
-            public string Module;
-            public PropertyEntry[] Parameters;
-
-            public override string ToString()
-            {
-                return Name;
-            }
-        }
-
-        public class DebugInterfaceList
-        {
-            public DebugInterface[] Interfaces;
-        }
-
         public OpenOCDDebugConfigurator(DebugMethod method, QuickSetupDatabase quickSetup)
         {
             InitializeComponent();

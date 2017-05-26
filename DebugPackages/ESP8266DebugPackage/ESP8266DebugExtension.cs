@@ -11,17 +11,11 @@ namespace ESP8266DebugPackage
 {
     public class ESP8266DebugExtension : IDebugMethodExtension2
     {
-        OpenOCDDebugConfigurator.DebugInterfaceList _Interfaces = new OpenOCDDebugConfigurator.DebugInterfaceList();
         bool _ESP32Mode;
 
         public ESP8266DebugExtension(bool esp32Mode)
         {
             _ESP32Mode = esp32Mode;
-            try
-            {
-                _Interfaces = XmlTools.LoadObject<OpenOCDDebugConfigurator.DebugInterfaceList>(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "interfaces.xml"));
-            }
-            catch { }
         }
 
         public ESP8266DebugExtension()
