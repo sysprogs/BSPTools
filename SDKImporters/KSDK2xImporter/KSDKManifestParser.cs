@@ -277,6 +277,9 @@ namespace KSDK2xImporter
                                         {
                                             const string optionID = "com.sysprogs.imported.ksdk2x.linker_script";
                                             mcuFamily.CompilationFlags.LinkerScript = $"$$SYS:BSP_ROOT$$/$${optionID}$$";
+                                            if ((mcuFamily.ConfigurableProperties?.PropertyGroups?.Count ?? 0) == 0)
+                                                mcuFamily.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+
                                             mcuFamily.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated
                                             {
                                                 UniqueID = optionID,
@@ -456,8 +459,34 @@ namespace KSDK2xImporter
                 if (!deviceDict.TryGetValue(deviceID, out dev))
                     continue;
 
-                foreach (XmlElement exampleNode in boardNode.SelectNodes("examples/example"))
+                foreach (XmlElement directExampleNode in boardNode.SelectNodes("examples/example"))
                 {
+                    var exampleNode = directExampleNode;
+
+                    var externalNode = exampleNode.SelectSingleNode("external/files");
+                    if (externalNode != null)
+                    {
+                        var path = (externalNode.ParentNode as XmlElement)?.GetAttribute("path");
+                        var mask = (externalNode as XmlElement)?.GetAttribute("mask");
+                        if (path != null && mask != null)
+                        {
+                            try
+                            {
+                                var sampleFiles = Directory.GetFiles(Path.Combine(sdkDirectory, path), mask);
+                                var fn = sampleFiles?.FirstOrDefault();
+                                if (fn != null)
+                                {
+                                    XmlDocument doc2 = new XmlDocument();
+                                    doc2.Load(fn);
+                                    exampleNode = doc2.DocumentElement.SelectSingleNode("example") as XmlElement;
+                                    if (exampleNode == null)
+                                        continue;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+
                     List<string> dependencyList = new List<string>(exampleNode.Attributes?.GetNamedItem("dependency")?.Value?.Split(' ')
                         ?.Select(id => fwPrefix + id) ?? new string[0]);
 
