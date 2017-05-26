@@ -60,6 +60,8 @@
             this.numSpeed2 = new System.Windows.Forms.NumericUpDown();
             this.openOCDScriptSelector1 = new OpenOCDPackage.OpenOCDScriptSelector();
             this.lblStartDriverTool = new System.Windows.Forms.LinkLabel();
+            this.cbHaveInitDataFile = new System.Windows.Forms.CheckBox();
+            this.cbInitDataFile = new System.Windows.Forms.ComboBox();
             this.panel2.SuspendLayout();
             this.pnlFLASH.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -69,15 +71,17 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.cbHaveInitDataFile);
             this.panel2.Controls.Add(this.label10);
             this.panel2.Controls.Add(this.label8);
+            this.panel2.Controls.Add(this.cbInitDataFile);
             this.panel2.Controls.Add(this.cbProgramMode);
             this.panel2.Controls.Add(this.cbResetMode);
             this.panel2.Controls.Add(this.pnlFLASH);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 147);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(359, 143);
+            this.panel2.Size = new System.Drawing.Size(359, 169);
             this.panel2.TabIndex = 42;
             // 
             // label10
@@ -145,7 +149,7 @@
             this.pnlFLASH.Controls.Add(this.label3, 0, 0);
             this.pnlFLASH.Controls.Add(this.label4, 2, 0);
             this.pnlFLASH.Controls.Add(this.comboBox2, 1, 0);
-            this.pnlFLASH.Location = new System.Drawing.Point(46, 55);
+            this.pnlFLASH.Location = new System.Drawing.Point(46, 83);
             this.pnlFLASH.Name = "pnlFLASH";
             this.pnlFLASH.RowCount = 3;
             this.pnlFLASH.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
@@ -441,13 +445,39 @@
             // 
             this.lblStartDriverTool.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblStartDriverTool.AutoSize = true;
-            this.lblStartDriverTool.Location = new System.Drawing.Point(3, 295);
+            this.lblStartDriverTool.Location = new System.Drawing.Point(3, 334);
             this.lblStartDriverTool.Name = "lblStartDriverTool";
             this.lblStartDriverTool.Size = new System.Drawing.Size(78, 13);
             this.lblStartDriverTool.TabIndex = 46;
             this.lblStartDriverTool.TabStop = true;
             this.lblStartDriverTool.Text = "Start driver tool";
             this.lblStartDriverTool.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblStartDriverTool_LinkClicked);
+            // 
+            // cbHaveInitDataFile
+            // 
+            this.cbHaveInitDataFile.AutoSize = true;
+            this.cbHaveInitDataFile.Checked = true;
+            this.cbHaveInitDataFile.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbHaveInitDataFile.Location = new System.Drawing.Point(7, 57);
+            this.cbHaveInitDataFile.Name = "cbHaveInitDataFile";
+            this.cbHaveInitDataFile.Size = new System.Drawing.Size(83, 17);
+            this.cbHaveInitDataFile.TabIndex = 17;
+            this.cbHaveInitDataFile.Text = "Init data file:";
+            this.cbHaveInitDataFile.UseVisualStyleBackColor = true;
+            this.cbHaveInitDataFile.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // cbInitDataFile
+            // 
+            this.cbInitDataFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbInitDataFile.FormattingEnabled = true;
+            this.cbInitDataFile.Location = new System.Drawing.Point(120, 55);
+            this.cbInitDataFile.Name = "cbInitDataFile";
+            this.cbInitDataFile.Size = new System.Drawing.Size(239, 21);
+            this.cbInitDataFile.TabIndex = 16;
+            this.cbInitDataFile.Tag = "com.sysprogs.esp8266.init_data_file";
+            this.cbInitDataFile.SelectedIndexChanged += new System.EventHandler(this.SettingsChangedHandler);
+            this.cbInitDataFile.TextUpdate += new System.EventHandler(this.SettingsChangedHandler);
             // 
             // OpenOCDDebugConfigurator
             // 
@@ -459,7 +489,7 @@
             this.Controls.Add(this.openOCDScriptSelector1);
             this.Controls.Add(this.panel1);
             this.Name = "OpenOCDDebugConfigurator";
-            this.Size = new System.Drawing.Size(359, 315);
+            this.Size = new System.Drawing.Size(359, 354);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.pnlFLASH.ResumeLayout(false);
@@ -507,5 +537,7 @@
         private System.Windows.Forms.CheckBox cbCmdline;
         private System.Windows.Forms.Button btnTest;
         private System.Windows.Forms.LinkLabel lblStartDriverTool;
+        private System.Windows.Forms.CheckBox cbHaveInitDataFile;
+        private System.Windows.Forms.ComboBox cbInitDataFile;
     }
 }

@@ -21,6 +21,24 @@ namespace ESP8266DebugPackage
         private DebugMethod _Method;
         private readonly string _OpenOCDDirectory;
 
+        public class DebugInterface
+        {
+            public string Name;
+            public string ID;
+            public string Module;
+            public PropertyEntry[] Parameters;
+
+            public override string ToString()
+            {
+                return Name;
+            }
+        }
+
+        public class DebugInterfaceList
+        {
+            public DebugInterface[] Interfaces;
+        }
+
         public OpenOCDDebugConfigurator(DebugMethod method, QuickSetupDatabase quickSetup)
         {
             InitializeComponent();
@@ -63,6 +81,22 @@ namespace ESP8266DebugPackage
             }
         }
 
+        public static void SetComboBoxValue(ComboBox comboBox, string val)
+        {
+            for (int i = 0; i < comboBox.Items.Count; i++)
+            {
+                if (comboBox.Items[i] is PropertyEntry.Enumerated.Suggestion && (comboBox.Items[i] as PropertyEntry.Enumerated.Suggestion).InternalValue == val)
+                {
+                    comboBox.SelectedIndex = i;
+                    return;
+                }
+            }
+
+            var item = new PropertyEntry.Enumerated.Suggestion { InternalValue = val };
+            comboBox.Items.Add(item);
+            comboBox.SelectedItem = item;
+        }
+
         public Dictionary<string, string> Configuration
         {
             get
@@ -76,6 +110,9 @@ namespace ESP8266DebugPackage
                     else
                         result[kv.Key] = kv.Value.Text;
                 }
+
+                if (!cbHaveInitDataFile.Checked)
+                    result["com.sysprogs.esp8266.init_data_file"] = "";
 
                 string iface = (cbQuickInterface.SelectedItem as QuickSetupDatabase.ProgrammingInterface)?.ScriptFile;
                 if (iface == null)
@@ -102,11 +139,14 @@ namespace ESP8266DebugPackage
                 foreach (var kv in _ComboBoxes)
                 {
                     if (value.TryGetValue(kv.Key, out val))
-                        ESP8266DebugConfigurator.SetComboBoxValue(kv.Value, val);
+                        SetComboBoxValue(kv.Value, val);
                 }
 
                 cbSuppressInterrupts.Checked = value.TryGetValue("com.sysprogs.esp8266.disable_interrupts_during_steps", out val) && val == "on";
                 cbFeedWatchdog.Checked = value.TryGetValue("com.sysprogs.esp8266.autofeed_watchdog", out val) && val == "on";
+                cbHaveInitDataFile.Checked = value.TryGetValue("com.sysprogs.esp8266.init_data_file", out val) && val != "";
+                if (cbInitDataFile.Text == "" && !cbHaveInitDataFile.Checked && cbInitDataFile.Items.Count > 0)
+                    cbInitDataFile.SelectedIndex = 0;
 
                 if (!value.TryGetValue("com.sysprogs.esp8266.openocd.extra_cmdline", out val) || string.IsNullOrEmpty(val))
                 {
@@ -276,6 +316,12 @@ namespace ESP8266DebugPackage
             }
             catch { }
 
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            cbInitDataFile.Enabled = cbHaveInitDataFile.Checked;
+            SettingsChangedHandler(sender, e);
         }
     }
 }

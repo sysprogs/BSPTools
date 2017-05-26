@@ -65,12 +65,6 @@
     <Compile Include="ESP32StartupSequence.cs" />
     <Compile Include="ESP8266BinaryImage.cs" />
     <Compile Include="ESP8266BootloaderClient.cs" />
-    <Compile Include="ESP8266DebugConfigurator.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ESP8266DebugConfigurator.Designer.cs">
-      <DependentUpon>ESP8266DebugConfigurator.cs</DependentUpon>
-    </Compile>
     <Compile Include="ESP8266DebugExtension.cs" />
     <Compile Include="ESP8266StartupSequence.cs" />
     <Compile Include="ESP8266StubDebugExtension.cs" />
@@ -90,9 +84,6 @@
     <Compile Include="SerialPortStream.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ESP8266DebugConfigurator.resx">
-      <DependentUpon>ESP8266DebugConfigurator.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="OpenOCDDebugConfigurator.resx">
       <DependentUpon>OpenOCDDebugConfigurator.cs</DependentUpon>
     </EmbeddedResource>

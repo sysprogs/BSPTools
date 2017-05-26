@@ -252,7 +252,44 @@ namespace ESP8266DebugPackage
             debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out mode);
             debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out size);
 
+            int initDataAddress = 0;
+            switch(size ?? "")
+            {
+                case "4m":
+                    initDataAddress = 0x7c000;
+                    break;
+                case "8m":
+                    initDataAddress = 0xfc000;
+                    break;
+                case "16m":
+                case "16m-c1":
+                    initDataAddress = 0x1fc000;
+                    break;
+                case "32m":
+                case "32m-c1":
+                case "32m-c2":
+                    initDataAddress = 0x3fc000;
+                    break;
+            }
+
             List<ProgrammableRegion> regions = new List<ProgrammableRegion>();
+
+            if (initDataAddress != 0)
+            {
+                string initFile;
+                debugMethodConfig.TryGetValue("com.sysprogs.esp8266.init_data_file", out initFile);
+                if (!string.IsNullOrEmpty(initFile))
+                {
+                    if (initFile.StartsWith("$$SYS:BSP_ROOT$$"))
+                        initFile = bspDict["SYS:BSP_ROOT"] + initFile.Substring("$$SYS:BSP_ROOT$$".Length);
+                    if (!Path.IsPathRooted(initFile))
+                        initFile = Path.Combine(bspDict["SYS:PROJECT_DIR"], initFile);
+
+                    if (!File.Exists(initFile))
+                        throw new Exception("Missing configuration file: " + initFile);
+                    regions.Add(new ProgrammableRegion { FileName = initFile, Offset = initDataAddress, Size = File.ReadAllBytes(initFile).Length });
+                }
+            }
 
             using (var elfFile = new ELFFile(targetPath))
             {
@@ -312,6 +349,7 @@ namespace ESP8266DebugPackage
                     }
                 }
             }
+
             return regions;
         }
 

@@ -76,17 +76,20 @@ namespace ESP8266DebugPackage
                 string val;
                 if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.program_flash", out val) || val != "0")
                 {
-                    var wrp = new ResultWrapper();
-                    _SyncContext.Send(o => ((ResultWrapper)o).Result = MessageBox.Show("Please reboot your ESP8266 into the bootloader mode and press OK.", "VisualGDB", MessageBoxButtons.OKCancel, MessageBoxIcon.Information), wrp);
-                    if (wrp.Result != DialogResult.OK)
-                        throw new OperationCanceledException();
+                    if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.gdbstub.suppress_reset_message", out val) || val != "1")
+                    {
+                        var wrp = new ResultWrapper();
+                        _SyncContext.Send(o => ((ResultWrapper)o).Result = MessageBox.Show("Please reboot your ESP8266 into the bootloader mode and press OK.", "VisualGDB", MessageBoxButtons.OKCancel, MessageBoxIcon.Information), wrp);
+                        if (wrp.Result != DialogResult.OK)
+                            throw new OperationCanceledException();
+                    }
 
                     using (var serialPort = new SerialPortStream(debugMethodConfig["com.sysprogs.esp8266.gdbstub.com_port"], int.Parse(debugMethodConfig["com.sysprogs.esp8266.gdbstub.bl_baud"]), System.IO.Ports.Handshake.None))
                     {
                         serialPort.AllowTimingOutWithZeroBytes = true;
                         int resetDelay;
                         if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.reset_delay", out val) || !int.TryParse(val, out resetDelay))
-                            resetDelay = 25;
+                            resetDelay = 50;
 
                         string seq;
                         debugMethodConfig.TryGetValue("com.sysprogs.esp8266.gdbstub.reset_sequence", out seq);
