@@ -291,7 +291,11 @@ namespace StandaloneBSPValidator
             bspDict["SYS:VSAMPLE_DIR"] = sampleDir.Path;
             var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
 
+            var projectCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
+        
             var frameworkCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.Configuration);
+            foreach (var k in projectCfg.Keys)
+                bspDict[k] = projectCfg[k];
             var frameworkIDs = vs.Configuration.Frameworks?.ToDictionary(fw => fw, fw => true);
             prj.AddBSPFilesToProject(bspDict, frameworkCfg, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, frameworkCfg, frameworkIDs);
@@ -610,7 +614,7 @@ namespace StandaloneBSPValidator
 
         public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1)
         {
-            const string defaultToolchainID = "SysGCC-arm-eabi-5.3.0";
+            const string defaultToolchainID = "SysGCC-arm-eabi-6.2.0";
             var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
             if (toolchainPath == null)
                 throw new Exception("Cannot locate toolchain path from registry");
