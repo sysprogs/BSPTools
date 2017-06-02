@@ -48,6 +48,7 @@
 			<Discoverers>
 			  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
 				<TargetDemangledNames>true</TargetDemangledNames>
+				<ReferenceSymbolName>main</ReferenceSymbolName>
 				<TestSymbolRegex>^TEST_$(Scope)_(.*)_TestShell_instance$</TestSymbolRegex>
 				<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
 				<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
@@ -118,6 +119,7 @@
 			<Discoverers>
 			  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
 				<TargetDemangledNames>true</TargetDemangledNames>
+				<ReferenceSymbolName>main</ReferenceSymbolName>
 				<TestSymbolRegex>^TEST_$(Scope)_(.*)_TestShell_instance$</TestSymbolRegex>
 				<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
 				<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
@@ -156,6 +158,7 @@
 			<Discoverers>
 			  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
 				<TargetDemangledNames>true</TargetDemangledNames>
+				<ReferenceSymbolName>main</ReferenceSymbolName>
 				<TestSymbolRegex>^TEST_$(Scope)_(.*)_TestShell_instance$</TestSymbolRegex>
 				<UniqueNameFormat>{0}::{2}</UniqueNameFormat>
 				<UserFriendlyNameFormat>{0}::{2}</UserFriendlyNameFormat>
