@@ -21,6 +21,7 @@ enum TestPacketType
     strpOutputMessage,              //Arguments: type, text
     strpTestFailed,                 //Arguments: a sequence of test objects prefixed by 1-byte TestObjectType
     strpTimestamp,                  //Arguments: 32-bit or 64-bit timestamp
+	strpReferenceAddressReport,		//Arguments: 32-bit or 64-bit reference address (used to support relocatable executables)
 };
 
 enum TestObjectType
