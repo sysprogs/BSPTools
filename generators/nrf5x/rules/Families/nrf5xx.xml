@@ -124,24 +124,6 @@
 					<TargetFolder>components\drivers_nrf</TargetFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
-					<GuardedFiles>
-						<string>nrf_drv_gpiote.c=>GPIOTE_ENABLED</string>
-						<string>nrf_drv_lpcomp.c=>LPCOMP_ENABLED</string>
-						<string>nrf_drv_qdec.c=>QDEC_ENABLED</string>
-						<string>nrf_drv_wdt.c=>WDT_ENABLED</string>
-						<string>nrf_drv_rng.c=>RNG_ENABLED</string>
-						<string>nrf_drv_spi.c=>SPI_COUNT</string>
-
-						<string>nrf_drv_twi.c=>TWI_COUNT</string>
-						<string>nrf_drv_timer.c=>TIMER_COUNT</string>
-						<string>nrf_drv_clock.c=>CLOCK_ENABLED</string>
-
-						<string>nrf_drv_i2s.c=>I2S_ENABLED</string>
-						<string>nrf_drv_pwm.c=>PWM_COUNT</string>
-						<string>nrf_drv_comp.c=>COMP_ENABLED</string>						
-						<string>nrf_drv_saadc.c=>SAADC_ENABLED</string>
-						<string>nrf_drv_twis.c=>TWIS_COUNT</string>
-					</GuardedFiles>
 					<SimpleFileConditions>					
 						<string>saadc\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
 						<string>comp\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
@@ -336,9 +318,6 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries</SourceFolder>
 					<TargetFolder>components\libraries</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
-					<GuardedFiles>
-						<string>simple_timer\\app_simple_timer.c=>TIMER_COUNT</string>
-					</GuardedFiles>
 					<SimpleFileConditions>
 						<string>atomic\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.atomic$$ == yes</string> 
 						<string>atomic_fifo\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo$$ == yes</string> 

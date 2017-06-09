@@ -477,7 +477,7 @@ namespace StandaloneBSPValidator
                 string ext = Path.GetExtension(sf);
                 if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
                 {
-                    if (ext != ".txt")
+                    if (ext != ".txt" && ext != ".a")
                         Console.WriteLine($"#{sf} is not a recognized source file");
                 }
                 else

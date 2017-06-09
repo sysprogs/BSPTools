@@ -147,7 +147,7 @@ namespace BSPGenerationTools
         protected AutoDetectedFramework[] AutoDetectedFrameworks;
         protected PathMapping[] AutoPathMappings;
 
-        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref ParsedDependency[] dependencies)
+        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref ParsedDependency[] dependencies, PropertyDictionary2 mcuConfiguration)
         {
             List<AutoDetectedFramework> matchedFrameworks = new List<AutoDetectedFramework>();
 
@@ -180,7 +180,8 @@ namespace BSPGenerationTools
             return new VendorSampleConfiguration
             {
                 Frameworks = matchedFrameworks.Select(f => f.FrameworkID).Distinct().ToArray(),
-                Configuration = new PropertyDictionary2 { Entries = matchedFrameworks.SelectMany(f => f.Configuration).Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value }).ToArray() }
+                Configuration = new PropertyDictionary2 { Entries = matchedFrameworks.SelectMany(f => f.Configuration).Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value }).ToArray() },
+                MCUConfiguration = mcuConfiguration
             };
         }
 
@@ -215,7 +216,7 @@ namespace BSPGenerationTools
                 mapper.MapPathList(ref s.IncludeDirectories);
                 mapper.MapPathList(ref s.SourceFiles);
 
-                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps);
+                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps, s.Configuration.MCUConfiguration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
                 foreach (var dep in deps)
@@ -239,6 +240,7 @@ namespace BSPGenerationTools
 
             Console.WriteLine("Updating BSP...");
             VendorSampleDirectory finalDir = new VendorSampleDirectory { Samples = finalSamples.ToArray() };
+            Directory.CreateDirectory(outputDir);
 
             using (var fs = File.Create(Path.Combine(outputDir, "VendorSamples.xml.gz")))
             using (var gs = new GZipStream(fs, CompressionMode.Compress))

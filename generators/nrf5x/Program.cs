@@ -442,7 +442,7 @@ namespace nrf5x
             {
                 strPackageID = "com.sysprogs.arm.nordic.nrf5x";
                 strPackageDesc = "Nordic NRF52x Devices";
-                strPAckVersion = "13.0r2";
+                strPAckVersion = "13.0r3";
             }
 
             BoardSupportPackage bsp = new BoardSupportPackage

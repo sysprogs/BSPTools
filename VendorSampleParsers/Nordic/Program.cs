@@ -38,7 +38,7 @@ namespace NordicVendorSampleParser
             return aCountUp;
         }
         //-----------------------------------------------
-        static string BuildAbsolutPath(string pDir, string s)
+        static string BuildAbsolutePath(string pDir, string s)
         {
             var RelativePath = s;
             if (Path.IsPathRooted(RelativePath))
@@ -48,22 +48,22 @@ namespace NordicVendorSampleParser
             return (string.Join("/", pDir.Split('\\').Reverse().Skip(aCountUp).Reverse()) + "/" + RelativePath);
         }
         //-----------------------------------------------
-        static void BuildAbsolutPath(string pStartDir, ref List<string> pLstDir)
+        static void BuildAbsolutePath(string pStartDir, ref List<string> pLstDir)
         {
             for (int c = 0; c < pLstDir.Count(); c++)
             {
-                pLstDir[c] = BuildAbsolutPath(pStartDir, pLstDir[c]);
+                pLstDir[c] = BuildAbsolutePath(pStartDir, pLstDir[c]);
             }
         }
         //-----------------------------------------------
-        static void PatchesFiles()
+        static void ApplyKnownPatches()
         {
             string fn = Path.Combine(SDKdir, @"examples\peripheral\twi_master_with_twis_slave\config.h");
 
             if (!File.Exists(fn))
                 throw new Exception($"No exists file {fn}");
 
-            PachFilesInsert(fn,
+            InsertLinesIntoFile(fn,
                 new string[] { "#undef BIG_ENDIAN", "#undef LITTLE_ENDIAN" },
                 "#define EEPROM_SIM_ADDRESS_LEN_BYTES    2");
 
@@ -72,10 +72,23 @@ namespace NordicVendorSampleParser
             if (!File.Exists(fn))
                 throw new Exception($"No exists file {fn}");
 
-            PachFilesInsert(fn,
+            InsertLinesIntoFile(fn,
                 new string[] { "#undef NRF52832_XXAA" },
                 "#include \"nrf_gpio.h\"");
         }
+
+        class NordicSampleRelocator : VendorSampleRelocator
+        {
+            public NordicSampleRelocator()
+            {
+                AutoDetectedFrameworks = new AutoDetectedFramework[0];
+                AutoPathMappings = new PathMapping[]
+                {
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(components|config|external)/(.*)", "$$SYS:BSP_ROOT$$/nRF5x/{1}/{2}"),
+                };
+            }
+        }
+
         //-----------------------------------------------
         static void Main(string[] args)
         {
@@ -88,9 +101,9 @@ namespace NordicVendorSampleParser
             SDKdir = args[0];
             tempDir = args[1];
 
-            toolchainDir = File.ReadAllLines(@"..\..\Makefile.windows")[0].Split('=')[1].Trim(' ');
+            toolchainDir = File.ReadAllLines(SDKdir + @"\components\toolchain\gcc\Makefile.windows")[0].Split('=')[1].Trim(' ');
 
-            PatchesFiles();
+            ApplyKnownPatches();
             string sampleListFile = Path.Combine(outputDir, "samples.xml");
             var sampleDir = BuildOrLoadSampleDirectory(SDKdir, outputDir, sampleListFile);
             if (sampleDir.Samples.FirstOrDefault(s => s.AllDependencies != null) == null)
@@ -101,6 +114,9 @@ namespace NordicVendorSampleParser
             }
 
             //Insert the samples into the generated BSP
+            var relocator = new NordicSampleRelocator();
+            relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir);
+
             var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspDir, "bsp.xml"));
             bsp.VendorSampleDirectoryPath = "VendorSamples";
             bsp.VendorSampleCatalogName = "Nordic SDK Samples";
@@ -109,6 +125,12 @@ namespace NordicVendorSampleParser
             string archiveName = string.Format("{0}-{1}.vgdbxbsp", bsp.PackageID.Split('.').Last(), bsp.PackageVersion);
             string statFile = Path.ChangeExtension(archiveName, ".xml");
             TarPacker.PackDirectoryToTGZ(bspDir, Path.Combine(bspDir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp" && Path.GetFileName(fn) != statFile);
+
+            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
+            expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
+            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir);
+            if (result.Failed > 0)
+                throw new Exception("Some of the vendor samples failed to build. Check the build log.");
         }
         //-----------------------------------------------
         private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile)
@@ -142,7 +164,7 @@ namespace NordicVendorSampleParser
             return sampleDir;
         }
         //-----------------------------------------------
-        static void PachFilesInsert(string filename, string[] insertLines, string AfterLines)
+        static void InsertLinesIntoFile(string filename, string[] insertLines, string AfterLines)
         {
             Patch.InsertLines p = new Patch.InsertLines
             {
@@ -159,7 +181,7 @@ namespace NordicVendorSampleParser
             File.WriteAllLines(filename, allLines);
         }
         //-----------------------------------------------
-        static VendorSample ParseLogMake(string namelog)
+        static VendorSample ParseNativeBuildLog(string namelog)
         {
             VendorSample vs = new VendorSample();
             List<string> lstFileC = new List<string>();
@@ -201,9 +223,8 @@ namespace NordicVendorSampleParser
                 lstFileC.AddRange(Libs);
             }
 
-            BuildAbsolutPath(aCurDir, ref lstFileInc);
-
-            BuildAbsolutPath(aCurDir, ref lstFileC);
+            BuildAbsolutePath(aCurDir, ref lstFileInc);
+            BuildAbsolutePath(aCurDir, ref lstFileC);
 
             var aProjectName = File.ReadAllLines(Path.Combine(aCurDir, "Makefile")).Single(ln => ln.StartsWith("PROJECT_NAME")).Split('=')[1].Trim(' ').ToUpper();
 
@@ -303,7 +324,11 @@ namespace NordicVendorSampleParser
                     Console.WriteLine($"No Log file {1}", Path.GetDirectoryName(makefile));
                     continue;
                 }
-                var vs = ParseLogMake(nameLog);
+                var vs = ParseNativeBuildLog(nameLog);
+                vs.Path = Path.GetDirectoryName(makefile);
+                while (Directory.GetFiles(vs.Path, "*.c").Length == 0)
+                    vs.Path = Path.GetDirectoryName(vs.Path);
+
                 allSamples.Add(vs);
                 //Clear
                 File.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "log.txt"));
