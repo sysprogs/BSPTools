@@ -153,7 +153,7 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L1_V1.6.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
+					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32l1????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>		
 					<Patches>
