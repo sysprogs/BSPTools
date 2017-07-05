@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <ToolchainPath>[SysGCC-arm-eabi-6.2.0]</ToolchainPath>
-    <BSPPath>$$JOBDIR$$\Output</BSPPath>
+    <BSPPath>C:\Users\jon\AppData\Local\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32old</BSPPath>
 	<DeviceRegex>STM32.*</DeviceRegex>
 	<Samples>
 		 <TestedSample>
@@ -65,11 +65,6 @@
 			<RegisterRegex>sTxMailBox|sFIFOMailBox|sFilterRegister</RegisterRegex>
 			<Offset>-1</Offset>
 			<Mode>WithSuffix</Mode>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterSetRegex>HSEM</RegisterSetRegex>
-			<RegisterRegex>R|RLR</RegisterRegex>
-			<Offset>-1</Offset>
 		</RegisterRenamingRule>
 	</RegisterRenamingRules>
 </TestJob>

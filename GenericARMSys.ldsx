@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <LinkerScriptTemplate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <EntryPoint>Reset_Handler</EntryPoint>
+  <EntryPoint>Reset_HandlerSys</EntryPoint>
   <SectionAlignment>4</SectionAlignment>
   <Sections>
 	<Section>
@@ -137,5 +137,23 @@
 			</SectionReference>
 		</Inputs>
 	</Section>  
-  </SectionsAfterEnd> 
+  </SectionsAfterEnd>
+  <SymbolAliases>
+	<SymbolAlias>
+		<Name>__isr_vector</Name>
+		<Target>g_pfnVectors</Target>
+	</SymbolAlias>
+	<SymbolAlias>
+		<Name>__StackLimit</Name>
+		<Target>_estack</Target>
+	</SymbolAlias>
+	<SymbolAlias>
+		<Name>__StackTop</Name>
+		<Target>__reserved_for_stack_start__</Target>
+	</SymbolAlias>
+	<SymbolAlias>
+		<Name>__etext</Name>
+		<Target>_etext</Target>
+	</SymbolAlias>
+  </SymbolAliases>
 </LinkerScriptTemplate>

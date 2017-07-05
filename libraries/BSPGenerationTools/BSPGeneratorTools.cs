@@ -660,7 +660,7 @@ namespace BSPGenerationTools
 
         }
 
-        public void AttachStartupFiles(IEnumerable<StartupFileGenerator.InterruptVectorTable> files, string startupFileFolder = "StartupFiles")
+        public void AttachStartupFiles(IEnumerable<StartupFileGenerator.InterruptVectorTable> files, string startupFileFolder = "StartupFiles",string pFileNameTemplate = "StartupFileTemplate.c")
         {
             var allFiles = files.ToArray();
             foreach (var mcu in MCUs)
@@ -671,7 +671,7 @@ namespace BSPGenerationTools
                     if (f.MatchPredicate == null || f.MatchPredicate(mcu))
                     {
                         mcu.StartupFile = "$$SYS:BSP_ROOT$$/" + FamilyFilePrefix + startupFileFolder + "/" + f.FileName;
-                        f.Save(Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, startupFileFolder, f.FileName));
+                        f.Save(Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, startupFileFolder, f.FileName), pFileNameTemplate);
                         matched = true;
                         break;
                     }

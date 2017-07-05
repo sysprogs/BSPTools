@@ -111,7 +111,7 @@ namespace BSPGenerationTools
                 return input.Select(i => i.Replace("$$ALIGN_SPACE_OFFSET$$", new string(' ', maxOff - i.IndexOf("$$ALIGN_SPACE_OFFSET$$")))).ToList();
             }
 
-            internal void Save(string fn)
+            internal void Save(string fn,string pFileNameTemplate)
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fn));
                 using (var sw = File.CreateText(fn))
@@ -119,7 +119,7 @@ namespace BSPGenerationTools
                     if (Vectors[0].Name != "_estack" || Vectors[1].Name != "Reset_Handler")
                         throw new Exception("Unexpected vector table layout");
 
-                    var templateLines = File.ReadAllLines("StartupFileTemplate.c");
+                    var templateLines = File.ReadAllLines(pFileNameTemplate);
                     for (int l = 0; l < templateLines.Length; l++ )
                     {
                         var line = templateLines[l];

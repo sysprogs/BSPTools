@@ -1,4 +1,5 @@
 #include <$$com.sysprogs.stm32.hal_header_prefix$$_hal.h>
+#include <stm32_hal_legacy.h>
 
 #ifdef __cplusplus
 extern "C"

@@ -27,6 +27,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
+#include <stm32_hal_legacy.h>
 #include <usbd_core.h>
 #include <usbd_cdc.h>
 /* Private typedef -----------------------------------------------------------*/

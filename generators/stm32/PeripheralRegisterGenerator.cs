@@ -237,9 +237,13 @@ namespace stm32_bsp_generator
             public string Prefix;
             public string SearchedText;
             public string ReplacementText;
+            public string RegexFile;
 
-            public bool Apply(ref string line)
+            public bool Apply(ref string line, string pfilename)
             {
+                if(RegexFile!=null)
+                  if (!Regex.IsMatch(pfilename,$"^{RegexFile}$"))
+                    return false;
                 if (!line.StartsWith(Prefix))
                     return false;
                 if (!line.Contains(SearchedText))
@@ -547,6 +551,8 @@ namespace stm32_bsp_generator
                 {
                     if (set.Value.Value == "USB")
                         continue;
+                    if (set.Value.Value == "SDMMC")
+                        continue;
                     throw new Exception("Cannot find base address for " + set.Value.Value);
                 }
                 if (registerset_addresses.ContainsKey(set_name + "1") && (set_addr == registerset_addresses[set_name + "1"]))
@@ -558,7 +564,9 @@ namespace stm32_bsp_generator
                         continue;
                     if(set.Value.Key == "DMA_request")
                         continue;
-                    throw new Exception("Unknown set type: " + set.Value.Key);
+                    if (set.Value.Key == "RCC_Core")
+                        continue;
+                       throw new Exception("Unknown set type: " + set.Value.Key);
                 
                 }
        
@@ -647,66 +655,72 @@ namespace stm32_bsp_generator
                         List<HardwareSubRegister> subregs;
                         if (subregisters.TryGetValue("HRTIM_" + register.Name, out subregs))
                             register.SubRegisters = subregs.ToArray();
-                        else if (register.Name.EndsWith("UPR"))
+                        else if (register.Name.EndsWith("UPR") || register.Name.EndsWith("DLLCR"))
                             continue;
                         else
                             errors.AddError(new RegisterParserErrors.MissingSubregisterDefinitions { FileName = PeripheralHeaderFile, SetName = set_name, RegisterName = register.Name });
                     }
                     else if ((set_name == "DAC") && (register.Name == "DHR12R2"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
-                            new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 0, SizeInBits = 12 } 
+                        register.SubRegisters = new HardwareSubRegister[] {
+                            new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 0, SizeInBits = 12 }
                         };
                     }
                     else if ((set_name == "DAC") && (register.Name == "DHR12L2"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
-                            new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 4, SizeInBits = 12 } 
+                        register.SubRegisters = new HardwareSubRegister[] {
+                            new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 4, SizeInBits = 12 }
                         };
                     }
                     else if ((set_name == "DAC") && (register.Name == "DHR8R2"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
-                            new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 0, SizeInBits = 8 } 
+                        register.SubRegisters = new HardwareSubRegister[] {
+                            new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 0, SizeInBits = 8 }
                         };
                     }
                     else if ((set_name == "DAC") && (register.Name == "DHR12RD"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
+                        register.SubRegisters = new HardwareSubRegister[] {
                             new HardwareSubRegister { Name = "DACC1DHR", FirstBit = 0, SizeInBits = 12 },
                             new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 16, SizeInBits = 12 }
                         };
                     }
                     else if ((set_name == "DAC") && (register.Name == "DHR12LD"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
+                        register.SubRegisters = new HardwareSubRegister[] {
                             new HardwareSubRegister { Name = "DACC1DHR", FirstBit = 4, SizeInBits = 12 },
                             new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 20, SizeInBits = 12 }
                         };
                     }
                     else if ((set_name == "DAC") && (register.Name == "DHR8RD"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
+                        register.SubRegisters = new HardwareSubRegister[] {
                             new HardwareSubRegister { Name = "DACC1DHR", FirstBit = 0, SizeInBits = 8 },
                             new HardwareSubRegister { Name = "DACC2DHR", FirstBit = 8, SizeInBits = 8 }
                         };
                     }
                     else if ((set_name == "DAC") && (register.Name == "DOR2"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
+                        register.SubRegisters = new HardwareSubRegister[] {
                             new HardwareSubRegister { Name = "DACC2DOR", FirstBit = 0, SizeInBits = 12 }
                         };
                     }
                     else if ((set_type == "USB_OTG") && (register.Name == "HNPTXSTS"))//Header BUG: subregister definition missing
                     {
-                        register.SubRegisters = new HardwareSubRegister[] { 
+                        register.SubRegisters = new HardwareSubRegister[] {
                             new HardwareSubRegister { Name = "NPTXQTOP", FirstBit = 24, SizeInBits = 7 },
                             new HardwareSubRegister { Name = "NPTQXSAV", FirstBit = 16, SizeInBits = 8 },
                             new HardwareSubRegister { Name = "NPTXFSAV", FirstBit = 0, SizeInBits = 16 }
                         };
                     }
-                    else if (((set_name == "FLASH") && ((register.Name == "KEYR2") || (register.Name == "SR2") || (register.Name == "CR2") || (register.Name == "AR2"))))// Reuse subregisters from non-2 FLASH registers
-                        register.SubRegisters = subregisters[set_type + "_" + register.Name.Substring(0, register.Name.Length - 1)].ToArray();
+                    else if (((set_name == "FLASH") && ((register.Name == "KEYR2") || (register.Name == "SR2") || (register.Name == "CR2") ||
+                        (register.Name == "CCR1") || (register.Name == "CCR2") || (register.Name == "CRCCR1") || (register.Name == "CRCCR2") ||
+                        (register.Name.StartsWith("CRC")) || (register.Name == "ECC_FA1") || (register.Name == "ECC_FA2") ||
+                        (register.Name == "SR1") || (register.Name == "CR1") || (register.Name == "AR2"))))// Reuse subregisters from non-2 FLASH registers
+                        if (subregisters.ContainsKey(set_type + "_" + register.Name.Substring(0, register.Name.Length - 1)))
+                            register.SubRegisters = subregisters[set_type + "_" + register.Name.Substring(0, register.Name.Length - 1)].ToArray();
+                        else
+                            continue;
                     else if ((set_name.StartsWith("GPIO") && ((register.Name == "BSRRL") || (register.Name == "BSRRH"))))// Reuse subregisters from BSRR defs
                         register.SubRegisters = subregisters[set_type + "_" + register.Name.Substring(0, register.Name.Length - 1)].ToArray();
                     else if (((set_name.StartsWith("DMA1_Stream") || (set_name.StartsWith("DMA2_Stream"))) && (register.Name == "CR")))// Reuse subregisters from DMA_SxCR defs
@@ -719,26 +733,28 @@ namespace stm32_bsp_generator
                         register.SubRegisters = subregisters["OPAMPx_CSR"].ToArray();
                     else if ((set_name.StartsWith("OPAMP")) && (register.Name == "CSR"))// Reuse subregisters from OPAMPx_CSR defs
                         register.SubRegisters = subregisters[set_name + "_" + register.Name].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "IMR2"))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "IMR2") && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_IMR"].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "EMR2"))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "EMR2") && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_EMR"].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "RTSR2"))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "RTSR2") && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_RTSR"].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "FTSR2"))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "FTSR2") && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_FTSR"].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "SWIER2"))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "SWIER2") && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_SWIER"].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "PR2"))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name == "PR2") && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_PR"].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name.StartsWith("TSR")))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name.StartsWith("TSR")) && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_TSR"].ToArray();
-                    else if ((set_name.StartsWith("EXTI")) && (register.Name.StartsWith("CR")))// Reuse subregisters
+                    else if ((set_name.StartsWith("EXTI")) && (register.Name.StartsWith("CR")) && !(set_name.StartsWith("EXTI_D")))// Reuse subregisters
                         register.SubRegisters = subregisters["EXTI_CR"].ToArray();
                     else if ((set_name.StartsWith("ADC1_2")))// Reuse subregisters
                         register.SubRegisters = subregisters["ADC12_" + register.Name].ToArray();
                     else if ((set_name.StartsWith("ADC1_")))// Reuse subregisters
                         register.SubRegisters = subregisters["ADC_" + register.Name].ToArray();
+                    else if ((set_type == "ADC_Common" && register.Name == "CDR2"))// Reuse subregisters
+                        register.SubRegisters = subregisters["ADC123_" + register.Name].ToArray();
                     else if ((set_name.StartsWith("ADC12_")))// Reuse subregisters
                         register.SubRegisters = subregisters["ADC_" + register.Name].ToArray();
                     else if ((set_name.StartsWith("ADC3_4")))// Reuse subregisters
@@ -765,6 +781,20 @@ namespace stm32_bsp_generator
                         register.SubRegisters = subregisters["USB_OTG_DIEPTXF"].ToArray();
                     else if (((set_type == "USB_OTG") && (register.Name.StartsWith("DIEPTXF"))))// Reuse subregisters
                         register.SubRegisters = subregisters["USB_OTG_DIEPTXF"].ToArray();
+                    else if (set_type == "FDCAN_ClockCalibrationUnit")// Reuse subregisters
+                        register.SubRegisters = subregisters["FDCANCCU_" + register.Name].ToArray();
+                    else if (set_type == "COMPOPT")// Reuse subregisters
+                        register.SubRegisters = subregisters[$"COMP_{ register.Name}"].ToArray();
+                    else if ((set_type == "COMP" || set_type == "COMP_Common") && register.Name == "CFGR")// Reuse subregisters
+                        register.SubRegisters = subregisters["COMP_CFGRx"].ToArray();
+                    else if (set_type == "EXTI_Core")// Reuse subregisters
+                        register.SubRegisters = subregisters["EXTI_" + register.Name].ToArray();
+                    else if (set_type == "BDMA_Channel")// Reuse subregisters
+                        register.SubRegisters = subregisters["BDMA_" + register.Name].ToArray();
+                    else if (set_type.StartsWith ("DMAMUX"))// Reuse subregisters
+                        continue;
+                    else if (set_type == "MDMA_Channel")// Reuse subregisters
+                        register.SubRegisters = subregisters["MDMA_" + register.Name].ToArray();
                     else if (set_type == "DFSDM_Channel" || set_type == "DFSDM_Filter")
                     {
                         List<HardwareSubRegister> subregs;
@@ -936,6 +966,7 @@ namespace stm32_bsp_generator
 
             Dictionary<string, int> dict_type_sizes = new Dictionary<string, int>();
             dict_type_sizes["uint32_t"] = 32;
+            dict_type_sizes["int32_t"] = 32;
             dict_type_sizes["uint16_t"] = 16;
             dict_type_sizes["uint8_t"] = 8;
 
@@ -948,7 +979,7 @@ namespace stm32_bsp_generator
                 int set_size = 0;
 
                 RegexOptions option = RegexOptions.IgnoreCase;
-                Regex register_regex = new Regex(@"[ ]*(__IO|__I)*[ ]*(?:const )*[ ]*([^ #\r\n]*)[ ]*(?:const )*([^\[;#\r\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r\n]*)[ ]*(\*/)*[ ]*(\r\n)*", option);
+                Regex register_regex = new Regex(@"[ \t]*(__IO|__I)*[ ]*(?:const )*[ ]*([^ #\r\n]*)[ ]*(?:const )*([^\[;#\r\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r\n]*)[ ]*(\*/)*[ ]*(\r\n)*", option);
  
                 var regs = register_regex.Matches(strct.Groups[1].Value);
 
@@ -1084,7 +1115,7 @@ namespace stm32_bsp_generator
                     || (line.StartsWith("#define DFSDM_Channel") && line.Contains("DFSDM1_Channel"))
                     || (line.StartsWith("#define DFSDM_Filter") && line.Contains(" DFSDM1_Filter"))
                     || (line.StartsWith("#define DAC ") && line.Contains(" DAC1"))
-
+                    || (line.Contains("#define USB_OTG") && (line.Contains("USB1_OTG") || line.Contains("USB2_OTG")))//stm32h7
                         )
                     continue;
                 
@@ -1282,8 +1313,11 @@ namespace stm32_bsp_generator
                     break;
                 string line = lines[nextLine++];
 
+                if (line.Contains(" Instances ***"))
+                    break;
+
                 foreach (var patch in cfg.LinePatches)
-                    if (patch.Apply(ref line))
+                    if (patch.Apply(ref line, Path.GetFileName(fileName)))
                         break;
 
                 Match m;
@@ -1386,7 +1420,7 @@ namespace stm32_bsp_generator
                     line = lines[nextLine++];
 
                     foreach (var patch in cfg.SubregisterLinePatches)
-                        if (patch.Apply(ref line))
+                        if (patch.Apply(ref line,fileName))
                         {
                           //  Console.WriteLine("\r\n patch SubregisterLinePatches " + line);
                             break;
@@ -1467,7 +1501,11 @@ namespace stm32_bsp_generator
                                 subreg_name != "HASH_CR_LKEY" &&
                                 subreg_name != "WDG_KR_KEY" &&
                                 !subreg_name.StartsWith("RCC_CFGR_") &&
-                                subreg_name != "FLASH_OPTR_SRAM2_RST")
+                                subreg_name != "FLASH_OPTR_SRAM2_RST" &&
+                                !subreg_name.StartsWith("HSEM_") &&
+                                subreg_name != "FDCAN_HPMS_MSI" &&
+                                subreg_name != "RCC_PLLCKSELR_PLLSRC_HSE")
+
                             {
                                 throw new Exception("Potential missed known subregister value!");
                             }

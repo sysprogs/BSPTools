@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>USB Communications Device</Name>
+	<Description>This is a basic USB CDC device based on the ST USB library</Description>
+	<MCUFilterRegex>STM32H7.*</MCUFilterRegex>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties/>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.stm32.hal</string>
+		<string>com.sysprogs.arm.stm32.usbdev</string>
+	</RequiredFrameworks>
+	<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+</EmbeddedProjectSample>

@@ -8,8 +8,8 @@ extern void *_estack;
 
 #define NULL ((void *)0)
 
-void Reset_Handler();
-void Default_Handler();
+void Reset_HandlerSys();
+void Default_HandlerIRQ();
 
 #ifdef DEBUG_DEFAULT_INTERRUPT_HANDLERS
 void __attribute__ ((weak)) $$VECTOR$$() $@+7
@@ -21,13 +21,13 @@ void __attribute__ ((weak)) $$VECTOR$$() $@+7
 }
 
 #else
-void $$VECTOR$$() $$ALIGN_SPACE_OFFSET$$ __attribute__ ((weak, alias ("Default_Handler")));
+void $$VECTOR$$() $$ALIGN_SPACE_OFFSET$$ __attribute__ ((weak, alias ("Default_HandlerIRQ")));
 #endif
 
 void * g_pfnVectors[$$VECTOR_TABLE_SIZE$$] __attribute__ ((section (".isr_vector"), used)) = 
 {
 	&_estack,
-	&Reset_Handler,
+	&Reset_HandlerSys,
 	$$VECTOR_POINTER$$,
 };
 
@@ -38,7 +38,7 @@ int main();
 extern void *_sidata, *_sdata, *_edata;
 extern void *_sbss, *_ebss;
 
-void __attribute__((naked, noreturn)) Reset_Handler()
+void __attribute__((naked, noreturn)) Reset_HandlerSys()
 {
 	$$EXTRA_RESET_HANDLER_CODE$$
 	//Normally the CPU should will setup the based on the value from the first entry in the vector table.
@@ -60,7 +60,7 @@ void __attribute__((naked, noreturn)) Reset_Handler()
 	for (;;) ;
 }
 
-void __attribute__((naked, noreturn)) Default_Handler()
+void __attribute__((naked, noreturn)) Default_HandlerIRQ()
 {
 	//If you get stuck here, your code is missing a handler for some interrupt.
 	//Define a 'DEBUG_DEFAULT_INTERRUPT_HANDLERS' macro via VisualGDB Project Properties and rebuild your project.
