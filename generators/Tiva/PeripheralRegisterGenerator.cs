@@ -40,7 +40,7 @@ namespace Tiva_bsp_generator
 
             foreach(var header in headerFiles)
             {
-                ProcessRegisterSetTypes(header, ref types);
+                ProcessRegisterSetTypes(header, types);
                 ProcessSubregisters(header, ref subregs);
             }
 
@@ -61,11 +61,11 @@ namespace Tiva_bsp_generator
                 for (int i = 0; i < registers.Count; i++)
                 {
                     var register = registers[i];
-
-                    string hex_offset = register.Address;
+                    bool isOffset = register.Address.StartsWith("+");
+                    string hex_offset = register.Address.TrimStart('+');
                     if (!string.IsNullOrEmpty(hex_offset))
                     {
-                        ulong offset = ParseHex(hex_offset);
+                        int offset = (int)ParseHex(hex_offset);
 
                         if (isGPIOPort && register.Name == "DATA")
                         {
@@ -74,7 +74,17 @@ namespace Tiva_bsp_generator
                             offset += 0xff << 2;
                         }
 
-                        hex_offset = register.Address = FormatToHex((addresses[set_name].Value + offset));
+                        ulong baseAddr;
+                        if (isOffset)
+                        {
+                            baseAddr = addresses[set_name].Value;
+                            if (Math.Abs(offset) > 0xF000)
+                                throw new Exception("Unexpected register offset for " + register.Name);
+                        }
+                        else
+                            baseAddr = 0;
+
+                        hex_offset = register.Address = FormatToHex((ulong)((long)baseAddr + offset));
                     }
                     else
                         throw new Exception("Register address not specified!");
@@ -140,7 +150,7 @@ namespace Tiva_bsp_generator
             return addresses;
         }
 
-        private static void ProcessRegisterSetTypes(string file, ref Dictionary<string, HardwareRegisterSet> types)
+        private static void ProcessRegisterSetTypes(string file, Dictionary<string, HardwareRegisterSet> types)
         {
             Regex type_regex = new Regex(@"\/\/[ \t]+The following are defines for the ([A-Za-z0-9_\/ ]+) register[ \n\r\/]+(offsets|addresses).[^#]+([^\*]+)\/\/\*", RegexOptions.Singleline);
             var type_m = type_regex.Matches(File.ReadAllText(file));
@@ -161,6 +171,7 @@ namespace Tiva_bsp_generator
                     string type_name2 = m2.Groups[1].ToString();
                     if (type_name != type_name2)
                         type_name = type_name2;
+                    bool isOffset = m2.Groups[2].Value == "_O";
                     string reg_name = m2.Groups[3].ToString();
                     string reg_addr = m2.Groups[4].ToString();
                     string comment = m2.Groups[5].ToString();
@@ -171,6 +182,8 @@ namespace Tiva_bsp_generator
                             comment += " " + cont_comment.Trim().Substring(2).Trim();
                     }
 
+                    if (isOffset)
+                        reg_addr = "+" + reg_addr;
                     regs.Add(new HardwareRegister { Name = reg_name, Address = reg_addr, SizeInBits = REGISTERLENGTHINBITS });
 
                     index += m2.Length;

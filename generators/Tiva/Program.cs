@@ -239,7 +239,7 @@ namespace Tiva_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
 
-                PackageVersion = "2.1.3.156r2"
+                PackageVersion = "2.1.3.156r3"
             };
 
             bspBuilder.Save(bsp, true);
