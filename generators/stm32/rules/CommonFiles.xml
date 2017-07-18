@@ -302,7 +302,7 @@
 				</CopyJob>
 			</CopyJobs>
 		</Framework>	
-		<!--Framework>
+		<Framework>
 			<Name>PolarSSL</Name>
 			<ID>com.sysprogs.arm.stm32.PolarSSL</ID>
 			     <ConfigurationFileTemplates>
@@ -319,7 +319,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.6.0\Middlewares\Third_Party\PolarSSL</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\PolarSSL</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-programs\*;-tests\*;-visualc\*;-scripts\*;-doxygen\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -359,7 +359,7 @@
 					</Patches>
 				</CopyJob>
 			</CopyJobs>
-		</Framework-->	
+		</Framework>	
 		<Framework>
 			<Name>FatFs</Name>
 			<ID>com.sysprogs.arm.stm32.FatFs</ID>

@@ -469,8 +469,9 @@ err_t ethernetif_init(struct netif *netif)
 
   return ERR_OK;
 }
+
 u32_t sys_now(void)
 {
-	return 0;
+    return HAL_GetTick();
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
