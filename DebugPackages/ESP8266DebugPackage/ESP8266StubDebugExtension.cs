@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+#if UNUSED
 namespace ESP8266DebugPackage
 {
     class ESP8266StubDebugExtension : IDebugMethodExtension2
@@ -39,7 +40,7 @@ namespace ESP8266DebugPackage
                 public DialogResult Result;
             }
 
-            public CustomStartupSequence BuildSequence(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
+            public BSPEngine.CustomStartupSequence BuildSequence(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
             {
                 if (!File.Exists(targetPath))
                     throw new Exception(targetPath + " not found. Debugging will not be possible.");
@@ -95,7 +96,7 @@ namespace ESP8266DebugPackage
                         debugMethodConfig.TryGetValue("com.sysprogs.esp8266.gdbstub.reset_sequence", out seq);
                         ESP8266BootloaderClient client = new ESP8266BootloaderClient(serialPort, resetDelay, seq);
                         client.Sync();
-                        var regions = ESP8266StartupSequence.BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
+                        var regions = ESP8266StartupSequence.BuildFLASHImages(service, debugMethodConfig, lineHandler);
 
                         ProgramProgressForm frm = null;
                         _SyncContext.Post(o => { frm = new ProgramProgressForm(); frm.ShowDialog(); }, null);
@@ -132,11 +133,11 @@ namespace ESP8266DebugPackage
                 if (debugMethodConfig?.TryGetValue("SYS:PROGRAM_WITHOUT_DEBUGGING", out tmp) == true && tmp == "1")
                     return null;    //Suppress connecting to gdb
 
-                return new CustomStartupSequence
+                return new BSPEngine.CustomStartupSequence
                 {
-                    Steps = new List<CustomStartStep> { 
-                        new CustomStartStep("set serial baud $$com.sysprogs.esp8266.gdbstub.baud$$"),
-                        new CustomStartStep(@"target remote \\.\$$com.sysprogs.esp8266.gdbstub.com_port$$"),
+                    Steps = new List<BSPEngine.CustomStartStep> { 
+                        new BSPEngine.CustomStartStep("set serial baud $$com.sysprogs.esp8266.gdbstub.baud$$"),
+                        new BSPEngine.CustomStartStep(@"target remote \\.\$$com.sysprogs.esp8266.gdbstub.com_port$$"),
                     }
                 };
             }
@@ -164,3 +165,4 @@ namespace ESP8266DebugPackage
 
     }
 }
+#endif

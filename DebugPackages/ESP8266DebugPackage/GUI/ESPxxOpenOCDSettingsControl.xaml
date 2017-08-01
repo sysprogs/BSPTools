@@ -50,6 +50,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.Resources>
             <Style TargetType="TextBlock" BasedOn="{StaticResource ResourceKey={x:Type TextBlock}}">
@@ -161,7 +163,7 @@
         </ListBox>
 
         <TextBlock Text="FLASH Size:" Grid.Row="3"/>
-        <ListBox Grid.Row="3" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHSizes}" 
+        <ComboBox Grid.Row="3" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHSizes}" 
                  SelectedItem="{Binding FLASHSettings.Size}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
 
         <TextBlock Text="FLASH Mode:" Grid.Row="4"/>
@@ -173,8 +175,8 @@
         <ListBox Grid.Row="5" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHFrequencies}" 
                  SelectedItem="{Binding FLASHSettings.Frequency}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
 
-        <TextBlock Text="FLASH Voltage:" Grid.Row="6"/>
-        <ListBox Grid.Row="6" Grid.Column="1" Margin="{StaticResource TableElementMargin}"
+        <TextBlock Text="FLASH Voltage:" Grid.Row="6" Visibility="{Binding ESP32Visibility}"/>
+        <ListBox Grid.Row="6" Grid.Column="1" Margin="{StaticResource TableElementMargin}" Visibility="{Binding ESP32Visibility}"
                  SelectedItem="{Binding FLASHVoltage}" SelectionChanged="RaiseSettingsChangedEvent">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -192,7 +194,35 @@
             </ListBox.ItemsSource>
         </ListBox>
 
-        <Expander Grid.ColumnSpan="2" Grid.Row="7" Header="Additional FLASH resources to program" IsExpanded="False">
+        <TextBlock Text="Reset Mode:" Grid.Row="7"/>
+        <ListBox Grid.Row="7" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.ResetModes}" 
+                 SelectedItem="{Binding ResetMode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+
+        <TextBlock Text="Sector sizes:" Grid.Row="8" Visibility="{Binding ESP8266Visibility}"/>
+        <Grid Grid.Row="8" Grid.Column="9" Visibility="{Binding ESP8266Visibility}" Margin="{StaticResource TableElementMargin}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Program:"/>
+            <TextBox Text="{Binding ProgramSectorSize}" Grid.Column="1" VerticalContentAlignment="Center"/>
+            <TextBlock Text="Erase:" Grid.Column="2"/>
+            <TextBox Text="{Binding EraseSectorSize}" Grid.Column="3" VerticalContentAlignment="Center"/>
+        </Grid>
+        
+        <CheckBox Grid.Row="9" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center" 
+                  IsChecked="{Binding NoInterruptsDuringSteps}" Margin="{StaticResource TableElementMargin}">
+            <TextBlock Text="Suppress interrupts during single-stepping"/>
+        </CheckBox>
+
+        <CheckBox Grid.Row="10" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center"
+                  IsChecked="{Binding AutofeedWatchdog}" Margin="{StaticResource TableElementMargin}">
+            <TextBlock Text="Feed ESP8266 watchdog timer while stopped"/>
+        </CheckBox>
+
+        <Expander Grid.ColumnSpan="2" Grid.Row="11" Header="Additional FLASH resources to program" IsExpanded="False">
             <StackPanel Orientation="Vertical">
                 <Border BorderThickness="1" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ESPxxOpenOCDSettingsControl}}" Margin="10">
                     <StackPanel Orientation="Vertical">
@@ -231,15 +261,23 @@
                         </ItemsControl>
                     </StackPanel>
                 </Border>
-                <Button Style="{DynamicResource HyperlinkButton}" HorizontalAlignment="Left" Click="AddNewResource" Margin="5 0 0 10">
+                <Button Style="{DynamicResource HyperlinkButton}" HorizontalAlignment="Left" Click="AddNewResource" Margin="10 0 0 10">
                     <StackPanel Orientation="Horizontal">
                         <Image Width="16" Height="16" Source="icons/add16.png"/>
                         <TextBlock Text="Add another resource" VerticalAlignment="Center" Margin="3"/>
                     </StackPanel>
                 </Button>
+                <Grid Visibility="{Binding ESP8266Visibility}" Margin="10 0 0 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Initialization data file:"/>
+                    <TextBox Text="{Binding InitDataFile}" Grid.Column="1" Margin="5 0 0 0" VerticalContentAlignment="Center"/>
+                </Grid>
             </StackPanel>
         </Expander>
-        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="10" Header="Advanced settings" IsExpanded="False">
+        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="12" Header="Advanced settings" IsExpanded="False">
             <Grid MinHeight="80" Margin="20 0 5 5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

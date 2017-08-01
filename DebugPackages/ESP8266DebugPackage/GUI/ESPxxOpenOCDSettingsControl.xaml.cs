@@ -28,11 +28,13 @@ namespace ESP8266DebugPackage.GUI
 
         private LoadedBSP.LoadedDebugMethod _Method;
         private IBSPConfiguratorHost _Host;
+        private readonly bool _IsESP32;
 
-        public ESPxxOpenOCDSettingsControl(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host, ICustomSettingsTypeProvider typeProvider)
+        public ESPxxOpenOCDSettingsControl(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host, ICustomSettingsTypeProvider typeProvider, bool isESP32)
         {
             _Method = method;
             _Host = host;
+            _IsESP32 = isESP32;
             TypeProvider = typeProvider;
             InitializeComponent();
 
@@ -54,7 +56,7 @@ namespace ESP8266DebugPackage.GUI
         public void SetConfiguration(object configuration, KnownInterfaceInstance context)
         {
             var settings = (configuration as ESPxxOpenOCDSettings);
-            _Editor = new ESPxxOpenOCDSettingsEditor(_Host, _Method.Directory, settings, context);
+            _Editor = new ESPxxOpenOCDSettingsEditor(_Host, _Method.Directory, settings, context, _IsESP32);
 
             _Editor.PropertyChanged += (s, e) => SettingsChanged?.Invoke(this, EventArgs.Empty);
             DataContext = _Editor;
@@ -141,6 +143,7 @@ namespace ESP8266DebugPackage.GUI
         public static Array FLASHSizes => Enum.GetValues(typeof(ESP8266BinaryImage.FLASHSize));
         public static Array FLASHModes => Enum.GetValues(typeof(ESP8266BinaryImage.FLASHMode));
         public static Array FLASHFrequencies => Enum.GetValues(typeof(ESP8266BinaryImage.FLASHFrequency));
+        public static Array ResetModes => Enum.GetValues(typeof(ResetMode));
         public static AnnotatedValueConverter Converter { get; } = new AnnotatedValueConverter();
     }
 }

@@ -8,22 +8,48 @@ using BSPEngine;
 using System.IO;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
+using System.Globalization;
 
 namespace ESP8266DebugPackage
 {
-    [XmlType("com.visualgdb.edp.openocd.settings.espxx")]
     public class ESPxxOpenOCDSettings : OpenOCDSettings
     {
         public ESP8266BinaryImage.ParsedHeader FLASHSettings = new ESP8266BinaryImage.ParsedHeader();
-        public bool FeedWatchdog;
-
         public FLASHResource[] FLASHResources;
+    }
+
+    [XmlType("com.visualgdb.edp.openocd.settings.esp32")]
+    public class ESP32OpenOCDSettings : ESPxxOpenOCDSettings
+    {
+
+    }
+
+    [XmlType("com.visualgdb.edp.openocd.settings.esp8266")]
+    public class ESP8266OpenOCDSettings : ESPxxOpenOCDSettings
+    {
+        public string InitDataFile;
+        public ResetMode ResetMode;
+
+        public int ProgramSectorSize = 4096;
+        public int EraseSectorSize = 4096;
+    }
+
+    public enum ResetMode
+    {
+        [ArgumentValue("soft_reset", "Emulate a CPU reset (non-OTA only)")]
+        Soft,
+        [ArgumentValue("entry_point", "Jump to entry point")]
+        JumpToEntry,
+        [ArgumentValue("hard_reset", "Reset entire chip")]
+        Hard,
     }
 
     public class FLASHResource : INotifyPropertyChanged
     {
         public string Path { get; set; }
         public string Offset { get; set; }
+        public bool Valid => !string.IsNullOrEmpty(Path) && !string.IsNullOrEmpty(Offset);
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -32,14 +58,32 @@ namespace ESP8266DebugPackage
             Path = path;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Path)));
         }
+
+        public ProgrammableRegion ToProgrammableRegion(IDebugStartService service)
+        {
+            return new ProgrammableRegion { FileName = service.ExpandProjectVariables(Path, true, true), Offset = ParseAddress(Offset) };
+        }
+
+        private int ParseAddress(string offset)
+        {
+            int r;
+            if (int.TryParse(offset, out r))
+                return r;
+            if (offset.StartsWith("0x") && int.TryParse(offset.Substring(2), NumberStyles.HexNumber, null, out r))
+                return r;
+            throw new Exception($"Invalid address ({offset}) specified in the additional FLASH resources");
+        }
     }
 
     public class ESPxxOpenOCDSettingsEditor : OpenOCDSettingsEditor
     {
-        public ESPxxOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, ESPxxOpenOCDSettings settings, KnownInterfaceInstance context)
+        private readonly bool _IsESP32;
+
+        public ESPxxOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, ESPxxOpenOCDSettings settings, KnownInterfaceInstance context, bool isESP32)
             : base(host, baseDir, settings, context)
         {
-            Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = "target/esp32.cfg" };
+            _IsESP32 = isESP32;
+            Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
             if (settings == null)
                 ExplicitFrequencyEnabled = true;
 
@@ -50,6 +94,10 @@ namespace ESP8266DebugPackage
         }
 
         public new ESPxxOpenOCDSettings Settings => (ESPxxOpenOCDSettings)base.Settings;
+
+        public Visibility ESP32Visibility => _IsESP32 ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ESP8266Visibility => !_IsESP32 ? Visibility.Visible : Visibility.Collapsed;
+
 
         public ESP8266BinaryImage.ParsedHeader FLASHSettings => Settings.FLASHSettings;
 
@@ -69,7 +117,7 @@ namespace ESP8266DebugPackage
         }
 
         protected override bool SuppressCommandLineReset => true;
-        protected override OpenOCDSettings CreateDefaultSettings() => new ESPxxOpenOCDSettings();
+        protected override OpenOCDSettings CreateDefaultSettings() => _IsESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings();
 
         public string FLASHVoltage
         {
@@ -107,6 +155,113 @@ namespace ESP8266DebugPackage
         {
             base.ApplyCommandLine(cmdLine);
             OnPropertyChanged(nameof(FLASHVoltage));
+        }
+
+        void InsertAfterLoadCommand(string cmd)
+        {
+            int idxLoad = ProvideLoadCommand();
+            Settings.StartupCommands.Insert(idxLoad + 1, cmd);
+        }
+
+        public bool NoInterruptsDuringSteps
+        {
+            get
+            {
+                return Settings.StartupCommands.Contains("mon xtensa_no_interrupts_during_steps on");
+            }
+            set
+            {
+                if (value == NoInterruptsDuringSteps)
+                    return;
+
+                if (value)
+                    InsertAfterLoadCommand("mon xtensa_no_interrupts_during_steps on");
+                else
+                    Settings.StartupCommands.Remove("mon xtensa_no_interrupts_during_steps on");
+
+                OnPropertyChanged(nameof(NoInterruptsDuringSteps));
+                OnPropertyChanged(nameof(StartupCommands));
+            }
+        }
+
+        public bool AutofeedWatchdog
+        {
+            get
+            {
+                return Settings.StartupCommands.Contains("mon esp8266_autofeed_watchdog on");
+            }
+            set
+            {
+                if (value == AutofeedWatchdog)
+                    return;
+
+                if (value)
+                    InsertAfterLoadCommand("mon esp8266_autofeed_watchdog on");
+                else
+                    Settings.StartupCommands.Remove("mon esp8266_autofeed_watchdog on");
+
+                OnPropertyChanged(nameof(AutofeedWatchdog));
+                OnPropertyChanged(nameof(StartupCommands));
+            }
+        }
+
+        const string DefaultInitDataFile = "$$SYS:BSP_ROOT$$/IoT-SDK/bin/esp_init_data_default.bin";
+
+        public ESP8266OpenOCDSettings ESP8266Settings => (ESP8266OpenOCDSettings)Settings;
+
+        public string InitDataFile
+        {
+            get => _IsESP32 ? null : (ESP8266Settings.InitDataFile ?? DefaultInitDataFile);
+            set
+            {
+                if (_IsESP32)
+                    return;
+
+                if (value == DefaultInitDataFile)
+                    ESP8266Settings.InitDataFile = null;
+                else
+                    ESP8266Settings.InitDataFile = value;
+                OnPropertyChanged(nameof(InitDataFile));
+            }
+        }
+
+        public ResetMode ResetMode
+        {
+            get => _IsESP32 ? default(ResetMode) : ESP8266Settings.ResetMode;
+            set
+            {
+                if (_IsESP32)
+                    return;
+
+                ESP8266Settings.ResetMode = value;
+                OnPropertyChanged(nameof(ResetMode));
+            }
+        }
+
+        public int ProgramSectorSize
+        {
+            get => _IsESP32 ? 0 : ESP8266Settings.ProgramSectorSize;
+            set
+            {
+                if (!_IsESP32)
+                {
+                    ESP8266Settings.ProgramSectorSize = value;
+                    OnPropertyChanged(nameof(ProgramSectorSize));
+                }
+            }
+        }
+
+        public int EraseSectorSize
+        {
+            get => _IsESP32 ? 0 : ESP8266Settings.EraseSectorSize;
+            set
+            {
+                if (!_IsESP32)
+                {
+                    ESP8266Settings.EraseSectorSize = value;
+                    OnPropertyChanged(nameof(EraseSectorSize));
+                }
+            }
         }
     }
 }

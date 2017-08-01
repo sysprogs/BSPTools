@@ -45,10 +45,7 @@ namespace ESP8266DebugPackage
         {
             get
             {
-                if (_ESP32Mode)
-                    return new ICustomStartupSequenceBuilder[] { new ESP32StartupSequence() };
-                else
-                    return new ICustomStartupSequenceBuilder[] { new ESP8266StartupSequence() };
+                return null;
             }
         }
     }

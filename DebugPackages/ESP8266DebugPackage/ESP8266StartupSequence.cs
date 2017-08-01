@@ -1,5 +1,4 @@
-﻿using BSPEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,7 +14,35 @@ namespace ESP8266DebugPackage
         public string FileName;
     }
 
-    class ESP8266StartupSequence : ICustomStartupSequenceBuilder
+    public struct CustomStartStep
+    {
+        public int ProgressWeight;
+        public bool CheckResult;
+        public string[] Commands;
+
+        public string ResultVariable;
+
+        public string ErrorMessage;
+        public bool CanRetry;
+
+        public CustomStartStep(params string[] commands)
+        {
+            Commands = commands;
+            ProgressWeight = 0;
+            ResultVariable = null;
+            ErrorMessage = null;
+            CheckResult = false;
+            CanRetry = false;
+        }
+    }
+
+    public class CustomStartupSequence
+    {
+        public List<CustomStartStep> Steps;
+        public string InitialHardBreakpointExpression;
+    }
+
+    class ESP8266StartupSequence
     {
         struct ParsedFLASHLoader
         {
@@ -88,8 +115,7 @@ namespace ESP8266DebugPackage
 
                 return new CustomStartStep(cmds.ToArray())
                 {
-                    ResultCheckExpression = string.Format("*((unsigned *)0x{0:x})", pResult),
-                    ResultCheckCondition = new Condition.Equals { ExpectedValue = "0", Expression = "$$RESULT$$" },
+                    ResultVariable = string.Format("*((unsigned *)0x{0:x})", pResult),
                     ErrorMessage = error,
                     ProgressWeight = dataSize,
                     CanRetry = true,
@@ -111,12 +137,10 @@ namespace ESP8266DebugPackage
                 }
             }
         }
-        public CustomStartupSequence BuildSequence(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
+        public static CustomStartupSequence BuildSequence(BSPEngine.IDebugStartService service, ESP8266OpenOCDSettings settings, BSPEngine.LiveMemoryLineHandler lineHandler, bool programFLASH)
         {
-            bool isOpenOCD = debugMethodConfig.ContainsKey("com.sysprogs.esp8266.openocd.iface_script");
-
             List<CustomStartStep> cmds = new List<CustomStartStep>();
-            cmds.Add(new CustomStartStep(isOpenOCD ? "mon reset halt" : "maint packet R",
+            cmds.Add(new CustomStartStep("mon reset halt",
                 "-exec-next-instruction",
                 "set $com_sysprogs_esp8266_wdcfg=0",
                 "set $vecbase=0x40000000",
@@ -128,14 +152,16 @@ namespace ESP8266DebugPackage
                 "set $icountlevel=0"));
 
             var result = new CustomStartupSequence { Steps = cmds };
+            var bspDict = service.SystemDictionary;
+            var targetPath = service.TargetPath;
 
             string val;
             if (bspDict.TryGetValue("com.sysprogs.esp8266.load_flash", out val) && val == "1")  //Not a FLASHless project
             {
-                if (debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.program_flash", out val) && val != "0")
+                if (programFLASH)
                 {
                     string bspPath = bspDict["SYS:BSP_ROOT"];
-                    List<ProgrammableRegion> regions = BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
+                    List<ProgrammableRegion> regions = BuildFLASHImages(service, settings, lineHandler);
 
                     string loader = bspPath + @"\sysprogs\flashprog\ESP8266FlashProg.bin";
                     if (!File.Exists(loader))
@@ -144,15 +170,13 @@ namespace ESP8266DebugPackage
                     var parsedLoader = new ParsedFLASHLoader(loader);
 
                     cmds.Add(new CustomStartStep("print *((int *)0x60000900)", "set *((int *)0x60000900)=0"));
-                    cmds.Add(parsedLoader.QueueInvocation(0, "$$com.sysprogs.esp8266.xt-ocd.prog_sector_size$$", "$$com.sysprogs.esp8266.xt-ocd.erase_sector_size$$", null, 0, 0, true));
+                    cmds.Add(parsedLoader.QueueInvocation(0, settings.ProgramSectorSize.ToString(), settings.EraseSectorSize.ToString(), null, 0, 0, true));
                     foreach (var region in regions)
                         parsedLoader.QueueRegionProgramming(cmds, region);
                 }
 
-                if (!debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_start_mode", out val))
-                    val = "soft_reset";
-
-                if (val == "soft_reset")
+                var resetMode = settings.ResetMode;
+                if (resetMode == ResetMode.Soft)
                 {
                     try
                     {
@@ -163,8 +187,8 @@ namespace ESP8266DebugPackage
                             int appMode = ESP8266BinaryImage.DetectAppMode(elfFile, out status);
                             if (appMode != 0)
                             {
-                                if (System.Windows.Forms.MessageBox.Show("The soft reset mechanism is not compatible with the OTA images. Use the jump-to-entry reset instead?", "VisualGDB", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
-                                    val = "entry_point";
+                                if (service.GUIService.Prompt("The soft reset mechanism is not compatible with the OTA images. Use the jump-to-entry reset instead?"))
+                                    resetMode = ResetMode.Hard;
                             }
                         }
                     }
@@ -173,11 +197,11 @@ namespace ESP8266DebugPackage
                     }
                 }
 
-                if (val == "soft_reset" || val == "entry_point")
+                if (resetMode == ResetMode.Soft || resetMode == ResetMode.JumpToEntry)
                 {
                     string entry = "0x40000080";
 
-                    if (val == "entry_point")
+                    if (resetMode == ResetMode.JumpToEntry)
                     {
                         using (ELFFile elf = new ELFFile(targetPath))
                         {
@@ -216,7 +240,7 @@ namespace ESP8266DebugPackage
                     result.InitialHardBreakpointExpression = "*$$DEBUG:ENTRY_POINT$$";
                 }
                 else
-                    cmds.Add(new CustomStartStep(isOpenOCD ? "mon reset halt" : "maint packet R"));
+                    cmds.Add(new CustomStartStep("mon reset halt"));
             }
             else
             {
@@ -236,8 +260,10 @@ namespace ESP8266DebugPackage
             return result;
         }
 
-        public static List<ProgrammableRegion> BuildFLASHImages(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
+        public static List<ProgrammableRegion> BuildFLASHImages(BSPEngine.IDebugStartService service, ESP8266OpenOCDSettings settings, BSPEngine.LiveMemoryLineHandler lineHandler)
         {
+            var bspDict = service.SystemDictionary;
+            var targetPath = service.TargetPath;
             string bspPath = bspDict["SYS:BSP_ROOT"];
             string toolchainPath = bspDict["SYS:TOOLCHAIN_ROOT"];
 
@@ -246,27 +272,22 @@ namespace ESP8266DebugPackage
                 if (rgBinFile.IsMatch(Path.GetFileName(fn)))
                     File.Delete(fn);
 
-            string freq, mode, size;
-            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_freq", out freq);
-            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out mode);
-            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out size);
-
             int initDataAddress = 0;
-            switch(size ?? "")
+            switch(settings.FLASHSettings.Size)
             {
-                case "4m":
+                case ESP8266BinaryImage.FLASHSize.size4M:
                     initDataAddress = 0x7c000;
                     break;
-                case "8m":
+                case ESP8266BinaryImage.FLASHSize.size8M:
                     initDataAddress = 0xfc000;
                     break;
-                case "16m":
-                case "16m-c1":
+                case ESP8266BinaryImage.FLASHSize.size16M:
+                case ESP8266BinaryImage.FLASHSize.size16M_c1:
                     initDataAddress = 0x1fc000;
                     break;
-                case "32m":
-                case "32m-c1":
-                case "32m-c2":
+                case ESP8266BinaryImage.FLASHSize.size32M:
+                case ESP8266BinaryImage.FLASHSize.size32M_c1:
+                case ESP8266BinaryImage.FLASHSize.size32M_c2:
                     initDataAddress = 0x3fc000;
                     break;
             }
@@ -275,8 +296,7 @@ namespace ESP8266DebugPackage
 
             if (initDataAddress != 0)
             {
-                string initFile;
-                debugMethodConfig.TryGetValue("com.sysprogs.esp8266.init_data_file", out initFile);
+                string initFile = settings.InitDataFile;
                 if (!string.IsNullOrEmpty(initFile))
                 {
                     if (initFile.StartsWith("$$SYS:BSP_ROOT$$"))
@@ -290,6 +310,11 @@ namespace ESP8266DebugPackage
                 }
             }
 
+            if (settings.FLASHResources != null)
+                foreach (var r in settings.FLASHResources)
+                    if (r.Valid)
+                        regions.Add(r.ToProgrammableRegion(service));
+
             using (var elfFile = new ELFFile(targetPath))
             {
                 string pathBase = Path.Combine(Path.GetDirectoryName(targetPath), Path.GetFileName(targetPath));
@@ -300,7 +325,7 @@ namespace ESP8266DebugPackage
 
                 if (appMode == 0)
                 {
-                    var img = ESP8266BinaryImage.MakeNonBootloaderImageFromELFFile(elfFile, new ESP8266BinaryImage.ParsedHeader(freq, mode, size));
+                    var img = ESP8266BinaryImage.MakeNonBootloaderImageFromELFFile(elfFile, settings.FLASHSettings);
 
                     string fn = pathBase + "-0x00000.bin";
                     using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
@@ -321,7 +346,7 @@ namespace ESP8266DebugPackage
                 }
                 else
                 {
-                    var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, new ESP8266BinaryImage.ParsedHeader(freq, mode, size), appMode);
+                    var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, settings.FLASHSettings, appMode);
 
                     string bspRoot, bootloader;
                     if (!bspDict.TryGetValue("SYS:BSP_ROOT", out bspRoot) || !bspDict.TryGetValue("com.sysprogs.esp8266.bootloader", out bootloader))
@@ -351,10 +376,5 @@ namespace ESP8266DebugPackage
 
             return regions;
         }
-
-        public string ID => "com.sysprogs.esp8266.load_sequence";
-        public string FirstStepName => "Preparing image";
-        public string SecondStepName => "Loading image";
-        public string Title => "Loading ESP8266 firmware";
     }
 }
