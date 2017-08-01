@@ -111,11 +111,15 @@ namespace ESP8266DebugPackage
             return default(_Ty);
         }
 
-        public struct ParsedHeader
+        public class ParsedHeader
         {
-            public FLASHSize Size;
-            public FLASHFrequency Frequency;
-            public FLASHMode Mode;
+            public FLASHSize Size { get; set; }
+            public FLASHFrequency Frequency { get; set; }
+            public FLASHMode Mode { get; set; }
+
+            public ParsedHeader()
+            {
+            }
 
             public ParsedHeader(string frequency, string mode, string size)
             {
@@ -131,7 +135,7 @@ namespace ESP8266DebugPackage
                 checksum ^= b;
         }
 
-        public ParsedHeader Header;
+        public ParsedHeader Header = new ParsedHeader();
         public List<Segment> Segments = new List<Segment>();
         public uint EntryPoint;
         public byte AppNumber;

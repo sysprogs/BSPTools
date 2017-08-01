@@ -30,8 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OpenOCDDebugConfigurator));
             this.panel2 = new System.Windows.Forms.Panel();
+            this.cbHaveInitDataFile = new System.Windows.Forms.CheckBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
+            this.cbInitDataFile = new System.Windows.Forms.ComboBox();
             this.cbProgramMode = new System.Windows.Forms.ComboBox();
             this.cbResetMode = new System.Windows.Forms.ComboBox();
             this.pnlFLASH = new System.Windows.Forms.TableLayoutPanel();
@@ -60,8 +62,6 @@
             this.numSpeed2 = new System.Windows.Forms.NumericUpDown();
             this.openOCDScriptSelector1 = new OpenOCDPackage.OpenOCDScriptSelector();
             this.lblStartDriverTool = new System.Windows.Forms.LinkLabel();
-            this.cbHaveInitDataFile = new System.Windows.Forms.CheckBox();
-            this.cbInitDataFile = new System.Windows.Forms.ComboBox();
             this.panel2.SuspendLayout();
             this.pnlFLASH.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -84,6 +84,19 @@
             this.panel2.Size = new System.Drawing.Size(359, 169);
             this.panel2.TabIndex = 42;
             // 
+            // cbHaveInitDataFile
+            // 
+            this.cbHaveInitDataFile.AutoSize = true;
+            this.cbHaveInitDataFile.Checked = true;
+            this.cbHaveInitDataFile.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbHaveInitDataFile.Location = new System.Drawing.Point(7, 57);
+            this.cbHaveInitDataFile.Name = "cbHaveInitDataFile";
+            this.cbHaveInitDataFile.Size = new System.Drawing.Size(83, 17);
+            this.cbHaveInitDataFile.TabIndex = 17;
+            this.cbHaveInitDataFile.Text = "Init data file:";
+            this.cbHaveInitDataFile.UseVisualStyleBackColor = true;
+            this.cbHaveInitDataFile.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // label10
             // 
             this.label10.AutoSize = true;
@@ -101,6 +114,19 @@
             this.label8.Size = new System.Drawing.Size(67, 13);
             this.label8.TabIndex = 5;
             this.label8.Text = "Reset mode:";
+            // 
+            // cbInitDataFile
+            // 
+            this.cbInitDataFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbInitDataFile.FormattingEnabled = true;
+            this.cbInitDataFile.Location = new System.Drawing.Point(120, 55);
+            this.cbInitDataFile.Name = "cbInitDataFile";
+            this.cbInitDataFile.Size = new System.Drawing.Size(239, 21);
+            this.cbInitDataFile.TabIndex = 16;
+            this.cbInitDataFile.Tag = "com.sysprogs.esp8266.init_data_file";
+            this.cbInitDataFile.SelectedIndexChanged += new System.EventHandler(this.SettingsChangedHandler);
+            this.cbInitDataFile.TextUpdate += new System.EventHandler(this.SettingsChangedHandler);
             // 
             // cbProgramMode
             // 
@@ -452,32 +478,6 @@
             this.lblStartDriverTool.TabStop = true;
             this.lblStartDriverTool.Text = "Start driver tool";
             this.lblStartDriverTool.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblStartDriverTool_LinkClicked);
-            // 
-            // cbHaveInitDataFile
-            // 
-            this.cbHaveInitDataFile.AutoSize = true;
-            this.cbHaveInitDataFile.Checked = true;
-            this.cbHaveInitDataFile.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbHaveInitDataFile.Location = new System.Drawing.Point(7, 57);
-            this.cbHaveInitDataFile.Name = "cbHaveInitDataFile";
-            this.cbHaveInitDataFile.Size = new System.Drawing.Size(83, 17);
-            this.cbHaveInitDataFile.TabIndex = 17;
-            this.cbHaveInitDataFile.Text = "Init data file:";
-            this.cbHaveInitDataFile.UseVisualStyleBackColor = true;
-            this.cbHaveInitDataFile.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
-            // cbInitDataFile
-            // 
-            this.cbInitDataFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbInitDataFile.FormattingEnabled = true;
-            this.cbInitDataFile.Location = new System.Drawing.Point(120, 55);
-            this.cbInitDataFile.Name = "cbInitDataFile";
-            this.cbInitDataFile.Size = new System.Drawing.Size(239, 21);
-            this.cbInitDataFile.TabIndex = 16;
-            this.cbInitDataFile.Tag = "com.sysprogs.esp8266.init_data_file";
-            this.cbInitDataFile.SelectedIndexChanged += new System.EventHandler(this.SettingsChangedHandler);
-            this.cbInitDataFile.TextUpdate += new System.EventHandler(this.SettingsChangedHandler);
             // 
             // OpenOCDDebugConfigurator
             // 

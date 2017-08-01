@@ -170,7 +170,6 @@ namespace ESP8266DebugPackage
                     }
                     catch
                     {
-
                     }
                 }
 

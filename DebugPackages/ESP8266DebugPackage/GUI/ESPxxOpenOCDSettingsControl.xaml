@@ -1,0 +1,264 @@
+﻿<UserControl x:Class="ESP8266DebugPackage.GUI.ESPxxOpenOCDSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ESP8266DebugPackage.GUI"
+             xmlns:bspe="clr-namespace:BSPEngine;assembly=BSPEngine"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:oocd="clr-namespace:OpenOCDPackage.GUI;assembly=OpenOCDPackage2"
+             xmlns:coll="clr-namespace:System.Collections;assembly=mscorlib"
+             mc:Ignorable="d" >
+    <UserControl.Resources>
+        <Border Style="{DynamicResource VsBrandedUIBorderStyle}" x:Key="interfaceScriptSelectionControl" Loaded="HackPopupDataContext">
+            <Grid DataContext="{Binding Path=DataContext.Interface}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <CheckBox IsChecked="{Binding Path=ShowScripts}" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0 5 5 5" Grid.Column="0">
+                    <TextBlock Text="Show raw OpenOCD scripts" Margin="0"/>
+                </CheckBox>
+                <Button Style="{DynamicResource HyperlinkButton}" Click="SelectScriptManually" HorizontalAlignment="Left" Margin="0 0 5 5" Grid.Column="1">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="16" Height="16" Source="icons/open16.png"/>
+                        <TextBlock Text="Browse..."/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <DataTemplate x:Key="AnnotatedItemTemplate">
+            <TextBlock Text="{Binding Converter={x:Static local:Options.Converter}}" Margin="0"/>
+        </DataTemplate>
+        <oocd:ShowOnlyInListViewConverter x:Key="showOnlyInListViewConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource ResourceKey={x:Type TextBlock}}">
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style TargetType="ComboBox" BasedOn="{StaticResource ResourceKey={x:Type ComboBox}}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style TargetType="TextBox" BasedOn="{StaticResource ResourceKey={x:Type TextBox}}">
+                <Setter Property="Padding" Value="0 1 0 1"/>
+            </Style>
+
+            <Style TargetType="ListBox" BasedOn="{StaticResource ResourceKey={x:Type ListBox}}">
+                <Style.Setters>
+                    <Setter Property="ItemsPanel">
+                        <Setter.Value>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style.Setters>
+            </Style>
+            <Thickness x:Key="TableElementMargin">0 2 0 2</Thickness>
+            <Thickness x:Key="SubSettingMargin">10 0 0 0</Thickness>
+            <Visibility x:Key="Collapsed">Collapsed</Visibility>
+        </Grid.Resources>
+
+        <TextBlock Text="JTAG/SWD programmer:" Grid.Row="0" Visibility="{Binding InterfaceSelectorVisibility}"/>
+        <ContentControl Grid.Row="0" Grid.Column="1" Margin="{StaticResource TableElementMargin}" Visibility="{Binding InterfaceSelectorVisibility}">
+            <ContentControl DataContext="{Binding Interface}">
+                <ComboBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" x:Name="InterfaceComboBox" Visibility="{Binding InterfaceSelectorVisibility}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Width="16" Height="16" Margin="0 0 5 0">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Entry}" Value="{x:Null}">
+                                                    <Setter Property="Source" Value="icons/script16.png"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Script}" Value="{x:Null}">
+                                                    <Setter Property="Source" Value="icons/excl16.png"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                            <Setter Property="Source" Value="icons/usb16.png"/>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                                <TextBlock Text="{Binding}" VerticalAlignment="Center" Grid.Column="1" Margin="0"/>
+                                <TextBlock Text="{Binding ScriptHint}" Opacity="0.5" VerticalAlignment="Center" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Self}, Converter={StaticResource showOnlyInListViewConverter}}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </ContentControl>
+        </ContentControl>
+
+        <CheckBox VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="{StaticResource SubSettingMargin}" Grid.Row="1" Visibility="{Binding ExplicitFrequencyVisibility}" IsChecked="{Binding ExplicitFrequencyEnabled}" x:Name="cbExplicitFrequency">
+            <TextBlock Text="Set JTAG/SWD frequency to:"/>
+        </CheckBox>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="{StaticResource TableElementMargin}" Visibility="{Binding ExplicitFrequencyVisibility}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding ExplicitFrequencyValue}" IsEnabled="{Binding IsChecked, ElementName=cbExplicitFrequency, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
+            <TextBlock Text="KHz" Grid.Column="1"/>
+        </Grid>
+
+        <TextBlock Text="Program FLASH memory:" Grid.Row="2"/>
+        <ListBox Grid.Row="2" Grid.Column="1" SelectedItem="{Binding ProgramMode}" Margin="{StaticResource TableElementMargin}">
+            <ListBox.ItemsSource>
+                <coll:ArrayList>
+                    <bspe:ProgramMode>Enabled</bspe:ProgramMode>
+                    <bspe:ProgramMode>Disabled</bspe:ProgramMode>
+                    <bspe:ProgramMode>Auto</bspe:ProgramMode>
+                </coll:ArrayList>
+            </ListBox.ItemsSource>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="Enabled">
+                                        <Setter Property="Text" Value="Always"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="Disabled">
+                                        <Setter Property="Text" Value="Never"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="Auto">
+                                        <Setter Property="Text" Value="If rebuilt since last load"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ESPxxOpenOCDSettingsControl}}"/>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock Text="FLASH Size:" Grid.Row="3"/>
+        <ListBox Grid.Row="3" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHSizes}" 
+                 SelectedItem="{Binding FLASHSettings.Size}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+
+        <TextBlock Text="FLASH Mode:" Grid.Row="4"/>
+        <ListBox Grid.Row="4" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHModes}" 
+                 SelectedItem="{Binding FLASHSettings.Mode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+
+
+        <TextBlock Text="FLASH Frequency:" Grid.Row="5"/>
+        <ListBox Grid.Row="5" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHFrequencies}" 
+                 SelectedItem="{Binding FLASHSettings.Frequency}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+
+        <TextBlock Text="FLASH Voltage:" Grid.Row="6"/>
+        <ListBox Grid.Row="6" Grid.Column="1" Margin="{StaticResource TableElementMargin}"
+                 SelectedItem="{Binding FLASHVoltage}" SelectionChanged="RaiseSettingsChangedEvent">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Margin="0" Text="{Binding}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.ItemsSource>
+                <coll:ArrayList>
+                    <sys:String>none</sys:String>
+                    <sys:String>1.8</sys:String>
+                    <sys:String>3.8</sys:String>
+                    <sys:String>high</sys:String>
+                    <sys:String>low</sys:String>
+                </coll:ArrayList>
+            </ListBox.ItemsSource>
+        </ListBox>
+
+        <Expander Grid.ColumnSpan="2" Grid.Row="7" Header="Additional FLASH resources to program" IsExpanded="False">
+            <StackPanel Orientation="Vertical">
+                <Border BorderThickness="1" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ESPxxOpenOCDSettingsControl}}" Margin="10">
+                    <StackPanel Orientation="Vertical">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="24"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="File"/>
+                            <TextBlock Text="Address" Grid.Column="2"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding FLASHResources}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="24"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox Text="{Binding Path}" Grid.Column="0" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="Wrap"/>
+                                        <Button Click="BrowseResource_Click" Grid.Column="1" Style="{DynamicResource VsDynamicButtonStyle}">
+                                            <Image Width="16" Height="16" Source="icons/open16.png"/>
+                                        </Button>
+                                        <TextBox Text="{Binding Offset}" HorizontalAlignment="Stretch" Grid.Column="2" VerticalContentAlignment="Center" TextWrapping="Wrap"/>
+                                        <Button Click="RemoveResource_Click" Grid.Column="3" Style="{DynamicResource VsDynamicButtonStyle}">
+                                            <Image Width="16" Height="16" Source="icons/clear16.png"/>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <Button Style="{DynamicResource HyperlinkButton}" HorizontalAlignment="Left" Click="AddNewResource" Margin="5 0 0 10">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="16" Height="16" Source="icons/add16.png"/>
+                        <TextBlock Text="Add another resource" VerticalAlignment="Center" Margin="3"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Expander>
+        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="10" Header="Advanced settings" IsExpanded="False">
+            <Grid MinHeight="80" Margin="20 0 5 5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*" MinHeight="80"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Command line:" Margin="2"/>
+                <TextBox Margin="2" Text="{Binding CommandLine, UpdateSourceTrigger=LostFocus}" Grid.Column="0" Grid.Row="1" AcceptsReturn="False" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"/>
+
+                <TextBlock Text="Startup GDB commands:" Margin="2" Grid.Column="1"/>
+                <TextBox Margin="2" Grid.Column="1" Text="{Binding StartupCommands, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"/>
+
+            </Grid>
+        </Expander>
+
+    </Grid>
+
+</UserControl>

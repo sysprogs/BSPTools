@@ -132,7 +132,7 @@ namespace ESP8266DebugPackage
                     //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\blink.bin", Offset = 0x10000, Size = 245328 });
                     //regions.Add(new ProgrammableRegion { FileName = @"E:\temp\esp\build\partitions_singleapp.bin", Offset = 0x4000, Size = 96 });
 
-                    var regions = BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
+                    /*var regions = BuildFLASHImages(targetPath, bspDict, debugMethodConfig, lineHandler);
 
                     int eraseBlockSize = int.Parse(debugMethodConfig["com.sysprogs.esp8266.xt-ocd.erase_sector_size"]);
                     cmds.Add(parsedLoader.QueueInvocation(0, "$$com.sysprogs.esp8266.xt-ocd.prog_sector_size$$", "0", null, 0, 0, true));
@@ -140,7 +140,7 @@ namespace ESP8266DebugPackage
                         foreach (var region in regions)
                             parsedLoader.QueueRegionProgramming(cmds, region, eraseBlockSize, pass == 0);
 
-                    cmds.Add(parsedLoader.QueueResetStep());
+                    cmds.Add(parsedLoader.QueueResetStep());*/
                 }
                 else
                     cmds.Add(new CustomStartStep("mon esp108 chip_reset"));
@@ -153,15 +153,10 @@ namespace ESP8266DebugPackage
             return new CustomStartupSequence { Steps = cmds };
         }
 
-        public static List<ProgrammableRegion> BuildFLASHImages(string targetPath, Dictionary<string, string> bspDict, Dictionary<string, string> debugMethodConfig, LiveMemoryLineHandler lineHandler)
+        public static List<ProgrammableRegion> BuildFLASHImages(string targetPath, Dictionary<string, string> bspDict, ESP8266BinaryImage.ParsedHeader flashSettings)
         {
             string bspPath = bspDict["SYS:BSP_ROOT"];
             string toolchainPath = bspDict["SYS:TOOLCHAIN_ROOT"];
-
-            string freq, mode, size;
-            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_freq", out freq);
-            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out mode);
-            debugMethodConfig.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out size);
 
             string partitionTable, bootloader, txtAppOffset;
             bspDict.TryGetValue("com.sysprogs.esp32.partition_table_file", out partitionTable);
@@ -179,8 +174,8 @@ namespace ESP8266DebugPackage
             if (appOffset == 0)
                 throw new Exception("Application FLASH offset not defined. Please check your settings.");
 
-            partitionTable = VariableHelper.ExpandVariables(partitionTable, bspDict, debugMethodConfig);
-            bootloader = VariableHelper.ExpandVariables(bootloader, bspDict, debugMethodConfig);
+            partitionTable = VariableHelper.ExpandVariables(partitionTable, bspDict);
+            bootloader = VariableHelper.ExpandVariables(bootloader, bspDict);
 
             if (!string.IsNullOrEmpty(partitionTable) && !Path.IsPathRooted(partitionTable))
                 partitionTable = Path.Combine(bspDict["SYS:PROJECT_DIR"], partitionTable);
@@ -198,7 +193,7 @@ namespace ESP8266DebugPackage
             {
                 string pathBase = Path.Combine(Path.GetDirectoryName(targetPath), Path.GetFileName(targetPath));
 
-                var img = ESP8266BinaryImage.MakeESP32ImageFromELFFile(elfFile, new ESP8266BinaryImage.ParsedHeader(freq, mode, size));
+                var img = ESP8266BinaryImage.MakeESP32ImageFromELFFile(elfFile, flashSettings);
 
                 //Bootloader/partition table offsets are hardcoded in ESP-IDF
                 regions.Add(new ProgrammableRegion { FileName = bootloader, Offset = 0x1000, Size = GetFileSize(bootloader) });

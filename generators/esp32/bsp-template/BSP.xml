@@ -11,7 +11,7 @@
       <UserFriendlyName>ESP32</UserFriendlyName>
       <CompilationFlags>
         <COMMONFLAGS>-mlongcalls -nostdlib -fstrict-volatile-bitfields</COMMONFLAGS>
-        <LDFLAGS>-Wl,-EL</LDFLAGS>
+        <LDFLAGS>-Wl,-EL -Wl,-u,uxTopUsedPriority</LDFLAGS>
 		<IncludeDirectories>
 			<string>.</string>
 		</IncludeDirectories>

@@ -208,7 +208,7 @@ namespace ESP8266DebugPackage
                 else
                 {
                     if (!cbQuickSpeed.Checked)
-                        numSpeed2.Value = iface.DefaultJtagSpeed;
+                        numSpeed2.Value = 3000;
                     cbQuickSpeed.Checked = true;
                 }
             }

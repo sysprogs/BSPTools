@@ -8,11 +8,11 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ESP8266DebugPackage</RootNamespace>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <AssemblyName>ESP8266DebugPackage</AssemblyName>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <AssemblyName>ESP8266DebugPackage</AssemblyName>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -30,34 +29,21 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug (ESP32)|AnyCPU' ">
-    <AssemblyName>ESP32DebugPackage</AssemblyName>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug (ESP32)\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;ESP32</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release (ESP32)|AnyCPU' ">
-    <AssemblyName>ESP32DebugPackage</AssemblyName>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release (ESP32)\</OutputPath>
-    <DefineConstants>TRACE;ESP32</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+  <PropertyGroup>
+    <AssemblyName>ESPxxDebugPackage</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BSPEngine">
       <HintPath>..\..\BSPEngine.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CRC32.cs" />
@@ -68,6 +54,11 @@
     <Compile Include="ESP8266DebugExtension.cs" />
     <Compile Include="ESP8266StartupSequence.cs" />
     <Compile Include="ESP8266StubDebugExtension.cs" />
+    <Compile Include="ESPxxDebugController.cs" />
+    <Compile Include="ESPxxOpenOCDSettings.cs" />
+    <Compile Include="GUI\ESPxxOpenOCDSettingsControl.xaml.cs">
+      <DependentUpon>ESPxxOpenOCDSettingsControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="OpenOCDDebugConfigurator.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -96,6 +87,25 @@
       <Project>{84589bb6-390b-49ec-a412-d7cadc0ee289}</Project>
       <Name>OpenOCDPackage</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="GUI\ESPxxOpenOCDSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\check16.png" />
+    <Resource Include="GUI\Icons\chip16.png" />
+    <Resource Include="GUI\Icons\clear16.png" />
+    <Resource Include="GUI\Icons\excl16.png" />
+    <Resource Include="GUI\Icons\help16.png" />
+    <Resource Include="GUI\Icons\open16.png" />
+    <Resource Include="GUI\Icons\script16.png" />
+    <Resource Include="GUI\Icons\usb16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\add16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
