@@ -32,6 +32,13 @@
   <PropertyGroup>
     <AssemblyName>ESPxxDebugPackage</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BSPEngine">
       <HintPath>..\..\BSPEngine.dll</HintPath>
@@ -51,44 +58,25 @@
     <Compile Include="ESP32StartupSequence.cs" />
     <Compile Include="ESP8266BinaryImage.cs" />
     <Compile Include="ESP8266BootloaderClient.cs" />
-    <Compile Include="ESP8266DebugExtension.cs" />
     <Compile Include="ESP8266StartupSequence.cs" />
-    <Compile Include="ESP8266StubDebugExtension.cs" />
+    <Compile Include="ESP8266StubDebugController.cs" />
     <Compile Include="ESPxxDebugController.cs" />
+    <Compile Include="ESPxxGDBStubSettings.cs" />
     <Compile Include="ESPxxOpenOCDSettings.cs" />
+    <Compile Include="GUI\ESPxxGDBStubSettingsControl.xaml.cs">
+      <DependentUpon>ESPxxGDBStubSettingsControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\ESPxxOpenOCDSettingsControl.xaml.cs">
       <DependentUpon>ESPxxOpenOCDSettingsControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="OpenOCDDebugConfigurator.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OpenOCDDebugConfigurator.Designer.cs">
-      <DependentUpon>OpenOCDDebugConfigurator.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ProgramProgressForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ProgramProgressForm.Designer.cs">
-      <DependentUpon>ProgramProgressForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerialPortStream.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="OpenOCDDebugConfigurator.resx">
-      <DependentUpon>OpenOCDDebugConfigurator.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ProgramProgressForm.resx">
-      <DependentUpon>ProgramProgressForm.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\sysprogs\support\OpenOCDPackage\OpenOCDPackage.csproj">
-      <Project>{84589bb6-390b-49ec-a412-d7cadc0ee289}</Project>
-      <Name>OpenOCDPackage</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <Page Include="GUI\ESPxxGDBStubSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="GUI\ESPxxOpenOCDSettingsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -106,6 +94,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="GUI\Icons\add16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\sysprogs\support\OpenOCDPackage\OpenOCDPackage.csproj">
+      <Project>{84589bb6-390b-49ec-a412-d7cadc0ee289}</Project>
+      <Name>OpenOCDPackage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

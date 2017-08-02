@@ -8,7 +8,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:oocd="clr-namespace:OpenOCDPackage.GUI;assembly=OpenOCDPackage2"
              xmlns:coll="clr-namespace:System.Collections;assembly=mscorlib"
-             mc:Ignorable="d" >
+             mc:Ignorable="d">
     <UserControl.Resources>
         <Border Style="{DynamicResource VsBrandedUIBorderStyle}" x:Key="interfaceScriptSelectionControl" Loaded="HackPopupDataContext">
             <Grid DataContext="{Binding Path=DataContext.Interface}">
@@ -194,9 +194,9 @@
             </ListBox.ItemsSource>
         </ListBox>
 
-        <TextBlock Text="Reset Mode:" Grid.Row="7"/>
+        <TextBlock Text="Reset Mode:" Grid.Row="7" Visibility="{Binding ESP8266Visibility}"/>
         <ListBox Grid.Row="7" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.ResetModes}" 
-                 SelectedItem="{Binding ResetMode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+                 SelectedItem="{Binding ResetMode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}" Visibility="{Binding ESP8266Visibility}"/>
 
         <TextBlock Text="Sector sizes:" Grid.Row="8" Visibility="{Binding ESP8266Visibility}"/>
         <Grid Grid.Row="8" Grid.Column="9" Visibility="{Binding ESP8266Visibility}" Margin="{StaticResource TableElementMargin}">

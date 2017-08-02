@@ -13,10 +13,17 @@ using System.Globalization;
 
 namespace ESP8266DebugPackage
 {
+    public interface IESP8266Settings
+    {
+        FLASHResource[] FLASHResources { get; set; }
+        string InitDataFile { get; set; }
+        ESP8266BinaryImage.ParsedHeader FLASHSettings { get; set; }
+    }
+
     public class ESPxxOpenOCDSettings : OpenOCDSettings
     {
-        public ESP8266BinaryImage.ParsedHeader FLASHSettings = new ESP8266BinaryImage.ParsedHeader();
-        public FLASHResource[] FLASHResources;
+        public ESP8266BinaryImage.ParsedHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ParsedHeader();
+        public FLASHResource[] FLASHResources { get; set; }
     }
 
     [XmlType("com.visualgdb.edp.openocd.settings.esp32")]
@@ -26,9 +33,9 @@ namespace ESP8266DebugPackage
     }
 
     [XmlType("com.visualgdb.edp.openocd.settings.esp8266")]
-    public class ESP8266OpenOCDSettings : ESPxxOpenOCDSettings
+    public class ESP8266OpenOCDSettings : ESPxxOpenOCDSettings, IESP8266Settings
     {
-        public string InitDataFile;
+        public string InitDataFile { get; set; }
         public ResetMode ResetMode;
 
         public int ProgramSectorSize = 4096;
@@ -205,7 +212,7 @@ namespace ESP8266DebugPackage
             }
         }
 
-        const string DefaultInitDataFile = "$$SYS:BSP_ROOT$$/IoT-SDK/bin/esp_init_data_default.bin";
+        public const string DefaultInitDataFile = "$$SYS:BSP_ROOT$$/IoT-SDK/bin/esp_init_data_default.bin";
 
         public ESP8266OpenOCDSettings ESP8266Settings => (ESP8266OpenOCDSettings)Settings;
 
@@ -264,4 +271,5 @@ namespace ESP8266DebugPackage
             }
         }
     }
+
 }

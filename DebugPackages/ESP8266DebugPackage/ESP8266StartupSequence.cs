@@ -260,7 +260,7 @@ namespace ESP8266DebugPackage
             return result;
         }
 
-        public static List<ProgrammableRegion> BuildFLASHImages(BSPEngine.IDebugStartService service, ESP8266OpenOCDSettings settings, BSPEngine.LiveMemoryLineHandler lineHandler)
+        public static List<ProgrammableRegion> BuildFLASHImages(BSPEngine.IDebugStartService service, IESP8266Settings settings, BSPEngine.LiveMemoryLineHandler lineHandler)
         {
             var bspDict = service.SystemDictionary;
             var targetPath = service.TargetPath;
