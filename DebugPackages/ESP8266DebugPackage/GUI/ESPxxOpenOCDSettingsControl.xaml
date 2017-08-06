@@ -21,7 +21,7 @@
                 <Button Style="{DynamicResource HyperlinkButton}" Click="SelectScriptManually" HorizontalAlignment="Left" Margin="0 0 5 5" Grid.Column="1">
                     <StackPanel Orientation="Horizontal">
                         <Image Width="16" Height="16" Source="icons/open16.png"/>
-                        <TextBlock Text="Browse..."/>
+                        <TextBlock Text="Browse..." VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </Grid>
