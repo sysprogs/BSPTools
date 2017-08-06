@@ -16,6 +16,9 @@
 			<string>.</string>
 		</IncludeDirectories>
       </CompilationFlags>
+	  <Bugs>
+		<RequiresMinimalOptimization>true</RequiresMinimalOptimization>
+	  </Bugs>
     </MCUFamily>
   </MCUFamilies>
   <SupportedMCUs>
@@ -142,7 +145,6 @@
 			<string>phy</string>
 			<string>pp</string>
 			<string>rtc</string>
-			<string>rtc_clk</string>
 			<string>smartconfig</string>
 			<string>wpa</string>
 			<string>wps</string>

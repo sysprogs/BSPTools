@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -83,6 +84,29 @@ namespace ESP8266DebugPackage.GUI
             var rsrc = (sender as FrameworkElement)?.DataContext as FLASHResource;
             if (rsrc != null)
                 _Editor.FLASHResources.Remove(rsrc);
+        }
+    }
+
+    public class ShowOnlyInListViewConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isInsidePopup = false;
+            for (DependencyObject obj = value as DependencyObject; obj != null; obj = VisualTreeHelper.GetParent(obj))
+            {
+                if (obj is ComboBoxItem)
+                {
+                    isInsidePopup = true;
+                    break;
+                }
+            }
+
+            return isInsidePopup ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -27,6 +27,11 @@ namespace esp32
         {
             throw new NotImplementedException();
         }
+
+        public override bool OnFilePathTooLong(string pathInsidePackage)
+        {
+            return true;
+        }
     }
 
 
@@ -93,8 +98,8 @@ namespace esp32
 
             string linkerScript = Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\esp32\ld\esp32.common.ld");
             var lines2 = File.ReadAllLines(linkerScript).ToList();
-            Regex rgLibrary = new Regex(@"(.*)\*lib([0-9a-zA-Z_]+).a:\(([^()]+)\)");
-            Regex rgFileInLibrary = new Regex(@"(.*)\*lib([0-9a-zA-Z_]+).a:([0-9a-zA-Z]+\.o)\(([^()]+)\)");
+            Regex rgLibrary = new Regex(@"(.*)\*lib([0-9a-zA-Z_-]+).a:\(([^()]+)\)");
+            Regex rgFileInLibrary = new Regex(@"(.*)\*lib([0-9a-zA-Z_-]+).a:([0-9a-zA-Z_-]+\.o)\(([^()]+)\)");
             for (int i = 0; i < lines2.Count; i++)
             {
                 var m = rgLibrary.Match(lines2[i]);
@@ -113,15 +118,16 @@ namespace esp32
                         int j = 0;
 
                         foreach (var fn in fns)
-                            lines2.Insert(i + ++j, $"{m.Groups[1].Value}*{fn}({m.Groups[3].Value})");
+                            lines2.Insert(i + ++j, $"{m.Groups[1].Value}*{fn}({m.Groups[3].Value}) /* => {lines2[i]}*/");
                         lines2.RemoveAt(i--);
+                        i += j;
                         continue;
                     }
                 }
                 m = rgFileInLibrary.Match(lines2[i]);
                 if (m.Success)
                 {
-                    lines2[i] = $"{m.Groups[1].Value}*{m.Groups[3].Value}({m.Groups[4].Value})";
+                    lines2[i] = $"{m.Groups[1].Value}*{m.Groups[3].Value}({m.Groups[4].Value}) /* => {lines2[i]} */";
                 }
 
             }

@@ -92,11 +92,26 @@ namespace ESP8266DebugPackage
             _IsESP32 = isESP32;
             Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
             if (settings == null)
+            {
                 ExplicitFrequencyEnabled = true;
+                if (!isESP32)
+                {
+                    AutofeedWatchdog = true;
+                    NoInterruptsDuringSteps = true;
+                }
+            }
+
+            var loadCommand = ProvideLoadCommand();
+            var idx = Settings.StartupCommands.IndexOf("mon reset halt");
+            if (idx < 0 || idx > loadCommand)
+            {
+                Settings.StartupCommands.Insert(loadCommand, "mon reset halt");
+            }
 
             if (Settings.FLASHResources != null)
                 foreach (var r in Settings.FLASHResources)
                     FLASHResources.Add(r);
+
             FLASHResources.CollectionChanged += (s, e) => { Settings.FLASHResources = FLASHResources.ToArray(); OnPropertyChanged(nameof(FLASHResources)); };
         }
 
@@ -268,6 +283,42 @@ namespace ESP8266DebugPackage
                     ESP8266Settings.EraseSectorSize = value;
                     OnPropertyChanged(nameof(EraseSectorSize));
                 }
+            }
+        }
+
+        public bool ShowRTOSThreads
+        {
+            get
+            {
+                var cmdLine = ParsedCommandLine;
+                var value = cmdLine.Items.OfType<OpenOCDCommandLine.CommandItem>().FirstOrDefault(c => c.Command.StartsWith("set ESP32_RTOS"))?.Command?.Split(' ')?.Last();
+                return value != "none";
+            }
+            set
+            {
+                if (value == ShowRTOSThreads)
+                    return;
+
+                var cmdLine = ParsedCommandLine;
+                var cmd = cmdLine.Items.OfType<OpenOCDCommandLine.CommandItem>().FirstOrDefault(c => c.Command.StartsWith("set ESP32_RTOS"));
+                if (!value)
+                {
+                    int? idx = cmdLine.FindTargetScript();
+                    if (!idx.HasValue)
+                        idx = cmdLine.Items.Count;
+
+                    if (cmd == null)
+                        cmdLine.Items.Insert(idx.Value, cmd = new OpenOCDCommandLine.CommandItem());
+
+                    cmd.Command = "set ESP32_RTOS none";
+                }
+                else
+                {
+                    if (cmd != null)
+                        cmdLine.Items.Remove(cmd);
+                }
+
+                ApplyCommandLine(cmdLine);
             }
         }
     }

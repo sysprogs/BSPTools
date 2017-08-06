@@ -1,5 +1,6 @@
 ﻿using BSPEngine;
 using ESP8266DebugPackage.GUI;
+using OpenOCDPackage;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -67,6 +68,8 @@ namespace ESP8266DebugPackage
                     return _SerialPort;
                 }
             }
+
+            public IConsoleOutputClassifier OutputClassifier { get; } = new OpenOCDOutputClassifier();
 
             public void ConnectGDBToStub(IDebugStartService service, ISimpleGDBSession session)
             {

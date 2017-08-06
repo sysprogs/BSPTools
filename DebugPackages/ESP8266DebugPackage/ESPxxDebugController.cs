@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ESP8266DebugPackage
 {
@@ -95,9 +96,6 @@ namespace ESP8266DebugPackage
 
         bool LoadFLASH(DebugStartContext context, IDebugStartService service, ISimpleGDBSession session, ESPxxOpenOCDSettings settings)
         {
-            if (!session.RunGDBCommand("mon reset halt").IsDone)
-                throw new Exception("Failed to reset target");
-
             string val;
             if (!service.SystemDictionary.TryGetValue("com.sysprogs.esp32.load_flash", out val) || val != "1")
             {
@@ -116,6 +114,7 @@ namespace ESP8266DebugPackage
                 using (var ctx = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Programming FLASH memory" }))
                 {
                     int blkNum = 0;
+                    Regex rgWriteXBytes = new Regex("wrote ([0-9]+) bytes from file");
                     foreach (var blk in blocks)
                     {
                         ctx.ReportTaskProgress(blkNum++, blocks.Count);
@@ -123,7 +122,13 @@ namespace ESP8266DebugPackage
                         var result = session.RunGDBCommand($"mon program_esp32 \"{path}\" 0x{blk.Offset:x}");
                         bool succeeded = result.StubOutput?.FirstOrDefault(l => l.Contains("** Programming Finished **")) != null;
                         if (!succeeded)
-                            throw new Exception("FLASH programming failed. Please review the gdb/OpenODC logs for details.");
+                            throw new Exception("FLASH programming failed. Please review the gdb/OpenOCD logs for details.");
+                        var m = result.StubOutput.Select(l => rgWriteXBytes.Match(l)).FirstOrDefault(m2 => m2.Success);
+                        if (m == null)
+                            throw new Exception("FLASH programming did not report the amount of written bytes. Please review the gdb/OpenOCD logs for details.");
+                        int bytesWritten = int.Parse(m.Groups[1].Value);
+                        if (bytesWritten == 0 && blk.Size > 0)
+                            throw new Exception("FLASH programming did not write any data. This is a known bug of ESP32 OpenOCD. Please restart your device and JTAG programmer and try again.");
                     }
                 }
             }

@@ -27,5 +27,7 @@
 		<string>com.sysprogs.esp32.idf.tcpip_adapter</string>
 		<string>com.sysprogs.esp32.idf.ulp</string>
 		<string>com.sysprogs.esp32.idf.vfs</string>
+		<string>com.sysprogs.esp32.idf.soc</string>
+		<string>com.sysprogs.esp32.idf.xtensa-debug-module</string>
 	</RequiredFrameworks>
 </EmbeddedProjectSample>

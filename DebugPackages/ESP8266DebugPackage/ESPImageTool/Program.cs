@@ -34,7 +34,7 @@ namespace ESPImageTool
         {
             try
             {
-                string pkg = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"sysprogs\debug\core\ESP8266DebugPackage.dll");
+                string pkg = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"sysprogs\debug\core\ESPxxDebugPackage.dll");
                 if (File.Exists(pkg))
                     _DebugPackage = Assembly.LoadFrom(pkg);
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -49,14 +49,20 @@ namespace ESPImageTool
 
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            if (args.Name?.StartsWith("ESP8266DebugPackage,") == true)
+            if (args.Name?.StartsWith("ESPxxDebugPackage,") == true)
                 return _DebugPackage;
             return null;
         }
 
         static void Run(string[] args)
-        { 
-            Console.WriteLine("ESP8266 image tool v1.0 [http://sysprogs.com/]");
+        {
+            bool esp32mode = false;
+
+            if (esp32mode)
+                Console.WriteLine("ESP32 image tool v1.0 [http://sysprogs.com/]");
+            else
+                Console.WriteLine("ESP8266 image tool v1.0 [http://sysprogs.com/]");
+
             if (args.Length < 1)
             {
                 PrintUsage();
@@ -68,7 +74,6 @@ namespace ESPImageTool
             int otaPort = 0;
             int baud = 115200;
             bool erase = false;
-            bool esp32mode = false;
             List<string> files = new List<string>();
             string frequency = null, mode = null, size = null;
             for (int i = 0; i < args.Length; i++)
@@ -153,7 +158,7 @@ namespace ESPImageTool
                         using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
                         {
                             img.Save(fs);
-                            regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0, Size = (int)fs.Length });
+                            regions.Add(new ProgrammableRegion { FileName = fn, Offset = 0x10000, Size = (int)fs.Length });
                         }
                     }
                     else

@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:ESP8266DebugPackage.GUI"
              xmlns:bspe="clr-namespace:BSPEngine;assembly=BSPEngine"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:oocd="clr-namespace:OpenOCDPackage.GUI;assembly=OpenOCDPackage2"
              xmlns:coll="clr-namespace:System.Collections;assembly=mscorlib"
              mc:Ignorable="d">
     <UserControl.Resources>
@@ -31,7 +30,7 @@
         <DataTemplate x:Key="AnnotatedItemTemplate">
             <TextBlock Text="{Binding Converter={x:Static local:Options.Converter}}" Margin="0"/>
         </DataTemplate>
-        <oocd:ShowOnlyInListViewConverter x:Key="showOnlyInListViewConverter"/>
+        <local:ShowOnlyInListViewConverter x:Key="showOnlyInListViewConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -39,6 +38,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -77,6 +77,7 @@
                 </Style.Setters>
             </Style>
             <Thickness x:Key="TableElementMargin">0 2 0 2</Thickness>
+            <Thickness x:Key="TableCheckboxMargin">5 2 0 2</Thickness>
             <Thickness x:Key="SubSettingMargin">10 0 0 0</Thickness>
             <Visibility x:Key="Collapsed">Collapsed</Visibility>
         </Grid.Resources>
@@ -213,16 +214,21 @@
         </Grid>
         
         <CheckBox Grid.Row="9" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center" 
-                  IsChecked="{Binding NoInterruptsDuringSteps}" Margin="{StaticResource TableElementMargin}">
+                  IsChecked="{Binding NoInterruptsDuringSteps}" Margin="{StaticResource TableCheckboxMargin}">
             <TextBlock Text="Suppress interrupts during single-stepping"/>
         </CheckBox>
 
         <CheckBox Grid.Row="10" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center"
-                  IsChecked="{Binding AutofeedWatchdog}" Margin="{StaticResource TableElementMargin}">
+                  IsChecked="{Binding AutofeedWatchdog}" Margin="{StaticResource TableCheckboxMargin}">
             <TextBlock Text="Feed ESP8266 watchdog timer while stopped"/>
         </CheckBox>
 
-        <Expander Grid.ColumnSpan="2" Grid.Row="11" Header="Additional FLASH resources to program" IsExpanded="False">
+        <CheckBox Grid.Row="11" Grid.ColumnSpan="2" Visibility="{Binding ESP32Visibility}" VerticalContentAlignment="Center"
+                  IsChecked="{Binding ShowRTOSThreads}" Margin="{StaticResource TableCheckboxMargin}">
+            <TextBlock Text="Show FreeRTOS threads in the 'threads' window"/>
+        </CheckBox>
+        
+        <Expander Grid.ColumnSpan="2" Grid.Row="12" Header="Additional FLASH resources to program" IsExpanded="False">
             <StackPanel Orientation="Vertical">
                 <Border BorderThickness="1" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ESPxxOpenOCDSettingsControl}}" Margin="10">
                     <StackPanel Orientation="Vertical">
@@ -277,7 +283,7 @@
                 </Grid>
             </StackPanel>
         </Expander>
-        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="12" Header="Advanced settings" IsExpanded="False">
+        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="13" Header="Advanced settings" IsExpanded="False">
             <Grid MinHeight="80" Margin="20 0 5 5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -292,7 +298,7 @@
                 <TextBox Margin="2" Text="{Binding CommandLine, UpdateSourceTrigger=LostFocus}" Grid.Column="0" Grid.Row="1" AcceptsReturn="False" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"/>
 
                 <TextBlock Text="Startup GDB commands:" Margin="2" Grid.Column="1"/>
-                <TextBox Margin="2" Grid.Column="1" Text="{Binding StartupCommands, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"/>
+                <TextBox Margin="2" Grid.Column="1" Text="{Binding StartupCommands, UpdateSourceTrigger=LostFocus}" Grid.Row="1" AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"/>
 
             </Grid>
         </Expander>

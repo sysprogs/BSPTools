@@ -6,14 +6,12 @@
              xmlns:local="clr-namespace:ESP8266DebugPackage.GUI"
              xmlns:bspe="clr-namespace:BSPEngine;assembly=BSPEngine"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:oocd="clr-namespace:OpenOCDPackage.GUI;assembly=OpenOCDPackage2"
              xmlns:coll="clr-namespace:System.Collections;assembly=mscorlib"
              mc:Ignorable="d">
     <UserControl.Resources>
         <DataTemplate x:Key="AnnotatedItemTemplate">
             <TextBlock Text="{Binding Converter={x:Static local:Options.Converter}}" Margin="0"/>
         </DataTemplate>
-        <oocd:ShowOnlyInListViewConverter x:Key="showOnlyInListViewConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
