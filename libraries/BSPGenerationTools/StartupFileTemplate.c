@@ -4,9 +4,8 @@
 	the platform-specific initializer and the main() function.
 */
 
+#include <stddef.h>
 extern void *_estack;
-
-#define NULL ((void *)0)
 
 void Reset_Handler();
 void Default_Handler();
