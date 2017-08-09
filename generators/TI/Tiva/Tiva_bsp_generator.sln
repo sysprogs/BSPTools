@@ -5,9 +5,9 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiva_bsp_generator", "Tiva_bsp_generator.csproj", "{1A169748-A9AE-4E4F-8AD2-5E5A2C518895}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkerScriptGenerator", "..\..\libraries\LinkerScriptGenerator\LinkerScriptGenerator.csproj", "{46E1D77E-E294-4A9A-964E-7139CD6C4A90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkerScriptGenerator", "..\..\..\libraries\LinkerScriptGenerator\LinkerScriptGenerator.csproj", "{46E1D77E-E294-4A9A-964E-7139CD6C4A90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

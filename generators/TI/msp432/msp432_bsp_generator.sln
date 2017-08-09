@@ -5,9 +5,9 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msp432_bsp_generator", "msp432_bsp_generator.csproj", "{2E09503C-E66B-49DC-BE8E-C5CBE66B5457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkerScriptGenerator", "..\..\libraries\LinkerScriptGenerator\LinkerScriptGenerator.csproj", "{46E1D77E-E294-4A9A-964E-7139CD6C4A90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkerScriptGenerator", "..\..\..\libraries\LinkerScriptGenerator\LinkerScriptGenerator.csproj", "{46E1D77E-E294-4A9A-964E-7139CD6C4A90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

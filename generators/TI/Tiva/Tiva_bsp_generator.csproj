@@ -34,7 +34,7 @@
   <ItemGroup>
     <Reference Include="BSPEngine, Version=5.0.8.0, Culture=neutral, PublicKeyToken=8f764369eb712693, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\BSPEngine.dll</HintPath>
+      <HintPath>..\..\..\BSPEngine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -53,11 +53,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\libraries\LinkerScriptGenerator\LinkerScriptGenerator.csproj">
+    <ProjectReference Include="..\..\..\libraries\LinkerScriptGenerator\LinkerScriptGenerator.csproj">
       <Project>{46e1d77e-e294-4a9a-964e-7139cd6c4a90}</Project>
       <Name>LinkerScriptGenerator</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj">
+    <ProjectReference Include="..\..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj">
       <Project>{9fe2706c-e100-4ef2-8498-c25c7ff3b122}</Project>
       <Name>BSPGenerationTools</Name>
     </ProjectReference>
