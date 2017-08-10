@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>				
+			</CopyJob>				
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>				
+				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
+				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s</RenameRules>
+				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart)\.c$=>drv_{1}.c</AdvancedRenameRules>
+			</CopyJob>				
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>				
+				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
+			</CopyJob>				
+		</CopyJobs>
+	</CoreFramework>
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>Core Drivers</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.device_drivers</ID>
+			<ProjectFolderName>Core Drivers</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\devices</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\ti\devices</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+				<AdditionalIncludeDirs>cc32xx</AdditionalIncludeDirs>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Peripheral Drivers</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.periph_drivers</ID>
+			<ProjectFolderName>Peripheral Drivers</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\drivers</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\ti\drivers</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Display</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.display</ID>
+			<ProjectFolderName>Display</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\display</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\ti\display</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>FatFS</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.fatfs</ID>
+			<ProjectFolderName>FatFS</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\third_party\fatfs</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-utils\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\third_party\fatfs</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
+				<PreprocessorMacros>_NSTREAM=5</PreprocessorMacros>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>ffcio.c</FilePath>
+						<OldLine>#include &lt;file.h&gt;</OldLine>
+						<NewLine>#include &lt;sys/file.h&gt;</NewLine>
+					</Patch>
+				</Patches>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>CC3220 Non-RTOS files</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.nortos</ID>
+			<ProjectFolderName>Device Drivers</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\nortos</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>kernel\nortos</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+				<AdditionalIncludeDirs>.;posix</AdditionalIncludeDirs>
+				<SimpleFileConditions>
+					<string>dpl\\ClockPCC32XX_nortos.c: $$com.sysprogs.bspoptions.cc3220.clock_file$$ == ClockPCC32XX_nortos</string>
+					<string>dpl\\ClockPTimer_nortos.c: $$com.sysprogs.bspoptions.cc3220.clock_file$$ == ClockPTimer_nortos</string>
+				</SimpleFileConditions>
+				</CopyJob>	
+			</CopyJobs>
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.cc3220.rtos</Key>
+					<Value>nortos</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>Clock File</Name>
+						  <UniqueID>com.sysprogs.bspoptions.cc3220.clock_file</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>ClockPCC32XX_nortos</InternalValue></Suggestion>
+							<Suggestion><InternalValue>ClockPTimer_nortos</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+
+	</AdditionalFrameworks>
+	
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\pwmled</SourceFolder>
+			<DestinationFolder>Samples\pwmled</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/Board.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/CC3220SF_LAUNCHXL.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/CC3220SF_LAUNCHXL.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/main_nortos.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/pwmled.c</string>
+			</AdditionalSources>
+		</SmartSample>		
+	
+	</SmartSamples>
+</FamilyDefinition>

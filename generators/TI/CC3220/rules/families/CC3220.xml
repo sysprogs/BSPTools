@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>CC3220</Name>
+	<DeviceRegex>.*</DeviceRegex>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\source\ti\devices\cc32xx\inc</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\examples\project</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<CompilationFlags>
+		<PreprocessorMacros>
+			<string>DeviceFamily_CC3220</string>
+			<string>gcc</string>
+		</PreprocessorMacros>
+		<LDFLAGS>-nostartfiles -eresetISR</LDFLAGS>
+	</CompilationFlags>
+</FamilyDefinition>

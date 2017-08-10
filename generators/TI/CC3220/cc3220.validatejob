@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainPath>[SysGCC-arm-eabi-5.3.0]</ToolchainPath>
+	<BSPPath>$$JOBDIR$$\Output</BSPPath>
+	<DeviceRegex>CC.*</DeviceRegex>
+	<Samples>
+		<TestedSample>
+			<Name>PWMLED</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-pwmled</TestDirSuffix>
+			<SampleConfiguration>			
+			</SampleConfiguration>
+			<FrameworkConfiguration>			
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.arm.ti.cc3200.free_rtos.heap</Key>
+						<Value>heap_3</Value>
+					</KeyValue>
+				</Entries>
+			</FrameworkConfiguration>
+		</TestedSample>
+
+	</Samples>
+</TestJob>
