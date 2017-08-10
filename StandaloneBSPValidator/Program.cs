@@ -278,6 +278,9 @@ namespace StandaloneBSPValidator
             vs.AllDependencies = Directory.GetFiles(sampleBuildDir, "*.d").SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":"))).Distinct().ToArray();
         }
 
+        static SystemDirectories SystemDirs = new SystemDirectories();
+
+
         private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, bool pSoftFPU, VendorSampleDirectory sampleDir)
         {
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
@@ -286,7 +289,9 @@ namespace StandaloneBSPValidator
             {
                 configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
             }
-            var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager(), null);
+
+
+            var bspDict = configuredMCU.BuildSystemDictionary(SystemDirs);
             bspDict["PROJECTNAME"] = "test";
             bspDict["SYS:VSAMPLE_DIR"] = sampleDir.Path;
             var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
@@ -401,7 +406,7 @@ namespace StandaloneBSPValidator
             //configuredSample.Parameters["com.sysprogs.examples.stm32.LEDPORT"] = "GPIOA";
             //configuredSample.Parameters["com.sysprogs.examples.stm32.freertos.heap_size"] = "0";
 
-            var bspDict = configuredMCU.BuildSystemDictionary(new BSPManager(), null);
+            var bspDict = configuredMCU.BuildSystemDictionary(SystemDirs);
             bspDict["PROJECTNAME"] = "test";
 
             if (configuredSample.Frameworks != null)
@@ -493,6 +498,22 @@ namespace StandaloneBSPValidator
                     });
                 }
             }
+
+
+            bool errorsFound = false;
+            foreach(var g in job.CompileTasks.GroupBy(t=>t.PrimaryOutput.ToLower()))
+            {
+                if (g.Count() > 1)
+                {
+                    Console.WriteLine($"ERROR: {g.Key} corresponds to the following files:");
+                    foreach (var f in g)
+                        Console.WriteLine("\t" + f.AllInputs.FirstOrDefault());
+                    errorsFound = true;
+                }
+            }
+
+            if (errorsFound)
+                throw new Exception("Multiple source files with the same name found");
 
             job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin");
 
@@ -619,8 +640,8 @@ namespace StandaloneBSPValidator
             if (toolchainPath == null)
                 throw new Exception("Cannot locate toolchain path from registry");
 
-            var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(toolchainPath), new ToolchainRelocationManager());
-            var bsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir))), toolchain);
+            var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(toolchainPath)));
+            var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir))), toolchain);
 
             TestStatistics stats = new TestStatistics();
             int cnt = 0, failed = 0, succeeded = 0;
@@ -756,7 +777,7 @@ namespace StandaloneBSPValidator
             return stats;
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length < 2)
                 throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
@@ -770,8 +791,8 @@ namespace StandaloneBSPValidator
                     throw new Exception("Cannot locate toolchain path from registry");
             }
 
-            var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
-            var bsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(job.BSPPath)), toolchain);
+            var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
+            var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(job.BSPPath))), toolchain);
 
             TestBSP(job, bsp, args[1]);
         }

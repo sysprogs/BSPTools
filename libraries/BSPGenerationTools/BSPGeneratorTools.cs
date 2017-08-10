@@ -70,11 +70,11 @@ namespace BSPGenerationTools
             return Name;
         }
 
-        public MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters)
+        public MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool canHaveNoStartupFile = false)
         {
             if (string.IsNullOrEmpty(LinkerScriptPath))
                 throw new Exception("Linker script not defined for " + Name);
-            if (string.IsNullOrEmpty(StartupFile))
+            if (!canHaveNoStartupFile && string.IsNullOrEmpty(StartupFile))
                 throw new Exception("Startup file not defined for " + Name);
             if (string.IsNullOrEmpty(MCUDefinitionFile) && requirePeripheralRegisters)
                 throw new Exception("Peripheral register definition not found for " + Name);
@@ -91,7 +91,7 @@ namespace BSPGenerationTools
                     PreprocessorMacros = new string[] { bspBuilder.GetMCUTypeMacro(this) },
                     LinkerScript = LinkerScriptPath,
                 },
-                AdditionalSourceFiles = new string[] { StartupFile },
+                AdditionalSourceFiles = new string[] { StartupFile }.Where(s => !string.IsNullOrEmpty(s)).ToArray(),
                 MCUDefinitionFile = MCUDefinitionFile
             };
 
@@ -131,7 +131,6 @@ namespace BSPGenerationTools
         }
     }
 
-
     public abstract class BSPBuilder
     {
         public LinkerScriptTemplate LDSTemplate;
@@ -140,10 +139,18 @@ namespace BSPGenerationTools
         public readonly Dictionary<string, string> SystemVars = new Dictionary<string, string>();
 
         public List<FileCondition> MatchedFileConditions = new List<FileCondition>();
+        public Dictionary<string, string> RenamedFileTable = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         public readonly BSPDirectories Directories;
 
-        public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = @"..\..\..\..\GenericARM.ldsx")
+        public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = null, int linkerScriptLevel = 4)
         {
+            if (linkerScriptTemplate == null)
+            {
+                for (int i = 0; i < linkerScriptLevel; i++)
+                    linkerScriptTemplate += @"..\";
+                linkerScriptTemplate += @"GenericARM.ldsx";
+            }
+
             Directories = dirs;
             SystemVars["$$BSPGEN:INPUT_DIR$$"] = dirs.InputDir;
             SystemVars["$$BSPGEN:RULES_DIR$$"] = dirs.RulesDir;
@@ -244,7 +251,7 @@ namespace BSPGenerationTools
 
         public virtual string GetMCUTypeMacro(MCUBuilder mcu)
         {
-            return mcu.Name;            
+            return mcu.Name;
         }
     }
 
@@ -660,7 +667,7 @@ namespace BSPGenerationTools
 
         }
 
-        public void AttachStartupFiles(IEnumerable<StartupFileGenerator.InterruptVectorTable> files, string startupFileFolder = "StartupFiles",string pFileNameTemplate = "StartupFileTemplate.c")
+        public void AttachStartupFiles(IEnumerable<StartupFileGenerator.InterruptVectorTable> files, string startupFileFolder = "StartupFiles", string pFileNameTemplate = "StartupFileTemplate.c")
         {
             var allFiles = files.ToArray();
             foreach (var mcu in MCUs)
@@ -678,7 +685,7 @@ namespace BSPGenerationTools
                 }
 
                 if (!matched)
-                 throw new Exception("Cannot find a startup file for " + mcu.Name);
+                    throw new Exception("Cannot find a startup file for " + mcu.Name);
             }
         }
 
@@ -697,7 +704,7 @@ namespace BSPGenerationTools
                     var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
                     foreach (var mcu in removed)
                         if (rgUnsupported == null || !rgUnsupported.IsMatch(mcu.Name))
-                            Console.WriteLine("throw new Exception(mcu.Name +  is not marked as unsupported, but cannot be categorized "+ mcu.Name);
+                            Console.WriteLine("throw new Exception(mcu.Name +  is not marked as unsupported, but cannot be categorized " + mcu.Name);
                 }
 
                 removedMCUs.AddRange(removed);

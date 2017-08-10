@@ -2,7 +2,7 @@
    This software is licensed under the Sysprogs BSP Generator License.
    https://github.com/sysprogs/BSPTools/blob/master/LICENSE
 */
- 
+
 using BSPEngine;
 using System;
 using System.Collections.Generic;
@@ -158,7 +158,7 @@ namespace BSPGenerationTools
                     if (m.Success)
                     {
                         List<object> args = new List<object>();
-                        foreach(Group g in m.Groups)
+                        foreach (Group g in m.Groups)
                             args.Add(g.Value);
                         lines[i] = string.Format(lines[i], args.ToArray());
                         hitCount++;
@@ -207,6 +207,7 @@ namespace BSPGenerationTools
         public string TargetFolder; //if null, defaults to (BSP)\(name of source folder), otherwise specifies relative path within the family subdirectory
         public string FilesToCopy;  //<MASKLIST> of files to copy
         public string RenameRules;
+        public string AdvancedRenameRules;  //regex=>expr
 
         public string AutoIncludeMask = "*.h";  //<MASKLIST> that will be used to derive include dirs
         public string ProjectInclusionMask = "*"; //<MASKLIST> that will be added in the Solution Explorer
@@ -236,15 +237,36 @@ namespace BSPGenerationTools
             }
         }
 
-        class RenameRule
+        interface IRenameRule
+        {
+            bool Matches(string targetFile);
+            string Apply(string targetFile);
+        }
+
+        public class RenameRule : IRenameRule
         {
             public string OldName;
             public string NewName;
 
-            internal bool Matches(string targetFile)
+            public string Apply(string targetFile) => NewName;
+
+            public bool Matches(string targetFile)
             {
                 return StringComparer.InvariantCultureIgnoreCase.Compare(targetFile, OldName) == 0;
             }
+        }
+
+        public class AdvancedRenamingRule : IRenameRule
+        {
+            public Regex OldName;
+            public string NewNameFormat;
+
+            public string Apply(string targetFile)
+            {
+                return string.Format(NewNameFormat, OldName.Match(targetFile).Groups.OfType<object>().ToArray());
+            }
+
+            public bool Matches(string targetFile) => OldName.IsMatch(targetFile);
         }
 
         public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir)
@@ -285,21 +307,25 @@ namespace BSPGenerationTools
                 folderInsideBSPPrefix = "";
             else if (folderInsideBSPPrefix != "" && !folderInsideBSPPrefix.StartsWith("/"))
                 folderInsideBSPPrefix = "/" + folderInsideBSPPrefix;
-            
+
             var copyMasks = new CopyFilters(FilesToCopy);
-            var autoIncludes = new CopyFilters(AutoIncludeMask);    
+            var autoIncludes = new CopyFilters(AutoIncludeMask);
             var projectContents = new CopyFilters(ProjectInclusionMask);
             var filesToCopy = Directory.GetFiles(expandedSourceFolder, "*", SearchOption.AllDirectories).Select(f => f.Substring(expandedSourceFolder.Length + 1)).Where(f => copyMasks.IsMatch(f)).ToArray();
             foreach (var dir in filesToCopy.Select(f => Path.Combine(absTarget, Path.GetDirectoryName(f))).Distinct())
                 Directory.CreateDirectory(dir);
 
-            RenameRule[] rules = null;
-            if (RenameRules != null)
-                rules = RenameRules.Split(';').Select(r =>
-                {
-                    int idx = r.IndexOf("=>");
-                    return new RenameRule { OldName = r.Substring(0, idx), NewName = r.Substring(idx + 2) };
-                }).ToArray();
+            List<IRenameRule> rules = new List<IRenameRule>();
+            foreach (var r in (RenameRules ?? "").Split(';').Where(s=>s!=""))
+            {
+                int idx = r.IndexOf("=>");
+                rules.Add(new RenameRule { OldName = r.Substring(0, idx), NewName = r.Substring(idx + 2) });
+            }
+            foreach (var r in (AdvancedRenameRules ?? "").Split(';').Where(s => s != ""))
+            {
+                int idx = r.IndexOf("=>");
+                rules.Add(new AdvancedRenamingRule { OldName = new Regex(r.Substring(0, idx), RegexOptions.IgnoreCase), NewNameFormat = r.Substring(idx + 2) });
+            }
 
             var includeDirs = filesToCopy.Where(f => autoIncludes.IsMatch(f)).Select(f => Path.GetDirectoryName(f).Replace('\\', '/')).Distinct().Select(d => "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + (string.IsNullOrEmpty(d) ? "" : ("/" + d))).ToList();
             foreach (var f in filesToCopy)
@@ -313,11 +339,19 @@ namespace BSPGenerationTools
                 }
 
                 string targetFile = Path.Combine(absTarget, f);
-                var rule = rules?.FirstOrDefault(r => r.Matches(f));
-                if (rule != null)
+                string newName = rules?.FirstOrDefault(r => r.Matches(f))?.Apply(targetFile);
+
+                if (newName == null)
+                    if (bsp.RenamedFileTable.TryGetValue(targetFile, out newName) || bsp.RenamedFileTable.TryGetValue(targetFile.Replace('/', '\\'), out newName))
+                    {
+                    }
+
+                if (newName != null)
                 {
-                    targetFile = Path.Combine(Path.GetDirectoryName(targetFile), rule.NewName);
-                    renamedRelativePath = Path.Combine(Path.GetDirectoryName(renamedRelativePath), rule.NewName);
+                    var oldTargetFile = targetFile;
+                    targetFile = Path.Combine(Path.GetDirectoryName(targetFile), newName);
+                    renamedRelativePath = Path.Combine(Path.GetDirectoryName(renamedRelativePath), newName);
+                    bsp.RenamedFileTable[oldTargetFile] = newName;
                 }
 
                 if (AlreadyCopied)
@@ -348,7 +382,7 @@ namespace BSPGenerationTools
 
             if (AdditionalProjectFiles != null)
             {
-                foreach(var spec in AdditionalProjectFiles.Split(';'))
+                foreach (var spec in AdditionalProjectFiles.Split(';'))
                 {
                     string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + spec;
                     projectFiles.Add(encodedPath);
@@ -360,7 +394,7 @@ namespace BSPGenerationTools
                 throw new Exception(string.Format("Found {0} unused conditions. Please recheck your rules.", unusedConditions.Length));
 
             if (Patches != null)
-                foreach(var p in Patches)
+                foreach (var p in Patches)
                 {
                     foreach (var fn in p.FilePath.Split(';'))
                     {
@@ -404,13 +438,33 @@ namespace BSPGenerationTools
                 }
 
             if (AdditionalIncludeDirs != null)
-                includeDirs.AddRange(AdditionalIncludeDirs.Split(';'));
+                includeDirs.AddRange(AdditionalIncludeDirs.Split(';').Select(d => MapIncludeDir(absTarget, d)));
 
             return new ToolFlags
             {
                 PreprocessorMacros = (PreprocessorMacros == null) ? null : PreprocessorMacros.Split(';'),
                 IncludeDirectories = includeDirs.ToArray()
             };
+        }
+
+        private string MapIncludeDir(string absTarget, string dir)
+        {
+            if (dir.StartsWith("$$SYS:BSP_ROOT$$/"))
+                return dir;
+            else
+            {
+                string relPath;
+
+                if (dir == ".")
+                    relPath = TargetFolder;
+                else
+                    relPath = Path.Combine(TargetFolder, dir);
+
+                if (!Directory.Exists(Path.Combine(absTarget, dir)))
+                    throw new Exception("Invalid explicit include dir: " + dir);
+
+                return "$$SYS:BSP_ROOT$$/" + relPath.Replace('\\', '/');
+            }
         }
 
         private Condition ParseCondition(string rawCond)
@@ -500,7 +554,7 @@ namespace BSPGenerationTools
                 foreach (var op in Options)
                     _Cache.Add(new KeyValuePair<Regex, string>(new Regex(op.Regex), op.Value));
                 if (AutoOptions != null)
-                    foreach(var ao in AutoOptions.Split(';'))
+                    foreach (var ao in AutoOptions.Split(';'))
                         _Cache.Add(new KeyValuePair<Regex, string>(new Regex(ao.Replace('x', '.')), ao));
             }
 
@@ -553,7 +607,7 @@ namespace BSPGenerationTools
             else
             {
                 string[] args = name.Split(ArgumentSeparator[0]);
-                for(int i = 0; i < args.Length; i++)
+                for (int i = 0; i < args.Length; i++)
                 {
                     if (i == 0)
                         str = str.Replace("$$BSPGEN:FRAMEWORK$$", args[i]);
