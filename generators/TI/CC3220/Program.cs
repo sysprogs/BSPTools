@@ -17,7 +17,8 @@ namespace CC3200_bsp_generator
     {
         class CC3220BSPBuilder : BSPBuilder
         {
-            const uint SRAMBase = 0x20004000;
+            const uint SRAMBase = 0x20000000;
+            const uint FLASHBase = 0x01000000;
 
             public CC3220BSPBuilder(BSPDirectories dirs)
                 : base(dirs, null, 5)
@@ -27,7 +28,7 @@ namespace CC3200_bsp_generator
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
             {
-                flashBase = 0;
+                flashBase = FLASHBase;
                 ramBase = SRAMBase;
             }
 
@@ -38,19 +39,7 @@ namespace CC3200_bsp_generator
 
             public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
-                //No additional memory information available for this MCU. Build a basic memory layout from known RAM/FLASH sizes.
-                MemoryLayout layout = new MemoryLayout { DeviceName = mcu.Name, Memories = new List<Memory>() };
-
-                layout.Memories.Add(new Memory
-                {
-                    Name = "SRAM",
-                    Access = MemoryAccess.Undefined,
-                    Type = MemoryType.RAM,
-                    Start = SRAMBase,
-                    Size = (uint)mcu.RAMSize,
-                });
-
-                return layout;
+                throw new NotSupportedException("CC3220 BSP should reuse existing linker scripts instead of generating new ones");
             }
         }
 
@@ -91,7 +80,7 @@ namespace CC3200_bsp_generator
                     RAMSize = 256 * 1024,
                     Name = name,
                     MCUDefinitionFile = deviceDefinitionFile,
-                    LinkerScriptPath = $"$$SYS:BSP_ROOT$$/source/ti/boards/{name}_LAUNCHXL/{name}_LAUNCHXL_$$com.sysprogs.cc3220.rtos$$.lds",
+                    //LinkerScriptPath = $"$$SYS:BSP_ROOT$$/source/ti/boards/{name}_LAUNCHXL/{name}_LAUNCHXL_$$com.sysprogs.cc3220.rtos$$.lds",
                     StartupFile = null
                 });
             }
@@ -102,9 +91,11 @@ namespace CC3200_bsp_generator
 
             MCUFamilyBuilder commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
 
-            var famObj = famBuilder.GenerateFamilyObject(true);
+            var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
             List<string> projectFiles = new List<string>();
             commonPseudofamily.CopyFamilyFiles(ref famObj.CompilationFlags, projectFiles);
+
+            famObj.AdditionalSourceFiles = famObj.AdditionalSourceFiles.Concat(projectFiles).ToArray();
 
             foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
                 frameworks.Add(fw);
@@ -112,14 +103,15 @@ namespace CC3200_bsp_generator
             foreach (var sample in commonPseudofamily.CopySamples())
                 exampleDirs.Add(sample);
 
-            /*commonPseudofamily.Definition.FamilySubdirectory = "";
             if (!noPeripheralRegisters)
-                commonPseudofamily.AttachPeripheralRegisters(ParsePeripheralRegisters(Path.Combine(DirSDK, @"source\ti\devices\cc32xx\inc")));*/
-
+                famBuilder.AttachPeripheralRegisters(ParsePeripheralRegisters(famBuilder.Definition.PrimaryHeaderDir));
 
             List<MCU> mcuDefinitions = new List<MCU>();
-            foreach (var mcu in famBuilder.MCUs)
-                mcuDefinitions.Add(mcu.GenerateDefinition(famBuilder, bspBuilder, !noPeripheralRegisters, true));
+            foreach (var mcuDef in famBuilder.MCUs)
+            {
+                var mcu = mcuDef.GenerateDefinition(famBuilder, bspBuilder, !noPeripheralRegisters, true);
+                mcuDefinitions.Add(mcu);
+            }
 
             BoardSupportPackage bsp = new BoardSupportPackage
             {
@@ -133,11 +125,12 @@ namespace CC3200_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
+                ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
                 PackageVersion = "1.40.01"
             };
             bspBuilder.Save(bsp, !noPack);
 
-            StandaloneBSPValidator.Program.Main(new[] { "..\\..\\cc3220.validatejob", "f:\\bsptest" });
+            //StandaloneBSPValidator.Program.Main(new[] { "..\\..\\cc3220.validatejob", "f:\\bsptest" });
         }
     }
 }

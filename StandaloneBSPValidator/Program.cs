@@ -21,6 +21,7 @@ namespace StandaloneBSPValidator
         public string DeviceRegex;
         public bool SkipIfNotFound;
         public bool ValidateRegisters;
+        public bool DataSections;
         public PropertyDictionary2 SampleConfiguration;
         public PropertyDictionary2 FrameworkConfiguration;
         public PropertyDictionary2 MCUConfiguration;
@@ -431,7 +432,7 @@ namespace StandaloneBSPValidator
             ApplyConfiguration(configuredSample.FrameworkParameters, extraParameters?.FrameworkConfiguration, sample.FrameworkConfiguration);
             ApplyConfiguration(configuredSample.Parameters, extraParameters?.SampleConfiguration, sample.SampleConfiguration);
 
-            var prj = new GeneratedProject(mcuDir, configuredMCU, frameworks);
+            var prj = new GeneratedProject(mcuDir, configuredMCU, frameworks) { DataSections = sample.DataSections };
             prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);
             Dictionary<string, bool> frameworkIDs = new Dictionary<string, bool>();
             if (frameworks != null)

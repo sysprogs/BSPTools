@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Name>PWMLED</Name>
+  <Name>Network Terminal</Name>
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <BinaryFiles />
    <RequiredFrameworks>
 	<string>com.sysprogs.arm.ti.cc3220.device_drivers</string>
 	<string>com.sysprogs.arm.ti.cc3220.periph_drivers</string>
-	<string>com.sysprogs.arm.ti.cc3220.nortos</string>
+	<string>com.sysprogs.arm.ti.cc3220.freertos</string>
   </RequiredFrameworks> 
 </EmbeddedProjectSample>

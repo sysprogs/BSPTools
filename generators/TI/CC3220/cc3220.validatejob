@@ -4,8 +4,9 @@
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
 	<DeviceRegex>CC.*</DeviceRegex>
 	<Samples>
-		<TestedSample>
+		<!-- <TestedSample>
 			<Name>PWMLED</Name>
+			<DataSections>true</DataSections>
 			<SkipIfNotFound>true</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-pwmled</TestDirSuffix>
@@ -19,7 +20,23 @@
 					</KeyValue>
 				</Entries>
 			</FrameworkConfiguration>
+		</TestedSample> -->
+		<TestedSample>
+			<Name>Network Terminal</Name>
+			<DataSections>true</DataSections>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-networkterm</TestDirSuffix>
+			<SampleConfiguration>			
+			</SampleConfiguration>
+			<FrameworkConfiguration>			
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.bspoptions.FreeRTOS_Heap_Implementation</Key>
+						<Value>Heap3 - use newlib malloc()/free()</Value>
+					</KeyValue>
+				</Entries>
+			</FrameworkConfiguration>
 		</TestedSample>
-
 	</Samples>
 </TestJob>

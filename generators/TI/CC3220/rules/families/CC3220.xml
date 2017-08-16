@@ -6,6 +6,9 @@
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\examples\project</StartupFileDir>
 	<Subfamilies></Subfamilies>
 	<CompilationFlags>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
 		<PreprocessorMacros>
 			<string>DeviceFamily_CC3220</string>
 			<string>gcc</string>

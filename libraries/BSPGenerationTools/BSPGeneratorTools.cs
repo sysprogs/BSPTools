@@ -70,11 +70,11 @@ namespace BSPGenerationTools
             return Name;
         }
 
-        public MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool canHaveNoStartupFile = false)
+        public MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false)
         {
-            if (string.IsNullOrEmpty(LinkerScriptPath))
+            if (!allowIncompleteDefinition && string.IsNullOrEmpty(LinkerScriptPath))
                 throw new Exception("Linker script not defined for " + Name);
-            if (!canHaveNoStartupFile && string.IsNullOrEmpty(StartupFile))
+            if (!allowIncompleteDefinition && string.IsNullOrEmpty(StartupFile))
                 throw new Exception("Startup file not defined for " + Name);
             if (string.IsNullOrEmpty(MCUDefinitionFile) && requirePeripheralRegisters)
                 throw new Exception("Peripheral register definition not found for " + Name);
@@ -96,7 +96,7 @@ namespace BSPGenerationTools
             };
 
             if (fam.Definition.HasMixedCores)
-                MCUFamilyBuilder.AddCoreSpecificFlags(true, mcu, Core);
+                MCUFamilyBuilder.AddCoreSpecificFlags(MCUFamilyBuilder.CoreSpecificFlags.All, mcu, Core);
 
             List<SysVarEntry> sysVars = new List<SysVarEntry>();
             foreach (var classifier in fam.Definition.Subfamilies)
@@ -288,7 +288,9 @@ namespace BSPGenerationTools
         public const string PrimaryMemoryOptionName = "com.sysprogs.bspoptions.primary_memory";
         public readonly FamilyDefinition Definition;
 
-        public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables)
+        public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables) => GenerateFamilyObject(defineConfigurationVariables ? CoreSpecificFlags.All : CoreSpecificFlags.None);
+
+        public MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate)
         {
             var family = new MCUFamily { ID = Definition.Name };
 
@@ -303,7 +305,7 @@ namespace BSPGenerationTools
                     if (mcu.Core != core)
                         throw new Exception("Different MCUs within " + Definition.Name + " have different core types");
 
-                AddCoreSpecificFlags(defineConfigurationVariables, family, core);
+                AddCoreSpecificFlags(flagsToGenerate, family, core);
             }
 
             family.CompilationFlags = family.CompilationFlags.Merge(Definition.CompilationFlags);
@@ -327,7 +329,16 @@ namespace BSPGenerationTools
             return family;
         }
 
-        internal static void AddCoreSpecificFlags(bool defineConfigurationVariables, MCUFamily family, CortexCore core)
+        [Flags]
+        public enum CoreSpecificFlags
+        {
+            None = 0,
+            FPU = 0x01,
+            PrimaryMemory = 0x02,
+            All = FPU | PrimaryMemory
+        }
+
+        internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core)
         {
             string coreName = null;
             switch (core)
@@ -363,7 +374,7 @@ namespace BSPGenerationTools
             }
 
 
-            if (defineConfigurationVariables)
+            if ((flagsToDefine & CoreSpecificFlags.PrimaryMemory) == CoreSpecificFlags.PrimaryMemory)
             {
                 if (core == CortexCore.M0)
                     family.AdditionalSystemVars = new SysVarEntry[] { new SysVarEntry { Key = PrimaryMemoryOptionName, Value = "flash" } };
@@ -391,29 +402,34 @@ namespace BSPGenerationTools
                                 }
                             }
                     };
+                }
+            }
 
-                    if (core == CortexCore.M4 || core == CortexCore.M7)
-                    {
-                        family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
-                            new PropertyEntry.Enumerated
-                            {
-                                Name = "Floating point support",
-                                UniqueID = "com.sysprogs.bspoptions.arm.floatmode",
-                                SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
-                                            {
+            if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
+            {
+                if (core == CortexCore.M4 || core == CortexCore.M7)
+                {
+                    if (family.ConfigurableProperties == null)
+                        family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+                    family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
+                        new PropertyEntry.Enumerated
+                        {
+                            Name = "Floating point support",
+                            UniqueID = "com.sysprogs.bspoptions.arm.floatmode",
+                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
+                                        {
                                                 new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=soft", UserFriendlyName = "Software"},
                                                 new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=hard", UserFriendlyName = "Hardware"},
                                                 new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Unspecified"},
-                                            }
-                            });
+                                        }
+                        });
 
-                        family.CompilationFlags.COMMONFLAGS += " $$com.sysprogs.bspoptions.arm.floatmode$$";
-                    }
+                    family.CompilationFlags.COMMONFLAGS += " $$com.sysprogs.bspoptions.arm.floatmode$$";
                 }
-
-                if (coreName != null)
-                    family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName } });
             }
+
+            if (coreName != null)
+                    family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName } });
         }
 
         public static bool IsHeaderFile(string fn)
@@ -426,7 +442,7 @@ namespace BSPGenerationTools
         {
             if (Definition.CoreFramework != null)
                 foreach (var job in Definition.CoreFramework.CopyJobs)
-                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory));
+                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties));
         }
 
         class MemoryComparer : IEqualityComparer<Memory>
@@ -546,7 +562,7 @@ namespace BSPGenerationTools
 
                     ToolFlags flags = new ToolFlags();
                     foreach (var job in fw.CopyJobs)
-                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory));
+                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties));
 
                     fwDef.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
                     fwDef.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
@@ -647,7 +663,7 @@ namespace BSPGenerationTools
                     if (f.MatchPredicate == null || f.MatchPredicate(mcu) || allFiles.Length == 1)
                     {
                         mcu.MCUDefinitionFile = FamilyFilePrefix + deviceDefinitionFolder + "/" + f.MCUName + ".xml";
-                        string outputFile = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, deviceDefinitionFolder, f.MCUName + ".xml.gz");
+                        string outputFile = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory ?? ".", deviceDefinitionFolder, f.MCUName + ".xml.gz");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
                         {
                             XmlSerializer ser = new XmlSerializer(typeof(MCUDefinition));

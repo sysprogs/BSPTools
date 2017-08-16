@@ -214,6 +214,7 @@ namespace BSPGenerationTools
         public string PreprocessorMacros;   //semicolon-separated macros
         public string AdditionalIncludeDirs;    //Semicolon-separated, full path starting with $$SYS:BSP_ROOT$$
         public string[] SimpleFileConditions;   //See <CONDITION SYNTAX> above
+        public string[] SmartFileConditions; //Will be automatically translated to SimpleFileConditions & properties. Option name|list of (regex => option value). See CC3220 BSP for examples.
         public bool AlreadyCopied;  //The files have been copied (and patched) by some previous jobs. This job is defined only to add the files to the project.
         public string[] GuardedFiles;
 
@@ -269,13 +270,73 @@ namespace BSPGenerationTools
             public bool Matches(string targetFile) => OldName.IsMatch(targetFile);
         }
 
-        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir)
+        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties)
         {
             List<ParsedCondition> conditions = null;
+            List<string> allConditions = new List<string>();
             if (SimpleFileConditions != null)
+                allConditions.AddRange(SimpleFileConditions);
+            if (SmartFileConditions != null)
+            {
+                foreach (var str in SmartFileConditions)
+                {
+                    int idx = str.IndexOf('|');
+                    string name = str.Substring(0, idx);
+                    string id = "com.sysprogs.bspoptions." + name.Replace(' ', '_');
+                    string[] values = str.Substring(idx + 1).Split(';');
+
+                    PropertyEntry entry;
+                    if (values.Length == 1)
+                    {
+                        var val = values[0];
+                        string regex, value;
+                        idx = val.IndexOf("=>");
+                        if (idx == -1)
+                        {
+                            regex = val;
+                            value = "1";
+                        }
+                        else
+                        {
+                            regex = val.Substring(0, idx);
+                            value = val.Substring(idx + 2);
+                        }
+
+                        allConditions.Add($"{regex}: $${id}$$ == {value}");
+
+                        entry = new PropertyEntry.Boolean { ValueForTrue = value, Name = name, UniqueID = id, DefaultValue = true };
+                    }
+                    else
+                    {
+                        List<PropertyEntry.Enumerated.Suggestion> suggestions = new List<PropertyEntry.Enumerated.Suggestion>();
+
+                        foreach (var val in values)
+                        {
+                            idx = val.IndexOf("=>");
+                            string regex = val.Substring(0, idx);
+                            string value = val.Substring(idx + 2);
+                            allConditions.Add($"{regex}: $${id}$$ == {value}");
+                            suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = value });
+                        }
+
+                        entry = new PropertyEntry.Enumerated { Name = name, UniqueID = id, SuggestionList = suggestions.ToArray() };
+                    }
+
+                    if (configurableProperties?.PropertyGroups == null)
+                        configurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
+
+                    var grp = configurableProperties.PropertyGroups.FirstOrDefault(g => g.Name == null && g.UniqueID == null);
+                    if (grp == null)
+                        configurableProperties.PropertyGroups.Insert(0, grp = new PropertyGroup());
+
+                    grp.Properties.Add(entry);
+                }
+            }
+
+            if (allConditions.Count > 0)
             {
                 conditions = new List<ParsedCondition>();
-                foreach (var cond in SimpleFileConditions)
+                foreach (var cond in allConditions)
                 {
                     int idx = cond.IndexOf(':');
                     if (idx == -1)
@@ -316,7 +377,7 @@ namespace BSPGenerationTools
                 Directory.CreateDirectory(dir);
 
             List<IRenameRule> rules = new List<IRenameRule>();
-            foreach (var r in (RenameRules ?? "").Split(';').Where(s=>s!=""))
+            foreach (var r in (RenameRules ?? "").Split(';').Where(s => s != ""))
             {
                 int idx = r.IndexOf("=>");
                 rules.Add(new RenameRule { OldName = r.Substring(0, idx), NewName = r.Substring(idx + 2) });

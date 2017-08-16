@@ -187,10 +187,16 @@ namespace StandaloneBSPValidator
         }
 
         public const string MapFileName = "test.map";
+        public bool DataSections;
 
         internal ToolFlags GetToolFlags(Dictionary<string, string> systemDict, Dictionary<string, string> frameworkDict, IDictionary frameworkIDs)
         {
             var flags = new ToolFlags { CXXFLAGS = "-fno-exceptions -ffunction-sections -Os", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + MapFileName, CFLAGS = "-ffunction-sections -Os" };
+            if (DataSections)
+            {
+                flags.CXXFLAGS += " -fdata-sections";
+                flags.CFLAGS += " -fdata-sections";
+            }
 
             var mcuFlags = MCU.ExpandToolFlags(systemDict, null);
             flags = flags.Merge(mcuFlags);

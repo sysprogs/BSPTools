@@ -14,7 +14,7 @@
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
-				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s</RenameRules>
+				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s;ti\drivers\utils\List.c=>drv_list.c</RenameRules>
 				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart)\.c$=>drv_{1}.c</AdvancedRenameRules>
 			</CopyJob>				
 			<CopyJob>
@@ -23,11 +23,44 @@
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
-			</CopyJob>				
+			</CopyJob>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:RULES_DIR$$</SourceFolder>
+				<FilesToCopy>error.c</FilesToCopy>
+				<ProjectInclusionMask>*.c</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>				
+				<TargetFolder>support</TargetFolder>
+			</CopyJob>	
 		</CopyJobs>
 	</CoreFramework>
+
+		  <ConditionalFlags>
+		<ConditionalToolFlags>
+		  <FlagCondition xsi:type="ReferencesFramework">
+			<FrameworkID>com.sysprogs.arm.ti.cc3220.freertos</FrameworkID>
+		  </FlagCondition>
+		  <Flags>
+			<LinkerScript>$$SYS:BSP_ROOT$$/source/ti/boards/$$SYS:MCU_ID$$_LAUNCHXL/$$SYS:MCU_ID$$_LAUNCHXL_freertos.lds</LinkerScript>
+		  </Flags>
+		</ConditionalToolFlags>
+		<ConditionalToolFlags>
+			<FlagCondition xsi:type="And">
+				<Arguments>
+				  <Condition xsi:type="Not">
+					<Argument xsi:type="ReferencesFramework">
+						<FrameworkID>com.sysprogs.arm.ti.cc3220.freertos</FrameworkID>
+					</Argument>
+				  </Condition>
+				</Arguments>
+			</FlagCondition>
+		  <Flags>
+			<LinkerScript>$$SYS:BSP_ROOT$$/source/ti/boards/$$SYS:MCU_ID$$_LAUNCHXL/$$SYS:MCU_ID$$_LAUNCHXL_nortos.lds</LinkerScript>
+		  </Flags>
+		</ConditionalToolFlags>
+	  </ConditionalFlags>
+	
 	<AdditionalFrameworks>
-		<Framework>
+		<Framework> <!-- devices -->
 			<Name>Core Drivers</Name>
 			<ID>com.sysprogs.arm.ti.cc3220.device_drivers</ID>
 			<ProjectFolderName>Core Drivers</ProjectFolderName>
@@ -48,7 +81,7 @@
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
-		<Framework>
+		<Framework> <!-- drivers -->
 			<Name>Peripheral Drivers</Name>
 			<ID>com.sysprogs.arm.ti.cc3220.periph_drivers</ID>
 			<ProjectFolderName>Peripheral Drivers</ProjectFolderName>
@@ -68,7 +101,7 @@
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
-		<Framework>
+		<Framework> <!-- Display -->
 			<Name>Display</Name>
 			<ID>com.sysprogs.arm.ti.cc3220.display</ID>
 			<ProjectFolderName>Display</ProjectFolderName>
@@ -88,7 +121,7 @@
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
-		<Framework>
+		<Framework> <!-- FatFS -->
 			<Name>FatFS</Name>
 			<ID>com.sysprogs.arm.ti.cc3220.fatfs</ID>
 			<ProjectFolderName>FatFS</ProjectFolderName>
@@ -117,12 +150,55 @@
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
-		<Framework>
+		<Framework> <!-- MQTT -->
+			<Name>MQTT Support</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.mqtt</ID>
+			<ProjectFolderName>MQTT</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\net\mqtt</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-utils\*;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\ti\net\mqtt</TargetFolder>
+				<SmartFileConditions>
+					<string>MQTT Client|client\\.*</string>
+					<string>MQTT Server|server\\.*</string>
+				</SmartFileConditions>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework> <!-- OTA -->
+			<Name>OTA Support</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.ota</ID>
+			<ProjectFolderName>OTA</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\net\ota</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-utils\*;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\ti\net\ota</TargetFolder>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework> <!-- NonRTOS -->
 			<Name>CC3220 Non-RTOS files</Name>
 			<ID>com.sysprogs.arm.ti.cc3220.nortos</ID>
-			<ProjectFolderName>Device Drivers</ProjectFolderName>
+			<ProjectFolderName>Non-RTOS files</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.ti.cc3220.freertos</string>
 			</IncompatibleFrameworks>
 			<RequiredFrameworks>
 			</RequiredFrameworks>
@@ -135,10 +211,9 @@
 				<TargetFolder>kernel\nortos</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
 				<AdditionalIncludeDirs>.;posix</AdditionalIncludeDirs>
-				<SimpleFileConditions>
-					<string>dpl\\ClockPCC32XX_nortos.c: $$com.sysprogs.bspoptions.cc3220.clock_file$$ == ClockPCC32XX_nortos</string>
-					<string>dpl\\ClockPTimer_nortos.c: $$com.sysprogs.bspoptions.cc3220.clock_file$$ == ClockPTimer_nortos</string>
-				</SimpleFileConditions>
+				<SmartFileConditions>
+					<string>Clock File|dpl\\ClockPCC32XX_nortos.c=>ClockPCC32XX_nortos;dpl\\ClockPTimer_nortos.c=>ClockPTimer_nortos</string>
+				</SmartFileConditions>
 				</CopyJob>	
 			</CopyJobs>
 			<AdditionalSystemVars>
@@ -151,23 +226,91 @@
 				<PropertyGroups>
 				  <PropertyGroup>
 					<Properties>
-						<PropertyEntry xsi:type="Enumerated">
-						  <Name>Clock File</Name>
-						  <UniqueID>com.sysprogs.bspoptions.cc3220.clock_file</UniqueID>
-						  <SuggestionList>
-							<Suggestion><InternalValue>ClockPCC32XX_nortos</InternalValue></Suggestion>
-							<Suggestion><InternalValue>ClockPTimer_nortos</InternalValue></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>0</DefaultEntryIndex>
-						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>
 					</Properties>
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>			
 		</Framework>
-
+		<Framework> <!-- FreeRTOS -->
+			<Name>CC3220 FreeRTOS</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.freertos</ID>
+			<ProjectFolderName>FreeRTOS</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.ti.cc3220.nortos</string>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*MSP432*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>kernel\freertos</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+				<PreprocessorMacros>SL_PLATFORM_MULTI_THREADED;USE_FREERTOS</PreprocessorMacros>
+				<AdditionalIncludeDirs>.;posix</AdditionalIncludeDirs>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>posix\mqueue.h</FilePath>
+						<OldLine>typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</OldLine>
+						<NewLine>//typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</NewLine>
+					</Patch>
+				</Patches>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\..\FreeRTOSv9.0.0\FreeRTOS</SourceFolder>
+				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>source\portable\MemMang\*;source\portable\GCC\ARM_CM3\*;source\portable\GCC\ARM_CM4F\*;-source\portable\*;source\*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>FreeRTOS</TargetFolder>
+				<AdditionalIncludeDirs>source\include;source\portable\GCC\ARM_CM3</AdditionalIncludeDirs>
+				<SmartFileConditions>
+					<string>FreeRTOS Heap Implementation|source\\portable\\MemMang\\heap_4.c=>Heap4 - contiguous heap area;source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing;source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation;source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free();source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area</string>
+					<string>FreeRTOS Port|source\\portable\\GCC\\ARM_CM3=>Software FP;source\\portable\\GCC\\ARM_CM4F=>Hardware FP</string>
+				</SmartFileConditions>
+			</CopyJob>	
+			<!-- <CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\tools\cc32xx_tools\FreeRTOS_patch</SourceFolder>
+				<ProjectInclusionMask>*.c;*.h;*.asm</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
+				<TargetFolder>FreeRTOS\source\port</TargetFolder>
+				<RenameRules>CCS\ARM_CM3\portasm.asm=>portasm.s</RenameRules>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>CCS\ARM_CM3\port.c</FilePath>
+						<OldLine>	void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )</OldLine>
+						<NewLine>	void __attribute__((weak)) vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )</NewLine>
+					</Patch>
+				</Patches>
+			</CopyJob>	 -->
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos\builds\CC3220SF_LAUNCHXL\release</SourceFolder>
+				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>FreeRTOSConfig.h</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>FreeRTOS\source\include</TargetFolder>
+			</CopyJob>	
+			</CopyJobs>
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.cc3220.rtos</Key>
+					<Value>freertos</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
 	</AdditionalFrameworks>
 	
 	<SmartSamples>
@@ -180,6 +323,64 @@
 				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/CC3220SF_LAUNCHXL.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/main_nortos.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/pwmled.c</string>
+			</AdditionalSources>
+		</SmartSample>		
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\network_terminal</SourceFolder>
+			<DestinationFolder>Samples\network_terminal_sf</DestinationFolder>
+			<MCUFilterRegex>CC3220SF$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/CC3220SF_LAUNCHXL.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/cmd_parser.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/netapp_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/network_terminal.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/radio_tool.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/socket_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/str.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/transceiver_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/uart_term.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/wlan_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/Board.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/CC3220SF_LAUNCHXL.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/cmd_parser.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/netapp_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/network_terminal.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/radio_tool.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/socket_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/str.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/transceiver_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/uart_term.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/wlan_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/freertos/main_freertos.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\network_terminal</SourceFolder>
+			<DestinationFolder>Samples\network_terminal_s</DestinationFolder>
+			<MCUFilterRegex>CC3220S$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/CC3220S_LAUNCHXL.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/cmd_parser.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/netapp_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/network_terminal.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/radio_tool.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/socket_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/str.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/transceiver_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/uart_term.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/wlan_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/Board.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/CC3220S_LAUNCHXL.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/cmd_parser.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/netapp_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/network_terminal.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/radio_tool.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/socket_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/str.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/transceiver_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/uart_term.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/wlan_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/freertos/main_freertos.c</string>
 			</AdditionalSources>
 		</SmartSample>		
 	
