@@ -27,6 +27,7 @@ namespace ESP8266DebugPackage.GUI
 
         public ESPxxGDBStubSettingsControl(IBSPConfiguratorHost host, ICustomSettingsTypeProvider provider)
         {
+            host.InstallStyles(this);
             InitializeComponent();
             TypeProvider = provider;
             _Host = host;

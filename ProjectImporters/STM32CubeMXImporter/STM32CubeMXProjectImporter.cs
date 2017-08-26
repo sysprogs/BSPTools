@@ -44,10 +44,14 @@ namespace STM32CubeMXImporter
                 rootDir.AddFile(Path.Combine(baseDir, name), category == "header");
             }
 
+            bool hasFreeRTOS = false;
+
             foreach (var component in xml.SelectNodes("package/components/component").OfType<XmlElement>())
             {
                 string group = component.GetAttribute("Cgroup");
                 string subGroup = component.GetAttribute("Csub");
+                if (subGroup == "FREERTOS")
+                    hasFreeRTOS = true;
                 foreach (var file in component.SelectNodes("files/file").OfType<XmlElement>())
                 {
                     string category = file.GetAttribute("category");
@@ -70,9 +74,13 @@ namespace STM32CubeMXImporter
                 }
             }
 
+            List<string> macros = new List<string> { "$$com.sysprogs.bspoptions.primary_memory$$_layout", "$$com.sysprogs.stm32.hal_device_family$$" };
+            if (hasFreeRTOS)
+                macros.Add("USE_FREERTOS");
+
             deviceName = deviceName.TrimEnd('x');
             deviceName = deviceName.Substring(0, deviceName.Length - 1);
-            
+
             return new ImportedExternalProject
             {
                 DeviceNameMask = new Regex(deviceName.Replace("x", ".*") + ".*"),
@@ -80,7 +88,7 @@ namespace STM32CubeMXImporter
                 RootDirectory = rootDir,
                 GNUTargetID = "arm-eabi",
                 ReferencedFrameworks = new string[0],   //Unless this is explicitly specified, VisualGDB will try to reference the default frameworks (STM32 HAL) that will conflict with the STM32CubeMX-generated files.
-                
+
                 Configurations = new[]
                 {
                     new ImportedExternalProject.ImportedConfiguration
@@ -88,7 +96,7 @@ namespace STM32CubeMXImporter
                         Settings = new ImportedExternalProject.InvariantProjectBuildSettings
                         {
                             IncludeDirectories = allHeaderDirs.Select(d=>Path.Combine(baseDir, d)).ToArray(),
-                            PreprocessorMacros = new[]{ "$$com.sysprogs.bspoptions.primary_memory$$_layout", "$$com.sysprogs.stm32.hal_device_family$$" }
+                            PreprocessorMacros = macros.ToArray()
                         }
                     }
                 }

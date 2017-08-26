@@ -36,6 +36,7 @@ namespace ESP8266DebugPackage.GUI
             _Host = host;
             _IsESP32 = isESP32;
             TypeProvider = typeProvider;
+            host.InstallStyles(this);
             InitializeComponent();
 
             host.MakeSearchableComboBox(InterfaceComboBox, (i, f) => _Editor?.FilterItem(i, f) ?? false, Resources["interfaceScriptSelectionControl"]);
