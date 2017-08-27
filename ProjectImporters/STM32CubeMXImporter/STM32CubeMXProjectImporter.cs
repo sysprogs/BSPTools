@@ -56,6 +56,11 @@ namespace STM32CubeMXImporter
                 {
                     string category = file.GetAttribute("category");
                     string name = file.GetAttribute("name");
+                    if (name.EndsWith(@"\*") && category == "header")
+                    {
+                        allHeaderDirs.Add(name.Substring(0, name.Length -2));
+                        continue;
+                    }
                     string condition = file.GetAttribute("condition");
                     if (!string.IsNullOrEmpty(condition) && condition != "GCC Toolchain")
                         continue;   //This is a IAR-only or Keil-only file
