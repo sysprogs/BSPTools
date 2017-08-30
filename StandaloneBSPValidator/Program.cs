@@ -307,13 +307,11 @@ namespace StandaloneBSPValidator
             var flags = prj.GetToolFlags(bspDict, frameworkCfg, frameworkIDs);
 
             //ToolFlags flags = new ToolFlags { CXXFLAGS = "  ", COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
-            if (!pSoftFPU)
-                flags.COMMONFLAGS = flags.COMMONFLAGS.Replace("soft", "hard");
 
             flags.CFLAGS += " -MD";
             flags.CXXFLAGS += " -MD";
 
-            flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories);
+            flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories).Distinct().ToArray();
             flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
 
             flags = LoadedBSP.ConfiguredMCU.ExpandToolFlags(flags, bspDict, null);
@@ -321,6 +319,7 @@ namespace StandaloneBSPValidator
             Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
             sourceExtensions.Add("c", true);
             sourceExtensions.Add("cpp", true);
+            sourceExtensions.Add("s", true);
 
             return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, vs);
         }
@@ -483,7 +482,7 @@ namespace StandaloneBSPValidator
                 string ext = Path.GetExtension(sf);
                 if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
                 {
-                    if (ext != ".txt" && ext != ".a")
+                    if (ext != ".txt" && ext != ".a" && ext != ".h")
                         Console.WriteLine($"#{sf} is not a recognized source file");
                 }
                 else
@@ -526,7 +525,7 @@ namespace StandaloneBSPValidator
 
             Console.Write("Building {0}...", Path.GetFileName(mcuDir));
             bool buildSucceeded;
-            if (false)
+            if (true)
             {
                 var proc = Process.Start(new ProcessStartInfo("cmd.exe", "/c " + Path.Combine(mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, "make.exe") + " -j" + Environment.ProcessorCount + " > build.log 2>&1") { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = mcuDir });
                 proc.WaitForExit();
@@ -654,10 +653,10 @@ namespace StandaloneBSPValidator
             Random rng = new Random();
             using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
             {
+                r.BeginSample("Test Simple");
                 foreach (var vs in samples.Samples)
                 {
                     LoadedBSP.LoadedMCU mcu;
-
                     try
                     {
                         var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.'), RegexOptions.IgnoreCase);
@@ -681,8 +680,6 @@ namespace StandaloneBSPValidator
                     string mcuDir = Path.Combine(temporaryDirectory, "VendorSamples", vs.UserFriendlyName);
                     if (!Directory.Exists(mcuDir))
                         Directory.CreateDirectory(mcuDir);
-                    if (vs.UserFriendlyName.ToUpper().Contains("RTOS"))
-                        aflSoftFPU = false;
                     DateTime start = DateTime.Now;
                     var result = TestVendorSample(mcu, vs, mcuDir, aflSoftFPU, samples);
 
@@ -697,6 +694,7 @@ namespace StandaloneBSPValidator
                     cnt++;
                     Console.WriteLine("{0}: {1}% done ({2}/{3} projects, {4} failed)", vs.UserFriendlyName, (cnt * 100) / sampleCount, cnt, sampleCount, failed);
                 }
+                r.EndSample();
             }
 
             stats.Passed += succeeded;
@@ -778,24 +776,54 @@ namespace StandaloneBSPValidator
             return stats;
         }
 
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
-            if (args.Length < 2)
-                throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
-
-            var job = XmlTools.LoadObject<TestJob>(args[0]);
-            job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(args[0]));
-            if (job.ToolchainPath.StartsWith("["))
+            if (args[0] == "vs")
             {
-                job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
-                if (job.ToolchainPath == null)
-                    throw new Exception("Cannot locate toolchain path from registry");
+                if (args.Length < 3)
+                    throw new Exception("Usage: StandaloneBSPValidator vs <VendorSamples dir> <output dir>");
+
+                if (Directory.GetFiles(args[1], "VendorSamples.xml").Count() == 0)
+                {
+                    foreach (var dir in Directory.GetDirectories(args[1]))
+                        foreach (var es in Directory.GetFiles(dir, "VendorSamples.xml"))
+                        {
+                            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(es);
+                            expandedSamples.Path = Path.GetFullPath(Path.Combine(dir, "VendorSamples"));
+                            var testdir = Path.GetDirectoryName(Path.Combine(dir, "VendorSamples")).Split('\\').Reverse().ToArray()[0];
+                            var ts = TestVendorSamples(expandedSamples, dir, Path.Combine(args[2], testdir));
+                        }
+                }
+                else
+                {
+                    var bspDir = args[1];
+                    var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples.xml"));
+                    expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
+                    var ts = TestVendorSamples(expandedSamples, bspDir, args[2]);
+                }
             }
+            else
+            {
+                if (args.Length < 2)
+                    throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
 
-            var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
-            var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(job.BSPPath))), toolchain);
+                var job = XmlTools.LoadObject<TestJob>(args[0]);
+                job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(args[0]));
+                if (job.ToolchainPath.StartsWith("["))
+                {
+                    job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
+                    if (job.ToolchainPath == null)
+                        throw new Exception("Cannot locate toolchain path from registry");
+                }
 
-            TestBSP(job, bsp, args[1]);
+                var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
+                var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(job.BSPPath))), toolchain);
+
+                TestBSP(job, bsp, args[1]);
+            }
+            return;
+            
+
         }
         static bool IsNoValid(string pNameFrend, string[] NonValid)
         {

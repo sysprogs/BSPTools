@@ -56,5 +56,15 @@
   <ItemGroup>
     <EmbeddedResource Include="main.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj">
+      <Project>{9fe2706c-e100-4ef2-8498-c25c7ff3b122}</Project>
+      <Name>BSPGenerationTools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\StandaloneBSPValidator\StandaloneBSPValidator.csproj">
+      <Project>{add117b0-6ac5-4e07-ba8b-8fdf35bdf421}</Project>
+      <Name>StandaloneBSPValidator</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

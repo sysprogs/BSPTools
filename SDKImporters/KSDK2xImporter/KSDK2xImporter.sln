@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25914.0
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KSDK2xImporter", "KSDK2xImporter.csproj", "{1E035726-9830-4D04-BB90-869C92B2D7CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandaloneBSPValidator", "..\..\StandaloneBSPValidator\StandaloneBSPValidator.csproj", "{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{1E035726-9830-4D04-BB90-869C92B2D7CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E035726-9830-4D04-BB90-869C92B2D7CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E035726-9830-4D04-BB90-869C92B2D7CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,6 +12,7 @@ namespace StandaloneBSPValidator
     {
         readonly string _ProjectDir;
         List<string> _SourceFiles = new List<string>();
+        List<string> _LibFiles = new List<string>();
         readonly LoadedBSP.ConfiguredMCU MCU;
         List<EmbeddedFramework> _Frameworks = new List<EmbeddedFramework>();
 
@@ -54,6 +55,17 @@ namespace StandaloneBSPValidator
             _ProjectDir = projectDir;
 
             _SourceFiles.AddRange(vs.SourceFiles.Select(s=>VariableHelper.ExpandVariables(s, bspDict)));
+
+            var cf = vs.ExtraFiles.Select(s1 => { var s2 = VariableHelper.ExpandVariables(s1.SourcePath, bspDict);
+            var targetFile = projectDir + "\\" + s1.TargetPath.Replace("/", "\\");
+                var pth = Path.GetDirectoryName(targetFile);
+                if (!Directory.Exists(pth))
+                     Directory.CreateDirectory(pth);
+                if (!File.Exists(targetFile))
+                        File.Copy(s2.Replace("/", "\\"), targetFile);
+                return s1.TargetPath; });
+             
+            _SourceFiles.AddRange(cf);
         }
 
         public void DoGenerateProjectFromEmbeddedSample(ConfiguredSample sample, bool plainC, Dictionary<string, string> bspDict)
@@ -86,7 +98,22 @@ namespace StandaloneBSPValidator
                 }
         }
 
-        public void AddBSPFilesToProject(Dictionary<string, string> SystemDictionary, Dictionary<string,string> frameworkConfig, Dictionary<string, bool> frameworkIDs)
+        class FileEqualityComparer : IEqualityComparer<string>
+        {
+            public bool Equals(string b1, string b2)
+            {
+                if (b1.Contains(Path.GetFileName(b2)))
+                    return true;
+                else
+                    return false;
+            }
+            public int GetHashCode(string bx)
+            {
+                int hCode = 0;
+                return hCode.GetHashCode();
+            }
+        }
+            public void AddBSPFilesToProject(Dictionary<string, string> SystemDictionary, Dictionary<string,string> frameworkConfig, Dictionary<string, bool> frameworkIDs)
         {
             if (MCU.ExpandedMCU.AdditionalSourceFiles != null && MCU.ExpandedMCU.AdditionalSourceFiles.Length > 0)
             {
@@ -110,7 +137,12 @@ namespace StandaloneBSPValidator
             foreach (var fw in _Frameworks)
             {
                 var files = fw.AdditionalSourceFiles.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
-                _SourceFiles.AddRange(files);
+                foreach (var file in files)
+                    if (!_SourceFiles.Contains(file, new FileEqualityComparer()))_SourceFiles.Add(file);
+
+                files = fw.AdditionalLibraries?.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
+                if(files!=null)
+                    _SourceFiles.AddRange(files);
             }
         }
         public void AddBSPFilesToProject(List<string> pSrcFile,string pDirPrj)

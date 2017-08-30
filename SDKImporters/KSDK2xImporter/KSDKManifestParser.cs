@@ -1,6 +1,7 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -27,7 +28,9 @@ namespace KSDK2xImporter
                 FullName = devNode.GetAttribute("full_name");
                 DeviceName = devNode.GetAttribute("name");
 
-                CoreName = devNode.SelectSingleNode("core/@name")?.Value;
+                //CoreName = devNode.SelectSingleNode("core/@name")?.Value; //SDK2.0
+                CoreName = devNode.SelectSingleNode("core/@type")?.Value; //SDK2.2
+
             }
 
             internal MCUFamily ToMCUFamily()
@@ -48,8 +51,10 @@ namespace KSDK2xImporter
             private ParsedDevice _Device;
             private XmlElement _Element;
             private string _Path;
-
+            public string _TargetPath;
+            public bool Exclude;
             public readonly string Type;
+            public CopiedFile CopiedFiles;
 
             public ParsedSource(XmlElement e, ParsedDevice dev)
             {
@@ -57,9 +62,21 @@ namespace KSDK2xImporter
                 _Device = dev;
                 _Path = ExpandVariables(e.GetAttribute("path") ?? "");
 
+                Exclude = (e.GetAttribute("exclude") ?? "false") == "true";
                 Type = e.GetAttribute("type") ?? "";
+                var comp = e.GetAttribute("compiler");
+                if (comp.Contains("compiler") && !comp.Contains("gcc"))
+                    Exclude = true;
+                if (comp.Contains("toolchain") && !comp.Contains("gcc"))
+                    Exclude = true;
+                var core = e.GetAttribute("core") ?? "";
+                if (core != "" && core != dev.CoreName)
+                    Exclude = true;
+                _TargetPath = ExpandVariables(e.GetAttribute("target_path") ?? "");
+                if (_TargetPath != "")
+                    CopiedFiles = new CopiedFile { SourcePath = "$$SYS:BSP_ROOT$$/" + _Path, TargetPath = _TargetPath };
             }
-
+            public string GetSourcePath() { return _Path; }
             public struct FileReference
             {
                 public string RelativePath;
@@ -84,8 +101,14 @@ namespace KSDK2xImporter
             {
                 get
                 {
+                    bool Exc = false;
+                    var atr1 = _Element.GetAttribute("toolchain");
+                    if (atr1 != "" && !atr1.Contains("armgcc"))
+                        Exc = true;
                     foreach (XmlAttribute maskAttr in _Element.SelectNodes("files/@mask"))
                     {
+                        if (Exc)
+                            continue;
                         string mask = maskAttr.Value;
                         string[] items;
                         mask = ExpandVariables(mask);
@@ -113,7 +136,10 @@ namespace KSDK2xImporter
                                 if (!File.Exists(fullPath))
                                     continue;
                             }
-                            catch { continue; }
+                            catch
+                            {
+                                continue;
+                            }
 
                             yield return new FileReference { RelativePath = _Path + "/" + item, FullPath = fullPath };
                         }
@@ -143,7 +169,6 @@ namespace KSDK2xImporter
                     stream.Read(data, 0, data.Length);
                     File.WriteAllBytes(Path.Combine(directory, MainFileName), data);
                 }
-
             }
         }
 
@@ -156,7 +181,6 @@ namespace KSDK2xImporter
             public override string ToString()
             {
                 return Framework?.UserFriendlyName;
-                //return $"{Framework?.UserFriendlyName} ({OriginalType})";
             }
 
             public EmbeddedProjectSample ToProjectSample(IEnumerable<string> extraReferences)
@@ -196,7 +220,16 @@ namespace KSDK2xImporter
                 }
             }
         }
-
+        public class ImprovedDictionary<TKey, TValue> : Dictionary<TKey, List<TValue>>
+        {
+            public void Add(TKey key, TValue value)
+            {
+                if (ContainsKey(key))
+                    this[key].Add(value);
+                else
+                    Add(key, new List<TValue> { value });
+            }
+        }
         public static ParsedSDK ParseKSDKManifest(string sdkDirectory, IWarningSink sink)
         {
             string[] manifestFiles = Directory.GetFiles(sdkDirectory, "*manifest.xml");
@@ -221,6 +254,17 @@ namespace KSDK2xImporter
             List<FileCondition> allConditions = new List<FileCondition>();
             string fwPrefix = "com.sysprogs.ksdk2x_imported.";
             HashSet<string> alwaysIncludedFrameworks = new HashSet<string>();
+            // HashSet<string> alwaysExcludedFrameworks = new HashSet<string>();
+            List<string> lstdevAll = new List<string>();
+            List<CopiedFile> cfs = new List<CopiedFile>();
+            var dictCopiedFile = new ImprovedDictionary<string, CopiedFile>();
+            var dictAddIncludeDir = new ImprovedDictionary<string, string>();
+
+
+            foreach (XmlElement devNode in doc.SelectNodes("//devices/device"))
+            {
+                lstdevAll.Add(new ParsedDevice(devNode, sdkDirectory).DeviceName);
+            }
 
             foreach (XmlElement devNode in doc.SelectNodes("//devices/device"))
             {
@@ -243,7 +287,11 @@ namespace KSDK2xImporter
                     string componentName = componentNode.SelectSingleNode("@name")?.Value ?? "";
                     string componentType = componentNode.SelectSingleNode("@type")?.Value ?? "";
                     string device = componentNode.SelectSingleNode("@device")?.Value ?? "";
+                    string idComponent = componentNode.SelectSingleNode("@id")?.Value ?? "";
+                    device = idComponent.Split('.').Last();
 
+                    if (device != dev.DeviceName && (lstdevAll.Contains(device)))
+                        continue;
                     switch (componentType)
                     {
                         case "documentation":
@@ -256,7 +304,7 @@ namespace KSDK2xImporter
                                 List<string> relPaths = new List<string>();
                                 bool isDebug = componentType == "debugger";
                                 string sourceType = isDebug ? "debug" : "linker";
-                                foreach (var src in componentNode.SelectNodes($"source[@type='{sourceType}']").OfType<XmlElement>().Select(e => new ParsedSource(e, dev)))
+                                foreach (var src in componentNode.SelectNodes($"source[@type='{sourceType}' and @toolchain='armgcc']").OfType<XmlElement>().Select(e => new ParsedSource(e, dev)))
                                 {
                                     foreach (var fn in src.AllFiles)
                                     {
@@ -293,12 +341,21 @@ namespace KSDK2xImporter
                             }
                             continue;
                         case "CMSIS":
+
                             //KSDK 2.x defines a Include_xxx framework for each possible CMSIS core. Those frameworks are redundant (normal 'Include' framework references the same include path) and should be removed to avoid confusion.
                             if (componentName.StartsWith("Include_"))
                                 continue;
+                            if (idComponent == "platform.CMSIS_Driver")
+                                continue;
+
                             if (componentName == "Include")
-                                alwaysIncludedFrameworks.Add(fwPrefix + componentName);
+                                alwaysIncludedFrameworks.Add(fwPrefix + componentName);//!!! +"."+dev.DeviceName);
+
+                            if (idComponent == "platform.CMSIS")
+                                alwaysIncludedFrameworks.Add(fwPrefix + idComponent);//!!! + "." + dev.DeviceName);
                             break;
+                        case "project_template":
+                            continue;
                         default:
                             break;
                     }
@@ -306,14 +363,45 @@ namespace KSDK2xImporter
                     List<string> headerFiles = new List<string>();
                     List<string> includeDirectories = new List<string>();
                     List<string> sourceFiles = new List<string>();
+                    List<string> libFiles = new List<string>();
+
+                    var IDFr = fwPrefix + idComponent; 
 
                     foreach (ParsedSource src in componentNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSource(e, dev)))
                     {
+
+                        if (src.Exclude)
+                            continue;
+
                         if (src.Type == "c_include")
                             includeDirectories.Add(src.BSPPath);
 
                         foreach (var file in src.AllFiles)
                         {
+                            if (file.BSPPath.EndsWith("ucosii.c") && !componentName.Contains("ucosii"))
+                                continue;
+                            if (file.BSPPath.EndsWith("ucosiii.c") && !componentName.Contains("ucosiii"))
+                                continue;
+
+                            if (file.BSPPath.Contains("freertos"))
+                                allConditions.Add(new FileCondition
+                                {
+                                    FilePath = file.BSPPath,
+                                    ConditionToInclude = new Condition.ReferencesFramework
+                                    {
+                                        FrameworkID = fwPrefix + "middleware.freertos." + dev.DeviceName
+                                    }
+                                });
+
+                            if (src._TargetPath != "")
+                            {
+                                dictCopiedFile.Add(IDFr, new CopiedFile { SourcePath = file.BSPPath, TargetPath = src._TargetPath + "/" + Path.GetFileName(file.BSPPath) });
+                                foreach (XmlElement patch in componentNode.SelectNodes("include_paths/include_path"))
+                                    dictAddIncludeDir.Add(IDFr, patch.GetAttribute("path"));
+                            }
+                            if (src.Type == "lib")
+                                libFiles.Add(file.BSPPath);
+
                             if (src.Type == "src" || src.Type == "asm_include")
                                 sourceFiles.Add(file.BSPPath);
                             else if (src.Type == "c_include")
@@ -321,22 +409,28 @@ namespace KSDK2xImporter
                         }
                     }
 
-                    if (componentName == "clock" && componentType == "driver")
-                        alwaysIncludedFrameworks.Add(fwPrefix + componentName);
+                    foreach (XmlElement patch in componentNode.SelectNodes("include_paths/include_path"))
+                        includeDirectories.Add(patch.GetAttribute("path"));
 
                     string[] dependencyList = componentNode.Attributes?.GetNamedItem("dependency")?.Value?.Split(' ')
                         ?.Select(id => fwPrefix + id)
                         ?.ToArray() ?? new string[0];
 
+                    var FilterRegex = device.Length > 5 ? $"^{device.Substring(0, 5)}.*" : $"^{device}.*"; //MK02F MK22F
+                    if (device.Length == 0)
+                        FilterRegex = "";
+
                     EmbeddedFramework fw = new EmbeddedFramework
                     {
-                        ID = $"{fwPrefix}{componentName}",
+                        ID = $"{IDFr}",
+                        MCUFilterRegex = FilterRegex,
                         UserFriendlyName = $"{componentName} ({componentType})",
                         ProjectFolderName = componentName,
                         AdditionalSourceFiles = sourceFiles.Distinct().ToArray(),
                         AdditionalHeaderFiles = headerFiles.Distinct().ToArray(),
                         RequiredFrameworks = dependencyList,
                         AdditionalIncludeDirs = includeDirectories.Distinct().ToArray(),
+                        AdditionalLibraries = libFiles.ToArray(),
                         AdditionalPreprocessorMacros = componentNode.SelectNodes("defines/define").OfType<XmlElement>().Select(el => new ParsedDefine(el).Definition).ToArray(),
                     };
 
@@ -370,7 +464,7 @@ namespace KSDK2xImporter
                             }
                         };
 
-                        foreach(var fn in fw.AdditionalSourceFiles)
+                        foreach (var fn in fw.AdditionalSourceFiles)
                         {
                             string name = Path.GetFileName(fn);
                             if (name.StartsWith("heap_"))
@@ -438,7 +532,7 @@ namespace KSDK2xImporter
                         RAMSize = RAMSize,
                         CompilationFlags = new ToolFlags
                         {
-                            PreprocessorMacros = new string[] { "CPU_" + pkgName }
+                            PreprocessorMacros = new string[] { "CPU_" + pkgName },
                         },
 
                         MCUDefinitionFile = deviceDefinitionFile
@@ -470,7 +564,6 @@ namespace KSDK2xImporter
                         var mask = (externalNode as XmlElement)?.GetAttribute("mask");
                         if (path != null && mask != null)
                         {
-                            try
                             {
                                 var sampleFiles = Directory.GetFiles(Path.Combine(sdkDirectory, path), mask);
                                 var fn = sampleFiles?.FirstOrDefault();
@@ -482,13 +575,15 @@ namespace KSDK2xImporter
                                     if (exampleNode == null)
                                         continue;
                                 }
+
                             }
-                            catch { }
                         }
                     }
 
                     List<string> dependencyList = new List<string>(exampleNode.Attributes?.GetNamedItem("dependency")?.Value?.Split(' ')
                         ?.Select(id => fwPrefix + id) ?? new string[0]);
+
+                    var name = exampleNode.GetAttribute("id") ?? "???";
 
                     dependencyList.AddRange(alwaysIncludedFrameworks);
 
@@ -498,23 +593,58 @@ namespace KSDK2xImporter
                         if (frameworkDict.TryGetValue(dependencyList[i], out fw) && fw?.RequiredFrameworks != null)
                             dependencyList.AddRange(fw.RequiredFrameworks.Except(dependencyList));
                     }
+                    List<string> dependencyList1 = new List<string>(dependencyList.Distinct());
+                    List<CopiedFile> CopiedFileForSample = new List<CopiedFile>();
+                    List<string> includeDirectories = new List<string>();
+                    foreach (var fr1 in dependencyList1)
+                    {
+                        if (!dictCopiedFile.ContainsKey(fr1))
+                            continue;
+
+                        var l = dictCopiedFile[fr1];
+                        CopiedFileForSample.AddRange(l);
+                        if (dictAddIncludeDir.ContainsKey(fr1))
+                            includeDirectories.AddRange(dictAddIncludeDir[fr1]);
+                    }
+                    List<PropertyDictionary2.KeyValue> CfgEntr = new List<PropertyDictionary2.KeyValue>();
+
+                    string typFpu = "soft";
+                    var tth = exampleNode.SelectSingleNode("toolchainSettings/toolchainSetting/option[@id='com.crt.advproject.gcc.fpu']")?.InnerText ?? "soft";
+
+                    if (tth.Contains("hard"))
+                        typFpu = "hard";
+
+                    CfgEntr.Add(new PropertyDictionary2.KeyValue
+                    {
+                        Key = "com.sysprogs.bspoptions.arm.floatmode",
+                        Value = "-mfloat-abi=" + typFpu
+                    });
+
 
                     VendorSample sample = new VendorSample
                     {
                         DeviceID = deviceID,
-                        UserFriendlyName = exampleNode.GetAttribute("name") ?? "???",
+                        UserFriendlyName = name,
                         BoardName = boardName,
                         Configuration = new VendorSampleConfiguration
                         {
-                            Frameworks = dependencyList.ToArray()
+                            Frameworks = dependencyList.Distinct().ToArray(),
+                            MCUConfiguration = new PropertyDictionary2 { Entries = CfgEntr.ToArray() }
                         },
                         VirtualPath = exampleNode.GetAttribute("category"),
+                        ExtraFiles = CopiedFileForSample.Distinct().ToArray(),
+
                         NoImplicitCopy = true
                     };
 
                     List<string> headerFiles = new List<string>();
-                    List<string> includeDirectories = new List<string>();
+
                     List<string> sourceFiles = new List<string>();
+                    foreach (var cf in CopiedFileForSample.Distinct())
+                    {
+                        includeDirectories.Add(Path.GetDirectoryName(cf.TargetPath));
+                    }
+
 
                     foreach (var src in exampleNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSource(e, dev)))
                     {
@@ -524,8 +654,14 @@ namespace KSDK2xImporter
                                 sourceFiles.Add(file.BSPPath);
                             else if (src.Type == "c_include")
                                 headerFiles.Add(file.BSPPath);
+                            if (src.Type == "lib")
+                                sourceFiles.Add(file.BSPPath);
+
                         }
                     }
+
+                    sample.PreprocessorMacros = exampleNode.SelectNodes("toolchainSettings/toolchainSetting/option[@id='gnu.c.compiler.option.preprocessor.def.symbols']/value").OfType<XmlElement>().
+                        Select(node => node.InnerText.Replace("'\"", "'<").Replace("\"'", ">'")).ToArray();
 
                     sample.SourceFiles = sourceFiles.ToArray();
                     sample.HeaderFiles = headerFiles.ToArray();
@@ -551,10 +687,16 @@ namespace KSDK2xImporter
                     if (matchingComponents != null)
                         sample.Path = string.Join("/", matchingComponents);
 
+                    foreach (var hf in headerFiles)
+                    {
+                        int c = hf.LastIndexOf('/');
+                        includeDirectories.Add(hf.Substring(0, c));
+                    }
+
+                    sample.IncludeDirectories = includeDirectories.Distinct().ToArray();
                     samples.Add(sample);
                 }
             }
-
 
             return new ParsedSDK
             {
@@ -567,11 +709,7 @@ namespace KSDK2xImporter
                     Frameworks = allFrameworks.Where(f => f.OriginalType != "project_template").Select(f => f.Framework).ToArray(),
                     MCUFamilies = families.ToArray(),
                     SupportedMCUs = mcus.ToArray(),
-                    FileConditions = allFiles
-                        .Where(f => f.IndexOf("freertos", StringComparison.InvariantCultureIgnoreCase) != -1)
-                        .Select(f => new FileCondition { FilePath = f, ConditionToInclude = new Condition.ReferencesFramework { FrameworkID = fwPrefix + "freertos" } })
-                        .Concat(allConditions)
-                        .ToArray(),
+                    FileConditions = allConditions.ToArray(),
                     VendorSampleCatalogName = "KSDK Samples",
                     EmbeddedSamples = allFrameworks.Where(f => f.OriginalType == "project_template").Select(f => f.ToProjectSample(alwaysIncludedFrameworks)).ToArray(),
                 },
@@ -588,7 +726,7 @@ namespace KSDK2xImporter
             var bsp = ParseKSDKManifest(directory, sink);
             bsp.Save(directory);
 
-            return bsp.BSP.PackageID;            
+            return bsp.BSP.PackageID;
         }
 
         public string Name => "Kinetis KSDK 2.x";

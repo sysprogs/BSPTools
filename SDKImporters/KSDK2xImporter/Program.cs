@@ -1,9 +1,7 @@
 ﻿using BSPEngine;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 
 namespace BSPGenerationTools
 {
@@ -34,10 +32,29 @@ namespace KSDK2xImporter
                 Environment.ExitCode = 1;
                 return;
             }
+            if (args[0] == "all")
+            { //Parsing several sdks
+                foreach (var dir in Directory.GetDirectories(args[1]))
+                {
+                    if (Directory.GetFiles(dir, "*manifest.xml").Count() == 0)
+                        continue;
+                    Console.WriteLine("Parser " + dir);
+                    var bsp1 = KSDKManifestParser.ParseKSDKManifest(dir, new ConsoleWarningSink());
+                    bsp1.Save(dir);
+                }
+                return;
+            }
 
             string sdkDir = args[0];
+            string tempDir = args[1];
             var bsp = KSDKManifestParser.ParseKSDKManifest(args[0], new ConsoleWarningSink());
             bsp.Save(args[0]);
+
+            var bspDir = sdkDir;
+            // Finally verify that everything builds
+            /*VendorSampleDirectory expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples.xml"));
+            expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
+            StandaloneBSPValidator.Program.TestVendorSamples( expandedSamples, bspDir, tempDir, 0.1);*/
         }
     }
 }

@@ -101,6 +101,9 @@ namespace KSDK2xImporter
         {
             switch(core ?? "")
             {
+                case "cm0plus":
+                    AddCoreSpecificFlags(defineConfigurationVariables, family, CortexCore.M0Plus);
+                    break;
                 case "cm0":
                     AddCoreSpecificFlags(defineConfigurationVariables, family, CortexCore.M0);
                     break;
