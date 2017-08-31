@@ -27,9 +27,19 @@ namespace KeilProjectImporter
             if (finalPath.IndexOf("\\RVDS\\", StringComparison.InvariantCultureIgnoreCase) != -1)
             {
                 var substitute = finalPath.ToLower().Replace("\\rvds\\", "\\gcc\\");
-                if (File.Exists(substitute) || Directory.Exists(substitute))
+                if (File.Exists(substitute) || Directory.Exists(substitute)) 
                     finalPath = substitute;
             }
+            if (finalPath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase) && finalPath.IndexOf("_Keil", StringComparison.InvariantCultureIgnoreCase) != -1)
+            {
+                string dir = Path.GetDirectoryName(finalPath);
+                string fn = Path.GetFileName(finalPath);
+
+                var substitute = Path.Combine(dir, Path.ChangeExtension(fn.ToLower().Replace("_keil", "_gcc"), ".a"));
+                if (File.Exists(substitute))
+                    finalPath = substitute;
+            }
+
             return finalPath;
         }
 
@@ -45,6 +55,12 @@ namespace KeilProjectImporter
             string deviceName = (target.SelectSingleNode("TargetOption/TargetCommonOption/Device") as XmlElement)?.InnerText;
             if (deviceName == null)
                 throw new Exception("Failed to extract the device name from " + parameters.ProjectFile);
+
+            if (deviceName.EndsWith("x"))
+            {
+                deviceName = deviceName.TrimEnd('x');
+                deviceName = deviceName.Substring(0, deviceName.Length - 1);
+            }
 
             string baseDir = Path.GetDirectoryName(parameters.ProjectFile);
             ImportedExternalProject.ConstructedVirtualDirectory rootDir = new ImportedExternalProject.ConstructedVirtualDirectory();
