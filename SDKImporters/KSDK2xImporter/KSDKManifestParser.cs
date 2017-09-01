@@ -28,9 +28,8 @@ namespace KSDK2xImporter
                 FullName = devNode.GetAttribute("full_name");
                 DeviceName = devNode.GetAttribute("name");
 
-                //CoreName = devNode.SelectSingleNode("core/@name")?.Value; //SDK2.0
-                CoreName = devNode.SelectSingleNode("core/@type")?.Value; //SDK2.2
-
+                CoreName = devNode.SelectSingleNode("core/@type")?.Value ?? //KSDK2.2
+                    devNode.SelectSingleNode("core/@name")?.Value; //KSDK2.0
             }
 
             internal MCUFamily ToMCUFamily()
@@ -51,7 +50,7 @@ namespace KSDK2xImporter
             private ParsedDevice _Device;
             private XmlElement _Element;
             private string _Path;
-            public string _TargetPath;
+            public string TargetPath;
             public bool Exclude;
             public readonly string Type;
             public CopiedFile CopiedFiles;
@@ -64,7 +63,7 @@ namespace KSDK2xImporter
 
                 Exclude = (e.GetAttribute("exclude") ?? "false") == "true";
                 Type = e.GetAttribute("type") ?? "";
-                var comp = e.GetAttribute("compiler");
+                var comp = e.GetAttribute("compiler") ?? "";
                 if (comp.Contains("compiler") && !comp.Contains("gcc"))
                     Exclude = true;
                 if (comp.Contains("toolchain") && !comp.Contains("gcc"))
@@ -72,11 +71,11 @@ namespace KSDK2xImporter
                 var core = e.GetAttribute("core") ?? "";
                 if (core != "" && core != dev.CoreName)
                     Exclude = true;
-                _TargetPath = ExpandVariables(e.GetAttribute("target_path") ?? "");
-                if (_TargetPath != "")
-                    CopiedFiles = new CopiedFile { SourcePath = "$$SYS:BSP_ROOT$$/" + _Path, TargetPath = _TargetPath };
+                TargetPath = ExpandVariables(e.GetAttribute("target_path") ?? "");
+                if (TargetPath != "")
+                    CopiedFiles = new CopiedFile { SourcePath = "$$SYS:BSP_ROOT$$/" + _Path, TargetPath = TargetPath };
             }
-            public string GetSourcePath() { return _Path; }
+
             public struct FileReference
             {
                 public string RelativePath;
@@ -102,8 +101,8 @@ namespace KSDK2xImporter
                 get
                 {
                     bool Exc = false;
-                    var atr1 = _Element.GetAttribute("toolchain");
-                    if (atr1 != "" && !atr1.Contains("armgcc"))
+                    var toolchain = _Element.GetAttribute("toolchain");
+                    if (toolchain != null && !toolchain.Contains("armgcc"))
                         Exc = true;
                     foreach (XmlAttribute maskAttr in _Element.SelectNodes("files/@mask"))
                     {
@@ -220,7 +219,7 @@ namespace KSDK2xImporter
                 }
             }
         }
-        public class ImprovedDictionary<TKey, TValue> : Dictionary<TKey, List<TValue>>
+        public class ListDictionary<TKey, TValue> : Dictionary<TKey, List<TValue>>
         {
             public void Add(TKey key, TValue value)
             {
@@ -230,6 +229,7 @@ namespace KSDK2xImporter
                     Add(key, new List<TValue> { value });
             }
         }
+
         public static ParsedSDK ParseKSDKManifest(string sdkDirectory, IWarningSink sink)
         {
             string[] manifestFiles = Directory.GetFiles(sdkDirectory, "*manifest.xml");
@@ -257,8 +257,8 @@ namespace KSDK2xImporter
             // HashSet<string> alwaysExcludedFrameworks = new HashSet<string>();
             List<string> lstdevAll = new List<string>();
             List<CopiedFile> cfs = new List<CopiedFile>();
-            var dictCopiedFile = new ImprovedDictionary<string, CopiedFile>();
-            var dictAddIncludeDir = new ImprovedDictionary<string, string>();
+            var dictCopiedFile = new ListDictionary<string, CopiedFile>();
+            var dictAddIncludeDir = new ListDictionary<string, string>();
 
 
             foreach (XmlElement devNode in doc.SelectNodes("//devices/device"))
@@ -393,9 +393,9 @@ namespace KSDK2xImporter
                                     }
                                 });
 
-                            if (src._TargetPath != "")
+                            if (src.TargetPath != "")
                             {
-                                dictCopiedFile.Add(IDFr, new CopiedFile { SourcePath = file.BSPPath, TargetPath = src._TargetPath + "/" + Path.GetFileName(file.BSPPath) });
+                                dictCopiedFile.Add(IDFr, new CopiedFile { SourcePath = file.BSPPath, TargetPath = src.TargetPath + "/" + Path.GetFileName(file.BSPPath) });
                                 foreach (XmlElement patch in componentNode.SelectNodes("include_paths/include_path"))
                                     dictAddIncludeDir.Add(IDFr, patch.GetAttribute("path"));
                             }
