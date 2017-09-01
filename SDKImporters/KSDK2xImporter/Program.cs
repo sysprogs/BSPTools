@@ -46,7 +46,7 @@ namespace KSDK2xImporter
             }
 
             string sdkDir = args[0];
-            string tempDir = args[1];
+            string tempDir = args.Skip(1).FirstOrDefault();
             var bsp = KSDKManifestParser.ParseKSDKManifest(args[0], new ConsoleWarningSink());
             bsp.Save(args[0]);
 

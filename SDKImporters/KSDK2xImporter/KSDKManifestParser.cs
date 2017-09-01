@@ -101,8 +101,8 @@ namespace KSDK2xImporter
                 get
                 {
                     bool Exc = false;
-                    var toolchain = _Element.GetAttribute("toolchain");
-                    if (toolchain != null && !toolchain.Contains("armgcc"))
+                    var toolchain = _Element.GetAttribute("toolchain") ?? "";
+                    if (toolchain != "" && !toolchain.Contains("armgcc"))
                         Exc = true;
                     foreach (XmlAttribute maskAttr in _Element.SelectNodes("files/@mask"))
                     {
