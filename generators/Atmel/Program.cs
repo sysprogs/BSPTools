@@ -430,7 +430,7 @@ namespace Atmel_bsp_generator
                                     regdata = pref.Remove(idx);
                                 else*/
                                  //   regdata = pref;
-                                    if (pref[0] != '0' && pref[0] != 'd' && pref[0] != 'r' && pref[0] != 'l' && pref[0] != 'b' && pref[0] != 'c')
+                                    if (pref[0] != '0' && pref[0] != 'd' && pref[0] != 'r' && pref[0] != 'l' && pref[0] != 'b' && pref[0] != 'c' && pref[0] != 'h')
                                             throw new Exception(" unknow prefix " + pref + " in " + dir);
                                      if(ac > 0)
                                         prefs += "|";
