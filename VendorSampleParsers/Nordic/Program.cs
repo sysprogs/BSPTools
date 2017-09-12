@@ -278,10 +278,6 @@ namespace NordicVendorSampleParser
             {
                 if (makefile.Contains(@"\ant\"))
                     continue;
-
-                //   if (!makefile.Contains(@"\ram_retention\")&& !makefile.Contains(@"\ble") && !makefile.Contains(@"\twi")) // for test
-                //               continue; 
-
                 string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("armgcc\\Makefile", "");
 
                 if (Directory.Exists(Path.Combine(Path.GetDirectoryName(makefile), "_build")))

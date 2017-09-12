@@ -32,6 +32,10 @@
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
         <Value />
       </KeyValue>
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.uart_driver</Key>
+        <Value>yes</Value>
+      </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
         <Value>BSP_UART_SUPPORT</Value>
@@ -107,6 +111,10 @@
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.ble.devmgr</Key>
         <Value>peripheral</Value>
+      </KeyValue>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
+        <Value>yes</Value>
       </KeyValue>
     </Entries>
 	</DefaultConfiguration>

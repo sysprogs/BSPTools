@@ -33,6 +33,10 @@
         <Key>com.sysprogs.bspoptions.nrf5x.pstorage_driver</Key>
         <Value>normal</Value>
       </KeyValue>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.pwr_mgmt</Key>
+        <Value>yes</Value>
+      </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.spi_driver</Key>
         <Value />

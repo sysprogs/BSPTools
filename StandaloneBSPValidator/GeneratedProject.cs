@@ -56,7 +56,7 @@ namespace StandaloneBSPValidator
 
             _SourceFiles.AddRange(vs.SourceFiles.Select(s=>VariableHelper.ExpandVariables(s, bspDict)));
 
-            var cf = vs.ExtraFiles.Select(s1 => { var s2 = VariableHelper.ExpandVariables(s1.SourcePath, bspDict);
+            var cf = vs.ExtraFiles?.Select(s1 => { var s2 = VariableHelper.ExpandVariables(s1.SourcePath, bspDict);
             var targetFile = projectDir + "\\" + s1.TargetPath.Replace("/", "\\");
                 var pth = Path.GetDirectoryName(targetFile);
                 if (!Directory.Exists(pth))
@@ -65,7 +65,7 @@ namespace StandaloneBSPValidator
                         File.Copy(s2.Replace("/", "\\"), targetFile);
                 return s1.TargetPath; });
              
-            _SourceFiles.AddRange(cf);
+            if(cf!=null)_SourceFiles.AddRange(cf);
         }
 
         public void DoGenerateProjectFromEmbeddedSample(ConfiguredSample sample, bool plainC, Dictionary<string, string> bspDict)

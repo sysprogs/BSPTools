@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <ToolchainPath>[SysGCC-arm-eabi-5.3.0]</ToolchainPath>
+    <ToolchainPath>[SysGCC-arm-eabi-6.2.0]</ToolchainPath>
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
 	<DeviceRegex>nRF52.*</DeviceRegex>
 	<Samples>
@@ -76,7 +76,7 @@
 				<Entries>
 					<KeyValue>
 						<Key>com.sysprogs.bspoptions.nrf5x.softdevice</Key>
-						<Value>s132</Value>
+						<Value>S132</Value>
 					</KeyValue>
 					  <KeyValue>
 						<Key>com.sysprogs.bspoptions.arm.floatmode</Key>
@@ -90,6 +90,10 @@
 			</MCUConfiguration>	
 			<FrameworkConfiguration>
 				<Entries>
+					<!--KeyValue>
+						<Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
+						<Value> no</Value>
+					</KeyValue-->				
 					<KeyValue>
 						<Key>com.sysprogs.bspoptions.nrf5x.board.type</Key>
 						<Value>PCA10040</Value>

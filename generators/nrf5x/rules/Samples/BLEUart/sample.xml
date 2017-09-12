@@ -27,6 +27,10 @@
   </ConditionalErrors>
   <DefaultConfiguration>
     <Entries>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt</Key>
+        <Value>1</Value>
+      </KeyValue>
 		<KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.pstorage_driver</Key>
         <Value>normal</Value>

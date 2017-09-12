@@ -22,6 +22,10 @@
    	   	<Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
 	   <Value>yes</Value>
   	</KeyValue>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
+        <Value>yes</Value>
+      </KeyValue>
   </Entries>
 </DefaultConfiguration>
 </EmbeddedProjectSample>
