@@ -2,7 +2,6 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -18,14 +17,14 @@ using System.Windows.Shapes;
 namespace ESP8266DebugPackage.GUI
 {
     /// <summary>
-    /// Interaction logic for ESPxxGDBStubSettingsControl.xaml
+    /// Interaction logic for ESP32GDBStubSettingsControl.xaml
     /// </summary>
-    public partial class ESPxxGDBStubSettingsControl : UserControl, ICustomDebugMethodConfigurator
+    public partial class ESP32GDBStubSettingsControl : UserControl, ICustomDebugMethodConfigurator
     {
         ESPxxGDBStubSettingsEditor _Editor;
         private IBSPConfiguratorHost _Host;
 
-        public ESPxxGDBStubSettingsControl(IBSPConfiguratorHost host, ICustomSettingsTypeProvider provider)
+        public ESP32GDBStubSettingsControl(IBSPConfiguratorHost host, ICustomSettingsTypeProvider provider)
         {
             host.InstallStyles(this);
             InitializeComponent();
@@ -37,7 +36,7 @@ namespace ESP8266DebugPackage.GUI
 
         public object Configuration => _Editor?.Settings;
 
-        public ICustomSettingsTypeProvider TypeProvider {get; private set; }
+        public ICustomSettingsTypeProvider TypeProvider { get; private set; }
 
         public bool SupportsLiveVariables => false;
 
@@ -45,7 +44,7 @@ namespace ESP8266DebugPackage.GUI
 
         public void SetConfiguration(object configuration, KnownInterfaceInstance context)
         {
-            DataContext = _Editor = new ESPxxGDBStubSettingsEditor(configuration as ESPxxGDBStubSettings, context, _Host, false);
+            DataContext = _Editor = new ESPxxGDBStubSettingsEditor(configuration as ESPxxGDBStubSettings, context, _Host, true);
             _Editor.SettingsChanged += (s, e) => SettingsChanged?.Invoke(s, e);
         }
 
@@ -85,29 +84,6 @@ namespace ESP8266DebugPackage.GUI
             var rsrc = (sender as FrameworkElement)?.DataContext as FLASHResource;
             if (rsrc != null)
                 _Editor.FLASHResources.Remove(rsrc);
-        }
-    }
-
-    public class ShowOnlyInListViewConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            bool isInsidePopup = false;
-            for (DependencyObject obj = value as DependencyObject; obj != null; obj = VisualTreeHelper.GetParent(obj))
-            {
-                if (obj is ComboBoxItem)
-                {
-                    isInsidePopup = true;
-                    break;
-                }
-            }
-
-            return isInsidePopup ? Visibility.Visible : Visibility.Hidden;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -27,6 +27,13 @@ namespace ESP8266DebugPackage
         public bool SuppressResetConfirmation { get; set; }
     }
 
+    [XmlType("com.visualgdb.edp.espxx.settings.gdbstub.esp32")]
+    public class ESP32GDBStubSettings : ESPxxGDBStubSettings
+    {
+        public string AdditionalToolArguments { get; set; }
+    }
+
+
     public class ESPxxGDBStubSettingsEditor
     {
         readonly KnownInterfaceInstance _Context;
@@ -35,11 +42,18 @@ namespace ESP8266DebugPackage
         public ESPxxGDBStubSettings Settings { get; private set; }
         public ObservableCollection<FLASHResource> FLASHResources { get; } = new ObservableCollection<FLASHResource>();
 
-        public ESPxxGDBStubSettingsEditor(ESPxxGDBStubSettings settings, KnownInterfaceInstance context, IBSPConfiguratorHost host)
+        public ESPxxGDBStubSettingsEditor(ESPxxGDBStubSettings settings, KnownInterfaceInstance context, IBSPConfiguratorHost host, bool esp32Mode)
         {
             _Context = context;
             _Host = host;
-            Settings = settings ?? new ESPxxGDBStubSettings();
+            Settings = settings;
+            if (Settings == null)
+            {
+                if (esp32Mode)
+                    Settings = new ESP32GDBStubSettings();
+                else
+                    Settings = new ESPxxGDBStubSettings();
+            }
 
             if (context.COMPortNumber.HasValue)
             {

@@ -11,7 +11,8 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-	<AssemblyVersion>BADBADBADBAD</AssemblyVersion> <!-- Should be overridden by the UpdateProjectVersion target -->
+    <AssemblyVersion>BADBADBADBAD</AssemblyVersion>
+    <!-- Should be overridden by the UpdateProjectVersion target -->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,6 +58,7 @@
     <Compile Include="CRC32.cs" />
     <Compile Include="ELFFile.cs" />
     <Compile Include="ESP32StartupSequence.cs" />
+    <Compile Include="ESP32StubDebugController.cs" />
     <Compile Include="ESP8266BinaryImage.cs" />
     <Compile Include="ESP8266BootloaderClient.cs" />
     <Compile Include="ESP8266StartupSequence.cs" />
@@ -64,6 +66,9 @@
     <Compile Include="ESPxxDebugController.cs" />
     <Compile Include="ESPxxGDBStubSettings.cs" />
     <Compile Include="ESPxxOpenOCDSettings.cs" />
+    <Compile Include="GUI\ESP32GDBStubSettingsControl.xaml.cs">
+      <DependentUpon>ESP32GDBStubSettingsControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\ESPxxGDBStubSettingsControl.xaml.cs">
       <DependentUpon>ESPxxGDBStubSettingsControl.xaml</DependentUpon>
     </Compile>
@@ -74,6 +79,10 @@
     <Compile Include="SerialPortStream.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="GUI\ESP32GDBStubSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="GUI\ESPxxGDBStubSettingsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -102,8 +111,11 @@
       <Name>OpenOCDPackage</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\warn16.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildThisFileDir)..\..\AutoVersion.props"/>
+  <Import Project="$(MSBuildThisFileDir)..\..\AutoVersion.props" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

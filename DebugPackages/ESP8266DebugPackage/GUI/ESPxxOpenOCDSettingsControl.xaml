@@ -188,7 +188,7 @@
                 <coll:ArrayList>
                     <sys:String>none</sys:String>
                     <sys:String>1.8</sys:String>
-                    <sys:String>3.8</sys:String>
+                    <sys:String>3.3</sys:String>
                     <sys:String>high</sys:String>
                     <sys:String>low</sys:String>
                 </coll:ArrayList>

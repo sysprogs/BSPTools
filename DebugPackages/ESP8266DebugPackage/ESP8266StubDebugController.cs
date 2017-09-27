@@ -34,7 +34,6 @@ namespace ESP8266DebugPackage
 
         public object TryConvertLegacyConfiguration(IBSPConfiguratorHost host, string methodDirectory, Dictionary<string, string> legacyConfiguration)
         {
-            //TODO: convert
             return null;
         }
 
