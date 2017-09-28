@@ -46,9 +46,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="VisualGDB, Version=5.2.4.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sysprogs\VisualGDB\VisualGDB\bin\Debug\VisualGDB.exe</HintPath>
+    <Reference Include="VisualGDBCore">
+      <HintPath>..\..\..\sysprogs\VisualGDB\VisualGDB\bin\Debug\VisualGDBCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using VisualGDB.TestEngine;
 using BSPGenerationTools;
 using LinkerScriptGenerator;
+using VisualGDB.TestEngine;
 
 namespace CppUTest
 {
@@ -17,7 +17,7 @@ namespace CppUTest
         {
             public string FrameworkID;
 
-            public DummyBSPBuilder(BSPDirectories dirs) : base(dirs, null)
+            public DummyBSPBuilder(BSPDirectories dirs) : base(dirs, null, -1)
             {
             }
 
@@ -37,7 +37,7 @@ namespace CppUTest
                     path = $"$$SYS:TESTFW_BASE$$/{FrameworkID}";
                 else if (!path.Contains("$$") && !Path.IsPathRooted(path))
                     path = $"$$SYS:TESTFW_BASE$$/{FrameworkID}/" + path.Replace('\\', '/');
-                return path.Replace("$$SYS:BSP_ROOT$$/", $"$$SYS:TESTFW_BASE$$/{FrameworkID}/");
+                return path.Replace("$$SYS:BSP_ROOT$$", $"$$SYS:TESTFW_BASE$$/{FrameworkID}");
             }
 
         }
@@ -61,7 +61,8 @@ namespace CppUTest
             ToolFlags flags = new ToolFlags();
             foreach(var job in rules.CopyJobs)
             {
-                flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null));
+                PropertyList configurableProperties = null;
+                flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null, ref configurableProperties));
             }
 
             Dictionary<string, FileCondition> matchedConditions = new Dictionary<string, FileCondition>(StringComparer.InvariantCultureIgnoreCase);
