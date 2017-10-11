@@ -58,12 +58,20 @@ namespace STM32CubeMXImporter
                     string name = file.GetAttribute("name");
                     if (name.EndsWith(@"\*") && category == "header")
                     {
-                        allHeaderDirs.Add(name.Substring(0, name.Length -2));
+                        allHeaderDirs.Add(name.Substring(0, name.Length - 2));
                         continue;
                     }
                     string condition = file.GetAttribute("condition");
-                    if (!string.IsNullOrEmpty(condition) && condition != "GCC Toolchain")
-                        continue;   //This is a IAR-only or Keil-only file
+                    if (!string.IsNullOrEmpty(condition))
+                    {
+                        if (condition == "FreeRTOS")
+                        {
+                            if (!hasFreeRTOS)
+                                continue;
+                        }
+                        else if (condition != "GCC Toolchain")
+                            continue;   //This is a IAR-only or Keil-only file
+                    }
 
                     if (category == "sourceAsm" && Path.GetFileName(name).StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase))
                         continue;   //VisualGDB provides its own startup files for STM32 devices that are compatible with STM32CubeMX-generated files

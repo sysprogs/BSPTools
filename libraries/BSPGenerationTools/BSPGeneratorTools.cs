@@ -154,7 +154,7 @@ namespace BSPGenerationTools
             Directories = dirs;
             SystemVars["$$BSPGEN:INPUT_DIR$$"] = dirs.InputDir;
             SystemVars["$$BSPGEN:RULES_DIR$$"] = dirs.RulesDir;
-            if (linkerScriptTemplate != null)
+            if (linkerScriptTemplate != null && linkerScriptLevel >= 0)
                 LDSTemplate = XmlTools.LoadObject<LinkerScriptTemplate>(linkerScriptTemplate);
             BSPRoot = dirs.OutputDir;
             if (Directory.Exists(dirs.OutputDir))

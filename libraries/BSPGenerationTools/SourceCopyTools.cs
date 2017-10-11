@@ -524,7 +524,10 @@ namespace BSPGenerationTools
                 if (!Directory.Exists(Path.Combine(absTarget, dir)))
                     throw new Exception("Invalid explicit include dir: " + dir);
 
-                return "$$SYS:BSP_ROOT$$/" + relPath.Replace('\\', '/');
+                if (relPath == "")
+                    return "$$SYS:BSP_ROOT$$";
+                else
+                    return "$$SYS:BSP_ROOT$$/" + relPath.Replace('\\', '/');
             }
         }
 
