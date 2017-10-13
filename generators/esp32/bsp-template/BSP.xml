@@ -147,6 +147,7 @@
 			<string>rtc</string>
 			<string>smartconfig</string>
 			<string>wpa</string>
+			<string>wp2</string>
 			<string>wps</string>
 			<string>stdc++</string>
         </AdditionalLibraries>

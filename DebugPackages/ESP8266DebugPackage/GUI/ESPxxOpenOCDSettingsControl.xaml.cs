@@ -56,7 +56,12 @@ namespace ESP8266DebugPackage.GUI
 
         public void SetConfiguration(object configuration, KnownInterfaceInstance context)
         {
-            var settings = (configuration as ESPxxOpenOCDSettings);
+            ESPxxOpenOCDSettings settings;
+            if (_IsESP32)
+                settings = configuration as ESP32OpenOCDSettings;
+            else
+                settings = configuration as ESP8266OpenOCDSettings;
+
             _Editor = new ESPxxOpenOCDSettingsEditor(_Host, _Method.Directory, settings, context, _IsESP32);
 
             _Editor.PropertyChanged += (s, e) => SettingsChanged?.Invoke(this, EventArgs.Empty);
@@ -142,6 +147,7 @@ namespace ESP8266DebugPackage.GUI
     public static class Options
     {
         public static Array FLASHSizes => Enum.GetValues(typeof(ESP8266BinaryImage.FLASHSize));
+        public static Array ESP32FLASHSizes => Enum.GetValues(typeof(ESP8266BinaryImage.ESP32FLASHSize));
         public static Array FLASHModes => Enum.GetValues(typeof(ESP8266BinaryImage.FLASHMode));
         public static Array FLASHFrequencies => Enum.GetValues(typeof(ESP8266BinaryImage.FLASHFrequency));
         public static Array ResetModes => Enum.GetValues(typeof(ResetMode));

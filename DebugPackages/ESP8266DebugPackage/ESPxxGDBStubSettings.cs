@@ -9,8 +9,7 @@ using System.Xml.Serialization;
 
 namespace ESP8266DebugPackage
 {
-    [XmlType("com.visualgdb.edp.espxx.settings.gdbstub")]
-    public class ESPxxGDBStubSettings : IESP8266Settings
+    public abstract class ESPxxGDBStubSettingsBase
     {
         public string COMPort { get; set; }
         public int StubBaudRate { get; set; } = 74880;
@@ -18,19 +17,30 @@ namespace ESP8266DebugPackage
         public int BootloaderResetDelay { get; set; } = 50;
         public string BootloaderActivationSequence { get; set; } = "!DTR;RTS;SLEEP;DTR;!RTS;SLEEP;!DTR;SLEEP";
 
-        public ESP8266BinaryImage.ParsedHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ParsedHeader();
         public FLASHResource[] FLASHResources { get; set; }
         public ProgramMode ProgramMode { get; set; }
 
         public string InitDataFile { get; set; }
         public ResetMode ResetMode { get; set; }
         public bool SuppressResetConfirmation { get; set; }
+        public abstract ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings();
+    }
+
+    [XmlType("com.visualgdb.edp.espxx.settings.gdbstub")]
+    public class ESP8266GDBStubSettings : ESPxxGDBStubSettingsBase, IESP8266Settings
+    {
+        public ESP8266BinaryImage.ESP8266ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP8266ImageHeader();
+        public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
     }
 
     [XmlType("com.visualgdb.edp.espxx.settings.gdbstub.esp32")]
-    public class ESP32GDBStubSettings : ESPxxGDBStubSettings
+    public class ESP32GDBStubSettings : ESPxxGDBStubSettingsBase, IESP32Settings
     {
         public string AdditionalToolArguments { get; set; }
+        public bool PatchBootloader { get; set; } = true;
+        public ESP8266BinaryImage.ESP32ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP32ImageHeader();
+
+        public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
     }
 
 
@@ -39,20 +49,23 @@ namespace ESP8266DebugPackage
         readonly KnownInterfaceInstance _Context;
         readonly IBSPConfiguratorHost _Host;
 
-        public ESPxxGDBStubSettings Settings { get; private set; }
+        public ESPxxGDBStubSettingsBase Settings { get; private set; }
         public ObservableCollection<FLASHResource> FLASHResources { get; } = new ObservableCollection<FLASHResource>();
 
-        public ESPxxGDBStubSettingsEditor(ESPxxGDBStubSettings settings, KnownInterfaceInstance context, IBSPConfiguratorHost host, bool esp32Mode)
+        public bool IsESP32 { get; }
+
+        public ESPxxGDBStubSettingsEditor(ESPxxGDBStubSettingsBase settings, KnownInterfaceInstance context, IBSPConfiguratorHost host, bool esp32Mode)
         {
             _Context = context;
             _Host = host;
+            IsESP32 = esp32Mode;
             Settings = settings;
             if (Settings == null)
             {
                 if (esp32Mode)
                     Settings = new ESP32GDBStubSettings();
                 else
-                    Settings = new ESPxxGDBStubSettings();
+                    Settings = new ESP8266GDBStubSettings();
             }
 
             if (context.COMPortNumber.HasValue)

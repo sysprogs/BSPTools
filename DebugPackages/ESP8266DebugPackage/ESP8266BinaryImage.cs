@@ -10,11 +10,13 @@ namespace ESP8266DebugPackage
     {
         public readonly string Name;
         public readonly string Hint;
+        public readonly string ESP32Hint;
 
-        public ArgumentValueAttribute(string name, string hint = null)
+        public ArgumentValueAttribute(string name, string hint = null, string esp32Hint = null)
         {
             Name = name;
             Hint = hint;
+            ESP32Hint = esp32Hint;
         }
     }
 
@@ -85,6 +87,20 @@ namespace ESP8266DebugPackage
             size32M_c2,
         }
 
+        public enum ESP32FLASHSize
+        {
+            [ArgumentValue("8m", "1MB (8mbit)")]
+            size1MB,
+            [ArgumentValue("16m", "2MB (16mbit)")]
+            size2MB,
+            [ArgumentValue("32m", "4MB (32mbit)")]
+            size4MB,
+            [ArgumentValue("32m", "8MB (64mbit)")]
+            size8MB,
+            [ArgumentValue("32m", "16MB (128mbit)")]
+            size16MB,
+        }
+
         public enum FLASHFrequency
         {
             [ArgumentValue("40m", "40 MHz")]
@@ -111,22 +127,49 @@ namespace ESP8266DebugPackage
             return default(_Ty);
         }
 
-        public class ParsedHeader
+        public interface IESPxxImageHeader
+        {
+            byte[] BuildRawHeader(int segmentCount);
+        }
+
+        public class ESP8266ImageHeader : IESPxxImageHeader
         {
             public FLASHSize Size { get; set; }
             public FLASHFrequency Frequency { get; set; }
             public FLASHMode Mode { get; set; }
 
-            public ParsedHeader()
+            public ESP8266ImageHeader()
             {
             }
 
-            public ParsedHeader(string frequency, string mode, string size)
+            public ESP8266ImageHeader(string frequency, string mode, string size)
             {
                 Size = ParseEnumValue<FLASHSize>(size);
                 Frequency = ParseEnumValue<FLASHFrequency>(frequency);
                 Mode = ParseEnumValue<FLASHMode>(mode);
             }
+
+            public byte[] BuildRawHeader(int segmentCount) => new byte[] { 0xe9, (byte)segmentCount, (byte)Mode, (byte)(((byte)Size << 4) | (byte)Frequency) };
+        }
+
+        public class ESP32ImageHeader : IESPxxImageHeader
+        {
+            public ESP32FLASHSize Size { get; set; } = ESP32FLASHSize.size2MB;
+            public FLASHFrequency Frequency { get; set; }
+            public FLASHMode Mode { get; set; }
+
+            public ESP32ImageHeader()
+            {
+            }
+
+            public ESP32ImageHeader(string frequency, string mode, string size)
+            {
+                Size = ParseEnumValue<ESP32FLASHSize>(size);
+                Frequency = ParseEnumValue<FLASHFrequency>(frequency);
+                Mode = ParseEnumValue<FLASHMode>(mode);
+            }
+
+            public byte[] BuildRawHeader(int segmentCount) => new byte[] { 0xe9, (byte)segmentCount, (byte)Mode, (byte)(((byte)Size << 4) | (byte)Frequency) };
         }
 
         static void UpdateChecksum(ref byte checksum, byte[] data)
@@ -135,7 +178,7 @@ namespace ESP8266DebugPackage
                 checksum ^= b;
         }
 
-        public ParsedHeader Header = new ParsedHeader();
+        public IESPxxImageHeader Header;
         public List<Segment> Segments = new List<Segment>();
         public uint EntryPoint;
         public byte AppNumber;
@@ -160,7 +203,7 @@ namespace ESP8266DebugPackage
                 segments.RemoveAt(0);
             }
 
-            rawHdr = new byte[] { 0xe9, (byte)segments.Count, (byte)Header.Mode, (byte)(((byte)Header.Size << 4) | (byte)Header.Frequency) };
+            rawHdr = Header.BuildRawHeader(segments.Count);
             stream.Write(rawHdr, 0, rawHdr.Length);
             stream.Write(BitConverter.GetBytes(EntryPoint), 0, 4);
 
@@ -243,7 +286,7 @@ namespace ESP8266DebugPackage
         const uint SPIFLASHLimit = 0x40400000;
         public ulong BootloaderImageOffset { get; private set; }
 
-        public static ESP8266BinaryImage MakeNonBootloaderImageFromELFFile(ELFFile file, ParsedHeader header, bool esptoolSectionOrder = false)
+        public static ESP8266BinaryImage MakeNonBootloaderImageFromELFFile(ELFFile file, ESP8266ImageHeader header, bool esptoolSectionOrder = false)
         {
             ESP8266BinaryImage image = new ESP8266BinaryImage();
             image.EntryPoint = file.ELFHeader.e_entry;
@@ -252,7 +295,7 @@ namespace ESP8266DebugPackage
             return image;
         }
 
-        public static ESP8266BinaryImage MakeESP32ImageFromELFFile(ELFFile file, ParsedHeader header)
+        public static ESP8266BinaryImage MakeESP32ImageFromELFFile(ELFFile file, ESP32ImageHeader header)
         {
             ESP8266BinaryImage image = new ESP8266BinaryImage(true);
             image.EntryPoint = file.ELFHeader.e_entry;
@@ -297,9 +340,13 @@ namespace ESP8266DebugPackage
         public ESP8266BinaryImage(bool esp32Mode = false)
         {
             ESP32Mode = esp32Mode;
+            if (esp32Mode)
+                Header = new ESP32ImageHeader();
+            else
+                Header = new ESP8266ImageHeader();
         }
 
-        public static ESP8266BinaryImage MakeBootloaderBasedImageFromELFFile(ELFFile file, ParsedHeader header, int appNumber, bool esptoolSectionOrder = false)
+        public static ESP8266BinaryImage MakeBootloaderBasedImageFromELFFile(ELFFile file, ESP8266ImageHeader header, int appNumber, bool esptoolSectionOrder = false)
         {
             ESP8266BinaryImage image = new ESP8266BinaryImage();
             image.EntryPoint = file.ELFHeader.e_entry;

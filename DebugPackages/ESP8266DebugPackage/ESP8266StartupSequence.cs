@@ -347,6 +347,7 @@ namespace ESP8266DebugPackage
                 else
                 {
                     var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, settings.FLASHSettings, appMode);
+                    var header = settings.FLASHSettings;
 
                     string bspRoot, bootloader;
                     if (!bspDict.TryGetValue("SYS:BSP_ROOT", out bspRoot) || !bspDict.TryGetValue("com.sysprogs.esp8266.bootloader", out bootloader))
@@ -357,8 +358,8 @@ namespace ESP8266DebugPackage
                         throw new Exception(fn + " not found. Cannot program OTA images.");
 
                     byte[] data = File.ReadAllBytes(fn);
-                    data[2] = (byte)img.Header.Mode;
-                    data[3] = (byte)(((byte)img.Header.Size << 4) | (byte)img.Header.Frequency);
+                    data[2] = (byte)header.Mode;
+                    data[3] = (byte)(((byte)header.Size << 4) | (byte)header.Frequency);
                     fn = string.Format("{0}-0x00000.bin", pathBase);
                     File.WriteAllBytes(fn, data);
 

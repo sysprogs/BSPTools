@@ -34,12 +34,24 @@ namespace ESP8266DebugPackage
 
             editor.RebuildStartupCommands();
 
-            if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out value))
-                editor.FLASHSettings.Size = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHSize>(value);
-            if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out value))
-                editor.FLASHSettings.Mode = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHMode>(value);
-            if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_freq", out value))
-                editor.FLASHSettings.Frequency = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHFrequency>(value);
+            if (editor.FLASHSettings is ESP8266BinaryImage.ESP8266ImageHeader hdr8266)
+            {
+                if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out value))
+                    hdr8266.Size = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHSize>(value);
+                if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out value))
+                    hdr8266.Mode = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHMode>(value);
+                if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_freq", out value))
+                    hdr8266.Frequency = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHFrequency>(value);
+            }
+            else if (editor.FLASHSettings is ESP8266BinaryImage.ESP32ImageHeader hdr32)
+            {
+                if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_size", out value))
+                    hdr32.Size = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.ESP32FLASHSize>(value);
+                if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_mode", out value))
+                    hdr32.Mode = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHMode>(value);
+                if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.flash_freq", out value))
+                    hdr32.Frequency = ESP8266BinaryImage.ParseEnumValue<ESP8266BinaryImage.FLASHFrequency>(value);
+            }
 
             if (!legacyConfiguration.TryGetValue("com.sysprogs.esp8266.xt-ocd.program_flash", out value) || string.IsNullOrEmpty(value))
                 editor.ProgramMode = ProgramMode.Disabled;
@@ -73,7 +85,7 @@ namespace ESP8266DebugPackage
             private ESP32DebugController _Controller;
             private DebugStartContext _Context;
 
-            public ESP32GDBStub(ESP32DebugController controller, DebugStartContext context, OpenOCDCommandLine cmdLine, IExternalToolInstance tool, ESPxxOpenOCDSettings settings, int gdbPort, int telnetPort, string temporaryScript)
+            public ESP32GDBStub(ESP32DebugController controller, DebugStartContext context, OpenOCDCommandLine cmdLine, IExternalToolInstance tool, ESP32OpenOCDSettings settings, int gdbPort, int telnetPort, string temporaryScript)
                 : base(cmdLine, tool, settings, gdbPort, telnetPort, temporaryScript)
             {
                 _Controller = controller;
@@ -85,16 +97,16 @@ namespace ESP8266DebugPackage
                 return base.SkipCommandOnAttach(cmd);
             }
 
-            protected override bool RunLoadCommand(IDebugStartService service, ISimpleGDBSession session, string cmd) => _Controller.LoadFLASH(_Context, service, session, (ESPxxOpenOCDSettings)_Settings);
+            protected override bool RunLoadCommand(IDebugStartService service, ISimpleGDBSession session, string cmd) => _Controller.LoadFLASH(_Context, service, session, (ESP32OpenOCDSettings)_Settings);
         }
 
 
         protected override IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool)
         {
-            return new ESP32GDBStub(this, context, cmdLine, tool, (ESPxxOpenOCDSettings)settings, gdbPort, telnetPort, temporaryScript);
+            return new ESP32GDBStub(this, context, cmdLine, tool, (ESP32OpenOCDSettings)settings, gdbPort, telnetPort, temporaryScript);
         }
 
-        bool LoadFLASH(DebugStartContext context, IDebugStartService service, ISimpleGDBSession session, ESPxxOpenOCDSettings settings)
+        bool LoadFLASH(DebugStartContext context, IDebugStartService service, ISimpleGDBSession session, ESP32OpenOCDSettings settings)
         {
             string val;
             if (!service.SystemDictionary.TryGetValue("com.sysprogs.esp32.load_flash", out val) || val != "1")
@@ -104,7 +116,7 @@ namespace ESP8266DebugPackage
             }
             else
             {
-                var blocks = ESP32StartupSequence.BuildFLASHImages(service.TargetPath, service.SystemDictionary, settings.FLASHSettings);
+                var blocks = ESP32StartupSequence.BuildFLASHImages(service.TargetPath, service.SystemDictionary, settings.FLASHSettings, (settings as IESP32Settings)?.PatchBootloader ?? false);
 
                 if (settings.FLASHResources != null)
                     foreach (var r in settings.FLASHResources)

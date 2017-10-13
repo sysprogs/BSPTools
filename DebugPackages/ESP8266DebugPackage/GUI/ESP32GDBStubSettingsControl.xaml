@@ -83,7 +83,7 @@
         </ComboBox>
 
         <TextBlock Text="FLASH Size:" Grid.Row="6"/>
-        <ComboBox Grid.Row="6" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHSizes}" 
+        <ComboBox Grid.Row="6" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.ESP32FLASHSizes}" 
                  SelectedItem="{Binding Settings.FLASHSettings.Size}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
 
         <TextBlock Text="FLASH Mode:" Grid.Row="7"/>

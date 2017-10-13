@@ -17,26 +17,39 @@ namespace ESP8266DebugPackage
     {
         FLASHResource[] FLASHResources { get; set; }
         string InitDataFile { get; set; }
-        ESP8266BinaryImage.ParsedHeader FLASHSettings { get; set; }
+        ESP8266BinaryImage.ESP8266ImageHeader FLASHSettings { get; set; }
     }
 
-    public class ESPxxOpenOCDSettings : OpenOCDSettings
+    public interface IESP32Settings
     {
-        public ESP8266BinaryImage.ParsedHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ParsedHeader();
+        bool PatchBootloader { get; set; }
+    }
+
+    public abstract class ESPxxOpenOCDSettings : OpenOCDSettings
+    {
         public FLASHResource[] FLASHResources { get; set; }
+
+        public abstract ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings();
     }
 
     [XmlType("com.visualgdb.edp.openocd.settings.esp32")]
-    public class ESP32OpenOCDSettings : ESPxxOpenOCDSettings
+    public class ESP32OpenOCDSettings : ESPxxOpenOCDSettings, IESP32Settings
     {
+        public ESP8266BinaryImage.ESP32ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP32ImageHeader();
+        public bool PatchBootloader { get; set; } = true;
+        public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
 
     }
 
     [XmlType("com.visualgdb.edp.openocd.settings.esp8266")]
     public class ESP8266OpenOCDSettings : ESPxxOpenOCDSettings, IESP8266Settings
     {
+        public ESP8266BinaryImage.ESP8266ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP8266ImageHeader();
         public string InitDataFile { get; set; }
         public ResetMode ResetMode;
+
+        public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
+
 
         public int ProgramSectorSize = 4096;
         public int EraseSectorSize = 4096;
@@ -84,12 +97,12 @@ namespace ESP8266DebugPackage
 
     public class ESPxxOpenOCDSettingsEditor : OpenOCDSettingsEditor
     {
-        private readonly bool _IsESP32;
+        public bool IsESP32 { get; }
 
         public ESPxxOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, ESPxxOpenOCDSettings settings, KnownInterfaceInstance context, bool isESP32)
-            : base(host, baseDir, settings, context)
+            : base(host, baseDir, settings ?? (isESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings()), context)
         {
-            _IsESP32 = isESP32;
+            IsESP32 = isESP32;
             Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
             if (settings == null)
             {
@@ -117,11 +130,11 @@ namespace ESP8266DebugPackage
 
         public new ESPxxOpenOCDSettings Settings => (ESPxxOpenOCDSettings)base.Settings;
 
-        public Visibility ESP32Visibility => _IsESP32 ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility ESP8266Visibility => !_IsESP32 ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ESP32Visibility => IsESP32 ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ESP8266Visibility => !IsESP32 ? Visibility.Visible : Visibility.Collapsed;
 
 
-        public ESP8266BinaryImage.ParsedHeader FLASHSettings => Settings.FLASHSettings;
+        public ESP8266BinaryImage.IESPxxImageHeader FLASHSettings => Settings.GetFLASHSettings();
 
         public ObservableCollection<FLASHResource> FLASHResources { get; } = new ObservableCollection<FLASHResource>();
 
@@ -139,7 +152,6 @@ namespace ESP8266DebugPackage
         }
 
         protected override bool SuppressCommandLineReset => true;
-        protected override OpenOCDSettings CreateDefaultSettings() => _IsESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings();
 
         public string FLASHVoltage
         {
@@ -233,10 +245,10 @@ namespace ESP8266DebugPackage
 
         public string InitDataFile
         {
-            get => _IsESP32 ? null : (ESP8266Settings.InitDataFile ?? DefaultInitDataFile);
+            get => IsESP32 ? null : (ESP8266Settings.InitDataFile ?? DefaultInitDataFile);
             set
             {
-                if (_IsESP32)
+                if (IsESP32)
                     return;
 
                 if (value == DefaultInitDataFile)
@@ -249,10 +261,10 @@ namespace ESP8266DebugPackage
 
         public ResetMode ResetMode
         {
-            get => _IsESP32 ? default(ResetMode) : ESP8266Settings.ResetMode;
+            get => IsESP32 ? default(ResetMode) : ESP8266Settings.ResetMode;
             set
             {
-                if (_IsESP32)
+                if (IsESP32)
                     return;
 
                 ESP8266Settings.ResetMode = value;
@@ -262,10 +274,10 @@ namespace ESP8266DebugPackage
 
         public int ProgramSectorSize
         {
-            get => _IsESP32 ? 0 : ESP8266Settings.ProgramSectorSize;
+            get => IsESP32 ? 0 : ESP8266Settings.ProgramSectorSize;
             set
             {
-                if (!_IsESP32)
+                if (!IsESP32)
                 {
                     ESP8266Settings.ProgramSectorSize = value;
                     OnPropertyChanged(nameof(ProgramSectorSize));
@@ -275,10 +287,10 @@ namespace ESP8266DebugPackage
 
         public int EraseSectorSize
         {
-            get => _IsESP32 ? 0 : ESP8266Settings.EraseSectorSize;
+            get => IsESP32 ? 0 : ESP8266Settings.EraseSectorSize;
             set
             {
-                if (!_IsESP32)
+                if (!IsESP32)
                 {
                     ESP8266Settings.EraseSectorSize = value;
                     OnPropertyChanged(nameof(EraseSectorSize));

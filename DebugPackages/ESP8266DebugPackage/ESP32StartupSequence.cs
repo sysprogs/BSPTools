@@ -10,7 +10,7 @@ namespace ESP8266DebugPackage
 {
     static class ESP32StartupSequence
     {
-        public static List<ProgrammableRegion> BuildFLASHImages(string targetPath, Dictionary<string, string> bspDict, ESP8266BinaryImage.ParsedHeader flashSettings)
+        public static List<ProgrammableRegion> BuildFLASHImages(string targetPath, Dictionary<string, string> bspDict, ESP8266BinaryImage.ESP32ImageHeader flashSettings, bool patchBootloader)
         {
             string bspPath = bspDict["SYS:BSP_ROOT"];
             string toolchainPath = bspDict["SYS:TOOLCHAIN_ROOT"];
@@ -53,7 +53,25 @@ namespace ESP8266DebugPackage
                 var img = ESP8266BinaryImage.MakeESP32ImageFromELFFile(elfFile, flashSettings);
 
                 //Bootloader/partition table offsets are hardcoded in ESP-IDF
-                regions.Add(new ProgrammableRegion { FileName = bootloader, Offset = 0x1000, Size = GetFileSize(bootloader) });
+
+                var bootloaderCopy = pathBase + "-bootloader.bin";
+                var bootloaderContents = File.ReadAllBytes(bootloader);
+
+                if (patchBootloader)
+                {
+                    if (bootloaderContents.Length < 16)
+                        throw new Exception("Bootloader image too small: " + bootloader);
+
+                    if (bootloaderContents[0] != 0xe9)
+                        throw new Exception("Invalid ESP32 bootloader signature in  " + bootloader);
+
+                    bootloaderContents[2] = (byte)flashSettings.Mode;
+                    bootloaderContents[3] = (byte)(((byte)flashSettings.Size << 4) | (byte)flashSettings.Frequency);
+                }
+
+                File.WriteAllBytes(bootloaderCopy, bootloaderContents);
+
+                regions.Add(new ProgrammableRegion { FileName = bootloaderCopy, Offset = 0x1000, Size = bootloaderContents.Length });
                 regions.Add(new ProgrammableRegion { FileName = partitionTable, Offset = 0x8000, Size = GetFileSize(partitionTable) });
 
                 string fn = pathBase + "-esp32.bin";

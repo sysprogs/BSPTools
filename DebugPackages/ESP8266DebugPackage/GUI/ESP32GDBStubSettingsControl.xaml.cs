@@ -44,7 +44,7 @@ namespace ESP8266DebugPackage.GUI
 
         public void SetConfiguration(object configuration, KnownInterfaceInstance context)
         {
-            DataContext = _Editor = new ESPxxGDBStubSettingsEditor(configuration as ESPxxGDBStubSettings, context, _Host, true);
+            DataContext = _Editor = new ESPxxGDBStubSettingsEditor(configuration as ESPxxGDBStubSettingsBase, context, _Host, true);
             _Editor.SettingsChanged += (s, e) => SettingsChanged?.Invoke(s, e);
         }
 

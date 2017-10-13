@@ -17,7 +17,7 @@ namespace ESP8266DebugPackage
 
         public bool SupportsConnectionTesting => true;
 
-        public Type[] SettingsObjectTypes => new[] { typeof(ESPxxGDBStubSettings) };
+        public Type[] SettingsObjectTypes => new[] { typeof(ESP8266GDBStubSettings) };
 
         public ICustomDebugMethodConfigurator CreateConfigurator(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host)
         {
@@ -40,13 +40,13 @@ namespace ESP8266DebugPackage
         public class GDBStubInstance : IGDBStubInstance
         {
             private DebugStartContext _Context;
-            private ESPxxGDBStubSettings _Settings;
+            private ESP8266GDBStubSettings _Settings;
             private string _COMPort;
 
             public GDBStubInstance(DebugStartContext context)
             {
                 _Context = context;
-                _Settings = (ESPxxGDBStubSettings)_Context.Configuration;
+                _Settings = (ESP8266GDBStubSettings)_Context.Configuration;
 
                 if (context.ResolvedDevices?.BestMatch.COMPortNumber.HasValue == true)
                     _COMPort = "COM" + context.ResolvedDevices.BestMatch.COMPortNumber;
@@ -102,7 +102,7 @@ namespace ESP8266DebugPackage
 
             public bool WaitForToolToStart(ManualResetEvent cancelEvent) => true;
 
-            static void DoConnect(IDebugStartService service, ISimpleGDBSession session, ESPxxGDBStubSettings settings, string comPort, bool programFLASH)
+            static void DoConnect(IDebugStartService service, ISimpleGDBSession session, ESP8266GDBStubSettings settings, string comPort, bool programFLASH)
             {
                 var targetPath = service.TargetPath;
                 if (targetPath != null) //When doing connection test without an active project, the targetPath will be NULL

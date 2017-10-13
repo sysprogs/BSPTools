@@ -43,7 +43,7 @@ namespace ESP8266DebugPackage
             }
 
 
-            var regions = ESP32StartupSequence.BuildFLASHImages(startService.TargetPath, startService.SystemDictionary, settings.FLASHSettings);
+            var regions = ESP32StartupSequence.BuildFLASHImages(startService.TargetPath, startService.SystemDictionary, settings.FLASHSettings, settings.PatchBootloader);
 
             if (settings.FLASHResources != null)
                 foreach (var r in settings.FLASHResources)

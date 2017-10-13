@@ -164,8 +164,21 @@
         </ListBox>
 
         <TextBlock Text="FLASH Size:" Grid.Row="3"/>
-        <ComboBox Grid.Row="3" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHSizes}" 
-                 SelectedItem="{Binding FLASHSettings.Size}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+        <ComboBox Grid.Row="3" Grid.Column="1" Margin="{StaticResource TableElementMargin}" 
+                 SelectedItem="{Binding FLASHSettings.Size}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}">
+            <ComboBox.Style>
+                <Style TargetType="ComboBox" BasedOn="{StaticResource ResourceKey={x:Type ComboBox}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsESP32}" Value="true">
+                            <Setter Property="ItemsSource" Value="{x:Static local:Options.ESP32FLASHSizes}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsESP32}" Value="false">
+                            <Setter Property="ItemsSource" Value="{x:Static local:Options.FLASHSizes}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.Style>
+        </ComboBox>
 
         <TextBlock Text="FLASH Mode:" Grid.Row="4"/>
         <ListBox Grid.Row="4" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHModes}" 
