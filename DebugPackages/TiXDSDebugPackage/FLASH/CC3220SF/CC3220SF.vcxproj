@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|VisualGDB">
+      <Configuration>Debug</Configuration>
+      <Platform>VisualGDB</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|VisualGDB">
+      <Configuration>Release</Configuration>
+      <Platform>VisualGDB</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{06D6E4DE-19DB-4308-B1ED-5AC0C8746AF0}</ProjectGuid>
+    <BSP_ID>com.sysprogs.arm.ti.cc3220</BSP_ID>
+    <BSP_VERSION>1.40.01</BSP_VERSION>
+    <InPlaceBSPSubdir />
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|VisualGDB'">
+    <MCUPropertyListFile>$(ProjectDir)cc3220.props</MCUPropertyListFile>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
+    <MCUPropertyListFile>$(ProjectDir)cc3220.props</MCUPropertyListFile>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|VisualGDB'">
+    <GNUConfigurationType>Debug</GNUConfigurationType>
+    <ToolchainID>com.visualgdb.arm-eabi</ToolchainID>
+    <ToolchainVersion>6.2.0/7.12/r4</ToolchainVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
+    <ToolchainID>com.visualgdb.arm-eabi</ToolchainID>
+    <ToolchainVersion>6.2.0/7.12/r4</ToolchainVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|VisualGDB'">
+    <Link>
+      <GenerateMapFile>true</GenerateMapFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ItemGroup>
+    <ClCompile Include="CC3220SF_LAUNCHXL.c" />
+    <ClCompile Include="main_nortos.c" />
+    <ClCompile Include="pwmled.c" />
+    <None Include="cc3220.props" />
+    <ClCompile Include="$(BSP_ROOT)\support\error.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\adc.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\aes.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\camera.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\cpu.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\crc.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\des.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\flash.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\gpio.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\hwspinlock.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2c.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2s.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\interrupt.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\pin.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\prcm.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\sdhost.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\shamd5.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\spi.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\systick.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\timer.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\uart.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\udma.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\utils.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\wdt.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_ADC.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\ADCBuf.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_Camera.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\Capture.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_I2C.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\I2CSlave.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_I2S.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\NVS.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\PWM.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\SD.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\SDFatFS.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\SDSPI.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_SPI.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_Timer.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_UART.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\Watchdog.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\adc\ADCCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\camera\CameraCC32XXDMA.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\capture\CaptureCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\crypto\CryptoCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\dma\UDMACC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\gpio\GPIOCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\i2c\I2CCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\i2s\I2SCC32XXDMA.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\eventreg.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\porting\cc_pal.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\device.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\driver.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\flowcont.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\fs.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netapp.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netcfg.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netdb.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netutil.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\nonos.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\sl_socket.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\socket.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\spawn.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\wlan.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\nvs\NVSSPI25X.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\power\PowerCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\power\PowerCC32XX_asm.s" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\pwm\PWMTimerCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\sd\SDHostCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\sdspi\SDSPICC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\spi\SPICC32XXDMA.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\timer\TimerCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XXDMA.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\utils\drv_list.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\utils\RingBuf.c" />
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\watchdog\WatchdogCC32XX.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\NoRTOS.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\ClockPCC32XX_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\DebugP_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\HwiPCC32XX_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\MutexP_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\posix_sleep.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\PowerCC32XX_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\QueueP_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\SemaphoreP_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\SwiP_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\SystemP_nortos.c" />
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\startup\startup_cc32xx_gcc.c" />
+    <ClInclude Include="Board.h" />
+    <ClInclude Include="CC3220SF_LAUNCHXL.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\DeviceFamily.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\adc.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\aes.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\camera.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\cpu.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\crc.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\debug.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\des.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\flash.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\gpio.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\hwspinlock.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2c.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2s.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\interrupt.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\pin.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\prcm.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\rom.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\rom_map.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\rom_patch.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\sdhost.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\shamd5.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\spi.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\systick.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\timer.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\uart.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\udma.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\utils.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\version.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\wdt.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\asmdefs.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_adc.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_aes.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_apps_config.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_apps_rcm.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_camera.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_common_reg.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_des.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_dthe.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_flash_ctrl.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_gpio.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_gprcm.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_hib1p2.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_hib3p3.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_i2c.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_ints.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_mcasp.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_mcspi.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_memmap.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_mmchs.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_nvic.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_ocp_shared.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_shamd5.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_stack_die_ctrl.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_timer.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_types.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_uart.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_udma.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_wdt.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\ADC.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\ADCBuf.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Camera.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Capture.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\GPIO.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\I2C.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\I2CSlave.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\I2S.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\NVS.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\PIN.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Power.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\PWM.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SD.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SDFatFS.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SDSPI.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SPI.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Timer.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\UART.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Watchdog.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\adc\ADCCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\camera\CameraCC32XXDMA.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\capture\CaptureCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\crypto\CryptoCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dma\UDMACC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\ClockP.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\DebugP.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\HwiP.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\MutexP.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\SemaphoreP.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\SwiP.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\SystemP.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\gpio\GPIOCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\i2c\I2CCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\i2s\I2SCC32XXDMA.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\device.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\errors.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\eventreg.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\fs.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\netapp.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\netcfg.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\netutil.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\simplelink.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\sl_socket.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\trace.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\wlan.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\errno.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\netdb.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\arpa\inet.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\netinet\in.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\sys\select.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\sys\socket.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\porting\cc_pal.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\porting\user.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\driver.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\flowcont.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\nonos.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\objInclusion.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\protocol.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\spawn.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\nvs\NVSSPI25X.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\power\PowerCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\pwm\PWMTimerCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\sd\SDHostCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\sdspi\SDSPICC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\spi\SPICC32XXDMA.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\timer\TimerCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XXDMA.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\utils\List.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\utils\RingBuf.h" />
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\watchdog\WatchdogCC32XX.h" />
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\NoRTOS.h" />
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\dpl\QueueP.h" />
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\dpl\TimerP.h" />
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\posix\unistd.h" />
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\posix\sys\types.h" />
+    <None Include="CC3220SF-Debug.vgdbsettings" />
+    <None Include="CC3220SF-Release.vgdbsettings" />
+    <None Include="cc3220.xml" />
+  </ItemGroup>
+</Project>

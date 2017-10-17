@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<EmbeddedProfile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ToolchainID>com.visualgdb.arm-eabi</ToolchainID>
+  <ToolchainVersion>
+    <GCC>6.2.0</GCC>
+    <GDB>7.12</GDB>
+    <Revision>4</Revision>
+  </ToolchainVersion>
+  <BspID>com.sysprogs.arm.ti.cc3220</BspID>
+  <BspVersion>1.40.01</BspVersion>
+  <McuID>CC3220S</McuID>
+  <MCUDefinitionFile>DeviceDefinitions/CC_3220.xml</MCUDefinitionFile>
+  <MCUProperties>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.arm.floatmode</Key>
+        <Value>-mfloat-abi=soft</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.toolchainoptions.arm.libctype</Key>
+        <Value>--specs=nano.specs</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.toolchainoptions.arm.compactcpp</Key>
+        <Value>compactcpp</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.toolchainoptions.arm.libnosys</Key>
+        <Value>--specs=nosys.specs</Value>
+      </KeyValue>
+    </Entries>
+  </MCUProperties>
+  <BSPSourceFolderName>Device-specific files</BSPSourceFolderName>
+  <MCUMakFile>cc3220.mak</MCUMakFile>
+  <ReferencedFrameworks>
+    <string>com.sysprogs.arm.ti.cc3220.device_drivers</string>
+    <string>com.sysprogs.arm.ti.cc3220.periph_drivers</string>
+    <string>com.sysprogs.arm.ti.cc3220.nortos</string>
+  </ReferencedFrameworks>
+  <FrameworkProperties>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.Clock_File</Key>
+        <Value>ClockPCC32XX_nortos</Value>
+      </KeyValue>
+    </Entries>
+  </FrameworkProperties>
+  <TestFrameworkProperties>
+    <Entries />
+  </TestFrameworkProperties>
+</EmbeddedProfile>

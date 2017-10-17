@@ -1,0 +1,739 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{16fb82c5-27c8-4e61-8d4c-cb1ae1f63fb4}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{6b825f44-76b1-4d20-844b-733885873ac5}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{411e019a-a90b-4d88-8b8f-908444093836}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Source files\Device-specific files">
+      <UniqueIdentifier>{71a9d176-6b8a-42d6-acd9-a8e86bd35c44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Device-specific files\Core Drivers">
+      <UniqueIdentifier>{81828eaf-9ea5-41db-98d9-43e9d942915a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Device-specific files\Peripheral Drivers">
+      <UniqueIdentifier>{5a9c1dd9-7c2d-4720-82ac-70c38fe63a14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Device-specific files\Non-RTOS files">
+      <UniqueIdentifier>{10358a65-3246-4352-b81f-f7eb48657ac2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Device-specific files">
+      <UniqueIdentifier>{47c7ea5e-3211-4b8b-8744-74b09b65df5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Device-specific files\Core Drivers">
+      <UniqueIdentifier>{d2fca7aa-b0a6-4c90-8397-64fb4349fd70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Device-specific files\Peripheral Drivers">
+      <UniqueIdentifier>{a196e194-f954-485e-b82e-076df591839e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Device-specific files\Non-RTOS files">
+      <UniqueIdentifier>{7889d618-3c13-4f20-821e-4902e986fe51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="VisualGDB settings">
+      <UniqueIdentifier>{7c9e6d29-0986-4f0d-b8b5-e743d154c127}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CC3220SF_LAUNCHXL.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="main_nortos.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="pwmled.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <None Include="cc3220.props">
+      <Filter>Source files\Device-specific files</Filter>
+    </None>
+    <ClCompile Include="$(BSP_ROOT)\support\error.c">
+      <Filter>Source files\Device-specific files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\adc.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\aes.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\camera.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\cpu.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\crc.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\des.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\flash.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\gpio.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\hwspinlock.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2c.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2s.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\interrupt.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\pin.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\prcm.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\sdhost.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\shamd5.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\spi.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\systick.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\timer.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\uart.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\udma.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\utils.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\wdt.c">
+      <Filter>Source files\Device-specific files\Core Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_ADC.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\ADCBuf.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_Camera.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\Capture.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_I2C.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\I2CSlave.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_I2S.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\NVS.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\PWM.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\SD.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\SDFatFS.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\SDSPI.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_SPI.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_Timer.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\drv_UART.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\Watchdog.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\adc\ADCCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\camera\CameraCC32XXDMA.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\capture\CaptureCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\crypto\CryptoCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\dma\UDMACC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\gpio\GPIOCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\i2c\I2CCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\i2s\I2SCC32XXDMA.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\eventreg.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\porting\cc_pal.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\device.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\driver.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\flowcont.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\fs.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netapp.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netcfg.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netdb.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\netutil.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\nonos.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\sl_socket.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\socket.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\spawn.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\wlan.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\nvs\NVSSPI25X.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\power\PowerCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\power\PowerCC32XX_asm.s">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\pwm\PWMTimerCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\sd\SDHostCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\sdspi\SDSPICC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\spi\SPICC32XXDMA.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\timer\TimerCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XXDMA.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\utils\drv_list.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\utils\RingBuf.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\source\ti\drivers\watchdog\WatchdogCC32XX.c">
+      <Filter>Source files\Device-specific files\Peripheral Drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\NoRTOS.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\ClockPCC32XX_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\DebugP_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\HwiPCC32XX_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\MutexP_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\posix_sleep.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\PowerCC32XX_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\QueueP_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\SemaphoreP_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\SwiP_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\dpl\SystemP_nortos.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BSP_ROOT)\kernel\nortos\startup\startup_cc32xx_gcc.c">
+      <Filter>Source files\Device-specific files\Non-RTOS files</Filter>
+    </ClCompile>
+    <ClInclude Include="Board.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="CC3220SF_LAUNCHXL.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\DeviceFamily.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\adc.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\aes.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\camera.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\cpu.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\crc.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\debug.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\des.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\flash.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\gpio.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\hwspinlock.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2c.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\i2s.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\interrupt.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\pin.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\prcm.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\rom.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\rom_map.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\rom_patch.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\sdhost.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\shamd5.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\spi.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\systick.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\timer.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\uart.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\udma.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\utils.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\version.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\driverlib\wdt.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\asmdefs.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_adc.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_aes.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_apps_config.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_apps_rcm.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_camera.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_common_reg.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_des.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_dthe.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_flash_ctrl.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_gpio.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_gprcm.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_hib1p2.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_hib3p3.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_i2c.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_ints.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_mcasp.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_mcspi.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_memmap.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_mmchs.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_nvic.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_ocp_shared.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_shamd5.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_stack_die_ctrl.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_timer.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_types.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_uart.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_udma.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\devices\cc32xx\inc\hw_wdt.h">
+      <Filter>Header files\Device-specific files\Core Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\ADC.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\ADCBuf.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Camera.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Capture.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\GPIO.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\I2C.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\I2CSlave.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\I2S.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\NVS.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\PIN.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Power.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\PWM.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SD.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SDFatFS.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SDSPI.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\SPI.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Timer.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\UART.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\Watchdog.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\adc\ADCCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\camera\CameraCC32XXDMA.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\capture\CaptureCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\crypto\CryptoCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dma\UDMACC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\ClockP.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\DebugP.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\HwiP.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\MutexP.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\SemaphoreP.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\SwiP.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\dpl\SystemP.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\gpio\GPIOCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\i2c\I2CCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\i2s\I2SCC32XXDMA.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\device.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\errors.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\eventreg.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\fs.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\netapp.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\netcfg.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\netutil.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\simplelink.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\sl_socket.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\trace.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\wlan.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\errno.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\netdb.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\arpa\inet.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\netinet\in.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\sys\select.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\bsd\sys\socket.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\porting\cc_pal.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\porting\user.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\driver.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\flowcont.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\nonos.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\objInclusion.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\protocol.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\net\wifi\source\spawn.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\nvs\NVSSPI25X.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\power\PowerCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\pwm\PWMTimerCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\sd\SDHostCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\sdspi\SDSPICC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\spi\SPICC32XXDMA.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\timer\TimerCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\uart\UARTCC32XXDMA.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\utils\List.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\utils\RingBuf.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\source\ti\drivers\watchdog\WatchdogCC32XX.h">
+      <Filter>Header files\Device-specific files\Peripheral Drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\NoRTOS.h">
+      <Filter>Header files\Device-specific files\Non-RTOS files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\dpl\QueueP.h">
+      <Filter>Header files\Device-specific files\Non-RTOS files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\dpl\TimerP.h">
+      <Filter>Header files\Device-specific files\Non-RTOS files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\posix\unistd.h">
+      <Filter>Header files\Device-specific files\Non-RTOS files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\kernel\nortos\posix\sys\types.h">
+      <Filter>Header files\Device-specific files\Non-RTOS files</Filter>
+    </ClInclude>
+    <None Include="CC3220SF-Debug.vgdbsettings">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+    <None Include="CC3220SF-Release.vgdbsettings">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+    <None Include="cc3220.xml">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+  </ItemGroup>
+</Project>

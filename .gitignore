@@ -37,3 +37,4 @@ obj
 *.suo
 Output
 /generators/mbed/data/*.pyc
+/DebugPackages/TiXDSDebugPackage/FLASH/CC3220SF/VisualGDB/VisualGDBCache/CC3220SF-Debug

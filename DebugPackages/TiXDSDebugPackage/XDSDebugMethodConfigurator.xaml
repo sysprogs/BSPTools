@@ -1,0 +1,124 @@
+﻿<UserControl x:Class="TiXDSDebugPackage.XDSDebugMethodConfigurator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TiXDSDebugPackage"
+             xmlns:bspe="clr-namespace:BSPEngine;assembly=BSPEngine"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             xmlns:coll="clr-namespace:System.Collections;assembly=mscorlib">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style TargetType="ListBox" BasedOn="{StaticResource ResourceKey={x:Type ListBox}}">
+                <Style.Setters>
+                    <Setter Property="ItemsPanel">
+                        <Setter.Value>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style.Setters>
+            </Style>
+        </Grid.Resources>
+        <TextBlock Text="TI GDB Agent Executable:" VerticalAlignment="Center" Margin="5"/>
+        <TextBox Text="{Binding GDBAgentExecutable}" VerticalContentAlignment="Center" VerticalAlignment="Stretch"  Grid.Column="1"/>
+        <Button Grid.Column="2" VerticalAlignment="Center" Margin="2 0 2 0" Click="Browse_Click">
+            <Image Width="16" Height="16" Source="icons\open16.png"/>
+        </Button>
+
+
+        <TextBlock Text="Program FLASH memory:" Grid.Row="1" VerticalAlignment="Center" Margin="5"/>
+        <ListBox Grid.Row="1" Grid.Column="1" SelectedItem="{Binding ProgramMode}" Grid.ColumnSpan="2" Margin="0 5 0 5">
+            <ListBox.ItemsSource>
+                <coll:ArrayList>
+                    <bspe:ProgramMode>Enabled</bspe:ProgramMode>
+                    <bspe:ProgramMode>Disabled</bspe:ProgramMode>
+                    <bspe:ProgramMode>Auto</bspe:ProgramMode>
+                </coll:ArrayList>
+            </ListBox.ItemsSource>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="Enabled">
+                                        <Setter Property="Text" Value="Always"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="Disabled">
+                                        <Setter Property="Text" Value="Never"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="Auto">
+                                        <Setter Property="Text" Value="If rebuilt since last load"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:XDSDebugMethodConfigurator}}"/>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Expander Grid.ColumnSpan="3" Grid.Row="2" Header="Additional FLASH resources to program" IsExpanded="False" Margin="5">
+            <StackPanel Orientation="Vertical">
+                <Border BorderThickness="1" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:XDSDebugMethodConfigurator}}" Margin="10">
+                    <StackPanel Orientation="Vertical">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="24"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="File"/>
+                            <TextBlock Text="Offset from start of FLASH" Grid.Column="2"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding FLASHResources}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition Width="160"/>
+                                            <ColumnDefinition Width="24"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox Text="{Binding Path}" Grid.Column="0" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="Wrap"/>
+                                        <Button Click="BrowseResource_Click" Grid.Column="1" Style="{DynamicResource VsDynamicButtonStyle}">
+                                            <Image Width="16" Height="16" Source="icons/open16.png"/>
+                                        </Button>
+                                        <TextBox Text="{Binding Offset}" HorizontalAlignment="Stretch" Grid.Column="2" VerticalContentAlignment="Center" TextWrapping="Wrap"/>
+                                        <Button Click="RemoveResource_Click" Grid.Column="3" Style="{DynamicResource VsDynamicButtonStyle}">
+                                            <Image Width="16" Height="16" Source="icons/clear16.png"/>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <Button Style="{DynamicResource HyperlinkButton}" HorizontalAlignment="Left" Click="AddNewResource" Margin="10 0 0 10">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="16" Height="16" Source="icons\add16.png"/>
+                        <TextBlock Text="Add another resource" VerticalAlignment="Center" Margin="3"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Expander>
+
+    </Grid>
+</UserControl>
