@@ -70,7 +70,7 @@ namespace BSPGenerationTools
             return Name;
         }
 
-        public MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false)
+        public MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false, MCUFamilyBuilder.CoreSpecificFlags flagsToAdd = MCUFamilyBuilder.CoreSpecificFlags.All)
         {
             if (!allowIncompleteDefinition && string.IsNullOrEmpty(LinkerScriptPath))
                 throw new Exception("Linker script not defined for " + Name);
@@ -85,7 +85,7 @@ namespace BSPGenerationTools
                 FamilyID = fam.Definition.Name,
                 FLASHSize = FlashSize,
                 RAMSize = RAMSize,
-                HierarchicalPath = string.Format(@"{0}\{1}", bspBuilder.ShortName, fam.Definition.Name),
+                HierarchicalPath = $@"{bspBuilder.ShortName}\{fam.Definition.Name}",
                 CompilationFlags = new ToolFlags
                 {
                     PreprocessorMacros = new string[] { bspBuilder.GetMCUTypeMacro(this) },
@@ -96,7 +96,7 @@ namespace BSPGenerationTools
             };
 
             if (fam.Definition.HasMixedCores)
-                MCUFamilyBuilder.AddCoreSpecificFlags(MCUFamilyBuilder.CoreSpecificFlags.All, mcu, Core);
+                MCUFamilyBuilder.AddCoreSpecificFlags(flagsToAdd, mcu, Core);
 
             List<SysVarEntry> sysVars = new List<SysVarEntry>();
             foreach (var classifier in fam.Definition.Subfamilies)
