@@ -10,7 +10,6 @@
 	<CompilationFlags>
 		<COMMONFLAGS>-mabi=aapcs $$com.sysprogs.bspoptions.nrf5x.floatsoft$$</COMMONFLAGS>
 		<PreprocessorMacros>
-			<string>$$com.sysprogs.bspoptions.nrf5x.defmak$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.defmakmcu$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
 			<string>NRF_DFU_SETTINGS_VERSION=1</string>
@@ -19,6 +18,7 @@
 		<IncludeDirectories>
 			<string>.</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/components/softdevice/$$com.sysprogs.bspoptions.nrf5x.softdevice$$/headers</string>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/components/softdevice/$$com.sysprogs.bspoptions.nrf5x.softdevice$$/headers/nrf52</string>
 		</IncludeDirectories>
 		<AdditionalLibraryDirectories>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/SoftdeviceLibraries</string>
@@ -91,7 +91,8 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\toolchain</SourceFolder>
 				<TargetFolder>components\toolchain</TargetFolder>
-				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c</FilesToCopy>
+				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c;*.S</FilesToCopy>
+				<ProjectInclusionMask>*.c;*.h;*.cpp</ProjectInclusionMask> <!-- Startup files will be added by the C# logic -->
 				<SimpleFileConditions>					
 					<string>system_nrf51.c: $$SYS:MCU_ID$$ =~ ^nRF518.*</string>
 					<string>system_nrf52.c: $$SYS:MCU_ID$$ =~ ^nRF52832.*</string>
@@ -220,6 +221,13 @@
 					<TargetFolder>components\libraries</TargetFolder>
 					<FilesToCopy>util\*</FilesToCopy>
 					<ProjectInclusionMask>-util\app_error_weak_cmock*;*</ProjectInclusionMask>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>bootloader\nrf_bootloader_app_start_asm.c</FilePath>
+							<OldLine>void __attribute__ ((noinline)) nrf_bootloader_app_start_impl(uint32_t start_addr)</OldLine>
+							<NewLine>void __attribute__ ((noinline, optimize("-fomit-frame-pointer"))) nrf_bootloader_app_start_impl(uint32_t start_addr)</NewLine>
+						</Patch>						
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
@@ -547,6 +555,49 @@
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>
+		<Framework>
+			<Name>Fixed Size Stack &amp; Heap</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.stack_heap</ID>
+			<ProjectFolderName>Stack/Heap</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
+					<FilesToCopy>-*</FilesToCopy>
+					<PreprocessorMacros>__STACK_SIZE=$$com.sysprogs.bspoptions.stackheap.stacksize$$;__HEAP_SIZE=$$com.sysprogs.bspoptions.stackheap.heapsize$$</PreprocessorMacros>
+				</CopyJob>
+			</CopyJobs>			
+			  <ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+					  <PropertyEntry xsi:type="Integral">
+						<Name>Fixed stack size</Name>
+						<UniqueID>com.sysprogs.bspoptions.stackheap.stacksize</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the amount of memory (in bytes) to reserve for the stack</Description>
+						<DefaultValue>8192</DefaultValue>
+						<MinValue>0</MinValue>
+						<MaxValue>16777216</MaxValue>
+						<Increment>1024</Increment>
+					  </PropertyEntry>		  
+					  <PropertyEntry xsi:type="Integral">
+						<Name>Fixed heap size</Name>
+						<UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
+						<DefaultValue>8192</DefaultValue>
+						<MinValue>0</MinValue>
+						<MaxValue>16777216</MaxValue>
+						<Increment>1024</Increment>
+					  </PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			  </ConfigurableProperties>
+			
+		</Framework>
 	</AdditionalFrameworks>
 	<Subfamilies>
 			<MCUClassifier>
@@ -582,14 +633,6 @@
 			<Required>true</Required>
 			<Options>		
 				<Option>
-					<Value>NRF51422</Value>
-					<Regex>^nRF51422.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF51802</Value>
-					<Regex>^nRF51802.*</Regex>			
-				</Option>					
-				<Option>
 					<Value>NRF51822</Value>
 					<Regex>^nRF51822.*</Regex>			
 				</Option>					
@@ -604,6 +647,10 @@
 				<Option>
 					<Value>NRF52840_XXAA</Value>
 					<Regex>^nRF52840.*</Regex>			
+				</Option>					
+				<Option>
+					<Value>NRF52810_XXAA</Value>
+					<Regex>^nRF52810.*</Regex>			
 				</Option>					
 			</Options>
 		</MCUClassifier>
