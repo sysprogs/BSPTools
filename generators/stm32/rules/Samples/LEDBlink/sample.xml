@@ -22,7 +22,7 @@
 			<Suggestion><InternalValue>GPIOH</InternalValue></Suggestion>
 			<Suggestion><InternalValue>GPIOI</InternalValue></Suggestion>
 		  </SuggestionList>
-		  <DefaultEntryIndex>3</DefaultEntryIndex>
+		  <DefaultEntryIndex>2</DefaultEntryIndex>
 		  <AllowFreeEntry>false</AllowFreeEntry>
 		</PropertyEntry>
 		<PropertyEntry xsi:type="Integral">

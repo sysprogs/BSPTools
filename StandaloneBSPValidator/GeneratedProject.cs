@@ -102,7 +102,7 @@ namespace StandaloneBSPValidator
         {
             public bool Equals(string b1, string b2)
             {
-                if (b1.Contains(Path.GetFileName(b2)))
+                if (Path.GetFileName(b1) == Path.GetFileName(b2))
                     return true;
                 else
                     return false;
