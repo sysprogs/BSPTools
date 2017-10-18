@@ -517,7 +517,7 @@ namespace BSPGenerationTools
                 string relPath;
 
                 if (dir == ".")
-                    relPath = TargetFolder;
+                    return ".";
                 else
                     relPath = Path.Combine(TargetFolder, dir);
 

@@ -816,7 +816,7 @@ namespace BSPGenerationTools
                     rawmcu_list.Add(mcu);
 
             }
-
+            rawmcu_list.Sort((a,b)=> a.Name.CompareTo(b.Name));
             return rawmcu_list;
         }
 

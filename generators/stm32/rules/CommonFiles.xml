@@ -302,7 +302,7 @@
 				</CopyJob>
 			</CopyJobs>
 		</Framework>	
-		<Framework>
+		<!--Framework>
 			<Name>PolarSSL</Name>
 			<ID>com.sysprogs.arm.stm32.PolarSSL</ID>
 			     <ConfigurationFileTemplates>
@@ -359,7 +359,7 @@
 					</Patches>
 				</CopyJob>
 			</CopyJobs>
-		</Framework>	
+		</Framework-->	
 		<Framework>
 			<Name>FatFs</Name>
 			<ID>com.sysprogs.arm.stm32.FatFs</ID>
