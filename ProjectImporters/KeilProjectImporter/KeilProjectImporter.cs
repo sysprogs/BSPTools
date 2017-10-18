@@ -22,25 +22,31 @@ namespace KeilProjectImporter
 
         static string AdjustPath(string baseDir, string path)
         {
-            var finalPath = Path.GetFullPath(Path.Combine(baseDir, path));
-            //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
-            if (finalPath.IndexOf("\\RVDS\\", StringComparison.InvariantCultureIgnoreCase) != -1)
+            try
             {
-                var substitute = finalPath.ToLower().Replace("\\rvds\\", "\\gcc\\");
-                if (File.Exists(substitute) || Directory.Exists(substitute)) 
-                    finalPath = substitute;
+                var finalPath = Path.GetFullPath(Path.Combine(baseDir, path));
+                //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
+                if (finalPath.IndexOf("\\RVDS\\", StringComparison.InvariantCultureIgnoreCase) != -1)
+                {
+                    var substitute = finalPath.ToLower().Replace("\\rvds\\", "\\gcc\\");
+                    if (File.Exists(substitute) || Directory.Exists(substitute))
+                        finalPath = substitute;
+                }
+                if (finalPath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase) && finalPath.IndexOf("_Keil", StringComparison.InvariantCultureIgnoreCase) != -1)
+                {
+                    string dir = Path.GetDirectoryName(finalPath);
+                    string fn = Path.GetFileName(finalPath);
+
+                    var substitute = Path.Combine(dir, Path.ChangeExtension(fn.ToLower().Replace("_keil", "_gcc"), ".a"));
+                    if (File.Exists(substitute))
+                        finalPath = substitute;
+                }
+                return finalPath;
             }
-            if (finalPath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase) && finalPath.IndexOf("_Keil", StringComparison.InvariantCultureIgnoreCase) != -1)
+            catch (ArgumentException)
             {
-                string dir = Path.GetDirectoryName(finalPath);
-                string fn = Path.GetFileName(finalPath);
-
-                var substitute = Path.Combine(dir, Path.ChangeExtension(fn.ToLower().Replace("_keil", "_gcc"), ".a"));
-                if (File.Exists(substitute))
-                    finalPath = substitute;
+                throw new ArgumentException($"Invalid path: {path}, base directory = {baseDir}");
             }
-
-            return finalPath;
         }
 
         public ImportedExternalProject ImportProject(ProjectImportParameters parameters, IProjectImportService service)
