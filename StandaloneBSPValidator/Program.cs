@@ -282,7 +282,7 @@ namespace StandaloneBSPValidator
         static SystemDirectories SystemDirs = new SystemDirectories();
 
 
-        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, bool pSoftFPU, VendorSampleDirectory sampleDir)
+        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, VendorSampleDirectory sampleDir)
         {
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
             configuredMCU.Configuration["com.sysprogs.toolchainoptions.arm.libnosys"] = "--specs=nosys.specs";
@@ -291,6 +291,11 @@ namespace StandaloneBSPValidator
                 configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
             }
 
+            var entries = vs.Configuration.MCUConfiguration?.Entries;
+            if (entries != null)
+                foreach (var e in entries)
+                    configuredMCU.Configuration[e.Key] = e.Value;
+
 
             var bspDict = configuredMCU.BuildSystemDictionary(SystemDirs);
             bspDict["PROJECTNAME"] = "test";
@@ -298,7 +303,7 @@ namespace StandaloneBSPValidator
             var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
 
             var projectCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
-        
+
             var frameworkCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.Configuration);
             foreach (var k in projectCfg.Keys)
                 bspDict[k] = projectCfg[k];
@@ -501,7 +506,7 @@ namespace StandaloneBSPValidator
 
 
             bool errorsFound = false;
-            foreach(var g in job.CompileTasks.GroupBy(t=>t.PrimaryOutput.ToLower()))
+            foreach (var g in job.CompileTasks.GroupBy(t => t.PrimaryOutput.ToLower()))
             {
                 if (g.Count() > 1)
                 {
@@ -653,7 +658,7 @@ namespace StandaloneBSPValidator
             Random rng = new Random();
             using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
             {
-                r.BeginSample("Test Simple");
+                r.BeginSample("Vendor Samples");
                 foreach (var vs in samples.Samples)
                 {
                     LoadedBSP.LoadedMCU mcu;
@@ -676,12 +681,34 @@ namespace StandaloneBSPValidator
                         continue;
                     }
 
-                    bool aflSoftFPU = true;
                     string mcuDir = Path.Combine(temporaryDirectory, "VendorSamples", vs.UserFriendlyName);
+                    mcuDir += $"-{mcu.ExpandedMCU.ID}";
                     if (!Directory.Exists(mcuDir))
                         Directory.CreateDirectory(mcuDir);
                     DateTime start = DateTime.Now;
-                    var result = TestVendorSample(mcu, vs, mcuDir, aflSoftFPU, samples);
+
+                    string[] hwSubstrings = new[]
+                    {
+                        @"\ARM_CM4F\port.c",
+                        @"ARM_CM7\r0p1\port.c",
+                        @"CM4_GCC.a",
+                    };
+
+                    if (vs.SourceFiles.FirstOrDefault(f => ContainsAnySubstrings(f, hwSubstrings)) != null)
+                    {
+                        if (vs.Configuration.MCUConfiguration != null)
+                            throw new Exception("TODO: merge old configuration with new configuration");
+
+                        vs.Configuration.MCUConfiguration = new PropertyDictionary2
+                        {
+                            Entries = new PropertyDictionary2.KeyValue[]
+                                {new PropertyDictionary2.KeyValue {Key = "com.sysprogs.bspoptions.arm.floatmode", Value = "-mfloat-abi=hard"}}
+                        };
+                    }
+
+                    vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
+
+                    var result = TestVendorSample(mcu, vs, mcuDir, samples);
 
                     Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
 
@@ -705,6 +732,21 @@ namespace StandaloneBSPValidator
                 (samples as ConstructedVendorSampleDirectory).BSPDirectory = Path.GetFullPath(bspDir);
             }
             return stats;
+        }
+
+        static bool ContainsAnySubstrings(string s, string[] substrings)
+        {
+            foreach (var sub in substrings)
+                if (s.IndexOf(sub, StringComparison.InvariantCultureIgnoreCase) != -1)
+                    return true;
+            return false;
+        }
+
+        static bool IsNonGCCFile(VendorSample vs, string fn)
+        {
+            if (fn.StartsWith(vs.Path + @"\MDK-ARM", StringComparison.InvariantCultureIgnoreCase))
+                return true;
+            return false;
         }
 
         public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
@@ -822,7 +864,7 @@ namespace StandaloneBSPValidator
                 TestBSP(job, bsp, args[1]);
             }
             return;
-            
+
 
         }
         static bool IsNoValid(string pNameFrend, string[] NonValid)

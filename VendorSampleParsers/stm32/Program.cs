@@ -62,13 +62,14 @@ namespace GeneratorSampleStm32
             List<string> includeDirs = new List<string>();
             bool flGetProperty = false;
             string aTarget = "";
-            VendorSample aSimpleOut = new VendorSample();
+            VendorSample sample = new VendorSample();
+
             foreach (var ln in File.ReadAllLines(aFilePrj))
             {
                 if (ln.Contains("<Target>"))
                 {
                     if (aCntTarget == 0)
-                        aSimpleOut = new VendorSample();
+                        sample = new VendorSample();
                     aCntTarget++;
                 }
                 if (ln.Contains("</Target>"))
@@ -85,9 +86,9 @@ namespace GeneratorSampleStm32
                 Match m = Regex.Match(ln, "[ \t]*<Device>(.*)</Device>[ \t]*");
                 if (m.Success)
                 {
-                    aSimpleOut.DeviceID = m.Groups[1].Value;
-                    if (aSimpleOut.DeviceID.EndsWith("x"))
-                        aSimpleOut.DeviceID = aSimpleOut.DeviceID.Remove(aSimpleOut.DeviceID.Length - 2, 2);
+                    sample.DeviceID = m.Groups[1].Value;
+                    if (sample.DeviceID.EndsWith("x"))
+                        sample.DeviceID = sample.DeviceID.Remove(sample.DeviceID.Length - 2, 2);
                 }
                 m = Regex.Match(ln, "[ \t]*<TargetName>(.*)</TargetName>[ \t]*");
                 if (m.Success)
@@ -102,6 +103,13 @@ namespace GeneratorSampleStm32
                     if (filePath.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
+                    if (filePath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        filePath = filePath.Replace("_Keil.lib", "_GCC.a");
+                        if (!File.Exists(Path.Combine(pDirPrj, filePath)))
+                            continue;
+                    }
+
                     if (!sourceFiles.Contains(filePath))
                         sourceFiles.Add(filePath);
                 }
@@ -110,25 +118,25 @@ namespace GeneratorSampleStm32
                 {
                     m = Regex.Match(ln, "[ \t]*<IncludePath>(.*)</IncludePath>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
-                        aSimpleOut.IncludeDirectories = m.Groups[1].Value.Split(';');
+                        sample.IncludeDirectories = m.Groups[1].Value.Split(';').Select(d=>d.TrimEnd('/', '\\')).ToArray();
 
                     m = Regex.Match(ln, "[ \t]*<Define>(.*)</Define>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
-                        aSimpleOut.PreprocessorMacros = m.Groups[1].Value.Split(',');
+                        sample.PreprocessorMacros = m.Groups[1].Value.Split(',');
                 }
 
 
                 if (ln.Contains("</Target>") && aCntTarget == 0)
                 {
-                    aSimpleOut.Path = Path.GetDirectoryName(pDirPrj);
-                    aSimpleOut.UserFriendlyName = aNamePrj;
-                    aSimpleOut.BoardName = aTarget;
-                    aSimpleOut.SourceFiles = ToAbsolutePath(pDirPrj, topLevelDir, sourceFiles).ToArray();
+                    sample.Path = Path.GetDirectoryName(pDirPrj);
+                    sample.UserFriendlyName = aNamePrj;
+                    sample.BoardName = aTarget;
+                    sample.SourceFiles = ToAbsolutePath(pDirPrj, topLevelDir, sourceFiles).ToArray();
 
-                    foreach (var fl in aSimpleOut.IncludeDirectories)
+                    foreach (var fl in sample.IncludeDirectories)
                         includeDirs.Add(fl);
                     includeDirs.AddRange(extraIncludeDirs);
-                    aSimpleOut.IncludeDirectories = ToAbsolutePath(pDirPrj, topLevelDir, includeDirs).ToArray();
+                    sample.IncludeDirectories = ToAbsolutePath(pDirPrj, topLevelDir, includeDirs).ToArray();
 
                     string readmeFile = Path.Combine(pDirPrj, @"..\readme.txt");
                     if (File.Exists(readmeFile))
@@ -138,11 +146,11 @@ namespace GeneratorSampleStm32
                         m = rgTitle.Match(readmeContents);
                         if (m.Success)
                         {
-                            aSimpleOut.Description = m.Groups[1].Value;
+                            sample.Description = m.Groups[1].Value;
                         }
                     }
 
-                    aLstVSampleOut.Add(aSimpleOut);
+                    aLstVSampleOut.Add(sample);
                 }
             }
             return aLstVSampleOut;
