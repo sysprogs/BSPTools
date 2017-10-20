@@ -20,10 +20,11 @@ namespace KeilProjectImporter
 
         public string UniqueID => "com.sysprogs.project_importers.keil";
 
-        static string AdjustPath(string baseDir, string path)
+        static string TryAdjustPath(string baseDir, string path, IProjectImportService service)
         {
             try
             {
+                path = path.Trim('\"');
                 var finalPath = Path.GetFullPath(Path.Combine(baseDir, path));
                 //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
                 if (finalPath.IndexOf("\\RVDS\\", StringComparison.InvariantCultureIgnoreCase) != -1)
@@ -43,9 +44,10 @@ namespace KeilProjectImporter
                 }
                 return finalPath;
             }
-            catch (ArgumentException)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Invalid path: {path}, base directory = {baseDir}");
+                service.Logger.LogException(ex, $"Invalid path: {path}, base directory = {baseDir}");
+                return null;
             }
         }
 
@@ -92,7 +94,8 @@ namespace KeilProjectImporter
                     if (string.IsNullOrEmpty(path))
                         continue;
 
-                    subdir.AddFile(AdjustPath(baseDir, path), type == "5");
+                    var adjustedPath = TryAdjustPath(baseDir, path, service);
+                    subdir.AddFile(adjustedPath, type == "5");
                 }
             }
 
@@ -105,7 +108,8 @@ namespace KeilProjectImporter
                 macros.AddRange((optionsNode.SelectSingleNode("Define")?.InnerText ?? "").Split(',').Select(m=>m.Trim()));
                 includeDirs.AddRange((optionsNode.SelectSingleNode("IncludePath")?.InnerText ?? "")
                     .Split(';')
-                    .Select(p => AdjustPath(baseDir, p.Trim())));
+                    .Select(p => TryAdjustPath(baseDir, p.Trim(), service))
+                    .Where(p => p != null));
             }
 
             return new ImportedExternalProject
