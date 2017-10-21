@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "risc-v", "risc-v.csproj", "{189AF3C6-0B72-42EE-8213-B136B08480C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkerScriptGenerator", "..\..\libraries\LinkerScriptGenerator\LinkerScriptGenerator.csproj", "{46E1D77E-E294-4A9A-964E-7139CD6C4A90}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Debug|x86.Build.0 = Debug|Any CPU
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Release|x86.ActiveCfg = Release|Any CPU
+		{189AF3C6-0B72-42EE-8213-B136B08480C5}.Release|x86.Build.0 = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|x86.Build.0 = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|x86.ActiveCfg = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|x86.Build.0 = Release|Any CPU
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Debug|x86.ActiveCfg = Debug|x86
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Debug|x86.Build.0 = Debug|x86
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Release|x86.ActiveCfg = Release|x86
+		{46E1D77E-E294-4A9A-964E-7139CD6C4A90}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {07B0446D-825A-4348-BD17-81A065E5AD8C}
+	EndGlobalSection
+EndGlobal

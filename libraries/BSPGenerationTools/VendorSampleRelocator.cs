@@ -49,9 +49,9 @@ namespace BSPGenerationTools
 
         protected const string SampleRootDirMarker = "$$SYS:VSAMPLE_DIR$$";
 
-        class PathMapper
+        public class PathMapper
         {
-            private ConstructedVendorSampleDirectory _SampleDir;
+            protected readonly ConstructedVendorSampleDirectory _SampleDir;
 
             public PathMapper(ConstructedVendorSampleDirectory dir)
             {
@@ -59,7 +59,7 @@ namespace BSPGenerationTools
             }
 
             //Returns null for toolchain-relative paths that need to be excluded
-            public string MapPath(string path)
+            public virtual string MapPath(string path)
             {
                 if (!Path.IsPathRooted(path))
                     return null;
@@ -191,7 +191,8 @@ namespace BSPGenerationTools
 
         protected virtual string BuildVirtualSamplePath(string originalPath) => null;
 
-        public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, string bspDirectory)
+
+        public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, string bspDirectory, PathMapper mapper = null)
         {
             List<VendorSample> finalSamples = new List<VendorSample>();
 
@@ -202,7 +203,8 @@ namespace BSPGenerationTools
                 Directory.Delete(outputDir, true);
             }
 
-            var mapper = new PathMapper(dir);
+            if (mapper == null)
+                mapper = new PathMapper(dir);
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
 

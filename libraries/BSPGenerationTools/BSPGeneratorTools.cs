@@ -553,6 +553,7 @@ namespace BSPGenerationTools
                         IncompatibleFrameworks = fw.IncompatibleFrameworks,
                         ClassID = fw.ClassID,
                         ConfigurationFileTemplates = fw.ConfigurationFileTemplates,
+                        AdditionalForcedIncludes = fw.AdditionalForcedIncludes?.Split(';'),
                     };
 
                     if (fw.Filter != null)
@@ -592,9 +593,28 @@ namespace BSPGenerationTools
                     string destFolder = Path.Combine(BSP.BSPRoot, sample.DestinationFolder);
                     string sourceDir = sample.SourceFolder;
                     BSP.ExpandVariables(ref sourceDir);
-                    PathTools.CopyDirectoryRecursive(sourceDir, destFolder);
 
-                    var sampleObj = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(destFolder, "sample.xml"));
+                    if (sample.CopyFilters == null)
+                        PathTools.CopyDirectoryRecursive(sourceDir, destFolder);
+                    else
+                    {
+                        var filters = new CopyFilters(sample.CopyFilters);
+                        foreach(var fn in Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories))
+                        {
+                            string relPath = fn.Substring(sourceDir.Length).TrimStart('\\');
+                            if (filters.IsMatch(relPath))
+                            {
+                                string targetPath = Path.Combine(destFolder, relPath);
+                                Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+                                File.Copy(fn, targetPath);
+                            }
+                        }
+                    }
+
+                    var sampleObj = sample.EmbeddedSample ?? XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(destFolder, "sample.xml"));
+                    if (sampleObj.RequiredFrameworks == null && allFrameworks != null)
+                        sampleObj.RequiredFrameworks = allFrameworks.Where(fw => fw.DefaultEnabled).Select(fw => fw.ClassID ?? fw.ID)?.ToArray();
+
                     if (sample.AdditionalSources != null)
                     {
                         sampleObj.AdditionalSourcesToCopy = sample.AdditionalSources.Select(f =>

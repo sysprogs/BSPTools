@@ -217,6 +217,7 @@ namespace BSPGenerationTools
         public string[] SmartFileConditions; //Will be automatically translated to SimpleFileConditions & properties. Option name|list of (regex => option value). See CC3220 BSP for examples.
         public bool AlreadyCopied;  //The files have been copied (and patched) by some previous jobs. This job is defined only to add the files to the project.
         public string[] GuardedFiles;
+        public string SymlinkResolutionMask;
 
         public string AdditionalProjectFiles;
 
@@ -371,6 +372,7 @@ namespace BSPGenerationTools
 
             var copyMasks = new CopyFilters(FilesToCopy);
             var autoIncludes = new CopyFilters(AutoIncludeMask);
+            var potentialSymlinks = new CopyFilters(SymlinkResolutionMask);
             var projectContents = new CopyFilters(ProjectInclusionMask);
             var filesToCopy = Directory.GetFiles(expandedSourceFolder, "*", SearchOption.AllDirectories).Select(f => f.Substring(expandedSourceFolder.Length + 1)).Where(f => copyMasks.IsMatch(f)).ToArray();
             foreach (var dir in filesToCopy.Select(f => Path.Combine(absTarget, Path.GetDirectoryName(f))).Distinct())
@@ -421,7 +423,24 @@ namespace BSPGenerationTools
                         throw new Exception(targetFile + " required by a copy job marked as 'Already Copied' does not exist");
                 }
                 else
-                    File.Copy(Path.Combine(expandedSourceFolder, f), targetFile, true);
+                {
+                    bool resolved = false;
+                    var absSourcePath = Path.Combine(expandedSourceFolder, f);
+                    if (potentialSymlinks.IsMatch(f))
+                    {
+                        for (; ; )
+                        {
+                            var contents = File.ReadAllLines(absSourcePath);
+                            if (contents.Length == 1 && File.Exists(Path.Combine(Path.GetDirectoryName(absSourcePath), contents[0])))
+                                absSourcePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(absSourcePath), contents[0]));
+                            else
+                                break;
+                        }
+                    }
+
+                    if (!resolved)
+                        File.Copy(absSourcePath, targetFile, true);
+                }
 
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
@@ -566,6 +585,7 @@ namespace BSPGenerationTools
         public SysVarEntry[] AdditionalSystemVars;  //Additional vars that can be referenced in sample templates
         public string[] IncompatibleFrameworks; //Mutually exclusive frameworks (e.g. HAL is incompatible with StdPeriph)
         public ConfigurationFileTemplate[] ConfigurationFileTemplates;
+        public string AdditionalForcedIncludes;
     }
 
     //Smart, i.e. configurable via wizard. We will eventually support 'dumb' samples just cloned from the BSP "as is".
@@ -576,6 +596,8 @@ namespace BSPGenerationTools
         public string[] AdditionalSources;  //Full paths ($$SYS:BSP_ROOT$$/...) of additional files that will be copied to the project dir. Can use the path/a.c=>b.c syntax to rename the file to b.c
         public string MCUFilterRegex;
         public bool IsTestProjectSample;
+        public EmbeddedProjectSample EmbeddedSample;
+        public string CopyFilters;
     }
 
     /* Use MCU classifiers to define MCU-specific flags.
