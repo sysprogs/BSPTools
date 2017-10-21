@@ -208,6 +208,27 @@ namespace GeneratorSampleStm32
                 return string.Join("\\", originalPath.Split('/').Skip(2).Reverse().Skip(1).Reverse());
             }
         }
+        class STM32PathMapper : VendorSampleRelocator.PathMapper
+        {
+            public STM32PathMapper(ConstructedVendorSampleDirectory dir) : base(dir)
+            {
+            }
+
+            const string Prefix1 = @"C:/QuickStep/STM32Cube_FW_H7_clean/Firmware";
+
+            public override string MapPath(string path)
+            {
+                if (path.StartsWith(Prefix1))
+                {
+                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.0.0{path.Substring(Prefix1.Length)}";
+                    if (!File.Exists(path) && !Directory.Exists(path))
+                        throw new Exception("Missing " + path);
+                }
+
+                return base.MapPath(path);
+            }
+        }
+
 
         static void Main(string[] args)
         {
@@ -231,7 +252,7 @@ namespace GeneratorSampleStm32
 
             //Insert the samples into the generated BSP
             var relocator = new STM32SampleRelocator();
-            relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir);
+            relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir, new STM32PathMapper(sampleDir));
 
             var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspDir, "bsp.xml"));
             bsp.VendorSampleDirectoryPath = "VendorSamples";
@@ -245,7 +266,7 @@ namespace GeneratorSampleStm32
             // Finally verify that everything builds
             var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
             expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir, 0.1);
+            StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir, 1);
         }
 
         private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile)

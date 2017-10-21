@@ -697,13 +697,19 @@ namespace StandaloneBSPValidator
                     if (vs.SourceFiles.FirstOrDefault(f => ContainsAnySubstrings(f, hwSubstrings)) != null)
                     {
                         if (vs.Configuration.MCUConfiguration != null)
-                            throw new Exception("TODO: merge old configuration with new configuration");
-
-                        vs.Configuration.MCUConfiguration = new PropertyDictionary2
                         {
-                            Entries = new PropertyDictionary2.KeyValue[]
-                                {new PropertyDictionary2.KeyValue {Key = "com.sysprogs.bspoptions.arm.floatmode", Value = "-mfloat-abi=hard"}}
-                        };
+                            var dict = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
+                            dict["com.sysprogs.bspoptions.arm.floatmode"] = "-mfloat-abi=hard";
+                            vs.Configuration.MCUConfiguration = new PropertyDictionary2 { Entries = dict.Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value }).ToArray() };
+                        }
+                        else
+                        {
+                            vs.Configuration.MCUConfiguration = new PropertyDictionary2
+                            {
+                                Entries = new PropertyDictionary2.KeyValue[]
+                                    {new PropertyDictionary2.KeyValue {Key = "com.sysprogs.bspoptions.arm.floatmode", Value = "-mfloat-abi=hard"}}
+                            };
+                        }
                     }
 
                     vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
