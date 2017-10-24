@@ -78,7 +78,7 @@
 	</SupportedMCUs>
   <Frameworks/>
   <DebugMethodPackages>
-	<string>sysprogs/debug/openocd</string>
+	<string>openocd</string>
   </DebugMethodPackages>
   <Examples>
 	<!-- <string>sysprogs/samples/NoFLASH</string>

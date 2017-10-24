@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1DBCDEFF-2978-4BEE-935E-7E3A3D06BD94}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RISCVDebugPackage</RootNamespace>
+    <AssemblyName>RISCVDebugPackage</AssemblyName>
+    <AssemblyVersion>BADBADBADBAD</AssemblyVersion>
+    <!-- Should be overridden by the UpdateProjectVersion target -->
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BSPEngine">
+      <HintPath>..\..\BSPEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="RISCVOpenOCDDebugController.cs" />
+    <Compile Include="RISCVOpenOCDSettings.cs" />
+    <Compile Include="GUI\RISCVOpenOCDSettingsControl.xaml.cs">
+      <DependentUpon>RISCVOpenOCDSettingsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\sysprogs\support\OpenOCDPackage\OpenOCDPackage.csproj">
+      <Project>{84589bb6-390b-49ec-a412-d7cadc0ee289}</Project>
+      <Name>OpenOCDPackage</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\check16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\chip16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\clear16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\excl16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\help16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\open16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\reset16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\script16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\usb16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="GUI\RISCVOpenOCDSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildThisFileDir)..\..\AutoVersion.props" />
+</Project>
