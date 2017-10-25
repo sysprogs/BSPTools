@@ -21,7 +21,17 @@
 				<AutoIncludeMask>-*instance*;-*component*;*.h</AutoIncludeMask>
 				<SimpleFileConditions>
 				</SimpleFileConditions>
-			</CopyJob>		
+			</CopyJob>	
+				<!--CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\sam0\drivers</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<TargetFolder>sam0\drivers\gpio</TargetFolder>
+					<AutoIncludeMask>-*.h</AutoIncludeMask>	
+					<ProjectInclusionMask>*.c</ProjectInclusionMask>
+					 <SimpleFileConditions> 
+						<string>\\.*:$$com.sysprogs.atmel.sam32._header_prefix_sam0$$==yes</string>
+					 </SimpleFileConditions>
+				</CopyJob-->						
 		</CopyJobs>	
 		
 		</CoreFramework>
@@ -47,19 +57,19 @@
 
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.clock</Key>
-          <Value>clock_samd21_r21_da</Value>
+          <Value>clock_samd21_r21_da_ha1</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.interrupt</Key>
           <Value>system_interrupt_samd09</Value>
         </SysVarEntry>
-		<SysVarEntry>
+		<SysVarEntry>			
           <Key>com.sysprogs.atmel.sam0.driver.power</Key>
-          <Value>power_sam_b</Value>
+          <Value>power_sam_d_r_h</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.reset</Key>
-          <Value>reset_sam_b</Value>
+          <Value>reset_sam_d_r_h</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.globaldir</Key>

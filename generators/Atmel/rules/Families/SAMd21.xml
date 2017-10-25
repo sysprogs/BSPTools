@@ -60,7 +60,7 @@
 
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.clock</Key>
-          <Value>clock_samd21_r21_da</Value>
+          <Value>clock_samd21_r21_da_ha1</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.interrupt</Key>
@@ -68,11 +68,11 @@
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.power</Key>
-          <Value>power_sam_d_r</Value>
+          <Value>power_sam_d_r_h</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.reset</Key>
-          <Value>reset_sam_d_r</Value>
+          <Value>reset_sam_d_r_h</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.globaldir</Key>

@@ -31,6 +31,9 @@
 					<TargetFolder>common</TargetFolder>
 					<ProjectInclusionMask>-osprintf*;-stdio*;*.c</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
+					 <SimpleFileConditions> 
+						<string>\\.*:$$com.sysprogs.atmel.sam32._header_prefix$$!=samb11</string>
+					 </SimpleFileConditions>
 					<Patches>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>parts.h</FilePath>
@@ -113,5 +116,14 @@
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_SAM4L</SourceFolder>
 			<DestinationFolder>Samples\LEDBlink_SAM4L</DestinationFolder>
 		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_SAMB</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_SAMB</DestinationFolder>
+		</SmartSample>	
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_SAMD</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_SAMD</DestinationFolder>
+		</SmartSample>			
+		
 	</SmartSamples>
 </FamilyDefinition>
