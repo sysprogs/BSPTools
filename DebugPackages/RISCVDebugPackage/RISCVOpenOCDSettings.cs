@@ -26,7 +26,7 @@ namespace RISCVDebugPackage
         {
             const string unprotectCommand = "mon flash protect 0 64 last off";
             const string resetHalt = "mon reset halt";
-            const string restartAtEntry = "set $pc = _start";
+            const string restartAtEntry = "mon reset halt"; // set $pc = _start";
             int idx;
 
             idx = Settings.StartupCommands.IndexOf(unprotectCommand);
@@ -37,15 +37,22 @@ namespace RISCVDebugPackage
             if (idx == -1)
                 Settings.StartupCommands.Insert(idxLoad, resetHalt);
 
-            idx = Settings.StartupCommands.IndexOf(restartAtEntry);
+            idx = Settings.StartupCommands.IndexOf(restartAtEntry, idxLoad + 1);
             if (idx == -1)
                 Settings.StartupCommands.Add(restartAtEntry);
         }
 
-        protected override QuickSetupDatabase.TargetDeviceFamily TryDetectDeviceById(QuickSetupDatabase db, LoadedBSP.ConfiguredMCU mcu)
+        public static bool IsE300CPU(LoadedBSP.ConfiguredMCU mcu)
         {
             string tmp = null;
             if (mcu.Configuration?.TryGetValue("com.sysprogs.risc-v.board", out tmp) == true && tmp.Contains("-e300-"))
+                return true;
+            return false;
+        }
+
+        protected override QuickSetupDatabase.TargetDeviceFamily TryDetectDeviceById(QuickSetupDatabase db, LoadedBSP.ConfiguredMCU mcu)
+        {
+            if (IsE300CPU(mcu))
                 return db.TryDetectDeviceById(mcu, "E300");
             else
                 return base.TryDetectDeviceById(db, mcu);

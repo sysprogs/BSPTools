@@ -173,6 +173,38 @@ namespace RISCVDebugPackage
                     else
                         session.RunGDBCommand(cmd);
                 }
+
+                if (service.Mode != EmbeddedDebugMode.Attach && RISCVOpenOCDSettingsEditor.IsE300CPU(service.MCU))
+                {
+                    //Issuing the reset signal will only trigger the 'software reset' interrupt that causes a halt by default.
+                    //Resetting it and then setting $pc to _start does the trick, but results in strange chip resets later.
+                    //Resetting the target via nSRST and reconnecting afterwards seems to do the trick
+                    session.RunGDBCommand("mon hifive_reset");
+
+                    //Manually manipulating nSRST with a gdb session active wreaks havoc in the internal gdb/gdbserver state machine,
+                    //so we simply reconnect gdb to OpenOCD.
+                    session.RunGDBCommand("-target-disconnect");
+                    session.RunGDBCommand("-target-select remote :$$SYS:GDB_PORT$$");
+
+                    var expr = session.EvaluateExpression("(void *)$pc == _start");
+                    if (expr.TrimStart('0', 'x') != "1")
+                    {
+                        session.SendInformationalOutput("Warning: unexpected value of $pc after a reset");
+                        session.RunGDBCommand("set $pc = _start");
+                    }
+
+                    //After resetting the CPU seems to be stuck in some state where resuming it will effectively keep it stalled, but
+                    //resuming, halting and then finally resuming again does the job. The line below does the first resume-halt pair.
+                    try
+                    {
+                        session.ResumeAndWaitForStop(200);
+                    }
+                    catch
+                    {
+                        //VisualGDB will throw a 'timed out' exception.
+                    }
+
+                }
             }
 
             protected virtual bool RunLoadCommand(IDebugStartService service, ISimpleGDBSession session, string cmd)
