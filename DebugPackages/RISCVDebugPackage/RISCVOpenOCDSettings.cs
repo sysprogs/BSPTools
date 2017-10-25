@@ -11,6 +11,13 @@ namespace RISCVDebugPackage
     [XmlType("com.visualgdb.edp.openocd.settings.risc-v")]
     public class RISCVOpenOCDSettings : OpenOCDSettings
     {
+        public RISCVResetMode ResetMode { get; set; } = RISCVResetMode.nSRST;
+    }
+
+    public enum RISCVResetMode
+    {
+        Manual,
+        nSRST,
     }
 
     public class RISCVOpenOCDSettingsEditor : OpenOCDSettingsEditor

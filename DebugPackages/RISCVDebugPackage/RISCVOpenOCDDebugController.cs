@@ -84,7 +84,7 @@ namespace RISCVDebugPackage
             return methodDir;
         }
 
-        protected virtual IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool)
+        protected virtual IGDBStubInstance CreateStub(DebugStartContext context, RISCVOpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool)
         {
             return new OpenOCDGDBStub(cmdLine, tool, settings, gdbPort, telnetPort, temporaryScript);
         }
@@ -119,11 +119,11 @@ namespace RISCVDebugPackage
         public class OpenOCDGDBStub : IGDBStubInstance
         {
             protected readonly OpenOCDCommandLine _CmdLine;
-            protected readonly OpenOCDSettings _Settings;
+            protected readonly RISCVOpenOCDSettings _Settings;
             private readonly int _GDBPort, _TelnetPort;
             private readonly string _TemporaryScript;
 
-            public OpenOCDGDBStub(OpenOCDCommandLine cmdLine, IExternalToolInstance tool, OpenOCDSettings settings, int gdbPort, int telnetPort, string temporaryScript)
+            public OpenOCDGDBStub(OpenOCDCommandLine cmdLine, IExternalToolInstance tool, RISCVOpenOCDSettings settings, int gdbPort, int telnetPort, string temporaryScript)
             {
                 _CmdLine = cmdLine;
                 Tool = tool;
@@ -176,14 +176,25 @@ namespace RISCVDebugPackage
 
                 if (service.Mode != EmbeddedDebugMode.Attach && RISCVOpenOCDSettingsEditor.IsE300CPU(service.MCU))
                 {
-                    //Issuing the reset signal will only trigger the 'software reset' interrupt that causes a halt by default.
-                    //Resetting it and then setting $pc to _start does the trick, but results in strange chip resets later.
-                    //Resetting the target via nSRST and reconnecting afterwards seems to do the trick
-                    session.RunGDBCommand("mon hifive_reset");
+                    bool autoReset = _Settings.ResetMode == RISCVResetMode.nSRST;
+                    if (autoReset)
+                    {
+                        //Issuing the reset signal will only trigger the 'software reset' interrupt that causes a halt by default.
+                        //Resetting it and then setting $pc to _start does the trick, but results in strange chip resets later.
+                        //Resetting the target via nSRST and reconnecting afterwards seems to do the trick
+                        session.RunGDBCommand("mon hifive_reset");
 
-                    //Manually manipulating nSRST with a gdb session active wreaks havoc in the internal gdb/gdbserver state machine,
-                    //so we simply reconnect gdb to OpenOCD.
-                    session.RunGDBCommand("-target-disconnect");
+                        //Manually manipulating nSRST with a gdb session active wreaks havoc in the internal gdb/gdbserver state machine,
+                        //so we simply reconnect gdb to OpenOCD.
+                        session.RunGDBCommand("-target-disconnect");
+                    }
+                    else
+                    {
+                        service.GUIService.Report("Please reset the board by pressing the 'reset' button and wait 1-2 seconds for the reset to complete. Then press 'OK'.", System.Windows.Forms.MessageBoxIcon.Information);
+                        session.RunGDBCommand("mon halt");
+                        session.RunGDBCommand("-target-disconnect");
+                    }
+
                     session.RunGDBCommand("-target-select remote :$$SYS:GDB_PORT$$");
 
                     var expr = session.EvaluateExpression("(void *)$pc == _start");
@@ -202,6 +213,17 @@ namespace RISCVDebugPackage
                     catch
                     {
                         //VisualGDB will throw a 'timed out' exception.
+                    }
+
+                    //If this step is skipped, subsequent break-in requests will fail
+                    using (var r = session.CreateScopedProgressReporter("Waiting for the board to initialize", new[] { "Waiting for board..." }))
+                    {
+                        int delayInTenthsOfSecond = 10;
+                        for (int i = 0; i < delayInTenthsOfSecond; i++)
+                        {
+                            Thread.Sleep(100);
+                            r.ReportTaskProgress(i, delayInTenthsOfSecond);
+                        }
                     }
 
                 }
