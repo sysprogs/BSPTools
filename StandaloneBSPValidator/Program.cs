@@ -499,7 +499,7 @@ namespace StandaloneBSPValidator
                         PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sf), ".o"),
                         AllInputs = new[] { sf },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c $< {flags.GetEffectiveCFLAGS(isCpp)} -o {obj}",
+                        Arguments = $"-c $< {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o {obj}",
                     });
                 }
             }

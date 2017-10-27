@@ -195,7 +195,8 @@ namespace mbed
         static void Main(string[] args)
         {
             var generator = new MbedBSPGenerator("5.6.3");
-            string suffix = "R2";
+
+            string suffix = "";
             generator.UpdateGitAndRescanTargets();
 
             ParsedTargetList parsedTargets = XmlTools.LoadObject<ParsedTargetList>(Path.Combine(generator.outputDir, "mbed", "ParsedTargets.xml"));
@@ -238,6 +239,9 @@ namespace mbed
                     Console.WriteLine($"Skipping {target.ID}: no linker script defined");
                     continue;
                 }
+
+                if (target.ID.StartsWith("ARCH_"))
+                    continue;
 
                 var mcu = new MCU
                 {
@@ -396,34 +400,43 @@ namespace mbed
 
             generator.ProduceBSPArchive(bsp);
 
-            var testfFiles = new TestInfo[] { new TestInfo("test_usbcd.xml", 0, 0), new TestInfo("test_ledblink_rtos.xml", 0, 0), new TestInfo("test_ledblink.xml", 0, 0), };
             bool performTests = true;
             if (performTests)
-            {
-                foreach (var test in testfFiles)
-                {
-                    Console.WriteLine($"Testing {test.Filename}...");
-                    var job = XmlTools.LoadObject<TestJob>(Path.Combine(generator.dataDir, test.Filename));
-                    if (job.ToolchainPath.StartsWith("["))
-                    {
-                        job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
-                        if (job.ToolchainPath == null)
-                            throw new Exception("Cannot locate toolchain path from registry");
-                    }
-                    var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
-                    var lbsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.Combine(generator.outputDir, "mbed"))), toolchain);
-                    var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(generator.outputDir, "TestResults"));
-                    test.Passed = r.Passed;
-                    test.Failed = r.Failed;
-                }
+                RunTests(generator);
+        }
 
-                foreach (var test in testfFiles)
+        private static void RunTests(MbedBSPGenerator generator)
+        {
+            var testFiles = new TestInfo[] {
+                new TestInfo("test_ledblink.xml", 0, 0),
+                new TestInfo("test_usbcd.xml", 0, 0),
+                new TestInfo("test_ledblink_rtos.xml", 0, 0),
+            };
+
+            foreach (var test in testFiles)
+            {
+                Console.WriteLine($"Testing {test.Filename}...");
+                var job = XmlTools.LoadObject<TestJob>(Path.Combine(generator.dataDir, test.Filename));
+                if (job.ToolchainPath.StartsWith("["))
                 {
-                    Console.WriteLine("Results for the test: " + test.Filename);
-                    Console.WriteLine("Passed: " + test.Passed.ToString());
-                    Console.WriteLine("Failed: " + test.Failed.ToString());
-                    Console.WriteLine();
+                    job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
+                    if (job.ToolchainPath == null)
+                        throw new Exception("Cannot locate toolchain path from registry");
                 }
+                var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
+                var lbsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.Combine(generator.outputDir, "mbed"))), toolchain);
+
+                var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(generator.outputDir, "TestResults"));
+                test.Passed = r.Passed;
+                test.Failed = r.Failed;
+            }
+
+            foreach (var test in testFiles)
+            {
+                Console.WriteLine("Results for the test: " + test.Filename);
+                Console.WriteLine("Passed: " + test.Passed.ToString());
+                Console.WriteLine("Failed: " + test.Failed.ToString());
+                Console.WriteLine();
             }
         }
     }

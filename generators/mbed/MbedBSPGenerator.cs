@@ -389,7 +389,7 @@ namespace mbed
                     }
 
                     if (definition == null)
-                        Console.WriteLine("Warning: cannot find device register definition for " + devRegex);
+                        Console.WriteLine("\r\nWarning: cannot find device register definition for " + devRegex);
                     else
                     {
                         mcu.MCUDefinitionFile = "DeviceDefinitions/" + Path.GetFileName(definition);
