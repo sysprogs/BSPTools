@@ -18,7 +18,7 @@ namespace mbed
         public readonly string dataDir = Path.GetFullPath(@"..\..\data");
         string mbedRoot;
         string toolchainDir = "e:\\sysgcc\\arm-eabi";
-        public  List<KeyValuePair<Regex, string>> nameRules;
+        public List<KeyValuePair<Regex, string>> nameRules;
         private Dictionary<string, string> mcuDefs;
 
         public readonly string Version;
@@ -43,10 +43,19 @@ namespace mbed
         {
             mcuDefs = new Dictionary<string, string>();
             var linkedBSPs = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi", "*.bsplink").Select(f => File.ReadAllText(f));
-            foreach (var dir in Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi").Concat(linkedBSPs))
+            foreach (var tmpDir in Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VisualGDB\EmbeddedBSPs\arm-eabi").Concat(linkedBSPs))
             {
+                string dir = tmpDir;
                 if (Path.GetFileName(dir).ToLower() == "mbed")
                     continue;
+
+                if (File.Exists(Path.Combine(dir, "MultipleBSPVersions.txt")))
+                {
+                    var subdirs = Directory.GetDirectories(dir).Select(d => Path.GetFileName(d)).ToList();
+                    subdirs.Sort();
+                    dir = Path.Combine(dir, subdirs.Last());
+                }
+
                 var anotherBSP = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(dir, "bsp.xml"));
                 foreach (var mcu in anotherBSP.SupportedMCUs)
                 {
@@ -64,16 +73,21 @@ namespace mbed
             Process proc;
             if (Directory.Exists(mbedRoot))
             {
-                //Prevent pull fail due to modified files
                 proc = Process.Start(new ProcessStartInfo(gitExe, "reset --hard") { WorkingDirectory = mbedRoot, UseShellExecute = false });
-                proc.WaitForExit();
-                if (proc.ExitCode != 0)
-                    throw new Exception("Git reset command exited with code " + proc.ExitCode);
-                proc = Process.Start(new ProcessStartInfo(gitExe, "pull origin " + Version) { WorkingDirectory = mbedRoot, UseShellExecute = false });
             }
             else
-                proc = Process.Start(new ProcessStartInfo(gitExe, $"clone https://github.com/ARMmbed/mbed-os.git -b {Version} mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
+            {
+                proc = Process.Start(new ProcessStartInfo(gitExe, $"clone https://github.com/ARMmbed/mbed-os.git mbed") { WorkingDirectory = outputDir, UseShellExecute = false });
+                proc.WaitForExit();
+
+                if (proc.ExitCode != 0)
+                    throw new Exception("Git exited with code " + proc.ExitCode);
+
+                proc = Process.Start(new ProcessStartInfo(gitExe, $"checkout mbed-os-{Version}") { WorkingDirectory = outputDir + "\\mbed", UseShellExecute = false });
+
+            }
             proc.WaitForExit();
+
             if (proc.ExitCode != 0)
                 throw new Exception("Git exited with code " + proc.ExitCode);
 
@@ -92,7 +106,7 @@ namespace mbed
                 }
             }
 
-            var patchedFile = Path.Combine(mbedRoot, @"tools\config.py");
+            var patchedFile = Path.Combine(mbedRoot, @"tools\config\__init__.py");
             var lines = File.ReadAllLines(patchedFile).ToList();
             var idx2 = Enumerable.Range(0, lines.Count).First(i => lines[i].Contains("self.value = int(value) if isinstance(value, bool) else value"));
             if (!lines[idx2 + 1].Contains("is_bool"))
@@ -104,7 +118,7 @@ namespace mbed
             //7. Enable exporting LPC targets
             patchedFile = Path.Combine(mbedRoot, @"tools\export\exporters.py");
             lines = File.ReadAllLines(patchedFile).ToList();
-            string str = "obj.post_binary_hook['function'] in whitelist:";
+            string str = "target.post_binary_hook['function'] in whitelist:";
             idx2 = Enumerable.Range(0, lines.Count).FirstOrDefault(i => lines[i].Contains(str));
             if (idx2 > 0)
             {
@@ -176,15 +190,6 @@ namespace mbed
                 }
             }
 
-            //5. em_usb.h - bad char16_t redefinition
-            patchedFile = Path.Combine(mbedRoot, @"features\unsupported\USBDevice\USBDevice\TARGET_Silicon_Labs\inc\em_usb.h");
-            lines = File.ReadAllLines(patchedFile).ToList();
-            idx2 = Enumerable.Range(0, lines.Count).First(i => lines[i].Contains("#if defined( __GNUC__  )"));
-            if (!lines[idx2].Contains("__cplusplus"))
-            {
-                lines[idx2] = "#if defined( __GNUC__  ) && !defined(__cplusplus)";
-                File.WriteAllLines(patchedFile, lines);
-            }
 
             //6. omit stack pointer
             foreach (var fn in Directory.GetFiles(mbedRoot, "rt_CMSIS.c", SearchOption.AllDirectories))
@@ -351,7 +356,7 @@ namespace mbed
 
             if (flash == null)
             {
-                if (mcu.ID != "LPC4330_M4")
+                if (mcu.ID != "LPC4330_M4" && mcu.ID != "LPC4337"&& mcu.ID != "LPC4330_M0")
                     throw new Exception("Could not locate FLASH memory");
             }
             else
@@ -416,7 +421,7 @@ namespace mbed
                 return true;
             }, subdir => !subdir.StartsWith(".git", StringComparison.CurrentCultureIgnoreCase));
 
-            BSPSummary lst = new BSPSummary
+            var lst = new BSPGenerationTools.BSPSummary
             {
                 BSPName = bsp.PackageDescription,
                 BSPID = bsp.PackageID,
@@ -426,7 +431,7 @@ namespace mbed
             };
 
             foreach (var mcu in bsp.SupportedMCUs)
-                lst.MCUs.Add(new BSPSummary.MCU { Name = mcu.ID, FLASHSize = mcu.FLASHSize, RAMSize = mcu.RAMSize });
+                lst.MCUs.Add(new BSPGenerationTools.BSPSummary.MCU { Name = mcu.ID, FLASHSize = mcu.FLASHSize, RAMSize = mcu.RAMSize });
 
             XmlTools.SaveObject(lst, Path.Combine(Path.GetDirectoryName(mbedRoot), Path.ChangeExtension(archiveName, ".xml")));
         }

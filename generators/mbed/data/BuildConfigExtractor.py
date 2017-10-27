@@ -23,6 +23,8 @@ from tools.libraries import LIBRARIES
 from tools.paths import MBED_HEADER
 from tools.settings import ROOT
 import bootloader_scanner
+from tools.targets import TARGET_NAMES, TARGET_MAP
+import re;
 
 
 Exporter = EXPORTERS['gcc_arm']
@@ -94,6 +96,12 @@ class BuildConfiguration:
 
 script_path = join(dirname(__file__))
 
+def copy_regex(regex, memo):
+    try:
+        return regex.__deepcopy__(memo)
+    except TypeError:
+        return regex
+
 def main():
     library_names = {
         'cpputest': "CppUTest",
@@ -111,9 +119,11 @@ def main():
 
     print("Parsing targets...")
 
-    supported_targets = Exporter.TARGETS
-    #supported_targets = [t for t in Exporter.TARGETS if "NRF52_DK" in t or "NRF51_DK" in t]
-    #supported_targets = [t for t in Exporter.TARGETS if "NRF5" in t]
+    supported_targets = TARGET_NAMES
+    copy._deepcopy_dispatch[type(re.compile('x'))] = copy_regex
+
+    #IPV6 is configured, but not listed as supported.Ignore it.
+    supported_targets = [t for t in supported_targets if "Super_Target" not in t]
 
     rootNode = ElementTree.Element('ParsedTargetList')
     targetListNode = append_node(rootNode, 'Targets')
@@ -161,7 +171,7 @@ def main():
             libCfg = BuildConfiguration(libToolchain, libRes)
             libNode.append(libCfg.ToXML('Configuration'))
 
-        for feature in fullRes.features:
+        for feature in copy.copy(fullRes.features):
             featureNode = append_node(derivedCfgListNode, 'DerivedConfiguration')
             featureNode.append(make_node('Feature', feature))
 

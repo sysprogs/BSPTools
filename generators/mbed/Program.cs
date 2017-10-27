@@ -194,7 +194,7 @@ namespace mbed
 
         static void Main(string[] args)
         {
-            var generator = new MbedBSPGenerator("5.4.2");
+            var generator = new MbedBSPGenerator("5.6.3");
             string suffix = "R2";
             generator.UpdateGitAndRescanTargets();
 
@@ -410,8 +410,8 @@ namespace mbed
                         if (job.ToolchainPath == null)
                             throw new Exception("Cannot locate toolchain path from registry");
                     }
-                    var toolchain = LoadedToolchain.Load(Environment.ExpandEnvironmentVariables(job.ToolchainPath), new ToolchainRelocationManager());
-                    var lbsp = LoadedBSP.Load(new BSPManager.BSPSummary(Environment.ExpandEnvironmentVariables(Path.Combine(generator.outputDir, "mbed"))), toolchain);
+                    var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
+                    var lbsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.Combine(generator.outputDir, "mbed"))), toolchain);
                     var r = StandaloneBSPValidator.Program.TestBSP(job, lbsp, Path.Combine(generator.outputDir, "TestResults"));
                     test.Passed = r.Passed;
                     test.Failed = r.Failed;

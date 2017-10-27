@@ -6,6 +6,7 @@
   </ConfigurableProperties>
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
+	<string>com.sysprogs.arm.mbed.drivers</string>
 	<string>com.sysprogs.arm.mbed.feature.BLE</string>
   </RequiredFrameworks>
 </EmbeddedProjectSample>

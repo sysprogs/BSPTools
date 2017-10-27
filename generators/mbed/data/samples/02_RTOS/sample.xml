@@ -54,5 +54,6 @@
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
 	<string>com.sysprogs.arm.mbed.rtos</string>
+	<string>com.sysprogs.arm.mbed.drivers</string>
   </RequiredFrameworks>
 </EmbeddedProjectSample>

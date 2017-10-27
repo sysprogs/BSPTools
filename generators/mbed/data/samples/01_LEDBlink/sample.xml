@@ -33,5 +33,6 @@
   </ConfigurableProperties>
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
+	<string>com.sysprogs.arm.mbed.drivers</string>
   </RequiredFrameworks>
 </EmbeddedProjectSample>
