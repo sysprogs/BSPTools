@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>LEDBlink</Name>
+  <Description>This is a very basic sample project - a classical blinking LED example.</Description>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><UserFriendlyName>Port A</UserFriendlyName><InternalValue>A</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port B</UserFriendlyName><InternalValue>B</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port C</UserFriendlyName><InternalValue>C</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port D</UserFriendlyName><InternalValue>D</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port E</UserFriendlyName><InternalValue>E</InternalValue></Suggestion>
+			<Suggestion><UserFriendlyName>Port F</UserFriendlyName><InternalValue>F</InternalValue></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>0</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>1</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>31</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay cycles</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYCYCLES</UniqueID>
+		  <Description>Specifies the delay (in empty loop cycles) between LED toggling events</Description>
+		  <DefaultValue>100000</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<MCUFilterRegex>SAM[B].*</MCUFilterRegex>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+    <!--string>com.sysprogs.arm.atmel.service.gpio</string-->
+    <string>com.sysprogs.arm.atmel.drivers.sam0</string>
+  </RequiredFrameworks>
+  <DefaultConfiguration>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.arm.atmel.drivers.sam0.gpio</Key>
+        <Value>1</Value>
+      </KeyValue>
+    </Entries>
+  </DefaultConfiguration>
+</EmbeddedProjectSample>

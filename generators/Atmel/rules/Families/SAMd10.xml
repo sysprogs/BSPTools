@@ -55,15 +55,15 @@
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.power</Key>
-          <Value>power_sam_d_r</Value>
+          <Value>power_sam_d_r_h</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.reset</Key>
-          <Value>reset_sam_d_r</Value>
+          <Value>reset_sam_d_r_h</Value>
         </SysVarEntry>
 		<SysVarEntry>
           <Key>com.sysprogs.atmel.sam0.driver.globaldir</Key>
-          <Value>_sam_d_r</Value>
+          <Value>_sam_d_r_h</Value>
         </SysVarEntry>
 		
 		

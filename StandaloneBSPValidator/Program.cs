@@ -102,6 +102,7 @@ namespace StandaloneBSPValidator
         public DeviceParameterSet[] DeviceParameterSets;
         public RegisterRenamingRule[] RegisterRenamingRules;
         public string[] NonValidatedRegisters;
+        public string[] UndefinedMacros;
     }
 
     public class Program
@@ -326,10 +327,10 @@ namespace StandaloneBSPValidator
             sourceExtensions.Add("cpp", true);
             sourceExtensions.Add("s", true);
 
-            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, vs);
+            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null,null, vs);
         }
 
-        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg)
+        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg, string[] pUndefinedMacros)
         {
             const int RepeatCount = 20;
             for (var i = 0; i < RepeatCount; ++i)
@@ -454,10 +455,10 @@ namespace StandaloneBSPValidator
             foreach (var ext in sample.SourceFileExtensions.Split(';'))
                 sourceExtensions[ext] = true;
 
-            return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg);
+            return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
         }
 
-        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, BSPEngine.VendorSample vendorSample = null)
+        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros,BSPEngine.VendorSample vendorSample = null)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
@@ -525,7 +526,7 @@ namespace StandaloneBSPValidator
             if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && validateRegisters)
             {
                 string firstSrcFileInPrjDir = prj.SourceFiles.First(fn => Path.GetDirectoryName(fn) == mcuDir);
-                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules, nonValidateReg);
+                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules, nonValidateReg, UndefinedMacros);
             }
 
             Console.Write("Building {0}...", Path.GetFileName(mcuDir));
@@ -800,7 +801,7 @@ namespace StandaloneBSPValidator
 
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
                         DateTime start = DateTime.Now;
-                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules, noValidateReg);
+                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules, noValidateReg, job.UndefinedMacros);
                         Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
                         if (result == TestResult.Failed)
                             failed++;
@@ -883,7 +884,7 @@ namespace StandaloneBSPValidator
                 }
             return false;
         }
-        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, LoadedRenamingRule[] renameRules, string[] pNonValidatedRegisters)
+        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, LoadedRenamingRule[] renameRules, string[] pNonValidatedRegisters, string[] pUndefinedMacros)
         {
             if (!File.Exists(sourceFile))
                 throw new Exception("File does not exist: " + sourceFile);
@@ -902,7 +903,10 @@ namespace StandaloneBSPValidator
                             string regName = reg.Name;
                             if (IsNoValid(regset.UserFriendlyName, pNonValidatedRegisters))
                                 continue;
-
+                            if (IsNoValid(regName, pNonValidatedRegisters))
+                                continue;
+                            if (IsNoValid(regName, pUndefinedMacros))
+                                 sw.WriteLine($"#undef {regName}");
                             if (renameRules != null)
                                 foreach (var rule in renameRules)
                                 {

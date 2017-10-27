@@ -59,7 +59,7 @@
 			<Suggestion><UserFriendlyName>30</UserFriendlyName><InternalValue>30</InternalValue></Suggestion>
 			<Suggestion><UserFriendlyName>31</UserFriendlyName><InternalValue>31</InternalValue></Suggestion>
 		  </SuggestionList>
-		  <DefaultEntryIndex>7</DefaultEntryIndex>
+		  <DefaultEntryIndex>6</DefaultEntryIndex>
 		  <AllowFreeEntry>false</AllowFreeEntry>
 		</PropertyEntry>
 		<PropertyEntry xsi:type="Integral">
@@ -73,7 +73,7 @@
 	</PropertyGroup>
 	</PropertyGroups>
 	</ConfigurableProperties>
-  <MCUFilterRegex>SAM[^34EGSV].*</MCUFilterRegex>
+  <MCUFilterRegex>SAM[^34EGSVBD].*</MCUFilterRegex>
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
     <string>com.sysprogs.arm.atmel.drivers.sam0</string>

@@ -25,7 +25,7 @@
 		  <Name>LED Port Number</Name>
 		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
 		  <Description>Specifies the port number of the LED port</Description>
-		  <DefaultValue>3</DefaultValue>
+		  <DefaultValue>5</DefaultValue>
 		  <MinValue>0</MinValue>
 		  <MaxValue>31</MaxValue>
 		</PropertyEntry>
