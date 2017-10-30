@@ -23,7 +23,7 @@ namespace Tiva_bsp_generator
             const uint FLASHBase = 0x00000000, SRAMBase = 0x20000000;
 
             public TivaBSPBuilder(BSPDirectories dirs)
-                : base(dirs)
+                : base(dirs, null, 5)
             {
                 ShortName = "Tiva";
             }
@@ -239,7 +239,7 @@ namespace Tiva_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
 
-                PackageVersion = "2.1.3.156r3"
+                PackageVersion = "2.1.4.178"
             };
 
             bspBuilder.Save(bsp, true);

@@ -717,7 +717,7 @@ namespace Atmel_bsp_generator
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
 
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "1.0"
+                PackageVersion = "3.35.1"
             };
 
             bspBuilder.Save(bsp, true);

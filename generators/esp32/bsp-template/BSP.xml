@@ -150,6 +150,7 @@
 			<string>wp2</string>
 			<string>wps</string>
 			<string>stdc++</string>
+			<string>gcc</string>
         </AdditionalLibraries>
 		<AdditionalLibraryDirectories>
 			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/lib</string>
