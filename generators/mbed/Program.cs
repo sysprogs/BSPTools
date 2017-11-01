@@ -196,7 +196,7 @@ namespace mbed
         {
             var generator = new MbedBSPGenerator("5.6.3");
 
-            string suffix = "";
+            string suffix = "r2";
             generator.UpdateGitAndRescanTargets();
 
             ParsedTargetList parsedTargets = XmlTools.LoadObject<ParsedTargetList>(Path.Combine(generator.outputDir, "mbed", "ParsedTargets.xml"));
@@ -239,9 +239,6 @@ namespace mbed
                     Console.WriteLine($"Skipping {target.ID}: no linker script defined");
                     continue;
                 }
-
-                if (target.ID.StartsWith("ARCH_"))
-                    continue;
 
                 var mcu = new MCU
                 {
