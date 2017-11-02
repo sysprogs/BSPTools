@@ -68,6 +68,13 @@ namespace stm32_bsp_generator
 
             }
             const int  NO_DATA = -1;
+
+            public override string GetMCUTypeMacro(MCUBuilder mcu)
+            {
+                var macro = base.GetMCUTypeMacro(mcu);
+                return macro.Replace('-', '_');
+            }
+
             public MemoryLayout GetLayoutFromICF(string pFileNameICF,string pNameDev)
             {
                 MemoryLayout layout = new MemoryLayout { DeviceName = pNameDev, Memories = new List<Memory>() };
@@ -354,7 +361,7 @@ namespace stm32_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "4.4",
+                PackageVersion = "4.5",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",

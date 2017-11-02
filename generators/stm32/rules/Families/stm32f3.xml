@@ -108,7 +108,7 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F3_V1.9.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
+					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm3230????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>
 					<Patches>
@@ -122,6 +122,22 @@
 					</Patches>
 				</CopyJob>
 			</CopyJobs>			
+			<ConfigurableProperties>
+				<PropertyGroups>
+                    <PropertyGroup>
+                        <Properties>
+                            <PropertyEntry xsi:type="Boolean">
+								<Name>Support legacy HAL API</Name>
+                                <UniqueID>com.sysprogs.bspoptions.stm32.hal_legacy</UniqueID>
+                                <ValueForTrue>USE_LEGACY</ValueForTrue>
+                                <ValueForFalse></ValueForFalse>
+                                <DefaultValue>true</DefaultValue>
+                            </PropertyEntry> 
+						</Properties>
+                        <CollapsedByDefault>false</CollapsedByDefault>
+                    </PropertyGroup>
+                </PropertyGroups>
+			</ConfigurableProperties>      
 		</Framework>
 		<Framework>
 			<Name>STM32F3 Default System Init File</Name>

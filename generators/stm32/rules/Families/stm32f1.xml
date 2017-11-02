@@ -159,7 +159,7 @@
                             <PropertyEntry xsi:type="Boolean">
 								<Name>Support legacy HAL API</Name>
                                 <UniqueID>com.sysprogs.bspoptions.stm32.hal_legacy</UniqueID>
-                                <ValueForTrue>USE_HAL_LEGACY </ValueForTrue>
+                                <ValueForTrue>USE_HAL_LEGACY</ValueForTrue>
                                 <ValueForFalse></ValueForFalse>
                                 <DefaultValue>true</DefaultValue>
                             </PropertyEntry> 

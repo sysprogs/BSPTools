@@ -278,7 +278,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.7.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.8.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt;*.bmp;*.jpg</FilesToCopy>
 					<ProjectInclusionMask>-*jpegtran.c;-*jmemmac.c;-*jmemdos.c;-*jmemname.c;-*jmemansi.c;-*jdatasrc_conf_template.c;source\j*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -377,18 +377,12 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.7.0\Middlewares\Third_Party\FatFs</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.8.0\Middlewares\Third_Party\FatFs</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
-					<ProjectInclusionMask>-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
+					<ProjectInclusionMask>-src\drivers\*;-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FatFs/src;$$SYS:BSP_ROOT$$/FatFs/src/drivers</AdditionalIncludeDirs>
 					<PreprocessorMacros></PreprocessorMacros>
-					<SimpleFileConditions>
-						<string>src\\drivers\\sd_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.sd_d$$ == 1</string>
-						<string>src\\drivers\\sdram_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.sdram_d$$ == 1</string>
-						<string>src\\drivers\\sram_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.sram_d$$ == 1</string>
-						<string>src\\drivers\\usbh_diskio.c: $$com.sysprogs.bspoptions.stm32.fatfs.usbh_d$$ == 1</string>
-					</SimpleFileConditions>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:RULES_DIR$$\\config</SourceFolder>
@@ -446,7 +440,7 @@
 			
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.7.0\Middlewares\Third_Party\LwIP</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.8.0\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-doc\*;system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
