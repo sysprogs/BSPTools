@@ -123,8 +123,11 @@ namespace stm32_bsp_generator
                 public string Name;
                 public uint Start, Size;
 
+                public int SortWeight;
+
                 public RawMemory(XmlElement n)
                 {
+                    SortWeight = 0;
                     Name = n.GetAttribute("name");
                     Start = Program.ParseHex(n.GetAttribute("start"));
                     Size = Program.ParseHex(n.GetAttribute("size"));
@@ -184,14 +187,17 @@ namespace stm32_bsp_generator
                     Memories = db.LookupMemories(specializedName ?? parsedMCU.RPN);
                     if (Memories.Length < 1)
                         throw new Exception("Could not locate memories for " + parsedMCU.Name);
-                }
 
-                public void OnMemoryLayoutGuessed()
-                {
-                }
+                    for (int i = 0; i < Memories.Length; i++)
+                    {
+                        Memories[i].SortWeight = 100 + i;
+                        if (Memories[i].Name == "FLASH")
+                            Memories[i].SortWeight = 0;
+                        else if (Memories[i].Name == "RAM")
+                            Memories[i].SortWeight = 1;
+                    }
 
-                public void OnMemoryLayoutFound(MemoryLayout value)
-                {
+                    Memories = Memories.OrderBy(m => m.SortWeight).ToArray();
                 }
 
                 public MemoryLayout ToMemoryLayout()
