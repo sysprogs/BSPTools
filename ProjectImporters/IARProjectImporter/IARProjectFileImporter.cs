@@ -7,9 +7,9 @@ using System.Xml;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace GeneratorFromIAR
+namespace IARProjectFileImporter
 {
-    public class STM32CubeMXProjectImporter : IExternalProjectImporter
+    public class IARProjectImporter : IExternalProjectImporter
     {
         public List<ImportedExternalProject.ImportedFile> GetFilesInGroup(XmlNode pGroup)
         {
@@ -111,9 +111,12 @@ namespace GeneratorFromIAR
         {
             var st = new ImportedExternalProject.InvariantProjectBuildSettings();
             pNode = pNode.SelectSingleNode("settings[name=\"ICCARM\"]/data");
-            st.PreprocessorMacros = pNode.SelectNodes("option[name=\"CCDefines\"]/state").OfType<XmlElement>().Select(el => el.InnerText).ToArray();
-            st.IncludeDirectories = pNode.SelectNodes("option[name=\"CCIncludePath2\"]/state").OfType<XmlElement>().Select(el => ExpandPath(el.InnerText)).ToArray();
-            st.GeneratePreprocessorOutput = pNode.SelectSingleNode("option[name=\"CCPreprocFile\"]/state").InnerText == "1" ? true : false;
+            if (pNode != null)
+            {
+                st.PreprocessorMacros = pNode.SelectNodes("option[name=\"CCDefines\"]/state").OfType<XmlElement>().Select(el => el.InnerText).ToArray();
+                st.IncludeDirectories = pNode.SelectNodes("option[name=\"CCIncludePath2\"]/state").OfType<XmlElement>().Select(el => ExpandPath(el.InnerText)).ToArray();
+                st.GeneratePreprocessorOutput = pNode.SelectSingleNode("option[name=\"CCPreprocFile\"]/state")?.InnerText == "1" ? true : false;
+            }
             return st;
         }
 

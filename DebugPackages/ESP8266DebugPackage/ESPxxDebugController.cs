@@ -97,7 +97,7 @@ namespace ESP8266DebugPackage
                 return base.SkipCommandOnAttach(cmd);
             }
 
-            protected override bool RunLoadCommand(IDebugStartService service, ISimpleGDBSession session, string cmd) => _Controller.LoadFLASH(_Context, service, session, (ESP32OpenOCDSettings)_Settings);
+            protected override bool RunLoadCommand(IDebugStartService service, ISimpleGDBSession session, string cmd) => _Controller.LoadFLASH(_Context, service, session, (ESP32OpenOCDSettings)_Settings, this);
         }
 
 
@@ -106,7 +106,7 @@ namespace ESP8266DebugPackage
             return new ESP32GDBStub(this, context, cmdLine, tool, (ESP32OpenOCDSettings)settings, gdbPort, telnetPort, temporaryScript);
         }
 
-        bool LoadFLASH(DebugStartContext context, IDebugStartService service, ISimpleGDBSession session, ESP32OpenOCDSettings settings)
+        bool LoadFLASH(DebugStartContext context, IDebugStartService service, ISimpleGDBSession session, ESP32OpenOCDSettings settings, ESP32GDBStub stub)
         {
             string val;
             if (!service.SystemDictionary.TryGetValue("com.sysprogs.esp32.load_flash", out val) || val != "1")
@@ -122,6 +122,41 @@ namespace ESP8266DebugPackage
                     foreach (var r in settings.FLASHResources)
                         if (r.Valid)
                             blocks.Add(r.ToProgrammableRegion(service));
+
+                Regex rgFLASHSize = new Regex("Auto-detected flash size ([0-9]+) KB");
+                if (settings.CheckFLASHSize)
+                {
+                    var match = stub.Tool.AllText.Split('\n').Select(s => rgFLASHSize.Match(s)).FirstOrDefault(m => m.Success);
+                    if (match != null)
+                    {
+                        int detectedSizeKB = int.Parse(match.Groups[1].Value);
+                        int specifiedSizeMB = 0;
+                        switch (settings.FLASHSettings.Size)
+                        {
+                            case ESP8266BinaryImage.ESP32FLASHSize.size1MB:
+                                specifiedSizeMB = 1;
+                                break;
+                            case ESP8266BinaryImage.ESP32FLASHSize.size2MB:
+                                specifiedSizeMB = 2;
+                                break;
+                            case ESP8266BinaryImage.ESP32FLASHSize.size4MB:
+                                specifiedSizeMB = 4;
+                                break;
+                            case ESP8266BinaryImage.ESP32FLASHSize.size8MB:
+                                specifiedSizeMB = 8;
+                                break;
+                            case ESP8266BinaryImage.ESP32FLASHSize.size16MB:
+                                specifiedSizeMB = 16;
+                                break;
+                        }
+
+                        if (detectedSizeKB < (specifiedSizeMB * 1024) && detectedSizeKB >= 1024)
+                        {
+                            if (service.GUIService.Prompt($"The FLASH size specified via Project Properties is greater than the actual SPI FLASH size on your device. Please switch FLASH size to {detectedSizeKB / 1024}MB or less.\nDo you want to cancel FLASH programming?", System.Windows.Forms.MessageBoxIcon.Warning))
+                                throw new OperationCanceledException();
+                        }
+                    }
+                }
 
                 using (var ctx = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Programming FLASH memory" }))
                 {

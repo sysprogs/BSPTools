@@ -116,8 +116,13 @@ namespace ESP8266DebugPackage.GUI
             if (rsrc != null)
                 _Editor.FLASHResources.Remove(rsrc);
         }
-    }
 
+        private void ESP32Diag_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://visualgdb.com/tutorials/esp32/flashdiag");
+        }
+    }
+    
     public class AnnotatedValueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

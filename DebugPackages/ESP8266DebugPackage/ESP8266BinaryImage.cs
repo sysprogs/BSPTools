@@ -156,7 +156,7 @@ namespace ESP8266DebugPackage
         {
             public ESP32FLASHSize Size { get; set; } = ESP32FLASHSize.size2MB;
             public FLASHFrequency Frequency { get; set; }
-            public FLASHMode Mode { get; set; }
+            public FLASHMode Mode { get; set; } = FLASHMode.DIO;    //Backward-compatible with QIO
 
             public ESP32ImageHeader()
             {

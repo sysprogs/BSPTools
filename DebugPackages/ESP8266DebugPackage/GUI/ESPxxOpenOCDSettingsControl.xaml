@@ -52,6 +52,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.Resources>
             <Style TargetType="TextBlock" BasedOn="{StaticResource ResourceKey={x:Type TextBlock}}">
@@ -225,23 +226,30 @@
             <TextBlock Text="Erase:" Grid.Column="2"/>
             <TextBox Text="{Binding EraseSectorSize}" Grid.Column="3" VerticalContentAlignment="Center"/>
         </Grid>
-        
-        <CheckBox Grid.Row="9" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center" 
+
+        <Button Grid.Row="9" Grid.ColumnSpan="2" Visibility="{Binding ESP32Visibility}" HorizontalAlignment="Left" Style="{DynamicResource HyperlinkButton}" Click="ESP32Diag_Click" Margin="5">
+            <StackPanel Orientation="Horizontal">
+                <Image Width="16" Height="16" Source="icons\bulb16.png" VerticalAlignment="Center" Margin="0 2 0 0"/>
+                <TextBlock Text="Show a tutorial on troubleshooting ESP32 FLASH programming" VerticalAlignment="Center" Margin="0"/>
+            </StackPanel>
+        </Button>
+
+        <CheckBox Grid.Row="10" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center" 
                   IsChecked="{Binding NoInterruptsDuringSteps}" Margin="{StaticResource TableCheckboxMargin}">
             <TextBlock Text="Suppress interrupts during single-stepping"/>
         </CheckBox>
 
-        <CheckBox Grid.Row="10" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center"
+        <CheckBox Grid.Row="11" Grid.ColumnSpan="2" Visibility="{Binding ESP8266Visibility}" VerticalContentAlignment="Center"
                   IsChecked="{Binding AutofeedWatchdog}" Margin="{StaticResource TableCheckboxMargin}">
             <TextBlock Text="Feed ESP8266 watchdog timer while stopped"/>
         </CheckBox>
 
-        <CheckBox Grid.Row="11" Grid.ColumnSpan="2" Visibility="{Binding ESP32Visibility}" VerticalContentAlignment="Center"
+        <CheckBox Grid.Row="12" Grid.ColumnSpan="2" Visibility="{Binding ESP32Visibility}" VerticalContentAlignment="Center"
                   IsChecked="{Binding ShowRTOSThreads}" Margin="{StaticResource TableCheckboxMargin}">
             <TextBlock Text="Show FreeRTOS threads in the 'threads' window"/>
         </CheckBox>
-        
-        <Expander Grid.ColumnSpan="2" Grid.Row="12" Header="Additional FLASH resources to program" IsExpanded="False">
+
+        <Expander Grid.ColumnSpan="2" Grid.Row="13" Header="Additional FLASH resources to program" IsExpanded="False">
             <StackPanel Orientation="Vertical">
                 <Border BorderThickness="1" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ESPxxOpenOCDSettingsControl}}" Margin="10">
                     <StackPanel Orientation="Vertical">
@@ -296,7 +304,7 @@
                 </Grid>
             </StackPanel>
         </Expander>
-        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="13" Header="Advanced settings" IsExpanded="False">
+        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="14" Header="Advanced settings" IsExpanded="False">
             <Grid MinHeight="80" Margin="20 0 5 5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

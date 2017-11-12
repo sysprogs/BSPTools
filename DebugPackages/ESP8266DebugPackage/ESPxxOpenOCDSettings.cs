@@ -35,6 +35,8 @@ namespace ESP8266DebugPackage
     [XmlType("com.visualgdb.edp.openocd.settings.esp32")]
     public class ESP32OpenOCDSettings : ESPxxOpenOCDSettings, IESP32Settings
     {
+        public bool CheckFLASHSize { get; set; } = true;
+
         public ESP8266BinaryImage.ESP32ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP32ImageHeader();
         public bool PatchBootloader { get; set; } = true;
         public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
