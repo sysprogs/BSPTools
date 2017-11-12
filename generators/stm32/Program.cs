@@ -20,11 +20,11 @@ namespace stm32_bsp_generator
 {
     class Program
     {
-        class STM32BSPBuilder : BSPBuilder
+        public class STM32BSPBuilder : BSPBuilder
         {
             List<KeyValuePair<Regex, MemoryLayout>> _SpecialMemoryLayouts = new List<KeyValuePair<Regex, MemoryLayout>>();
 
-           public void GetMemoryMcu(MCUFamilyBuilder pfam)
+            public void GetMemoryMcu(MCUFamilyBuilder pfam)
             {
                 if (pfam.FamilyFilePrefix.StartsWith("STM32W1"))
                 {
@@ -51,7 +51,8 @@ namespace stm32_bsp_generator
                     _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(kvStr.Replace('x', '.') + ".*"), layoutW1));
 
                 }
-                else {
+                else
+                {
                     string aDirIcf = pfam.Definition.StartupFileDir;
                     if (!aDirIcf.EndsWith("gcc"))
                         throw new Exception("No Gcc sturtup Tamplate");
@@ -65,9 +66,8 @@ namespace stm32_bsp_generator
                         _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(kvStr.Replace('x', '.') + ".*", RegexOptions.IgnoreCase), GetLayoutFromICF(fnIcf, kvStr)));
                     }
                 }
-
             }
-            const int  NO_DATA = -1;
+            const int NO_DATA = -1;
 
             public override string GetMCUTypeMacro(MCUBuilder mcu)
             {
@@ -75,7 +75,7 @@ namespace stm32_bsp_generator
                 return macro.Replace('-', '_');
             }
 
-            public MemoryLayout GetLayoutFromICF(string pFileNameICF,string pNameDev)
+            public MemoryLayout GetLayoutFromICF(string pFileNameICF, string pNameDev)
             {
                 MemoryLayout layout = new MemoryLayout { DeviceName = pNameDev, Memories = new List<Memory>() };
                 int StartFlash = NO_DATA;
@@ -93,7 +93,7 @@ namespace stm32_bsp_generator
                         StartFlash = (int)ParseHex(m.Groups[2].Value);
                         continue;
                     }
-                     m = Regex.Match(ln, @"define symbol __ICFEDIT_region_([\w\d]+)_end__[ ]*=[ ]*([x0-9A-Faf]+)[ ]*;");
+                    m = Regex.Match(ln, @"define symbol __ICFEDIT_region_([\w\d]+)_end__[ ]*=[ ]*([x0-9A-Faf]+)[ ]*;");
                     if (m.Success)
                     {
                         SizeFlash = (int)ParseHex(m.Groups[2].Value);
@@ -104,12 +104,12 @@ namespace stm32_bsp_generator
 
                         if (m.Groups[1].Value == "ROM")
                             aNameData = "FLASH";
-                        else  if (m.Groups[1].Value == "RAM")
-                                aNameData = "SRAM";
+                        else if (m.Groups[1].Value == "RAM")
+                            aNameData = "SRAM";
 
                         if (StartFlash != NO_DATA && SizeFlash != NO_DATA)
                         {
-                            SizeFlash  -= StartFlash;
+                            SizeFlash -= StartFlash;
                             if ((SizeFlash % 1024) != 0) SizeFlash += 1;
                             layout.Memories.Add(new Memory
                             {
@@ -129,9 +129,11 @@ namespace stm32_bsp_generator
 
                 return layout;
             }
+
             public STM32BSPBuilder(BSPDirectories dirs, string cubeDir)
                 : base(dirs)
             {
+                STM32CubeDir = cubeDir;
                 ShortName = "STM32";
             }
 
@@ -140,36 +142,63 @@ namespace stm32_bsp_generator
                 base.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout, generalizedName);
             }
 
+            public readonly string STM32CubeDir;
+
+            static void VerifyMemories(string mcu, MemoryLayout newLayout, MemoryLayout compatLayout, string name)
+            {
+                return; //The sizes parsed from the ICF files don't match the ST datasheets and the XML definitions
+
+                var mem1 = compatLayout.Memories.First(m => m.Name == name);
+                var mem2 = newLayout.Memories.First(m => m.Name == name);
+
+                if (mem1.Size != mem2.Size)
+                    Console.WriteLine($"Mismatching {name} size for {mcu}: was {mem1.Size}, now {mem2.Size}");
+                if (mem1.Start != mem2.Start)
+                    throw new Exception($"Mismatching {name} offset for {mcu}");
+            }
+
             public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
+                MemoryLayout compatLayout = _SpecialMemoryLayouts.FirstOrDefault(m => m.Key.IsMatch(mcu.Name)).Value;
 
-                foreach (var kv in _SpecialMemoryLayouts)
-                    if (kv.Key.IsMatch(mcu.Name))
-                        return kv.Value;
+                if (mcu is DeviceListProviders.CubeProvider.STM32MCUBuilder stMCU)
+                {
+                    var newLayout = stMCU.ToMemoryLayout();
+                    if (compatLayout != null)
+                    {
+                        VerifyMemories(mcu.Name, newLayout, compatLayout, "FLASH");
+                        VerifyMemories(mcu.Name, newLayout, compatLayout, "SRAM");
+                    }
+                    return newLayout;
+                }
+
+                throw new Exception($"{mcu.Name} is not provided by the STM32CubeMX-based MCU locator. Please ensure we get the actual memory map for this device, as guessing it from totals often yields wrong results.");
+
 
                 MemoryLayout layout = new MemoryLayout { DeviceName = mcu.Name, Memories = new List<Memory>() };
 
-                    layout.Memories.Add(new Memory
-                    {
-                        Name = "FLASH",
-                        Access = MemoryAccess.Undefined,
-                        Type = MemoryType.FLASH,
-                        Start = FLASHBase,
-                        Size = (uint)mcu.FlashSize,
-                    });
+                layout.Memories.Add(new Memory
+                {
+                    Name = "FLASH",
+                    Access = MemoryAccess.Undefined,
+                    Type = MemoryType.FLASH,
+                    Start = FLASHBase,
+                    Size = (uint)mcu.FlashSize,
+                });
 
-                    layout.Memories.Add(new Memory
-                    {
-                        Name = "SRAM",
-                        Access = MemoryAccess.Undefined,
-                        Type = MemoryType.RAM,
-                        Start = SRAMBase,
-                        Size = (uint)mcu.RAMSize,
-                    });
+                layout.Memories.Add(new Memory
+                {
+                    Name = "SRAM",
+                    Access = MemoryAccess.Undefined,
+                    Type = MemoryType.RAM,
+                    Start = SRAMBase,
+                    Size = (uint)mcu.RAMSize,
+                });
 
 
                 return layout;
             }
+
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
             {
@@ -184,13 +213,14 @@ namespace stm32_bsp_generator
 
             var allFiles = Directory.GetFiles(dir);
 
-            foreach(var fn in allFiles)
+            foreach (var fn in allFiles)
             {
                 string subfamily = Path.GetFileNameWithoutExtension(fn);
                 if (!subfamily.StartsWith("startup_"))
                     continue;
                 subfamily = subfamily.Substring(8);
-                 yield return new  StartupFileGenerator.InterruptVectorTable{
+                yield return new StartupFileGenerator.InterruptVectorTable
+                {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
                     MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
                     Vectors = StartupFileGenerator.ParseInterruptVectors(fn, "g_pfnVectors:", @"/\*{10,999}|^[^/\*]+\*/
@@ -214,32 +244,32 @@ namespace stm32_bsp_generator
 
                 /*if (subfamily != "stm32f301x8")
                  continue;*/
-                 
+
                 Func<MCUDefinitionWithPredicate> func = () =>
                     {
                         RegisterParserConfiguration cfg = XmlTools.LoadObject<RegisterParserConfiguration>(fam.BSP.Directories.RulesDir + @"\PeripheralRegisters.xml");
                         var r = new MCUDefinitionWithPredicate
-                            {
-                                MCUName = subfamily,
-                                RegisterSets = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegisters(fn, cfg, errors,fam.MCUs[0].Core),
-                                MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
-                            };
+                        {
+                            MCUName = subfamily,
+                            RegisterSets = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegisters(fn, cfg, errors, fam.MCUs[0].Core),
+                            MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
+                        };
                         Console.Write(".");
                         return r;
                     };
 
-            //  func();
-              tasks.Add(Task.Run(func));
+                //  func();
+                tasks.Add(Task.Run(func));
             }
 
-           Task.WaitAll(tasks.ToArray());
+            Task.WaitAll(tasks.ToArray());
             var errorCnt = errors.ErrorCount;
             if (errorCnt != 0)
             {
-               // throw new Exception("Found " + errorCnt + " errors while parsing headers");
+                // throw new Exception("Found " + errorCnt + " errors while parsing headers");
 
-                   for (int i = 0; i < errors.ErrorCount;i++)
-                     Console.WriteLine("\n er  " + i + "  -  " + errors.DetalErrors(i));
+                for (int i = 0; i < errors.ErrorCount; i++)
+                    Console.WriteLine("\n er  " + i + "  -  " + errors.DetalErrors(i));
 
             }
 
@@ -284,17 +314,18 @@ namespace stm32_bsp_generator
             if (args.Length < 2)
                 throw new Exception("Usage: stm32.exe <SW package directory> <STM32Cube directory>");
 
+            ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
+            IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
+
             var bspBuilder = new STM32BSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"), args[1]);
-            var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\stm32devices.csv", "Part Number", "FLASH Size (Prog)", "Internal RAM Size", "Core", true);
-            var devicesOld = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\stm32devicesOld.csv", "Part Number", "FLASH Size (Prog)", "Internal RAM Size", "Core", true);
-            foreach(var d in  devicesOld)
-                if (!devices.Contains(d))
-                    devices.Add(d);
+
+            var devices = provider.LoadDeviceList(bspBuilder);
             if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
                 throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
+
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
-            foreach(var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
+            foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
             var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
@@ -312,6 +343,8 @@ namespace stm32_bsp_generator
             List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
             bool noPeripheralRegisters = args.Contains("/noperiph");
+
+            var files = string.Join("\r\n", File.ReadAllLines(@"E:\ware\Logfile.CSV").Select(l => l.Split(',')[4].Trim('\"')).Distinct().OrderBy(x => x).ToArray());
 
             var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
             foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
@@ -339,7 +372,7 @@ namespace stm32_bsp_generator
 
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
-             
+
                 foreach (var sample in fam.CopySamples())
                     exampleDirs.Add(sample);
             }
@@ -348,7 +381,7 @@ namespace stm32_bsp_generator
                 exampleDirs.Add(sample);
 
             var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
-            exampleDirs.Sort((a,b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
+            exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
 
             BoardSupportPackage bsp = new BoardSupportPackage
             {
@@ -361,7 +394,7 @@ namespace stm32_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "4.5",
+                PackageVersion = "4.5R2",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",
@@ -405,8 +438,8 @@ namespace stm32_bsp_generator
 
             Console.WriteLine("Items missing from second list:");
             foreach (var line in list1)
-            { 
-                if(!list2.Contains(line))
+            {
+                if (!list2.Contains(line))
                     Console.WriteLine(line);
 
             }
@@ -470,7 +503,7 @@ namespace stm32_bsp_generator
         static string FitOldLineToNewHeaderOrder(string line, string[] oldHeaders, string[] newHeaders)
         {
             List<string> built_line = new List<string>();
-            string[] split_line = line.Split(new char[]{','});
+            string[] split_line = line.Split(new char[] { ',' });
 
             foreach (var col in newHeaders)
             {
@@ -514,7 +547,7 @@ namespace stm32_bsp_generator
             return layout.Memories[layout.Memories.Count - 1];
         }
 
-        static uint ParseHex(string text)
+        public static uint ParseHex(string text)
         {
             text = text.Replace(" ", "");
             if (text.StartsWith("0x"))
@@ -571,7 +604,6 @@ namespace stm32_bsp_generator
         }
 
         const uint FLASHBase = 0x08000000, SRAMBase = 0x20000000;
-
 
         static void CopyDirectoryRecursive(string sourceDirectory, string destinationDirectory)
         {
