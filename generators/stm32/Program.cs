@@ -164,6 +164,13 @@ namespace stm32_bsp_generator
                 if (mcu is DeviceListProviders.CubeProvider.STM32MCUBuilder stMCU)
                 {
                     var newLayout = stMCU.ToMemoryLayout();
+
+                    if (newLayout.Memories.FirstOrDefault(m=>m.Name == "SRAM") == null)
+                    {
+                        var ram1 = newLayout.Memories.First(m => m.Name == "RAM_D1");
+                        ram1.Name = "SRAM";
+                    }
+
                     if (compatLayout != null)
                     {
                         VerifyMemories(mcu.Name, newLayout, compatLayout, "FLASH");

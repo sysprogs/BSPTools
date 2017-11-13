@@ -162,6 +162,7 @@ namespace stm32_bsp_generator
                                 throw new Exception("Unknown memory type " + Name);
                         }
                     }
+
                     return new Memory { Name = (Name == "RAM") ? "SRAM" : Name, Start = Start, Size = Size * 1024, Type = type };
                 }
             }
@@ -211,6 +212,7 @@ namespace stm32_bsp_generator
                 public string Name, RefName, RPN;
 
                 public CortexCore Core;
+                public readonly DeviceMemoryDatabase.RawMemory[] Memories;
                 public int[] RAMs;
                 public int FLASH;
 
@@ -221,15 +223,15 @@ namespace stm32_bsp_generator
                     return doc.DocumentElement;
                 }
 
-                public ParsedMCU(XmlElement n, string familyDir)
+                public ParsedMCU(XmlElement n, string familyDir, DeviceMemoryDatabase db)
                 {
                     Name = n.GetAttribute("Name");
                     RefName = n.GetAttribute("RefName");
                     RPN = n.GetAttribute("RPN");
 
-                    var mcuDef = LoadMCUDefinition(familyDir, Name);
-                    var nsmgr2 = new XmlNamespaceManager(mcuDef.OwnerDocument.NameTable);
-                    nsmgr2.AddNamespace("mcu", "http://mcd.rou.st.com/modules.php?name=mcu");
+                    //var mcuDef = LoadMCUDefinition(familyDir, Name);
+                    //var nsmgr2 = new XmlNamespaceManager(mcuDef.OwnerDocument.NameTable);
+                    //nsmgr2.AddNamespace("mcu", "http://mcd.rou.st.com/modules.php?name=mcu");
 
                     var core = n.SelectSingleNode("Core").InnerText;
                     switch (core)
@@ -253,7 +255,10 @@ namespace stm32_bsp_generator
                             throw new Exception("Don't know how to map core: " + core);
                     }
 
-                    RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
+                    Memories = db.LookupMemories(RefName);
+
+                    //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
+                    RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     if (RAMs.Length < 1)
                         throw new Exception("No RAMs defined for " + Name);
 
@@ -274,12 +279,12 @@ namespace stm32_bsp_generator
                     {
                         Name = nameOverride ?? RPN,
                         FlashSize = FLASH * 1024,
-                        RAMSize = RAMs.Sum() * 1024,
+                        RAMSize = RAMs.First() * 1024,
                         Core = Core
                     };
                 }
 
-                public ConfigSnapshot Config => new ConfigSnapshot { FLASH = FLASH, RAMs = string.Join("|", RAMs.Select(r => r.ToString()).ToArray()) };
+                public ConfigSnapshot Config => new ConfigSnapshot { FLASH = FLASH, RAMs = string.Join("|", Memories.Select(r => $"{r.Name}={r.Size}").ToArray()) };
             }
 
             //MCUs with the same value of ConfigSnapshot can use the same linker script, MCU definition, etc
@@ -297,7 +302,7 @@ namespace stm32_bsp_generator
                 var db = new DeviceMemoryDatabase(bspBuilder.STM32CubeDir);
 
                 doc.Load(Path.Combine(familyDir, @"families.xml"));
-                var rawMCUs = doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>().Select(n => new ParsedMCU(n, familyDir)).ToArray();
+                var rawMCUs = doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>().Select(n => new ParsedMCU(n, familyDir, db)).ToArray();
 
                 foreach (var grp in rawMCUs.GroupBy(m => m.RPN))
                 {

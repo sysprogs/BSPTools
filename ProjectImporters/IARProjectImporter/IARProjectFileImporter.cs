@@ -95,14 +95,14 @@ namespace IARProjectFileImporter
 
         public string ExpandPath(string pPath)
         {
-            string aDirFile = PRJ_DIR;
+            string projectDir = PRJ_DIR;
             while (pPath.IndexOf(@"\..") > 0)
             {
                 pPath = pPath.Remove(pPath.IndexOf(@"\.."), 3);
-                aDirFile = aDirFile.Remove(aDirFile.LastIndexOf(@"\"));
+                projectDir = projectDir.Remove(projectDir.LastIndexOf(@"\"));
             }
 
-            pPath = pPath.Replace("$PROJ_DIR$", aDirFile);
+            pPath = pPath.Replace("$PROJ_DIR$", projectDir);
 
             return pPath;
         }
@@ -110,11 +110,11 @@ namespace IARProjectFileImporter
         public ImportedExternalProject.InvariantProjectBuildSettings ExtractInvariantBuildSettings(XmlNode pNode)
         {
             var st = new ImportedExternalProject.InvariantProjectBuildSettings();
-            pNode = pNode.SelectSingleNode("settings[name=\"ICCARM\"]/data");
+            pNode = pNode.SelectSingleNode("settings[starts-with(name, 'ICC')]/data");
             if (pNode != null)
             {
                 st.PreprocessorMacros = pNode.SelectNodes("option[name=\"CCDefines\"]/state").OfType<XmlElement>().Select(el => el.InnerText).ToArray();
-                st.IncludeDirectories = pNode.SelectNodes("option[name=\"CCIncludePath2\"]/state").OfType<XmlElement>().Select(el => ExpandPath(el.InnerText)).ToArray();
+                st.IncludeDirectories = pNode.SelectNodes("(option[name=\"CCIncludePath2\"]|option[name=\"newCCIncludePaths\"])/state").OfType<XmlElement>().Select(el => ExpandPath(el.InnerText)).ToArray();
                 st.GeneratePreprocessorOutput = pNode.SelectSingleNode("option[name=\"CCPreprocFile\"]/state")?.InnerText == "1" ? true : false;
             }
             return st;
@@ -149,7 +149,7 @@ namespace IARProjectFileImporter
                 var tPrjSetting = ExtractInvariantBuildSettings(prjNode);
 
                 //string aIcfFile = ExpandPath(prjNode.SelectSingleNode("settings/data/option[name=\"IlinkIcfFile\"]/state").InnerText);
-                deviceName = prjNode.SelectSingleNode("settings/data/option[name=\"OGChipSelectEditMenu\"]/state")?.InnerText?.Split(' ', '\t')[0] ?? "";
+                deviceName = prjNode.SelectSingleNode("(settings/data/option[name=\"OGChipSelectEditMenu\"]|settings/data/option[name=\"OGChipSelectMenu\"])/state")?.InnerText?.Split(' ', '\t')[0] ?? "";
                 //tPrjSetting.LinkerScript = aIcfFile;
 
                 configuration.Settings = tPrjSetting;
@@ -165,13 +165,13 @@ namespace IARProjectFileImporter
                 Subdirectories = ConvertGroupToVirtualDirectoryRecursively(doc.SelectSingleNode("//project"))
             };
             result.RootDirectory = RootDirectory;
-
+            
             if (deviceName == "")
                 service.Logger.LogLine($"Warning: {pFileEwp} does not specify the device name");
 
             result.Configurations = allConfigurations.ToArray();
             result.OriginalProjectFile = pFileEwp;
-            result.DeviceNameMask = new Regex(".*" + deviceName + ".*");
+            result.DeviceNameMask = new Regex(".*" + deviceName + ".*", RegexOptions.IgnoreCase);
             if (result.Configurations.Length == 1)
                 result.Configurations[0].Name = null;
 
@@ -179,7 +179,7 @@ namespace IARProjectFileImporter
 
             return result;
         }
-
+        
         public ImportedExternalProject ImportProject(ProjectImportParameters parameters, IProjectImportService service)
         {
             return ParseEIPFile(parameters.ProjectFile, service);
