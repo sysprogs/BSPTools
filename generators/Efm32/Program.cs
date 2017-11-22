@@ -47,12 +47,6 @@ namespace SLab_bsp_generator
                 string aFileName = family.BSP.Directories.InputDir + "\\platform\\Device\\SiliconLabs\\" + family.FamilyFilePrefix.Substring(0, family.FamilyFilePrefix.Length - 1) + "\\Include\\" + mcu + ".h";
                 Match m;
                 Regex rg = new Regex(@"(#define RAM_MEM_BASE[ \t]*.*0x)([0-9][U][L])+.*");
-            /*    while(!File.Exists(aFileName))
-                {
-                    aFileName = aFileName.Remove(aFileName.Length - 3, 1);
-                    if (aFileName.Length < 3)
-                        throw new Exception("No file include");
-                }*/
                 var RAMStart = 0;
                 foreach (var ln in File.ReadAllLines(aFileName))
                 {
@@ -161,6 +155,8 @@ namespace SLab_bsp_generator
                 var idx = amcu.Name.IndexOf("-");
                 if (idx > 0)
                     amcu.Name = amcu.Name.Remove(idx);
+                amcu.Name = amcu.Name.Replace(" ","");
+                if(amcu.Name.EndsWith("G")) amcu.Name = amcu.Name.Remove(amcu.Name.Length - 1, 1);
 
             }
             return rawmcu_list;
