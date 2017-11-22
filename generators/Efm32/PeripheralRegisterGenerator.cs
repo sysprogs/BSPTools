@@ -143,11 +143,17 @@ namespace SLab_bsp_generator
             List<HardwareRegisterSet> oPerReg = new List<HardwareRegisterSet>();
             foreach (var ln in File.ReadAllLines(pFileName))
             {
-                Match m = Regex.Match(ln, @"#define[ \t]+([\w]+)_BASE[ \t]+[\(]?([\w]+)[\)]?.*");
+                
+                Match m = Regex.Match(ln.Replace("(uint32_t)", ""), @"#define[ \t]+([\w]+)_BASE[ \t]+[\(]?([\w ]+)[\)]?.*");
                 if (m.Success)
                 {
-                    var str = m.Groups[2].Value.Replace("UL", "");
-                    var aAdrBase = Convert.ToInt32(str, 16);
+                    int aAdrBase;
+                    var str = m.Groups[2].Value.Replace("UL", "").Replace(" ","");
+                    if (aDicBaseAdr.ContainsKey(str))
+                        //aAdrBase = aDicBaseAdr[str];
+                        continue;
+                    else
+                        aAdrBase = Convert.ToInt32(str, 16);
                     aDicBaseAdr.Add(m.Groups[1].Value + "_BASE", aAdrBase);
                 }
                 m = Regex.Match(ln, @"#define[ \t]+([\w]+)[ \t]+[\(]*([\w]+)_TypeDef[ \t\*\)]+([\w]+).*");

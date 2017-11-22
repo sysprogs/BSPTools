@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>EFR32 Flex Gecko 1P</Name>
-	<DeviceRegex>^EFR32FG1P.*</DeviceRegex>
-	<FamilySubdirectory>EFR32FG1P</FamilySubdirectory>
+	<Name>EFR32 B Gecko 13P</Name>
+	<DeviceRegex>^EFR32BG13P.*</DeviceRegex>
+	<FamilySubdirectory>EFR32BG13P</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\platform\Device\SiliconLabs\EFR32FG1P\Source\GCC\startup_EFR32FG1P.c</StartupFileDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\platform\Device\SiliconLabs\EFR32BG13P\Source\GCC\startup_EFR32BG13P.c</StartupFileDir>
 	<ConfigurableProperties>
         <PropertyGroups>
           <PropertyGroup>
@@ -14,7 +14,7 @@
 	  	<CoreFramework>
 	  	<CopyJobs>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\Device\SiliconLabs\EFR32FG1P</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\Device\SiliconLabs\EFR32BG13P</SourceFolder>
 				<FilesToCopy>-*startup_*;*.h;*.c</FilesToCopy>
 				<TargetFolder>Devices</TargetFolder>
 				<ProjectInclusionMask>*.c</ProjectInclusionMask>

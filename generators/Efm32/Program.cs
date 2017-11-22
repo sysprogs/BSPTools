@@ -44,10 +44,16 @@ namespace SLab_bsp_generator
                 MemoryLayout layout = new MemoryLayout();
                 layout.Memories = new List<Memory>();
                 layout.DeviceName = mcu.Name;
-                string aFileName = family.BSP.Directories.InputDir + "\\Device\\SiliconLabs\\" + family.FamilyFilePrefix.Substring(0, family.FamilyFilePrefix.Length - 1) + "\\Include\\" + mcu + ".h";
+                string aFileName = family.BSP.Directories.InputDir + "\\platform\\Device\\SiliconLabs\\" + family.FamilyFilePrefix.Substring(0, family.FamilyFilePrefix.Length - 1) + "\\Include\\" + mcu + ".h";
                 Match m;
                 Regex rg = new Regex(@"(#define RAM_MEM_BASE[ \t]*.*0x)([0-9][U][L])+.*");
-                int RAMStart = 0;
+            /*    while(!File.Exists(aFileName))
+                {
+                    aFileName = aFileName.Remove(aFileName.Length - 3, 1);
+                    if (aFileName.Length < 3)
+                        throw new Exception("No file include");
+                }*/
+                var RAMStart = 0;
                 foreach (var ln in File.ReadAllLines(aFileName))
                 {
                     m = Regex.Match(ln, @"#define RAM_MEM_BASE[ \t]+.*0x([\d]+)UL.*");
@@ -170,7 +176,16 @@ namespace SLab_bsp_generator
             var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuSiliconLabs.csv",
                 "Part No.", "Flash (kB)", "Ram (kB)", "MCU Core", true);
             RemoveDuplicateMCU(ref devices);
+            var devicesOld = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuSiliconLabsOld.csv",
+                "Part No.", "Flash (kB)", "Ram (kB)", "MCU Core", true);
+            RemoveDuplicateMCU(ref devicesOld);
+            foreach (var d in devicesOld)
+                if (!devices.Contains(d))
+                    devices.Add(d);
+            if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
+                throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
+            
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
                 allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
@@ -179,7 +194,7 @@ namespace SLab_bsp_generator
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             List<MCU> mcuDefinitions = new List<MCU>();
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<string> exampleDirs = new List<string>();
+            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
 
             bool noPeripheralRegisters = args.Contains("/noperiph");
@@ -243,7 +258,8 @@ namespace SLab_bsp_generator
                 MCUFamilies = familyDefinitions.ToArray(),
                 SupportedMCUs = mcuDefinitions.ToArray(),
                 Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.ToArray(),
+                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 PackageVersion = "1.0"
             };

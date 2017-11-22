@@ -759,17 +759,17 @@ namespace BSPGenerationTools
     {
         static CortexCore ParseCoreName(string core)
         {
-            switch (core)
+            switch (core.Replace(" ",""))
             {
-                case "ARM Cortex-M0":
+                case "ARMCortex-M0":
                     return CortexCore.M0;
-                case "ARM Cortex-M0+":
+                case "ARMCortex-M0+":
                     return CortexCore.M0Plus;
-                case "ARM Cortex-M3":
+                case "ARMCortex-M3":
                     return CortexCore.M3;
-                case "ARM Cortex-M4":
+                case "ARMCortex-M4":
                     return CortexCore.M4;
-                case "ARM Cortex-M7":
+                case "ARMCortex-M7":
                     return CortexCore.M7;
                 case "Cortex-M0":
                     return CortexCore.M0;

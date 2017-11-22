@@ -4,7 +4,7 @@
 	<DeviceRegex>^EFM32TG.*</DeviceRegex>
 	<FamilySubdirectory>EFM32TG</FamilySubdirectory>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32TG\Source\GCC\startup_efm32TG.c</StartupFileDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\platform\Device\SiliconLabs\EFM32TG\Source\GCC\startup_efm32TG.c</StartupFileDir>
 	<ConfigurableProperties>
         <PropertyGroups>
           <PropertyGroup>
@@ -14,7 +14,7 @@
 	  	<CoreFramework>
 	  	<CopyJobs>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\Device\SiliconLabs\EFM32TG</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\Device\SiliconLabs\EFM32TG</SourceFolder>
 				<FilesToCopy>-*startup_*;*.h;*.c</FilesToCopy>
 				<TargetFolder>Devices</TargetFolder>
 				<ProjectInclusionMask>*.c</ProjectInclusionMask>

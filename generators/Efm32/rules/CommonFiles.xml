@@ -3,7 +3,7 @@
 	<CoreFramework>
 		<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\CMSIS\Include</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\CMSIS\Include</SourceFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS</TargetFolder>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
@@ -20,7 +20,7 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\emlib</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\emlib</SourceFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<TargetFolder>framework\emlib</TargetFolder>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
@@ -36,7 +36,7 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\usb</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\middleware\usb_gecko</SourceFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<TargetFolder>framework\usb</TargetFolder>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
