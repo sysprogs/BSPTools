@@ -2,7 +2,7 @@
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <ToolchainPath>[SysGCC-arm-eabi-6.2.0]</ToolchainPath>
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
-	<DeviceRegex>EFM32JG12.*</DeviceRegex>
+	<DeviceRegex>EFM32.*</DeviceRegex>
 	<NonValidatedRegisters>
 		<string>RESERVED</string></NonValidatedRegisters>
 
