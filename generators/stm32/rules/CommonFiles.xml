@@ -388,45 +388,11 @@
 					<SourceFolder>$$BSPGEN:RULES_DIR$$\\config</SourceFolder>
 					<FilesToCopy>ffconf.h</FilesToCopy>
 					<TargetFolder>BSP\ConfigTemplates</TargetFolder>
+					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32F7xxxx/BSP/STM32756G_EVAL</AdditionalIncludeDirs>
 					<ProjectInclusionMask>*.h</ProjectInclusionMask>				
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-				  	<Properties>
-					  <PropertyEntry xsi:type="Boolean">
-						<Name>SD Disc IO Support</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.sd_d</UniqueID>
-						<ValueForTrue>1</ValueForTrue>
-						<ValueForFalse>0</ValueForFalse>
-					  </PropertyEntry>
-					  <PropertyEntry xsi:type="Boolean">
-						<Name>SDRAM Disc IO Support</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.sdram_d</UniqueID>
-						<ValueForTrue>1</ValueForTrue>
-						<ValueForFalse>0</ValueForFalse>
-					  </PropertyEntry>
-					  <PropertyEntry xsi:type="Boolean">
-						<Name>SRAM Disc IO Support</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.sram_d</UniqueID>
-						<ValueForTrue>1</ValueForTrue>
-						<ValueForFalse>0</ValueForFalse>
-					  </PropertyEntry>
-  					  <PropertyEntry xsi:type="Boolean">
-						<Name>USBH Disc IO Support</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.fatfs.usbh_d</UniqueID>
-						<ValueForTrue>1</ValueForTrue>
-						<ValueForFalse>0</ValueForFalse>
-					  </PropertyEntry>
-
-					<CollapsedByDefault>false</CollapsedByDefault>
-					</Properties>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
-
 		</Framework>	
 		<Framework>
 					<!--LwIP -->

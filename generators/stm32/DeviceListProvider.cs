@@ -74,7 +74,6 @@ namespace stm32_bsp_generator
                     var fn = Path.GetFileName(absoluteUri.ToString());
                     var ms = new MemoryStream();
                     _ZipFile.ExtractEntry(_Entries[fn], ms);
-                    File.WriteAllBytes(Path.Combine("e:\\temp", fn), ms.ToArray());
                     ms.Position = 0;
                     return ms;
                 }

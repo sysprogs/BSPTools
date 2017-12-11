@@ -359,13 +359,12 @@ namespace BSPGenerationTools
                     coreName = "M3";
                     break;
                 case CortexCore.M4:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb";
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
-                    family.CompilationFlags.ASFLAGS = "-mfpu=fpv4-sp-d16";
                     coreName = "M4";
                     break;
                 case CortexCore.M7:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb";
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb -mfpu=fpv4-sp-d16";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
                     coreName = "M7";
                     break;
