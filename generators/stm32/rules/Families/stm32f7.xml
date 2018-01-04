@@ -64,7 +64,7 @@
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>Device\ST\STM32f7xx\Source\Templates\system_stm32f7xx.c</FilePath>
 							<OldLine>/* #define VECT_TAB_SRAM */</OldLine>
-							<NewLine>#ifdef stm32_sram_layout
+							<NewLine>#ifdef sram_layout
 #define VECT_TAB_SRAM
 #endif</NewLine>
 						</Patch>				
