@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.Resources>
             <Style TargetType="ListBox" BasedOn="{StaticResource ResourceKey={x:Type ListBox}}">
@@ -38,9 +39,41 @@
             <Image Width="16" Height="16" Source="icons\open16.png"/>
         </Button>
 
+        <TextBlock Text="FLASH driver:" Grid.Row="1" VerticalAlignment="Center" Margin="5"/>
+        <ListBox Grid.Row="1" Grid.Column="1" SelectedItem="{Binding FLASHDriver}" Grid.ColumnSpan="2" Margin="0 5 0 5">
+            <ListBox.ItemsSource>
+                <coll:ArrayList>
+                    <local:TiXDSFLASHDriver>None</local:TiXDSFLASHDriver>
+                    <local:TiXDSFLASHDriver>UniFLASH</local:TiXDSFLASHDriver>
+                    <local:TiXDSFLASHDriver>CC3220</local:TiXDSFLASHDriver>
+                </coll:ArrayList>
+            </ListBox.ItemsSource>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="None">
+                                        <Setter Property="Text" Value="None"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="CC3220">
+                                        <Setter Property="Text" Value="CC3220SF"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="UniFLASH">
+                                        <Setter Property="Text" Value="UniFLASH"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:XDSDebugMethodConfigurator}}"/>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
-        <TextBlock Text="Program FLASH memory:" Grid.Row="1" VerticalAlignment="Center" Margin="5"/>
-        <ListBox Grid.Row="1" Grid.Column="1" SelectedItem="{Binding ProgramMode}" Grid.ColumnSpan="2" Margin="0 5 0 5">
+        <TextBlock Text="Program FLASH memory:" Grid.Row="2" VerticalAlignment="Center" Margin="5"/>
+        <ListBox Grid.Row="2" Grid.Column="1" SelectedItem="{Binding ProgramMode}" Grid.ColumnSpan="2" Margin="0 5 0 5">
             <ListBox.ItemsSource>
                 <coll:ArrayList>
                     <bspe:ProgramMode>Enabled</bspe:ProgramMode>
@@ -72,7 +105,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Expander Grid.ColumnSpan="3" Grid.Row="2" Header="Additional FLASH resources to program" IsExpanded="False" Margin="5">
+        <Expander Grid.ColumnSpan="3" Grid.Row="3" Header="Additional FLASH resources to program" IsExpanded="False" Margin="5" Visibility="{Binding FLASHResourceVisibility}">
             <StackPanel Orientation="Vertical">
                 <Border BorderThickness="1" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:XDSDebugMethodConfigurator}}" Margin="10">
                     <StackPanel Orientation="Vertical">

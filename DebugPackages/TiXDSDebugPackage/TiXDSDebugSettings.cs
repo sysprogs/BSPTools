@@ -7,16 +7,26 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Xml.Serialization;
 
 namespace TiXDSDebugPackage
 {
+    public enum TiXDSFLASHDriver
+    {
+        None,
+        UniFLASH,
+        CC3220,
+    }
+
     public class TiXDSDebugSettings
     {
         public ProgramMode ProgramMode;
 
         public int ProgramTimeout { get; set; } = 15000;
         public FLASHResource[] FLASHResources;
+        public TiXDSFLASHDriver FLASHDriver { get; set; }
+        public string CustomConfigFile { get; set; }
     }
 
     public class FLASHResource : INotifyPropertyChanged
@@ -92,6 +102,19 @@ namespace TiXDSDebugPackage
             {
                 Settings.ProgramMode = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ProgramMode)));
+            }
+        }
+
+        public Visibility FLASHResourceVisibility => (FLASHDriver == TiXDSFLASHDriver.CC3220) ? Visibility.Visible : Visibility.Collapsed;
+
+        public TiXDSFLASHDriver FLASHDriver
+        {
+            get => Settings.FLASHDriver;
+            set
+            {
+                Settings.FLASHDriver = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ProgramMode)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FLASHResourceVisibility)));
             }
         }
 

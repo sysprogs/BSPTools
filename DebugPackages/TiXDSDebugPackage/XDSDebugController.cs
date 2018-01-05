@@ -26,7 +26,65 @@ namespace TiXDSDebugPackage
             if (string.IsNullOrEmpty(exe) || !File.Exists(exe))
                 throw new Exception("Missing TI XDS stub: " + exe);
 
-            var tool = startService.LaunchCommandLineTool(new CommandLineToolLaunchInfo { Command = exe, WorkingDirectory = Path.GetDirectoryName(exe), Arguments = "cc3220s.dat" });
+            string configFile = null;
+            switch (settings.FLASHDriver)
+            {
+                case TiXDSFLASHDriver.CC3220:
+                    configFile = "cc3220s.dat";
+                    break;
+                case TiXDSFLASHDriver.UniFLASH:
+                    configFile = Path.Combine(context.Method.Directory, "rm57x.dat");
+                    break;
+            }
+
+            if (settings.FLASHDriver == TiXDSFLASHDriver.UniFLASH && startService.Mode != EmbeddedDebugMode.ConnectionTest && startService.Mode != EmbeddedDebugMode.Attach)
+            {
+                bool skipLoad = false;
+
+                switch (settings.ProgramMode)
+                {
+                    case ProgramMode.Disabled:
+                        skipLoad = true;
+                        break;
+                    case ProgramMode.Auto:
+                        if (startService.IsCurrentFirmwareAlreadyProgrammed())
+                            skipLoad = true;
+                        break;
+                }
+
+                if (!skipLoad)
+                {
+                    string uniFLASHDir = Path.Combine(context.Method.Directory, "UniFLASH");
+                    var programTool = startService.LaunchCommandLineTool(new CommandLineToolLaunchInfo { Command = Path.Combine(uniFLASHDir, "dslite.bat"), Arguments = $@"--config={uniFLASHDir}\user_files\configs\rm57l8xx.ccxml {startService.TargetPath} --verbose", ShowInGDBStubWindow = true });
+                    using (var logFile = new FileStream(Path.Combine(Path.GetDirectoryName(startService.TargetPath), "UniFLASH.log"), FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                    {
+                        programTool.LineReceived += (s, e) =>
+                        {
+                            try
+                            {
+                                byte[] data = Encoding.UTF8.GetBytes(e.Line + "\r\n");
+                                logFile.Write(data, 0, data.Length);
+                                logFile.Flush();
+                            } catch { };
+                        };
+
+                        while (programTool.IsRunning)
+                        {
+                            Thread.Sleep(100);
+                        }
+
+                        if (programTool.ExitCode != 0)
+                            throw new Exception($"UniFLASH exited with code {programTool.ExitCode}. Please check UniFLASH.log.");
+                    }
+
+                    startService.OnFirmwareProgrammedSuccessfully();
+                }
+            }
+
+            if (!string.IsNullOrEmpty(settings.CustomConfigFile))
+                configFile = settings.CustomConfigFile;
+
+            var tool = startService.LaunchCommandLineTool(new CommandLineToolLaunchInfo { Command = exe, WorkingDirectory = Path.GetDirectoryName(exe), Arguments = configFile });
             return new StubInstance(context.Method.Directory, settings, tool);
         }
 
@@ -157,104 +215,107 @@ namespace TiXDSDebugPackage
                 if (!result.IsDone)
                     throw new Exception("Failed to reset target");
 
-                var sections = info.GetLoadableSections()
-                    .Where(section => section.LoadAddress.HasValue && section.LoadAddress.Value >= FLASHBase && section.LoadAddress.Value < (FLASHBase + MaximumFLASHSize))
-                    .ToArray();
-
-                if (sections.Length == 0)
+                if (_Settings.FLASHDriver == TiXDSFLASHDriver.CC3220)
                 {
-                    if (service.Mode != EmbeddedDebugMode.ConnectionTest)
+                    var sections = info.GetLoadableSections()
+                        .Where(section => section.LoadAddress.HasValue && section.LoadAddress.Value >= FLASHBase && section.LoadAddress.Value < (FLASHBase + MaximumFLASHSize))
+                        .ToArray();
+
+                    if (sections.Length == 0)
                     {
-                        session.SendInformationalOutput("No FLASH sections found in " + info.Path);
-
-                        result = session.RunGDBCommand("load");
-                        if (!result.IsDone)
-                            throw new Exception("Failed to reset target");
-                    }
-                }
-                else
-                {
-                    bool skipLoad = false;
-
-                    switch (_Settings.ProgramMode)
-                    {
-                        case ProgramMode.Disabled:
-                            skipLoad = true;
-                            break;
-                        case ProgramMode.Auto:
-                            if (service.IsCurrentFirmwareAlreadyProgrammed())
-                                skipLoad = true;
-                            break;
-                    }
-
-                    if (service.Mode == EmbeddedDebugMode.Attach || service.Mode == EmbeddedDebugMode.ConnectionTest)
-                        skipLoad = true;
-
-                    if (!skipLoad)
-                    {
-                        var resources = _Settings.FLASHResources ?? new FLASHResource[0];
-
-                        using (var progr = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Erasing FLASH", "Programing FLASH" }))
+                        if (service.Mode != EmbeddedDebugMode.ConnectionTest)
                         {
-                            var stub = new LoadedProgrammingStub(service.GetPathWithoutSpaces(Path.Combine(_BaseDir, "CC3220SF.bin")), session, _Settings);
-                            uint totalSize = 0;
+                            session.SendInformationalOutput("No FLASH sections found in " + info.Path);
 
-                            int totalItems = sections.Length + resources.Length;
-                            int itemsDone = 0;
+                            result = session.RunGDBCommand("load");
+                            if (!result.IsDone)
+                                throw new Exception("Failed to reset target");
+                        }
+                    }
+                    else
+                    {
+                        bool skipLoad = false;
 
-                            foreach (var sec in sections)
+                        switch (_Settings.ProgramMode)
+                        {
+                            case ProgramMode.Disabled:
+                                skipLoad = true;
+                                break;
+                            case ProgramMode.Auto:
+                                if (service.IsCurrentFirmwareAlreadyProgrammed())
+                                    skipLoad = true;
+                                break;
+                        }
+
+                        if (service.Mode == EmbeddedDebugMode.Attach || service.Mode == EmbeddedDebugMode.ConnectionTest)
+                            skipLoad = true;
+
+                        if (!skipLoad)
+                        {
+                            var resources = _Settings.FLASHResources ?? new FLASHResource[0];
+
+                            using (var progr = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Erasing FLASH", "Programing FLASH" }))
                             {
-                                stub.EraseMemory((uint)sec.LoadAddress.Value, (uint)sec.Size);
-                                totalSize += (uint)sec.Size;
-                                progr.ReportTaskProgress(itemsDone, totalItems, $"Erasing {sec.Name}...");
-                            }
+                                var stub = new LoadedProgrammingStub(service.GetPathWithoutSpaces(Path.Combine(_BaseDir, "CC3220SF.bin")), session, _Settings);
+                                uint totalSize = 0;
 
-                            foreach(var r in resources)
-                            {
-                                r.ExpandedPath = service.ExpandProjectVariables(r.Path, true, true);
-                                r.Data = File.ReadAllBytes(r.ExpandedPath);
+                                int totalItems = sections.Length + resources.Length;
+                                int itemsDone = 0;
 
-                                stub.EraseMemory(FLASHBase + (uint)r.ParsedOffset, (uint)r.Data.Length);
-                                totalSize += (uint)r.Data.Length;
-                                progr.ReportTaskProgress(itemsDone, totalItems, $"Erasing area for {Path.GetFileName(r.ExpandedPath)}...");
-                            }
-
-                            progr.ReportTaskCompletion(true);
-
-                            var path = service.GetPathWithoutSpaces(info.Path);
-
-                            uint doneTotal = 0;
-                            foreach (var sec in sections)
-                            {
-                                for (uint done = 0; done < (uint)sec.Size; done++)
+                                foreach (var sec in sections)
                                 {
-                                    uint todo = Math.Min(stub.ProgramBufferSize, (uint)sec.Size - done);
-                                    progr.ReportTaskProgress(doneTotal, totalSize, $"Programming {sec.Name}...");
-                                    stub.ProgramMemory((uint)sec.LoadAddress.Value + done, path, (uint)sec.OffsetInFile + done, todo, sec.Name);
-
-                                    doneTotal += todo;
-                                    done += todo;
+                                    stub.EraseMemory((uint)sec.LoadAddress.Value, (uint)sec.Size);
+                                    totalSize += (uint)sec.Size;
+                                    progr.ReportTaskProgress(itemsDone, totalItems, $"Erasing {sec.Name}...");
                                 }
-                            }
 
-                            foreach (var r in resources)
-                            {
-                                var imgName = Path.GetFileName(r.ExpandedPath);
-                                for (uint done = 0; done < (uint)r.Data.Length; done++)
+                                foreach (var r in resources)
                                 {
-                                    uint todo = Math.Min(stub.ProgramBufferSize, (uint)r.Data.Length - done);
-                                    progr.ReportTaskProgress(doneTotal, totalSize, $"Programming {imgName}...");
-                                    stub.ProgramMemory((uint)FLASHBase + (uint)r.ParsedOffset + done, path, done, todo, imgName);
+                                    r.ExpandedPath = service.ExpandProjectVariables(r.Path, true, true);
+                                    r.Data = File.ReadAllBytes(r.ExpandedPath);
 
-                                    doneTotal += todo;
-                                    done += todo;
+                                    stub.EraseMemory(FLASHBase + (uint)r.ParsedOffset, (uint)r.Data.Length);
+                                    totalSize += (uint)r.Data.Length;
+                                    progr.ReportTaskProgress(itemsDone, totalItems, $"Erasing area for {Path.GetFileName(r.ExpandedPath)}...");
+                                }
+
+                                progr.ReportTaskCompletion(true);
+
+                                var path = service.GetPathWithoutSpaces(info.Path);
+
+                                uint doneTotal = 0;
+                                foreach (var sec in sections)
+                                {
+                                    for (uint done = 0; done < (uint)sec.Size; done++)
+                                    {
+                                        uint todo = Math.Min(stub.ProgramBufferSize, (uint)sec.Size - done);
+                                        progr.ReportTaskProgress(doneTotal, totalSize, $"Programming {sec.Name}...");
+                                        stub.ProgramMemory((uint)sec.LoadAddress.Value + done, path, (uint)sec.OffsetInFile + done, todo, sec.Name);
+
+                                        doneTotal += todo;
+                                        done += todo;
+                                    }
+                                }
+
+                                foreach (var r in resources)
+                                {
+                                    var imgName = Path.GetFileName(r.ExpandedPath);
+                                    for (uint done = 0; done < (uint)r.Data.Length; done++)
+                                    {
+                                        uint todo = Math.Min(stub.ProgramBufferSize, (uint)r.Data.Length - done);
+                                        progr.ReportTaskProgress(doneTotal, totalSize, $"Programming {imgName}...");
+                                        stub.ProgramMemory((uint)FLASHBase + (uint)r.ParsedOffset + done, path, done, todo, imgName);
+
+                                        doneTotal += todo;
+                                        done += todo;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    service.OnFirmwareProgrammedSuccessfully();
-                    session.RunGDBCommand("set $pc=resetISR", false);
+                        service.OnFirmwareProgrammedSuccessfully();
+                        session.RunGDBCommand("set $pc=resetISR", false);
+                    }
                 }
             }
 

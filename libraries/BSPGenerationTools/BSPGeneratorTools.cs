@@ -25,6 +25,7 @@ namespace BSPGenerationTools
         M3,
         M4,
         M7,
+        R5F,
     }
 
     public class BSPSummary
@@ -368,6 +369,10 @@ namespace BSPGenerationTools
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
                     coreName = "M7";
                     break;
+                case CortexCore.R5F:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mfpu=vfpv3-d16";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CR5" };
+                    break;
                 default:
                     throw new Exception("Unsupported core type");
             }
@@ -406,7 +411,7 @@ namespace BSPGenerationTools
 
             if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
             {
-                if (core == CortexCore.M4 || core == CortexCore.M7)
+                if (core == CortexCore.M4 || core == CortexCore.M7 || core == CortexCore.R5F)
                 {
                     if (family.ConfigurableProperties == null)
                         family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };

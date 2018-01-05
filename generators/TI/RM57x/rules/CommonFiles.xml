@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CoreFramework>
+		<CopyJobs>
+
+		</CopyJobs>
+	</CoreFramework>
+
+	<ConditionalFlags>
+		<ConditionalToolFlags>
+		  <FlagCondition xsi:type="ReferencesFramework">
+			<FrameworkID>com.sysprogs.arm.ti.rm57x.nonrtos</FrameworkID>
+		  </FlagCondition>
+		  <Flags>
+			<LinkerScript>$$SYS:BSP_ROOT$$/NonRTOS/source/HL_sys_link.ld</LinkerScript>
+		  </Flags>
+		</ConditionalToolFlags>
+		<ConditionalToolFlags>
+		  <FlagCondition xsi:type="ReferencesFramework">
+			<FrameworkID>com.sysprogs.arm.ti.rm57x.freertos</FrameworkID>
+		  </FlagCondition>
+		  <Flags>
+			<LinkerScript>$$SYS:BSP_ROOT$$/FreeRTOS/source/HL_sys_link.ld</LinkerScript>
+		  </Flags>
+		</ConditionalToolFlags>
+	</ConditionalFlags>
+	
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>Non-RTOS Drivers</Name>
+			<ID>com.sysprogs.arm.ti.rm57x.nonrtos</ID>
+			<ProjectFolderName>Drivers</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.ti.rm57x.freertos</string>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\NonRTOS</SourceFolder>
+					<ProjectInclusionMask>-*\HL_sys_main.c;*.c;*.h;*.s</ProjectInclusionMask>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask>*.h</AutoIncludeMask>	
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>include\HL_system.h</FilePath>
+							<OldLine>resetSource_t getResetSource(void) __attribute__((naked));</OldLine>
+							<NewLine>resetSource_t getResetSource(void);</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>source\HL_sys_startup.c</FilePath>
+							<OldLine>        if ((esmREG->SR1[2]) != 0U)</OldLine>
+							<NewLine>        #ifndef DEBUG
+        if ((esmREG->SR1[2]) != 0U)
+		#else
+		if (0)
+		#endif
+</NewLine>
+						</Patch>
+					</Patches>
+				</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>FreeRTOS Drivers</Name>
+			<ID>com.sysprogs.arm.ti.rm57x.freertos</ID>
+			<ProjectFolderName>Drivers</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.ti.rm57x.nonrtos</string>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\FreeRTOS</SourceFolder>
+					<ProjectInclusionMask>-*\HL_sys_main.c;*.c;*.h;*.s</ProjectInclusionMask>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask>*.h</AutoIncludeMask>	
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>include\HL_system.h</FilePath>
+							<OldLine>resetSource_t getResetSource(void) __attribute__((naked));</OldLine>
+							<NewLine>resetSource_t getResetSource(void);</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>source\HL_sys_startup.c</FilePath>
+							<OldLine>        if ((esmREG->SR1[2]) != 0U)</OldLine>
+							<NewLine>        #ifndef DEBUG
+        if ((esmREG->SR1[2]) != 0U)
+		#else
+		if (0)
+		#endif
+</NewLine>
+						</Patch>
+					</Patches>
+				</CopyJob>	
+			</CopyJobs>
+		</Framework>
+
+	</AdditionalFrameworks>
+	
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBLink</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+			<EmbeddedSample>
+			  <Name>LEDBlink (Non-RTOS)</Name>
+			  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+			  <BinaryFiles />
+			   <RequiredFrameworks>
+				<string>com.sysprogs.arm.ti.rm57x.nonrtos</string>
+			  </RequiredFrameworks> 
+			</EmbeddedSample>
+		</SmartSample>	
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink_FreeRTOS</DestinationFolder>
+			<EmbeddedSample>
+			  <Name>LEDBlink (FreeRTOS)</Name>
+			  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+			  <BinaryFiles />
+			   <RequiredFrameworks>
+				<string>com.sysprogs.arm.ti.rm57x.freertos</string>
+			  </RequiredFrameworks> 
+			</EmbeddedSample>
+		</SmartSample>	
+	</SmartSamples>
+</FamilyDefinition>
