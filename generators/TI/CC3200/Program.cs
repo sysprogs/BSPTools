@@ -20,7 +20,7 @@ namespace CC3200_bsp_generator
             const uint SRAMBase = 0x20004000;
 
             public CC3200BSPBuilder(BSPDirectories dirs)
-                : base(dirs)
+                : base(dirs, null, 5)
             {
                 ShortName = "CC3200";
             }
@@ -323,7 +323,7 @@ namespace CC3200_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "1.4"
+                PackageVersion = "3.0"
             };
             bspBuilder.Save(bsp, true);
         }

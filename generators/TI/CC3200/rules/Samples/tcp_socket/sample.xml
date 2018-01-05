@@ -12,7 +12,6 @@
          <Files>
            <string>$$SYS:BSP_ROOT$$/common/uart_if.c</string>
  		  <string>$$SYS:BSP_ROOT$$/common/udma_if.c</string>
-  		  <string>$$SYS:BSP_ROOT$$/common/network_common.c</string>
 		  
       </Files>
         <Subdirs />

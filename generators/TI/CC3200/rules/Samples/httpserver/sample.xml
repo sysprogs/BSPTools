@@ -21,10 +21,8 @@
       <VirtualSourceDir>
         <Name>Common files</Name>
         <Files>
-           <string>$$SYS:BSP_ROOT$$/common/uart_if.c</string>
+          <string>$$SYS:BSP_ROOT$$/common/uart_if.c</string>
  		  <string>$$SYS:BSP_ROOT$$/common/gpio_if.c</string>
-  		  <string>$$SYS:BSP_ROOT$$/common/network_common.c</string>
-		  
         </Files>
         <Subdirs />
       </VirtualSourceDir>      

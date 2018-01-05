@@ -65,6 +65,21 @@
 						<OldLine>unsigned short itoa(short cNum, char *cString)</OldLine>
 						<NewLine>unsigned short itoaNet(short cNum, char *cString)</NewLine>
 					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>network_common.c</FilePath>
+						<OldLine>_SlEventPropogationStatus_e sl_Provisioning_HttpServerEventHdl(</OldLine>
+						<NewLine>_SlEventPropogationStatus_e __attribute__((weak)) sl_Provisioning_HttpServerEventHdl(</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>network_common.c</FilePath>
+						<OldLine>_SlEventPropogationStatus_e sl_Provisioning_NetAppEventHdl(SlNetAppEvent_t *apNetAppEvent)</OldLine>
+						<NewLine>_SlEventPropogationStatus_e __attribute__((weak)) sl_Provisioning_NetAppEventHdl(SlNetAppEvent_t *apNetAppEvent)</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>network_common.c</FilePath>
+						<OldLine>_SlEventPropogationStatus_e sl_Provisioning_WlanEventHdl(SlWlanEvent_t *apEventInfo)</OldLine>
+						<NewLine>_SlEventPropogationStatus_e __attribute__((weak)) sl_Provisioning_WlanEventHdl(SlWlanEvent_t *apEventInfo)</NewLine>
+					</Patch>
 				</Patches>
 			</CopyJob>	
 			</CopyJobs>
@@ -108,15 +123,6 @@
 				<TargetFolder>SDK\simplelink</TargetFolder>
 				<PreprocessorMacros>__SL__</PreprocessorMacros>
 				<Patches>
-					<Patch xsi:type="InsertLines">
-						<FilePath>include\simplelink.h</FilePath>
-						<AfterLine>#include "wlan_rx_filters.h"</AfterLine>
-						<InsertedLines>
-							<string>#ifdef __cplusplus //VG added</string>
-							<string> extern "C" { //VG added</string>
-							<string>#endif //VG added</string>
-						</InsertedLines>
-					</Patch>		
 					<Patch xsi:type="InsertLines">
 						<FilePath>include\socket.h</FilePath>
 						<AfterLine>#define __SL_SOCKET_H__</AfterLine>

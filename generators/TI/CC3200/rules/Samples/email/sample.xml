@@ -10,7 +10,6 @@
     <string>com.sysprogs.arm.ti.cc3200.free_rtos</string>
 	<string>com.sysprogs.arm.ti.cc3200.cl.netapps.smtp</string>	
 	<string>com.sysprogs.arm.ti.cc3200.netapps.base64encoder</string>
-
   </RequiredFrameworks>
   <AdditionalSourcesFromBSP>
     <Files />
