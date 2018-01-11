@@ -47,10 +47,11 @@ namespace esp8266
             bsp.Frameworks = frameworks.ToArray();
 
             List<string> projectFiles = new List<string>();
+            PropertyList props = null;
 
             if (commonPseudofamily.Definition.CoreFramework != null)
                 foreach (var job in commonPseudofamily.Definition.CoreFramework.CopyJobs)
-                    job.CopyAndBuildFlags(bspBuilder, projectFiles, null);
+                    job.CopyAndBuildFlags(bspBuilder, projectFiles, null, ref props);
 
             var mainFamily = bsp.MCUFamilies.First();
 

@@ -16,7 +16,6 @@
 		</AdditionalLibraryDirectories>
 		<IncludeDirectories>
 			<string>.</string>
-			<string>$$SYS:BSP_ROOT$$/sysprogs/include</string>
 		</IncludeDirectories>
       </CompilationFlags>
     </MCUFamily>

@@ -3,27 +3,16 @@
   <PackageID>com.sysprogs.esp8266.core</PackageID>
   <PackageVersion>1.0</PackageVersion>
   <GNUTargetFilter>^xtensa-.*</GNUTargetFilter>
-  <UserFriendlyName>Xtensa OCD Daemon</UserFriendlyName>
-  <ExtensionDLL>ESP8266DebugPackage.dll</ExtensionDLL>
+  <UserFriendlyName>ESP8266 debug methods</UserFriendlyName>
+  <ExtensionDLL>ESPxxDebugPackage.dll</ExtensionDLL>
+  <ExtensionSupportsShadowLoad>true</ExtensionSupportsShadowLoad>
+  <DriverSubdirectory>..\..\..\OpenOCD\drivers</DriverSubdirectory>
   <SupportedDebugMethods>
     <DebugMethod>
       <UserFriendlyName>OpenOCD</UserFriendlyName>
 	  <AutoSelectScore>2000</AutoSelectScore>
       <ID>openocd</ID>
-	  <ExtensionClass>ESP8266DebugPackage.ESP8266DebugExtension</ExtensionClass>
-	  <GDBServerApplication>$$SYS:BSP_ROOT$$\openocd\bin\openocd.exe</GDBServerApplication>
-	  <GDBServerWorkingDir>$$SYS:BSP_ROOT$$\openocd\share\openocd\scripts</GDBServerWorkingDir>
-	  <GDBServerArguments>
-		  <GNUStyle>false</GNUStyle>
-		  <Template>-f $$com.sysprogs.esp8266.openocd.iface_script$$ -f target/esp8266.cfg $$com.sysprogs.esp8266.openocd.speed_cmd$$ $$com.sysprogs.esp8266.openocd.extra_cmdline$$</Template>
-      </GDBServerArguments>
-      <GDBServerDelay>500</GDBServerDelay>
-      <GDBStartupCommands>
-        <string>target remote :3333</string>
-        <string>$$com.sysprogs.esp8266.load_sequence$$</string>
-        <string>mon xtensa_no_interrupts_during_steps $$com.sysprogs.esp8266.disable_interrupts_during_steps$$</string>
-        <string>mon esp8266_autofeed_watchdog $$com.sysprogs.esp8266.autofeed_watchdog$$</string>
-      </GDBStartupCommands>
+	  <ControllerClass>ESP8266DebugPackage.ESP8266DebugController</ControllerClass>
       <UseContinueToStart>true</UseContinueToStart>
       <SendCtrlCToGDBServer>false</SendCtrlCToGDBServer>
 	  <RequireExplicitDisconnect>true</RequireExplicitDisconnect>
@@ -31,298 +20,216 @@
 	  <WriteOnlyPCOverride>$epc2</WriteOnlyPCOverride>
 	  <RequestAdvancedDebugVariables>true</RequestAdvancedDebugVariables>
 	  <NoCompareSections>true</NoCompareSections>
-	  <AdditionalProperties>
-          <PropertyGroups>
-            <PropertyGroup>
-              <Properties>
-			  	<PropertyEntry xsi:type="String">
-                  <Name>Inteface script</Name>
-                  <UniqueID>com.sysprogs.esp8266.openocd.iface_script</UniqueID>
-				  <DefaultValue>interface/olimex-arm-usb-ocd-h.cfg</DefaultValue>
-                </PropertyEntry>
-			  	<PropertyEntry xsi:type="Boolean">
-                  <Name>Suppress interrupts during single-stepping</Name>
-                  <UniqueID>com.sysprogs.esp8266.disable_interrupts_during_steps</UniqueID>
-				  <DefaultValue>true</DefaultValue>
-				  <ValueForTrue>on</ValueForTrue>
-				  <ValueForFalse>off</ValueForFalse>
-                </PropertyEntry>
-			  	<PropertyEntry xsi:type="Boolean">
-                  <Name>Feed watchdog while stopped</Name>
-                  <UniqueID>com.sysprogs.esp8266.autofeed_watchdog</UniqueID>
-				  <DefaultValue>true</DefaultValue>
-				  <ValueForTrue>on</ValueForTrue>
-				  <ValueForFalse>off</ValueForFalse>
-                </PropertyEntry>
-			  	<PropertyEntry xsi:type="String">
-                  <Name>Speed selection command</Name>
-                  <UniqueID>com.sysprogs.esp8266.openocd.speed_cmd</UniqueID>
-				  <DefaultValue></DefaultValue>
-                </PropertyEntry>
-			  	<PropertyEntry xsi:type="String">
-                  <Name>Additional command line</Name>
-                  <UniqueID>com.sysprogs.esp8266.openocd.extra_cmdline</UniqueID>
-				  <DefaultValue></DefaultValue>
-                </PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>Program SPI FLASH</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.program_flash</UniqueID>
-				  <SuggestionList>
-					<Suggestion><UserFriendlyName>Always program before debugging</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Assume it is already programmed</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Program only if changed</UserFriendlyName><InternalValue>auto</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>Start mode</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_start_mode</UniqueID>
-				  <SuggestionList>
-					<Suggestion><UserFriendlyName>Emulate a CPU reset (non-OTA only)</UserFriendlyName><InternalValue>soft_reset</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Jump to entry point</UserFriendlyName><InternalValue>entry_point</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Reset entire chip</UserFriendlyName><InternalValue>hard_reset</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>false</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>Initialization Data File</Name>
-				  <UniqueID>com.sysprogs.esp8266.init_data_file</UniqueID>
-				  <SuggestionList>
-					<Suggestion><UserFriendlyName>(default)</UserFriendlyName><InternalValue>$$SYS:BSP_ROOT$$/IoT-SDK/bin/esp_init_data_default.bin</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Sector Size</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.prog_sector_size</UniqueID>
-				  <SuggestionList>
-					<Suggestion><UserFriendlyName>4096</UserFriendlyName><InternalValue>4096</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Erase Block Size</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.erase_sector_size</UniqueID>
-				  <SuggestionList>
-					<Suggestion><UserFriendlyName>4096</UserFriendlyName><InternalValue>4096</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Frequency</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_freq</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>40m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>26m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>20m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>80m</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Mode</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_mode</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>qio</InternalValue></Suggestion>
-					<Suggestion><InternalValue>qout</InternalValue></Suggestion>
-					<Suggestion><InternalValue>dio</InternalValue></Suggestion>
-					<Suggestion><InternalValue>dout</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Size</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_size</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>4m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>2m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>8m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>16m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>32m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>16m-c1</InternalValue></Suggestion>
-					<Suggestion><InternalValue>32m-c1</InternalValue></Suggestion>
-					<Suggestion><InternalValue>32m-c2</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-			  </Properties>
-            </PropertyGroup>
-          </PropertyGroups>
-	  </AdditionalProperties>
-      <AutoProgramProfile>
-		<AutoProgramCondition xsi:type="Equals">
-			<Expression>$$com.sysprogs.esp8266.xt-ocd.program_flash$$</Expression>
-			<ExpectedValue>auto</ExpectedValue>
-		</AutoProgramCondition>
-		<ProgramCommandRegex>\$\$com.sysprogs.esp8266.load_sequence\$\$</ProgramCommandRegex>
-		<VarsToProgram>
-			<SysVarEntry>
-				<Key>com.sysprogs.esp8266.xt-ocd.program_flash</Key>
-				<Value>1</Value>
-			</SysVarEntry>
-		</VarsToProgram>
-		<VarsToSkip>
-			<SysVarEntry>
-				<Key>com.sysprogs.esp8266.xt-ocd.program_flash</Key>
-				<Value>0</Value>
-			</SysVarEntry>
-		</VarsToSkip>
-	  </AutoProgramProfile>
+	  <SuppressEndOfStackValidation>true</SuppressEndOfStackValidation>
+      <SupportedInterfaces>
+        <ProgrammingInterface>
+          <ID>jlink</ID>
+          <Name>Segger J-Link</Name>
+          <Identities>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>0101</PID>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>0102</PID>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>0103</PID>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>0104</PID>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>0105</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>0107</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>0108</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1010</PID>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1011</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1012</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1013</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1014</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1015</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1016</PID>
+              <Interface>04</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1017</PID>
+              <Interface>04</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1018</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>1019</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>101A</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>101B</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>101C</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>101D</PID>
+              <Interface>02</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>101E</PID>
+              <Interface>04</Interface>
+            </UsbIdentity>
+            <UsbIdentity>
+              <VID>1366</VID>
+              <PID>101F</PID>
+              <Interface>04</Interface>
+            </UsbIdentity>
+          </Identities>
+          <UniversalDriverId>com.sysprogs.libusb.mini</UniversalDriverId>
+          <AutoSelectPriority>0</AutoSelectPriority>
+        </ProgrammingInterface>
+        <ProgrammingInterface>
+          <ID>olimex-arm-usb-ocd</ID>
+          <Name>Olimex ARM-USB-OCD</Name>
+          <Identities>
+            <UsbIdentity>
+              <VID>15ba</VID>
+              <PID>0003</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+          </Identities>
+          <UniversalDriverId>com.sysprogs.libusb.mini</UniversalDriverId>
+          <AutoSelectPriority>0</AutoSelectPriority>
+        </ProgrammingInterface>
+        <ProgrammingInterface>
+          <ID>olimex-arm-usb-ocd-h</ID>
+          <Name>Olimex ARM-USB-OCD-H</Name>
+          <Identities>
+            <UsbIdentity>
+              <VID>15ba</VID>
+              <PID>002b</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+          </Identities>
+          <UniversalDriverId>com.sysprogs.libusb.mini</UniversalDriverId>
+          <AutoSelectPriority>0</AutoSelectPriority>
+        </ProgrammingInterface>
+        <ProgrammingInterface>
+          <ID>olimex-arm-usb-tiny-h</ID>
+          <Name>Olimex ARM-USB-OCD-Tiny</Name>
+          <Identities>
+            <UsbIdentity>
+              <VID>15ba</VID>
+              <PID>002a</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+          </Identities>
+          <UniversalDriverId>com.sysprogs.libusb.mini</UniversalDriverId>
+          <AutoSelectPriority>0</AutoSelectPriority>
+        </ProgrammingInterface>
+        <ProgrammingInterface>
+          <ID>olimex-jtag-tiny</ID>
+          <Name>Olimex JTAG-Tiny</Name>
+          <Identities>
+            <UsbIdentity>
+              <VID>15ba</VID>
+              <PID>0004</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+          </Identities>
+          <UniversalDriverId>com.sysprogs.libusb.mini</UniversalDriverId>
+          <AutoSelectPriority>0</AutoSelectPriority>
+        </ProgrammingInterface>
+        <ProgrammingInterface>
+          <ID>flyswatter</ID>
+          <Name>TinCanTools Flyswatter</Name>
+          <Identities>
+            <UsbIdentity>
+              <VID>0403</VID>
+              <PID>6010</PID>
+              <Interface>00</Interface>
+            </UsbIdentity>
+          </Identities>
+          <UniversalDriverId>com.sysprogs.libusb.mini</UniversalDriverId>
+          <AutoSelectPriority>0</AutoSelectPriority>
+        </ProgrammingInterface>
+	</SupportedInterfaces>
 	</DebugMethod>
     <DebugMethod>
       <UserFriendlyName>Bootloader + GDB Stub</UserFriendlyName>
 	  <AutoSelectScore>100</AutoSelectScore>
       <ID>gdbstub</ID>
-	  <ExtensionClass>ESP8266DebugPackage.ESP8266StubDebugExtension</ExtensionClass>
-      <GDBStartupCommands>
-        <string>$$com.sysprogs.esp8266.gdbstub.startup_sequence$$</string>
-      </GDBStartupCommands>
+	  <ControllerClass>ESP8266DebugPackage.ESP8266StubDebugController</ControllerClass>
       <UseContinueToStart>true</UseContinueToStart>
       <SendCtrlCToGDBServer>false</SendCtrlCToGDBServer>
 	  <RequireExplicitDisconnect>true</RequireExplicitDisconnect>
 	  <NoCompareSections>true</NoCompareSections>
-	  <AdditionalProperties>
-          <PropertyGroups>
-            <PropertyGroup>
-              <Properties>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>COM Port</Name>
-				  <UniqueID>com.sysprogs.esp8266.gdbstub.com_port</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>COM1</InternalValue></Suggestion>
-					<Suggestion><InternalValue>COM2</InternalValue></Suggestion>
-					<Suggestion><InternalValue>COM3</InternalValue></Suggestion>
-					<Suggestion><InternalValue>COM4</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>GDB Stub Baud Rate</Name>
-				  <UniqueID>com.sysprogs.esp8266.gdbstub.baud</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>74880</InternalValue></Suggestion>
-					<Suggestion><InternalValue>115200</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>Bootloader Baud Rate</Name>
-				  <UniqueID>com.sysprogs.esp8266.gdbstub.bl_baud</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>115200</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Integral">
-				  <Name>Bootloader reset delay (msec)</Name>
-				  <UniqueID>com.sysprogs.esp8266.reset_delay</UniqueID>
-				  <DefaultValue>50</DefaultValue>
-				  <MinValue>0</MinValue>
-				  <MaxValue>10000</MaxValue>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>Program SPI FLASH</Name>
-				  <UniqueID>com.sysprogs.esp8266.program_flash</UniqueID>
-				  <SuggestionList>
-					<Suggestion><UserFriendlyName>Always program before debugging</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Assume it is already programmed</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
-					<Suggestion><UserFriendlyName>Program only if changed</UserFriendlyName><InternalValue>auto</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Frequency</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_freq</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>40m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>26m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>20m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>80m</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Mode</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_mode</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>qio</InternalValue></Suggestion>
-					<Suggestion><InternalValue>qout</InternalValue></Suggestion>
-					<Suggestion><InternalValue>dio</InternalValue></Suggestion>
-					<Suggestion><InternalValue>dout</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>SPI FLASH Size</Name>
-				  <UniqueID>com.sysprogs.esp8266.xt-ocd.flash_size</UniqueID>
-				  <SuggestionList>
-					<Suggestion><InternalValue>4m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>2m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>8m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>16m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>32m</InternalValue></Suggestion>
-					<Suggestion><InternalValue>16m-c1</InternalValue></Suggestion>
-					<Suggestion><InternalValue>32m-c1</InternalValue></Suggestion>
-					<Suggestion><InternalValue>32m-c2</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-				<PropertyEntry xsi:type="Enumerated">
-				  <Name>Initialization Data File</Name>
-				  <UniqueID>com.sysprogs.esp8266.init_data_file</UniqueID>
-				  <SuggestionList>
-					<Suggestion><UserFriendlyName>(default)</UserFriendlyName><InternalValue>$$SYS:BSP_ROOT$$/IoT-SDK/bin/esp_init_data_default.bin</InternalValue></Suggestion>
-				  </SuggestionList>
-				  <DefaultEntryIndex>0</DefaultEntryIndex>
-				  <AllowFreeEntry>true</AllowFreeEntry>
-				</PropertyEntry>
-			  	<PropertyEntry xsi:type="String">
-                  <Name>Bootloader activation sequence</Name>
-                  <UniqueID>com.sysprogs.esp8266.gdbstub.reset_sequence</UniqueID>
-				  <DefaultValue>!DTR;RTS;SLEEP;DTR;!RTS;SLEEP;!DTR;SLEEP</DefaultValue>
-                </PropertyEntry>
-			  	<PropertyEntry xsi:type="Boolean">
-                  <Name>Do not show the 'Reset to bootloader' message</Name>
-                  <UniqueID>com.sysprogs.esp8266.gdbstub.suppress_reset_message</UniqueID>
-				  <ValueForTrue>1</ValueForTrue>
-				  <DefaultValue>false</DefaultValue>
-                </PropertyEntry>
-			  </Properties>
-            </PropertyGroup>
-          </PropertyGroups>
-	  </AdditionalProperties>
-      <AutoProgramProfile>
-		<AutoProgramCondition xsi:type="Equals">
-			<Expression>$$com.sysprogs.esp8266.program_flash$$</Expression>
-			<ExpectedValue>auto</ExpectedValue>
-		</AutoProgramCondition>
-		<ProgramCommandRegex>\$\$com.sysprogs.esp8266.gdbstub.startup_sequence\$\$</ProgramCommandRegex>
-		<VarsToProgram>
-			<SysVarEntry>
-				<Key>com.sysprogs.esp8266.program_flash</Key>
-				<Value>1</Value>
-			</SysVarEntry>
-		</VarsToProgram>
-		<VarsToSkip>
-			<SysVarEntry>
-				<Key>com.sysprogs.esp8266.program_flash</Key>
-				<Value>0</Value>
-			</SysVarEntry>
-		</VarsToSkip>
-	  </AutoProgramProfile>
+	  <SuppressEndOfStackValidation>true</SuppressEndOfStackValidation>
+	  <DetachCommand>echo done</DetachCommand>
+      <SupportedInterfaces>
+        <ProgrammingInterface>
+          <ID>com.sysprogs.espxx.bootloader</ID>
+          <Name>COM Port</Name>
+          <Identities>
+            <UsbIdentity>
+              <VID>$CLASS</VID>
+              <PID>CDC</PID>
+            </UsbIdentity>
+          </Identities>
+        </ProgrammingInterface>
+      </SupportedInterfaces>
 	</DebugMethod>
 	</SupportedDebugMethods>
 </EmbeddedDebugPackage>	

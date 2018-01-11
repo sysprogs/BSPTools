@@ -3,7 +3,6 @@ extern "C"
 {
 #endif
 
-#include <espmissingincludes.h>
 #include <ets_sys.h>
 #include <osapi.h>
 #include <ip_addr.h>

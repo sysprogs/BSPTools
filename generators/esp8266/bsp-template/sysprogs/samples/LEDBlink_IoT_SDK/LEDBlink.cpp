@@ -8,7 +8,6 @@ extern "C"
 #include <gpio.h>
 #include <os_type.h>
 #include <user_interface.h>
-#include <espmissingincludes.h>
 
 int user_init();
 
