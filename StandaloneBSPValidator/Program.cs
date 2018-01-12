@@ -466,7 +466,7 @@ namespace StandaloneBSPValidator
             job.OtherTasks.Add(new BuildTask
             {
                 Executable = prefix + "g++",
-                Arguments = $"{flags.EffectiveLDFLAGS} $^ -o $@",
+                Arguments = $"{flags.StartGroup} {flags.EffectiveLDFLAGS} $^ {flags.EndGroup} -o $@",
                 AllInputs = prj.SourceFiles.Where(f => sourceExtensions.ContainsKey(Path.GetExtension(f).TrimStart('.')))
                 .Select(f => Path.ChangeExtension(Path.GetFileName(f), ".o"))
                 .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)))
