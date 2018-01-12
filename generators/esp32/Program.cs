@@ -57,10 +57,11 @@ namespace esp32
             bsp.Frameworks = frameworks.ToArray();
 
             List<string> projectFiles = new List<string>();
+            PropertyList unused = null;
 
             if (commonPseudofamily.Definition.CoreFramework != null)
                 foreach (var job in commonPseudofamily.Definition.CoreFramework.CopyJobs)
-                    job.CopyAndBuildFlags(bspBuilder, projectFiles, null);
+                    job.CopyAndBuildFlags(bspBuilder, projectFiles, null, ref unused);
 
             var mainFamily = bsp.MCUFamilies.First();
 
