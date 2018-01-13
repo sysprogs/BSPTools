@@ -69,6 +69,13 @@ namespace IARProjectFileImporter
                         file.FullPath = substitute;
                 }
 
+                string nameOnly = Path.GetFileName(file.FullPath);
+                if (nameOnly.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase) && nameOnly.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    //IAR startup files are not compatible with gcc and are not needed either as VisualGDB provides its own startup files.
+                    continue;
+                }
+
                 result.Add(file);
             }
 
