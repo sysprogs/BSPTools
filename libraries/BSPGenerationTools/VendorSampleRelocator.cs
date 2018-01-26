@@ -21,7 +21,7 @@ namespace BSPGenerationTools
                         continue;
                     var extraDeps = vs.AllDependencies.Except(vs.HeaderFiles ?? new string[0]).Except(vs.SourceFiles ?? new string[0]).Where(d => !d.StartsWith(toolchainDir, StringComparison.InvariantCultureIgnoreCase)).ToArray();
 
-                    var knownDirs = vs.IncludeDirectories.Concat(vs.SourceFiles.Select(f=>Path.GetDirectoryName(f)));
+                    var knownDirs = vs.IncludeDirectories.Concat(vs.SourceFiles.Select(f => Path.GetDirectoryName(f)));
 
                     foreach (var dep in extraDeps)
                     {
@@ -29,7 +29,7 @@ namespace BSPGenerationTools
                         {
                             bool found = false;
 
-                            foreach(var includeDir in vs.IncludeDirectories.Concat(vs.SourceFiles.Select(f=>Path.GetDirectoryName(f))))
+                            foreach (var includeDir in vs.IncludeDirectories.Concat(vs.SourceFiles.Select(f => Path.GetDirectoryName(f))))
                             {
                                 string baseDir = Path.GetDirectoryName(includeDir);
                                 if (dep.Replace('\\', '/').StartsWith(baseDir.Replace('\\', '/'), StringComparison.InvariantCultureIgnoreCase))
@@ -67,7 +67,7 @@ namespace BSPGenerationTools
                 if (path.StartsWith(_SampleDir.ToolchainDirectory, StringComparison.InvariantCultureIgnoreCase))
                     return null;
                 if (path.StartsWith(_SampleDir.BSPDirectory, StringComparison.InvariantCultureIgnoreCase))
-                    return null;
+                    return "$$SYS:BSP_ROOT$$/" + path.Substring(_SampleDir.BSPDirectory.Length + 1).Replace('\\', '/');
                 if (path.StartsWith(_SampleDir.SourceDirectory, StringComparison.InvariantCultureIgnoreCase))
                     return SampleRootDirMarker + "/" + path.Substring(_SampleDir.SourceDirectory.Length + 1).Replace('\\', '/');
 
@@ -164,15 +164,18 @@ namespace BSPGenerationTools
                 }
             }
 
-            foreach(var map in AutoPathMappings)
+            foreach (var map in AutoPathMappings)
             {
                 map.MapArray(ref sources);
                 map.MapArray(ref headers);
                 map.MapArray(ref includeDirs);
 
                 for (int i = 0; i < dependencies.Length; i++)
-                    if (dependencies[i].MappedFile != null && map.TryMap(dependencies[i].MappedFile) != null)
-                        dependencies[i].MappedFile = null;
+                    if (dependencies[i].MappedFile != null)
+                    {
+                        string mappedPath = map.TryMap(dependencies[i].MappedFile);
+                        dependencies[i].MappedFile = mappedPath ?? dependencies[i].MappedFile;
+                    }
             }
 
             dependencies = dependencies.Where(d => d.MappedFile != null).ToArray();
@@ -208,10 +211,11 @@ namespace BSPGenerationTools
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
 
-            foreach(var s in dir.Samples)
+            foreach (var s in dir.Samples)
             {
                 if (s.AllDependencies == null)
                     continue;
+
                 var deps = s.AllDependencies.Concat(s.SourceFiles).Distinct().Select(d => new ParsedDependency { OriginalFile = d, MappedFile = mapper.MapPath(d) }).Where(d => d.MappedFile != null).ToArray();
 
                 mapper.MapPathList(ref s.HeaderFiles);
@@ -222,7 +226,12 @@ namespace BSPGenerationTools
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
                 foreach (var dep in deps)
+                {
+                    if (dep.MappedFile.StartsWith("$$SYS:BSP_ROOT$$/"))
+                        continue;   //The file was already copied
                     copiedFiles[dep.OriginalFile] = dep.MappedFile.Replace(SampleRootDirMarker, outputDir);
+                }
+
 
                 s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
 
@@ -232,7 +241,7 @@ namespace BSPGenerationTools
             }
 
             Console.WriteLine($"Copying {copiedFiles.Count} files...");
-            foreach(var kv in copiedFiles)
+            foreach (var kv in copiedFiles)
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(kv.Value));
                 if (!File.Exists(kv.Value))

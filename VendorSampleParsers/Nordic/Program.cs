@@ -113,6 +113,9 @@ namespace NordicVendorSampleParser
                 XmlTools.SaveObject(sampleDir, sampleListFile);
             }
 
+            foreach (var s in sampleDir.Samples)
+                s.BSPReferencesAreCopyable = true;
+
             //Insert the samples into the generated BSP
             var relocator = new NordicSampleRelocator();
             relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir);
