@@ -537,6 +537,11 @@ namespace BSPGenerationTools
 
                 if (dir == ".")
                     return ".";
+                else if (dir == "?")
+                {
+                    relPath = TargetFolder;
+                    dir = ".";
+                }
                 else
                     relPath = Path.Combine(TargetFolder, dir);
 
@@ -549,7 +554,6 @@ namespace BSPGenerationTools
                     return "$$SYS:BSP_ROOT$$/" + relPath.Replace('\\', '/');
             }
         }
-
         private Condition ParseCondition(string rawCond)
         {
             int idx = rawCond.IndexOf("&&");

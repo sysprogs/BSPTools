@@ -13,8 +13,8 @@
 				<FilesToCopy>*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
-				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
-				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s;ti\drivers\utils\List.c=>drv_list.c</RenameRules>
+				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
+				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s;ti\drivers\utils\List.c=>drv_list.c;ti\posix\freertos\timer.c=>freertos_timer.c</RenameRules>
 				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart)\.c$=>drv_{1}.c</AdvancedRenameRules>
 			</CopyJob>				
 			<CopyJob>
@@ -22,7 +22,6 @@
 				<FilesToCopy>*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
-				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
 			</CopyJob>	
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:RULES_DIR$$</SourceFolder>
@@ -210,10 +209,7 @@
 				<AutoIncludeMask>-*</AutoIncludeMask>	
 				<TargetFolder>kernel\nortos</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
-				<AdditionalIncludeDirs>.;posix</AdditionalIncludeDirs>
-				<SmartFileConditions>
-					<string>Clock File|dpl\\ClockPCC32XX_nortos.c=>ClockPCC32XX_nortos;dpl\\ClockPTimer_nortos.c=>ClockPTimer_nortos</string>
-				</SmartFileConditions>
+				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
 				</CopyJob>	
 			</CopyJobs>
 			<AdditionalSystemVars>
@@ -250,15 +246,24 @@
 				<AutoIncludeMask>-*</AutoIncludeMask>	
 				<TargetFolder>kernel\freertos</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
-				<PreprocessorMacros>SL_PLATFORM_MULTI_THREADED;USE_FREERTOS</PreprocessorMacros>
-				<AdditionalIncludeDirs>.;posix</AdditionalIncludeDirs>
-				<Patches>
+				<PreprocessorMacros>SL_PLATFORM_MULTI_THREADED;USE_FREERTOS;PTLS_TLS_INDEX=0</PreprocessorMacros>
+				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source/ti/posix</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*MSP432*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>-ccs\*;-iar\*;-tirtos\*;-package\*;-freertos\package\*;-freertos\mtx.c;-freertos\reent.c;*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\ti\posix</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+				<AdditionalIncludeDirs>gcc</AdditionalIncludeDirs>
+--				<Patches>
 					<Patch xsi:type="ReplaceLine">
-						<FilePath>posix\mqueue.h</FilePath>
+						<FilePath>gcc\mqueue.h</FilePath>
 						<OldLine>typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</OldLine>
 						<NewLine>//typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</NewLine>
 					</Patch>
-				</Patches>
+				</Patches> 
 			</CopyJob>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\..\FreeRTOSv9.0.0\FreeRTOS</SourceFolder>

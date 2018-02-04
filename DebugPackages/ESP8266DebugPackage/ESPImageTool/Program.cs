@@ -59,9 +59,9 @@ namespace ESPImageTool
             bool esp32mode = false;
 
             if (esp32mode)
-                Console.WriteLine("ESP32 image tool v1.0 [http://sysprogs.com/]");
+                Console.WriteLine("ESP32 image tool v1.1 [http://sysprogs.com/]");
             else
-                Console.WriteLine("ESP8266 image tool v1.0 [http://sysprogs.com/]");
+                Console.WriteLine("ESP8266 image tool v1.1 [http://sysprogs.com/]");
 
             if (args.Length < 1)
             {
@@ -128,15 +128,29 @@ namespace ESPImageTool
                     files.Add(args[i]);
             }
 
-            ESP8266BinaryImage.ParsedHeader hdr = new ESP8266BinaryImage.ParsedHeader(frequency, mode, size);
-            Console.WriteLine("FLASH Parameters:");
-            Console.WriteLine("\tFrequency: " + DumpEnumValue(hdr.Frequency));
-            Console.WriteLine("\tMode: " + DumpEnumValue(hdr.Mode));
-            Console.WriteLine("\tSize: " + DumpEnumValue(hdr.Size));
+            ESP8266BinaryImage.IESPxxImageHeader hdr;
+            if (esp32mode)
+            {
+                var hdr2 = new ESP8266BinaryImage.ESP32ImageHeader(frequency, mode, size);
+                Console.WriteLine("FLASH Parameters:");
+                Console.WriteLine("\tFrequency: " + DumpEnumValue(hdr2.Frequency));
+                Console.WriteLine("\tMode: " + DumpEnumValue(hdr2.Mode));
+                Console.WriteLine("\tSize: " + DumpEnumValue(hdr2.Size));
+                hdr = hdr2;
+            }
+            else
+            {
+                var hdr2 = new ESP8266BinaryImage.ESP8266ImageHeader(frequency, mode, size);
+                Console.WriteLine("FLASH Parameters:");
+                Console.WriteLine("\tFrequency: " + DumpEnumValue(hdr2.Frequency));
+                Console.WriteLine("\tMode: " + DumpEnumValue(hdr2.Mode));
+                Console.WriteLine("\tSize: " + DumpEnumValue(hdr2.Size));
+                hdr = hdr2;
+            }
 
             if (otaPort != 0)
             {
-                OTAServer.ServeOTAFiles(otaPort, hdr, files.ToArray());
+                OTAServer.ServeOTAFiles(otaPort, (ESP8266BinaryImage.ESP8266ImageHeader)hdr, files.ToArray());
                 return;
             }
 
@@ -152,7 +166,7 @@ namespace ESPImageTool
                     string status;
                     if (esp32mode)
                     {
-                        var img = ESP8266BinaryImage.MakeESP32ImageFromELFFile(elfFile, hdr);
+                        var img = ESP8266BinaryImage.MakeESP32ImageFromELFFile(elfFile, (ESP8266BinaryImage.ESP32ImageHeader)hdr);
 
                         string fn = pathBase + "-esp32.bin";
                         using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
@@ -168,7 +182,7 @@ namespace ESPImageTool
 
                         if (appMode == 0)
                         {
-                            var img = ESP8266BinaryImage.MakeNonBootloaderImageFromELFFile(elfFile, hdr);
+                            var img = ESP8266BinaryImage.MakeNonBootloaderImageFromELFFile(elfFile, (ESP8266BinaryImage.ESP8266ImageHeader)hdr);
 
                             string fn = pathBase + "-0x00000.bin";
                             using (var fs = new FileStream(fn, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
@@ -190,7 +204,8 @@ namespace ESPImageTool
                         else
                         {
                             string fn;
-                            var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, hdr, appMode);
+                            var hdr2 = (ESP8266BinaryImage.ESP8266ImageHeader)hdr;
+                            var img = ESP8266BinaryImage.MakeBootloaderBasedImageFromELFFile(elfFile, hdr2, appMode);
 
                             if (bootloader == null)
                                 Console.WriteLine("Warning: no bootloader specified. Skipping bootloader...");
@@ -200,8 +215,8 @@ namespace ESPImageTool
                                     throw new Exception(bootloader + " not found. Cannot program OTA images.");
 
                                 byte[] data = File.ReadAllBytes(bootloader);
-                                data[2] = (byte)img.Header.Mode;
-                                data[3] = (byte)(((byte)img.Header.Size << 4) | (byte)img.Header.Frequency);
+                                data[2] = (byte)hdr2.Mode;
+                                data[3] = (byte)(((byte)hdr2.Size << 4) | (byte)hdr2.Frequency);
                                 fn = string.Format("{0}-boot.bin", pathBase);
                                 File.WriteAllBytes(fn, data);
 

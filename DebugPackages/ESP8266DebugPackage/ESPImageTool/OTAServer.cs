@@ -16,7 +16,7 @@ namespace ESPImageTool
             public string File;
         }
 
-        public static void ServeOTAFiles(int port, ESP8266BinaryImage.ParsedHeader hdr, params string[] elfFiles)
+        public static void ServeOTAFiles(int port, ESP8266BinaryImage.ESP8266ImageHeader hdr, params string[] elfFiles)
         {
             TcpListener listener = new TcpListener(port);
             byte[] buffer = new byte[1024];
