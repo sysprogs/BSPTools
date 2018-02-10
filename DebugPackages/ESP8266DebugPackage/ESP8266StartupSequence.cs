@@ -297,15 +297,18 @@ namespace ESP8266DebugPackage
             if (initDataAddress != 0)
             {
                 string initFile = settings.InitDataFile;
-                if (!string.IsNullOrEmpty(initFile))
+                if (initFile != "")
                 {
+                    if (initFile == null)
+                        initFile = ESPxxOpenOCDSettingsEditor.DefaultInitDataFile;
+
                     if (initFile.StartsWith("$$SYS:BSP_ROOT$$"))
                         initFile = bspDict["SYS:BSP_ROOT"] + initFile.Substring("$$SYS:BSP_ROOT$$".Length);
                     if (!Path.IsPathRooted(initFile))
                         initFile = Path.Combine(bspDict["SYS:PROJECT_DIR"], initFile);
 
                     if (!File.Exists(initFile))
-                        throw new Exception("Missing configuration file: " + initFile);
+                        throw new Exception("Missing initialization data file: " + initFile);
                     regions.Add(new ProgrammableRegion { FileName = initFile, Offset = initDataAddress, Size = File.ReadAllBytes(initFile).Length });
                 }
             }
