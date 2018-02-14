@@ -3,8 +3,8 @@
 	<Name>STM32H7</Name>
 	<DeviceRegex>^STM32H7.*</DeviceRegex>
 	<FamilySubdirectory>STM32H7xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
@@ -37,7 +37,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\STM32H7xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\STM32H7xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 					<Patches>	
@@ -49,7 +49,7 @@
 					</Patches>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-*Examples\*;-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
@@ -80,7 +80,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\BSP\STM32H743I_EVAL</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\BSP\STM32H743I_EVAL</SourceFolder>
 					<TargetFolder>BSP\STM32H743I_EVAL</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
@@ -129,7 +129,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\BSP\STM32H7xx_Nucleo_144</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\BSP\STM32H7xx_Nucleo_144</SourceFolder>
 					<TargetFolder>BSP\STM32H7xx_Nucleo_144</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
@@ -150,7 +150,7 @@
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<FilesToCopy>Device*system_stm*.c</FilesToCopy>
 				</CopyJob>
@@ -170,7 +170,7 @@
 				<DefaultEnabled>true</DefaultEnabled>
 				<CopyJobs>
 					<CopyJob>
-						<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.0.0\Drivers\BSP\Components</SourceFolder>
+						<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\BSP\Components</SourceFolder>
 						<TargetFolder>BSP\Components</TargetFolder>
 						<FilesToCopy>$$BSPGEN:FRAMEWORK$$\*;Common\*</FilesToCopy>
 						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>

@@ -351,7 +351,7 @@ namespace stm32_bsp_generator
 
             bool noPeripheralRegisters = args.Contains("/noperiph");
 
-            var files = string.Join("\r\n", File.ReadAllLines(@"E:\ware\Logfile.CSV").Select(l => l.Split(',')[4].Trim('\"')).Distinct().OrderBy(x => x).ToArray());
+            //var files = string.Join("\r\n", File.ReadAllLines(@"E:\ware\Logfile.CSV").Select(l => l.Split(',')[4].Trim('\"')).Distinct().OrderBy(x => x).ToArray());
 
             var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
             foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())

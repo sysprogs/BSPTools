@@ -588,13 +588,14 @@ namespace stm32_bsp_generator
                     if (!nested_types.ContainsKey(set_type + "_" + register.Name))
                         if (!dict_repeat_reg_addr.ContainsKey(register.Address))
                             dict_repeat_reg_addr[register.Address] = set_name + "_" + register.Name;
-                        else if (!(set_name.StartsWith("FMC_") && dict_repeat_reg_addr[register.Address].StartsWith("FSMC_")) &&
+                        else if (!(set_name.StartsWith("DMAMUX1_Channel0") && dict_repeat_reg_addr[register.Address].StartsWith("DMAMUX1")) && 
+                                !(set_name.StartsWith("FMC_") && dict_repeat_reg_addr[register.Address].StartsWith("FSMC_")) &&
                                 !(set_name.StartsWith("ADC") && dict_repeat_reg_addr[register.Address].StartsWith("ADC1")) &&
                                  !(set_name.StartsWith("DAC") && dict_repeat_reg_addr[register.Address].StartsWith("DAC")) &&
                                  !(set_name.StartsWith("COMP") && dict_repeat_reg_addr[register.Address].StartsWith("COMP")) &&
                                 (set_type != "SC_UART") && (set_type != "SC_SPI") && (set_type != "SC_I2C") && (set_type != "COMP") && (set_type != "OPAMP") && (set_type != "OPAMP_Common"))// This register is removed later on anyway as it is an either/or thing
                                                                                                                                                              //        throw new Exception("Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
-                            Console.WriteLine("560 PrepReg throw new Exception(Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
+                            Console.WriteLine("560 PrepReg throw new Exception(Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address]);
 
                     if (subregisters.ContainsKey(set_type + "_" + register.Name))
                     {
@@ -1570,12 +1571,38 @@ namespace stm32_bsp_generator
                                 aDefPosDict[m1.Groups[1].Value] = UInt32.Parse(m1.Groups[2].Value);
                             else
                             {
+                                //#define SDMMC_STA_DPSMACT_Msk           (0x1U << SDMMC_STA_CPSMACT_Pos)        /*!< 0x00001000 */
+                                //#define SDMMC_STA_CPSMACT_Pos  
                                 m1 = Regex.Match(line, @"#define[ \t]+([\w]+)[ \t]+\(0x([0-9A-Fa-fx]+)U << ([\w]+)\)");
                                 if (m1.Success)
                                 {
-                                    UInt32 aValueMask = UInt32.Parse(m1.Groups[2].Value, System.Globalization.NumberStyles.AllowHexSpecifier);
-                                    aValueMask = aValueMask << (int)aDefPosDict[m1.Groups[3].Value];
-                                    aDefPosDict[m1.Groups[1].Value] = aValueMask;
+                                    if (!aDefPosDict.ContainsKey(m1.Groups[3].Value))
+                                    {
+                                        for (int nextline2 = nextLine; nextline2 < lines.Length; nextline2++)
+                                        {
+                                            string line2 = lines[nextline2];
+                                            if (line2.Contains(m1.Groups[3].Value))
+                                            {
+                                                var m2 = Regex.Match(line2, @"#define[ \t]+([\w]+_Pos)[ \t]+\(([0-9A-Fa-f]+)U\)");
+                                                if (m2.Success)
+                                                {
+                                                    aDefPosDict[m2.Groups[1].Value] = UInt32.Parse(m2.Groups[2].Value);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                     
+                                    try
+                                    {
+                                        UInt32 aValueMask = UInt32.Parse(m1.Groups[2].Value, System.Globalization.NumberStyles.AllowHexSpecifier);
+                                        aValueMask = aValueMask << (int)aDefPosDict[m1.Groups[3].Value];
+                                        aDefPosDict[m1.Groups[1].Value] = aValueMask;
+                                    }catch(Exception ex)
+                                    {
+                                        Console.WriteLine("Exc 1589 Mes" + ex.Message + " Value" + m1.Groups[3].Value);
+                                        continue;
+                                    }
                                 }
                             }
                         }
