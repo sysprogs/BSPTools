@@ -43,7 +43,7 @@ namespace nrf5x
             {
                 if (pathInsidePackage.EndsWith(".hex") || pathInsidePackage.EndsWith(".zip") || pathInsidePackage.EndsWith(".ld") || pathInsidePackage.EndsWith(".eww") || pathInsidePackage.EndsWith(".uvmpw") || pathInsidePackage.Contains("experimental") || pathInsidePackage.Contains("\\ant\\") || pathInsidePackage.Contains("\\ser_"))
                     return false;
-                if (pathInsidePackage.Contains("nrf_drv_config.h") || pathInsidePackage.Contains("app_usbd_string_config.h"))
+                if (pathInsidePackage.Contains("nrf_drv_config.h") || pathInsidePackage.Contains("app_usbd_string_config.h") || pathInsidePackage.Contains(".emProject"))
                     return false;
                 return base.OnFilePathTooLong(pathInsidePackage);
             }
@@ -111,8 +111,10 @@ namespace nrf5x
                 static LDFileMemoryInfo FindLdsFile(string pDir, string sdname)
                 {
                     var allMatchingLinkerScripts = Directory.GetFiles(pDir, "*.ld", SearchOption.AllDirectories)
+                        .Where(fn => !fn.Contains("bootloader"))
                         .Where(fn => fn.IndexOf($"\\{sdname}\\", StringComparison.InvariantCultureIgnoreCase) != -1)
                         .Select(fn => new LDFileMemoryInfo(fn))
+                        .Where(i => i.HasAllNecessarySymbols)
                         .ToArray();
 
                     var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Origin).Last();
@@ -205,6 +207,7 @@ namespace nrf5x
                 };
 
                 List<string> lines = File.ReadAllLines(sd.LdOriginalName).ToList();
+                lines.Insert(0, $"/* Based on {sd.LdOriginalName} */");
 
                 var m = Regex.Match(lines.Find(s => s.Contains("INCLUDE")) ?? " ", "INCLUDE[ ]*\"([a-z0-9_.]*)");
                 if (m.Success)
@@ -239,7 +242,7 @@ namespace nrf5x
                         "  .softdevice_sram :",
                         "  {",
                         "    FILL(0xFFFFFFFF);",
-                        $"    . = {mems.RAM.Origin - SRAMBase:x8};",
+                        $"    . = 0x{mems.RAM.Origin - SRAMBase:x8};",
                         "  } > SRAM_SOFTDEVICE"
                     }
                 );
@@ -267,13 +270,16 @@ namespace nrf5x
                     string abi = "";
                     if (sd.Name == "S132" || sd.Name == "S140")
                     {
-                        sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
                     }
                     if (sd.Name == "s1xx_iot")
                     {
                         sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name;
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
+                    }
+                    if (sd.Name == "S112")
+                    {
+                        abi = " \"-mfloat-abi=soft\"";
                     }
 
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
@@ -333,6 +339,11 @@ namespace nrf5x
         {
             public readonly SingleMemoryInfo FLASH, RAM;
             public readonly string FullPath;
+
+            bool _HasBLEObservers, _HasPowerMgt;
+
+            public bool HasAllNecessarySymbols => _HasBLEObservers;// && _HasPowerMgt;
+
             public override string ToString() => FullPath;
 
             public LDFileMemoryInfo(string fn)
@@ -340,6 +351,11 @@ namespace nrf5x
                 FullPath = fn;
                 foreach (var line in File.ReadAllLines(fn))
                 {
+                    if (line.Contains("__stop_sdh_ble_observers"))
+                        _HasBLEObservers = true;
+                    if (line.Contains("__start_pwr_mgmt_data"))
+                        _HasBLEObservers = true;
+
                     var m = Regex.Match(line, $".*(FLASH|RAM).*ORIGIN[ =]+0x([a-fA-F0-9]+).*LENGTH[ =]+0x([a-fA-F0-9]+)");
                     if (m.Success)
                     {
@@ -378,11 +394,11 @@ namespace nrf5x
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
             bool usingIoTSDK = false;
 
-            if (Directory.Exists(Path.Combine(args[0], @"components\iot\ble_6lowpan")))
-            {
-                usingIoTSDK = true;
-                Console.WriteLine("Detected IoT SDK");
-            }
+            /*            if (Directory.Exists(Path.Combine(args[0], @"components\iot\ble_6lowpan")))
+                        {
+                            usingIoTSDK = true;
+                            Console.WriteLine("Detected IoT SDK");
+                        }*/
 
             if (usingIoTSDK)
             {
@@ -392,8 +408,9 @@ namespace nrf5x
             else
             {
                 bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf528(32|10).*", null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf52810.*", null, bspBuilder.Directories.InputDir));
             }
             List<MCUBuilder> devices = new List<MCUBuilder>();
 
@@ -410,9 +427,7 @@ namespace nrf5x
 
             devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/components/toolchain/gcc/gcc_startup_nrf52.S" });
             devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/components/toolchain/gcc/gcc_startup_nrf52840.S" });
-
-            //nRF52810 seems to have no FPU and no separate softdevice is provided yet. We skip it for now.
-            //devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M3, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/components/toolchain/gcc/gcc_startup_nrf52810.S" });
+            devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/components/toolchain/gcc/gcc_startup_nrf52810.S" });
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
@@ -521,11 +536,7 @@ namespace nrf5x
                 familyDefinitions.Add(famObj);
                 fam.GenerateLinkerScripts(false);
 
-                SysVarEntry defaultConfigFolder51 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "pca10040/s132" };// s132_pca10036" };
-                SysVarEntry defaultConfigFolder52 = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "pca10056/s140" };// s130_pca10028" };
-
-                SysVarEntry defaultConfigFolder51_pca = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_pca", Value = "pca10040" };// s132_pca10036" };
-                SysVarEntry defaultConfigFolder52_pca = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_pca", Value = "pca10056" };// s130_pca10028" };
+                SysVarEntry suffixEntry = null;
 
                 foreach (var mcu in fam.MCUs)
                 {
@@ -534,7 +545,7 @@ namespace nrf5x
                     if (mcu.Name.StartsWith("nRF52832"))
                     {
                         //Although documented as a legacy definition, skipping this breaks fds_internal_defs.h
-                        mcuDef.CompilationFlags.PreprocessorMacros = mcuDef.CompilationFlags.PreprocessorMacros.Concat(new[] {"NRF52"}).ToArray();
+                        mcuDef.CompilationFlags.PreprocessorMacros = mcuDef.CompilationFlags.PreprocessorMacros.Concat(new[] { "NRF52" }).ToArray();
                     }
 
                     var compatibleSoftdevs = new[]
@@ -571,11 +582,16 @@ namespace nrf5x
                         var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
                         prop.DefaultEntryIndex = idx;
                         prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
-
-                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { defaultConfigFolder51, defaultConfigFolder51_pca });
                     }
+
+                    string defaultConfig;
+                    if (mcu.Name.StartsWith("nRF52840"))
+                        defaultConfig = "pca10056/s140";
                     else
-                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { defaultConfigFolder52, defaultConfigFolder52_pca });
+                        defaultConfig = "pca10040/s132";
+
+                    suffixEntry = new SysVarEntry {Key = "com.sysprogs.nordic.default_config_suffix", Value = defaultConfig};
+                    mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { suffixEntry });
 
                     mcuDefinitions.Add(mcuDef);
                 }
@@ -586,7 +602,7 @@ namespace nrf5x
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
 
-                foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { defaultConfigFolder51 }))
+                foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { suffixEntry }))
                     exampleDirs.Add(sample);
             }
             bspBuilder.GenerateSoftdeviceLibraries();
@@ -606,7 +622,7 @@ namespace nrf5x
             {
                 strPackageID = "com.sysprogs.arm.nordic.nrf5x";
                 strPackageDesc = "Nordic NRF52x Devices";
-                strPAckVersion = "14.0";
+                strPAckVersion = "14.2";
             }
 
             BoardSupportPackage bsp = new BoardSupportPackage

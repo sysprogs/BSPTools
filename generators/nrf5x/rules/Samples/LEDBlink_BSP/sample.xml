@@ -11,6 +11,10 @@
   <DefaultConfiguration>
     <Entries>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
 	        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
         	<Value />
       </KeyValue>

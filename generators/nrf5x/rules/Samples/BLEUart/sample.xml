@@ -18,7 +18,7 @@
 		<ErrorCondition xsi:type="Not">
 			<Argument xsi:type="MatchesRegex">
 				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>S(110|130|310|132|140)</Regex>
+				<Regex>S.*</Regex>
 				<IgnoreCase>false</IgnoreCase>
 			</Argument>
 		</ErrorCondition>
@@ -27,6 +27,10 @@
   </ConditionalErrors>
   <DefaultConfiguration>
     <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>
+        <Value>yes</Value>
+      </KeyValue>
 	   <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt</Key>
         <Value>1</Value>

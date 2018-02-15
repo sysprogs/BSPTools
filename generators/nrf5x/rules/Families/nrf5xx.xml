@@ -157,6 +157,7 @@
 						
 						<string>spi_master\\nrf_drv_spi..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == master</string>
 						<string>spi_master\\spi_5W_master..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == 5W_master</string>
+						<string>swi\\*: $$com.sysprogs.bspoptions.nrf5x.swi_driver$$ == yes</string>
 						<string>spi_slave\\nrf_drv_spis..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == slave</string>
 						<string>.*\\twi_hw_master.c: $$com.sysprogs.bspoptions.nrf5x.twi_driver$$ == hw_master</string>
 						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.uart_driver$$ == yes</string>
@@ -191,6 +192,7 @@
 						  <DefaultEntryIndex>0</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>SWI driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.swi_driver</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>TWI Driver</Name>
 						  <UniqueID>com.sysprogs.bspoptions.nrf5x.twi_driver</UniqueID>
@@ -282,6 +284,9 @@
 						<string>pca10056.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA10056</string>
 						<string>pca20006.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == PCA20006</string>
 						<string>wt51822.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == WT51822</string>
+						<string>d52_starterkit.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == D52DK1</string>
+						<string>n5_starterkit.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == N5DK1</string>
+						<string>arduino_primo.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == ARDUINO_PRIMO</string>
 					</SimpleFileConditions>
 				</CopyJob>
 				<CopyJob>
@@ -304,7 +309,6 @@
 						  <SuggestionList>
 							<Suggestion><InternalValue>PCA10000</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA10001</InternalValue></Suggestion>
-							<Suggestion><InternalValue>PCA10002</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA10003</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA10028</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA10031</InternalValue></Suggestion>
@@ -314,6 +318,9 @@
 							<Suggestion><InternalValue>PCA20006</InternalValue></Suggestion>
 							<Suggestion><InternalValue>NRF6310</InternalValue></Suggestion>
 							<Suggestion><InternalValue>WT51822</InternalValue></Suggestion>
+							<Suggestion><InternalValue>N5DK1</InternalValue><UserFriendlyValue>N5 Starter Kit</UserFriendlyValue></Suggestion>
+							<Suggestion><InternalValue>D52DK1</InternalValue><UserFriendlyValue>D52 Starter Kit</UserFriendlyValue></Suggestion>
+							<Suggestion><InternalValue>ARDUINO_PRIMO</InternalValue></Suggestion>
 							<Suggestion><InternalValue>CUSTOM</InternalValue><UserFriendlyValue>Custom board</UserFriendlyValue></Suggestion>
 						  </SuggestionList>
 						  <DefaultEntryIndex>4</DefaultEntryIndex>
@@ -712,7 +719,7 @@
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEBeacon</SourceFolder>
 			<DestinationFolder>samples\BLEBeacon</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<MCUFilterRegex>^nRF528(32|10).*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/main.c</string>
@@ -745,7 +752,8 @@
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/main.c</string>
 			</AdditionalSources>
 		</SmartSample>
-		<SmartSample>
+<!-- Requires the __start_pwr_mgmt_data that is no longer defined for all softdevices -->
+<!--		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRSClient</SourceFolder>
 			<DestinationFolder>samples\BLE_HRSClient</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
@@ -753,7 +761,7 @@
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/main.c</string>
 			</AdditionalSources>
-		</SmartSample>
+		</SmartSample>-->
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMultilinkCentral</SourceFolder>
 			<DestinationFolder>samples\BLEMultilinkCentral</DestinationFolder>

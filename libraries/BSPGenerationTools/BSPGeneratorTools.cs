@@ -24,6 +24,7 @@ namespace BSPGenerationTools
         M0Plus,
         M3,
         M4,
+        M4_NOFPU,
         M7,
         R5F,
     }
@@ -361,6 +362,11 @@ namespace BSPGenerationTools
                     break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
+                    coreName = "M4";
+                    break;
+                case CortexCore.M4_NOFPU:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
                     coreName = "M4";
                     break;
@@ -744,7 +750,7 @@ namespace BSPGenerationTools
                     var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
                     foreach (var mcu in removed)
                         if (rgUnsupported == null || !rgUnsupported.IsMatch(mcu.Name))
-                            Console.WriteLine("throw new Exception(mcu.Name +  is not marked as unsupported, but cannot be categorized " + mcu.Name);
+                            throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized " + mcu.Name);
                 }
 
                 removedMCUs.AddRange(removed);

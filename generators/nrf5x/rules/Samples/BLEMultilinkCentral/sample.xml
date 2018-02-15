@@ -27,6 +27,10 @@
   <DefaultConfiguration>
     <Entries>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.pstorage_driver</Key>
         <Value>normal</Value>
       </KeyValue>
