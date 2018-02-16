@@ -59,7 +59,7 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
 				<TargetFolder></TargetFolder>
-				<FilesToCopy>-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;examples\*;external\*;svd\*</FilesToCopy>
+				<FilesToCopy>-*_iar.s;-*_keil.s;-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;examples\*;external\*;svd\*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>
 				<!--FilesToCopy>-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;examples\*;svd\*;-external\segger_rtt\*KEIL.*;-external\segger_rtt\*IAR.*;external\*</FilesToCopy>
@@ -80,6 +80,21 @@
 								<string>#include "config.h"</string>								
 							</InsertedLines>
 						</Patch>							
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
+							<OldLine>#define configTOTAL_HEAP_SIZE                                                     ( 4096 )</OldLine>
+							<NewLine>#define configTOTAL_HEAP_SIZE                                                     ( 16384 )</NewLine>
+						</Patch>						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
+							<OldLine>#define configMINIMAL_STACK_SIZE                                                  ( 60 )</OldLine>
+							<NewLine>#define configMINIMAL_STACK_SIZE                                                  ( 512 )</NewLine>
+						</Patch>						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
+							<OldLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 80 )</OldLine>
+							<NewLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 512 )</NewLine>
+						</Patch>						
 					</Patches>	
 			</CopyJob>
 			<CopyJob>
@@ -295,6 +310,9 @@
 					<ProjectInclusionMask>-bsp_btn_ant.*;*.c;*.h</ProjectInclusionMask>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<AlreadyCopied>true</AlreadyCopied>
+					<SimpleFileConditions>
+						<string>bsp_btn_ble.c: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
+					</SimpleFileConditions>
 				</CopyJob>
 			</CopyJobs>			
 			<ConfigurableProperties>
@@ -390,7 +408,7 @@
 						<string>sha256\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.sha256$$ == yes</string>
 						<string>simple_timer\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.simple_timer$$ == yes</string>
 						<string>slip\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.slip$$ == yes</string>
-						<string>timer\\app_timer..$: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ != none</string>
+						<string>timer\\app_timer..$: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == normal</string>
 						<string>timer\\app_timer_freertos..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
 						<string>timer\\app_timer_rtx..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == rtx</string>
 						<string>twi\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.twi$$ == yes</string>
@@ -605,6 +623,61 @@
 			  </ConfigurableProperties>
 			
 		</Framework>
+		<Framework>
+			<Name>FreeRTOS</Name>
+			<ID>com.sysprogs.arm.nordic.nrf51.freertos</ID>
+			<ProjectFolderName>FreeRTOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\freertos</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;portable\GCC\nrf52\*;portable\CMSIS\nrf52\*;-Source\Portable\*;-Portable\*;*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Portable/gcc/nrf52;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Portable/CMSIS/nrf52</AdditionalIncludeDirs>
+					<SimpleFileConditions>
+						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_1</string>
+						<string>Source\\portable\\MemMang\\heap_2.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_2</string>
+						<string>Source\\portable\\MemMang\\heap_3.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_3</string>
+						<string>Source\\portable\\MemMang\\heap_4.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_4</string>
+						<string>Source\\portable\\MemMang\\heap_5.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_5</string>
+					</SimpleFileConditions>
+				<Patches>
+				</Patches>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>FreeRTOS Heap Implementation</Name>
+						  <UniqueID>com.sysprogs.bspoptions.stm32.freertos.heap</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>heap_1</InternalValue><UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_2</InternalValue><UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_3</InternalValue><UserFriendlyName>Heap3 - use newlib malloc()/free()</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_4</InternalValue><UserFriendlyName>Heap4 - contiguous heap area</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_5</InternalValue><UserFriendlyName>Heap5 - scattered heap area</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>3</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.rtos_type</Key>
+					<Value>com.sysprogs.freertos</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
+		</Framework>	
 	</AdditionalFrameworks>
 	<Subfamilies>
 			<MCUClassifier>
@@ -692,9 +765,18 @@
 			<DestinationFolder>samples\LEDBlink</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky/pca10040/blank/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/radio_config/radio_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/sdio/config/sdio_config.h</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_FreeRTOS</SourceFolder>
+			<DestinationFolder>samples\LEDBlink_FreeRTOS</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky_freertos/pca10040/blank/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
@@ -752,20 +834,19 @@
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/main.c</string>
 			</AdditionalSources>
 		</SmartSample>
-<!-- Requires the __start_pwr_mgmt_data that is no longer defined for all softdevices -->
-<!--		<SmartSample>
+		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRSClient</SourceFolder>
 			<DestinationFolder>samples\BLE_HRSClient</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/main.c</string>
 			</AdditionalSources>
-		</SmartSample>-->
+		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMultilinkCentral</SourceFolder>
 			<DestinationFolder>samples\BLEMultilinkCentral</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/main.c</string>

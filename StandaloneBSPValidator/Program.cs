@@ -186,7 +186,23 @@ namespace StandaloneBSPValidator
                     foreach (var task in CompileTasks.Concat(OtherTasks))
                     {
                         sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
-                        sw.WriteLine($"\t{task.Executable} {task.Arguments}");
+                        if (task.Arguments.Length > 7000)
+                        {
+                            string prefixArgs = "", extArgs = task.Arguments;
+
+                            int idx = task.Arguments.IndexOf("$<");
+                            if (idx != -1)
+                            {
+                                prefixArgs = task.Arguments.Substring(0, idx + 2);
+                                extArgs = task.Arguments.Substring(idx + 2);
+                            }
+
+                            string rspFile = Path.ChangeExtension(Path.GetFileName(task.PrimaryOutput), ".rsp");
+                            File.WriteAllText(Path.Combine(Path.GetDirectoryName(filePath), rspFile), extArgs.Replace('\\', '/').Replace("/\"", "\\\""));
+                            sw.WriteLine($"\t{task.Executable} {prefixArgs} @{rspFile}");
+                        }
+                        else
+                            sw.WriteLine($"\t{task.Executable} {task.Arguments}");
                         sw.WriteLine();
                     }
                 }
@@ -500,7 +516,7 @@ namespace StandaloneBSPValidator
                         PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sf), ".o"),
                         AllInputs = new[] { sf },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c $< {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o {obj}",
+                        Arguments = $"-c $< {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -g -o {obj}",
                     });
                 }
             }

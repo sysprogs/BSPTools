@@ -115,7 +115,7 @@
 			</EmbeddedSample>
 		</SmartSample>	
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples</SourceFolder>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink_FreeRTOS</SourceFolder>
 			<DestinationFolder>Samples\LEDBlink_FreeRTOS</DestinationFolder>
 			<EmbeddedSample>
 			  <Name>LEDBlink (FreeRTOS)</Name>

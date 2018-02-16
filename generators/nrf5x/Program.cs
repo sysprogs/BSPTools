@@ -145,18 +145,18 @@ namespace nrf5x
 
             void DoGenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName, string ldsSuffix)
             {
-                using (var gen = new LdsFileGenerator(LDSTemplate, layout))
-                {
-                    using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev" + ldsSuffix + ".lds")))
-                        gen.GenerateLdsFile(sw);
-                }
-
                 foreach (var sd in SoftDevices)
                 {
                     if (!sd.IsCompatible(mcu.Name))
                         continue;
                     if (sd.LinkerScriptWithMaximumReservedRAM == null)
                     {
+                        using (var gen = new LdsFileGenerator(LDSTemplate, layout))
+                        {
+                            using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev" + ldsSuffix + ".lds")))
+                                gen.GenerateLdsFile(sw);
+                        }
+
                         //IoT
                         var softdevTemplate = LDSTemplate.ShallowCopy();
                         softdevTemplate.Sections = new List<Section>(softdevTemplate.Sections);
@@ -203,11 +203,14 @@ namespace nrf5x
                     "PROVIDE(_sidata = __etext);",
                     "PROVIDE(_estack = __StackTop);",
                     "PROVIDE(_edata =__data_end__);",
-                    "PROVIDE(__isr_vector = __StackTop);"
+                    "PROVIDE(__isr_vector = __StackTop);",
+                    "PROVIDE(_etext = __etext);"
                 };
 
                 List<string> lines = File.ReadAllLines(sd.LdOriginalName).ToList();
                 lines.Insert(0, $"/* Based on {sd.LdOriginalName} */");
+
+                InsertPowerMgmtData(lines);
 
                 var m = Regex.Match(lines.Find(s => s.Contains("INCLUDE")) ?? " ", "INCLUDE[ ]*\"([a-z0-9_.]*)");
                 if (m.Success)
@@ -216,7 +219,17 @@ namespace nrf5x
                     if (incf.Count() > 1)
                         throw new Exception("more include file");
                     if (!File.Exists(Path.Combine(ldsDirectory, m.Groups[1].Value)))
-                        File.Copy(incf[0], Path.Combine(ldsDirectory, m.Groups[1].Value));
+                    {
+                        string commonLds = Path.Combine(ldsDirectory, m.Groups[1].Value);
+
+                        var commonLines = File.ReadAllLines(incf[0]).ToList();
+                        var idx = commonLines.IndexOf("    .text :");
+                        if (idx == -1)
+                            throw new Exception("Could not find the beginning of section .text");
+                        commonLines.Insert(idx, "    _stext = .;");
+
+                        File.WriteAllLines(commonLds, commonLines.ToArray());
+                    }
                 }
 
                 var mems = sd.LinkerScriptWithMaximumReservedRAM;
@@ -256,10 +269,28 @@ namespace nrf5x
 
                 //no softdev
                 lines = File.ReadAllLines(sd.LdOriginalName).ToList();
+                InsertPowerMgmtData(lines);
                 var indFl = lines.FindOrThrow(s => s.Contains("FLASH"));
                 lines[indFl] = $"  FLASH (RX) :  ORIGIN = 0x{FLASHBase:x}, LENGTH = 0x{sd.LinkerScriptWithMaximumReservedRAM.FLASH.Origin + sd.LinkerScriptWithMaximumReservedRAM.FLASH.Length:x}";
                 lines.AddRange(providedSymbols);
                 File.WriteAllLines(Path.Combine(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev" + ldsSuffix + ".lds")), lines);
+            }
+
+            private static void InsertPowerMgmtData(List<string> lines)
+            {
+                int idx = lines.IndexOf("  .log_const_data :");
+                if (idx == -1)
+                    throw new Exception("Could not find the beginning of section .text");
+
+                lines.InsertRange(idx, new string[]
+                {
+                    "   .pwr_mgmt_data :",
+                    "  {",
+                    "    PROVIDE(__start_pwr_mgmt_data = .);",
+                    "    KEEP(*(SORT(.pwr_mgmt_data*)))",
+                    "    PROVIDE(__stop_pwr_mgmt_data = .);",
+                    "  } > FLASH"
+                });
             }
 
             internal void GenerateSoftdeviceLibraries()
@@ -386,6 +417,38 @@ namespace nrf5x
             }
         }
 
+        class NordicFamilyBuilder : MCUFamilyBuilder
+        {
+            public NordicFamilyBuilder(BSPBuilder bspBuilder, FamilyDefinition definition)
+                : base(bspBuilder, definition)
+            {
+            }
+
+            protected override void OnMissingSampleFile(MissingSampleFileArgs args)
+            {
+                string path = args.ExpandedPath;
+                if (path.Contains("pca10040e/s112"))
+                {
+                    string originalFn = path.Replace("pca10040e/s112", "pca10040/s132");
+                    if (ReplaceFile(originalFn, path))
+                        return;
+                }
+
+                base.OnMissingSampleFile(args);
+            }
+
+            bool ReplaceFile(string originalFn, string path)
+            {
+                if (File.Exists(originalFn))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    File.Copy(originalFn, path);
+                    return true;
+                }
+                return false;
+            }
+        }
+
         static NordicBSPBuilder bspBuilder;
         static void Main(string[] args)
         {
@@ -431,7 +494,7 @@ namespace nrf5x
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
-                allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
+                allFamilies.Add(new NordicFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
             var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
@@ -587,10 +650,12 @@ namespace nrf5x
                     string defaultConfig;
                     if (mcu.Name.StartsWith("nRF52840"))
                         defaultConfig = "pca10056/s140";
+                    else if (mcu.Name.StartsWith("nRF52810"))
+                        defaultConfig = "pca10040e/s112";
                     else
                         defaultConfig = "pca10040/s132";
 
-                    suffixEntry = new SysVarEntry {Key = "com.sysprogs.nordic.default_config_suffix", Value = defaultConfig};
+                    suffixEntry = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = defaultConfig };
                     mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { suffixEntry });
 
                     mcuDefinitions.Add(mcuDef);
@@ -602,7 +667,7 @@ namespace nrf5x
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
 
-                foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { suffixEntry }))
+                foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "pca10040e/s112" } }))
                     exampleDirs.Add(sample);
             }
             bspBuilder.GenerateSoftdeviceLibraries();
@@ -640,6 +705,7 @@ namespace nrf5x
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray(),
+                InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
             };
 
             bspBuilder.Save(bsp, true, false);

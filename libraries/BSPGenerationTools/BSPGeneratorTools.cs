@@ -14,6 +14,7 @@ using LinkerScriptGenerator;
 using System.Xml.Serialization;
 using System.IO.Compression;
 using System.Reflection;
+using System.Threading;
 
 namespace BSPGenerationTools
 {
@@ -162,18 +163,38 @@ namespace BSPGenerationTools
             if (Directory.Exists(dirs.OutputDir))
             {
                 Console.Write("Deleting {0}...", dirs.OutputDir);
-                try
-                {
-                    Directory.Delete(dirs.OutputDir, true);
-                }
-                catch
-                {
-                    if (Directory.GetFiles(dirs.OutputDir, "*", SearchOption.AllDirectories).Length != 0)
-                        throw;
-                }
+                DeleteDirectoryWithRetries(dirs.OutputDir);
                 Console.WriteLine(" done");
             }
             Directory.CreateDirectory(dirs.OutputDir);
+        }
+
+        void DeleteDirectoryWithRetries(string dir)
+        {
+            for (int retry = 0; ; retry++)
+            {
+                try
+                {
+                    Directory.Delete(dir, true);
+                    return;
+                }
+                catch
+                {
+                    try
+                    {
+                        if (Directory.GetFiles(dir, "*", SearchOption.AllDirectories).Length == 0)
+                            return;
+                    }
+                    catch
+                    {
+                    }
+
+                    if (retry >= 5)
+                        throw;
+
+                    Thread.Sleep(200);
+                }
+            }
         }
 
         public void Save(BoardSupportPackage bsp, bool produceBSPArchive, bool addFixedStackHeapFramework = true)
@@ -376,7 +397,7 @@ namespace BSPGenerationTools
                     coreName = "M7";
                     break;
                 case CortexCore.R5F:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mfpu=vfpv3-d16";
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mfpu=vfpv3-d16 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CR5" };
                     break;
                 default:
@@ -439,7 +460,7 @@ namespace BSPGenerationTools
             }
 
             if (coreName != null)
-                    family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName } });
+                family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName } });
         }
 
         public static bool IsHeaderFile(string fn)
@@ -594,6 +615,19 @@ namespace BSPGenerationTools
             public bool IsTestProjectSample;
         }
 
+        protected class MissingSampleFileArgs
+        {
+            public string UnexpandedPath, ExpandedPath;
+
+            public string SubstitutePath;   //Must work for ALL samples
+        }
+
+        protected virtual void OnMissingSampleFile(MissingSampleFileArgs args)
+        {
+            //DO NOT REPLACE THIS WITH A WARNING! If needed, override this method in specific generators.
+            throw new Exception($"Missing sample file: {args.ExpandedPath}. Please setup fallback lookup rules.");
+        }
+
         public IEnumerable<CopiedSample> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null, IEnumerable<SysVarEntry> extraVariablesToValidateSamples = null)
         {
             if (Definition.SmartSamples != null)
@@ -609,7 +643,7 @@ namespace BSPGenerationTools
                     else
                     {
                         var filters = new CopyFilters(sample.CopyFilters);
-                        foreach(var fn in Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories))
+                        foreach (var fn in Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories))
                         {
                             string relPath = fn.Substring(sourceDir.Length).TrimStart('\\');
                             if (filters.IsMatch(relPath))
@@ -636,9 +670,10 @@ namespace BSPGenerationTools
                                     return new AdditionalSourceFile { SourcePath = f.Substring(0, idx).Trim(), TargetFileName = f.Substring(idx + 2).Trim() };
                             }).ToArray();
 
-                        foreach (var f in sampleObj.AdditionalSourcesToCopy)
+
+                        for (int i = 0; i < sampleObj.AdditionalSourcesToCopy.Length; i++)
                         {
-                            string path = f.SourcePath.Replace("$$SYS:BSP_ROOT$$", BSP.Directories.OutputDir);
+                            string path = sampleObj.AdditionalSourcesToCopy[i].SourcePath.Replace("$$SYS:BSP_ROOT$$", BSP.Directories.OutputDir);
                             if (!File.Exists(path))
                             {
                                 if (extraVariablesToValidateSamples != null)
@@ -646,7 +681,23 @@ namespace BSPGenerationTools
                                         path = path.Replace("$$" + v.Key + "$$", v.Value);
 
                                 if (!File.Exists(path))
-                                    Console.WriteLine("Missing sample file: " + f.SourcePath);
+                                {
+                                    var args = new MissingSampleFileArgs { UnexpandedPath = sampleObj.AdditionalSourcesToCopy[i].SourcePath, ExpandedPath = path };
+                                    OnMissingSampleFile(args);
+                                    if (args.SubstitutePath != null)
+                                    {
+                                        if (args.SubstitutePath.StartsWith(BSP.BSPRoot))
+                                            args.SubstitutePath = "$$SYS:BSP_ROOT$$" + args.SubstitutePath.Substring(BSP.BSPRoot.Length).Replace('\\', '/');
+                                        else if (args.SubstitutePath.StartsWith("$$"))
+                                        {
+                                            //Already encoded
+                                        }
+                                        else
+                                            throw new Exception("Invalid substitute path: " + args.SubstitutePath);
+
+                                        sampleObj.AdditionalSourcesToCopy[i].SourcePath = args.SubstitutePath;
+                                    }
+                                }
                             }
                         }
                     }
@@ -769,7 +820,7 @@ namespace BSPGenerationTools
     {
         static CortexCore ParseCoreName(string core)
         {
-            switch (core.Replace(" ",""))
+            switch (core.Replace(" ", ""))
             {
                 case "ARMCortex-M0":
                     return CortexCore.M0;
@@ -846,7 +897,7 @@ namespace BSPGenerationTools
                     rawmcu_list.Add(mcu);
 
             }
-            rawmcu_list.Sort((a,b)=> a.Name.CompareTo(b.Name));
+            rawmcu_list.Sort((a, b) => a.Name.CompareTo(b.Name));
             return rawmcu_list;
         }
 

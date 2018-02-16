@@ -15,8 +15,6 @@ namespace NordicVendorSampleParser
     class Program
     {
         static string SDKdir;
-        static int CntSamles = 0;
-        static int FaildSamles = 0;
         static string outputDir = @"..\..\Output";
         static string toolchainDir;
 
@@ -105,7 +103,7 @@ namespace NordicVendorSampleParser
 
             ApplyKnownPatches();
             string sampleListFile = Path.Combine(outputDir, "samples.xml");
-            var sampleDir = BuildOrLoadSampleDirectory(SDKdir, outputDir, sampleListFile);
+            var sampleDir = BuildOrLoadSampleDirectory(SDKdir, outputDir, sampleListFile, toolchainDir);
             if (sampleDir.Samples.FirstOrDefault(s => s.AllDependencies != null) == null)
             {
                 //Perform Pass 1 testing - test the raw VendorSamples in-place
@@ -136,7 +134,7 @@ namespace NordicVendorSampleParser
                 throw new Exception("Some of the vendor samples failed to build. Check the build log.");
         }
         //-----------------------------------------------
-        private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile)
+        private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile, string toolchainDir)
         {
             ConstructedVendorSampleDirectory sampleDir;
             if (File.Exists(sampleListFile) || File.Exists(sampleListFile + ".gz"))
@@ -150,12 +148,7 @@ namespace NordicVendorSampleParser
                 Directory.Delete(outputDir, true);
             Directory.CreateDirectory(outputDir);
 
-            var samples = ParseVendorSamples(SDKdir);
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            ToLog($"Total exemples : {CntSamles}");
-            ToLog($"Failed exemples : {FaildSamles}, {CntSamles / 100 * FaildSamles} % from Total");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            var samples = ParseVendorSamples(SDKdir, toolchainDir + "/make");
 
             sampleDir = new ConstructedVendorSampleDirectory
             {
@@ -212,10 +205,10 @@ namespace NordicVendorSampleParser
             }
 
             // Processing arguments
-            lstFileInc.AddRange(string.Join(" ", splitArgs.Where(ar => ar.StartsWith("-I"))).Split(new string[] { "-I" }, StringSplitOptions.RemoveEmptyEntries));
-            lstDef.AddRange(string.Join(" ", splitArgs.Where(ar => ar.StartsWith("-D"))).Split(new string[] { "-D" }, StringSplitOptions.RemoveEmptyEntries));
+            lstFileInc.AddRange(splitArgs.Where(ar => ar.StartsWith("-I")).Select(a=>a.Substring(2).Trim()));
+            lstDef.AddRange(splitArgs.Where(ar => ar.StartsWith("-D")).Select(a=>a.Substring(2).Trim()));
 
-            lstFileC.AddRange(splitArgs.Where(ar => ar.EndsWith(".c") && !ar.Contains(@"components/toolchain/")));
+            lstFileC.AddRange(splitArgs.Where(ar => (ar.EndsWith(".c") || ar.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase)) && !ar.Contains(@"components/toolchain/")));
 
 
             //arguments from file
@@ -266,8 +259,9 @@ namespace NordicVendorSampleParser
             }
             Console.WriteLine(strlog);
         }
+
         //-----------------------------------------------
-        static List<VendorSample> ParseVendorSamples(string SDKdir)
+        static List<VendorSample> ParseVendorSamples(string SDKdir, string makeExecutable)
         {
             string[] ExampleDirs = Directory.GetFiles(Path.Combine(SDKdir, "examples"), "Makefile", SearchOption.AllDirectories).ToArray();
             if (!File.Exists(Path.Combine(SDKdir, @"components\toolchain\gcc\Makefile.windowsbak")))
@@ -276,6 +270,10 @@ namespace NordicVendorSampleParser
                 File.Copy(@"..\..\Makefile.windows", Path.Combine(SDKdir, @"components\toolchain\gcc\Makefile.windows"));
             }
             List<VendorSample> allSamples = new List<VendorSample>();
+
+            int samplesDone = 0;
+            int samplesFailed = 0;
+
 
             foreach (var makefile in ExampleDirs)
             {
@@ -294,12 +292,12 @@ namespace NordicVendorSampleParser
 
                 Process compiler = new Process();
                 compiler.StartInfo.FileName = "cmd.exe";
-                compiler.StartInfo.Arguments = "/c make VERBOSE=1 > log.txt 2>&1";
+                compiler.StartInfo.Arguments = $"/c {makeExecutable} -j{Environment.ProcessorCount} VERBOSE=1 > log.txt 2>&1";
                 compiler.StartInfo.UseShellExecute = false;
                 compiler.StartInfo.WorkingDirectory = Path.GetDirectoryName(makefile);
                 compiler.Start();
                 compiler.WaitForExit();
-                CntSamles++;
+                samplesDone++;
                 bool buildSucceeded;
 
                 buildSucceeded = compiler.ExitCode == 0;
@@ -307,11 +305,11 @@ namespace NordicVendorSampleParser
                 Console.ForegroundColor = ConsoleColor.Green;
                 if (!buildSucceeded)
                 {
-                    FaildSamles++;
+                    samplesFailed++;
                     Console.ForegroundColor = ConsoleColor.Red;
-                    File.Copy(nameLog, Path.Combine(outputDir, $"FaildLogs{nameExampl.Replace('\\', '-')}"));
+                    File.Copy(nameLog, Path.Combine(outputDir, $"FailureLog-{nameExampl.Replace('\\', '-').TrimEnd('-')}.txt"));
                 }
-                ToLog(string.Format("{2}: {0} - {1} (Failed: {3})", nameExampl, buildSucceeded ? "Succes" : "Failed ", CntSamles, FaildSamles));
+                ToLog($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
                 Console.ForegroundColor = ConsoleColor.Gray;
 
                 if (!buildSucceeded)
@@ -333,6 +331,12 @@ namespace NordicVendorSampleParser
                 File.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "log.txt"));
                 Directory.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "_build"), true);
             }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            ToLog($"Total samples : {samplesDone}");
+            ToLog($"Failed samples : {samplesFailed}, {samplesDone / 100 * samplesFailed} % from Total");
+            Console.ForegroundColor = ConsoleColor.Gray;
+
             return allSamples;
         }
     }

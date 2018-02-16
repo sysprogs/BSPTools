@@ -1,3 +1,11 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<InitializationCodeInsertionPoints>
+		<CodeInsertionPoint>
+			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\};]*\n([ \t]+)([^\t]*;)</Regex>
+			<InitGroupNumber>3</InitGroupNumber>
+			<IndentationGroupNumber>2</IndentationGroupNumber>
+			<InsertAfterGroup>false</InsertAfterGroup>
+		</CodeInsertionPoint>
+	</InitializationCodeInsertionPoints>
 </FamilyDefinition>

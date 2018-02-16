@@ -20,7 +20,7 @@
 		<ErrorCondition xsi:type="Not">
 			<Argument xsi:type="MatchesRegex">
 				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>S(110|130|310|132|140)</Regex>
+				<Regex>S.*</Regex>
 				<IgnoreCase>false</IgnoreCase>
 			</Argument>
 		</ErrorCondition>
@@ -135,11 +135,11 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.simple_timer</Key>
-        <Value />
+        <Value/>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.timer</Key>
-        <Value>appsh</Value>
+        <Value>normal</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.trace</Key>
