@@ -35,6 +35,11 @@
 	</Samples>
 	<RegisterRenamingRules>
 		<RegisterRenamingRule>
+			<RegisterSetRegex>OCTOSPIM|GFXMMU</RegisterSetRegex>
+			<RegisterRegex>PCR|LUT</RegisterRegex>
+			<Offset>-1</Offset>
+		</RegisterRenamingRule>
+		<RegisterRenamingRule>
 			<RegisterSetRegex>DSI</RegisterSetRegex>
 			<RegisterRegex>TCCR|WPCR|ISR|IER|FIR</RegisterRegex>
 		</RegisterRenamingRule>
