@@ -187,6 +187,7 @@
 						<string>Source\\portable\\GCC\\ARM_CM4_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4_MPU</string>
 						<string>Source\\portable\\GCC\\ARM_CM4F\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4F</string>
 						<string>Source\\portable\\GCC\\ARM_CM7\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7/r0p1</string>
+						<string>Source\\portable\\GCC\\ARM_CM7_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7_MPU/r0p1</string>
 					</SimpleFileConditions>
 				<Patches>
 					<Patch xsi:type="ReplaceLine">
@@ -229,6 +230,7 @@
 							<Suggestion><InternalValue>CM4_MPU</InternalValue><UserFriendlyName>ARM Cortex M4 with MPU</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>CM4F</InternalValue><UserFriendlyName>ARM Cortex M4 with Hardware FP</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>CM7/r0p1</InternalValue><UserFriendlyName>ARM Cortex M7</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM7_MPU/r0p1</InternalValue><UserFriendlyName>ARM Cortex M7 with MPU</UserFriendlyName></Suggestion>
 						  </SuggestionList>
 						  <DefaultEntryIndex>1</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>

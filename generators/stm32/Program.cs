@@ -316,6 +316,19 @@ namespace stm32_bsp_generator
 
         }
 
+        class STM32FamilyBuilder : MCUFamilyBuilder
+        {
+            public STM32FamilyBuilder(BSPBuilder bspBuilder, FamilyDefinition definition) : base(bspBuilder, definition)
+            {
+            }
+
+            protected override void OnMissingSampleFile(MissingSampleFileArgs args)
+            {
+                return;
+                base.OnMissingSampleFile(args);
+            }
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -333,7 +346,7 @@ namespace stm32_bsp_generator
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
-                allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
+                allFamilies.Add(new STM32FamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
             var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
@@ -372,7 +385,7 @@ namespace stm32_bsp_generator
                 if (!noPeripheralRegisters)
                     fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam));
 
-                familyDefinitions.Add(fam.GenerateFamilyObject(true));
+                familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
                 fam.GenerateLinkerScripts(false);
                 foreach (var mcu in fam.MCUs)
                     mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters));
@@ -401,7 +414,7 @@ namespace stm32_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "4.5R3",
+                PackageVersion = "4.6R2",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",

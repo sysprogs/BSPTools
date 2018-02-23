@@ -95,7 +95,7 @@ namespace BSPGenerationTools
                     LinkerScript = LinkerScriptPath,
                 },
                 AdditionalSourceFiles = new string[] { StartupFile }.Where(s => !string.IsNullOrEmpty(s)).ToArray(),
-                MCUDefinitionFile = MCUDefinitionFile
+                MCUDefinitionFile = MCUDefinitionFile,
             };
 
             if (fam.Definition.HasMixedCores)
@@ -311,9 +311,11 @@ namespace BSPGenerationTools
         public const string PrimaryMemoryOptionName = "com.sysprogs.bspoptions.primary_memory";
         public readonly FamilyDefinition Definition;
 
+        const string IgnoreStartupFileProperty = "com.sysprogs.mcuoptions.ignore_startup_file";
+
         public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables) => GenerateFamilyObject(defineConfigurationVariables ? CoreSpecificFlags.All : CoreSpecificFlags.None);
 
-        public MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate)
+        public MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate, bool allowExcludingStartupFiles = false)
         {
             var family = new MCUFamily { ID = Definition.Name };
 
@@ -341,13 +343,40 @@ namespace BSPGenerationTools
 
             family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, Definition.AdditionalSystemVars);
 
-            if (Definition.ConfigurableProperties != null)
+            if (Definition.ConfigurableProperties != null || allowExcludingStartupFiles)
             {
                 if (family.ConfigurableProperties == null)
                     family.ConfigurableProperties = new PropertyList();
 
-                family.ConfigurableProperties.Import(Definition.ConfigurableProperties);
+                if (Definition.ConfigurableProperties != null)
+                    family.ConfigurableProperties.Import(Definition.ConfigurableProperties);
+
+                if (allowExcludingStartupFiles && MCUs != null)
+                {
+                    family.ConfigurableProperties.Import(new PropertyList { PropertyGroups = new List<PropertyGroup>()
+                    {
+                        new PropertyGroup
+                        {
+                            Properties = new List<PropertyEntry>
+                            {
+                                new PropertyEntry.Boolean
+                                {
+                                    DefaultValue = false,
+                                    ValueForTrue = "1",
+                                    Name = "Exclude the startup file from project",
+                                    UniqueID = IgnoreStartupFileProperty,
+                                }
+                            }
+                        }
+                    }
+                    });
+
+                    foreach (var mcu in MCUs)
+                        if (mcu.StartupFile != null)
+                            BSP.MatchedFileConditions.Add(new FileCondition { FilePath = mcu.StartupFile, ConditionToInclude = new Condition.Not { Argument = new Condition.Equals { Expression = $"$${IgnoreStartupFileProperty}$$", ExpectedValue = "1" } } });
+                }
             }
+
 
             return family;
         }

@@ -53,8 +53,8 @@
 					<FilesToCopy>-*Examples\*;-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-*Include\stm32h7????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;*.h</AutoIncludeMask>		
+					<ProjectInclusionMask>-*Include\stm32h7????.h*;-*system_*.c;-RTOS2\Template\*;*</ProjectInclusionMask>
+					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;*.h</AutoIncludeMask>		
 					<Patches>											
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>Device\ST\STM32H7xx\Source\Templates\system_stm32h7xx.c</FilePath>

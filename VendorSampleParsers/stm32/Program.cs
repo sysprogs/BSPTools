@@ -220,7 +220,7 @@ namespace GeneratorSampleStm32
             {
                 if (path.StartsWith(Prefix1))
                 {
-                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.0.0{path.Substring(Prefix1.Length)}";
+                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.2.0{path.Substring(Prefix1.Length)}";
                     if (!File.Exists(path) && !Directory.Exists(path))
                         throw new Exception("Missing " + path);
                 }
