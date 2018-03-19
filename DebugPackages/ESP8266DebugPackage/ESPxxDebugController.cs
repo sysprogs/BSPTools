@@ -116,66 +116,113 @@ namespace ESP8266DebugPackage
             }
             else
             {
-                var blocks = ESP32StartupSequence.BuildFLASHImages(service.TargetPath, service.SystemDictionary, settings.FLASHSettings, (settings as IESP32Settings)?.PatchBootloader ?? false);
-
-                if (settings.FLASHResources != null)
-                    foreach (var r in settings.FLASHResources)
-                        if (r.Valid)
-                            blocks.Add(r.ToProgrammableRegion(service));
-
-                Regex rgFLASHSize = new Regex("Auto-detected flash size ([0-9]+) KB");
-                if (settings.CheckFLASHSize)
+                if (settings.ProgramUsingIDF)
                 {
-                    var match = stub.Tool.AllText.Split('\n').Select(s => rgFLASHSize.Match(s)).FirstOrDefault(m => m.Success);
-                    if (match != null)
-                    {
-                        int detectedSizeKB = int.Parse(match.Groups[1].Value);
-                        int specifiedSizeMB = 0;
-                        switch (settings.FLASHSettings.Size)
-                        {
-                            case ESP8266BinaryImage.ESP32FLASHSize.size1MB:
-                                specifiedSizeMB = 1;
-                                break;
-                            case ESP8266BinaryImage.ESP32FLASHSize.size2MB:
-                                specifiedSizeMB = 2;
-                                break;
-                            case ESP8266BinaryImage.ESP32FLASHSize.size4MB:
-                                specifiedSizeMB = 4;
-                                break;
-                            case ESP8266BinaryImage.ESP32FLASHSize.size8MB:
-                                specifiedSizeMB = 8;
-                                break;
-                            case ESP8266BinaryImage.ESP32FLASHSize.size16MB:
-                                specifiedSizeMB = 16;
-                                break;
-                        }
+                    string bash, bashArgs;
+                    if (!service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.bash", out bash) || !service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.bash_args", out bashArgs))
+                        throw new Exception("ESP-IDF did not report esptool arguments");
 
-                        if (detectedSizeKB < (specifiedSizeMB * 1024) && detectedSizeKB >= 1024)
+                    var tool = service.LaunchCommandLineTool(new CommandLineToolLaunchInfo
+                    {
+                        Command = bash,
+                        Arguments = bashArgs
+                    });
+
+                    ESP32StubDebugController.GDBStubInstance.ReportFLASHProgrammingProgress(tool, service, session);
+
+                    string text = tool.AllText;
+                    int validLines = text.Split('\n').Count(l => l.Trim() == "Hash of data verified.");
+                    int binCount = 0;
+                    if (service.MCU.Configuration.TryGetValue("com.sysprogs.esp32.esptool.binaries.count", out var tmp))
+                        int.TryParse(tmp, out binCount);
+                    binCount = 0;
+
+                    if (validLines < binCount)
+                        service.GUIService.Report("Warning: some of the FLASH regions could not be programmed. Please examine the stub output for details.", System.Windows.Forms.MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    List<ProgrammableRegion> blocks;
+                    if (service.MCU.Configuration.TryGetValue("com.sysprogs.esp32.esptool.binaries.count", out var tmp) && int.TryParse(tmp, out var binaryCount) && binaryCount > 0)
+                    {
+                        blocks = new List<ProgrammableRegion>();
+                        for (int i = 0; i < binaryCount; i++)
                         {
-                            if (service.GUIService.Prompt($"The FLASH size specified via Project Properties is greater than the actual SPI FLASH size on your device. Please switch FLASH size to {detectedSizeKB / 1024}MB or less.\nDo you want to cancel FLASH programming?", System.Windows.Forms.MessageBoxIcon.Warning))
-                                throw new OperationCanceledException();
+                            string fn = service.MCU.Configuration[$"com.sysprogs.esp32.esptool.binaries[{i}].path"];
+
+                            blocks.Add(new ProgrammableRegion
+                            {
+                                FileName = fn,
+                                Size = File.ReadAllBytes(fn).Length,
+                                Offset = int.Parse(service.MCU.Configuration[$"com.sysprogs.esp32.esptool.binaries[{i}].address"])
+                            });
                         }
                     }
-                }
-
-                using (var ctx = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Programming FLASH memory" }))
-                {
-                    int blkNum = 0;
-                    Regex rgWriteXBytes = new Regex("wrote ([0-9]+) bytes from file");
-                    foreach (var blk in blocks)
+                    else
                     {
-                        ctx.ReportTaskProgress(blkNum++, blocks.Count);
-                        string path = blk.FileName.Replace('\\', '/');
-                        var result = session.RunGDBCommand($"mon program_esp32 \"{path}\" 0x{blk.Offset:x}");
-                        bool succeeded = result.StubOutput?.FirstOrDefault(l => l.Contains("** Programming Finished **")) != null;
-                        if (!succeeded)
-                            throw new Exception("FLASH programming failed. Please review the gdb/OpenOCD logs for details.");
-                        var m = result.StubOutput.Select(l => rgWriteXBytes.Match(l)).FirstOrDefault(m2 => m2.Success);
-                        if (m == null)
-                            throw new Exception("FLASH programming did not report the amount of written bytes. Please review the gdb/OpenOCD logs for details.");
-                        int bytesWritten = int.Parse(m.Groups[1].Value);
-                        if (bytesWritten == 0 && blk.Size > 0)
-                            throw new Exception("FLASH programming did not write any data. This is a known bug of ESP32 OpenOCD. Please restart your device and JTAG programmer and try again.");
+                        bool patchBootloader = (settings as IESP32Settings)?.PatchBootloader ?? false;
+                        blocks = ESP32StartupSequence.BuildFLASHImages(service.TargetPath, service.SystemDictionary, settings.FLASHSettings, patchBootloader);
+                    }
+
+                    if (settings.FLASHResources != null)
+                        foreach (var r in settings.FLASHResources)
+                            if (r.Valid)
+                                blocks.Add(r.ToProgrammableRegion(service));
+
+                    Regex rgFLASHSize = new Regex("Auto-detected flash size ([0-9]+) KB");
+                    if (settings.CheckFLASHSize)
+                    {
+                        var match = stub.Tool.AllText.Split('\n').Select(s => rgFLASHSize.Match(s)).FirstOrDefault(m => m.Success);
+                        if (match != null)
+                        {
+                            int detectedSizeKB = int.Parse(match.Groups[1].Value);
+                            int specifiedSizeMB = 0;
+                            switch (settings.FLASHSettings.Size)
+                            {
+                                case ESP8266BinaryImage.ESP32FLASHSize.size1MB:
+                                    specifiedSizeMB = 1;
+                                    break;
+                                case ESP8266BinaryImage.ESP32FLASHSize.size2MB:
+                                    specifiedSizeMB = 2;
+                                    break;
+                                case ESP8266BinaryImage.ESP32FLASHSize.size4MB:
+                                    specifiedSizeMB = 4;
+                                    break;
+                                case ESP8266BinaryImage.ESP32FLASHSize.size8MB:
+                                    specifiedSizeMB = 8;
+                                    break;
+                                case ESP8266BinaryImage.ESP32FLASHSize.size16MB:
+                                    specifiedSizeMB = 16;
+                                    break;
+                            }
+
+                            if (detectedSizeKB < (specifiedSizeMB * 1024) && detectedSizeKB >= 1024)
+                            {
+                                if (service.GUIService.Prompt($"The FLASH size specified via Project Properties is greater than the actual SPI FLASH size on your device. Please switch FLASH size to {detectedSizeKB / 1024}MB or less.\nDo you want to cancel FLASH programming?", System.Windows.Forms.MessageBoxIcon.Warning))
+                                    throw new OperationCanceledException();
+                            }
+                        }
+                    }
+
+                    using (var ctx = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Programming FLASH memory" }))
+                    {
+                        int blkNum = 0;
+                        Regex rgWriteXBytes = new Regex("wrote ([0-9]+) bytes from file");
+                        foreach (var blk in blocks)
+                        {
+                            ctx.ReportTaskProgress(blkNum++, blocks.Count);
+                            string path = blk.FileName.Replace('\\', '/');
+                            var result = session.RunGDBCommand($"mon program_esp32 \"{path}\" 0x{blk.Offset:x}");
+                            bool succeeded = result.StubOutput?.FirstOrDefault(l => l.Contains("** Programming Finished **")) != null;
+                            if (!succeeded)
+                                throw new Exception("FLASH programming failed. Please review the gdb/OpenOCD logs for details.");
+                            var m = result.StubOutput.Select(l => rgWriteXBytes.Match(l)).FirstOrDefault(m2 => m2.Success);
+                            if (m == null)
+                                throw new Exception("FLASH programming did not report the amount of written bytes. Please review the gdb/OpenOCD logs for details.");
+                            int bytesWritten = int.Parse(m.Groups[1].Value);
+                            if (bytesWritten == 0 && blk.Size > 0)
+                                throw new Exception("FLASH programming did not write any data. This is a known bug of ESP32 OpenOCD. Please restart your device and JTAG programmer and try again.");
+                        }
                     }
                 }
             }

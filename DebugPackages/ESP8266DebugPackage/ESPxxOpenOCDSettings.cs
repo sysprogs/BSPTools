@@ -40,6 +40,7 @@ namespace ESP8266DebugPackage
         public ESP8266BinaryImage.ESP32ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP32ImageHeader();
         public bool PatchBootloader { get; set; } = true;
         public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
+        public bool ProgramUsingIDF { get; set; }
 
     }
 
@@ -105,6 +106,8 @@ namespace ESP8266DebugPackage
             : base(host, baseDir, settings ?? (isESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings()), context)
         {
             IsESP32 = isESP32;
+            _ESPIDFMode = host.MCU.Configuration.ContainsKey("com.sysprogs.esp32.idf.sdkconfig");
+
             Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
             if (settings == null)
             {
@@ -132,8 +135,13 @@ namespace ESP8266DebugPackage
 
         public new ESPxxOpenOCDSettings Settings => (ESPxxOpenOCDSettings)base.Settings;
 
+        bool _ESPIDFMode;
+
         public Visibility ESP32Visibility => IsESP32 ? Visibility.Visible : Visibility.Collapsed;
         public Visibility ESP8266Visibility => !IsESP32 ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility FLASHSettingVisibility => _ESPIDFMode ? Visibility.Collapsed : Visibility.Visible;
+        public Visibility ESPIDFHintVisibility => _ESPIDFMode ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ESP32FLASHVisibility => (IsESP32 && !_ESPIDFMode) ? Visibility.Visible : Visibility.Collapsed;
 
 
         public ESP8266BinaryImage.IESPxxImageHeader FLASHSettings => Settings.GetFLASHSettings();
@@ -239,6 +247,12 @@ namespace ESP8266DebugPackage
                 OnPropertyChanged(nameof(AutofeedWatchdog));
                 OnPropertyChanged(nameof(StartupCommands));
             }
+        }
+
+        public bool ProgramUsingIDF
+        {
+            get => (Settings as ESP32OpenOCDSettings)?.ProgramUsingIDF ?? false;
+            set => (Settings as ESP32OpenOCDSettings).ProgramUsingIDF = value;
         }
 
         public const string DefaultInitDataFile = "$$SYS:BSP_ROOT$$/IoT-SDK/bin/esp_init_data_default.bin";

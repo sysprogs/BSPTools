@@ -96,7 +96,7 @@ namespace ESP8266DebugPackage
 
             public IConsoleOutputClassifier OutputClassifier => null;
 
-            public void ConnectGDBToStub(IDebugStartService service, ISimpleGDBSession session)
+            public static void ReportFLASHProgrammingProgress(IExternalToolInstance tool, IDebugStartService service, ISimpleGDBSession session)
             {
                 using (var r = session.CreateScopedProgressReporter("Programming FLASH memory", new string[] { "Loading FLASH memory" }))
                 {
@@ -116,22 +116,26 @@ namespace ESP8266DebugPackage
 
                     try
                     {
-                        Tool.LineReceived += handler;
-                        while (Tool.IsRunning && !r.IsAborted)
+                        tool.LineReceived += handler;
+                        while (tool.IsRunning && !r.IsAborted)
                             Thread.Sleep(100);
 
                         if (r.IsAborted)
                         {
-                            Tool.TerminateProgram();
+                            tool.TerminateProgram();
                             throw new OperationCanceledException();
                         }
                     }
                     finally
                     {
-                        Tool.LineReceived -= handler;
+                        tool.LineReceived -= handler;
                     }
                 }
+            }
 
+            public void ConnectGDBToStub(IDebugStartService service, ISimpleGDBSession session)
+            {
+                ReportFLASHProgrammingProgress(Tool, service, session);
                 string text = Tool.AllText;
                 int validLines = text.Split('\n').Count(l => l.Trim() == "Hash of data verified.");
                 if (validLines >= _RegionCount.Count)
