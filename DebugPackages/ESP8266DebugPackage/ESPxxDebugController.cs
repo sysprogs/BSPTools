@@ -122,6 +122,25 @@ namespace ESP8266DebugPackage
                     if (!service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.bash", out bash) || !service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.bash_args", out bashArgs))
                         throw new Exception("ESP-IDF did not report esptool arguments");
 
+                    if (service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.script", out var script) && File.Exists(script))
+                    {
+                        var lines = File.ReadAllLines(script).ToList();
+                        int idx = Enumerable.Range(0, lines.Count).FirstOrDefault(i => lines[i].Contains("def hard_reset(self):"));
+                        if (idx > 0 && idx < (lines.Count - 1))
+                        {
+                            if (!lines[idx + 1].Contains("self._port.setDTR(False)"))
+                            {
+                                if (service.GUIService.Prompt("The esptool.py binary used in the current ESP-IDF contains known compatibility issue with Cygwin. Do you want to patch it automatically?"))
+                                {
+                                    Regex rgIndent = new Regex("^([ \t]*)[^ \t]");
+                                    var m = rgIndent.Match(lines[idx + 1]);
+                                    lines.Insert(idx + 1, m.Groups[1].Value + "self._port.setDTR(False)  # IO0=HIGH");
+                                    File.WriteAllLines(script, lines.ToArray());
+                                }
+                            }
+                        }
+                    }
+
                     var tool = service.LaunchCommandLineTool(new CommandLineToolLaunchInfo
                     {
                         Command = bash,
