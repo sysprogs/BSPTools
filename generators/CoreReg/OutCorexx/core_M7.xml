@@ -165,6 +165,58 @@
       </SubRegisters>
     </HardwareRegister>
     <HardwareRegister>
+      <Name>NVIC_ISER4</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e110</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ISER5</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e114</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ISER6</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e118</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ISER7</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e11c</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
       <Name>NVIC_ICER0</Name>
       <SizeInBits>32</SizeInBits>
       <Address>0xe000e180</Address>
@@ -207,6 +259,58 @@
       <Name>NVIC_ICER3</Name>
       <SizeInBits>32</SizeInBits>
       <Address>0xe000e18c</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ICER4</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e190</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ICER5</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e194</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ICER6</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e198</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRENA</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ICER7</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e19c</Address>
       <ReadOnly>false</ReadOnly>
       <SubRegisters>
         <HardwareSubRegister>
@@ -269,6 +373,58 @@
       </SubRegisters>
     </HardwareRegister>
     <HardwareRegister>
+      <Name>NVIC_ISPR4</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e210</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ISPR5</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e214</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ISPR6</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e218</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ISPR7</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e21c</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>SETPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
       <Name>NVIC_ICPR0</Name>
       <SizeInBits>32</SizeInBits>
       <Address>0xe000e280</Address>
@@ -321,6 +477,58 @@
       </SubRegisters>
     </HardwareRegister>
     <HardwareRegister>
+      <Name>NVIC_ICPR4</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e290</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ICPR5</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e294</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ICPR6</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e298</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_ICPR7</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e29c</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>CLRPEND</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
       <Name>NVIC_IABR0</Name>
       <SizeInBits>32</SizeInBits>
       <Address>0xe000e300</Address>
@@ -363,6 +571,58 @@
       <Name>NVIC_IABR3</Name>
       <SizeInBits>32</SizeInBits>
       <Address>0xe000e30c</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>ACTIVE</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_IABR4</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e310</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>ACTIVE</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_IABR5</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e314</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>ACTIVE</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_IABR6</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e318</Address>
+      <ReadOnly>false</ReadOnly>
+      <SubRegisters>
+        <HardwareSubRegister>
+          <Name>ACTIVE</Name>
+          <FirstBit>0</FirstBit>
+          <SizeInBits>32</SizeInBits>
+        </HardwareSubRegister>
+      </SubRegisters>
+    </HardwareRegister>
+    <HardwareRegister>
+      <Name>NVIC_IABR7</Name>
+      <SizeInBits>32</SizeInBits>
+      <Address>0xe000e31c</Address>
       <ReadOnly>false</ReadOnly>
       <SubRegisters>
         <HardwareSubRegister>
