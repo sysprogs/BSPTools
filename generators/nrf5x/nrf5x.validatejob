@@ -29,13 +29,13 @@
 			<TestDirSuffix>-BLEBeacon</TestDirSuffix>
 		</TestedSample>	 
 		<TestedSample>
-			<Name>Bluetooth LE Heart Rate Service Client</Name>
+			<Name>Bluetooth LE HRS Client</Name>
 			<SkipIfNotFound>true</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLE_HRSClient</TestDirSuffix>
 		</TestedSample>
 		<TestedSample>
-			<Name>Bluetooth LE Heart Rate Service Peripheral</Name>
+			<Name>Bluetooth LE HRS Peripheral</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLE_HRSPeripheral</TestDirSuffix>

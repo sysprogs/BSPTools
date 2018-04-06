@@ -41,6 +41,17 @@
 			</Flags>
 		</ConditionalToolFlags>
 		<ConditionalToolFlags>
+			<FlagCondition xsi:type="Equals">
+				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
+				<ExpectedValue>nosoftdev</ExpectedValue>
+			</FlagCondition>
+			<Flags>
+				<IncludeDirectories>
+					<string>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/nrf_soc_nosd</string>
+				</IncludeDirectories>
+			</Flags>
+		</ConditionalToolFlags>
+		<ConditionalToolFlags>
 			<FlagCondition xsi:type="Not">
 				<Argument xsi:type="Equals">
 					<Expression>$$com.sysprogs.bspoptions.nrf5x.libraries.timer$$</Expression>
@@ -162,6 +173,7 @@
 					<TargetFolder>components\drivers_nrf</TargetFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
+					<AutoIncludeMask>-nrf_soc_nosd\*;*.h</AutoIncludeMask>
 					<SimpleFileConditions>					
 						<string>saadc\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
 						<string>comp\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
@@ -169,7 +181,8 @@
 						<string>pdm\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
 						<string>pwm\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
 						<string>twis_slave\\*: $$com.sysprogs.bspoptions.nrf5x.defmak$$ == NRF52</string>
-						
+						<string>nrf_soc_nosd\\*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ == nosoftdev</string>
+
 						<string>spi_master\\nrf_drv_spi..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == master</string>
 						<string>spi_master\\spi_5W_master..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == 5W_master</string>
 						<string>swi\\*: $$com.sysprogs.bspoptions.nrf5x.swi_driver$$ == yes</string>

@@ -670,6 +670,20 @@ namespace nrf5x
                 foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "pca10040e/s112" } }))
                     exampleDirs.Add(sample);
             }
+
+            const string softdevExpression = "$$com.sysprogs.bspoptions.nrf5x.softdevice$$";
+
+            foreach (var softdev in bspBuilder.SoftDevices)
+                condFlags.Add(new ConditionalToolFlags
+                {
+                    FlagCondition = new Condition.Equals {Expression = softdevExpression, ExpectedValue = softdev.Name + "_reserve"},
+                    Flags = new ToolFlags
+                    {
+                        PreprocessorMacros = familyDefinitions.First().CompilationFlags.PreprocessorMacros.Where(f=>f.Contains(softdevExpression)).Select(f=>f.Replace(softdevExpression, softdev.Name)).ToArray(),
+                        IncludeDirectories = familyDefinitions.First().CompilationFlags.IncludeDirectories.Where(f=>f.Contains(softdevExpression)).Select(f=>f.Replace(softdevExpression, softdev.Name)).ToArray()
+                    }
+                });
+
             bspBuilder.GenerateSoftdeviceLibraries();
 
             Console.WriteLine("Building BSP archive...");
@@ -687,7 +701,7 @@ namespace nrf5x
             {
                 strPackageID = "com.sysprogs.arm.nordic.nrf5x";
                 strPackageDesc = "Nordic NRF52x Devices";
-                strPAckVersion = "14.2";
+                strPAckVersion = "14.2R2";
             }
 
             BoardSupportPackage bsp = new BoardSupportPackage

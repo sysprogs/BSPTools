@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	  <Name>Bluetooth LE Heart Rate Service Client</Name>
-	  <Description>This sample demonstrates a Bluetooth LE Central device collecting information from peripherals running the Heart Rate Service</Description>
+	  <Name>Bluetooth LE HRS Client</Name>
+	  <Description>This sample demonstrates a Bluetooth LE Central device collecting information from Heart Rate Service peripherals</Description>
 	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
     <string>com.sysprogs.arm.nordic.nrf5x.periph</string>
