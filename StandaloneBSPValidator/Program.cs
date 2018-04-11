@@ -473,12 +473,15 @@ namespace StandaloneBSPValidator
 
             return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
         }
-
+        private static bool flEsp32;
         private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros,BSPEngine.VendorSample vendorSample = null)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
 
+            //esp32
+            if(flEsp32)
+                prefix = prefix.Replace('\\', '/');
             job.OtherTasks.Add(new BuildTask
             {
                 Executable = prefix + "g++",
@@ -501,6 +504,7 @@ namespace StandaloneBSPValidator
 
             foreach (var sf in prj.SourceFiles)
             {
+                var sfE = sf.Replace('\\', '/');
                 string ext = Path.GetExtension(sf);
                 if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
                 {
@@ -510,13 +514,14 @@ namespace StandaloneBSPValidator
                 else
                 {
                     bool isCpp = ext.ToLower() != ".c";
-                    string obj = Path.ChangeExtension(Path.GetFileName(sf), ".o");
+                    string obj = Path.ChangeExtension(Path.GetFileName(sfE), ".o");
                     job.CompileTasks.Add(new BuildTask
                     {
-                        PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sf), ".o"),
-                        AllInputs = new[] { sf },
+                        PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sfE), ".o"),
+                        AllInputs = new[] { sfE },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c $< {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -g -o {obj}",
+                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 ":" ")} {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o {obj}".Replace('\\', '/').Replace("/\"","\\\""),
+                        
                     });
                 }
             }
@@ -655,16 +660,25 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1)
+        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1,bool esp32 = false)
         {
-            const string defaultToolchainID = "SysGCC-arm-eabi-6.2.0";
+           string defaultToolchainID = "SysGCC-arm-eabi-6.2.0";
+            flEsp32 = false;
+
+            if (esp32)
+            {
+                defaultToolchainID = "SysGCC-xtensa-esp32-elf-5.2.0";
+                flEsp32 = true;
+            }
+            
             var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
             if (toolchainPath == null)
                 throw new Exception("Cannot locate toolchain path from registry");
 
             var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(toolchainPath)));
             var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir))), toolchain);
-
+            if (flEsp32)
+                toolchainPath = toolchainPath.Replace('\\', '/'); //esp32
             TestStatistics stats = new TestStatistics();
             int cnt = 0, failed = 0, succeeded = 0;
             LoadedBSP.LoadedMCU[] MCUs = bsp.MCUs.ToArray();
