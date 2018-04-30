@@ -50,7 +50,7 @@
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.2.0\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-*Examples\*;-DSP_Lib\*;*.h;*.c</FilesToCopy>
+					<FilesToCopy>-*Examples\*;-DSP\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32h7????.h*;-*system_*.c;-RTOS2\Template\*;*</ProjectInclusionMask>

@@ -73,7 +73,7 @@ namespace BSPGenerationTools
             return Name;
         }
 
-        public MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false, MCUFamilyBuilder.CoreSpecificFlags flagsToAdd = MCUFamilyBuilder.CoreSpecificFlags.All)
+        public virtual MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false, MCUFamilyBuilder.CoreSpecificFlags flagsToAdd = MCUFamilyBuilder.CoreSpecificFlags.All)
         {
             if (!allowIncompleteDefinition && string.IsNullOrEmpty(LinkerScriptPath))
                 throw new Exception("Linker script not defined for " + Name);
@@ -275,6 +275,35 @@ namespace BSPGenerationTools
         public virtual string GetMCUTypeMacro(MCUBuilder mcu)
         {
             return mcu.Name;
+        }
+
+        public void ValidateBSP(BoardSupportPackage bsp)
+        {
+            int devicesWithZeroRAM = bsp.SupportedMCUs.Count(dev => dev.RAMSize == 0);
+            if (devicesWithZeroRAM > 0)
+                throw new Exception($"Found {devicesWithZeroRAM} devices with RAMSize = 0. Please fix the list.");
+
+            foreach(var dev in bsp.SupportedMCUs)
+            {
+                if (dev.MemoryMap != null)
+                {
+                    bool foundMainFLASH = false;
+
+                    foreach(var mem in dev.MemoryMap.Memories)
+                    {
+                        if ((mem.Flags & MCUMemoryFlags.IsDefaultFLASH) == MCUMemoryFlags.IsDefaultFLASH)
+                            foundMainFLASH = true;
+                        if (mem.LoadedFromMemory != null)
+                        {
+                            var foundMem = dev.MemoryMap.Memories.First(m => m.Name == mem.LoadedFromMemory) ?? throw new Exception($"Could not find memory {mem.LoadedFromMemory} referenced by {mem.Name}");
+                        }
+                    }
+
+                    if (!foundMainFLASH)
+                        throw new Exception($"Memory map for {dev.ID} does not contain a FLASH memory");
+                }
+            }
+
         }
     }
 

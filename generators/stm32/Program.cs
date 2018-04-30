@@ -163,13 +163,7 @@ namespace stm32_bsp_generator
 
                 if (mcu is DeviceListProviders.CubeProvider.STM32MCUBuilder stMCU)
                 {
-                    var newLayout = stMCU.ToMemoryLayout();
-
-                    if (newLayout.Memories.FirstOrDefault(m=>m.Name == "SRAM") == null)
-                    {
-                        var ram1 = newLayout.Memories.First(m => m.Name == "RAM_D1");
-                        ram1.Name = "SRAM";
-                    }
+                    var newLayout = stMCU.ToMemoryLayout(true);
 
                     if (compatLayout != null)
                     {
@@ -340,8 +334,8 @@ namespace stm32_bsp_generator
             var bspBuilder = new STM32BSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"), args[1]);
 
             var devices = provider.LoadDeviceList(bspBuilder);
-            if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
-                throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
+            if (devices.Where(d => d.FlashSize == 0).Count() > 0)
+                throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
@@ -414,13 +408,15 @@ namespace stm32_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "4.6R2",
+                PackageVersion = "4.6R4",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",
                 FirstCompatibleVersion = "3.0",
                 InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
             };
+
+            bspBuilder.ValidateBSP(bsp);
 
             File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
             Console.WriteLine("Saving BSP...");

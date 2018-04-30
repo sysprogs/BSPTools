@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using LinkerScriptGenerator;
+using BSPEngine;
 
 namespace stm32_bsp_generator
 {
@@ -200,9 +201,53 @@ namespace stm32_bsp_generator
                     Memories = Memories.OrderBy(m => m.SortWeight).ToArray();
                 }
 
-                public MemoryLayout ToMemoryLayout()
+                public MemoryLayout ToMemoryLayout(bool patchMemoryNames)
                 {
-                    return new MemoryLayout { DeviceName = Name, Memories = Memories.Select(m => m.ToMemoryDefinition()).ToList() };
+                    var layout = new MemoryLayout { DeviceName = Name, Memories = Memories.Select(m => m.ToMemoryDefinition()).ToList() };
+                    if (patchMemoryNames)
+                    {
+                        if (layout.Memories.FirstOrDefault(m => m.Name == "SRAM") == null)
+                        {
+                            var ram1 = layout.Memories.First(m => m.Name == "RAM_D1");
+                            ram1.Name = "SRAM";
+                        }
+                    }
+                    return layout;
+                }
+
+                public override MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false, MCUFamilyBuilder.CoreSpecificFlags flagsToAdd = MCUFamilyBuilder.CoreSpecificFlags.All)
+                {
+                    var mcu = base.GenerateDefinition(fam, bspBuilder, requirePeripheralRegisters, allowIncompleteDefinition, flagsToAdd);
+
+                    var layout = ToMemoryLayout(true);
+                    var sram = layout.Memories.First(m => m.Name == "SRAM");
+
+                    mcu.RAMBase = sram.Start;
+                    mcu.RAMSize = (int)sram.Size;
+
+                    mcu.MemoryMap = new AdvancedMemoryMap
+                    {
+                        Memories = layout.Memories.Select(MakeMCUMemory).ToArray()
+                    };
+
+                    return mcu;
+                }
+
+                private MCUMemory MakeMCUMemory(Memory arg)
+                {
+                    var mem = new MCUMemory
+                    {
+                        Address = arg.Start,
+                        Size = arg.Size,
+                        Name = arg.Name,
+                    };
+
+                    if (arg.Name == "FLASH")
+                        mem.Flags |= MCUMemoryFlags.IsDefaultFLASH;
+                    else
+                        mem.LoadedFromMemory = "FLASH";
+
+                    return mem;
                 }
             }
 
@@ -278,7 +323,7 @@ namespace stm32_bsp_generator
                     {
                         Name = nameOverride ?? RPN,
                         FlashSize = FLASH * 1024,
-                        RAMSize = RAMs.First() * 1024,
+                        RAMSize = 0,    //This will be adjusted later in our override of GenerateDefinition()
                         Core = Core
                     };
                 }
