@@ -147,7 +147,7 @@
 			<string>rtc</string>
 			<string>smartconfig</string>
 			<string>wpa</string>
-			<string>wp2</string>
+			<string>btdm_app</string>
 			<string>wps</string>
 			<string>stdc++</string>
 			<string>gcc</string>
@@ -155,6 +155,7 @@
 		<AdditionalLibraryDirectories>
 			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/lib</string>
 			<string>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/ld</string>
+		    <string>$$SYS:BSP_ROOT$$/esp-idf/components/bt/lib</string>
 		</AdditionalLibraryDirectories>
 		<AdditionalLinkerInputs>
 			<string>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/lib/libc.a</string>

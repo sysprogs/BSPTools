@@ -37,15 +37,84 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig</SourceFolder>
 					<TargetFolder>esp-idf</TargetFolder>
 					<FilesToCopy>-.git\*;*</FilesToCopy>
-					<RenameRules>components\esp32\hwcrypto\aes.c=>esp_aes.c;components\lwip\core\timers.c=>lwip_timers.c;components\wpa_supplicant\src\crypto\sha256.c=>sha256_wpa.c;components\wpa_supplicant\src\crypto\sha1.c=>sha1_wpa.c;components\wpa_supplicant\src\crypto\md5.c=>md5_wpa.c;components\wpa_supplicant\src\crypto\bignum.c=>bignum_wpa.c;components\bt\bluedroid\stack\smp\aes.c=>bt_aes.c;components\bt\bluedroid\stack\smp\include\aes.h=>bt_aes.h;components\bt\bluedroid\osi\list.c=>bt_list.c;components\bt\bluedroid\osi\include\list.h=>bt_list.h</RenameRules>
+					<!--RenameRules>components\esp32\hwcrypto\aes.c=>esp_aes.c;components\lwip\core\timers.c=>lwip_timers.c;components\wpa_supplicant\src\crypto\sha256.c=>sha256_wpa.c;components\wpa_supplicant\src\crypto\sha1.c=>sha1_wpa.c;components\wpa_supplicant\src\crypto\md5.c=>md5_wpa.c;components\wpa_supplicant\src\crypto\bignum.c=>bignum_wpa.c;components\bt\bluedroid\stack\smp\aes.c=>bt_aes.c;components\bt\bluedroid\stack\smp\include\aes.h=>	.h;components\bt\bluedroid\osi\list.c=>bt_list.c;components\bt\bluedroid\osi\include\list.h=>bt_list.h</RenameRules-->
+					
 					<ProjectInclusionMask>-*\test\*;components\esp32\*.c;components\esp32\*.cpp;components\esp32\*.h</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include;$$SYS:BSP_ROOT$$/esp-idf/components/freertos/include/freertos;$$SYS:BSP_ROOT$$/esp-idf/components/json/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/mbedtls/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/nghttp/port/include;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/rom;$$SYS:BSP_ROOT$$/esp-idf/components/esp32/include/xtensa;$$SYS:BSP_ROOT$$/esp-idf/components/bootloader_support/include;$$SYS:BSP_ROOT$$/esp-idf/components/driver/include/driver</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 					<PreprocessorMacros>HAVE_CONFIG_H;MBEDTLS_CONFIG_FILE="mbedtls/esp_config.h";ESP_PLATFORM;IDF_VER="2.1"</PreprocessorMacros>
-					<Patches>
+					<Patches>					
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\osi\config.c</FilePath>
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "..\..\osi\include\list.h"</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\bta\av\bta_av_int.h</FilePath>
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "..\..\osi\include\list.h"</NewLine>
+						</Patch>
+						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\hci\hci_layer.c</FilePath>
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "..\..\osi\include\list.h"</NewLine>
+						</Patch>
+						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\osi\fixed_queue.c</FilePath>
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "..\..\osi\include\list.h"</NewLine>
+						</Patch>
+						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\osi\list.c</FilePath><!--Rename1.c-->
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "..\..\osi\include\list.h"</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\osi\hash_map.c</FilePath>
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "..\..\osi\include\list.h"</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\btc\core\btc_profile_queue.c</FilePath>
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "..\..\osi\include\list.h"</NewLine>
+						</Patch>
+						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\stack\smp\aes.c</FilePath>
+							<OldLine>#include "aes.h"</OldLine>
+							<NewLine>#include "include\aes.h"</NewLine>
+						</Patch>
+						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\stack\smp\smp_keys.c</FilePath>
+							<OldLine>#include "aes.h"</OldLine>
+							<NewLine>#include "include\aes.h"</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\bt\bluedroid\external\sbc\encoder\srce\sbc_analysis.c</FilePath>
+							<OldLine>#endif /* #if (defined(SBC_ENC_INCLUDED) &amp;&amp; SBC_ENC_INCLUDED == TRUE) */</OldLine>
+							<NewLine>//#endif /* #if (defined(SBC_ENC_INCLUDED) &amp;&amp; SBC_ENC_INCLUDED == TRUE) */</NewLine>
+						</Patch>
+						 
+						<!---->
+						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\freertos\list.c</FilePath><!--Rename2.c-->
+							<OldLine>#include "list.h"</OldLine>
+							<NewLine>#include "include\freertos\list.h"</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>components\libsodium\libsodium\src\libsodium\sodium\version.c</FilePath><!--Rename1.c-->
+							<OldLine>#include "version.h"</OldLine>
+							<NewLine>#include "../../../../port_include/sodium/version.h"</NewLine>
+						</Patch>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>components\ethernet\emac_dev.h</FilePath>
 							<OldLine>void inline emac_poll_tx_cmd(void)</OldLine>
@@ -56,16 +125,16 @@
 							<OldLine>void inline emac_poll_rx_cmd(void)</OldLine>
 							<NewLine>static inline void emac_poll_rx_cmd(void)</NewLine>
 						</Patch>					
-						<Patch xsi:type="ReplaceLine">
+						<!--Patch xsi:type="ReplaceLine">
 							<FilePath>components\bt\bluedroid\hci\hci_layer.c;components\bt\bluedroid\osi\bt_list.c;components\bt\bluedroid\osi\config.c;components\bt\bluedroid\osi\fixed_queue.c;components\bt\bluedroid\osi\hash_map.c;components\bt\bluedroid\stack\l2cap\include\l2c_int.h</FilePath>
 							<OldLine>#include "list.h"</OldLine>
 							<NewLine>#include "bt_list.h"</NewLine>
-						</Patch>
-						<Patch xsi:type="ReplaceLine">
+						</Patch-->
+						<!--Patch xsi:type="ReplaceLine">
 							<FilePath>components\bt\bluedroid\stack\smp\bt_aes.c;components\bt\bluedroid\stack\smp\smp_keys.c</FilePath>
 							<OldLine>#include "aes.h"</OldLine>
 							<NewLine>#include "bt_aes.h"</NewLine>
-						</Patch>
+						</Patch-->
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>components\xtensa-debug-module\trax.c</FilePath>
 							<OldLine>#include "trax.h"</OldLine>
@@ -82,7 +151,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\expat</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\expat</SourceFolder>
 					<TargetFolder>esp-idf\components\expat</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
@@ -99,7 +168,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\nvs_flash</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\nvs_flash</SourceFolder>
 					<TargetFolder>esp-idf\components\nvs_flash</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-test\*;-test_nvs_host\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
@@ -116,10 +185,10 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\lwip</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\lwip</SourceFolder>
 					<TargetFolder>esp-idf\components\lwip</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
-					<RenameRules>core\timers.c=>lwip_timers.c</RenameRules>
+					<!--RenameRules>core\timers.c=>lwip_timers.c</RenameRules-->
 					<ProjectInclusionMask>-test\*;-netif\ppp\*;-include\lwip\netif\ppp\*;-netif\ethernetif.c;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip;$$SYS:BSP_ROOT$$/esp-idf/components/lwip/include/lwip/port</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
@@ -134,10 +203,10 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\newlib</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\newlib</SourceFolder>
 					<TargetFolder>esp-idf\components\newlib</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
-					<RenameRules>core\timers.c=>lwip_timers.c</RenameRules>
+					<!--RenameRules>core\timers.c=>lwip_timers.c</RenameRules-->
 					<ProjectInclusionMask>-test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/newlib/include;$$SYS:BSP_ROOT$$/esp-idf/components/newlib/platform_include</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
@@ -152,7 +221,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\mbedtls</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\mbedtls</SourceFolder>
 					<TargetFolder>esp-idf\components\mbedtls</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-test\*;-library\net.c;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
@@ -181,10 +250,10 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\wpa_supplicant</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\wpa_supplicant</SourceFolder>
 					<TargetFolder>esp-idf\components\wpa_supplicant</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
-					<RenameRules>src\crypto\sha256.c=>sha256_wpa.c;src\crypto\sha1.c=>sha1_wpa.c;src\crypto\md5.c=>md5_wpa.c;src\crypto\bignum.c=>bignum_wpa.c</RenameRules>
+					<!--RenameRules>src\crypto\sha256.c=>sha256_wpa.c;src\crypto\sha1.c=>sha1_wpa.c;src\crypto\md5.c=>md5_wpa.c;src\crypto\bignum.c=>bignum_wpa.c</RenameRules-->
 					<ProjectInclusionMask>-test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/esp-idf/components/wpa_supplicant/include;$$SYS:BSP_ROOT$$/esp-idf/components/wpa_supplicant/port/include</AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
@@ -199,7 +268,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\soc</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\soc</SourceFolder>
 					<TargetFolder>esp-idf\components\soc</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-esp32\test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
@@ -216,10 +285,10 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\bt</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\bt</SourceFolder>
 					<TargetFolder>esp-idf\components\bt</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
-					<RenameRules>bluedroid\stack\smp\aes.c=>bt_aes.c;bluedroid\stack\smp\include\aes.h=>bt_aes.h;bluedroid\osi\list.c=>bt_list.c;bluedroid\osi\include\list.h=>bt_list.h</RenameRules>
+					<!--RenameRules>bluedroid\stack\smp\aes.c=>bt_aes.c;bluedroid\stack\smp\include\aes.h=>bt_aes.h;bluedroid\osi\list.c=>bt_list.c;bluedroid\osi\include\list.h=>bt_list.h</RenameRules-->
 					<ProjectInclusionMask>-test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<AlreadyCopied>true</AlreadyCopied>
@@ -352,7 +421,7 @@
 				<DefaultEnabled>true</DefaultEnabled>
 				<CopyJobs>
 					<CopyJob>
-						<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.v21\components\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<SourceFolder>$$BSPGEN:INPUT_DIR$$\esp-idf.orig\components\$$BSPGEN:FRAMEWORK$$</SourceFolder>
 						<TargetFolder>esp-idf\components\$$BSPGEN:FRAMEWORK$$</TargetFolder>
 						<FilesToCopy>*</FilesToCopy>
 						<ProjectInclusionMask>-test\*;*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
