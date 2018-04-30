@@ -17,7 +17,7 @@ namespace mbed
         public readonly string outputDir = Path.GetFullPath(@"..\..\Output");
         public readonly string dataDir = Path.GetFullPath(@"..\..\data");
         string mbedRoot;
-        string toolchainDir = "e:\\sysgcc\\arm-eabi";
+        string toolchainDir = "e:\\sysgcc\\arm-eabi-v53";
         public List<KeyValuePair<Regex, string>> nameRules;
         private Dictionary<string, string> mcuDefs;
 

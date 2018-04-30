@@ -194,9 +194,9 @@ namespace mbed
 
         static void Main(string[] args)
         {
-            var generator = new MbedBSPGenerator("5.6.3");
+            var generator = new MbedBSPGenerator("5.7.7");
 
-            string suffix = "r2";
+            string suffix = "";
             generator.UpdateGitAndRescanTargets();
 
             ParsedTargetList parsedTargets = XmlTools.LoadObject<ParsedTargetList>(Path.Combine(generator.outputDir, "mbed", "ParsedTargets.xml"));
