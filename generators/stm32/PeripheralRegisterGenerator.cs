@@ -1152,7 +1152,7 @@ namespace stm32_bsp_generator
         {
             Dictionary<string, ulong> addresses = new Dictionary<string, ulong>();
 
-            Regex memory_map_begin_regex = new Regex(@"/\*\* \@addtogroup Peripheral_memory_map\r\n(.*)\r\n(.*)");
+            Regex memory_map_begin_regex = new Regex(@"/\*\* \@addtogroup Peripheral_memory_map[\r]?\n(.*)[\r]?\n(.*)");
             Regex memory_map_begin_regex2 = new Regex(@"/\*\* \r\n  \* \@brief Peripheral_memory_map");
             Regex rgComment = new Regex(@"^[ \t]*/\*[^/]+\*/[ \t]*$");
             var m_begin = memory_map_begin_regex.Match(file);

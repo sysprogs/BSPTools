@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.19.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -95,7 +95,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.19.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
@@ -169,7 +169,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.19.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -280,7 +280,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.9.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt;*.bmp;*.jpg</FilesToCopy>
 					<ProjectInclusionMask>-*jpegtran.c;-*jmemmac.c;-*jmemdos.c;-*jmemname.c;-*jmemansi.c;-*jdatasrc_conf_template.c;source\j*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -379,7 +379,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.9.0\Middlewares\Third_Party\FatFs</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Middlewares\Third_Party\FatFs</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-src\drivers\*;-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -408,7 +408,7 @@
 			
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.9.0\Middlewares\Third_Party\LwIP</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-doc\*;system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -457,7 +457,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.19.0\Utilities</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Utilities</SourceFolder>
 					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
 					<SimpleFileConditions>
