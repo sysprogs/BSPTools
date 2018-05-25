@@ -62,9 +62,11 @@ void SysTick_Handler(void)
 	osSystickHandler();
 }
 
+extern ETH_HandleTypeDef EthHandle;
+
 void ETH_IRQHandler(void)
 {
-	ETHERNET_IRQHandler();
+	HAL_ETH_IRQHandler(&EthHandle);
 }
 
 static void MainThread(void const * argument)

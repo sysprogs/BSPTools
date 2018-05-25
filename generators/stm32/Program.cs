@@ -408,13 +408,24 @@ namespace stm32_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "4.6R4",
+                PackageVersion = "4.7",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",
                 FirstCompatibleVersion = "3.0",
                 InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
             };
+
+            StringWriter libraryVersionList = new StringWriter();
+
+            foreach(var subdir in Directory.GetDirectories(bspBuilder.Directories.InputDir))
+            {
+                var nameOnly = Path.GetFileName(subdir);
+                if (nameOnly.StartsWith("STM32Cube_FW", StringComparison.InvariantCultureIgnoreCase) || nameOnly.IndexOf("_StdPeriph_Lib", StringComparison.InvariantCultureIgnoreCase) != -1)
+                    libraryVersionList.WriteLine(nameOnly);
+            }
+
+            File.WriteAllText(Path.Combine(bspBuilder.BSPRoot, "SDKVersions.txt"), libraryVersionList.ToString());
 
             bspBuilder.ValidateBSP(bsp);
 

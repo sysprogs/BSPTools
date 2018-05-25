@@ -487,14 +487,74 @@
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F2X</SourceFolder>
 			<DestinationFolder>samples\HTTP_Netconn_STM32F2X</DestinationFolder>
+			<AdditionalBuildTimeSources>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.7.0\Projects\STM32F207ZG-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Src\ethernetif.c</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.7.0\Projects\STM32F207ZG-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\ethernetif.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.7.0\Projects\STM32F207ZG-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\FreeRTOSConfig.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.7.0\Projects\STM32F207ZG-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\lwipopts.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.7.0\Projects\STM32F207ZG-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\stm32f2xx_hal_conf.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F2_V1.7.0\Projects\STM32F207ZG-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\src\system_stm32f2xx.c</string>
+			</AdditionalBuildTimeSources>
+			<Patches>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>FreeRTOSConfig.h</FilePath>
+					<OldLine> #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 25 * 1024 ) )</OldLine>
+					<NewLine> #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 32 * 1024 ) )</NewLine>
+				</Patch>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>lwipopts.h</FilePath>
+					<OldLine>#define HTTPD_USE_CUSTOM_FSDATA   1</OldLine>
+					<NewLine>#define HTTPD_USE_CUSTOM_FSDATA   0</NewLine>
+				</Patch>
+			</Patches>
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F4X</SourceFolder>
 			<DestinationFolder>samples\HTTP_Netconn_STM32F4X</DestinationFolder>
+			<AdditionalBuildTimeSources>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Src\ethernetif.c</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\ethernetif.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\FreeRTOSConfig.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\lwipopts.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\stm32f4xx_hal_conf.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\src\system_stm32f4xx.c</string>
+			</AdditionalBuildTimeSources>
+			<Patches>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>FreeRTOSConfig.h</FilePath>
+					<OldLine> #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 25 * 1024 ) )</OldLine>
+					<NewLine> #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 32 * 1024 ) )</NewLine>
+				</Patch>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>lwipopts.h</FilePath>
+					<OldLine>#define HTTPD_USE_CUSTOM_FSDATA   1</OldLine>
+					<NewLine>#define HTTPD_USE_CUSTOM_FSDATA   0</NewLine>
+				</Patch>
+			</Patches>
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F7X</SourceFolder>
 			<DestinationFolder>samples\HTTP_Netconn_STM32F7X</DestinationFolder>
+			<AdditionalBuildTimeSources>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Src\ethernetif.c</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\ethernetif.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\FreeRTOSConfig.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\lwipopts.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\stm32f7xx_hal_conf.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.11.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\src\system_stm32f7xx.c</string>
+			</AdditionalBuildTimeSources>
+			<Patches>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>FreeRTOSConfig.h</FilePath>
+					<OldLine> #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 25 * 1024 ) )</OldLine>
+					<NewLine> #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 32 * 1024 ) )</NewLine>
+				</Patch>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>lwipopts.h</FilePath>
+					<OldLine>#define HTTPD_USE_CUSTOM_FSDATA   1</OldLine>
+					<NewLine>#define HTTPD_USE_CUSTOM_FSDATA   0</NewLine>
+				</Patch>
+			</Patches>
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>

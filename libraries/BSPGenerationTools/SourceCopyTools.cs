@@ -602,6 +602,8 @@ namespace BSPGenerationTools
         public bool IsTestProjectSample;
         public EmbeddedProjectSample EmbeddedSample;
         public string CopyFilters;
+        public string[] AdditionalBuildTimeSources; //Sources that will be copied to the sample directory during BSP building as if they were present in the SourceFolder.
+        public Patch[] Patches;
     }
 
     /* Use MCU classifiers to define MCU-specific flags.

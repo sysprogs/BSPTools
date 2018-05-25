@@ -713,6 +713,28 @@ namespace BSPGenerationTools
                         }
                     }
 
+                    if (sample.AdditionalBuildTimeSources != null)
+                    {
+                        foreach(var src in sample.AdditionalBuildTimeSources)
+                        {
+                            string source = src;
+                            BSP.ExpandVariables(ref source);
+                            string targetPath = Path.Combine(destFolder, Path.GetFileName(source));
+                            File.Copy(source, targetPath);
+                        }
+                    }
+
+                    if (sample.Patches != null)
+                        foreach (var p in sample.Patches)
+                        {
+                            foreach (var fn in p.FilePath.Split(';'))
+                            {
+                                List<string> allLines = File.ReadAllLines(Path.Combine(destFolder, fn)).ToList();
+                                p.Apply(allLines);
+                                File.WriteAllLines(Path.Combine(destFolder, fn), allLines);
+                            }
+                        }
+
                     var sampleObj = sample.EmbeddedSample ?? XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(destFolder, "sample.xml"));
                     if (sampleObj.RequiredFrameworks == null && allFrameworks != null)
                         sampleObj.RequiredFrameworks = allFrameworks.Where(fw => fw.DefaultEnabled).Select(fw => fw.ClassID ?? fw.ID)?.ToArray();
