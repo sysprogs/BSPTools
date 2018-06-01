@@ -36,7 +36,7 @@ namespace KSDK2xImporter
             { //Parsing several sdks
                 foreach (var dir in Directory.GetDirectories(args[1]))
                 {
-                    if (Directory.GetFiles(dir, "*manifest.xml").Count() == 0)
+                    if (Directory.GetFiles(dir, "*manifest*.xml").Count() == 0)
                         continue;
                     Console.WriteLine("Parser " + dir);
                     var bsp1 = KSDKManifestParser.ParseKSDKManifest(dir, new ConsoleWarningSink());

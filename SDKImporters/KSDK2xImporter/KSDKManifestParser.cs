@@ -232,11 +232,11 @@ namespace KSDK2xImporter
 
         public static ParsedSDK ParseKSDKManifest(string sdkDirectory, IWarningSink sink)
         {
-            string[] manifestFiles = Directory.GetFiles(sdkDirectory, "*manifest.xml");
+            string[] manifestFiles = Directory.GetFiles(sdkDirectory, "*manifest*.xml");
             if (manifestFiles.Length < 1)
                 throw new Exception($"No manifest files in {sdkDirectory}");
 
-            string manifestFile = Directory.GetFiles(sdkDirectory, "*manifest.xml")[0];
+            string manifestFile = Directory.GetFiles(sdkDirectory, "*manifest*.xml")[0];
 
             List<VendorSample> vsl = new List<VendorSample>();
 
@@ -273,8 +273,12 @@ namespace KSDK2xImporter
                 var mcuFamily = dev.ToMCUFamily();
 
                 int FLASHSize, RAMSize;
-                int.TryParse((devNode.SelectSingleNode("memory/@flash_size_kb")?.Value ?? ""), out FLASHSize);
-                int.TryParse((devNode.SelectSingleNode("memory/@ram_size_kb")?.Value ?? ""), out RAMSize);
+                if (!int.TryParse((devNode.SelectSingleNode("memory/@flash_size_kb")?.Value ?? ""), out FLASHSize))
+                    int.TryParse((devNode.SelectSingleNode("total_memory/@flash_size_kb")?.Value ?? ""), out FLASHSize);
+                    
+                if (!int.TryParse((devNode.SelectSingleNode("memory/@ram_size_kb")?.Value ?? ""), out RAMSize))
+                    int.TryParse((devNode.SelectSingleNode("total_memory/@ram_size_kb")?.Value ?? ""), out RAMSize);
+
                 FLASHSize *= 1024;
                 RAMSize *= 1024;
 
@@ -729,10 +733,10 @@ namespace KSDK2xImporter
             return bsp.BSP.PackageID;
         }
 
-        public string Name => "Kinetis KSDK 2.x";
-        public string CommandName => "Import a Kinetis KSDK 2.x";
+        public string Name => "MCUXpresso SDK";
+        public string CommandName => "Import an MCUXpresso SDK";
         public string Target => "arm-eabi";
-        public string OpenFileFilter => "KSDK Manifest Files|*manifest.xml";
+        public string OpenFileFilter => "MCUXpresso SDK Manifest Files|*manifest*.xml";
 
         static int CountMatches(string[] left, string[] right)
         {
