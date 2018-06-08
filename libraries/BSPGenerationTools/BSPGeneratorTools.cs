@@ -557,7 +557,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public void GenerateLinkerScripts(bool generalizeWherePossible)
+        public Dictionary<string, MemoryLayout> GenerateLinkerScripts(bool generalizeWherePossible)
         {
             string ldsDirectory = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, "LinkerScripts");
             Directory.CreateDirectory(ldsDirectory);
@@ -617,6 +617,8 @@ namespace BSPGenerationTools
 
                 BSP.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, FamilyFilePrefix, mcu, layout, generalizedName);
             }
+
+            return memoryLayouts;
         }
 
 

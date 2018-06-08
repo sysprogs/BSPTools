@@ -689,12 +689,26 @@ namespace Atmel_bsp_generator
                 famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
 
                 familyDefinitions.Add(famObj);
-                fam.GenerateLinkerScripts(false);
+                var memoryLayouts = fam.GenerateLinkerScripts(false);
                 if (!noPeripheralRegisters)
                     fam.AttachPeripheralRegisters(ParsePeripheralRegisters(bspBuilder.Directories.OutputDir, fam));
 
                 foreach (var mcu in fam.MCUs)
-                    mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters));
+                {
+                    var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters);
+                    var layout = memoryLayouts[mcu.Name];
+
+                    var ram = layout.Memories.First(m => m.Type == MemoryType.RAM);
+                    var flash = layout.Memories.First(m => m.Type == MemoryType.FLASH);
+
+                    mcuDef.RAMBase = ram.Start;
+                    mcuDef.RAMSize = (int)ram.Size;
+
+                    mcuDef.FLASHBase = flash.Start;
+                    mcuDef.FLASHSize = (int)flash.Size;
+
+                    mcuDefinitions.Add(mcuDef);
+                }
 
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
@@ -717,7 +731,7 @@ namespace Atmel_bsp_generator
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
 
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "3.35.1"
+                PackageVersion = "3.35.2"
             };
 
             bspBuilder.Save(bsp, true);
