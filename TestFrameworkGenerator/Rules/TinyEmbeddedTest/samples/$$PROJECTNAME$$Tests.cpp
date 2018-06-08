@@ -18,6 +18,16 @@ TEST_GROUP(DemoTestGroup)
     {
         asm("nop");
     }
+	
+	void TestSetup(TestInstance *)
+	{
+		asm("nop");
+	}
+	
+	void TestTeardown(TestInstance *)
+	{
+		asm("nop");
+	}
 };
 
 TEST(DemoTestGroup, FailingTest)

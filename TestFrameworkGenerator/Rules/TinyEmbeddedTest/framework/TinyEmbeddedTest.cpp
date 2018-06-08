@@ -4,7 +4,17 @@
 #include "TinyEmbeddedTest.h"
 #include "SysprogsTestHooks.h"
 
+#ifndef TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE
+#define TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE 0
+#endif
+
 TestGroup *TestGroup::s_pFirstTestGroup = 0;
+
+#if TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 1
+static jmp_buf s_TinyEmbeddedTestJumpBuffer;
+#elif TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 2
+#include <exception>
+#endif
 
 void RunAllTests()
 {
@@ -38,8 +48,29 @@ void RunAllTests()
                 pGroup->setup();
         }
         
-        SysprogsTestHook_TestStarting(pInstance);
-        pInstance->run();
+	    SysprogsTestHook_TestStarting(pInstance);
+	    
+	    pGroup->TestSetup(pInstance);
+	    
+#if TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 1
+	    if (!setjmp(s_TinyEmbeddedTestJumpBuffer))
+	    {
+		    pInstance->run();
+	    }
+#elif TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 2
+	    try
+	    {
+		    pInstance->run();
+	    }
+	    catch (...)
+	    {
+	    }
+#else
+	    pInstance->run();
+#endif
+	    
+	    pGroup->TestTeardown(pInstance);
+	    
         SysprogsTestHook_TestEnded();
     }
     
@@ -59,4 +90,10 @@ void ReportTestFailure(const char *pFormat, ...)
     vsnprintf(pBuffer, requiredLength + 1, pFormat, ap);
     SysprogsTestHook_TestFailed(0, pBuffer, 0);
     va_end(ap);
+	
+#if TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 1
+	longjmp(s_TinyEmbeddedTestJumpBuffer, 1);
+#elif TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 2
+	throw std::exception();
+#endif
 }

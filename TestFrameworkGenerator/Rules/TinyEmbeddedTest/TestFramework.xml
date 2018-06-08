@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.tinyembtest</ID>
 	<Name>TinyEmbeddedTest</Name>
-	<Version>1.1</Version>
+	<Version>1.2</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -13,6 +13,7 @@
 		</TestReportChannel>
 		<AdditionalPreprocessorMacros>
 			<string>SYSPROGS_TEST_PLATFORM_EMBEDDED</string>
+			<string>TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE=$$com.sysprogs.testsettings.testendmode$$</string>
 		</AdditionalPreprocessorMacros>
 		<AdditionalIncludeDirs>
 		</AdditionalIncludeDirs>
@@ -66,7 +67,28 @@
 					  <MaxValue>86400</MaxValue>
 					  <DefaultValue>1800</DefaultValue>
 					</PropertyEntry>
-				</Properties>
+					  <PropertyEntry xsi:type="Enumerated">
+						<Name>When a test failure is detected</Name>
+						<UniqueID>com.sysprogs.testsettings.testendmode</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<SuggestionList>
+						  <Suggestion>
+							<UserFriendlyName>Test continues running</UserFriendlyName>
+							<InternalValue>0</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>Test ends via setjmp() (may cause memory leaks)</UserFriendlyName>
+							<InternalValue>1</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<UserFriendlyName>Test ends via C++ exceptions (incompatible with Newlib-nano)</UserFriendlyName>
+							<InternalValue>2</InternalValue>
+						  </Suggestion>
+						</SuggestionList>
+						<DefaultEntryIndex>0</DefaultEntryIndex>
+						<AllowFreeEntry>false</AllowFreeEntry>
+					  </PropertyEntry>
+			  </Properties>
 				<CollapsedByDefault>false</CollapsedByDefault>
 			  </PropertyGroup>
 			</PropertyGroups>

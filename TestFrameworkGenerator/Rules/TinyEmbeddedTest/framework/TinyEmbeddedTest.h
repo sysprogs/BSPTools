@@ -1,6 +1,7 @@
 #pragma once
 #include <string.h>
 #include <math.h>
+#include <setjmp.h>
 
 class TestGroup;
 
@@ -22,6 +23,9 @@ public:
         
     virtual void setup() {}
     virtual void teardown() {}
+	
+	virtual void TestSetup(TestInstance *) {}
+	virtual void TestTeardown(TestInstance *) {}
     
     void Register()
     {
