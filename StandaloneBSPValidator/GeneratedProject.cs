@@ -16,6 +16,8 @@ namespace StandaloneBSPValidator
         readonly LoadedBSP.ConfiguredMCU MCU;
         List<EmbeddedFramework> _Frameworks = new List<EmbeddedFramework>();
 
+        string _LinkerScript;
+
         public IEnumerable<string> SourceFiles { get { return _SourceFiles; } }
 
         public GeneratedProject(string projectDir, LoadedBSP.ConfiguredMCU mcu, string[] selectedFrameworks)
@@ -53,19 +55,24 @@ namespace StandaloneBSPValidator
             : this(projectDir, mcu, frameworks)
         {
             _ProjectDir = projectDir;
+            _LinkerScript = vs.LinkerScript;
 
-            _SourceFiles.AddRange(vs.SourceFiles.Select(s=>VariableHelper.ExpandVariables(s, bspDict)));
+            _SourceFiles.AddRange(vs.SourceFiles.Select(s => VariableHelper.ExpandVariables(s, bspDict)));
 
-            var cf = vs.ExtraFiles?.Select(s1 => { var s2 = VariableHelper.ExpandVariables(s1.SourcePath, bspDict);
-            var targetFile = projectDir + "\\" + s1.TargetPath.Replace("/", "\\");
+            var cf = vs.ExtraFiles?.Select(s1 =>
+            {
+                var s2 = VariableHelper.ExpandVariables(s1.SourcePath, bspDict);
+                var targetFile = projectDir + "\\" + s1.TargetPath.Replace("/", "\\");
                 var pth = Path.GetDirectoryName(targetFile);
                 if (!Directory.Exists(pth))
-                     Directory.CreateDirectory(pth);
+                    Directory.CreateDirectory(pth);
                 if (!File.Exists(targetFile))
-                        File.Copy(s2.Replace("/", "\\"), targetFile);
-                return s1.TargetPath; });
-             
-            if(cf!=null)_SourceFiles.AddRange(cf);
+                    File.Copy(s2.Replace("/", "\\"), targetFile);
+                return s1.TargetPath;
+            });
+
+            if (cf != null)
+                _SourceFiles.AddRange(cf);
         }
 
         public void DoGenerateProjectFromEmbeddedSample(ConfiguredSample sample, bool plainC, Dictionary<string, string> bspDict)
@@ -113,7 +120,7 @@ namespace StandaloneBSPValidator
                 return hCode.GetHashCode();
             }
         }
-            public void AddBSPFilesToProject(Dictionary<string, string> SystemDictionary, Dictionary<string,string> frameworkConfig, Dictionary<string, bool> frameworkIDs)
+        public void AddBSPFilesToProject(Dictionary<string, string> SystemDictionary, Dictionary<string, string> frameworkConfig, Dictionary<string, bool> frameworkIDs)
         {
             if (MCU.ExpandedMCU.AdditionalSourceFiles != null && MCU.ExpandedMCU.AdditionalSourceFiles.Length > 0)
             {
@@ -138,19 +145,19 @@ namespace StandaloneBSPValidator
             {
                 var files = fw.AdditionalSourceFiles.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
                 foreach (var file in files)
-                    if (!_SourceFiles.Contains(file, new FileEqualityComparer()))_SourceFiles.Add(file);
+                    if (!_SourceFiles.Contains(file, new FileEqualityComparer())) _SourceFiles.Add(file);
 
                 files = fw.AdditionalLibraries?.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
-                if(files!=null)
+                if (files != null)
                     _SourceFiles.AddRange(files);
             }
         }
-        public void AddBSPFilesToProject(List<string> pSrcFile,string pDirPrj)
+        public void AddBSPFilesToProject(List<string> pSrcFile, string pDirPrj)
         {
-            foreach(var sp in pSrcFile)
+            foreach (var sp in pSrcFile)
             {
-                 string fullPath = Path.Combine(pDirPrj,sp);
-                 _SourceFiles.Add(fullPath);
+                string fullPath = Path.Combine(pDirPrj, sp);
+                _SourceFiles.Add(fullPath);
             }
         }
 
@@ -236,7 +243,7 @@ namespace StandaloneBSPValidator
 
             foreach (var fwObj in _Frameworks)
             {
-                if (fwObj.AdditionalSystemVars != null) 
+                if (fwObj.AdditionalSystemVars != null)
                     foreach (var sv in fwObj.AdditionalSystemVars)
                         primaryDict[sv.Key] = sv.Value;
 
@@ -250,6 +257,10 @@ namespace StandaloneBSPValidator
                     if (cf.FlagCondition.IsTrue(primaryDict, frameworkDict, frameworkIDs))
                         flags = flags.Merge(LoadedBSP.ConfiguredMCU.ExpandToolFlags(cf.Flags, primaryDict, frameworkDict));
             }
+
+            if (!string.IsNullOrEmpty(_LinkerScript))
+                flags.LinkerScript = VariableHelper.ExpandVariables(_LinkerScript, primaryDict, frameworkDict);
+
             return flags;
         }
     }

@@ -722,6 +722,7 @@ namespace nrf5x
                 InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
             };
 
+            bspBuilder.ValidateBSP(bsp);
             bspBuilder.Save(bsp, true, false);
         }
     }

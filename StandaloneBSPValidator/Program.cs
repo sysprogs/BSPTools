@@ -219,7 +219,7 @@ namespace StandaloneBSPValidator
                     foreach (var task in CompileTasks)
                     {
                         int firstEmptySlot;
-                        for (;;)
+                        for (; ; )
                         {
                             firstEmptySlot = Enumerable.Range(0, slots.Length).FirstOrDefault(i => slots[i]?.HasExited != false);
                             if (slots[firstEmptySlot]?.HasExited == false)
@@ -343,7 +343,7 @@ namespace StandaloneBSPValidator
             sourceExtensions.Add("cpp", true);
             sourceExtensions.Add("s", true);
 
-            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null,null, vs);
+            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, null, vs);
         }
 
         private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg, string[] pUndefinedMacros)
@@ -465,6 +465,8 @@ namespace StandaloneBSPValidator
 
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
+            if (!string.IsNullOrEmpty(configuredSample.Sample.Sample.LinkerScript))
+                flags.LinkerScript = VariableHelper.ExpandVariables(configuredSample.Sample.Sample.LinkerScript, bspDict, configuredSample.FrameworkParameters);
 
             flags.COMMONFLAGS += " -save-temps ";
             Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
@@ -474,13 +476,13 @@ namespace StandaloneBSPValidator
             return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
         }
         private static bool flEsp32;
-        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros,BSPEngine.VendorSample vendorSample = null)
+        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros, BSPEngine.VendorSample vendorSample = null)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
 
             //esp32
-            if(flEsp32)
+            if (flEsp32)
                 prefix = prefix.Replace('\\', '/');
             job.OtherTasks.Add(new BuildTask
             {
@@ -520,8 +522,8 @@ namespace StandaloneBSPValidator
                         PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sfE), ".o"),
                         AllInputs = new[] { sfE },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 ":" ")} {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o {obj}".Replace('\\', '/').Replace("/\"","\\\""),
-                        
+                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o {obj}".Replace('\\', '/').Replace("/\"", "\\\""),
+
                     });
                 }
             }
@@ -660,9 +662,9 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1,bool esp32 = false)
+        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1, bool esp32 = false)
         {
-           string defaultToolchainID = "SysGCC-arm-eabi-6.2.0";
+            string defaultToolchainID = "SysGCC-arm-eabi-7.2.0";
             flEsp32 = false;
 
             if (esp32)
@@ -670,7 +672,7 @@ namespace StandaloneBSPValidator
                 defaultToolchainID = "SysGCC-xtensa-esp32-elf-5.2.0";
                 flEsp32 = true;
             }
-            
+
             var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
             if (toolchainPath == null)
                 throw new Exception("Cannot locate toolchain path from registry");
@@ -936,7 +938,7 @@ namespace StandaloneBSPValidator
                             if (IsNoValid(regName, pNonValidatedRegisters))
                                 continue;
                             if (IsNoValid(regName, pUndefinedMacros))
-                                 sw.WriteLine($"#undef {regName}");
+                                sw.WriteLine($"#undef {regName}");
                             if (renameRules != null)
                                 foreach (var rule in renameRules)
                                 {

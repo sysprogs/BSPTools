@@ -304,6 +304,13 @@ namespace BSPGenerationTools
                 }
             }
 
+            HashSet<string> usedFolders = new HashSet<string>();
+            foreach(var fw in bsp.Frameworks ?? new EmbeddedFramework[0])
+            {
+                if (usedFolders.Contains(fw.ProjectFolderName))
+                    throw new Exception($"'{fw.ProjectFolderName}' is used by more than 1 framework. This will break builds in Visual Studio.");
+                usedFolders.Add(fw.ProjectFolderName);
+            }
         }
     }
 
