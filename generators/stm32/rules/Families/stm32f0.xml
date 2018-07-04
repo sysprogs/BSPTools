@@ -212,6 +212,7 @@
 		<Framework>
 			<Name>STM32F0 Legacy Peripheral Library</Name>
 			<ID>com.sysprogs.arm.stm32.f0_stdperiph</ID>
+			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
 			<IncompatibleFrameworks>
 				<string>com.sysprogs.arm.stm32.f0_hal</string>
 			</IncompatibleFrameworks>

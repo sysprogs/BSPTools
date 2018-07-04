@@ -41,6 +41,7 @@ namespace stm32_bsp_generator
     public class RegisterParserConfiguration
     {
         Dictionary<string, bool> _IgnoredSubregisters = new Dictionary<string, bool>();
+        Dictionary<string, bool> _PotentiallyNotSequentialRegisters = new Dictionary<string, bool>();
         string[] _IgnoredSubregisterPrefixes;
         string[] _IgnoredSubregisterSuffixes;
         Regex[] _IgnoredSubregisterRegexes;
@@ -268,6 +269,20 @@ namespace stm32_bsp_generator
             {
                 foreach (var r in value.Split(';'))
                     _IgnoredSubregisters[r] = true;
+            }
+        }
+
+        //Those registers might be non-sequential for some devices, but not all. We will only ignore the actual non-sequential instances of them.
+        public bool IsKnownNonSequentialRegister(string register) => _PotentiallyNotSequentialRegisters.ContainsKey(register);
+
+
+        public string PotentiallyNotSequentialRegisters
+        {
+            get => throw new NotImplementedException();
+            set
+            {
+                foreach (var r in value.Split(';'))
+                    _PotentiallyNotSequentialRegisters[r] = true;
             }
         }
 
@@ -1518,9 +1533,14 @@ namespace stm32_bsp_generator
                         {
                             ExtractFirstBitAndSize(ParseHex(address_offset), out size, out offset);
                         }
-                        catch(Exception ex)
+                        catch
                         {
-                            errors.AddError(new RegisterParserErrors.BitmaskNotSequential { FileName = fileName, LineContents = line, LineNumber = nextLine - 1 });
+                            if (cfg.IsKnownNonSequentialRegister(subreg_name))
+                            {
+                                //Nothing to do - ignore the error.
+                            }
+                            else
+                                errors.AddError(new RegisterParserErrors.BitmaskNotSequential { FileName = fileName, LineContents = line, LineNumber = nextLine - 1 });
                             continue;
                         }
 

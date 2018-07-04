@@ -77,6 +77,7 @@
 		<Framework>
 			<Name>STM32746G-Discovery drivers</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.stm2746g-discovery</ID>
+			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.f7_hal</string>
 			</RequiredFrameworks>
@@ -129,6 +130,7 @@
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.f7_hal</string>
 			</RequiredFrameworks>
+			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<IncompatibleFrameworks>
 				<string>com.sysprogs.arm.stm32.stm2746g-discovery</string>
 			</IncompatibleFrameworks>

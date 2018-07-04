@@ -191,6 +191,7 @@
 		<Framework>
 			<Name>STM32F1 Legacy Peripheral Library</Name>
 			<ID>com.sysprogs.arm.stm32.f1_stdperiph</ID>
+			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
 			<IncompatibleFrameworks>
 				<string>com.sysprogs.arm.stm32.f1_hal</string>
 			</IncompatibleFrameworks>

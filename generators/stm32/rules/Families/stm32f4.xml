@@ -172,6 +172,7 @@
 		<Framework>
 			<Name>STM32F4 Legacy Peripheral Library</Name>
 			<ID>com.sysprogs.arm.stm32.f4_stdperiph</ID>
+			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
 			<IncompatibleFrameworks>
 				<string>com.sysprogs.arm.stm32.f4_hal</string>
 			</IncompatibleFrameworks>

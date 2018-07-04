@@ -70,6 +70,7 @@
 		<Framework>
 			<Name>STM32H743I_EVAL drivers</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.stm32h743i_eval</ID>
+			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.h7_hal</string>
 			</RequiredFrameworks>
@@ -119,6 +120,7 @@
 		<Framework>
 			<Name>STM32H7xx_Nucleo_144</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.nucleo144</ID>
+			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.h7_hal</string>
 			</RequiredFrameworks>

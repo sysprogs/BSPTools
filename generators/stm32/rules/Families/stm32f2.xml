@@ -82,6 +82,7 @@
 		<Framework>
 			<Name>STM32F2 Legacy Peripheral Library</Name>
 			<ID>com.sysprogs.arm.stm32.f2_stdperiph</ID>
+			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
 			<IncompatibleFrameworks>
 				<string>com.sysprogs.arm.stm32.f2_hal</string>
 			</IncompatibleFrameworks>

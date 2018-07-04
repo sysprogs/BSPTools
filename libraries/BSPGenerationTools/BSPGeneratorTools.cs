@@ -304,13 +304,21 @@ namespace BSPGenerationTools
                 }
             }
 
-            HashSet<string> usedFolders = new HashSet<string>();
+            Dictionary<string, string> usedFoldersToCompatibleIDs = new Dictionary<string, string>();
+            int ambiguousFolders = 0;
             foreach(var fw in bsp.Frameworks ?? new EmbeddedFramework[0])
             {
-                if (usedFolders.Contains(fw.ProjectFolderName))
-                    throw new Exception($"'{fw.ProjectFolderName}' is used by more than 1 framework. This will break builds in Visual Studio.");
-                usedFolders.Add(fw.ProjectFolderName);
+                var id = fw.ClassID ?? fw.ID;
+                if (usedFoldersToCompatibleIDs.TryGetValue(fw.ProjectFolderName, out var tmp) && tmp != id)
+                {
+                    ambiguousFolders++;
+                    Console.WriteLine($"'{fw.ProjectFolderName}' is used by both {id} and {tmp}. This will break builds in Visual Studio.");
+                }
+                usedFoldersToCompatibleIDs[fw.ProjectFolderName] = id;
             }
+
+            if (ambiguousFolders > 0)
+                throw new Exception($"Found {ambiguousFolders} ambiguous folders. Please check the generator output.");
         }
     }
 
