@@ -986,7 +986,7 @@ namespace stm32_bsp_generator
             dict_type_sizes["uint16_t"] = 16;
             dict_type_sizes["uint8_t"] = 8;
 
-            Regex struct_regex = new Regex(@"typedef struct[ \t]*\r\n\{[ \t]*\r\n([^}]*)\r\n\}[ \t\r\n]*([A-Za-z0-9_]*)_(Global)?TypeDef;");
+            Regex struct_regex = new Regex(@"typedef struct[ \t]*\r?\n\{[ \t]*\r?\n([^}]*)\r?\n\}[ \t\r?\n]*([A-Za-z0-9_]*)_(Global)?TypeDef;");
 
             var structs = struct_regex.Matches(file);
             foreach (Match strct in structs)
@@ -995,7 +995,7 @@ namespace stm32_bsp_generator
                 int set_size = 0;
 
                 RegexOptions option = RegexOptions.IgnoreCase;
-                Regex register_regex = new Regex(@"[ \t]*(__IO|__I)*[ ]*(?:const )*[ ]*([^ #\r\n]*)[ ]*(?:const )*([^\[;#\r\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r\n]*)[ ]*(\*/)*[ ]*(\r\n)*", option);
+                Regex register_regex = new Regex(@"[ \t]*(__IO|__I)*[ ]*(?:const )*[ ]*([^ #\r?\n]*)[ ]*(?:const )*([^\[;#\r?\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r?\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r?\n]*)[ ]*(\*/)*[ ]*(\r?\n)*", option);
  
                 var regs = register_regex.Matches(strct.Groups[1].Value);
 
@@ -1099,8 +1099,10 @@ namespace stm32_bsp_generator
         {
             Dictionary<string, KeyValuePair<string, string>> names = new Dictionary<string, KeyValuePair<string, string>>();
 
-            Regex periph_decl_begin_regex = new Regex(@"/\*\* \@addtogroup Peripheral_declaration\r\n(.*)\r\n(.*)");
+            Regex periph_decl_begin_regex = new Regex(@"/\*\* \@addtogroup Peripheral_declaration\r?\n(.*)\r?\n(.*)");
             var m_begin = periph_decl_begin_regex.Match(file);
+            if (!m_begin.Success)
+                throw new Exception("Failed to locate peripheral declaration group");
 
             string[] lines = file.Substring(m_begin.Index + m_begin.Groups[0].Length).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             Regex periph_def_regex = new Regex(@"#define[ ]+([a-zA-Z0-9_]*)[ ]+\(\(([a-zA-Z0-9_]*)_(|Global)TypeDef[ ]+\*\)[ ]*(.+)\)");
@@ -1168,7 +1170,7 @@ namespace stm32_bsp_generator
             Dictionary<string, ulong> addresses = new Dictionary<string, ulong>();
 
             Regex memory_map_begin_regex = new Regex(@"/\*\* \@addtogroup Peripheral_memory_map[\r]?\n(.*)[\r]?\n(.*)");
-            Regex memory_map_begin_regex2 = new Regex(@"/\*\* \r\n  \* \@brief Peripheral_memory_map");
+            Regex memory_map_begin_regex2 = new Regex(@"/\*\* \r?\n  \* \@brief Peripheral_memory_map");
             Regex rgComment = new Regex(@"^[ \t]*/\*[^/]+\*/[ \t]*$");
             var m_begin = memory_map_begin_regex.Match(file);
             if (!m_begin.Success)
@@ -1671,6 +1673,14 @@ namespace stm32_bsp_generator
             return string.Format(format, (uint)addr);
         }
 
+        public class BitmaskNotSequentialException : Exception
+        {
+            public BitmaskNotSequentialException()
+                : base()
+            {
+            }
+        }
+
         private static void ExtractFirstBitAndSize(ulong val, out int size, out int firstBit)
         {
             size = 0;
@@ -1683,7 +1693,7 @@ namespace stm32_bsp_generator
                     if (state == 0)
                         state = 1;
                     else if (state == 2)
-                        throw new Exception("Hit a second 1 region inside subregister bit mask!");
+                        throw new BitmaskNotSequentialException();
 
                     size++;
                     if (firstBit < 0)
