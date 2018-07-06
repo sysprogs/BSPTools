@@ -35,7 +35,7 @@
 #define DEBUG(...) /* nothing */
 #endif /* #if NEED_CONSOLE_OUTPUT */
  
-BLEDevice  ble;
+BLEDevice  g_BLE;
 DigitalOut led1(LED1);
 UARTService *uart;
  
@@ -43,7 +43,7 @@ void disconnectionCallback(const Gap::DisconnectionCallbackParams_t *params)
 {
 	DEBUG("Disconnected!\n\r");
 	DEBUG("Restarting the advertising process\n\r");
-	ble.startAdvertising();
+	g_BLE.startAdvertising();
 }
  
 void periodicCallback(void)
@@ -59,26 +59,26 @@ int main(void)
 	ticker.attach(periodicCallback, 1);
  
 	DEBUG("Initialising the nRF51822\n\r");
-	ble.init();
-	ble.onDisconnection(disconnectionCallback);
+	g_BLE.init();
+	g_BLE.onDisconnection(disconnectionCallback);
     
-	uart = new UARTService(ble);
+	uart = new UARTService(g_BLE);
  
     /* setup advertising */
-	ble.accumulateAdvertisingPayload(GapAdvertisingData::BREDR_NOT_SUPPORTED);
-	ble.setAdvertisingType(GapAdvertisingParams::ADV_CONNECTABLE_UNDIRECTED);
-	ble.accumulateAdvertisingPayload(GapAdvertisingData::SHORTENED_LOCAL_NAME,
+	g_BLE.accumulateAdvertisingPayload(GapAdvertisingData::BREDR_NOT_SUPPORTED);
+	g_BLE.setAdvertisingType(GapAdvertisingParams::ADV_CONNECTABLE_UNDIRECTED);
+	g_BLE.accumulateAdvertisingPayload(GapAdvertisingData::SHORTENED_LOCAL_NAME,
 		(const uint8_t *)"BLE UART",
 		sizeof("BLE UART") - 1);
-	ble.accumulateAdvertisingPayload(GapAdvertisingData::COMPLETE_LIST_128BIT_SERVICE_IDS,
+	g_BLE.accumulateAdvertisingPayload(GapAdvertisingData::COMPLETE_LIST_128BIT_SERVICE_IDS,
 		(const uint8_t *)UARTServiceUUID_reversed,
 		sizeof(UARTServiceUUID_reversed));
  
-	ble.setAdvertisingInterval(160); /* 100ms; in multiples of 0.625ms. */
-	ble.startAdvertising();
+	g_BLE.setAdvertisingInterval(160); /* 100ms; in multiples of 0.625ms. */
+	g_BLE.startAdvertising();
  
 	while (true) {
-		ble.waitForEvent();
+		g_BLE.waitForEvent();
 	}
 }
  

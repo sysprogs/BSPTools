@@ -24,6 +24,7 @@ from tools.paths import MBED_HEADER
 from tools.settings import ROOT
 import bootloader_scanner
 from tools.targets import TARGET_NAMES, TARGET_MAP
+from tools.utils import NotSupportedException
 import re;
 
 
@@ -114,7 +115,8 @@ def main():
         'fat': "FAT File System support",
         'eth': "Ethernet support",
         'rtx': "Keil RTX RTOS",
-        'features': 'Device features'
+        'features': 'Device features',
+        'mbedtls' : 'TLS Support (mbedtls)'
     }
 
     print("Parsing targets...")
@@ -123,7 +125,7 @@ def main():
     copy._deepcopy_dispatch[type(re.compile('x'))] = copy_regex
 
     #IPV6 is configured, but not listed as supported.Ignore it.
-    supported_targets = [t for t in supported_targets if "Super_Target" not in t]
+    supported_targets = [t for t in supported_targets if t not in ("Super_Target", "VBLUNO51_OTA", "VBLUNO51_BOOT", "VBLUNO51_LEGACY", "VBLUNO51")]
 
     rootNode = ElementTree.Element('ParsedTargetList')
     targetListNode = append_node(rootNode, 'Targets')
@@ -135,7 +137,11 @@ def main():
         targetNode = append_node(targetListNode, 'Target')
         targetNode.append(make_node('ID', target))
 
-        toolchain = ba.prepare_toolchain([ROOT], "", target, 'GCC_ARM', silent=True)
+        try:
+            toolchain = ba.prepare_toolchain([ROOT], "", target, 'GCC_ARM')
+        except NotSupportedException:
+            print(t + " is not supported!")
+            continue
 
         fullRes = toolchain.scan_resources(ROOT)
         fullRes.toolchain = toolchain
@@ -171,7 +177,7 @@ def main():
             libCfg = BuildConfiguration(libToolchain, libRes)
             libNode.append(libCfg.ToXML('Configuration'))
 
-        for feature in copy.copy(fullRes.features):
+        for feature in list(fullRes.features):
             featureNode = append_node(derivedCfgListNode, 'DerivedConfiguration')
             featureNode.append(make_node('Feature', feature))
 
@@ -181,9 +187,10 @@ def main():
             featureCfg = BuildConfiguration(featureToolchain, featureRes)
             featureNode.append(featureCfg.ToXML('Configuration'))
 
-        for lib in LIBRARIES:
+        for lib in LIBRARIES + [{"id" : "mbedtls", "source_dir" : ROOT + "/features/mbedtls"}]:
             if lib['id'] in ['rtos' ,'rtx']:
                 continue   #Already handled via mbed_library_dirs
+
             sourceDirs = lib['source_dir']
             if isinstance(sourceDirs, str):
                 sourceDirs = [sourceDirs]

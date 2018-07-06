@@ -65,7 +65,7 @@ namespace mbed
             }
         }
 
-        public void UpdateGitAndRescanTargets()
+        public void UpdateGitAndRescanTargets(bool skipRescan = false)
         {
             string gitExe = (Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\BSPGenerators")?.GetValue("git") as string) ?? "git.exe";
             string pythonExe = (Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\BSPGenerators")?.GetValue("python") as string) ?? "python.exe";
@@ -127,6 +127,17 @@ namespace mbed
                 File.WriteAllLines(patchedFile, lines);
             }
 
+            patchedFile = Path.Combine(mbedRoot, @"tools\config\__init__.py");
+            lines = File.ReadAllLines(patchedFile).ToList();
+            str = "raise NotSupportedException(\"Target does not support mbed OS 5\")";
+            idx2 = Enumerable.Range(0, lines.Count).FirstOrDefault(i => lines[i].Contains(str));
+            if (idx2 > 0)
+            {
+                int subIdx = lines[idx2].IndexOf(str);
+                lines[idx2] = lines[idx2].Substring(0, subIdx) + "print(\"library does not support mbed OS 5\")";
+                File.WriteAllLines(patchedFile, lines);
+            }
+
             string sampleDir = Path.Combine(mbedRoot, "samples");
             if (Directory.Exists(sampleDir))
                 Directory.Delete(sampleDir, true);
@@ -136,11 +147,15 @@ namespace mbed
             bspGenInfo.UseShellExecute = false;
             bspGenInfo.EnvironmentVariables["PYTHONPATH"] = mbedRoot;
             bspGenInfo.EnvironmentVariables["PATH"] += $@";{toolchainDir}\bin";
-            proc = Process.Start(bspGenInfo);
-            proc.WaitForExit();
 
-            if (proc.ExitCode != 0)
-                throw new Exception("BSP generator exited with code " + proc.ExitCode);
+            if (!skipRescan)
+            {
+                proc = Process.Start(bspGenInfo);
+                proc.WaitForExit();
+
+                if (proc.ExitCode != 0)
+                    throw new Exception("BSP generator exited with code " + proc.ExitCode);
+            }
         }
 
         public void PatchBuggyFiles()
@@ -352,7 +367,7 @@ namespace mbed
 
             mcu.MemoryMap = new AdvancedMemoryMap { Memories = memories };
             var flash = memories.FirstOrDefault(m => m.Name.ToUpper() == "FLASH" || m.Name == "m_text" || m.Name == "ROM" || m.Name == "rom" || m.Name == "MFlash256");
-            var ram = memories.First(m => m.Name.ToUpper() == "RAM" || m.Name == "m_data" || m.Name == "RAM_INTERN" || m.Name == "SRAM1" || m.Name == "RAM0" || m.Name.StartsWith("Ram0_"));
+            var ram = memories.First(m => m.Name.ToUpper() == "RAM" || m.Name == "m_data" || m.Name == "RAM_INTERN" || m.Name == "SRAM1" || m.Name == "RAM0" || m.Name.StartsWith("Ram0_") || m.Name.StartsWith("DSRAM_"));
 
             if (flash == null)
             {

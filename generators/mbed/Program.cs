@@ -177,6 +177,11 @@ namespace mbed
             }
 
             public readonly string ID, Name;
+
+            public override string ToString()
+            {
+                return ID;
+            }
         }
 
         class PropertyComparerByID : IEqualityComparer<PropertyEntry>
@@ -194,10 +199,12 @@ namespace mbed
 
         static void Main(string[] args)
         {
-            var generator = new MbedBSPGenerator("5.7.7");
+            var generator = new MbedBSPGenerator("5.9");
+
+            bool skipRescan = args.Contains("/norescan");
 
             string suffix = "";
-            generator.UpdateGitAndRescanTargets();
+            generator.UpdateGitAndRescanTargets(skipRescan);
 
             ParsedTargetList parsedTargets = XmlTools.LoadObject<ParsedTargetList>(Path.Combine(generator.outputDir, "mbed", "ParsedTargets.xml"));
             generator.PatchBuggyFiles();
@@ -212,16 +219,18 @@ namespace mbed
                 BSPSourceFolderName = "mbed Files"
             };
 
+            var validTargets = parsedTargets.Targets.Where(t => t.BaseConfiguration != null).ToArray();
+
             MCUFamily commonFamily = new MCUFamily
             {
                 ID = "MBED_CORE",
-                AdditionalSourceFiles = generator.ConvertPaths(Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.SourceFiles))),
-                AdditionalHeaderFiles = generator.ConvertPaths(Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.HeaderFiles))),
+                AdditionalSourceFiles = generator.ConvertPaths(Intersect(validTargets.Select(t => t.BaseConfiguration.SourceFiles))),
+                AdditionalHeaderFiles = generator.ConvertPaths(Intersect(validTargets.Select(t => t.BaseConfiguration.HeaderFiles))),
                 SymbolsRequiredByLinkerScript = new[] { "__Vectors", "Stack_Size" },
                 CompilationFlags = new ToolFlags
                 {
-                    IncludeDirectories = generator.ConvertPaths(Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.IncludeDirectories))),
-                    PreprocessorMacros = Intersect(parsedTargets.Targets.Select(t => t.BaseConfiguration.EffectivePreprocessorMacros))
+                    IncludeDirectories = generator.ConvertPaths(Intersect(validTargets.Select(t => t.BaseConfiguration.IncludeDirectories))),
+                    PreprocessorMacros = Intersect(validTargets.Select(t => t.BaseConfiguration.EffectivePreprocessorMacros))
                 }
             };
 
@@ -232,7 +241,7 @@ namespace mbed
 
             Console.WriteLine("Generating target definitions...");
 
-            foreach (var target in parsedTargets.Targets)
+            foreach (var target in validTargets)
             {
                 if (string.IsNullOrEmpty(target.BaseConfiguration.LinkerScript))
                 {

@@ -8,5 +8,6 @@
   <RequiredFrameworks>
 	<string>com.sysprogs.arm.mbed.drivers</string>
 	<string>com.sysprogs.arm.mbed.feature.BLE</string>
+	<string>com.sysprogs.arm.mbed.mbedtls</string>
   </RequiredFrameworks>
 </EmbeddedProjectSample>

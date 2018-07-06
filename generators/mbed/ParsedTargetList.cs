@@ -20,6 +20,16 @@ namespace mbed
 
             public bool IsFixed => string.IsNullOrEmpty(Description);
 
+            public bool IsUnsupported
+            {
+                get
+                {
+                    if (IsBool != "True" && DefaultValue == "None")
+                        return true;   //In mbed, setting the variable to 'none' completely removes the corresponding macro. VisualGDB can only replicate this for variables with a fixed list of options, that isn't the case for mbed.
+                    return false;
+                }
+            }
+
             public override string ToString()
             {
                 return ID;
@@ -60,14 +70,14 @@ namespace mbed
                         int defaultIdx = Array.IndexOf(options, DefaultValue);
                         if (defaultIdx < 0)
                             throw new Exception("Default value is not a part of suggestion list");
-                        if (options.FirstOrDefault(s=>!IsValidIdentifier(s)) == null)
+                        if (options.FirstOrDefault(s => !IsValidIdentifier(s)) == null)
                         {
                             //All options are valid identifiers
                             return new PropertyEntry.Enumerated
                             {
                                 UniqueID = ID,
                                 Name = ID,
-                                SuggestionList = options.Select(s=>new PropertyEntry.Enumerated.Suggestion { InternalValue = s}).ToArray(),
+                                SuggestionList = options.Select(s => new PropertyEntry.Enumerated.Suggestion { InternalValue = s }).ToArray(),
                                 DefaultEntryIndex = defaultIdx
                             };
                         }
@@ -94,12 +104,13 @@ namespace mbed
                 {
                     return NormalPreprocessorMacros
                         .Concat(ConfigurationVariables.Where(c => c.IsFixed).Select(c => $"{c.MacroName}={c.DefaultValue}"))
-                        .Concat(ConfigurationVariables.Where(c => !c.IsFixed).Select(c => $"{c.MacroName}=$$com.sysprogs.mbed.{c.ID}$$"))
+                        .Concat(ConfigurationVariables.Where(c => !c.IsFixed && !c.IsUnsupported).Select(c => $"{c.MacroName}=$$com.sysprogs.mbed.{c.ID}$$"))
                         .ToArray();
                 }
             }
 
-            public PropertyEntry[] EffectiveConfigurableProperties => ConfigurationVariables.Where(c => !c.IsFixed).Select(c => c.ToPropertyEntry()).ToArray();
+
+            public PropertyEntry[] EffectiveConfigurableProperties => ConfigurationVariables.Where(c => !c.IsFixed && !c.IsUnsupported).Select(c => c.ToPropertyEntry()).ToArray();
 
             static string[] SubtractOrThrow(string[] left, string[] right, bool throwIfBaseValuesAreNotPresent, string hint)
             {
@@ -149,6 +160,11 @@ namespace mbed
             public string Feature;
 
             public string CanonicalKey => Library != null ? "L:" + Library : "F:" + Feature;
+
+            public override string ToString()
+            {
+                return CanonicalKey;
+            }
 
             public BuildConfiguration Configuration;
 
