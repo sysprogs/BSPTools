@@ -318,7 +318,11 @@ namespace mbed
                     agg.AddedSettingsPerTargets[target.ID] = cfg.Configuration.Subtract(target.BaseConfiguration, cfg.CanonicalKey, cfg.Library != null);
                 }
 
-                generator.ConvertSoftdevicesAndPatchTarget(mcu, target.BaseConfiguration.HexFiles);
+                if (!generator.ConvertSoftdevicesAndPatchTarget(mcu, target.BaseConfiguration.HexFiles))
+                {
+                    mcu.CompilationFlags.LinkerScript = generator.ConvertPath(generator.PreprocessLinkerScriptIfNeeded(mcu.CompilationFlags.LinkerScript));
+                }
+
                 generator.CopyAndAttachRegisterDefinitions(mcu);
                 mcus.Add(mcu);
             }

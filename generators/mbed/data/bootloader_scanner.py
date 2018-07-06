@@ -24,7 +24,11 @@ def LocateHexFiles(toolchain, resources):
     try:
         hook = toolchain.target.post_binary_hook['function']
     except:
-        return None
+        hook = None
     if hook == "MCU_NRF51Code.binary_hook":
         return LocateNordicSoftdeviceAndBootloader(toolchain, resources)
+    elif "NORDIC" in toolchain.target.extra_labels:
+        if len(resources.hex_files) != 1:
+            raise Exception("Unexpected hex file count for " + t_self.target.name)
+        return resources.hex_files
     return None

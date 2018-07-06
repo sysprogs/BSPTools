@@ -23,12 +23,15 @@ namespace mbed
 
         public readonly string Version;
 
+        LinkerScriptCache _LinkerScriptCache;
+
         public MbedBSPGenerator(string version)
         {
             Directory.CreateDirectory(outputDir);
             mbedRoot = Path.GetFullPath(Path.Combine(outputDir, "mbed"));
             Version = version;
 
+            _LinkerScriptCache = new LinkerScriptCache(toolchainDir, mbedRoot);
             nameRules = new List<KeyValuePair<Regex, string>>();
             foreach (var line in File.ReadAllLines(Path.Combine(dataDir, "DeviceNameRules.txt")))
             {
@@ -90,21 +93,6 @@ namespace mbed
 
             if (proc.ExitCode != 0)
                 throw new Exception("Git exited with code " + proc.ExitCode);
-
-            foreach (var lds in Directory.GetFiles(mbedRoot, "*.ld", SearchOption.AllDirectories))
-            {
-                if (File.ReadAllText(lds).Contains("\n#if"))
-                {
-                    ProcessStartInfo preprocessInfo = new ProcessStartInfo($@"{toolchainDir}\bin\arm-eabi-cpp.exe", $"-P -C {lds} -o {lds}.preprocessed");
-                    preprocessInfo.UseShellExecute = false;
-                    preprocessInfo.EnvironmentVariables["PATH"] += $@";{toolchainDir}\bin";
-                    proc = Process.Start(preprocessInfo);
-                    proc.WaitForExit();
-
-                    File.Copy(lds + ".preprocessed", lds, true);
-                    File.Delete(lds + ".preprocessed");
-                }
-            }
 
             var patchedFile = Path.Combine(mbedRoot, @"tools\config\__init__.py");
             var lines = File.ReadAllLines(patchedFile).ToList();
@@ -225,11 +213,13 @@ namespace mbed
             {
                 if (fn.Length == mbedRoot.Length && fn.ToLower() == mbedRoot.ToLower())
                     return "$$SYS:BSP_ROOT$$";
-                if (fn.StartsWith(mbedRoot, StringComparison.InvariantCulture))
+                if (fn.StartsWith(mbedRoot, StringComparison.InvariantCultureIgnoreCase))
                     return "$$SYS:BSP_ROOT$$/" + fn.Substring(mbedRoot.Length + 1).Replace('\\', '/');
                 throw new Exception("Source path is not inside the mbed BSP: " + fn);
             }).ToArray();
         }
+
+        public string ConvertPath(string physicalPath) => ConvertPaths(new[] { physicalPath })[0];
 
         public struct ConvertedHexFile
         {
@@ -237,16 +227,116 @@ namespace mbed
             public int Size;
             public string RelativePath;
             public string SectionName;
+
+            public int End => (int)LoadAddress + Size;
         }
 
         Dictionary<string, ConvertedHexFile> _ConvertedHexFiles = new Dictionary<string, ConvertedHexFile>();
-        Dictionary<string, string> _PatchedLinkerScripts = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-        Dictionary<string, string> _PatchedLinkerScriptsReverse = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-        public void ConvertSoftdevicesAndPatchTarget(MCU mcu, string[] hexFiles)
+        static int AlignHexFileSize(int size)
         {
-            string baseDir = Path.Combine(mbedRoot, "SysprogsGenerated");
-            Directory.CreateDirectory(baseDir);
+            const int alignment = 4096;
+            return ((size + alignment - 1) / alignment) * alignment;
+        }
+
+        class LinkerScriptCache
+        {
+            public readonly string BaseDir;
+            readonly string _ToolchainDir;
+            readonly string _MBEDRoot;
+
+            public LinkerScriptCache(string toolchainDir, string mbedRoot)
+            {
+                _ToolchainDir = toolchainDir;
+                _MBEDRoot = mbedRoot;
+                BaseDir = Path.Combine(mbedRoot, "SysprogsGenerated");
+                Directory.CreateDirectory(BaseDir);
+            }
+
+            Dictionary<KeyValuePair<string, int>, string> _PreprocessedScripts = new Dictionary<KeyValuePair<string, int>, string>();
+            HashSet<string> _UsedGeneratedPaths = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
+            public string ProvidePreprocessedLinkerScript(string baseScript, int appStart)
+            {
+                baseScript = baseScript.Replace("$$SYS:BSP_ROOT$$", _MBEDRoot);
+
+                var key = new KeyValuePair<string, int>(baseScript, appStart);
+                if (_PreprocessedScripts.TryGetValue(key, out var val))
+                    return val;
+
+                if (!File.ReadAllText(baseScript).Contains("\n#if"))
+                    return _PreprocessedScripts[key] = baseScript;
+
+                ProcessStartInfo preprocessInfo = new ProcessStartInfo($@"{_ToolchainDir}\bin\arm-eabi-cpp.exe", $"-P -C {baseScript} -o {baseScript}.preprocessed");
+                if (appStart != 0)
+                    preprocessInfo.Arguments += $" -DMBED_APP_START=0x{appStart:x}";
+
+                preprocessInfo.UseShellExecute = false;
+                preprocessInfo.EnvironmentVariables["PATH"] += $@";{_ToolchainDir}\bin";
+                var proc = Process.Start(preprocessInfo);
+                proc.WaitForExit();
+
+                string nameBase = $"{BaseDir}\\{Path.GetFileNameWithoutExtension(baseScript)}-{appStart:x}";
+                for (int iter = 0; iter < 100000; iter++)
+                {
+                    string newName = nameBase;
+                    if (iter > 0)
+                        newName += $"-{iter}";
+
+                    newName += ".ld";
+                    if (_UsedGeneratedPaths.Contains(newName))
+                        continue;
+
+                    _UsedGeneratedPaths.Add(newName);
+
+                    File.Copy(baseScript + ".preprocessed", newName, true);
+                    File.Delete(baseScript + ".preprocessed");
+                    return _PreprocessedScripts[key] = newName;
+                }
+
+                throw new Exception("Failed to locate a name for preprocessed " + baseScript);
+            }
+
+            Dictionary<string, string> _PatchedScripts = new Dictionary<string, string>();
+
+            public string ProvideNameForPatchedScript(string originalScript, out bool alreadyCreated)
+            {
+                if (_PatchedScripts.TryGetValue(originalScript, out var result))
+                {
+                    alreadyCreated = true;
+                    return result;
+                }
+
+                alreadyCreated = false;
+                string nameBase = $"{BaseDir}\\{Path.GetFileNameWithoutExtension(originalScript)}-sd";
+
+                for (int iter = 0; iter < 100000; iter++)
+                {
+                    string newName = nameBase;
+                    if (iter > 0)
+                        newName += $"-{iter}";
+
+                    newName += ".ld";
+                    if (_UsedGeneratedPaths.Contains(newName))
+                        continue;
+
+                    _UsedGeneratedPaths.Add(newName);
+                    return newName;                    
+                }
+
+                throw new Exception("Failed to locate a name for patched " + originalScript);
+            }
+        }
+
+        public string PreprocessLinkerScriptIfNeeded(string linkerScript)
+        {
+            return _LinkerScriptCache.ProvidePreprocessedLinkerScript(linkerScript, 0);
+        }
+
+        //Returns true if the linker script was preprocessed.
+        public bool ConvertSoftdevicesAndPatchTarget(MCU mcu, string[] hexFiles)
+        {
+            var baseDir = _LinkerScriptCache.BaseDir;
             File.WriteAllText(Path.Combine(baseDir, ".mbedignore"), "*");
 
             foreach (var hexFile in hexFiles)
@@ -281,33 +371,25 @@ namespace mbed
 
                 if (!generatedCFile.StartsWith(mbedRoot, StringComparison.InvariantCultureIgnoreCase))
                     throw new Exception("HEX file outside mbed root");
-                _ConvertedHexFiles[hexFile] = new ConvertedHexFile { LoadAddress = parsedFile.LoadAddress, RelativePath = generatedCFile.Substring(mbedRoot.Length + 1), SectionName = sectionName, Size = parsedFile.Data.Length };
+                _ConvertedHexFiles[hexFile] = new ConvertedHexFile
+                {
+                    LoadAddress = parsedFile.LoadAddress,
+                    RelativePath = generatedCFile.Substring(mbedRoot.Length + 1),
+                    SectionName = sectionName,
+                    Size = AlignHexFileSize(parsedFile.Data.Length)
+                };
             }
 
             var hexFileList = hexFiles.Select(hf => _ConvertedHexFiles[hf]).ToList();
             if (hexFiles.Length == 0)
-                return;
+                return false;
 
             hexFileList.Sort((a, b) => a.LoadAddress.CompareTo(b.LoadAddress));
-            var linkerScript = mcu.CompilationFlags.LinkerScript;
-            string patchedLinkerScript;
+            var linkerScript = _LinkerScriptCache.ProvidePreprocessedLinkerScript(mcu.CompilationFlags.LinkerScript, hexFileList.Last().End);
 
-            if (!_PatchedLinkerScripts.TryGetValue(linkerScript, out patchedLinkerScript))
+            string patchedLinkerScript = _LinkerScriptCache.ProvideNameForPatchedScript(linkerScript, out bool scriptAlreadyPatched);
+            if (!scriptAlreadyPatched)
             {
-                patchedLinkerScript = Path.Combine(baseDir, Path.GetFileName(mcu.CompilationFlags.LinkerScript));
-                if (_PatchedLinkerScriptsReverse.TryGetValue(patchedLinkerScript, out string tmp) && tmp != linkerScript)
-                {
-                    for (int i = 2; ; i++)
-                    {
-                        patchedLinkerScript = Path.Combine(baseDir, Path.GetFileNameWithoutExtension(mcu.CompilationFlags.LinkerScript) + "_x" + i + Path.GetExtension(mcu.CompilationFlags.LinkerScript));
-                        if (!_PatchedLinkerScriptsReverse.ContainsKey(patchedLinkerScript))
-                            break;
-                    }
-
-                }
-                _PatchedLinkerScripts[linkerScript] = patchedLinkerScript;
-                _PatchedLinkerScriptsReverse[patchedLinkerScript] = linkerScript;
-
                 List<string> linkerScriptLines = File.ReadAllLines(linkerScript.Replace("$$SYS:BSP_ROOT$$", mbedRoot)).ToList();
 
                 int firstMemorySectionLine = Enumerable.Range(0, linkerScript.Length)
@@ -338,13 +420,16 @@ namespace mbed
                 File.WriteAllLines(patchedLinkerScript.Replace("$$SYS:BSP_ROOT$$", mbedRoot), linkerScriptLines);
             }
 
-            mcu.CompilationFlags.LinkerScript = ConvertPaths(new[] { patchedLinkerScript })[0];
+            mcu.CompilationFlags.LinkerScript = ConvertPath(patchedLinkerScript);
             mcu.AdditionalSourceFiles = mcu.AdditionalSourceFiles.Concat(hexFileList.Select(h => "$$SYS:BSP_ROOT$$/" + h.RelativePath.Replace('\\', '/'))).ToArray();
+            return true;
         }
 
         public void DetectAndApplyMemorySizes(MCU mcu, string linkerScript)
         {
             Console.Write(".");
+            linkerScript = _LinkerScriptCache.ProvidePreprocessedLinkerScript(linkerScript, 0);
+
             string tmpFile = Path.GetTempPath() + "LinkerScriptQuery.c";
             File.WriteAllText(tmpFile, "");
             string mapFile = Path.ChangeExtension(tmpFile, ".map");
