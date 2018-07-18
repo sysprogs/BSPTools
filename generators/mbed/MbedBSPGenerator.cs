@@ -250,7 +250,6 @@ namespace mbed
                 _ToolchainDir = toolchainDir;
                 _MBEDRoot = mbedRoot;
                 BaseDir = Path.Combine(mbedRoot, "SysprogsGenerated");
-                Directory.CreateDirectory(BaseDir);
             }
 
             Dictionary<KeyValuePair<string, int>, string> _PreprocessedScripts = new Dictionary<KeyValuePair<string, int>, string>();
@@ -258,6 +257,7 @@ namespace mbed
 
             public string ProvidePreprocessedLinkerScript(string baseScript, int appStart)
             {
+                Directory.CreateDirectory(BaseDir);
                 baseScript = baseScript.Replace("$$SYS:BSP_ROOT$$", _MBEDRoot);
 
                 var key = new KeyValuePair<string, int>(baseScript, appStart);
@@ -301,6 +301,7 @@ namespace mbed
 
             public string ProvideNameForPatchedScript(string originalScript, out bool alreadyCreated)
             {
+                Directory.CreateDirectory(BaseDir);
                 if (_PatchedScripts.TryGetValue(originalScript, out var result))
                 {
                     alreadyCreated = true;

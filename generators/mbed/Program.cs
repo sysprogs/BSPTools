@@ -199,7 +199,7 @@ namespace mbed
 
         static void Main(string[] args)
         {
-            var generator = new MbedBSPGenerator("5.9");
+            var generator = new MbedBSPGenerator("5.9.2");
 
             bool skipRescan = args.Contains("/norescan");
 
