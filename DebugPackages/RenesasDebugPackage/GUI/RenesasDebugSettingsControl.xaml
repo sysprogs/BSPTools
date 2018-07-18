@@ -4,12 +4,82 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RenesasDebugPackage.GUI"
+             xmlns:bspe="clr-namespace:BSPEngine;assembly=BSPEngine"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:coll="clr-namespace:System.Collections;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.Resources>
             <local:MaxWidthConverter x:Key="MaxWidthConverter"/>
+            <ItemsPanelTemplate x:Key="HorizontalItemsPanel">
+                <StackPanel Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+            <Thickness x:Key="TableElementMargin">0 2 0 2</Thickness>
         </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Programming interface:" Grid.Row="0"/>
+        <ListBox Grid.Row="0" Grid.Column="1" SelectedItem="{Binding ProgrammingInterface}" Margin="{StaticResource TableElementMargin}" ItemsPanel="{StaticResource HorizontalItemsPanel}">
+            <ListBox.ItemsSource>
+                <coll:ArrayList>
+                    <local:KnownProgrammingInterface>E1</local:KnownProgrammingInterface>
+                    <local:KnownProgrammingInterface>E2</local:KnownProgrammingInterface>
+                    <local:KnownProgrammingInterface>E2LITE</local:KnownProgrammingInterface>
+                    <local:KnownProgrammingInterface>EZ</local:KnownProgrammingInterface>
+                    <local:KnownProgrammingInterface>IECUBE</local:KnownProgrammingInterface>
+                </coll:ArrayList>
+            </ListBox.ItemsSource>
+        </ListBox>
+        
+        <Label Content="Program FLASH memory:" Grid.Row="1"/>
+        <ListBox Grid.Row="1" Grid.Column="1" SelectedItem="{Binding ProgramMode}" Margin="{StaticResource TableElementMargin}" ItemsPanel="{StaticResource HorizontalItemsPanel}">
+            <ListBox.ItemsSource>
+                <coll:ArrayList>
+                    <bspe:ProgramMode>Enabled</bspe:ProgramMode>
+                    <bspe:ProgramMode>Disabled</bspe:ProgramMode>
+                    <bspe:ProgramMode>Auto</bspe:ProgramMode>
+                </coll:ArrayList>
+            </ListBox.ItemsSource>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="Enabled">
+                                        <Setter Property="Text" Value="Always"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="Disabled">
+                                        <Setter Property="Text" Value="Never"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="Auto">
+                                        <Setter Property="Text" Value="If rebuilt since last load"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:RenesasDebugSettingsControl}}"/>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
         <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="14" Header="Advanced settings" IsExpanded="False">
             <Grid MinHeight="80" Margin="20 0 5 5">
                 <Grid.RowDefinitions>

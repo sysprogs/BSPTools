@@ -32,7 +32,11 @@ namespace RenesasDebugPackage.GUI
 
         public class ControllerImpl : ICustomDebugMethodConfigurator, INotifyPropertyChanged
         {
-            void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            void OnPropertyChanged(string name)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+                SettingsChanged?.Invoke(this, EventArgs.Empty);
+            }
 
             RenesasGDBServerCommandLine _CommandLine;
 
@@ -42,6 +46,34 @@ namespace RenesasDebugPackage.GUI
                 TypeProvider = controller;
                 _CommandLine = new RenesasGDBServerCommandLine(new RenesasDebugSettings().CommandLineArguments);
             }
+
+            ProgramMode _ProgramMode;
+            public ProgramMode ProgramMode
+            {
+                get => _ProgramMode;
+                set
+                {
+                    _ProgramMode = value;
+                    OnPropertyChanged(nameof(ProgramMode));
+                }
+            }
+
+            public KnownProgrammingInterface ProgrammingInterface
+            {
+                get
+                {
+                    var iface = _CommandLine.DebugInterface ?? "EZ";
+                    if (Enum.TryParse<KnownProgrammingInterface>(iface, out var val))
+                        return val;
+                    return KnownProgrammingInterface.EZ;
+                }
+                set
+                {
+                    _CommandLine.DebugInterface = value.ToString();
+                    OnCommandLineChanged();
+                }
+            }
+
 
             public string CommandLine
             {
@@ -56,11 +88,12 @@ namespace RenesasDebugPackage.GUI
             void OnCommandLineChanged()
             {
                 OnPropertyChanged(nameof(CommandLine));
+                OnPropertyChanged(nameof(ProgrammingInterface));
             }
 
             public object Control { get; }
 
-            public object Configuration => new RenesasDebugSettings { CommandLineArguments = _CommandLine.CommandLine };
+            public object Configuration => new RenesasDebugSettings { CommandLineArguments = _CommandLine.CommandLine, ProgramMode = ProgramMode };
 
             public ICustomSettingsTypeProvider TypeProvider { get; }
 
@@ -71,7 +104,9 @@ namespace RenesasDebugPackage.GUI
 
             public void SetConfiguration(object configuration, KnownInterfaceInstance context)
             {
-                _CommandLine = new RenesasGDBServerCommandLine(((configuration as RenesasDebugSettings) ?? new RenesasDebugSettings()).CommandLineArguments);
+                var settings = (configuration as RenesasDebugSettings) ?? new RenesasDebugSettings();
+                _CommandLine = new RenesasGDBServerCommandLine(settings.CommandLineArguments);
+                ProgramMode = settings.ProgramMode;
             }
 
             public bool TryFixSettingsFromStubError(IGDBStubInstance stub)
@@ -100,5 +135,14 @@ namespace RenesasDebugPackage.GUI
         {
             throw new NotImplementedException();
         }
+    }
+
+    public enum KnownProgrammingInterface
+    {
+        E1,
+        E2,
+        E2LITE,
+        EZ,
+        IECUBE
     }
 }

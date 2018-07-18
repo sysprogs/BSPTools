@@ -14,7 +14,7 @@ namespace RenesasDebugPackage
             CommandLine = commandLine;
         }
 
-        string GetSeparatedValue(string key)
+        public string GetSeparatedValue(string key)
         {
             for (int i = 0; i < _SplitCommandLine.Count - 1; i++)
                 if (_SplitCommandLine[i] == key)
@@ -22,7 +22,7 @@ namespace RenesasDebugPackage
             return null;
         }
 
-        void SetSeparatedValue(string key, string value)
+        public void SetSeparatedValue(string key, string value)
         {
             for (int i = 0; i < _SplitCommandLine.Count - 1; i++)
                 if (_SplitCommandLine[i] == key)
