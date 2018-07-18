@@ -218,6 +218,10 @@ namespace RenesasToolchainManager
                 if (idx == -1)
                     throw new Exception("Failed to determine the prefix from the gcc path");
 
+                Status = "Locating Python...";
+                string pythonExe = Directory.GetFiles(E2StudioPath, "python27.dll", SearchOption.AllDirectories).FirstOrDefault() ?? throw new Exception("Could not find python27.dll in " + E2StudioPath);
+                string pythonDir = Path.GetDirectoryName(pythonExe);
+
                 BuildBSP(gccVersion.Target);
 
                 Toolchain tc = new Toolchain
@@ -236,6 +240,11 @@ namespace RenesasToolchainManager
                     {
                         BSPDirectoryName
                     },
+                    ExtraEnvironment = new[]
+                    {
+                        $"PATH=%PATH%;{pythonDir}",
+                        $"PYTHONHOME={pythonDir}"
+                    }
                 };
 
                 Status = "Writing configuration files...";
