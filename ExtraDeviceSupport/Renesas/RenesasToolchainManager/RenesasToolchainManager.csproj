@@ -100,5 +100,8 @@
   <ItemGroup>
     <Resource Include="check16.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\DebugPackages\RenesasDebugPackage\bin\$(Configuration)\RenesasDebugPackage.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

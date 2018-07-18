@@ -128,17 +128,22 @@ namespace RenesasToolchainManager
 
                 string generatorResourceDir = Path.Combine(E2StudioPath, @"internal\projectgen\rl78\Generate");
                 File.Copy(Path.Combine(generatorResourceDir, @"resetprg\reset_program.asm"), Path.Combine(bspDir, "start.S"), true);
+                File.WriteAllText(Path.Combine(bspDir, "stubs.c"), "void __attribute__((weak)) HardwareSetup(void)\r\n{\r\n}\r\n");
+
+                string debugComponentDir = Path.Combine(E2StudioPath, "DebugComp", "RL78");
+                Directory.CreateDirectory(Path.Combine(bspDir, "DeviceDefinitions"));
 
                 foreach (var fn in linkerScripts)
                 {
                     Progress = (double)i++ / linkerScripts.Length;
-                    var mcu = RenesasMCUGenerator.GenerateMCUDefinition(bspDir, fn, generatorResourceDir, target);
-                    mcus.Add(mcu);
+                    var mcu = RenesasMCUGenerator.GenerateMCUDefinition(bspDir, fn, generatorResourceDir, target, debugComponentDir);
+                    if (mcu != null)
+                        mcus.Add(mcu);
                 }
 
                 string debugPackageDir = Path.Combine(bspDir, "DebugPackage");
                 Directory.CreateDirectory(debugPackageDir);
-                File.WriteAllText(Path.Combine(debugPackageDir, "DebugCompLink.txt"), Path.Combine(E2StudioPath, "DebugComp", "RL78"));
+                File.WriteAllText(Path.Combine(debugPackageDir, "DebugCompLink.txt"), debugComponentDir);
 
                 EmbeddedDebugPackage edp = new EmbeddedDebugPackage
                 {
@@ -162,6 +167,10 @@ namespace RenesasToolchainManager
                 };
 
                 XmlTools.SaveObject(edp, Path.Combine(debugPackageDir, "edp.xml"));
+                var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("RenesasToolchainManager.RenesasDebugPackage.dll") ?? throw new Exception("Could not find the debug package resource");
+                byte[] data = new byte[stream.Length];
+                stream.Read(data, 0, data.Length);
+                File.WriteAllBytes(Path.Combine(debugPackageDir, "RenesasDebugPackage.dll"), data);
 
                 BoardSupportPackage bsp = new BoardSupportPackage
                 {
@@ -174,7 +183,11 @@ namespace RenesasToolchainManager
                         RenesasMCUGenerator.GenerateMCUFamilyDefinition(target)
                     },
                     SupportedMCUs = mcus.ToArray(),
-                    DebugMethodPackages = new[] { "DebugPackage" }
+                    DebugMethodPackages = new[] { "DebugPackage" },
+                    Frameworks = new[]
+                    {
+                        RenesasMCUGenerator.GenerateStartupFilesFramework(target)
+                    }
                 };
 
                 XmlTools.SaveObject(bsp, Path.Combine(bspDir, "BSP.xml"));
