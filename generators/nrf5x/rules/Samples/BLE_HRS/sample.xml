@@ -1,35 +1,62 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	  <Name>Bluetooth LE HRS Peripheral</Name>
-	  <Description>This sample demonstrates the Bluetooth LE Heart Rate Service</Description>
-	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+  <Name>Bluetooth LE HRS Peripheral</Name>
+  <Description>This sample demonstrates the Bluetooth LE Heart Rate Service</Description>
+  <MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
     <string>com.sysprogs.arm.nordic.nrf5x.periph</string>
     <string>com.sysprogs.arm.nordic.nrf5x.util</string>
     <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
     <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
-	<string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_dis</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_hrs</string>
     <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
+	
+	    <string>com.sysprogs.arm.nordic.nrf51.modules_nrfx</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.ble_link_ctx_manager</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_qwr</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
+	
   </RequiredFrameworks>
-  <ConditionalErrors>
-	<ConditionalError>
-		<ErrorCondition xsi:type="Not">
-			<Argument xsi:type="MatchesRegex">
-				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>S.*</Regex>
-				<IgnoreCase>false</IgnoreCase>
-			</Argument>
-		</ErrorCondition>
-		<ErrorText>Please select a BLE Peripheral-capable softdevice on the previous page.</ErrorText>
-	</ConditionalError>
-  </ConditionalErrors>
+  <AdditionalSourcesToCopy>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</SourcePath>
+      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
+    </AdditionalSourceFile>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/main.c</SourcePath>
+      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
+    </AdditionalSourceFile>
+  </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.bsp</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	 <KeyValue>
+	   <Key>com.sysprogs.bspoptions.nrf5x.uart_driver_legacy</Key>
+		<Value>yes</Value>
+      </KeyValue>
+       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	     <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_log</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.pwr_mgmt</Key>
+		<Value>yes</Value>
+        <Value />
+      </KeyValue>
+	  
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>
         <Value>yes</Value>
@@ -130,7 +157,18 @@
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
         <Value>yes</Value>
       </KeyValue>
-
     </Entries>
-	</DefaultConfiguration>
+  </DefaultConfiguration>
+  <ConditionalErrors>
+    <ConditionalError>
+      <ErrorCondition xsi:type="Not">
+        <Argument xsi:type="MatchesRegex">
+          <Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
+          <Regex>S.*</Regex>
+          <IgnoreCase>false</IgnoreCase>
+        </Argument>
+      </ErrorCondition>
+      <ErrorText>Please select a BLE Peripheral-capable softdevice on the previous page.</ErrorText>
+    </ConditionalError>
+  </ConditionalErrors>
 </EmbeddedProjectSample>

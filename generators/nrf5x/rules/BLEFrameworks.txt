@@ -24,3 +24,6 @@ ble_services\ble_nus|Nordic UART Service
 ble_services\ble_rscs|Running Speed and Cadence Service
 ble_services\ble_rscs_c|Running Speed and Cadence Service Client
 ble_services\ble_tps|TX Power Service
+ble_link_ctx_manager|Ble_Link_CTX_manager
+ble_services\ble_ipsp|IPSP Service
+nrf_ble_qwr|Nrf_Ble_Qwr

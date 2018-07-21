@@ -11,6 +11,10 @@
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string>
     <string>com.sysprogs.arm.nordic.nrf5x.iot</string>
+	
+	<string>com.sysprogs.arm.nordic.nrf51.modules_nrfx</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.ble_ipsp</string>		
   </RequiredFrameworks>
   <ConditionalErrors>
 	<ConditionalError>
@@ -29,6 +33,14 @@
 	   <KeyValue>
 		<Key>com.sysprogs.bspoptions.nrf5x.iot.tls_instance</Key>
         <Value></Value>
+      </KeyValue>
+	     <KeyValue>
+		<Key>com.sysprogs.bspoptions.nrf5x.iot.mem_manager</Key>
+        <Value></Value>
+      </KeyValue>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.iot.ble_ipsp</Key>
+        <Value>yes</Value>
       </KeyValue>
 
       <KeyValue>
@@ -82,10 +94,7 @@
         <Value>yes</Value>
       </KeyValue>
 	  
-      <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.iot.ble_ipsp</Key>
-        <Value>yes</Value>
-      </KeyValue>
+     
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.iot.ipv6_stack</Key>
         <Value>yes</Value>

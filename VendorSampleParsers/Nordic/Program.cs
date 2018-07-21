@@ -82,7 +82,7 @@ namespace NordicVendorSampleParser
                 AutoDetectedFrameworks = new AutoDetectedFramework[0];
                 AutoPathMappings = new PathMapping[]
                 {
-                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(components|config|external)/(.*)", "$$SYS:BSP_ROOT$$/nRF5x/{1}/{2}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(components|config|external|integration|modules)/(.*)", "$$SYS:BSP_ROOT$$/nRF5x/{1}/{2}"),
                 };
             }
         }
@@ -107,7 +107,7 @@ namespace NordicVendorSampleParser
             if (sampleDir.Samples.FirstOrDefault(s => s.AllDependencies != null) == null)
             {
                 //Perform Pass 1 testing - test the raw VendorSamples in-place
-                StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir);
+                StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir+"_COMP_ORIG");
                 XmlTools.SaveObject(sampleDir, sampleListFile);
             }
 
@@ -129,7 +129,7 @@ namespace NordicVendorSampleParser
 
             var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
             expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir);
+            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir+"VS");
             if (result.Failed > 0)
                 throw new Exception("Some of the vendor samples failed to build. Check the build log.");
         }
@@ -208,7 +208,8 @@ namespace NordicVendorSampleParser
             lstFileInc.AddRange(splitArgs.Where(ar => ar.StartsWith("-I")).Select(a=>a.Substring(2).Trim()));
             lstDef.AddRange(splitArgs.Where(ar => ar.StartsWith("-D")).Select(a=>a.Substring(2).Trim()));
 
-            lstFileC.AddRange(splitArgs.Where(ar => (ar.EndsWith(".c") || ar.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase)) && !ar.Contains(@"components/toolchain/")));
+            lstFileC.AddRange(splitArgs.Where(ar => (ar.EndsWith(".c") || ar.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase)) && !ar.Contains(@"components/toolchain/") &&
+            !ar.Contains(@"gcc_startup")));
 
 
             //arguments from file
@@ -242,6 +243,10 @@ namespace NordicVendorSampleParser
                     lstFileC.RemoveAt(n);
 
             }
+            
+            if(Directory.GetFiles(aCurDir, "*.ld").Count()>0)
+               vs.LinkerScript = Directory.GetFiles(aCurDir, "*.ld")[0].Replace(SDKdir, "$$SYS:BSP_ROOT$$/nRF5x");
+
             vs.IncludeDirectories = lstFileInc.ToArray();
             vs.PreprocessorMacros = lstDef.ToArray();
             vs.SourceFiles = lstFileC.ToArray();
@@ -277,16 +282,22 @@ namespace NordicVendorSampleParser
 
             foreach (var makefile in ExampleDirs)
             {
-                if (makefile.Contains(@"\ant\"))
-                    continue;
                 string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("armgcc\\Makefile", "");
+                if (makefile.Contains(@"\ant\"))
+                {
+                    ToLog($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (" Skipped"));
+                    continue;
+                }
+              //  if (!makefile.Contains(@"publisher"))
+              //        if(!makefile.Contains(@"keyboard"))
+              //            continue;
 
-                if (Directory.Exists(Path.Combine(Path.GetDirectoryName(makefile), "_build")))
-                    Directory.Delete(Path.Combine(Path.GetDirectoryName(makefile), "_build"), true);
+              //  if (Directory.Exists(Path.Combine(Path.GetDirectoryName(makefile), "_build")))
+              //      Directory.Delete(Path.Combine(Path.GetDirectoryName(makefile), "_build"), true);
 
                 var nameLog = Path.Combine(Path.GetDirectoryName(makefile), "log.txt");
-                if (File.Exists(nameLog))
-                    File.Delete(nameLog);
+//                if (File.Exists(nameLog))
+//                    File.Delete(nameLog);
 
                 Console.WriteLine($"Compiling {nameExampl} ...");
 
@@ -295,12 +306,15 @@ namespace NordicVendorSampleParser
                 compiler.StartInfo.Arguments = $"/c {makeExecutable} -j{Environment.ProcessorCount} VERBOSE=1 > log.txt 2>&1";
                 compiler.StartInfo.UseShellExecute = false;
                 compiler.StartInfo.WorkingDirectory = Path.GetDirectoryName(makefile);
-                compiler.Start();
-                compiler.WaitForExit();
+                if (!File.Exists(nameLog))
+                {
+                    compiler.Start();
+                    compiler.WaitForExit();
+                }
                 samplesDone++;
                 bool buildSucceeded;
 
-                buildSucceeded = compiler.ExitCode == 0;
+                buildSucceeded =  compiler.ExitCode == 0;
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 if (!buildSucceeded)
@@ -318,6 +332,7 @@ namespace NordicVendorSampleParser
 
                 if (!File.Exists(nameLog))
                 {
+                    ToLog($"No Log file  " + Path.GetDirectoryName(makefile));
                     Console.WriteLine($"No Log file {1}", Path.GetDirectoryName(makefile));
                     continue;
                 }
@@ -328,13 +343,13 @@ namespace NordicVendorSampleParser
 
                 allSamples.Add(vs);
                 //Clear
-                File.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "log.txt"));
-                Directory.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "_build"), true);
+//                File.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "log.txt"));
+//                Directory.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "_build"), true);
             }
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             ToLog($"Total samples : {samplesDone}");
-            ToLog($"Failed samples : {samplesFailed}, {samplesDone / 100 * samplesFailed} % from Total");
+            ToLog($"Failed samples : {samplesFailed}, {(samplesFailed/samplesDone ) * 100} % from Total");
             Console.ForegroundColor = ConsoleColor.Gray;
 
             return allSamples;

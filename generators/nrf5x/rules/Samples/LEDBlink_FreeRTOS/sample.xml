@@ -1,26 +1,28 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>LEDBlink (FreeRTOS)</Name>
-	<Description>This sample shows how to use FreeRTOS with the Nordic nRF5x devices.</Description>
-	<RequiredFrameworks>
-		<string>com.sysprogs.arm.nordic.nrf5x.util</string>
-		<string>com.sysprogs.arm.nordic.nrf5x.periph</string>
-		<string>com.sysprogs.arm.nordic.nrf5x.boards</string>
-    	<string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
-    	<string>com.sysprogs.arm.nordic.nrf51.freertos</string>
-	</RequiredFrameworks>
-  <ConditionalErrors>
-	<ConditionalError>
-		<ErrorCondition xsi:type="Not">
-			<Argument xsi:type="MatchesRegex">
-				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>nosoftdev</Regex>
-				<IgnoreCase>false</IgnoreCase>
-			</Argument>
-		</ErrorCondition>
-		<ErrorText>To use this sample, please select "Softdevice: none" on the previous page.</ErrorText>
-	</ConditionalError>
-  </ConditionalErrors>
+  <Name>LEDBlink (FreeRTOS)</Name>
+  <Description>This sample shows how to use FreeRTOS with the Nordic nRF5x devices.</Description>
+  <MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+    <string>com.sysprogs.arm.nordic.nrf5x.util</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.periph</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
+    <string>com.sysprogs.arm.nordic.nrf51.freertos</string>
+		 <string>com.sysprogs.arm.nordic.nrf51.modules_nrfx</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
+  </RequiredFrameworks>
+  <AdditionalSourcesToCopy>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky_freertos/pca10040/blank/config/sdk_config.h</SourcePath>
+      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
+    </AdditionalSourceFile>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</SourcePath>
+      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
+    </AdditionalSourceFile>
+  </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
       <KeyValue>
@@ -28,21 +30,33 @@
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
-	        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
-        	<Value />
+        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
+        <Value />
       </KeyValue>
       <KeyValue>
-	        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
-        	<Value />
+        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
+        <Value />
       </KeyValue>
       <KeyValue>
-   	   	<Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
-	   <Value>yes</Value>
-  	</KeyValue>
-	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
         <Value>yes</Value>
       </KeyValue>
-  </Entries>
-</DefaultConfiguration>
+    </Entries>
+  </DefaultConfiguration>
+  <ConditionalErrors>
+    <ConditionalError>
+      <ErrorCondition xsi:type="Not">
+        <Argument xsi:type="MatchesRegex">
+          <Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
+          <Regex>nosoftdev</Regex>
+          <IgnoreCase>false</IgnoreCase>
+        </Argument>
+      </ErrorCondition>
+      <ErrorText>To use this sample, please select "Softdevice: none" on the previous page.</ErrorText>
+    </ConditionalError>
+  </ConditionalErrors>
 </EmbeddedProjectSample>

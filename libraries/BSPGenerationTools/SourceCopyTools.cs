@@ -395,7 +395,7 @@ namespace BSPGenerationTools
             {
                 string renamedRelativePath = f;
                 string pathInsidePackage = Path.Combine(subdir, TargetFolder, f);
-                if (pathInsidePackage.Length > 120)
+                if (pathInsidePackage.Length > 170)
                 {
                     if (!bsp.OnFilePathTooLong(pathInsidePackage))
                         continue;

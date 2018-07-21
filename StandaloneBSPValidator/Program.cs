@@ -465,6 +465,9 @@ namespace StandaloneBSPValidator
 
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
+          //  if(sampleObj.Sample.LinkerScript!=null)
+           //     flags.LinkerScript = sampleObj.Sample.LinkerScript;
+
             if (!string.IsNullOrEmpty(configuredSample.Sample.Sample.LinkerScript))
                 flags.LinkerScript = VariableHelper.ExpandVariables(configuredSample.Sample.Sample.LinkerScript, bspDict, configuredSample.FrameworkParameters);
 
@@ -785,6 +788,9 @@ namespace StandaloneBSPValidator
         {
             if (fn.StartsWith(vs.Path + @"\MDK-ARM", StringComparison.InvariantCultureIgnoreCase))
                 return true;
+            if (fn.Contains("system_nrf52"))
+                return true;
+
             return false;
         }
 

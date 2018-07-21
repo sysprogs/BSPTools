@@ -1,41 +1,65 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>LEDBlink</Name>
-	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
-	<ConfigurableProperties>
-	<PropertyGroups>
-	<PropertyGroup>
-	  <Properties>
-		<PropertyEntry xsi:type="Integral">
-		  <Name>LED Port Number</Name>
-		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
-		  <Description>Specifies the port number of the LED port</Description>
-		  <DefaultValue>21</DefaultValue>
-		  <MinValue>0</MinValue>
-		  <MaxValue>31</MaxValue>
-		</PropertyEntry>
-		<PropertyEntry xsi:type="Integral">
-		  <Name>Delay (msec)</Name>
-		  <UniqueID>com.sysprogs.examples.ledblink.DELAYMSEC</UniqueID>
-		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
-		  <DefaultValue>500</DefaultValue>
-		</PropertyEntry>
-	  </Properties>
-	  <CollapsedByDefault>false</CollapsedByDefault>
-	</PropertyGroup>
-	</PropertyGroups>
-	</ConfigurableProperties>
-	<RequiredFrameworks>
-		<string>com.sysprogs.arm.nordic.nrf5x.util</string>
-		<string>com.sysprogs.arm.nordic.nrf5x.periph</string>
-    		<string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
-	</RequiredFrameworks>
-	<DefaultConfiguration>
-    	<Entries>
-	        <KeyValue>
-        	<Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
-   		     <Value>yes</Value>
-      		</KeyValue>
-    	</Entries>
-	</DefaultConfiguration>
+  <Name>LEDBlink</Name>
+  <Description>This is a very basic sample project - a classical blinking LED example.</Description>
+  <ConfigurableProperties>
+    <PropertyGroups>
+      <PropertyGroup>
+        <Properties>
+          <PropertyEntry xsi:type="Integral">
+            <Name>LED Port Number</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the port number of the LED port</Description>
+            <DefaultValue>21</DefaultValue>
+            <MinValue>0</MinValue>
+            <MaxValue>31</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>Delay (msec)</Name>
+            <UniqueID>com.sysprogs.examples.ledblink.DELAYMSEC</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+            <DefaultValue>500</DefaultValue>
+            <MinValue>-2147483648</MinValue>
+            <MaxValue>2147483647</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+        </Properties>
+        <CollapsedByDefault>false</CollapsedByDefault>
+      </PropertyGroup>
+    </PropertyGroups>
+  </ConfigurableProperties>
+  <MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+    <string>com.sysprogs.arm.nordic.nrf5x.util</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.periph</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
+	  		    <string>com.sysprogs.arm.nordic.nrf51.modules_nrfx</string>
+				<string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
+  </RequiredFrameworks>
+  <AdditionalSourcesToCopy>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/peripheral/blinky/pca10040/blank/config/sdk_config.h</SourcePath>
+      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
+    </AdditionalSourceFile>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/radio_config/radio_config.h</SourcePath>
+      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
+    </AdditionalSourceFile>
+    <AdditionalSourceFile>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/components/drivers_nrf/sdio/config/sdio_config.h</SourcePath>
+      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
+    </AdditionalSourceFile>
+  </AdditionalSourcesToCopy>
+  <DefaultConfiguration>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
+        <Value>yes</Value>
+      </KeyValue>
+    </Entries>
+  </DefaultConfiguration>
 </EmbeddedProjectSample>

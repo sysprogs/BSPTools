@@ -118,7 +118,9 @@ namespace nrf5x
                         .ToArray();
 
                     var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Origin).Last();
-                    var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Origin).Last();
+        //            var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Length).Last();
+                   var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Origin).Last();
+ //                   var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Length).Last();
 
                     if (!maxFLASH.FLASH.Equals(maxRAM.FLASH))
                         throw new Exception("Inconsistent maximum linker scripts"); //The 'max RAM' script has a different FLASH size than the 'max FLASH' script.
@@ -312,10 +314,10 @@ namespace nrf5x
                     {
                         abi = " \"-mfloat-abi=soft\"";
                     }
-
+                    
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
                     var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName + abi, UseShellExecute = false };
-                    info.EnvironmentVariables["PATH"] += @";e:\sysgcc\arm-eabi\bin";
+                    info.EnvironmentVariables["PATH"] += @";c:\sysgcc\arm-eabi\bin";
                     Process.Start(info).WaitForExit();
                     string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
@@ -455,27 +457,14 @@ namespace nrf5x
 
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
-            bool usingIoTSDK = false;
+            bool usingIoTSDK =  false;
 
-            /*            if (Directory.Exists(Path.Combine(args[0], @"components\iot\ble_6lowpan")))
-                        {
-                            usingIoTSDK = true;
-                            Console.WriteLine("Detected IoT SDK");
-                        }*/
 
-            if (usingIoTSDK)
-            {
-                bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules_iot"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("s1xx_iot", 0x1f000, 0x2800, "nrf52", "IoT", bspBuilder.Directories.InputDir));
-            }
-            else
-            {
                 bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf52810.*", null, bspBuilder.Directories.InputDir));
-            }
-            List<MCUBuilder> devices = new List<MCUBuilder>();
+                List<MCUBuilder> devices = new List<MCUBuilder>();
 
 #if NRF51_SUPPORT
             if (!usingIoTSDK)
@@ -487,12 +476,13 @@ namespace nrf5x
                 }
 #endif
 
+            devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52.S" });
+            devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52840.S" });
+            if (!usingIoTSDK)
+                devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52810.S" });
+            
 
-            devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/components/toolchain/gcc/gcc_startup_nrf52.S" });
-            devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/components/toolchain/gcc/gcc_startup_nrf52840.S" });
-            devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/components/toolchain/gcc/gcc_startup_nrf52810.S" });
-
-            List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+            List < MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
                 allFamilies.Add(new NordicFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
@@ -553,7 +543,7 @@ namespace nrf5x
                         {
                             new CopyJob
                             {
-                                SourceFolder = allFamilies[0].Definition.PrimaryHeaderDir + @"\..\components\ble\" + dir,
+                                SourceFolder = allFamilies[0].Definition.PrimaryHeaderDir + @"\..\..\..\components\ble\" + dir,
                                 TargetFolder = dir,
                                 FilesToCopy = "*.c;*.h",
                             }
@@ -656,7 +646,8 @@ namespace nrf5x
                         defaultConfig = "pca10040/s132";
 
                     suffixEntry = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = defaultConfig };
-                    mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { suffixEntry });
+                    mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { suffixEntry,
+                    new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_blank", Value = "pca10040" } });
 
                     mcuDefinitions.Add(mcuDef);
                 }
@@ -666,8 +657,11 @@ namespace nrf5x
 
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
-
-                foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = "pca10040e/s112" } }))
+                string dirpca = "pca10040e/s112";
+                if (usingIoTSDK)
+                    dirpca = "pca10040/s132";
+                foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value =dirpca },
+                    new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_blank", Value = "pca10040" } }))
                     exampleDirs.Add(sample);
             }
 
@@ -688,21 +682,11 @@ namespace nrf5x
 
             Console.WriteLine("Building BSP archive...");
             string strPackageID, strPackageDesc, strPAckVersion;
-            if (usingIoTSDK)
-            {
-                strPackageID = "com.sysprogs.arm.nordic.nrf5x-iot";
-                strPackageDesc = "Nordic NRF52 IoT";
-                strPAckVersion = "0.9";
+          
+           strPackageID = "com.sysprogs.arm.nordic.nrf5x";
+           strPackageDesc = "Nordic NRF52x Devices";
+           strPAckVersion = "14.2R2";
 
-                foreach (var mcu in mcuDefinitions)
-                    mcu.UserFriendlyName = mcu.ID + " (IoT)";
-            }
-            else
-            {
-                strPackageID = "com.sysprogs.arm.nordic.nrf5x";
-                strPackageDesc = "Nordic NRF52x Devices";
-                strPAckVersion = "14.2R2";
-            }
 
             BoardSupportPackage bsp = new BoardSupportPackage
             {
@@ -722,7 +706,6 @@ namespace nrf5x
                 InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
             };
 
-            bspBuilder.ValidateBSP(bsp);
             bspBuilder.Save(bsp, true, false);
         }
     }

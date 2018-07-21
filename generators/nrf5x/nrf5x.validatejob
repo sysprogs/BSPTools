@@ -1,21 +1,22 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <ToolchainPath>[SysGCC-arm-eabi-6.2.0]</ToolchainPath>
+    <ToolchainPath>[SysGCC-arm-eabi-7.2.0]</ToolchainPath>
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
+	<!--BSPPath>d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\Output14_VS</BSPPath-->
 	<DeviceRegex>nRF52.*</DeviceRegex>
+	
 	<Samples>
-		<TestedSample>
-			<Name>Bluetooth LE Mouse</Name>
-			<SkipIfNotFound>false</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEMouse</TestDirSuffix>
-		</TestedSample>	 
 		<TestedSample>
 			<Name>Bluetooth LE Proximity Tag</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEProximity</TestDirSuffix>
-		</TestedSample>	 
+		</TestedSample>	 <TestedSample>
+			<Name>Bluetooth LE Mouse</Name>
+			<SkipIfNotFound>false</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-BLEMouse</TestDirSuffix>
+		</TestedSample>	 		
 		<TestedSample>
 			<Name>Bluetooth LE Keyboard</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
@@ -142,7 +143,7 @@
 					  </KeyValue>
 					  <KeyValue>
 						<Key>com.sysprogs.toolchainoptions.arm.libnosys</Key>
-						<Value>--specs=nosys.specs</Value>
+						<Value>-specs=nosys.specs</Value>
 					  </KeyValue>					  
 				</Entries>
 			</MCUConfiguration>	
