@@ -217,8 +217,8 @@
         <ListBox Grid.Row="7" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.ResetModes}" 
                  SelectedItem="{Binding ResetMode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}" Visibility="{Binding ESP8266Visibility}"/>
 
-        <TextBlock Text="Program FLASH using:" Grid.Row="8" Visibility="{Binding ESPIDFHintVisibility}"/>
-        <ListBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding ProgramUsingIDF}" Margin="{StaticResource TableElementMargin}">
+        <TextBlock Text="Program FLASH using:" Grid.Row="8" Visibility="{Binding ExternalFLASHModeVisibility}"/>
+        <ListBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding ProgramUsingIDF}" Margin="{StaticResource TableElementMargin}" Visibility="{Binding ExternalFLASHModeVisibility}">
             <ListBox.ItemsSource>
                 <coll:ArrayList>
                     <sys:Boolean>false</sys:Boolean>
@@ -232,7 +232,7 @@
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding}" Value="true">
-                                        <Setter Property="Text" Value="esptool.py (via a COM port)"/>
+                                        <Setter Property="Text" Value="{Binding Path=DataContext.ExternallyProgrammableProjectDebugContext.ExternalProgrammingOptionName, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:ESPxxOpenOCDSettingsControl}}}"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding}" Value="false">
                                         <Setter Property="Text" Value="OpenOCD (via JTAG)"/>
@@ -246,9 +246,9 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="9" Grid.Column="1" Margin="5 0 0 0" Visibility="{Binding ESPIDFHintVisibility}">
+        <StackPanel Orientation="Horizontal" Grid.Row="9" Grid.Column="1" Margin="5 0 0 0" Visibility="{Binding ExternalFLASHModeVisibility}">
             <Image Width="16" Height="16" Source="icons\bulb16.png" VerticalAlignment="Center" Margin="0 2 0 0"/>
-            <TextBlock Text="Use the ESP-IDF Settings page to specify the COM port for FLASH programming." VerticalAlignment="Center" Margin="0"/>
+            <TextBlock VerticalAlignment="Center" Margin="0" Text="{Binding Path=ExternallyProgrammableProjectDebugContext.ExternalProgrammingOptionHint}"/>
         </StackPanel>
 
         <ContentControl Grid.Row="10" Grid.ColumnSpan="2" Visibility="{Binding ESPIDFHintVisibility}" HorizontalAlignment="Left" Margin="5">

@@ -118,46 +118,8 @@ namespace ESP8266DebugPackage
             {
                 if (settings.ProgramUsingIDF)
                 {
-                    string bash, bashArgs;
-                    if (!service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.bash", out bash) || !service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.bash_args", out bashArgs))
-                        throw new Exception("ESP-IDF did not report esptool arguments");
-
-                    if (service.SystemDictionary.TryGetValue("com.sysprogs.esp32.esptool.script", out var script) && File.Exists(script))
-                    {
-                        var lines = File.ReadAllLines(script).ToList();
-                        int idx = Enumerable.Range(0, lines.Count).FirstOrDefault(i => lines[i].Contains("def hard_reset(self):"));
-                        if (idx > 0 && idx < (lines.Count - 1))
-                        {
-                            if (!lines[idx + 1].Contains("self._port.setDTR(False)"))
-                            {
-                                if (service.GUIService.Prompt("The esptool.py binary used in the current ESP-IDF contains known compatibility issue with Cygwin. Do you want to patch it automatically?"))
-                                {
-                                    Regex rgIndent = new Regex("^([ \t]*)[^ \t]");
-                                    var m = rgIndent.Match(lines[idx + 1]);
-                                    lines.Insert(idx + 1, m.Groups[1].Value + "self._port.setDTR(False)  # IO0=HIGH");
-                                    File.WriteAllLines(script, lines.ToArray());
-                                }
-                            }
-                        }
-                    }
-
-                    var tool = service.LaunchCommandLineTool(new CommandLineToolLaunchInfo
-                    {
-                        Command = bash,
-                        Arguments = bashArgs
-                    });
-
-                    ESP32StubDebugController.GDBStubInstance.ReportFLASHProgrammingProgress(tool, service, session);
-
-                    string text = tool.AllText;
-                    int validLines = text.Split('\n').Count(l => l.Trim() == "Hash of data verified.");
-                    int binCount = 0;
-                    if (service.MCU.Configuration.TryGetValue("com.sysprogs.esp32.esptool.binaries.count", out var tmp))
-                        int.TryParse(tmp, out binCount);
-                    binCount = 0;
-
-                    if (validLines < binCount)
-                        service.GUIService.Report("Warning: some of the FLASH regions could not be programmed. Please examine the stub output for details.", System.Windows.Forms.MessageBoxIcon.Warning);
+                    var svc = service.AdvancedDebugService as IExternallyProgrammedProjectDebugService ?? throw new Exception("This project type does not support external FLASH memory programming");
+                    svc.ProgramFLASHMemoryUsingExternalTool(session);
                 }
                 else
                 {

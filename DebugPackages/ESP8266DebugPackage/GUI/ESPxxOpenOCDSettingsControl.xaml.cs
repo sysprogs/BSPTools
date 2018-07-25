@@ -109,7 +109,7 @@ namespace ESP8266DebugPackage.GUI
                     rsrc.UpdatePath(dlg.FileName);
             }
         }
-
+        
         private void RemoveResource_Click(object sender, RoutedEventArgs e)
         {
             var rsrc = (sender as FrameworkElement)?.DataContext as FLASHResource;
@@ -122,7 +122,7 @@ namespace ESP8266DebugPackage.GUI
             System.Diagnostics.Process.Start("https://visualgdb.com/tutorials/esp32/flashdiag");
         }
     }
-    
+
     public class AnnotatedValueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

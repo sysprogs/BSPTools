@@ -102,11 +102,19 @@ namespace ESP8266DebugPackage
     {
         public bool IsESP32 { get; }
 
+
+
         public ESPxxOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, ESPxxOpenOCDSettings settings, KnownInterfaceInstance context, bool isESP32)
             : base(host, baseDir, settings ?? (isESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings()), context)
         {
             IsESP32 = isESP32;
+
             _ESPIDFMode = host.MCU.Configuration.ContainsKey("com.sysprogs.esp32.idf.sdkconfig");
+            if (host.AdvancedModeContext is IExternallyProgrammableProjectDebugContext ectx)
+            {
+                ExternalFLASHModeVisibility = Visibility.Visible;
+                ExternallyProgrammableProjectDebugContext = ectx;
+            }
 
             Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
             if (settings == null)
@@ -143,6 +151,9 @@ namespace ESP8266DebugPackage
         public Visibility ESPIDFHintVisibility => _ESPIDFMode ? Visibility.Visible : Visibility.Collapsed;
         public Visibility ESP32FLASHVisibility => (IsESP32 && !_ESPIDFMode) ? Visibility.Visible : Visibility.Collapsed;
 
+        public IExternallyProgrammableProjectDebugContext ExternallyProgrammableProjectDebugContext { get; }
+
+        public Visibility ExternalFLASHModeVisibility { get; } = Visibility.Collapsed;
 
         public ESP8266BinaryImage.IESPxxImageHeader FLASHSettings => Settings.GetFLASHSettings();
 
