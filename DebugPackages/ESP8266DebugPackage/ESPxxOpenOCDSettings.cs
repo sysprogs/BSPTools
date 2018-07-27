@@ -40,7 +40,6 @@ namespace ESP8266DebugPackage
         public ESP8266BinaryImage.ESP32ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP32ImageHeader();
         public bool PatchBootloader { get; set; } = true;
         public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
-        public bool ProgramUsingIDF { get; set; }
 
     }
 
@@ -110,11 +109,6 @@ namespace ESP8266DebugPackage
             IsESP32 = isESP32;
 
             _ESPIDFMode = host.MCU.Configuration.ContainsKey("com.sysprogs.esp32.idf.sdkconfig");
-            if (host.AdvancedModeContext is IExternallyProgrammableProjectDebugContext ectx)
-            {
-                ExternalFLASHModeVisibility = Visibility.Visible;
-                ExternallyProgrammableProjectDebugContext = ectx;
-            }
 
             Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
             if (settings == null)
@@ -151,17 +145,27 @@ namespace ESP8266DebugPackage
         public Visibility ESPIDFHintVisibility => _ESPIDFMode ? Visibility.Visible : Visibility.Collapsed;
         public Visibility ESP32FLASHVisibility => (IsESP32 && !_ESPIDFMode) ? Visibility.Visible : Visibility.Collapsed;
 
-        public IExternallyProgrammableProjectDebugContext ExternallyProgrammableProjectDebugContext { get; }
-
-        public Visibility ExternalFLASHModeVisibility { get; } = Visibility.Collapsed;
-
         public ESP8266BinaryImage.IESPxxImageHeader FLASHSettings => Settings.GetFLASHSettings();
 
         public ObservableCollection<FLASHResource> FLASHResources { get; } = new ObservableCollection<FLASHResource>();
 
+        bool _ProgramFLASHExternally;
+        public bool ProgramFLASHExternally
+        {
+            get => _ProgramFLASHExternally;
+            set
+            {
+                _ProgramFLASHExternally = value;
+                OnPropertyChanged(nameof(ProgramFLASHExternally));
+            }
+        }
 
         protected override string GetScriptDir(string baseDir)
         {
+            string directDir = Path.Combine(baseDir, @"share\openocd\scripts");
+            if (Directory.Exists(directDir))
+                return directDir;
+
             return Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\OpenOCD\share\openocd\scripts"));
         }
 
@@ -258,12 +262,6 @@ namespace ESP8266DebugPackage
                 OnPropertyChanged(nameof(AutofeedWatchdog));
                 OnPropertyChanged(nameof(StartupCommands));
             }
-        }
-
-        public bool ProgramUsingIDF
-        {
-            get => (Settings as ESP32OpenOCDSettings)?.ProgramUsingIDF ?? false;
-            set => (Settings as ESP32OpenOCDSettings).ProgramUsingIDF = value;
         }
 
         public const string DefaultInitDataFile = "$$SYS:BSP_ROOT$$/IoT-SDK/bin/esp_init_data_default.bin";

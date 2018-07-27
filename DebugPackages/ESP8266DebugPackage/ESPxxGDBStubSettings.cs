@@ -111,6 +111,16 @@ namespace ESP8266DebugPackage
             }
         }
 
+        public string SelectedCOMPortText
+        {
+            get => Settings.COMPort;
+            set
+            {
+                Settings.COMPort = value;
+                OnSettingsChanged();
+            }
+        }
+
         public COMPortInfo[] COMPorts => _Host.GetAvailableCOMPorts();
 
         public string InitDataFile

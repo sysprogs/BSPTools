@@ -66,9 +66,11 @@ namespace ESP8266DebugPackage
 
         protected override bool SupportsScriptEditing => false;
 
-
+        
         protected override string GetOpenOCDDirectory(string methodDir)
         {
+            if (File.Exists(methodDir + @"\bin\openocd.exe"))
+                return methodDir;
             return Path.GetFullPath(Path.Combine(methodDir, @"..\..\..\OpenOCD"));
         }
     }
@@ -116,10 +118,10 @@ namespace ESP8266DebugPackage
             }
             else
             {
-                if (settings.ProgramUsingIDF)
+                if (settings.ProgramFLASHUsingExternalTool)
                 {
                     var svc = service.AdvancedDebugService as IExternallyProgrammedProjectDebugService ?? throw new Exception("This project type does not support external FLASH memory programming");
-                    svc.ProgramFLASHMemoryUsingExternalTool(session);
+                    svc.ProgramFLASHMemoryUsingExternalTool(settings.ProgramMode);
                 }
                 else
                 {
@@ -193,6 +195,8 @@ namespace ESP8266DebugPackage
                         {
                             ctx.ReportTaskProgress(blkNum++, blocks.Count);
                             string path = blk.FileName.Replace('\\', '/');
+                            if (path.Contains(" "))
+                                throw new Exception($"ESP32 OpenOCD does not support spaces in paths. Please relocate {path} to a location without spaces");
                             var result = session.RunGDBCommand($"mon program_esp32 \"{path}\" 0x{blk.Offset:x}");
                             bool succeeded = result.StubOutput?.FirstOrDefault(l => l.Contains("** Programming Finished **")) != null;
                             if (!succeeded)

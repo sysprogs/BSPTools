@@ -218,7 +218,7 @@
                  SelectedItem="{Binding ResetMode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}" Visibility="{Binding ESP8266Visibility}"/>
 
         <TextBlock Text="Program FLASH using:" Grid.Row="8" Visibility="{Binding ExternalFLASHModeVisibility}"/>
-        <ListBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding ProgramUsingIDF}" Margin="{StaticResource TableElementMargin}" Visibility="{Binding ExternalFLASHModeVisibility}">
+        <ListBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding ProgramUsingExternalTool}" Margin="{StaticResource TableElementMargin}" Visibility="{Binding ExternalFLASHModeVisibility}">
             <ListBox.ItemsSource>
                 <coll:ArrayList>
                     <sys:Boolean>false</sys:Boolean>

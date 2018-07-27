@@ -62,7 +62,9 @@
         </Grid.Resources>
 
         <TextBlock Text="COM Port:" Grid.Row="0" Visibility="{Binding COMPortSelectorVisibility}"/>
-        <ComboBox Grid.Row="0" Grid.Column="1" Margin="{StaticResource TableElementMargin}" IsEditable="True" ItemsSource="{Binding COMPorts}" SelectedItem="{Binding SelectedCOMPort}" Text="{Binding SelectedCOMPort, Mode=OneWayToSource}" SelectionChanged="RaiseSettingsChangedEvent" Visibility="{Binding COMPortSelectorVisibility}">
+        <ComboBox Grid.Row="0" Grid.Column="1" Margin="{StaticResource TableElementMargin}" IsEditable="True" ItemsSource="{Binding COMPorts}" 
+                  SelectedItem="{Binding SelectedCOMPort}" Text="{Binding SelectedCOMPortText}" 
+                  SelectionChanged="RaiseSettingsChangedEvent" Visibility="{Binding COMPortSelectorVisibility}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
