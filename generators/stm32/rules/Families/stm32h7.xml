@@ -120,14 +120,11 @@
 		<Framework>
 			<Name>STM32H7xx_Nucleo_144</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.nucleo144</ID>
-			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
+			<!-- Do not set the ClassID for this framework as otherwise it will conflict with STM32H743I-Eval BSP framework -->
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.h7_hal</string>
 			</RequiredFrameworks>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.nucleo144</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>Board</ProjectFolderName>
+			<ProjectFolderName>Nucleo144</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>

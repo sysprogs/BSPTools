@@ -75,8 +75,9 @@
 			</CopyJobs>			
 		</Framework>
 		<Framework>
-			<Name>STM32746G-Discovery drivers</Name>
-			<ID>com.sysprogs.arm.stm32.bspdrv.stm2746g-discovery</ID>
+			<Name>STM32F746G-Discovery drivers</Name>
+			<Filter>STM32F746.*</Filter>
+			<ID>com.sysprogs.arm.stm32.bspdrv.stm32f746g-discovery</ID>
 			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.f7_hal</string>
@@ -127,12 +128,13 @@
 		<Framework>
 			<Name>STM32756G_EVAL drivers</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.stm32756G_eval</ID>
+			<Filter>STM32F756.*</Filter>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.f7_hal</string>
 			</RequiredFrameworks>
 			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.stm2746g-discovery</string>
+				<string>com.sysprogs.arm.stm32.stm32f746g-discovery</string>
 			</IncompatibleFrameworks>
 			<ProjectFolderName>Board</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>

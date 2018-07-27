@@ -283,13 +283,16 @@ namespace BSPGenerationTools
             if (devicesWithZeroRAM > 0)
                 throw new Exception($"Found {devicesWithZeroRAM} devices with RAMSize = 0. Please fix the list.");
 
-            foreach(var dev in bsp.SupportedMCUs)
+            int totalErrors = 0;
+            HashSet<string> reportedClassIDs = new HashSet<string>();
+
+            foreach (var dev in bsp.SupportedMCUs)
             {
                 if (dev.MemoryMap != null)
                 {
                     bool foundMainFLASH = false;
 
-                    foreach(var mem in dev.MemoryMap.Memories)
+                    foreach (var mem in dev.MemoryMap.Memories)
                     {
                         if ((mem.Flags & MCUMemoryFlags.IsDefaultFLASH) == MCUMemoryFlags.IsDefaultFLASH)
                             foundMainFLASH = true;
@@ -302,23 +305,37 @@ namespace BSPGenerationTools
                     if (!foundMainFLASH)
                         throw new Exception($"Memory map for {dev.ID} does not contain a FLASH memory");
                 }
+
+                foreach (var fw in bsp.Frameworks.Where(fw => fw.IsCompatibleWithMCU(dev.ID)).GroupBy(fw => fw.ClassID).Where(g => g.Key != null))
+                {
+                    if (fw.Count() > 1 && !reportedClassIDs.Contains(fw.Key))
+                    {
+                        totalErrors++;
+                        Console.WriteLine($"{fw.Key} ClassID corresponds to more then 1 framework on {dev.ID}:");
+                        foreach(var fwObj in fw)
+                            Console.WriteLine($"    {fwObj.ID}");
+                        Console.WriteLine($"This will break referencing those frameworks via VisualGDB Project Properties. Specify MCUFilterRegex for those frameworks to ensure only 1 is compatible with each device.");
+                        Console.WriteLine();
+
+                        reportedClassIDs.Add(fw.Key);
+                    }
+                }
             }
 
             Dictionary<string, string> usedFoldersToCompatibleIDs = new Dictionary<string, string>();
-            int ambiguousFolders = 0;
-            foreach(var fw in bsp.Frameworks ?? new EmbeddedFramework[0])
+            foreach (var fw in bsp.Frameworks ?? new EmbeddedFramework[0])
             {
                 var id = fw.ClassID ?? fw.ID;
                 if (usedFoldersToCompatibleIDs.TryGetValue(fw.ProjectFolderName, out var tmp) && tmp != id)
                 {
-                    ambiguousFolders++;
+                    totalErrors++;
                     Console.WriteLine($"'{fw.ProjectFolderName}' is used by both {id} and {tmp}. This will break builds in Visual Studio.");
                 }
                 usedFoldersToCompatibleIDs[fw.ProjectFolderName] = id;
             }
 
-            if (ambiguousFolders > 0)
-                throw new Exception($"Found {ambiguousFolders} ambiguous folders. Please check the generator output.");
+            if (totalErrors > 0)
+                throw new Exception($"Found {totalErrors} validation errors. Please check the generator output.");
         }
     }
 
@@ -397,7 +414,9 @@ namespace BSPGenerationTools
 
                 if (allowExcludingStartupFiles && MCUs != null)
                 {
-                    family.ConfigurableProperties.Import(new PropertyList { PropertyGroups = new List<PropertyGroup>()
+                    family.ConfigurableProperties.Import(new PropertyList
+                    {
+                        PropertyGroups = new List<PropertyGroup>()
                     {
                         new PropertyGroup
                         {
@@ -732,7 +751,7 @@ namespace BSPGenerationTools
 
                     if (sample.AdditionalBuildTimeSources != null)
                     {
-                        foreach(var src in sample.AdditionalBuildTimeSources)
+                        foreach (var src in sample.AdditionalBuildTimeSources)
                         {
                             string source = src;
                             BSP.ExpandVariables(ref source);
