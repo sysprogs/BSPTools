@@ -32,6 +32,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.Resources>
             <Style TargetType="TextBlock" BasedOn="{StaticResource ResourceKey={x:Type TextBlock}}">
@@ -75,8 +77,22 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <TextBlock Text="GDB Stub Baud Rate:" Grid.Row="1"/>
-        <ComboBox Grid.Row="1" Grid.Column="1" Margin="{StaticResource TableElementMargin}" IsEditable="True" Text="{Binding Settings.StubBaudRate}" SelectionChanged="RaiseSettingsChangedEvent">
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Margin="5 0 0 0" Grid.ColumnSpan="2">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ExternalCOMPortSelectionHint}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+            <Image Width="16" Height="16" Source="icons\bulb16.png" VerticalAlignment="Center" Margin="0 2 5 0"/>
+            <TextBlock VerticalAlignment="Center" Margin="0" Text="{Binding Path=ExternalCOMPortSelectionHint}"/>
+        </StackPanel>
+        <TextBlock Text="GDB Stub Baud Rate:" Grid.Row="2"/>
+        <ComboBox Grid.Row="2" Grid.Column="1" Margin="{StaticResource TableElementMargin}" IsEditable="True" Text="{Binding Settings.StubBaudRate}" SelectionChanged="RaiseSettingsChangedEvent">
             <ComboBox.ItemsSource>
                 <coll:ArrayList>
                     <sys:String>74880</sys:String>
@@ -85,8 +101,8 @@
             </ComboBox.ItemsSource>
         </ComboBox>
 
-        <TextBlock Text="Bootloader Baud Rate:" Grid.Row="2"/>
-        <ComboBox Grid.Row="2" Grid.Column="2" Margin="{StaticResource TableElementMargin}" IsEditable="True" Text="{Binding Settings.BootloaderBaudRate}" SelectionChanged="RaiseSettingsChangedEvent">
+        <TextBlock Text="Bootloader Baud Rate:" Grid.Row="3" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
+        <ComboBox Grid.Row="3" Grid.Column="2" Margin="{StaticResource TableElementMargin}" IsEditable="True" Text="{Binding Settings.BootloaderBaudRate}" SelectionChanged="RaiseSettingsChangedEvent" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}">
             <ComboBox.ItemsSource>
                 <coll:ArrayList>
                     <sys:String>115200</sys:String>
@@ -94,15 +110,15 @@
             </ComboBox.ItemsSource>
         </ComboBox>
 
-        <TextBlock Text="Bootloader Reset Delay (msec):" Grid.Row="3"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.BootloaderResetDelay}" Margin="{StaticResource TableElementMargin}" TextChanged="RaiseSettingsChangedEvent"/>
+        <TextBlock Text="Bootloader Reset Delay (msec):" Grid.Row="4" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Settings.BootloaderResetDelay}" Margin="{StaticResource TableElementMargin}" TextChanged="RaiseSettingsChangedEvent" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
 
-        <TextBlock Text="Bootloader Activation Sequence:" Grid.Row="4"/>
-        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Settings.BootloaderActivationSequence}" Margin="{StaticResource TableElementMargin}" TextChanged="RaiseSettingsChangedEvent"/>
+        <TextBlock Text="Bootloader Activation Sequence:" Grid.Row="5" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
+        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Settings.BootloaderActivationSequence}" Margin="{StaticResource TableElementMargin}" TextChanged="RaiseSettingsChangedEvent" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
 
 
-        <TextBlock Text="Program FLASH memory:" Grid.Row="5"/>
-        <ListBox Grid.Row="5" Grid.Column="1" SelectedItem="{Binding Settings.ProgramMode}" Margin="{StaticResource TableElementMargin}" SelectionChanged="RaiseSettingsChangedEvent">
+        <TextBlock Text="Program FLASH memory:" Grid.Row="6"/>
+        <ListBox Grid.Row="6" Grid.Column="1" SelectedItem="{Binding Settings.ProgramMode}" Margin="{StaticResource TableElementMargin}" SelectionChanged="RaiseSettingsChangedEvent">
             <ListBox.ItemsSource>
                 <coll:ArrayList>
                     <bspe:ProgramMode>Enabled</bspe:ProgramMode>
@@ -134,24 +150,24 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <TextBlock Text="FLASH Size:" Grid.Row="6"/>
-        <ComboBox Grid.Row="6" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHSizes}" 
-                 SelectedItem="{Binding Settings.FLASHSettings.Size}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+        <TextBlock Text="FLASH Size:" Grid.Row="7" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
+        <ComboBox Grid.Row="7" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHSizes}" 
+                 SelectedItem="{Binding Settings.FLASHSettings.Size}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
 
-        <TextBlock Text="FLASH Mode:" Grid.Row="7"/>
-        <ListBox Grid.Row="7" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHModes}" 
-                 SelectedItem="{Binding Settings.FLASHSettings.Mode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+        <TextBlock Text="FLASH Mode:" Grid.Row="8" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
+        <ListBox Grid.Row="8" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHModes}" 
+                 SelectedItem="{Binding Settings.FLASHSettings.Mode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
 
 
-        <TextBlock Text="FLASH Frequency:" Grid.Row="8"/>
-        <ListBox Grid.Row="8" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHFrequencies}" 
-                 SelectedItem="{Binding Settings.FLASHSettings.Frequency}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+        <TextBlock Text="FLASH Frequency:" Grid.Row="9" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
+        <ListBox Grid.Row="9" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.FLASHFrequencies}" 
+                 SelectedItem="{Binding Settings.FLASHSettings.Frequency}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}"/>
 
-        <TextBlock Text="Reset Mode:" Grid.Row="9"/>
-        <ListBox Grid.Row="9" Grid.Column="1" Margin="{StaticResource TableElementMargin}" ItemsSource="{x:Static local:Options.ResetModes}" 
-                 SelectedItem="{Binding Settings.ResetMode}" SelectionChanged="RaiseSettingsChangedEvent" ItemTemplate="{StaticResource AnnotatedItemTemplate}"/>
+        <CheckBox Grid.Row="10" Margin="5" Grid.ColumnSpan="2" VerticalContentAlignment="Center" IsChecked="{Binding Path=Settings.SuppressResetConfirmation}" Checked="RaiseSettingsChangedEvent" Unchecked="RaiseSettingsChangedEvent">
+            <TextBlock Text="Suppress the 'Reset device into bootloader mode' prompt."/>
+        </CheckBox>
 
-        <Expander Grid.ColumnSpan="2" Grid.Row="11" Header="Additional FLASH resources to program" IsExpanded="False">
+        <Expander Grid.ColumnSpan="2" Grid.Row="13" Header="Additional FLASH resources to program" IsExpanded="False" Visibility="{Binding DirectFLASHProgrammingOptionVisibility}">
             <StackPanel Orientation="Vertical">
                 <Border BorderThickness="1" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ESPxxOpenOCDSettingsControl}}" Margin="10">
                     <StackPanel Orientation="Vertical">

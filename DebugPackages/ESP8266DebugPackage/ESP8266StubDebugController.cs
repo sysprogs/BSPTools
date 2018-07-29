@@ -29,7 +29,7 @@ namespace ESP8266DebugPackage
             if (startService.Mode == EmbeddedDebugMode.ConnectionTest)
                 startService.GUIService.Report("Please ensure the firmware with the gdb stub is running on your board, then reset it and connect the COM port to your computer.");
 
-            return new GDBStubInstance(context);
+            return new GDBStubInstance(context, startService);
         }
 
         public object TryConvertLegacyConfiguration(IBSPConfiguratorHost host, string methodDirectory, Dictionary<string, string> legacyConfiguration)
@@ -43,12 +43,14 @@ namespace ESP8266DebugPackage
             private ESP8266GDBStubSettings _Settings;
             private string _COMPort;
 
-            public GDBStubInstance(DebugStartContext context)
+            public GDBStubInstance(DebugStartContext context, IDebugStartService startService)
             {
                 _Context = context;
                 _Settings = (ESP8266GDBStubSettings)_Context.Configuration;
 
-                if (context.ResolvedDevices?.BestMatch.COMPortNumber.HasValue == true)
+                if (startService.AdvancedDebugService is IExternallyProgrammedProjectDebugService eps)
+                    _COMPort = eps.TryGetProgrammingCOMPortIfKnown(true) ?? _COMPort;
+                else if (context.ResolvedDevices?.BestMatch.COMPortNumber.HasValue == true)
                     _COMPort = "COM" + context.ResolvedDevices.BestMatch.COMPortNumber;
                 else
                     _COMPort = _Settings.COMPort;
@@ -57,7 +59,7 @@ namespace ESP8266DebugPackage
             public IExternalToolInstance Tool => null;
 
             SerialPortStream _SerialPort;
-            
+
             public object LocalGDBEndpoint
             {
                 get
@@ -150,41 +152,48 @@ namespace ESP8266DebugPackage
                         if (!settings.SuppressResetConfirmation)
                             service.GUIService.Report("Please reboot your ESP8266 into the bootloader mode and press OK.");
 
-                        using (var serialPort = new SerialPortStream(comPort, settings.BootloaderBaudRate, System.IO.Ports.Handshake.None))
+                        if (service.AdvancedDebugService is IExternallyProgrammedProjectDebugService eps)
                         {
-                            serialPort.AllowTimingOutWithZeroBytes = true;
-
-                            ESP8266BootloaderClient client = new ESP8266BootloaderClient(serialPort, settings.BootloaderResetDelay, settings.BootloaderActivationSequence);
-                            client.Sync();
-                            var regions = ESP8266StartupSequence.BuildFLASHImages(service, settings, (l, t) => session.SendInformationalOutput(l));
-
-                            ctx.ReportTaskCompletion(true);
-
-                            int totalSize = 0, writtenSize = 0;
-                            foreach (var r in regions)
-                                totalSize += r.Size;
-
-                            ESP8266BootloaderClient.BlockWrittenHandler handler = (s, addr, len) => ctx.ReportTaskProgress(writtenSize += len, totalSize, $"Writing FLASH at 0x{addr:x8}...");
-                            bool useDIO = false;
-
-                            try
+                            eps.ProgramFLASHMemoryUsingExternalTool(ProgramMode.Enabled);
+                        }
+                        else
+                        {
+                            using (var serialPort = new SerialPortStream(comPort, settings.BootloaderBaudRate, System.IO.Ports.Handshake.None))
                             {
-                                client.BlockWritten += handler;
+                                serialPort.AllowTimingOutWithZeroBytes = true;
+
+                                ESP8266BootloaderClient client = new ESP8266BootloaderClient(serialPort, settings.BootloaderResetDelay, settings.BootloaderActivationSequence);
+                                client.Sync();
+                                var regions = ESP8266StartupSequence.BuildFLASHImages(service, settings, (l, t) => session.SendInformationalOutput(l));
+
+                                ctx.ReportTaskCompletion(true);
+
+                                int totalSize = 0, writtenSize = 0;
                                 foreach (var r in regions)
+                                    totalSize += r.Size;
+
+                                ESP8266BootloaderClient.BlockWrittenHandler handler = (s, addr, len) => ctx.ReportTaskProgress(writtenSize += len, totalSize, $"Writing FLASH at 0x{addr:x8}...");
+                                bool useDIO = false;
+
+                                try
                                 {
-                                    var data = File.ReadAllBytes(r.FileName);
-                                    if (r.Offset == 0 && data.Length >= 4)
-                                        useDIO = (data[2] == 2);
+                                    client.BlockWritten += handler;
+                                    foreach (var r in regions)
+                                    {
+                                        var data = File.ReadAllBytes(r.FileName);
+                                        if (r.Offset == 0 && data.Length >= 4)
+                                            useDIO = (data[2] == 2);
 
-                                    client.ProgramFLASH((uint)r.Offset, data);
+                                        client.ProgramFLASH((uint)r.Offset, data);
+                                    }
                                 }
-                            }
-                            finally
-                            {
-                                client.BlockWritten -= handler;
-                            }
+                                finally
+                                {
+                                    client.BlockWritten -= handler;
+                                }
 
-                            client.RunProgram(useDIO, false);
+                                client.RunProgram(useDIO, false);
+                            }
                         }
                     }
 

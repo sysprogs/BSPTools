@@ -86,6 +86,11 @@ namespace ESP8266DebugPackage.GUI
             if (rsrc != null)
                 _Editor.FLASHResources.Remove(rsrc);
         }
+
+        private void RaiseSettingsChangedEvent(object sender, RoutedEventArgs e)
+        {
+            SettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public class ShowOnlyInListViewConverter : IValueConverter

@@ -21,7 +21,6 @@ namespace ESP8266DebugPackage
         public ProgramMode ProgramMode { get; set; }
 
         public string InitDataFile { get; set; }
-        public ResetMode ResetMode { get; set; }
         public bool SuppressResetConfirmation { get; set; }
         public abstract ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings();
     }
@@ -54,6 +53,8 @@ namespace ESP8266DebugPackage
 
         public bool IsESP32 { get; }
 
+        public string ExternalCOMPortSelectionHint { get; }
+
         public ESPxxGDBStubSettingsEditor(ESPxxGDBStubSettingsBase settings, KnownInterfaceInstance context, IBSPConfiguratorHost host, bool esp32Mode)
         {
             _Context = context;
@@ -73,6 +74,12 @@ namespace ESP8266DebugPackage
                 Settings.COMPort = "COM" + context.COMPortNumber;
                 COMPortSelectorVisibility = Visibility.Collapsed;
             }
+            else if (host.AdvancedModeContext is IExternallyProgrammableProjectDebugContext ectx)
+            {
+                ExternalCOMPortSelectionHint = ectx.ExternalProgrammingOptionHint;
+                if (ExternalCOMPortSelectionHint != null)
+                    COMPortSelectorVisibility = DirectFLASHProgrammingOptionVisibility = Visibility.Collapsed;
+            }
 
             if (Settings.FLASHResources != null)
                 foreach (var r in Settings.FLASHResources)
@@ -81,6 +88,7 @@ namespace ESP8266DebugPackage
         }
 
         public Visibility COMPortSelectorVisibility { get; private set; }
+        public Visibility DirectFLASHProgrammingOptionVisibility { get; private set; } = Visibility.Visible;
 
         public string ValidateSettings()
         {
