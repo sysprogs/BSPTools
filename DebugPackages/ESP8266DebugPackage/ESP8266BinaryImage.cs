@@ -19,7 +19,7 @@ namespace ESP8266DebugPackage
             ESP32Hint = esp32Hint;
         }
     }
-
+    
     public class ESP8266BinaryImage
     {
         public struct Segment

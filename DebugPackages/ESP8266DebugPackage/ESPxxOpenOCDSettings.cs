@@ -23,6 +23,8 @@ namespace ESP8266DebugPackage
     public interface IESP32Settings
     {
         bool PatchBootloader { get; set; }
+        ESP8266BinaryImage.ESP32ImageHeader FLASHSettings { get; }
+        FLASHResource[] FLASHResources { get; }
     }
 
     public abstract class ESPxxOpenOCDSettings : OpenOCDSettings

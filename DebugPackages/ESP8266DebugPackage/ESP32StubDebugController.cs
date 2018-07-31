@@ -43,12 +43,7 @@ namespace ESP8266DebugPackage
             }
 
 
-            var regions = ESP32StartupSequence.BuildFLASHImages(startService.TargetPath, startService.SystemDictionary, settings.FLASHSettings, settings.PatchBootloader);
-
-            if (settings.FLASHResources != null)
-                foreach (var r in settings.FLASHResources)
-                    if (r.Valid)
-                        regions.Add(r.ToProgrammableRegion(startService));
+            var regions = ESP32DebugController.BuildProgrammableBlocksFromSettings(startService, settings);
 
             foreach (var r in regions)
             {

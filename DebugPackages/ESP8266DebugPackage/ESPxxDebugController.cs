@@ -125,32 +125,7 @@ namespace ESP8266DebugPackage
                 }
                 else
                 {
-                    List<ProgrammableRegion> blocks;
-                    if (service.MCU.Configuration.TryGetValue("com.sysprogs.esp32.esptool.binaries.count", out var tmp) && int.TryParse(tmp, out var binaryCount) && binaryCount > 0)
-                    {
-                        blocks = new List<ProgrammableRegion>();
-                        for (int i = 0; i < binaryCount; i++)
-                        {
-                            string fn = service.MCU.Configuration[$"com.sysprogs.esp32.esptool.binaries[{i}].path"];
-
-                            blocks.Add(new ProgrammableRegion
-                            {
-                                FileName = fn,
-                                Size = File.ReadAllBytes(fn).Length,
-                                Offset = int.Parse(service.MCU.Configuration[$"com.sysprogs.esp32.esptool.binaries[{i}].address"])
-                            });
-                        }
-                    }
-                    else
-                    {
-                        bool patchBootloader = (settings as IESP32Settings)?.PatchBootloader ?? false;
-                        blocks = ESP32StartupSequence.BuildFLASHImages(service.TargetPath, service.SystemDictionary, settings.FLASHSettings, patchBootloader);
-                    }
-
-                    if (settings.FLASHResources != null)
-                        foreach (var r in settings.FLASHResources)
-                            if (r.Valid)
-                                blocks.Add(r.ToProgrammableRegion(service));
+                    List<ProgrammableRegion> blocks = BuildProgrammableBlocksFromSettings(service, settings);
 
                     Regex rgFLASHSize = new Regex("Auto-detected flash size ([0-9]+) KB");
                     if (settings.CheckFLASHSize)
@@ -218,6 +193,36 @@ namespace ESP8266DebugPackage
             return true;
         }
 
+        public static List<ProgrammableRegion> BuildProgrammableBlocksFromSettings(IDebugStartService service, IESP32Settings settings)
+        {
+            List<ProgrammableRegion> blocks;
+            if (service.MCU.Configuration.TryGetValue("com.sysprogs.esp32.esptool.binaries.count", out var tmp) && int.TryParse(tmp, out var binaryCount) && binaryCount > 0)
+            {
+                blocks = new List<ProgrammableRegion>();
+                for (int i = 0; i < binaryCount; i++)
+                {
+                    string fn = service.MCU.Configuration[$"com.sysprogs.esp32.esptool.binaries[{i}].path"];
+
+                    blocks.Add(new ProgrammableRegion
+                    {
+                        FileName = fn,
+                        Size = File.ReadAllBytes(fn).Length,
+                        Offset = int.Parse(service.MCU.Configuration[$"com.sysprogs.esp32.esptool.binaries[{i}].address"])
+                    });
+                }
+            }
+            else
+            {
+                bool patchBootloader = settings.PatchBootloader;
+                blocks = ESP32StartupSequence.BuildFLASHImages(service.TargetPath, service.SystemDictionary, settings.FLASHSettings, patchBootloader);
+            }
+
+            if (settings.FLASHResources != null)
+                foreach (var r in settings.FLASHResources)
+                    if (r.Valid)
+                        blocks.Add(r.ToProgrammableRegion(service));
+            return blocks;
+        }
     }
 
     public class ESP8266DebugController : ESPxxDebugController
