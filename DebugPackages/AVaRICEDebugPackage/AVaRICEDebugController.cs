@@ -99,6 +99,8 @@ namespace AVaRICEDebugPackage
 
             public void ConnectGDBToStub(IDebugStartService service, ISimpleGDBSession session)
             {
+                session.RunGDBCommand($"set remotetimeout 60"); //We may need to wait for the AVaRICE to complete programming the FLASH memory.
+
                 var result = session.RunGDBCommand($"target remote :{_GDBPort}");
                 if (!result.IsDone)
                     throw new Exception("Failed to connect to AVaRICE");
