@@ -55,12 +55,8 @@ namespace STM32CubeMXImporter
                 foreach (var file in component.SelectNodes("files/file").OfType<XmlElement>())
                 {
                     string category = file.GetAttribute("category");
-                    string name = file.GetAttribute("name");
-                    if (name.EndsWith(@"\*") && category == "header")
-                    {
-                        allHeaderDirs.Add(name.Substring(0, name.Length - 2));
-                        continue;
-                    }
+                    string relativePath = file.GetAttribute("name");
+
                     string condition = file.GetAttribute("condition");
                     if (!string.IsNullOrEmpty(condition))
                     {
@@ -73,17 +69,42 @@ namespace STM32CubeMXImporter
                             continue;   //This is a IAR-only or Keil-only file
                     }
 
-                    if (category == "sourceAsm" && Path.GetFileName(name).StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase))
+                    int idx = relativePath.LastIndexOfAny(new[] { '\\', '/' });
+                    string name, dir;
+                    if (idx == -1)
+                    {
+                        name = relativePath;
+                        dir = "";
+                    }
+                    else
+                    {
+                        name = relativePath.Substring(idx + 1);
+                        dir = relativePath.Substring(0, idx);
+                    }
+
+                    if (category == "sourceAsm" && name.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase))
                         continue;   //VisualGDB provides its own startup files for STM32 devices that are compatible with STM32CubeMX-generated files
 
-                    if (category == "header")
-                        allHeaderDirs.Add(Path.GetDirectoryName(name));
+                    if (category == "header" && dir != "")
+                        allHeaderDirs.Add(dir);
 
                     string path = group;
                     if (!string.IsNullOrEmpty(subGroup))
                         path += "/" + subGroup;
 
-                    rootDir.ProvideSudirectory(path).AddFile(Path.Combine(baseDir, name), category == "header");
+                    if (relativePath.Contains("*"))
+                    {
+                        string physicalDir = Path.Combine(baseDir, dir);
+                        if (Directory.Exists(physicalDir))
+                        {
+                            foreach(var fn in Directory.GetFiles(physicalDir, name))
+                            {
+                                rootDir.ProvideSudirectory(path).AddFile(fn, category == "header");
+                            }
+                        }
+                    }
+                    else
+                        rootDir.ProvideSudirectory(path).AddFile(Path.Combine(baseDir, relativePath), category == "header");
                 }
             }
 
