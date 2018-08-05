@@ -29,8 +29,11 @@ namespace ESP8266DebugPackage
 
     public abstract class ESPxxOpenOCDSettings : OpenOCDSettings
     {
-        public FLASHResource[] FLASHResources { get; set; }
+        //This is used to check whether the settings object was created by an earlier version of the package and needs updating.
+        public int SuggestionLogicRevision;
 
+        public FLASHResource[] FLASHResources { get; set; }
+        
         public abstract ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings();
     }
 
@@ -103,7 +106,10 @@ namespace ESP8266DebugPackage
     {
         public bool IsESP32 { get; }
 
-
+        const int SuggestionLogicRevision = 1;
+        
+        //ESP32 OpenOCD supports software breakpoints in FLASH, but only if they are requested as hardware breakpoints. The following command ensures all breakpoints are requested as hardware ones.
+        const string BreakpointFixCommand = "mon gdb_breakpoint_override hard";
 
         public ESPxxOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, ESPxxOpenOCDSettings settings, KnownInterfaceInstance context, bool isESP32)
             : base(host, baseDir, settings ?? (isESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings()), context)
@@ -128,6 +134,22 @@ namespace ESP8266DebugPackage
             if (idx < 0 || idx > loadCommand)
             {
                 Settings.StartupCommands.Insert(loadCommand, "mon reset halt");
+            }
+
+            if (Settings.SuggestionLogicRevision < SuggestionLogicRevision)
+            {
+                if (isESP32 && Settings.StartupCommands.IndexOf(BreakpointFixCommand) == -1)
+                {
+                    Settings.SuggestionLogicRevision = SuggestionLogicRevision;
+                    for (int i = 0; i < Settings.StartupCommands.Count; i++)
+                    {
+                        if (Settings.StartupCommands[i].StartsWith("target "))
+                        {
+                            Settings.StartupCommands.Insert(i + 1, BreakpointFixCommand);
+                            break;
+                        }
+                    }
+                }
             }
 
             if (Settings.FLASHResources != null)
