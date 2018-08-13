@@ -78,17 +78,19 @@ namespace AVaRICEDebugPackage
                 Arguments = string.Join(" ", args.ToArray())
             });
 
-            return new StubInstance(context, tool, gdbPort);
+            return new StubInstance(context, tool, gdbPort, settings);
         }
 
         class StubInstance : IGDBStubInstance
         {
             readonly int _GDBPort;
+            private readonly AVaRICEDebugSettings _Settings;
 
-            public StubInstance(DebugStartContext context, IExternalToolInstance tool, int GDBPort)
+            public StubInstance(DebugStartContext context, IExternalToolInstance tool, int GDBPort, AVaRICEDebugSettings settings)
             {
                 Tool = tool;
                 _GDBPort = GDBPort;
+                _Settings = settings;
             }
 
             public IExternalToolInstance Tool { get; }
@@ -99,7 +101,15 @@ namespace AVaRICEDebugPackage
 
             public void ConnectGDBToStub(IDebugStartService service, ISimpleGDBSession session)
             {
-                session.RunGDBCommand($"set remotetimeout 60"); //We may need to wait for the AVaRICE to complete programming the FLASH memory.
+                //We may need to wait for the AVaRICE to complete programming the FLASH memory.
+                int timeout = _Settings.GDBTimeout;
+
+                if (timeout != 0)
+                {
+                    session.RunGDBCommand($"set remotetimeout {timeout}");
+                    session.RunGDBCommand($"set tcp connect-timeout {timeout}");
+                    session.RunGDBCommand($"set tcp auto-retry on");
+                }
 
                 var result = session.RunGDBCommand($"target remote :{_GDBPort}");
                 if (!result.IsDone)

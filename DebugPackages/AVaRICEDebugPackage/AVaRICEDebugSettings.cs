@@ -89,6 +89,7 @@ namespace AVaRICEDebugPackage
         }
 
         string _ExtraArguments;
+
         public string ExtraArguments
         {
             get => _ExtraArguments;
@@ -99,6 +100,7 @@ namespace AVaRICEDebugPackage
             }
         }
 
+        public int GDBTimeout = 60;
 
         public AVaRICEDebugSettings Clone() => (AVaRICEDebugSettings)MemberwiseClone();
 

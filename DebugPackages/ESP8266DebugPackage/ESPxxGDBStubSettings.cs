@@ -92,7 +92,7 @@ namespace ESP8266DebugPackage
 
         public string ValidateSettings()
         {
-            if (string.IsNullOrEmpty(Settings.COMPort) && !_Context.COMPortNumber.HasValue)
+            if (string.IsNullOrEmpty(Settings.COMPort) && !_Context.COMPortNumber.HasValue && ExternalCOMPortSelectionHint == null)
                 return "Missing COM port for gdb stub";
             return null;
         }
