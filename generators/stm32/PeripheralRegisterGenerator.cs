@@ -71,7 +71,7 @@ namespace stm32_bsp_generator
             set
             {
                 List<KnownRegisterWithoutSubregisters> rules = new List<KnownRegisterWithoutSubregisters>();
-                foreach(var spec in value.Split(';'))
+                foreach (var spec in value.Split(';'))
                 {
                     int idx = spec.IndexOf('/');
                     bool type = false;
@@ -172,7 +172,7 @@ namespace stm32_bsp_generator
                         return false;
                 }
 
-                    mSubreg = _SubregisterRegex.Match(fullName);
+                mSubreg = _SubregisterRegex.Match(fullName);
                 if (!mSubreg.Success)
                     return false;
 
@@ -242,9 +242,9 @@ namespace stm32_bsp_generator
 
             public bool Apply(ref string line, string pfilename)
             {
-                if(RegexFile!=null)
-                  if (!Regex.IsMatch(pfilename,$"^{RegexFile}$"))
-                    return false;
+                if (RegexFile != null)
+                    if (!Regex.IsMatch(pfilename, $"^{RegexFile}$"))
+                        return false;
                 if (!line.StartsWith(Prefix))
                     return false;
                 if (!line.Contains(SearchedText))
@@ -473,7 +473,7 @@ namespace stm32_bsp_generator
 
         public string DetalErrors(int num)
         {
-             return (_Errors[num].FileName +":"+ _Errors[num].LineNumber+ " - "+_Errors[num].ToString() + " : " + _Errors[num].GetType());                  
+            return (_Errors[num].FileName + ":" + _Errors[num].LineNumber + " - " + _Errors[num].ToString() + " : " + _Errors[num].GetType());
         }
         public void AddError(ErrorBase error)
         {
@@ -551,7 +551,7 @@ namespace stm32_bsp_generator
                     aFileCore = Path.Combine(DirCoreReg, "core_M7.xml");
                     break;
                 default:
-                  throw new Exception("Unsupported core type");
+                    throw new Exception("Unsupported core type");
 
             }
             regCore = XmlTools.LoadObject<HardwareRegisterSet>(aFileCore);
@@ -577,17 +577,17 @@ namespace stm32_bsp_generator
                 {
                     if (set.Value.Key == "HASH_DIGEST" || set.Value.Key == "HRTIM" || set.Value.Key == "HRTIM_TIM")
                         continue;
-                    if(set.Value.Key == "DMA_request")
+                    if (set.Value.Key == "DMA_request")
                         continue;
                     if (set.Value.Key == "RCC_Core")
                         continue;
-                       throw new Exception("Unknown set type: " + set.Value.Key);
-                
+                    throw new Exception("Unknown set type: " + set.Value.Key);
+
                 }
-       
+
                 List<HardwareRegister> registers = new List<HardwareRegister>(DeepCopy(registerset_types[set.Value.Key]).Registers);
 
-                for (int i = 0; i < registers.Count;i++ )
+                for (int i = 0; i < registers.Count; i++)
                 {
                     var register = registers[i];
 
@@ -603,13 +603,13 @@ namespace stm32_bsp_generator
                     if (!nested_types.ContainsKey(set_type + "_" + register.Name))
                         if (!dict_repeat_reg_addr.ContainsKey(register.Address))
                             dict_repeat_reg_addr[register.Address] = set_name + "_" + register.Name;
-                        else if (!(set_name.StartsWith("DMAMUX1_Channel0") && dict_repeat_reg_addr[register.Address].StartsWith("DMAMUX1")) && 
+                        else if (!(set_name.StartsWith("DMAMUX1_Channel0") && dict_repeat_reg_addr[register.Address].StartsWith("DMAMUX1")) &&
                                 !(set_name.StartsWith("FMC_") && dict_repeat_reg_addr[register.Address].StartsWith("FSMC_")) &&
                                 !(set_name.StartsWith("ADC") && dict_repeat_reg_addr[register.Address].StartsWith("ADC1")) &&
                                  !(set_name.StartsWith("DAC") && dict_repeat_reg_addr[register.Address].StartsWith("DAC")) &&
                                  !(set_name.StartsWith("COMP") && dict_repeat_reg_addr[register.Address].StartsWith("COMP")) &&
                                 (set_type != "SC_UART") && (set_type != "SC_SPI") && (set_type != "SC_I2C") && (set_type != "COMP") && (set_type != "OPAMP") && (set_type != "OPAMP_Common"))// This register is removed later on anyway as it is an either/or thing
-                                                                                                                                                             //        throw new Exception("Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
+                                                                                                                                                                                             //        throw new Exception("Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address] + "!");
                             Console.WriteLine("560 PrepReg throw new Exception(Register address for " + set_name + "_" + register.Name + " is already used by " + dict_repeat_reg_addr[register.Address]);
 
                     if (subregisters.ContainsKey(set_type + "_" + register.Name))
@@ -657,7 +657,7 @@ namespace stm32_bsp_generator
                                 throw new Exception("No subregisters found for register " + register2_cpy.Name + "!");
 
                             register2_cpy.Name = reg_name + "_" + register2_cpy.Name; // Make nested name to collapse the hierarchy
- 
+
                             registers.Insert(i, register2_cpy);
                             if (!dict_repeat_reg_addr.ContainsKey(register2_cpy.Address))
                                 dict_repeat_reg_addr[register2_cpy.Address] = set_name + "_" + register2_cpy.Name;
@@ -807,7 +807,7 @@ namespace stm32_bsp_generator
                         register.SubRegisters = subregisters["EXTI_" + register.Name].ToArray();
                     else if (set_type == "BDMA_Channel")// Reuse subregisters
                         register.SubRegisters = subregisters["BDMA_" + register.Name].ToArray();
-                    else if (set_type.StartsWith ("DMAMUX"))// Reuse subregisters
+                    else if (set_type.StartsWith("DMAMUX"))// Reuse subregisters
                         continue;
                     else if (set_type == "MDMA_Channel")// Reuse subregisters
                         register.SubRegisters = subregisters["MDMA_" + register.Name].ToArray();
@@ -844,7 +844,7 @@ namespace stm32_bsp_generator
                         continue;   //Bug: one header is missing the definition
                     else if (set_type == "RCC" && register.Name == "CRRCR")
                         continue;   //Bug: one header is missing the definition stm32l041xx.h
-                    else if (set_type == "DCMI" && ( register.Name == "RISR" || register.Name == "MISR"))
+                    else if (set_type == "DCMI" && (register.Name == "RISR" || register.Name == "MISR"))
                         continue;
                     else if (subregisters.ContainsKey(set_name + "_" + register.Name))
                     {
@@ -864,7 +864,7 @@ namespace stm32_bsp_generator
                 {
                     foreach (var r in s.Registers)
                     {
-                        if(r.SubRegisters != null)
+                        if (r.SubRegisters != null)
                             foreach (var sr in r.SubRegisters)
                             {
                                 if (sr.FirstBit >= r.SizeInBits)
@@ -874,11 +874,11 @@ namespace stm32_bsp_generator
                 }
 
                 sets.Add(new HardwareRegisterSet
-                    {
-                        UserFriendlyName = set_name,
-                        ExpressionPrefix = set_name + "->",
-                        Registers = registers.ToArray()
-                    }
+                {
+                    UserFriendlyName = set_name,
+                    ExpressionPrefix = set_name + "->",
+                    Registers = registers.ToArray()
+                }
                 );
             }
 
@@ -996,7 +996,7 @@ namespace stm32_bsp_generator
 
                 RegexOptions option = RegexOptions.IgnoreCase;
                 Regex register_regex = new Regex(@"[ \t]*(__IO|__I)*[ ]*(?:const )*[ ]*([^ #\r?\n]*)[ ]*(?:const )*([^\[;#\r?\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r?\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r?\n]*)[ ]*(\*/)*[ ]*(\r?\n)*", option);
- 
+
                 var regs = register_regex.Matches(strct.Groups[1].Value);
 
                 List<HardwareRegister> hw_regs = new List<HardwareRegister>();
@@ -1005,10 +1005,10 @@ namespace stm32_bsp_generator
 
                 foreach (Match m in regs)
                 {
-                    string type = m.Groups[2].Value; 
+                    string type = m.Groups[2].Value;
                     if (!dict_type_sizes.ContainsKey(type))
                         throw new Exception("Unknown register type: " + type);
-                 
+
                     int size = dict_type_sizes[type];
                     int array_size = 1;
                     try
@@ -1032,7 +1032,7 @@ namespace stm32_bsp_generator
                         set_size += array_size * size;
 
                     string name = m.Groups[3].Value;
-                 
+
                     if (name.StartsWith("RESERVED", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
@@ -1042,7 +1042,7 @@ namespace stm32_bsp_generator
 
                     if (desc.StartsWith("DSI "))
                         flNameArrayFromOne = false;
-                    
+
 
                     for (int i = 1; i <= array_size; i++)
                     {
@@ -1057,10 +1057,10 @@ namespace stm32_bsp_generator
                                     throw new Exception("Cannot use low-high naming with array sizes greater than 2!");
                             }
                             else
-                                if(flNameArrayFromOne)
-                                   name = m.Groups[3].Value + i.ToString();
-                                 else
-                                    name = m.Groups[3].Value + (i-1).ToString();
+                                if (flNameArrayFromOne)
+                                name = m.Groups[3].Value + i.ToString();
+                            else
+                                name = m.Groups[3].Value + (i - 1).ToString();
 
                         if ((type != "uint32_t") && (type != "uint16_t") && (type != "uint8_t"))
                         {
@@ -1079,7 +1079,7 @@ namespace stm32_bsp_generator
                         if (hw_regs.Find(x => ((x.Name == hw_reg.Name) && (x.Address == hw_reg.Address))) != null)
                             throw new Exception("Register with the same name and address already exists in the set!");
                         hw_regs.Add(hw_reg);
-                        hex_offset = FormatToHex(ParseHex(hex_offset) + Math.Max((ulong)(size/8.0), (ulong)4));
+                        hex_offset = FormatToHex(ParseHex(hex_offset) + Math.Max((ulong)(size / 8.0), (ulong)4));
                     }
                 }
 
@@ -1136,7 +1136,7 @@ namespace stm32_bsp_generator
                     || (line.Contains("#define USB_OTG") && (line.Contains("USB1_OTG") || line.Contains("USB2_OTG")))//stm32h7
                         )
                     continue;
-                
+
                 if (line.StartsWith("/**") || line.StartsWith(" /**"))
                     break;
 
@@ -1147,18 +1147,18 @@ namespace stm32_bsp_generator
                     if (names.ContainsKey(m.Groups[1].Value))
                         throw new Exception("Repeating register set name in peripheral declaration!");
 
-                    var m2 = rgDirectValue.Match(value); 
+                    var m2 = rgDirectValue.Match(value);
                     if (m2.Success)
                         names[m.Groups[1].Value] = new KeyValuePair<string, string>(m.Groups[2].Value, m2.Groups[1].Value);
                     else
                     {
                         throw new Exception("Unrecognized peripheral declaration line!");
-                       
+
                     }
                     continue;
                 }
 
-                Console.WriteLine(" throw new Exception(Unrecognized peripheral declaration line! >:"+line);
+                Console.WriteLine(" throw new Exception(Unrecognized peripheral declaration line! >:" + line);
 
             }
 
@@ -1209,7 +1209,7 @@ namespace stm32_bsp_generator
 
                 if (line.StartsWith("/**"))
                     break;
-                
+
                 if (rgComment.IsMatch(line) || string.IsNullOrWhiteSpace(line))
                     continue;
 
@@ -1278,7 +1278,7 @@ namespace stm32_bsp_generator
                                 addresses[regset_name] = addresses[regset2_name] + ParseHex(addr);
                             else
                             {
-                             if (!addresses.ContainsKey(regset2_name))
+                                if (!addresses.ContainsKey(regset2_name))
                                     Console.WriteLine("1180 Per Reg!addresses.ContainsKey(regset2_name" + regset2_name + s);
 
                             }
@@ -1289,12 +1289,12 @@ namespace stm32_bsp_generator
                         Regex base_addr_base_regex = new Regex(@"([^ ]+)_BASE");
                         m = base_addr_base_regex.Match(value);
                         if (m.Success)
-                         {
-                          string prevRegset = m.Groups[1].Value;
-                          addresses[regset_name] = addresses[prevRegset.TrimStart('(')];
+                        {
+                            string prevRegset = m.Groups[1].Value;
+                            addresses[regset_name] = addresses[prevRegset.TrimStart('(')];
 
-                          continue;
-                         }
+                            continue;
+                        }
                     }
                     else if (cfg.IsBaseAddrDefinitionIgnored(macroName))
                         continue;
@@ -1325,7 +1325,7 @@ namespace stm32_bsp_generator
             string[] lines = fileContents.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             int nextLine = 0;
             bool insideIgnoredBlock = false;
-            for (;;)
+            for (; ; )
             {
                 if (nextLine >= lines.Length)
                     break;
@@ -1380,14 +1380,14 @@ namespace stm32_bsp_generator
                             errors.AddError(new RegisterParserErrors.BadBitDefinition { LineContents = line, LineNumber = nextLine - 1, FileName = fileName });
                     }
 
-                    if (line.StartsWith("#define") 
-                        && line.Contains("0x") 
-                        && !line.Contains("CLEAR_REG") 
-                        && !line.Contains("USB_EP") 
+                    if (line.StartsWith("#define")
+                        && line.Contains("0x")
+                        && !line.Contains("CLEAR_REG")
+                        && !line.Contains("USB_EP")
                         && !line.Contains("FLASH_FKEY")
                         && !line.Contains("FLASH_KEY")
                         && !line.Contains("EXTI_EMR")
-                        && !line.Contains("FLASH_OPTKEY") 
+                        && !line.Contains("FLASH_OPTKEY")
                         && !line.Contains("(USB_BASE +")
                         && !line.Contains("RTC_BKP_NUMBER")
                         && !line.Contains("USB_ISTR")
@@ -1431,16 +1431,16 @@ namespace stm32_bsp_generator
 
                 var subregisters = new List<HardwareSubRegister>();
 
-                for (;;)
+                for (; ; )
                 {
                     if (nextLine >= lines.Length)
-                        break;                   
+                        break;
                     line = lines[nextLine++];
 
                     foreach (var patch in cfg.SubregisterLinePatches)
-                        if (patch.Apply(ref line,fileName))
+                        if (patch.Apply(ref line, fileName))
                         {
-                          //  Console.WriteLine("\r\n patch SubregisterLinePatches " + line);
+                            //  Console.WriteLine("\r\n patch SubregisterLinePatches " + line);
                             break;
                         }
                     string subreg_name = "";
@@ -1454,8 +1454,6 @@ namespace stm32_bsp_generator
                         if (m.Success && !m.Groups[1].Value.EndsWith("_Pos") && !m.Groups[1].Value.EndsWith("_Msk") && !line.Contains("<<"))
                         {
                             subreg_name = m.Groups[1].Value;
-                            if (subreg_name == "RTC_BKP_NUMBER" || subreg_name.EndsWith("_IDLE") || subreg_name.EndsWith("_EMPTY"))
-                                continue;
 
                             reg_type = "uint32_t";
                             if (m.Groups[2].Value.StartsWith("0x"))
@@ -1471,25 +1469,27 @@ namespace stm32_bsp_generator
 
                                     // for Legacy defines */
                                     aDefPosDict[m.Groups[1].Value] = aDefPosDict[m.Groups[2].Value];
-                                } else
+                                }
+                                else
                                     if (Regex.IsMatch(m.Groups[2].Value, "(0x[0-9A-FU]+)"))
-                                       aDefPosDict.Add(m.Groups[1].Value, (uint)ParseHex(m.Groups[2].Value));
-                                    else {
-                                        //    Console.WriteLine("No Hex value:{0}, : {1}", m.Groups[1].Value, m.Groups[2].Value);
-                                           continue;
-                                       } 
+                                    aDefPosDict.Add(m.Groups[1].Value, (uint)ParseHex(m.Groups[2].Value));
+                                else
+                                {
+                                    //    Console.WriteLine("No Hex value:{0}, : {1}", m.Groups[1].Value, m.Groups[2].Value);
+                                    continue;
+                                }
                             }
-                                aParseOk = true;
-                            }
+                            aParseOk = true;
+                        }
                     }
                     else
                     {
-                         subreg_name = m.Groups[1].Value;
-                         reg_type = m.Groups[2].Value;
-                         address_offset = m.Groups[3].Value;
+                        subreg_name = m.Groups[1].Value;
+                        reg_type = m.Groups[2].Value;
+                        address_offset = m.Groups[3].Value;
                         if (!aDefPosDict.ContainsKey(m.Groups[1].Value))
-                            aDefPosDict.Add(m.Groups[1].Value, (uint)ParseHex(m.Groups[3].Value)); 
-                         aParseOk = true;
+                            aDefPosDict.Add(m.Groups[1].Value, (uint)ParseHex(m.Groups[3].Value));
+                        aParseOk = true;
                     }
 
                     if (aParseOk)
@@ -1614,13 +1614,14 @@ namespace stm32_bsp_generator
                                             }
                                         }
                                     }
-                                     
+
                                     try
                                     {
                                         UInt32 aValueMask = UInt32.Parse(m1.Groups[2].Value, System.Globalization.NumberStyles.AllowHexSpecifier);
                                         aValueMask = aValueMask << (int)aDefPosDict[m1.Groups[3].Value];
                                         aDefPosDict[m1.Groups[1].Value] = aValueMask;
-                                    }catch(Exception ex)
+                                    }
+                                    catch (Exception ex)
                                     {
                                         Console.WriteLine("Exc 1589 Mes" + ex.Message + " Value" + m1.Groups[3].Value);
                                         continue;
@@ -1642,7 +1643,7 @@ namespace stm32_bsp_generator
             Regex numbered_name_regex = new Regex(@"(.*)_[0-9]+");
             foreach (var list in result.Values)
             {
-                for (int i = 0; i < list.Count;i++ )
+                for (int i = 0; i < list.Count; i++)
                 {
                     var element = list[i];
                     var m = numbered_name_regex.Match(element.Name);
@@ -1663,7 +1664,7 @@ namespace stm32_bsp_generator
             if (hex.StartsWith("0x"))
                 hex = hex.Substring(2);
             if (hex.Contains("U"))
-                hex = hex.Replace("U","");
+                hex = hex.Replace("U", "");
             return ulong.Parse(hex, System.Globalization.NumberStyles.HexNumber);
         }
 
@@ -1719,10 +1720,10 @@ namespace stm32_bsp_generator
                 ExpressionPrefix = set.ExpressionPrefix,
             };
 
-            if(set.Registers != null)
+            if (set.Registers != null)
             {
                 set_new.Registers = new HardwareRegister[set.Registers.Length];
-                for(int i=0;i<set.Registers.Length;i++)
+                for (int i = 0; i < set.Registers.Length; i++)
                 {
                     set_new.Registers[i] = DeepCopy(set.Registers[i]);
                 }
@@ -1733,17 +1734,19 @@ namespace stm32_bsp_generator
 
         private static HardwareRegister DeepCopy(HardwareRegister reg)
         {
-            HardwareRegister reg_new = new HardwareRegister { 
+            HardwareRegister reg_new = new HardwareRegister
+            {
                 Name = reg.Name,
                 Address = reg.Address,
                 GDBExpression = reg.GDBExpression,
                 ReadOnly = reg.ReadOnly,
-                SizeInBits = reg.SizeInBits };
+                SizeInBits = reg.SizeInBits
+            };
 
             if (reg.SubRegisters != null)
             {
                 reg_new.SubRegisters = new HardwareSubRegister[reg.SubRegisters.Length];
-                for(int i=0;i<reg.SubRegisters.Length;i++)
+                for (int i = 0; i < reg.SubRegisters.Length; i++)
                 {
                     reg_new.SubRegisters[i] = DeepCopy(reg.SubRegisters[i]);
                 }
@@ -1759,7 +1762,7 @@ namespace stm32_bsp_generator
                 Name = subreg.Name,
                 FirstBit = subreg.FirstBit,
                 SizeInBits = subreg.SizeInBits,
-                KnownValues = (subreg.KnownValues != null)?(KnownSubRegisterValue[])subreg.KnownValues.Clone():null
+                KnownValues = (subreg.KnownValues != null) ? (KnownSubRegisterValue[])subreg.KnownValues.Clone() : null
             };
 
             return subreg_new;
