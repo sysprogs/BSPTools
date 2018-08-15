@@ -76,7 +76,7 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
 				<TargetFolder></TargetFolder>
-				<FilesToCopy>-*_iar.s;-*_keil.s;-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;-*.emSession;-*_build*;examples\*;-external\*</FilesToCopy>
+				<FilesToCopy>-*_iar.s;-*_keil.s;-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;-components\drivers_ext\*;-components\drivers_nrf\*;components\*;documentation\*;-*.emSession;-*_build*;examples\*;-external\*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>
 				<!--FilesToCopy>-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;examples\*;svd\*;-external\segger_rtt\*KEIL.*;-external\segger_rtt\*IAR.*;external\*</FilesToCopy>
@@ -231,8 +231,8 @@
 							
 		<Framework>
 			<Name>NRF5x Peripheral Drivers</Name>
-			<ID>com.sysprogs.arm.nordic.nrf5x.periph</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.periph</ClassID>
+			<ID>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</ClassID>
 			<ProjectFolderName>Peripherals</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<RequiredFrameworks>
@@ -259,22 +259,25 @@
 						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.uart_driver$$ == yes</string>
 						<string>spi_master\\nrf_drv_spi..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == master</string>
 						
-						<-->
+							
 						<string>spi_master\\spi_5W_master..: $$com.sysprogs.bspoptions.nrf5x.spi_driver$$ == 5W_master</string>
 						
 						<string>nrf_soc_nosd\\*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ == nosoftdev</string>
 						<string>.*\\twi_hw_master.c: $$com.sysprogs.bspoptions.nrf5x.twi_driver$$ == hw_master</string>
 						<string>.*\\twi_sw_master.c: $$com.sysprogs.bspoptions.nrf5x.twi_driver$$ == sw_master</string>
+					<-->
 					</SimpleFileConditions>				
 				</CopyJob>			
 			</CopyJobs>
 			<ConfigurableProperties>
-				<PropertyGroups>
+			<PropertyGroups>
 				  <PropertyGroup>
-					<Properties>
+					<Name>NRF5x Peripheral Drivers</Name>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_nrf.</UniqueID>
+					<!--Properties>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>Storage Driver</Name>
-						  <UniqueID>com.sysprogs.bspoptions.nrf5x.pstorage_driver</UniqueID>
+						  <UniqueID>pstorage_driver</UniqueID>
 						  <SuggestionList>
 							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
 							<Suggestion><UserFriendlyName>Normal</UserFriendlyName><InternalValue>normal</InternalValue></Suggestion>
@@ -285,7 +288,7 @@
 						</PropertyEntry>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>SPI Driver</Name>
-						  <UniqueID>com.sysprogs.bspoptions.nrf5x.spi_driver</UniqueID>
+						  <UniqueID>spi_driver</UniqueID>
 						  <SuggestionList>
 							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue></Suggestion>
 							<Suggestion><UserFriendlyName>Master</UserFriendlyName><InternalValue>master</InternalValue></Suggestion>
@@ -298,7 +301,7 @@
 						<PropertyEntry xsi:type="Boolean"><Name>SWI driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.swi_driver</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>TWI Driver</Name>
-						  <UniqueID>com.sysprogs.bspoptions.nrf5x.twi_driver</UniqueID>
+						  <UniqueID>twi_driver</UniqueID>
 						  <SuggestionList>
 							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue></Suggestion>
 							<Suggestion><UserFriendlyName>Hardware Master</UserFriendlyName><InternalValue>hw_master</InternalValue></Suggestion>
@@ -308,12 +311,38 @@
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>UART driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.uart_driver</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-					</Properties>
+					</Properties-->
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 		</Framework>
+		<Framework>
+			<Name>NRF5x Peripheral Drivers Ext</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.drivers_ext</ID>
+			<ClassID>com.sysprogs.arm.nordic.nrf5x.drivers_ext</ClassID>
+			<ProjectFolderName>Peripherals</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>			
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\drivers_ext</SourceFolder>
+					<TargetFolder>components\drivers_ext</TargetFolder>
+					<FilesToCopy>*.h;*.c</FilesToCopy>
+					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
+					<AutoIncludeMask>*.h</AutoIncludeMask>
+					</CopyJob>			
+			</CopyJobs>
+			<ConfigurableProperties>
+			<PropertyGroups>
+				  <PropertyGroup>
+					<Name>NRF5x Peripheral Drivers Ext</Name>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_ext.</UniqueID>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>
+		</Framework>
+
 		<Framework>
 			<Name>NRF5x Common Utilities</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.util</ID>
@@ -375,6 +404,7 @@
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
 					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
+					<!--   The conditions are generated programmatically, see function GenerateConditionsBoard>
 					<SimpleFileConditions>
 						<string>nrf6310.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == NRF6310</string>
 						<string>pca10000.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ =~ PCA1000[02]</string>
@@ -390,7 +420,7 @@
 						<string>d52_starterkit.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == D52DK1</string>
 						<string>n5_starterkit.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == N5DK1</string>
 						<string>arduino_primo.h: $$com.sysprogs.bspoptions.nrf5x.board.type$$ == ARDUINO_PRIMO</string>
-					</SimpleFileConditions>
+					</SimpleFileConditions-->
 				</CopyJob>
 				<!--CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries\bsp</SourceFolder>
@@ -407,9 +437,11 @@
 					<Name>nRF5x Evaluation Board</Name>
 					<UniqueID>com.sysprogs.bspoptions.nrf5x.board.</UniqueID>
 					<Properties>
-						<PropertyEntry xsi:type="Enumerated">
+						<!--   The conditions are generated programmatically, see function GenerateConditionsBoard>
+						</ARC2><PropertyEntry xsi:type="Enumerated">
 						  <Name>Board Type</Name>
 						  <UniqueID>type</UniqueID>
+						  		
 						  <SuggestionList>
 							<Suggestion><InternalValue>PCA10000</InternalValue></Suggestion>
 							<Suggestion><InternalValue>PCA10001</InternalValue></Suggestion>
@@ -426,10 +458,12 @@
 							<Suggestion><InternalValue>D52DK1</InternalValue><UserFriendlyValue>D52 Starter Kit</UserFriendlyValue></Suggestion>
 							<Suggestion><InternalValue>ARDUINO_PRIMO</InternalValue></Suggestion>
 							<Suggestion><InternalValue>CUSTOM</InternalValue><UserFriendlyValue>Custom board</UserFriendlyValue></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>4</DefaultEntryIndex>
+						  
+								</SuggestionList>
+						  		
+							<DefaultEntryIndex>4</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>
+						</PropertyEntry</ARC2-->
 						<PropertyEntry xsi:type="Boolean">
 							<Name>Advanced mode</Name>
 						  <UniqueID>bsp_mode</UniqueID>
@@ -458,8 +492,8 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries</SourceFolder>
 					<TargetFolder>components\libraries</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
-					<SimpleFileConditions>
+					<FilesToCopy>-*_keil*;-*_iar*;*</FilesToCopy>
+					<!--ARC2 SimpleFileConditions>
 						<string>experimental_libuarte\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.experimental_libuarte$$ == yes</string>
 						<string>experimental_task_manager\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.experimental_task_manager$$ == yes</string>
 						<string>atomic\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.atomic$$ == yes</string> 
@@ -476,10 +510,10 @@
 						<string>crc16\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc16$$ == yes</string>
 						<string>crc32\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.crc32$$ == yes</string>
 						<string>ecc\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.ecc$$ == yes</string>
-						<!--string>eddystone\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.eddystone$$ == yes</string-->
+
 						<string>fds\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fds$$ == yes</string>
 						<string>fifo\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fifo$$ == yes</string>
-						<string>gpiote\\app_gpiote.c: $$com.sysprogs.bspoptions.nrf5x.libraries.gpiote$$ == normal</string>
+						<string>gpiote\\app_gpiote.c: $$com.sysprogs.bspoptions.nrf5x.libraries.gpiote$$ == yes normal</string>
 						<string>hci\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.hci$$ == yes</string>
 						<string>led_softblink\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.led_softblink$$ == yes</string>
 						<string>low_power_pwm\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.low_power_pwm$$ == yes</string>
@@ -497,7 +531,7 @@
 						<string>timer\\app_timer..$: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == normal</string>
 						<string>timer\\app_timer_freertos..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
 						<string>timer\\app_timer_rtx..: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == rtx</string>
-						<!--string>twi\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.twi$$ == yes</string-->
+
 						<string>uart\\app_uart.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart</string>
 						<string>uart\\app_uart_fifo.c: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ == app_uart_fifo</string>
 						<string>uart\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.uart$$ != </string>
@@ -505,9 +539,10 @@
 						<string>twi_sensor\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.sensortwi$$ == yes</string>
 						<string>fstorage\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.fstorage$$ ==yes </string>
 						<string>mem_manager\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.mem_manager$$==yes </string>
-						<!--string>bsp\\bsp_btn_ble..: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string-->
+
 												
-					</SimpleFileConditions>
+												
+					</SimpleFileConditions-->
 					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-bootloader_dfu\*init_template*;-timer\experimental\*;*</ProjectInclusionMask>
 					<AutoIncludeMask>-ant_fs\*;-console\*;*.h</AutoIncludeMask>
 					<Patches>
@@ -564,14 +599,6 @@
 					<Name>nRF5x Libraries</Name>
 					<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
 					<Properties>
-						<PropertyEntry xsi:type="Boolean"><Name>atomic</Name><UniqueID>atomic</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>atomic_fifo</Name><UniqueID>atomic_fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>balloc</Name><UniqueID>balloc</UniqueID><DefaultValue>true</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>block_dev</Name><UniqueID>block_dev</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>cli</Name><UniqueID>cli</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>fstorage</Name><UniqueID>fstorage</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>mem_manager</Name><UniqueID>mem_manager</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>bsp</Name><UniqueID>bsp</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>bootloader_dfu</Name>
@@ -586,6 +613,25 @@
 						  <DefaultEntryIndex>0</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>		
+					<!--   The conditions are generated programmatically, see function GenerateConditionsBoard>
+					<ARC2 PropertyEntry xsi:type="Enumerated">
+						  <Name>gpiote</Name>
+						  <UniqueID>gpiote</UniqueID>
+						  <SuggestionList>
+							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
+							<Suggestion><UserFriendlyName>Normal</UserFriendlyName><InternalValue>normal</InternalValue></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>							
+						<PropertyEntry xsi:type="Boolean"><Name>atomic</Name><UniqueID>atomic</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>atomic_fifo</Name><UniqueID>atomic_fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>balloc</Name><UniqueID>balloc</UniqueID><DefaultValue>true</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>block_dev</Name><UniqueID>block_dev</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>cli</Name><UniqueID>cli</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>fstorage</Name><UniqueID>fstorage</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>mem_manager</Name><UniqueID>mem_manager</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>bsp</Name><UniqueID>bsp</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						
 						<PropertyEntry xsi:type="Boolean"><Name>experimental_log</Name><UniqueID>experimental_log</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>experimental_libuarte</Name><UniqueID>experimental_libuarte</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
@@ -598,16 +644,6 @@
 						<PropertyEntry xsi:type="Boolean"><Name>fds</Name><UniqueID>fds</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fifo</Name><UniqueID>fifo</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>fstorage</Name><UniqueID>fstorage</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Enumerated">
-						  <Name>gpiote</Name>
-						  <UniqueID>gpiote</UniqueID>
-						  <SuggestionList>
-							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Normal</UserFriendlyName><InternalValue>normal</InternalValue></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>0</DefaultEntryIndex>
-						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>							
 						<PropertyEntry xsi:type="Boolean"><Name>hci</Name><UniqueID>hci</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>led_softblink</Name><UniqueID>led_softblink</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>low_power_pwm</Name><UniqueID>low_power_pwm</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
@@ -660,6 +696,8 @@
 						</PropertyEntry>
 						</Properties>
 						<PropertyEntry xsi:type="Boolean"><Name>usbd</Name><UniqueID>USB Device</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+					<ARC2-->
+					</Properties>
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
@@ -682,7 +720,7 @@
 		</Framework>
 		<Framework>
 			<Name>Modules_nrfx</Name>
-			<ID>com.sysprogs.arm.nordic.nrf51.modules_nrfx</ID>
+			<ID>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</ID>
 			<ClassID>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</ClassID>
 			<ProjectFolderName>modules_nrfx</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
@@ -739,9 +777,9 @@
 				<PropertyGroups>
 				  <PropertyGroup>
 					<Name>nRF5x Libraries Nrfx</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries</UniqueID>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.modules_nrfx.</UniqueID>
 					<Properties>
-						<PropertyEntry xsi:type="Boolean"><Name>nrfx_drivers</Name><UniqueID>nrfx_drivers</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
+						<!--PropertyEntry xsi:type="Boolean"><Name>nrfx_drivers</Name><UniqueID>nrfx_drivers</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry-->
 					</Properties>
 					</PropertyGroup>
 				</PropertyGroups>
@@ -978,9 +1016,10 @@
 						<string>ipv6_stack\\udp\\udp6.c=>UDP6_MAX_SOCKET_COUNT</string>
 
 					</GuardedFiles>
-					<SimpleFileConditions>						
+					<!--string>ble_ipsp\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.ble_ipsp$$ == yes</string-->
+					<!--ARC2 SimpleFileConditions>						
 						<string>ble_6lowpan\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.ble_6lowpan$$ == yes</string>
-						<!--string>ble_ipsp\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.ble_ipsp$$ == yes</string-->
+						
 						<string>iot_timer\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.iot_timer$$ == yes</string>
 						<string>mqtt\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.mqtt$$ == yes</string>
 						<string>socket\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.socket$$ == yes</string>
@@ -991,8 +1030,8 @@
 						<string>coap\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.coap$$ == yes</string>
 						<string>medium\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.medium$$ == yes</string>
 						<string>ipv6_stack\\.*: $$com.sysprogs.bspoptions.nrf5x.iot.ipv6_stack$$ == yes</string>
-						</SimpleFileConditions>
-					<ProjectInclusionMask>-*.a;-mqtt\mqtt_transport_socket.c;-*.lib;*</ProjectInclusionMask>
+						</SimpleFileConditions-->
+					<ProjectInclusionMask>-*.a;-mqtt\mqtt_transport_socket.c;-*.lib;*.c</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<PreprocessorMacros>NRF_TLS_MAX_INSTANCE_COUNT=$$com.sysprogs.bspoptions.nrf5x.iot.tls_instance$$</PreprocessorMacros>
 					<Patches>	
@@ -1013,6 +1052,7 @@
 					<UniqueID>com.sysprogs.bspoptions.nrf5x.iot.</UniqueID>
 					<Properties>
 						<!--PropertyEntry xsi:type="Boolean"><Name>ble_ipsp</Name><UniqueID>ble_ipsp</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry-->
+						<!--<
 						<PropertyEntry xsi:type="Boolean"><Name>medium_Ipv6</Name><UniqueID>medium</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>ble_6lowpan</Name><UniqueID>ble_6lowpan</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>ipv6_stack</Name><UniqueID>ipv6_stack</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
@@ -1024,7 +1064,8 @@
 						<PropertyEntry xsi:type="Boolean"><Name>tls</Name><UniqueID>tls</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>coap</Name><UniqueID>coap</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
 						<PropertyEntry xsi:type="Boolean"><Name>lwm2m</Name><UniqueID>lwm2m</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-					  <PropertyEntry xsi:type="Integral">
+					 -->
+					 <PropertyEntry xsi:type="Integral">
 						<Name>tls_instance</Name>
 						<UniqueID>com.sysprogs.bspoptions.stackheap.tls_instance</UniqueID>
 						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>

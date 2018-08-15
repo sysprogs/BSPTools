@@ -1,2 +1,0 @@
-ble_advertising|Connectable Advertising Support
-ble_services\ble_ipsp|IPSP Service

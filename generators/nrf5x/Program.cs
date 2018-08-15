@@ -314,15 +314,50 @@ namespace nrf5x
                     {
                         abi = " \"-mfloat-abi=soft\"";
                     }
-                    
+
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
                     var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName + abi, UseShellExecute = false };
-                    info.EnvironmentVariables["PATH"] += @";c:\sysgcc\arm-eabi\bin";
+                    info.EnvironmentVariables["PATH"] += @";e:\sysgcc\arm-eabi\bin";
                     Process.Start(info).WaitForExit();
                     string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
                         throw new Exception("Failed to convert a softdevice");
                 }
+            }
+            public void GenerateConditionsBoard( ref List<EmbeddedFramework> prFrBoard)
+            {
+                List<PropertyEntry.Enumerated.Suggestion> lstProp = new List<PropertyEntry.Enumerated.Suggestion>();
+                var propertysFrBoard = prFrBoard.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards")).
+                                            ConfigurableProperties.PropertyGroups.
+                                                SingleOrDefault(pg => pg.UniqueID.Equals("com.sysprogs.bspoptions.nrf5x.board.")).Properties;
+
+                foreach (var fb in Directory.GetFiles(Path.Combine(Directories.OutputDir, @"nRF5x\components\boards"), "*.h"))
+                {
+                    string fileboard = fb;
+                    string boardid = Path.GetFileNameWithoutExtension(fb).Replace("_starterkit", "DK1").ToUpper();
+                    MatchedFileConditions.Add(new FileCondition()
+                    {
+                        ConditionToInclude = new Condition.Equals()
+                        {
+                            Expression = "$$com.sysprogs.bspoptions.nrf5x.board.type$$",
+                            ExpectedValue = boardid,
+                            IgnoreCase = false
+                        },
+                        FilePath = fileboard.Replace(@"..\..\Output", "$$SYS:BSP_ROOT$$").Replace('\\', '/')
+                    });
+                    lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = boardid });
+                }
+                //--ConfigurableProperties--
+
+                propertysFrBoard.Add(
+                                    new PropertyEntry.Enumerated
+                                    {
+                                        UniqueID = "type",
+                                        Name = "Boards type",
+                                        DefaultEntryIndex = 4,
+                                        SuggestionList = lstProp.ToArray()
+                                    });
+
             }
         }
 
@@ -449,6 +484,118 @@ namespace nrf5x
                 }
                 return false;
             }
+
+
+        }
+        static List<PropertyEntry.Enumerated> ReadCompositePropery(string nameFile )
+        {
+            List<PropertyEntry.Enumerated> lsPr = new List<PropertyEntry.Enumerated>();
+            foreach(var ln in File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir,nameFile)))
+             {
+                if (ln.StartsWith("\t") || ln.StartsWith("//"))
+                    continue;
+                Match m = Regex.Match(ln, "(.*):(.*)");
+                if (!m.Success)
+                    continue;
+                var name = m.Groups[1].Value;
+                var prop = m.Groups[2].Value;
+
+                List<PropertyEntry.Enumerated.Suggestion>  lstSugg  = new List<PropertyEntry.Enumerated.Suggestion>();
+                foreach(var sg in prop.Trim(' ').Split(';'))
+                {
+                    Match m1 = Regex.Match(sg, "(.*)=(.*)");
+                    lstSugg.Add(new PropertyEntry.Enumerated.Suggestion
+                    {
+                        UserFriendlyName = m1.Groups[1].Value,
+                        InternalValue = m1.Groups[2].Value
+                    });
+
+                }
+                lsPr.Add(new PropertyEntry.Enumerated { Name = name,UniqueID = name,SuggestionList = lstSugg.ToArray() });
+            }
+
+            return lsPr;
+        }
+        static List<string> ReadCompositeCondidtions(string nameFile,string name_fr )
+        {
+            List<string> lsPrContin = new List<string>();
+            string nameLib = "";
+            foreach (var ln in File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, nameFile)))
+            {
+                if (ln.StartsWith("//") || ln=="")
+                    continue;
+                if (!ln.StartsWith("\t"))
+                {
+                    nameLib = ln.Remove(ln.IndexOf(':'));
+                    continue;
+                }
+
+                lsPrContin.Add(ln.Trim('\t').Replace(":", $": $$com.sysprogs.bspoptions.nrf5x.{name_fr}.{nameLib}$$"));
+              
+                }
+
+            return lsPrContin;
+        }
+
+        static void GenerateConditionsLibriries(Framework[] fr,string name_lib)//libraries
+        {
+            var compositeProp = ReadCompositePropery($"NRF5x{ name_lib}.txt");
+            //  var compositeConditions
+
+            List<PropertyEntry.Boolean> lstProp = new List<PropertyEntry.Boolean>();
+
+            lstGenFramworks.Add($"com.sysprogs.arm.nordic.nrf5x.{name_lib}");
+            var propertysFr = fr.SingleOrDefault(f => f.ID.Equals($"com.sysprogs.arm.nordic.nrf5x.{name_lib}")).
+                                        ConfigurableProperties.PropertyGroups.
+                                            SingleOrDefault(pg => pg.UniqueID.Equals($"com.sysprogs.bspoptions.nrf5x.{name_lib}.")).Properties;
+
+            List<string> lstConditions = new List<string>();
+            var dirLib = $@"components\{name_lib}";
+            if (name_lib == "modules_nrfx")
+                dirLib = @"modules\nrfx";
+            foreach (var fb in Directory.GetDirectories(Path.Combine(bspBuilder.Directories.InputDir, $@"{dirLib}")))
+            {
+                string namelibrary = fb.Remove(0, fb.LastIndexOf('\\') + 1);
+                string Conditions = $@"{namelibrary}\\.*: $$com.sysprogs.bspoptions.nrf5x.{name_lib}.{namelibrary}$$ == yes";
+                if (compositeProp.Where(n => n.Name == namelibrary).Count() > 0)
+                    continue;
+                
+                lstConditions.Add(Conditions);
+
+                lstGenConditions.Add(new PropertyDictionary2.KeyValue() { Key = $"com.sysprogs.bspoptions.nrf5x.{ name_lib }.{ namelibrary}",Value ="yes" });
+                lstProp.Add( new PropertyEntry.Boolean()
+                            { Name = namelibrary, UniqueID = namelibrary, DefaultValue = false, ValueForTrue = "yes" } );
+
+            }
+            //--ConfigurableProperties--
+
+            lstConditions.AddRange(ReadCompositeCondidtions($"NRF5x{ name_lib}.txt", name_lib));
+            
+            fr.SingleOrDefault(f => f.ID.Equals($"com.sysprogs.arm.nordic.nrf5x.{name_lib}")).
+                CopyJobs.SingleOrDefault(c => c.SourceFolder.Equals($@"$$BSPGEN:INPUT_DIR$$\{dirLib}")).
+                SimpleFileConditions = lstConditions.ToArray();
+
+
+            propertysFr.AddRange(lstProp.ToArray());
+            propertysFr.AddRange(compositeProp.ToArray());
+
+        }
+        static List<string> lstGenFramworks;
+        static List<PropertyDictionary2.KeyValue> lstGenConditions;
+        static void GenFramworkSample()
+        {
+            var fsample = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(bspBuilder.Directories.RulesDir, "FramworkSamples", "sample.xml"));
+
+            lstGenFramworks.AddRange(fsample.RequiredFrameworks);
+            fsample.RequiredFrameworks = lstGenFramworks.Distinct().ToArray();
+            lstGenConditions.AddRange(fsample.DefaultConfiguration.Entries);
+            fsample.DefaultConfiguration.Entries = lstGenConditions.ToArray();
+
+            Directory.CreateDirectory(Path.Combine(bspBuilder.Directories.OutputDir, "FramworkSamples"));
+            XmlTools.SaveObject(fsample, Path.Combine(bspBuilder.Directories.OutputDir, "FramworkSamples", "sample.xml"));
+            foreach (var fl in Directory.GetFiles(Path.Combine(bspBuilder.Directories.RulesDir, "FramworkSamples"), "*.c"))
+                File.Copy(fl, Path.Combine(bspBuilder.Directories.OutputDir, "FramworkSamples", Path.GetFileName(fl)));
+
         }
 
         static NordicBSPBuilder bspBuilder;
@@ -457,15 +604,27 @@ namespace nrf5x
 
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
-            bool usingIoTSDK =  false;
+            bool usingIoTSDK = false;
 
 
+            if (usingIoTSDK)
+            {
+                bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output_i", @"..\..\rules_iot"));
+                //        bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("s1xx_iot", 0x1f000, 0x2800, "nrf52", "IoT", bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
+                //bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", 0x1f000, 0x2800, "nrf52", "IoT", bspBuilder.Directories.InputDir));
+            }
+            else
+            {
                 bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf52810.*", null, bspBuilder.Directories.InputDir));
-                List<MCUBuilder> devices = new List<MCUBuilder>();
-
+            }
+            List<MCUBuilder> devices = new List<MCUBuilder>();
+            lstGenFramworks = new List<string>();
+            lstGenConditions = new List<PropertyDictionary2.KeyValue> ();
 #if NRF51_SUPPORT
             if (!usingIoTSDK)
                 foreach (string part in new string[] { "nRF51822", "nRF51422" })
@@ -476,13 +635,13 @@ namespace nrf5x
                 }
 #endif
 
+
             devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52.S" });
             devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52840.S" });
             if (!usingIoTSDK)
                 devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52810.S" });
-            
 
-            List < MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+            List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
                 allFamilies.Add(new NordicFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
@@ -517,6 +676,13 @@ namespace nrf5x
                     foreach (var mcu in rejectedMCUs)
                         Console.WriteLine("\t{0}", mcu.Name);
                 }
+
+                GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "libraries");
+                GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "drivers_nrf");
+                GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "drivers_ext");
+                GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "iot");
+
+
 
                 List<Framework> bleFrameworks = new List<Framework>();
                 foreach (var line in File.ReadAllLines(bspBuilder.Directories.RulesDir + @"\BLEFrameworks.txt"))
@@ -670,22 +836,35 @@ namespace nrf5x
             foreach (var softdev in bspBuilder.SoftDevices)
                 condFlags.Add(new ConditionalToolFlags
                 {
-                    FlagCondition = new Condition.Equals {Expression = softdevExpression, ExpectedValue = softdev.Name + "_reserve"},
+                    FlagCondition = new Condition.Equals { Expression = softdevExpression, ExpectedValue = softdev.Name + "_reserve" },
                     Flags = new ToolFlags
                     {
-                        PreprocessorMacros = familyDefinitions.First().CompilationFlags.PreprocessorMacros.Where(f=>f.Contains(softdevExpression)).Select(f=>f.Replace(softdevExpression, softdev.Name)).ToArray(),
-                        IncludeDirectories = familyDefinitions.First().CompilationFlags.IncludeDirectories.Where(f=>f.Contains(softdevExpression)).Select(f=>f.Replace(softdevExpression, softdev.Name)).ToArray()
+                        PreprocessorMacros = familyDefinitions.First().CompilationFlags.PreprocessorMacros.Where(f => f.Contains(softdevExpression)).Select(f => f.Replace(softdevExpression, softdev.Name)).ToArray(),
+                        IncludeDirectories = familyDefinitions.First().CompilationFlags.IncludeDirectories.Where(f => f.Contains(softdevExpression)).Select(f => f.Replace(softdevExpression, softdev.Name)).ToArray()
                     }
                 });
 
             bspBuilder.GenerateSoftdeviceLibraries();
+            bspBuilder.GenerateConditionsBoard(ref frameworks);
+            GenFramworkSample();
 
             Console.WriteLine("Building BSP archive...");
             string strPackageID, strPackageDesc, strPAckVersion;
-          
-           strPackageID = "com.sysprogs.arm.nordic.nrf5x";
-           strPackageDesc = "Nordic NRF52x Devices";
-           strPAckVersion = "15.0";
+            if (usingIoTSDK)
+            {
+                strPackageID = "com.sysprogs.arm.nordic.nrf5x-iot";
+                strPackageDesc = "Nordic NRF52 IoT";
+                strPAckVersion = "0.9";
+
+                foreach (var mcu in mcuDefinitions)
+                    mcu.UserFriendlyName = mcu.ID + " (IoT)";
+            }
+            else
+            {
+                strPackageID = "com.sysprogs.arm.nordic.nrf5x";
+                strPackageDesc = "Nordic NRF52x Devices";
+                strPAckVersion = "15.0";
+            }
 
 
             BoardSupportPackage bsp = new BoardSupportPackage

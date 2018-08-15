@@ -793,7 +793,7 @@ namespace StandaloneBSPValidator
 
             return false;
         }
-
+        static EmbeddedProjectSample SampleFramwork ;
         public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
         {
             TestStatistics stats = new TestStatistics();
@@ -830,6 +830,14 @@ namespace StandaloneBSPValidator
                         effectiveMCUs = MCUs.Where(mcu => rgDevice.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
                     }
 
+                    if (sample.Name == "ValidateGenerateFramwoks")
+                    {
+                        SampleFramwork = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(job.BSPPath, "FramworkSamples", "sample.xml"));
+                        LoadedBSP.LoadedSample sampleObj1 = new LoadedBSP.LoadedSample() { Sample = SampleFramwork };
+                        effectiveMCUs[0].BSP.Samples.Add(sampleObj1);
+                        effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 1].Directory = effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 2].Directory.Remove(effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 2].Directory.LastIndexOf("samples")) + "FramworkSamples";
+                    }
+
                     foreach (var mcu in effectiveMCUs)
                     {
                         if (string.IsNullOrEmpty(mcu.ExpandedMCU.ID))
@@ -839,6 +847,8 @@ namespace StandaloneBSPValidator
 
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
                         DateTime start = DateTime.Now;
+                        SampleFramwork = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(job.BSPPath, "FramworkSamples", "sample.xml"));
+
                         var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules, noValidateReg, job.UndefinedMacros);
                         Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
                         if (result == TestResult.Failed)

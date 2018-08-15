@@ -5,7 +5,7 @@
   <MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
   <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
-    <string>com.sysprogs.arm.nordic.nrf5x.periph</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</string>
     <string>com.sysprogs.arm.nordic.nrf5x.util</string>
     <string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
     <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
@@ -17,7 +17,7 @@
     <string>com.sysprogs.arm.nordic.nrfx.ble_dis</string>
     <string>com.sysprogs.arm.nordic.nrfx.ble_hids</string>
 	
-		    <string>com.sysprogs.arm.nordic.nrf51.modules_nrfx</string>
+		    <string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_link_ctx_manager</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_qwr</string>
     <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
@@ -34,7 +34,47 @@
   </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
-	
+	      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.util</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.hardfault</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.csense_drv</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.gfx</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_section_vars</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_flags</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.balloc</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.serial</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.strerror</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.bsp</Key>
         <Value>yes</Value>
@@ -91,10 +131,7 @@
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>
         <Value>yes</Value>
       </KeyValue>
-      <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.balloc</Key>
-        <Value />
-      </KeyValue>
+    
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.block_dev</Key>
         <Value />
