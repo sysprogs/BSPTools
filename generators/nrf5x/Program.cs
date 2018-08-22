@@ -118,9 +118,9 @@ namespace nrf5x
                         .ToArray();
 
                     var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Origin).Last();
-        //            var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Length).Last();
-                   var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Origin).Last();
- //                   var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Length).Last();
+                    //            var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Length).Last();
+                    var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Origin).Last();
+                    //                   var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Length).Last();
 
                     if (!maxFLASH.FLASH.Equals(maxRAM.FLASH))
                         throw new Exception("Inconsistent maximum linker scripts"); //The 'max RAM' script has a different FLASH size than the 'max FLASH' script.
@@ -324,40 +324,50 @@ namespace nrf5x
                         throw new Exception("Failed to convert a softdevice");
                 }
             }
-            public void GenerateConditionsBoard( ref List<EmbeddedFramework> prFrBoard)
+
+            public void GenerateConditionsBoard(ref List<EmbeddedFramework> prFrBoard)
             {
                 List<PropertyEntry.Enumerated.Suggestion> lstProp = new List<PropertyEntry.Enumerated.Suggestion>();
-                var propertysFrBoard = prFrBoard.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards")).
+                var propertyGroup = prFrBoard.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards")).
                                             ConfigurableProperties.PropertyGroups.
-                                                SingleOrDefault(pg => pg.UniqueID.Equals("com.sysprogs.bspoptions.nrf5x.board.")).Properties;
+                                                SingleOrDefault(pg => pg.UniqueID.Equals("com.sysprogs.bspoptions.nrf5x.board."));
 
-                foreach (var fb in Directory.GetFiles(Path.Combine(Directories.OutputDir, @"nRF5x\components\boards"), "*.h"))
+                var rgBoardIfdef = new Regex("#(if|elif) defined\\((BOARD_[A-Z0-9a-z_]+)\\)");
+                var rgInclude = new Regex("#include \"([^\"]+)\"");
+
+                var lines = File.ReadAllLines(Path.Combine(Directories.OutputDir, @"nRF5x\components\boards\boards.h"));
+                lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = "", UserFriendlyName = "None" });
+
+                for (int i = 0; i < lines.Length; i++)
                 {
-                    string fileboard = fb;
-                    string boardid = Path.GetFileNameWithoutExtension(fb).Replace("_starterkit", "DK1").ToUpper();
+                    var m = rgBoardIfdef.Match(lines[i]);
+                    if (!m.Success)
+                        continue;
+
+                    string boardID = m.Groups[2].Value;
+                    string file = rgInclude.Match(lines[i + 1]).Groups[1].Value;
+
                     MatchedFileConditions.Add(new FileCondition()
                     {
                         ConditionToInclude = new Condition.Equals()
                         {
                             Expression = "$$com.sysprogs.bspoptions.nrf5x.board.type$$",
-                            ExpectedValue = boardid,
+                            ExpectedValue = boardID,
                             IgnoreCase = false
                         },
-                        FilePath = fileboard.Replace(@"..\..\Output", "$$SYS:BSP_ROOT$$").Replace('\\', '/')
+                        FilePath = "nRF5x/components/boards/" + file
                     });
-                    lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = boardid });
+                    lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = boardID });
                 }
                 //--ConfigurableProperties--
 
-                propertysFrBoard.Add(
-                                    new PropertyEntry.Enumerated
-                                    {
-                                        UniqueID = "type",
-                                        Name = "Boards type",
-                                        DefaultEntryIndex = 4,
-                                        SuggestionList = lstProp.ToArray()
-                                    });
-
+                propertyGroup.Properties.Add(new PropertyEntry.Enumerated
+                {
+                    UniqueID = "type",
+                    Name = "Board Type",
+                    DefaultEntryIndex = Enumerable.Range(0, lstProp.Count).First(i => lstProp[i].InternalValue == "BOARD_PCA10040"),
+                    SuggestionList = lstProp.ToArray()
+                });
             }
         }
 
@@ -484,14 +494,13 @@ namespace nrf5x
                 }
                 return false;
             }
-
-
         }
-        static List<PropertyEntry.Enumerated> ReadCompositePropery(string nameFile )
+
+        static List<PropertyEntry.Enumerated> ReadCompositePropery(string nameFile)
         {
             List<PropertyEntry.Enumerated> lsPr = new List<PropertyEntry.Enumerated>();
-            foreach(var ln in File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir,nameFile)))
-             {
+            foreach (var ln in File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, nameFile)))
+            {
                 if (ln.StartsWith("\t") || ln.StartsWith("//"))
                     continue;
                 Match m = Regex.Match(ln, "(.*):(.*)");
@@ -500,8 +509,8 @@ namespace nrf5x
                 var name = m.Groups[1].Value;
                 var prop = m.Groups[2].Value;
 
-                List<PropertyEntry.Enumerated.Suggestion>  lstSugg  = new List<PropertyEntry.Enumerated.Suggestion>();
-                foreach(var sg in prop.Trim(' ').Split(';'))
+                List<PropertyEntry.Enumerated.Suggestion> lstSugg = new List<PropertyEntry.Enumerated.Suggestion>();
+                foreach (var sg in prop.Trim(' ').Split(';'))
                 {
                     Match m1 = Regex.Match(sg, "(.*)=(.*)");
                     lstSugg.Add(new PropertyEntry.Enumerated.Suggestion
@@ -511,18 +520,19 @@ namespace nrf5x
                     });
 
                 }
-                lsPr.Add(new PropertyEntry.Enumerated { Name = name,UniqueID = name,SuggestionList = lstSugg.ToArray() });
+                lsPr.Add(new PropertyEntry.Enumerated { Name = name, UniqueID = name, SuggestionList = lstSugg.ToArray() });
             }
 
             return lsPr;
         }
-        static List<string> ReadCompositeCondidtions(string nameFile,string name_fr )
+
+        static List<string> ReadCompositeCondidtions(string nameFile, string name_fr)
         {
             List<string> lsPrContin = new List<string>();
             string nameLib = "";
             foreach (var ln in File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, nameFile)))
             {
-                if (ln.StartsWith("//") || ln=="")
+                if (ln.StartsWith("//") || ln == "")
                     continue;
                 if (!ln.StartsWith("\t"))
                 {
@@ -531,13 +541,13 @@ namespace nrf5x
                 }
 
                 lsPrContin.Add(ln.Trim('\t').Replace(":", $": $$com.sysprogs.bspoptions.nrf5x.{name_fr}.{nameLib}$$"));
-              
-                }
+
+            }
 
             return lsPrContin;
         }
 
-        static void GenerateConditionsLibriries(Framework[] fr,string name_lib)//libraries
+        static void GenerateConditionsLibriries(Framework[] fr, string name_lib)//libraries
         {
             var compositeProp = ReadCompositePropery($"NRF5x{ name_lib}.txt");
             //  var compositeConditions
@@ -559,18 +569,18 @@ namespace nrf5x
                 string Conditions = $@"{namelibrary}\\.*: $$com.sysprogs.bspoptions.nrf5x.{name_lib}.{namelibrary}$$ == yes";
                 if (compositeProp.Where(n => n.Name == namelibrary).Count() > 0)
                     continue;
-                
+
                 lstConditions.Add(Conditions);
 
-                lstGenConditions.Add(new PropertyDictionary2.KeyValue() { Key = $"com.sysprogs.bspoptions.nrf5x.{ name_lib }.{ namelibrary}",Value ="yes" });
-                lstProp.Add( new PropertyEntry.Boolean()
-                            { Name = namelibrary, UniqueID = namelibrary, DefaultValue = false, ValueForTrue = "yes" } );
+                lstGenConditions.Add(new PropertyDictionary2.KeyValue() { Key = $"com.sysprogs.bspoptions.nrf5x.{ name_lib }.{ namelibrary}", Value = "yes" });
+                lstProp.Add(new PropertyEntry.Boolean()
+                { Name = namelibrary, UniqueID = namelibrary, DefaultValue = false, ValueForTrue = "yes" });
 
             }
             //--ConfigurableProperties--
 
             lstConditions.AddRange(ReadCompositeCondidtions($"NRF5x{ name_lib}.txt", name_lib));
-            
+
             fr.SingleOrDefault(f => f.ID.Equals($"com.sysprogs.arm.nordic.nrf5x.{name_lib}")).
                 CopyJobs.SingleOrDefault(c => c.SourceFolder.Equals($@"$$BSPGEN:INPUT_DIR$$\{dirLib}")).
                 SimpleFileConditions = lstConditions.ToArray();
@@ -624,7 +634,7 @@ namespace nrf5x
             }
             List<MCUBuilder> devices = new List<MCUBuilder>();
             lstGenFramworks = new List<string>();
-            lstGenConditions = new List<PropertyDictionary2.KeyValue> ();
+            lstGenConditions = new List<PropertyDictionary2.KeyValue>();
 #if NRF51_SUPPORT
             if (!usingIoTSDK)
                 foreach (string part in new string[] { "nRF51822", "nRF51422" })
@@ -884,6 +894,8 @@ namespace nrf5x
                 ConditionalFlags = condFlags.ToArray(),
                 InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
             };
+
+            bspBuilder.ValidateBSP(bsp);
 
             bspBuilder.Save(bsp, true, false);
         }
