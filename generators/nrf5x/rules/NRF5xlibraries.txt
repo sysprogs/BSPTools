@@ -1,0 +1,15 @@
+// // -comments 
+//name options: name mode=value;name mode=value;...
+//[tab] namefile:==value
+scheduler: None=none;Normal=normal;Serialization mode=serconn
+	scheduler\\app_scheduler.c: == normal
+	scheduler\\app_scheduler_serconn.c: == serconn
+	scheduler\\app_scheduler.h: != none
+timer: None=none;Using nRF5x scheduler=normal;Using FreeRTOS=freertos;Using RTX=rtx
+	timer\\app_timer..$: == normal
+	timer\\app_timer_freertos..: == freertos
+	timer\\app_timer_rtx..: == rtx
+uart: None=;Without FIFO=app_uart;With FIFO=app_uart_fifo
+	uart\\app_uart.c:  == app_uart
+	uart\\app_uart_fifo.c:  == app_uart_fifo
+	uart\\.*: != 

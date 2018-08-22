@@ -7,23 +7,32 @@
 	
 	<Samples>
 		<TestedSample>
-			<Name>Bluetooth LE Proximity Tag</Name>
+			<DeviceRegex>^nRF528(32|40).*$</DeviceRegex>
+			<Name>ValidateGenerateFramwoks</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-BLEProximity</TestDirSuffix>
-		</TestedSample>	 <TestedSample>
+			<TestDirSuffix>-ValidateGenerateFramwoks</TestDirSuffix>
+		</TestedSample>	 
+		
+		<!--TestedSample>
 			<Name>Bluetooth LE Mouse</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEMouse</TestDirSuffix>
-		</TestedSample>	 		
+		</TestedSample-->	 
+		<TestedSample>
+			<Name>Bluetooth LE Proximity Tag</Name>
+			<SkipIfNotFound>false</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-BLEProximity</TestDirSuffix>
+		</TestedSample>	 
 		<TestedSample>
 			<Name>Bluetooth LE Keyboard</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEKeyboard</TestDirSuffix>
 		</TestedSample>	 
-		<TestedSample>
+		<!--TestedSample>
 			<Name>Bluetooth LE Beacon</Name>
 			<SkipIfNotFound>true</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
@@ -68,7 +77,7 @@
 			<TestDirSuffix>-LEDBlink(BSP)</TestDirSuffix>
 			<SampleConfiguration>			
 			</SampleConfiguration>            
-		</TestedSample>
+		</TestedSample-->
 	</Samples>
 	<DeviceParameterSets>
 		<DeviceParameterSet>
@@ -129,7 +138,7 @@
 				</Entries>
 			</FrameworkConfiguration>	
 		</DeviceParameterSet>
-		<DeviceParameterSet>
+		<!--DeviceParameterSet>
 			<DeviceRegex>nRF52810</DeviceRegex>
 			<MCUConfiguration>
 				<Entries>
@@ -155,6 +164,6 @@
 					</KeyValue>
 				</Entries>
 			</FrameworkConfiguration>	
-		</DeviceParameterSet>
+		</DeviceParameterSet-->
 	</DeviceParameterSets>
 </TestJob>

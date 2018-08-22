@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Name>LEDBlink (BSP)</Name>
-  <Description>This sample toggles all LEDs on a specified evaluation board using the nRF51 board abstraction API.</Description>
-  <MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+   <Name>ValidateGenerateFramwoks</Name>
+  <Description>This sample demonstrates a include framwors</Description>
+  <MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
     <string>com.sysprogs.arm.nordic.nrf5x.util</string>
     <string>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</string>
     <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
     <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
-	  
-	 <string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
-	<string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.lwip</string>
   </RequiredFrameworks>
   <AdditionalSourcesToCopy>
     <AdditionalSourceFile>
-      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_blinky_c/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</SourcePath>
+      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_blinky/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</SourcePath>
       <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
     </AdditionalSourceFile>
     <AdditionalSourceFile>
@@ -29,7 +29,7 @@
   </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
-	      <KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
         <Value>yes</Value>
       </KeyValue>
@@ -73,22 +73,21 @@
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.bsp</Key>
         <Value>yes</Value>
       </KeyValue>
-			 <KeyValue>
-	   <Key>com.sysprogs.bspoptions.nrf5x.uart_driver_legacy</Key>
-		<Value>yes</Value>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.uart_driver_legacy</Key>
+        <Value>yes</Value>
       </KeyValue>
-       <KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic</Key>
         <Value>yes</Value>
       </KeyValue>
-	     <KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_log</Key>
         <Value>yes</Value>
       </KeyValue>
-	   <KeyValue>
+      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.pwr_mgmt</Key>
-		<Value>yes</Value>
-        <Value />
+        <Value>yes</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>

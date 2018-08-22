@@ -3,29 +3,28 @@
 	  <Name>IoT tcp client</Name>
 	  <Description>This sample demonstrates a IoT TCP client.</Description>
 	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
-	  <LinkerScript>$$SYS:BSP_ROOT$$\nRF5x\examples\iot\mqtt\lwip\publisher\pca10040\s132\armgcc\iot_lwip_mqtt_publisher_gcc_nrf52.ld</LinkerScript>
   <RequiredFrameworks>
 	<string>com.sysprogs.arm.nordic.nrf5x.util</string>
-	<string>com.sysprogs.arm.nordic.nrf5x.periph</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</string>
 	<string>com.sysprogs.arm.nordic.nrf5x.boards</string>
     <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
     <!--string>com.sysprogs.arm.nordic.nrfx.ble_advertising</string-->
     <string>com.sysprogs.arm.nordic.nrf5x.iot</string>
 	
-	<string>com.sysprogs.arm.nordic.nrf51.modules_nrfx</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
 	<string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
 	<string>com.sysprogs.arm.nordic.nrf5x.ble_ipsp</string>		
 	
     <string>com.sysprogs.arm.nordic.nrf5x.lwip</string>
-
+		<string>com.sysprogs.arm.nordic.nrf5x.stack_heap</string>
   </RequiredFrameworks>
   <ConditionalErrors>
 	<ConditionalError>
 		<ErrorCondition xsi:type="Not">
 			<Argument xsi:type="MatchesRegex">
 				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>S.*</Regex>
+				<Regex>s.*</Regex>
 				<IgnoreCase>false</IgnoreCase>
 			</Argument>
 		</ErrorCondition>
@@ -33,7 +32,48 @@
 	</ConditionalError>
   </ConditionalErrors>
   <DefaultConfiguration>
-    <Entries>
+    	<Entries> <KeyValue><Key>com.sysprogs.bspoptions.nrf5x.iot.context_manager</Key><Value>yes</Value></KeyValue>
+		      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.util</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.hardfault</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.csense_drv</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.gfx</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_section_vars</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_flags</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.balloc</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.serial</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.strerror</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  
 		<KeyValue>
 			<Key>com.sysprogs.bspoptions.stackheap.stacksize</Key>
 			<Value>4096</Value>
