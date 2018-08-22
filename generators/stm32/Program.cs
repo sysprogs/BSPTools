@@ -55,7 +55,7 @@ namespace stm32_bsp_generator
                 {
                     string aDirIcf = pfam.Definition.StartupFileDir;
                     if (!aDirIcf.EndsWith("gcc"))
-                        throw new Exception("No Gcc sturtup Tamplate");
+                        throw new Exception("No GCC startup template");
                     aDirIcf = aDirIcf.Replace("\\gcc", "\\iar\\linker");
                     if (!Directory.Exists(aDirIcf))
                         throw new Exception("No dir " + aDirIcf);
@@ -63,7 +63,8 @@ namespace stm32_bsp_generator
                     foreach (var fnIcf in Directory.GetFiles(aDirIcf, "stm32*_flash.icf"))
                     {
                         string kvStr = Path.GetFileName(fnIcf).Replace("_flash.icf", "");
-                        _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(kvStr.Replace('x', '.') + ".*", RegexOptions.IgnoreCase), GetLayoutFromICF(fnIcf, kvStr)));
+                        var regex = new Regex(kvStr.Replace('x', '.') + ".*", RegexOptions.IgnoreCase);
+                        _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(regex, GetLayoutFromICF(fnIcf, kvStr)));
                     }
                 }
             }

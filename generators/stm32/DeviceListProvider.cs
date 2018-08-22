@@ -75,12 +75,22 @@ namespace stm32_bsp_generator
                     var fn = Path.GetFileName(absoluteUri.ToString());
                     var ms = new MemoryStream();
                     _ZipFile.ExtractEntry(_Entries[fn], ms);
+
+                    if (false)
+                    {
+                        ms.Position = 0;
+                        byte[] data = new byte[ms.Length];
+                        ms.Read(data, 0, data.Length);
+                        File.WriteAllBytes(Path.Combine(@"e:\temp", Path.GetFileName(absoluteUri.AbsolutePath)), data);
+                    }
+
                     ms.Position = 0;
                     return ms;
                 }
             }
 
-            Dictionary<string, XmlElement> _DevicesByPNs = new Dictionary<string, XmlElement>();
+            Dictionary<string, XmlElement> _DevicesByGeneralizedName = new Dictionary<string, XmlElement>();
+            Dictionary<string, XmlElement> _DevicesBySpecializedName = new Dictionary<string, XmlElement>();
 
             public DeviceMemoryDatabase(string STM32CubeDir)
             {
@@ -107,14 +117,21 @@ namespace stm32_bsp_generator
 
                 foreach (XmlElement el in _Document.DocumentElement.SelectNodes("family/subFamily/device"))
                 {
-                    foreach (var pn in el.SelectSingleNode("PN").InnerText.Split(','))
-                    {
-                        _DevicesByPNs[pn] = el;
+                    var pnArray = el.SelectSingleNode("PN").InnerText.Split(',');
+                    //Contains IDs for the following toolchains: EWARM, MDK-ARM, TrueSTUDIO, RIDE, TASKING, SW4STM32
+                    var pn = pnArray[0];
 
-                        foreach (var v in (el.SelectSingleNode("variants")?.InnerText ?? "").Split(','))
-                            _DevicesByPNs[pn + v] = el;
+                    if (_DevicesByGeneralizedName.ContainsKey(pn))
+                    {
+                        //Another device with the same generalized name was already defined (e.g. both STM32F103RC-Tx and STM32F103RC-Yx go as STM32F103RC).
+                        //In that case remove the original generalized entry and use specialized entries (e.g. STM32F103RC-Tx) instead.
+                        _DevicesByGeneralizedName[pn] = null;
                     }
 
+                    _DevicesByGeneralizedName[pn] = el;
+
+                    foreach (var v in (el.SelectSingleNode("variants")?.InnerText ?? "").Split(','))
+                        _DevicesBySpecializedName[pn + v] = el;
                 }
             }
 
@@ -169,7 +186,15 @@ namespace stm32_bsp_generator
 
             internal RawMemory[] LookupMemories(string RPN)
             {
-                var node = _DevicesByPNs[RPN];
+                XmlElement node;
+                if (!_DevicesBySpecializedName.TryGetValue(RPN, out node))
+                {
+                    if (!_DevicesByGeneralizedName.TryGetValue(RPN, out node))
+                        throw new Exception("No memory layout known for " + RPN);
+                    else if (node == null)
+                        throw new Exception("Ambiguous device ID: " + RPN); //See the comment near '_DevicesByGeneralizedName.ContainsKey' in the constructor.
+                }
+
                 return node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
             }
         }
@@ -253,7 +278,7 @@ namespace stm32_bsp_generator
 
             public struct ParsedMCU
             {
-                public string Name, RefName, RPN;
+                public readonly string Name, RefName, RPN;
 
                 public CortexCore Core;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
@@ -299,7 +324,7 @@ namespace stm32_bsp_generator
                             throw new Exception("Don't know how to map core: " + core);
                     }
 
-                    Memories = db.LookupMemories(RefName);
+                    Memories = db.LookupMemories(RPN);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
