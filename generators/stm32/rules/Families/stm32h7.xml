@@ -56,13 +56,6 @@
 					<ProjectInclusionMask>-*Include\stm32h7????.h*;-*system_*.c;-RTOS2\Template\*;*</ProjectInclusionMask>
 					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;*.h</AutoIncludeMask>		
 					<Patches>											
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>Device\ST\STM32H7xx\Source\Templates\system_stm32h7xx.c</FilePath>
-							<OldLine>/* #define VECT_TAB_SRAM */</OldLine>
-							<NewLine>#ifdef sram_layout
-#define VECT_TAB_SRAM
-#endif</NewLine>
-						</Patch>			
 					</Patches>
 				</CopyJob>
 			</CopyJobs>			

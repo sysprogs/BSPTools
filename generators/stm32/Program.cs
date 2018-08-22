@@ -365,6 +365,8 @@ namespace stm32_bsp_generator
             foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
                 frameworks.Add(fw);
 
+            List<ConditionalToolFlags> allConditionalToolFlags = new List<ConditionalToolFlags>();
+
             foreach (var fam in allFamilies)
             {
                 bspBuilder.GetMemoryMcu(fam);
@@ -390,6 +392,9 @@ namespace stm32_bsp_generator
 
                 foreach (var sample in fam.CopySamples())
                     exampleDirs.Add(sample);
+
+                if (fam.Definition.ConditionalFlags != null)
+                    allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
             }
 
             foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
@@ -415,6 +420,7 @@ namespace stm32_bsp_generator
                 MinimumEngineVersion = "5.1",
                 FirstCompatibleVersion = "3.0",
                 InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
+                ConditionalFlags = allConditionalToolFlags.ToArray()
             };
 
             StringWriter libraryVersionList = new StringWriter();
