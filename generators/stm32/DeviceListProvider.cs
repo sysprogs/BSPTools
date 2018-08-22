@@ -89,7 +89,6 @@ namespace stm32_bsp_generator
                 }
             }
 
-            Dictionary<string, XmlElement> _DevicesByGeneralizedName = new Dictionary<string, XmlElement>();
             Dictionary<string, XmlElement> _DevicesBySpecializedName = new Dictionary<string, XmlElement>();
 
             public DeviceMemoryDatabase(string STM32CubeDir)
@@ -118,17 +117,8 @@ namespace stm32_bsp_generator
                 foreach (XmlElement el in _Document.DocumentElement.SelectNodes("family/subFamily/device"))
                 {
                     var pnArray = el.SelectSingleNode("PN").InnerText.Split(',');
-                    //Contains IDs for the following toolchains: EWARM, MDK-ARM, TrueSTUDIO, RIDE, TASKING, SW4STM32
-                    var pn = pnArray[0];
-
-                    if (_DevicesByGeneralizedName.ContainsKey(pn))
-                    {
-                        //Another device with the same generalized name was already defined (e.g. both STM32F103RC-Tx and STM32F103RC-Yx go as STM32F103RC).
-                        //In that case remove the original generalized entry and use specialized entries (e.g. STM32F103RC-Tx) instead.
-                        _DevicesByGeneralizedName[pn] = null;
-                    }
-
-                    _DevicesByGeneralizedName[pn] = el;
+                    //Contains IDs for the following toolchains: EWARM, MDK-ARM, TrueSTUDIO, RIDE, TASKING, SW4STM32.
+                    var pn = pnArray[5];
 
                     foreach (var v in (el.SelectSingleNode("variants")?.InnerText ?? "").Split(','))
                         _DevicesBySpecializedName[pn + v] = el;
@@ -184,15 +174,12 @@ namespace stm32_bsp_generator
                 }
             }
 
-            internal RawMemory[] LookupMemories(string RPN)
+            internal RawMemory[] LookupMemories(string RPN, string RefName)
             {
                 XmlElement node;
-                if (!_DevicesBySpecializedName.TryGetValue(RPN, out node))
+                if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
                 {
-                    if (!_DevicesByGeneralizedName.TryGetValue(RPN, out node))
-                        throw new Exception("No memory layout known for " + RPN);
-                    else if (node == null)
-                        throw new Exception("Ambiguous device ID: " + RPN); //See the comment near '_DevicesByGeneralizedName.ContainsKey' in the constructor.
+                    throw new Exception("Could not find memory layout for " + RefName);
                 }
 
                 return node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
@@ -207,10 +194,10 @@ namespace stm32_bsp_generator
 
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
 
-                public STM32MCUBuilder(ParsedMCU parsedMCU, DeviceMemoryDatabase db, string specializedName)
+                public STM32MCUBuilder(ParsedMCU parsedMCU, DeviceMemoryDatabase db)
                 {
                     MCU = parsedMCU;
-                    Memories = db.LookupMemories(specializedName ?? parsedMCU.RPN);
+                    Memories = db.LookupMemories(parsedMCU.RPN, parsedMCU.RefName);
                     if (Memories.Length < 1)
                         throw new Exception("Could not locate memories for " + parsedMCU.Name);
 
@@ -278,7 +265,9 @@ namespace stm32_bsp_generator
 
             public struct ParsedMCU
             {
-                public readonly string Name, RefName, RPN;
+                public readonly string Name;    //Generic name, may contain brackets (e.g. STM32F031C(4-6)Tx)
+                public readonly string RefName; //Specialized name (e.g. STM32F031C4Tx)
+                public readonly string RPN;     //Short name (e.g.STM32F031C4)
 
                 public CortexCore Core;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
@@ -324,7 +313,7 @@ namespace stm32_bsp_generator
                             throw new Exception("Don't know how to map core: " + core);
                     }
 
-                    Memories = db.LookupMemories(RPN);
+                    Memories = db.LookupMemories(RPN, RefName);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
@@ -342,11 +331,11 @@ namespace stm32_bsp_generator
                     return Name;
                 }
 
-                public MCUBuilder ToMCUBuilder(DeviceMemoryDatabase db, string nameOverride = null)
+                public MCUBuilder ToMCUBuilder(DeviceMemoryDatabase db, bool useSpecializedName = false)
                 {
-                    return new STM32MCUBuilder(this, db, nameOverride)
+                    return new STM32MCUBuilder(this, db)
                     {
-                        Name = nameOverride ?? RPN,
+                        Name = useSpecializedName ? RefName : RPN,
                         FlashSize = FLASH * 1024,
                         RAMSize = 0,    //This will be adjusted later in our override of GenerateDefinition()
                         Core = Core
@@ -386,7 +375,7 @@ namespace stm32_bsp_generator
                     {
                         foreach (var subGrp in mcusByConfig)
                         {
-                            result.Add(subGrp.First().ToMCUBuilder(db, subGrp.First().RefName));
+                            result.Add(subGrp.First().ToMCUBuilder(db, true));
                         }
                     }
                 }
