@@ -126,17 +126,30 @@ namespace BSPGenerationTools
             public string OldLine;
             public string NewLine;
 
+            public string AnchorLine;
+            public int AnchorDistance = 1;
+
             public override void Apply(List<string> lines)
             {
                 bool found = false;
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    if (lines[i] == OldLine)
+                    if (lines[i] != OldLine)
+                        continue;
+
+                    if (AnchorLine != null)
                     {
-                        lines[i] = NewLine;
-                        found = true;
-                        break;
+                        int idx = i + AnchorDistance;
+                        if (idx < 0 || idx >= lines.Count)
+                            continue;
+
+                        if (lines[idx] != AnchorLine)
+                            continue;
                     }
+
+                    lines[i] = NewLine;
+                    found = true;
+                    break;
                 }
                 if (!found)
                     throw new Exception("Failed to apply patch for " + FilePath);
