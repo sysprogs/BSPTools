@@ -142,60 +142,35 @@ namespace nrf5x
 
             public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
             {
-                DoGenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout, generalizedName, "");
-            }
-
-            void DoGenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName, string ldsSuffix)
-            {
                 foreach (var sd in SoftDevices)
                 {
                     if (!sd.IsCompatible(mcu.Name))
                         continue;
                     if (sd.LinkerScriptWithMaximumReservedRAM == null)
                     {
-                        using (var gen = new LdsFileGenerator(LDSTemplate, layout))
-                        {
-                            using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev" + ldsSuffix + ".lds")))
-                                gen.GenerateLdsFile(sw);
-                        }
-
-                        //IoT
-                        var softdevTemplate = LDSTemplate.ShallowCopy();
-                        softdevTemplate.Sections = new List<Section>(softdevTemplate.Sections);
-                        softdevTemplate.Sections.Insert(0, new Section { Name = ".softdevice", TargetMemory = "FLASH_SOFTDEVICE", Inputs = new List<SectionReference> { new SectionReference { NamePattern = ".softdevice", Flags = SectionReferenceFlags.Keep } }, Fill = new FillInfo { Pattern = uint.MaxValue, TotalSize = (int)sd.FLASHSize }, Flags = SectionFlags.Unaligned });
-                        softdevTemplate.Sections.Insert(1, new Section { Name = ".softdevice_sram", TargetMemory = "SRAM_SOFTDEVICE", Inputs = new List<SectionReference>(), Fill = new FillInfo { Pattern = 0, TotalSize = (int)sd.SRAMSize }, Flags = SectionFlags.Unaligned });
-
-                        var layoutCopy = layout.Clone();
-                        var flash = layoutCopy.Memories.First(m => m.Name == "FLASH");
-                        var ram = layoutCopy.Memories.First(m => m.Name == "SRAM");
-
-                        if (flash.Size < sd.FLASHSize || ram.Size < sd.SRAMSize)
-                            throw new Exception("Device too small for " + sd.Name);
-
-                        layoutCopy.Memories.Insert(layoutCopy.Memories.IndexOf(flash), new Memory { Name = "FLASH_SOFTDEVICE", Access = MemoryAccess.Readable | MemoryAccess.Executable, Start = flash.Start, Size = sd.FLASHSize });
-                        layoutCopy.Memories.Insert(layoutCopy.Memories.IndexOf(ram), new Memory { Name = "SRAM_SOFTDEVICE", Access = MemoryAccess.Readable | MemoryAccess.Writable | MemoryAccess.Executable, Start = ram.Start, Size = sd.SRAMSize });
-
-                        flash.Size -= sd.FLASHSize;
-                        flash.Start += sd.FLASHSize;
-
-                        ram.Size -= sd.SRAMSize;
-                        ram.Start += sd.SRAMSize;
-
-                        using (var gen = new LdsFileGenerator(softdevTemplate, layoutCopy))
-                        {
-                            using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + ldsSuffix + ".lds")))
-                                gen.GenerateLdsFile(sw, new string[] { "", "GROUP(" + sd.Name + "_softdevice.o)", "" });
-                        }
+                        //Due to the complexity of the Nordic SDK, we need to reuse the original linker scripts instead of generating them from scratch.
+                        throw new Exception("Could not locate the original linker script for this device.");
                     }
                     else
                     {
-                        BuildLinkerScriptBasedOnOriginalNordicScripts(ldsDirectory, generalizedName, ldsSuffix, sd);
+                        BuildLinkerScriptBasedOnOriginalNordicScripts(ldsDirectory, generalizedName, sd);
                     }
                 }
                 mcu.LinkerScriptPath = $"$$SYS:BSP_ROOT$$/{familyFilePrefix}LinkerScripts/{generalizedName}_$${SoftdevicePropertyID}$$.lds";
             }
 
-            static void BuildLinkerScriptBasedOnOriginalNordicScripts(string ldsDirectory, string generalizedName, string ldsSuffix, SoftDevice sd)
+            enum LinkerScriptGenerationPass
+            {
+                BeforeFirst,
+
+                Regular,
+                Reserve,
+                Nosoftdev,
+
+                AfterLast
+            }
+
+            static void DoBuildLinkerScriptBasedOnOriginalNordicScripts(string ldsDirectory, string generalizedName, SoftDevice sd, LinkerScriptGenerationPass pass)
             {
                 string[] providedSymbols =
                 {
@@ -218,8 +193,8 @@ namespace nrf5x
                 if (m.Success)
                 {
                     string[] incf = Directory.GetFiles(bspBuilder.Directories.InputDir, m.Groups[1].Value, SearchOption.AllDirectories);
-                    if (incf.Count() > 1)
-                        throw new Exception("more include file");
+                    if (incf.Length > 1)
+                        throw new Exception("Ambiguous 'common' include file.");
                     if (!File.Exists(Path.Combine(ldsDirectory, m.Groups[1].Value)))
                     {
                         string commonLds = Path.Combine(ldsDirectory, m.Groups[1].Value);
@@ -234,48 +209,63 @@ namespace nrf5x
                     }
                 }
 
-                var mems = sd.LinkerScriptWithMaximumReservedRAM;
+                if (pass == LinkerScriptGenerationPass.Nosoftdev)
+                {
+                    var indFl = lines.FindOrThrow(s => s.Contains("FLASH"));
+                    lines[indFl] = $"  FLASH (RX) :  ORIGIN = 0x{FLASHBase:x}, LENGTH = 0x{sd.LinkerScriptWithMaximumReservedRAM.FLASH.Origin + sd.LinkerScriptWithMaximumReservedRAM.FLASH.Length:x}";
+                }
+                else
+                {
+                    var mems = sd.LinkerScriptWithMaximumReservedRAM;
 
-                lines.Insert(lines.FindOrThrow(s => s.Contains("FLASH")), $"  FLASH_SOFTDEVICE (RX) : ORIGIN = 0x{FLASHBase:x8}, LENGTH = 0x{mems.FLASH.Origin - FLASHBase:x8}");
-                lines.Insert(lines.FindOrThrow(s => s.Contains("RAM")), $"  SRAM_SOFTDEVICE (RWX) : ORIGIN = 0x{SRAMBase:x8}, LENGTH = 0x{mems.RAM.Origin - SRAMBase:x8}");
-                var idxSectionList = lines.FindOrThrow(s => s == "SECTIONS") + 1;
-                while (lines[idxSectionList].Trim() == "{")
-                    idxSectionList++;
+                    lines.Insert(lines.FindOrThrow(s => s.Contains("FLASH")), $"  FLASH_SOFTDEVICE (RX) : ORIGIN = 0x{FLASHBase:x8}, LENGTH = 0x{mems.FLASH.Origin - FLASHBase:x8}");
+                    lines.Insert(lines.FindOrThrow(s => s.Contains("RAM")), $"  SRAM_SOFTDEVICE (RWX) : ORIGIN = 0x{SRAMBase:x8}, LENGTH = 0x{mems.RAM.Origin - SRAMBase:x8}");
+                    var idxSectionList = lines.FindOrThrow(s => s == "SECTIONS") + 1;
+                    while (lines[idxSectionList].Trim() == "{")
+                        idxSectionList++;
 
-                if (lines[idxSectionList].Contains(". = ALIGN"))
-                    idxSectionList++;
+                    if (lines[idxSectionList].Contains(". = ALIGN"))
+                        idxSectionList++;
 
-                lines.InsertRange(idxSectionList, new[]
+                    if (pass == LinkerScriptGenerationPass.Regular)
                     {
-                        "  .softdevice :",
-                        "  {",
-                        "    KEEP(*(.softdevice))",
-                        "    FILL(0xFFFFFFFF);",
-                        $"    . = 0x{mems.FLASH.Origin - FLASHBase:x8};",
-                        "  } > FLASH_SOFTDEVICE",
-                        "",
-                        "  .softdevice_sram :",
-                        "  {",
-                        "    FILL(0xFFFFFFFF);",
-                        $"    . = 0x{mems.RAM.Origin - SRAMBase:x8};",
-                        "  } > SRAM_SOFTDEVICE"
+                        lines.InsertRange(idxSectionList, new[] {
+                            "  .softdevice :",
+                            "  {",
+                            "    KEEP(*(.softdevice))",
+                            "    FILL(0xFFFFFFFF);",
+                            $"    . = 0x{mems.FLASH.Origin - FLASHBase:x8};",
+                            "  } > FLASH_SOFTDEVICE",
+                            "",
+                            "  .softdevice_sram :",
+                            "  {",
+                            "    FILL(0xFFFFFFFF);",
+                            $"    . = 0x{mems.RAM.Origin - SRAMBase:x8};",
+                            "  } > SRAM_SOFTDEVICE"
+                            });
+
+                        lines.Insert(lines.FindOrThrow(s => s.Contains("MEMORY")), $"GROUP({sd.Name}_softdevice.o)");
                     }
-                );
 
+                }
 
                 lines.AddRange(providedSymbols);
 
-                File.WriteAllLines(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + "_reserve" + ldsSuffix + ".lds"), lines);
-                lines.Insert(lines.FindOrThrow(s => s.Contains("MEMORY")), $"GROUP({sd.Name}_softdevice.o)");
-                File.WriteAllLines(Path.Combine(ldsDirectory, generalizedName + "_" + sd.Name.ToLower() + ldsSuffix + ".lds"), lines);
+                string suffix;
+                if (pass == LinkerScriptGenerationPass.Nosoftdev)
+                    suffix = "nosoftdev";
+                else if (pass == LinkerScriptGenerationPass.Reserve)
+                    suffix = $"{sd.Name.ToLower()}_reserve";
+                else
+                    suffix = sd.Name.ToLower();
 
-                //no softdev
-                lines = File.ReadAllLines(sd.LdOriginalName).ToList();
-                InsertPowerMgmtData(lines);
-                var indFl = lines.FindOrThrow(s => s.Contains("FLASH"));
-                lines[indFl] = $"  FLASH (RX) :  ORIGIN = 0x{FLASHBase:x}, LENGTH = 0x{sd.LinkerScriptWithMaximumReservedRAM.FLASH.Origin + sd.LinkerScriptWithMaximumReservedRAM.FLASH.Length:x}";
-                lines.AddRange(providedSymbols);
-                File.WriteAllLines(Path.Combine(Path.Combine(ldsDirectory, generalizedName + "_nosoftdev" + ldsSuffix + ".lds")), lines);
+                File.WriteAllLines(Path.Combine(ldsDirectory, $"{generalizedName}_{suffix}.lds"), lines);
+            }
+
+            static void BuildLinkerScriptBasedOnOriginalNordicScripts(string ldsDirectory, string generalizedName, SoftDevice sd)
+            {
+                for (LinkerScriptGenerationPass pass = LinkerScriptGenerationPass.BeforeFirst + 1; pass < LinkerScriptGenerationPass.AfterLast; pass++)
+                    DoBuildLinkerScriptBasedOnOriginalNordicScripts(ldsDirectory, generalizedName, sd, pass);
             }
 
             private static void InsertPowerMgmtData(List<string> lines)

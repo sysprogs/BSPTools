@@ -341,7 +341,7 @@
 					<TargetFolder>components\boards</TargetFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
-					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
+					<PreprocessorMacros>$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
 					<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
 				</CopyJob>
 				<!--CopyJob>
