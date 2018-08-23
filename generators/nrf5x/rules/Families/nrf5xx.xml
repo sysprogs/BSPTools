@@ -341,7 +341,7 @@
 					<TargetFolder>components\boards</TargetFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
-					<PreprocessorMacros>$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
+					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
 					<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
 				</CopyJob>
 				<!--CopyJob>
@@ -841,6 +841,16 @@
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEAppTemplate</SourceFolder>
+			<DestinationFolder>samples\BLEAppTemplate</DestinationFolder>
+			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+			<AdditionalSources>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_template/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/nrf_peripherals.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_template/main.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMouse</SourceFolder>
 			<DestinationFolder>samples\BLEMouse</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
@@ -923,15 +933,6 @@
 			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/main.c</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/config/ipv6_medium_platform.h</string>
-			</AdditionalSources>
-		</SmartSample>
-				<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\misc\iot_timer</SourceFolder>
-			<DestinationFolder>samples\IoT\misc\iot_timer</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
-			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/misc/iot_timer/main.c</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/misc/iot_timer/pca10040/blank/config/sdk_config.h</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>

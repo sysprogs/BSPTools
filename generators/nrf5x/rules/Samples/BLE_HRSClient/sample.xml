@@ -15,11 +15,10 @@
     <string>com.sysprogs.arm.nordic.nrfx.ble_hrs_c</string>
     <string>com.sysprogs.arm.nordic.nrf5x.peerm</string>
     <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
-	
-		    <string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_link_ctx_manager</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_qwr</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.drivers_nrf_legacy</string>
+    <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
   </RequiredFrameworks>
   <AdditionalSourcesToCopy>
     <AdditionalSourceFile>

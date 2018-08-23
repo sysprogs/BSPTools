@@ -322,7 +322,7 @@ namespace nrf5x
                                             ConfigurableProperties.PropertyGroups.
                                                 SingleOrDefault(pg => pg.UniqueID.Equals("com.sysprogs.bspoptions.nrf5x.board."));
 
-                var rgBoardIfdef = new Regex("#(if|elif) defined\\((BOARD_[A-Z0-9a-z_]+)\\)");
+                var rgBoardIfdef = new Regex("#(if|elif) defined\\(BOARD_([A-Z0-9a-z_]+)\\)");
                 var rgInclude = new Regex("#include \"([^\"]+)\"");
 
                 var lines = File.ReadAllLines(Path.Combine(Directories.OutputDir, @"nRF5x\components\boards\boards.h"));
@@ -355,7 +355,7 @@ namespace nrf5x
                 {
                     UniqueID = "type",
                     Name = "Board Type",
-                    DefaultEntryIndex = Enumerable.Range(0, lstProp.Count).First(i => lstProp[i].InternalValue == "BOARD_PCA10040"),
+                    DefaultEntryIndex = Enumerable.Range(0, lstProp.Count).First(i => lstProp[i].InternalValue == "PCA10040"),
                     SuggestionList = lstProp.ToArray()
                 });
             }

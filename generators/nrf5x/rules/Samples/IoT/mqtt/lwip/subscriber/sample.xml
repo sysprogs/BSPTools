@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	  <Name>IoT MQTT subscriber</Name>
-	  <Description>This sample demonstrates a MQTT subscriber.</Description>
+	  <Name>MQTT subscriber (IoT)</Name>
+	  <Description>This sample demonstrates a basic MQTT subscriber using the IoT stack.</Description>
 	  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+      <MCUFilterRegex>nRF528(32|40).*</MCUFilterRegex>
   <RequiredFrameworks>
 	<string>com.sysprogs.arm.nordic.nrf5x.util</string>
     <string>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</string>
@@ -22,7 +23,7 @@
 		<ErrorCondition xsi:type="Not">
 			<Argument xsi:type="MatchesRegex">
 				<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-				<Regex>s.*</Regex>
+				<Regex>S.*</Regex>
 				<IgnoreCase>false</IgnoreCase>
 			</Argument>
 		</ErrorCondition>
