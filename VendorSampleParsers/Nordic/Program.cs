@@ -99,7 +99,7 @@ namespace NordicVendorSampleParser
             SDKdir = args[0];
             tempDir = args[1];
 
-            toolchainDir = File.ReadAllLines(SDKdir + @"\components\toolchain\gcc\Makefile.windows")[0].Split('=')[1].Trim(' ');
+            toolchainDir = File.ReadAllLines(@"..\..\Makefile.windows")[0].Split('=')[1].Trim(' ');
 
             ApplyKnownPatches();
             string sampleListFile = Path.Combine(outputDir, "samples.xml");
@@ -107,7 +107,7 @@ namespace NordicVendorSampleParser
             if (sampleDir.Samples.FirstOrDefault(s => s.AllDependencies != null) == null)
             {
                 //Perform Pass 1 testing - test the raw VendorSamples in-place
-                StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir+"_COMP_ORIG");
+                StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir + @"\nRF5x_Pass1", codeRequiresDebugInfoFlag: true);
                 XmlTools.SaveObject(sampleDir, sampleListFile);
             }
 
@@ -129,7 +129,7 @@ namespace NordicVendorSampleParser
 
             var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
             expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir+"VS");
+            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir+ @"\nRF5x_Pass2");
             if (result.Failed > 0)
                 throw new Exception("Some of the vendor samples failed to build. Check the build log.");
         }
@@ -306,29 +306,33 @@ namespace NordicVendorSampleParser
                 compiler.StartInfo.Arguments = $"/c {makeExecutable} -j{Environment.ProcessorCount} VERBOSE=1 > log.txt 2>&1";
                 compiler.StartInfo.UseShellExecute = false;
                 compiler.StartInfo.WorkingDirectory = Path.GetDirectoryName(makefile);
+                samplesDone++;
+
                 if (!File.Exists(nameLog))
                 {
                     compiler.Start();
                     compiler.WaitForExit();
+
+                    bool buildSucceeded;
+
+                    buildSucceeded = compiler.ExitCode == 0;
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    if (!buildSucceeded)
+                    {
+                        samplesFailed++;
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        File.Copy(nameLog, Path.Combine(outputDir, $"FailureLog-{nameExampl.Replace('\\', '-').TrimEnd('-')}.txt"));
+                    }
+                    ToLog($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
+                    Console.ForegroundColor = ConsoleColor.Gray;
+
+                    if (!buildSucceeded)
+                    {
+                        File.Delete(nameLog);
+                        continue;
+                    }
                 }
-                samplesDone++;
-                bool buildSucceeded;
-
-                buildSucceeded =  compiler.ExitCode == 0;
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                if (!buildSucceeded)
-                {
-                    samplesFailed++;
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    File.Copy(nameLog, Path.Combine(outputDir, $"FailureLog-{nameExampl.Replace('\\', '-').TrimEnd('-')}.txt"));
-                }
-                ToLog($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
-                Console.ForegroundColor = ConsoleColor.Gray;
-
-                if (!buildSucceeded)
-                    continue;
-
 
                 if (!File.Exists(nameLog))
                 {
@@ -336,6 +340,7 @@ namespace NordicVendorSampleParser
                     Console.WriteLine($"No Log file {1}", Path.GetDirectoryName(makefile));
                     continue;
                 }
+
                 var vs = ParseNativeBuildLog(nameLog);
                 vs.Path = Path.GetDirectoryName(makefile);
                 while (Directory.GetFiles(vs.Path, "*.c").Length == 0)

@@ -299,7 +299,7 @@ namespace StandaloneBSPValidator
         static SystemDirectories SystemDirs = new SystemDirectories();
 
 
-        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, VendorSampleDirectory sampleDir)
+        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, VendorSampleDirectory sampleDir, bool codeRequiresDebugInfoFlag)
         {
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
             configuredMCU.Configuration["com.sysprogs.toolchainoptions.arm.libnosys"] = "--specs=nosys.specs";
@@ -332,6 +332,12 @@ namespace StandaloneBSPValidator
 
             flags.CFLAGS += " -MD";
             flags.CXXFLAGS += " -MD";
+
+            if (codeRequiresDebugInfoFlag)
+            {
+                flags.CFLAGS += " -ggdb";
+                flags.CXXFLAGS += " -ggdb";
+            }
 
             flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories).Distinct().ToArray();
             flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
@@ -665,7 +671,7 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1, bool esp32 = false)
+        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1, bool esp32 = false, bool codeRequiresDebugInfoFlag = false)
         {
             string defaultToolchainID = "SysGCC-arm-eabi-7.2.0";
             flEsp32 = false;
@@ -750,7 +756,7 @@ namespace StandaloneBSPValidator
 
                     vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
 
-                    var result = TestVendorSample(mcu, vs, mcuDir, samples);
+                    var result = TestVendorSample(mcu, vs, mcuDir, samples, codeRequiresDebugInfoFlag);
 
                     Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
 
