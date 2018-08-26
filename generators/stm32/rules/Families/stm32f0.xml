@@ -6,6 +6,7 @@
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F0_V1.9.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F0_V1.9.0\Drivers\CMSIS\Device\ST\STM32F0xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
+	
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
@@ -122,6 +123,9 @@
 		</MCUClassifier>
 	</Subfamilies>
 	<CompilationFlags>
+	<PreprocessorMacros>
+		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
+	</PreprocessorMacros>
 		<IncludeDirectories>
 			<string>.</string>
 		</IncludeDirectories>
@@ -150,7 +154,7 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F0_V1.9.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
+					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32f0????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>					
 					<Patches>
@@ -236,7 +240,7 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F0xx_StdPeriph_Lib_V1.5.0\Libraries\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
-					<PreprocessorMacros>$$com.sysprogs.bspoptions.primary_memory$$_layout;$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
+					<PreprocessorMacros>$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\stm32f0????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<Patches>
 						<Patch xsi:type="InsertLines">
