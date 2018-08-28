@@ -307,7 +307,7 @@ namespace nrf5x
 
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
                     var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName + abi, UseShellExecute = false };
-                    info.EnvironmentVariables["PATH"] += @";e:\sysgcc\arm-eabi\bin";
+                    info.EnvironmentVariables["PATH"] += @";c:\sysgcc\arm-eabi\bin";
                     Process.Start(info).WaitForExit();
                     string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
@@ -562,7 +562,6 @@ namespace nrf5x
 
                 lstConditions.Add(Conditions);
 
-                lstGenConditions.Add(new PropertyDictionary2.KeyValue() { Key = $"com.sysprogs.bspoptions.nrf5x.{ name_lib }.{ namelibrary}", Value = "yes" });
                 lstProp.Add(new PropertyEntry.Boolean()
                 { Name = namelibrary, UniqueID = namelibrary, DefaultValue = false, ValueForTrue = "yes" });
 
