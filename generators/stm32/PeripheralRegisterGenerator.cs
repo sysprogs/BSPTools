@@ -1459,7 +1459,7 @@ namespace stm32_bsp_generator
                             if (m.Groups[2].Value.StartsWith("0x"))
                             {
                                 address_offset = m.Groups[2].Value.Replace("U", "");//#define GPIO_OTYPER_OT_0                (0x00000001U)     
-                                aDefPosDict[m.Groups[1].Value] = UInt32.Parse(address_offset.Replace("x", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                                aDefPosDict[m.Groups[1].Value] = (uint)ParseHex(address_offset);
                             }
                             else
                             {
@@ -1663,8 +1663,7 @@ namespace stm32_bsp_generator
         {
             if (hex.StartsWith("0x"))
                 hex = hex.Substring(2);
-            if (hex.Contains("U"))
-                hex = hex.Replace("U", "");
+            hex = hex.TrimEnd('U', 'L');
             return ulong.Parse(hex, System.Globalization.NumberStyles.HexNumber);
         }
 

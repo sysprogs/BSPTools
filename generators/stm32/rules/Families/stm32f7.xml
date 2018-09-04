@@ -64,14 +64,6 @@
 								<string>#include &lt;stm32f7xx_hal.h&gt;</string>
 							</InsertedLines>
 						</Patch>					
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>Device\ST\STM32f7xx\Source\Templates\system_stm32f7xx.c</FilePath>
-							<OldLine>/* #define VECT_TAB_SRAM */</OldLine>
-							<NewLine>#ifdef sram_layout
-#define VECT_TAB_SRAM
-#endif</NewLine>
-						</Patch>				
-								
 					</Patches>
 				</CopyJob>
 			</CopyJobs>			
@@ -252,4 +244,18 @@
           <Value>STM32F7xxxx/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_conf_template.h</Value>
         </SysVarEntry>
       </AdditionalSystemVars>
+	  <ConditionalFlags>
+		<ConditionalToolFlags>
+		  <FlagCondition xsi:type="Equals">
+			<Expression>$$com.sysprogs.bspoptions.primary_memory$$</Expression>
+			<ExpectedValue>sram</ExpectedValue>
+			<IgnoreCase>false</IgnoreCase>
+		  </FlagCondition>
+		  <Flags>
+			<PreprocessorMacros>
+				<string>VECT_TAB_SRAM</string>
+			</PreprocessorMacros>
+		  </Flags>
+		</ConditionalToolFlags>
+	  </ConditionalFlags>
 </FamilyDefinition>
