@@ -6,12 +6,9 @@
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
     <string>com.sysprogs.arm.nordic.nrf5x.util</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</string>
     <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
     <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.lwip</string>
   </RequiredFrameworks>
   <AdditionalSourcesToCopy>
     <AdditionalSourceFile>
@@ -29,7 +26,15 @@
   </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
+     <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_uart</Key>
+        <Value />
+      </KeyValue>
       <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.board.bsp_mode</Key>
+        <Value />
+      </KeyValue>
+	    <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
         <Value>yes</Value>
       </KeyValue>
