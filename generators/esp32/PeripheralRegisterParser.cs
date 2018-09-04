@@ -51,7 +51,7 @@ namespace esp32
             {
                 return new HardwareSubRegister
                 {
-                    Name = Name,
+                    Name = Name.TrimStart('_'),
                     FirstBit = (int)Offset.Value,
                     SizeInBits = MaskToBits(Mask.Value),
                 };
@@ -74,6 +74,11 @@ namespace esp32
                     SubRegisters = Fields.Values.Where(f => f.MaskIsSequential).OrderBy(f => f.Offset.Value).Select(f => f.ToSubregister()).ToArray()
                 };
             }
+
+            public ConstructedRegister CloneWithOffset(ulong offset)
+            {
+                return new ConstructedRegister { Name = Name, Address = Address + offset, Fields = Fields };
+            }
         }
 
         class ConstructedRegisterSet
@@ -81,6 +86,8 @@ namespace esp32
             public string Name;
             public ulong Address;
             public List<ConstructedRegister> Registers = new List<ConstructedRegister>();
+
+            public int MultipleInstanceMultiplier;
 
             public HardwareRegisterSet ToRegisterSet()
             {
@@ -90,6 +97,38 @@ namespace esp32
                     Registers = Registers.OrderBy(r => r.Address).Select(r => r.ToRegister()).ToArray()
                 };
             }
+
+            public override string ToString()
+            {
+                return Name;
+            }
+
+            public bool IsPossibleInstanceOf(ConstructedRegisterSet set, int maxInstances)
+            {
+                if (Address < set.Address)
+                    return false;
+
+                ulong delta = Address - set.Address;
+                if (delta % (uint)set.MultipleInstanceMultiplier != 0)
+                    return false;
+
+                int instance = (int)(delta / (uint)set.MultipleInstanceMultiplier);
+                if (instance > maxInstances)
+                    return false;
+
+                return true;
+            }
+        }
+
+        struct MultiInstanceRegister
+        {
+            public string BaseName;
+            public int Multiplier;
+
+            public override string ToString()
+            {
+                return $"{BaseName} + i * 0x{Multiplier:x}";
+            }
         }
 
         public static HardwareRegisterSet[] ParsePeripheralRegisters(string sdkDir)
@@ -97,31 +136,75 @@ namespace esp32
             Dictionary<string, ConstructedRegisterSet> registerSets = new Dictionary<string, ConstructedRegisterSet>();
             Regex rgBaseDefinition = new Regex("#define[ \t]+DR_REG_(.*)_BASE[ \t]+0x([0-9a-fA-F]+)$");
             Regex rgRegisterDef = new Regex("#define[ \t]+([^ \t]+)[ \t]+\\(DR_REG_(.*)_BASE \\+ (.*)\\)");
+            Regex rgRegisterDefWithIndex = new Regex(@"#define[ \t]+([^ \t]+)[ \t]+\(([0-9A-Za-z_]+_BASE)[ \t]*\(i\) \+ (.*)\)");
             Regex rgBitDef = new Regex("#define[ \t]+([^ \t]+)_(S|V)[ \t]+\\(?(0x[0-9a-fA-F]+|[0-9]+)\\)?");
 
-            foreach (var match in File.ReadAllLines(Path.Combine(sdkDir, @"components\esp32\include\soc\soc.h")).Select(line => rgBaseDefinition.Match(line)).Where(m => m.Success))
+            Regex rgiTimesNumber = new Regex(@"^[ (\t]*i[ \t)]*\*[ \t]*[ \t(]*0x([0-9a-fA-F]+)[ \t)]*$");
+
+            foreach (var match in File.ReadAllLines(Path.Combine(sdkDir, @"components\soc\esp32\include\soc\soc.h")).Select(line => rgBaseDefinition.Match(line)).Where(m => m.Success))
                 registerSets[match.Groups[1].Value] = new ConstructedRegisterSet
                 {
                     Name = match.Groups[1].Value,
                     Address = ulong.Parse(match.Groups[2].Value, System.Globalization.NumberStyles.HexNumber)
                 };
 
-            foreach (var fn in Directory.GetFiles(Path.Combine(sdkDir, @"components\esp32\include\soc"), "*_reg.h"))
+            foreach (var fn in Directory.GetFiles(Path.Combine(sdkDir, @"components\soc\esp32\include\soc"), "*_reg.h"))
             {
+                Dictionary<string, MultiInstanceRegister> multiInstanceRegisterBases = new Dictionary<string, MultiInstanceRegister>();
+
                 ConstructedRegister currentRegister = null;
                 foreach (var line in File.ReadAllLines(fn))
                 {
                     var m = rgRegisterDef.Match(line);
+                    bool isIndexedRegister = false;
+                    if (!m.Success)
+                    {
+                        m = rgRegisterDefWithIndex.Match(line);
+                        if (m.Success)
+                            isIndexedRegister = true;
+                    }
+
                     if (m.Success)
                     {
-                        var set = registerSets[m.Groups[2].Value];
+                        if (!registerSets.TryGetValue(m.Groups[2].Value, out var set))
+                        {
+                            if (isIndexedRegister && multiInstanceRegisterBases.TryGetValue(m.Groups[2].Value, out var multiRegSet))
+                            {
+                                if (registerSets.TryGetValue(multiRegSet.BaseName, out set))
+                                {
+                                    set.MultipleInstanceMultiplier = multiRegSet.Multiplier;
+                                }
+                            }
+
+                            if (set == null)
+                                continue;
+                        }
+
                         string name = m.Groups[1].Value;
                         if (name.Contains("("))
-                            continue;   //One of the multiplexed registers. Skip for now.
+                        {
+                            if (!name.EndsWith("(i)"))
+                                continue;   //Unexpected syntax.
+
+                            name = name.Substring(0, name.Length - 3).Trim();
+
+                            if (name.EndsWith("_BASE"))
+                            {
+                                var m2 = rgiTimesNumber.Match(m.Groups[3].Value);
+                                if (!m2.Success)
+                                {
+                                    Console.WriteLine("Unexpected base definition: " + line);
+                                    continue;
+                                }
+
+                                multiInstanceRegisterBases[name] = new MultiInstanceRegister { BaseName = m.Groups[2].Value, Multiplier = int.Parse(m2.Groups[1].Value, System.Globalization.NumberStyles.HexNumber) };
+                                continue;
+                            }
+                        }
 
                         currentRegister = new ConstructedRegister
                         {
-                            Name = m.Groups[1].Value,
+                            Name = name,
                             Address = set.Address + ParseOffset(m.Groups[3].Value)
                         };
 
@@ -176,6 +259,22 @@ namespace esp32
                     }
                 }
             }
+
+            foreach (var set in registerSets.Values.Where(s => s.MultipleInstanceMultiplier != 0))
+            {
+                var possibleNextInstances = registerSets.Values.Where(s => s != set && s.Registers.Count == 0 && s.IsPossibleInstanceOf(set, 1)).ToArray();
+
+                foreach(var set2 in possibleNextInstances)
+                {
+                    var offset = set2.Address - set.Address;
+                    foreach(var reg in set.Registers)
+                    {
+                        set2.Registers.Add(reg.CloneWithOffset(offset));
+                    }
+                }
+            }
+
+            var emptyRegisterSets = registerSets.Values.Where(s => s.Registers.Count == 0).ToArray();
 
             return registerSets.Values.Where(s => s.Registers.Count != 0).OrderBy(v => v.Address).Select(s => s.ToRegisterSet()).ToArray();
         }

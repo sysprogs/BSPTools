@@ -63,20 +63,20 @@ namespace esp32
                 DictRulesRename.Add(flRename.Replace(pDir, "").Replace('\\', '/'), filenamenew.Replace(pDir, "").Replace('\\', '/'));
             }
         }
-        
-        static void RenameDublFiles(string pBspDir , string nameFolderEsp = "esp-idf") 
-        {
-         SearchRenameDublFiles(pBspDir + $@"\{nameFolderEsp}\components");
 
-         var txtbsp = File.ReadAllLines(Path.Combine(pBspDir, "BSP.XML"));
-         for(int c= 0; c<txtbsp.Count(); c ++)
-         {
-             foreach (var strdic in DictRulesRename)
-                 if (txtbsp[c].Contains(strdic.Key))
+        static void RenameDublFiles(string pBspDir, string nameFolderEsp = "esp-idf")
+        {
+            SearchRenameDublFiles(pBspDir + $@"\{nameFolderEsp}\components");
+
+            var txtbsp = File.ReadAllLines(Path.Combine(pBspDir, "BSP.XML"));
+            for (int c = 0; c < txtbsp.Count(); c++)
+            {
+                foreach (var strdic in DictRulesRename)
+                    if (txtbsp[c].Contains(strdic.Key))
                         txtbsp[c] = txtbsp[c].Replace(strdic.Key, strdic.Value);
-         }
-         File.Delete(Path.Combine(pBspDir, "BSP.XML"));
-         File.WriteAllLines(Path.Combine(pBspDir, "BSP.XML"), txtbsp);
+            }
+            File.Delete(Path.Combine(pBspDir, "BSP.XML"));
+            File.WriteAllLines(Path.Combine(pBspDir, "BSP.XML"), txtbsp);
 
             //-- Write log
             var lstFl = DictRulesRename.Select(a => a.Key.ToString() + " => " + a.Value.ToString()).ToList();
@@ -85,9 +85,14 @@ namespace esp32
         }
         static void Main(string[] args)
         {
-
             if (args.Length < 1)
                 throw new Exception("Usage: esp32.exe <esp-idf directory>");
+
+            if (args[0] == "/periph")
+            {
+                ParsePeripheralRegisters(args[1]);
+                return;
+            }
 
             if (args[0] == "R")
             {// Only rename files
@@ -99,11 +104,10 @@ namespace esp32
             PathTools.CopyDirectoryRecursive(@"..\..\bsp-template", bspBuilder.Directories.OutputDir);
 
             string registerSetFile = Path.Combine(bspBuilder.Directories.OutputDir, "registers.xml");
-            var registers =  PeripheralRegisterParser.ParsePeripheralRegisters(Path.Combine(bspBuilder.Directories.InputDir, "esp-idf.orig"));
-
+            var registers = PeripheralRegisterParser.ParsePeripheralRegisters(Path.Combine(bspBuilder.Directories.InputDir, "esp-idf.orig"));
             XmlTools.SaveObject(new MCUDefinition { MCUName = "ESP32", RegisterSets = registers }, registerSetFile);
 
-           var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.BSPRoot, "bsp.xml"));
+            var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.BSPRoot, "bsp.xml"));
 
             var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>(bsp.Frameworks);
@@ -126,7 +130,7 @@ namespace esp32
             mainFamily.AdditionalHeaderFiles = projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray();
             bsp.FileConditions = bspBuilder.MatchedFileConditions.ToArray();
 
-            foreach(var fn in Directory.GetFiles(Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\nghttp"), "*.?", SearchOption.AllDirectories))
+            foreach (var fn in Directory.GetFiles(Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\nghttp"), "*.?", SearchOption.AllDirectories))
             {
                 string ext = Path.GetExtension(fn).ToLower();
                 if (ext != ".c" && ext != ".h")
@@ -150,7 +154,7 @@ namespace esp32
                 mcu.MCUDefinitionFile = Path.GetFileName(registerSetFile);
 
             File.WriteAllText(Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\nghttp\port\include\nghttp-config.h"), "#include \"config.h\"\n");
-            
+
             string linkerScript = Path.Combine(bspBuilder.Directories.OutputDir, @"esp-idf\components\esp32\ld\esp32.common.ld");
             var lines2 = File.ReadAllLines(linkerScript).ToList();
             Regex rgLibrary = new Regex(@"(.*)\*lib([0-9a-zA-Z_-]+).a:\(([^()]+)\)");
@@ -166,8 +170,8 @@ namespace esp32
                         string[] fns = Directory.GetFiles(dir)
                             .Select(f => Path.GetFileName(f))
                             .Where(f => f.EndsWith(".S", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase))
-                            .Select(f=>Path.ChangeExtension(f, ".o"))
-                            .OrderBy(f=>f)
+                            .Select(f => Path.ChangeExtension(f, ".o"))
+                            .OrderBy(f => f)
                             .ToArray();
 
                         int j = 0;
@@ -187,10 +191,17 @@ namespace esp32
 
             }
             File.WriteAllLines(linkerScript, lines2);
-            
+
             XmlTools.SaveObject(bsp, Path.Combine(bspBuilder.BSPRoot, "BSP.XML"));
 
             RenameDublFiles(bspBuilder.BSPRoot);
+        }
+
+        private static void ParsePeripheralRegisters(string inputDir)
+        {
+            string registerSetFile = Path.Combine(@"..\..\output", "registers.xml");
+            var registers = PeripheralRegisterParser.ParsePeripheralRegisters(inputDir);
+            XmlTools.SaveObject(new MCUDefinition { MCUName = "ESP32", RegisterSets = registers }, registerSetFile);
         }
     }
 }
