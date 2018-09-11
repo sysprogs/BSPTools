@@ -6,7 +6,7 @@
   <UserFriendlyName>ESP8266 debug methods</UserFriendlyName>
   <ExtensionDLL>ESPxxDebugPackage.dll</ExtensionDLL>
   <ExtensionSupportsShadowLoad>true</ExtensionSupportsShadowLoad>
-  <DriverSubdirectory>..\..\..\OpenOCD\drivers</DriverSubdirectory>
+  <DriverSubdirectory>drivers</DriverSubdirectory>
   <SupportedDebugMethods>
     <DebugMethod>
       <UserFriendlyName>OpenOCD</UserFriendlyName>

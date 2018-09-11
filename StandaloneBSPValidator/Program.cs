@@ -296,9 +296,6 @@ namespace StandaloneBSPValidator
             vs.AllDependencies = Directory.GetFiles(sampleBuildDir, "*.d").SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":"))).Distinct().ToArray();
         }
 
-        static SystemDirectories SystemDirs = new SystemDirectories();
-
-
         private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, VendorSampleDirectory sampleDir, bool codeRequiresDebugInfoFlag)
         {
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
@@ -314,7 +311,7 @@ namespace StandaloneBSPValidator
                     configuredMCU.Configuration[e.Key] = e.Value;
 
 
-            var bspDict = configuredMCU.BuildSystemDictionary(SystemDirs);
+            var bspDict = configuredMCU.BuildSystemDictionary(default(SystemDirectories));
             bspDict["PROJECTNAME"] = "test";
             bspDict["SYS:VSAMPLE_DIR"] = sampleDir.Path;
             var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
@@ -439,7 +436,7 @@ namespace StandaloneBSPValidator
             //configuredSample.Parameters["com.sysprogs.examples.stm32.LEDPORT"] = "GPIOA";
             //configuredSample.Parameters["com.sysprogs.examples.stm32.freertos.heap_size"] = "0";
 
-            var bspDict = configuredMCU.BuildSystemDictionary(SystemDirs);
+            var bspDict = configuredMCU.BuildSystemDictionary(default(SystemDirectories));
             bspDict["PROJECTNAME"] = "test";
 
             if (configuredSample.Frameworks != null)
@@ -489,15 +486,12 @@ namespace StandaloneBSPValidator
 
             return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
         }
-        private static bool flEsp32;
+
         private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros, BSPEngine.VendorSample vendorSample = null)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
 
-            //esp32
-            if (flEsp32)
-                prefix = prefix.Replace('\\', '/');
             job.OtherTasks.Add(new BuildTask
             {
                 Executable = prefix + "g++",
@@ -676,16 +670,9 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1, bool esp32 = false, bool codeRequiresDebugInfoFlag = false)
+        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1, bool codeRequiresDebugInfoFlag = false)
         {
             string defaultToolchainID = "SysGCC-arm-eabi-7.2.0";
-            flEsp32 = false;
-
-            if (esp32)
-            {
-                defaultToolchainID = "SysGCC-xtensa-esp32-elf-5.2.0";
-                flEsp32 = true;
-            }
 
             var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
             if (toolchainPath == null)
@@ -693,8 +680,6 @@ namespace StandaloneBSPValidator
 
             var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(toolchainPath)));
             var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir))), toolchain);
-            if (flEsp32)
-                toolchainPath = toolchainPath.Replace('\\', '/'); //esp32
             TestStatistics stats = new TestStatistics();
             int cnt = 0, failed = 0, succeeded = 0;
             LoadedBSP.LoadedMCU[] MCUs = bsp.MCUs.ToArray();

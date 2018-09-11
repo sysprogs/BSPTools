@@ -145,6 +145,8 @@ namespace BSPGenerationTools
         public Dictionary<string, string> RenamedFileTable = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         public readonly BSPDirectories Directories;
 
+        public bool SkipHiddenFiles { get; protected set; }
+
         public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = null, int linkerScriptLevel = 4)
         {
             if (linkerScriptTemplate == null)

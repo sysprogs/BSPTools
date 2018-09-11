@@ -285,7 +285,7 @@ namespace GeneratorSampleStm32
             // Finally verify that everything builds
             var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
             expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir, 1);
+            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir);
 
             if (result.Failed != 0)
                 throw new Exception("Some of the vendor samples have failed the internal test. Fix this before releasing the BSP.");

@@ -129,7 +129,7 @@ namespace NordicVendorSampleParser
 
             var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
             expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir+ @"\nRF5x_Pass2");
+            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir+ @"\nRF5x_Pass2", codeRequiresDebugInfoFlag: true);
             if (result.Failed > 0)
                 throw new Exception("Some of the vendor samples failed to build. Check the build log.");
         }
