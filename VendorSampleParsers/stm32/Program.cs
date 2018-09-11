@@ -244,6 +244,8 @@ namespace GeneratorSampleStm32
                     result = $"{m.Groups[1]}/{m.Groups[2]}/{m.Groups[3]}";
                 }
 
+                result = result?.Replace("/SW4STM32/", "/");
+
                 return result;
             }
         }
