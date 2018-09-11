@@ -273,23 +273,30 @@ namespace ESP8266DebugPackage
                     File.Delete(fn);
 
             int initDataAddress = 0;
-            switch(settings.FLASHSettings.Size)
+            if (!string.IsNullOrEmpty(settings.InitDataAddress))
             {
-                case ESP8266BinaryImage.FLASHSize.size4M:
-                    initDataAddress = 0x7c000;
-                    break;
-                case ESP8266BinaryImage.FLASHSize.size8M:
-                    initDataAddress = 0xfc000;
-                    break;
-                case ESP8266BinaryImage.FLASHSize.size16M:
-                case ESP8266BinaryImage.FLASHSize.size16M_c1:
-                    initDataAddress = 0x1fc000;
-                    break;
-                case ESP8266BinaryImage.FLASHSize.size32M:
-                case ESP8266BinaryImage.FLASHSize.size32M_c1:
-                case ESP8266BinaryImage.FLASHSize.size32M_c2:
-                    initDataAddress = 0x3fc000;
-                    break;
+                initDataAddress = (int)(ESP32StartupSequence.TryParseNumber(settings.InitDataAddress) ?? 0);
+            }
+            else
+            {
+                switch (settings.FLASHSettings.Size)
+                {
+                    case ESP8266BinaryImage.FLASHSize.size4M:
+                        initDataAddress = 0x7c000;
+                        break;
+                    case ESP8266BinaryImage.FLASHSize.size8M:
+                        initDataAddress = 0xfc000;
+                        break;
+                    case ESP8266BinaryImage.FLASHSize.size16M:
+                    case ESP8266BinaryImage.FLASHSize.size16M_c1:
+                        initDataAddress = 0x1fc000;
+                        break;
+                    case ESP8266BinaryImage.FLASHSize.size32M:
+                    case ESP8266BinaryImage.FLASHSize.size32M_c1:
+                    case ESP8266BinaryImage.FLASHSize.size32M_c2:
+                        initDataAddress = 0x3fc000;
+                        break;
+                }
             }
 
             List<ProgrammableRegion> regions = new List<ProgrammableRegion>();

@@ -21,6 +21,7 @@ namespace ESP8266DebugPackage
         public ProgramMode ProgramMode { get; set; }
 
         public string InitDataFile { get; set; }
+        public string InitDataAddress { get; set; }
         public bool SuppressResetConfirmation { get; set; }
         public abstract ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings();
     }

@@ -10,6 +10,21 @@ namespace ESP8266DebugPackage
 {
     static class ESP32StartupSequence
     {
+        public static uint? TryParseNumber(string str)
+        {
+            bool done;
+            uint result;
+            if (str.StartsWith("0x"))
+                done = uint.TryParse(str.Substring(2), NumberStyles.HexNumber, null, out result);
+            else
+                done = uint.TryParse(str, out result);
+
+            if (done)
+                return result;
+            else
+                return null;
+        }
+
         public static List<ProgrammableRegion> BuildFLASHImages(string targetPath, Dictionary<string, string> bspDict, ESP8266BinaryImage.ESP32ImageHeader flashSettings, bool patchBootloader)
         {
             string bspPath = bspDict["SYS:BSP_ROOT"];
@@ -23,10 +38,8 @@ namespace ESP8266DebugPackage
             uint appOffset;
             if (txtAppOffset == null)
                 appOffset = 0;
-            else if (txtAppOffset.StartsWith("0x"))
-                uint.TryParse(txtAppOffset.Substring(2), NumberStyles.HexNumber, null, out appOffset);
             else
-                uint.TryParse(txtAppOffset, out appOffset);
+                appOffset = TryParseNumber(txtAppOffset) ?? 0;
 
             if (appOffset == 0)
                 throw new Exception("Application FLASH offset not defined. Please check your settings.");

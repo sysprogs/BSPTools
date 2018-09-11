@@ -17,6 +17,7 @@ namespace ESP8266DebugPackage
     {
         FLASHResource[] FLASHResources { get; set; }
         string InitDataFile { get; set; }
+        string InitDataAddress { get; set; }
         ESP8266BinaryImage.ESP8266ImageHeader FLASHSettings { get; set; }
     }
 
@@ -53,6 +54,7 @@ namespace ESP8266DebugPackage
     {
         public ESP8266BinaryImage.ESP8266ImageHeader FLASHSettings { get; set; } = new ESP8266BinaryImage.ESP8266ImageHeader();
         public string InitDataFile { get; set; }
+        public string InitDataAddress { get; set; }
         public ResetMode ResetMode;
 
         public override ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings() => FLASHSettings;
