@@ -8,4 +8,6 @@
 	<string>com.sysprogs.arm.ti.cc3220.periph_drivers</string>
 	<string>com.sysprogs.arm.ti.cc3220.freertos</string>
   </RequiredFrameworks> 
+  <CLanguageStandard>c99</CLanguageStandard>
+  <CPPLanguageStandard>c++11</CPPLanguageStandard>
 </EmbeddedProjectSample>

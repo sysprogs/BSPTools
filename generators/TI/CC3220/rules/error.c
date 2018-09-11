@@ -1,4 +1,4 @@
 void __attribute__((weak)) __error__()
 {
-	asm("bkpt 255");
+	__asm("bkpt 255");
 }

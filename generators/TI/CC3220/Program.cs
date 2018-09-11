@@ -24,6 +24,7 @@ namespace CC3200_bsp_generator
                 : base(dirs, null, 5)
             {
                 ShortName = "CC3220";
+                SkipHiddenFiles = true;
             }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
@@ -126,7 +127,7 @@ namespace CC3200_bsp_generator
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
-                PackageVersion = "1.60.00"
+                PackageVersion = "2.20.00"
             };
             bspBuilder.Save(bsp, !noPack);
 

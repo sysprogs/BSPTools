@@ -257,16 +257,21 @@
 				<TargetFolder>source\ti\posix</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
 				<AdditionalIncludeDirs>gcc</AdditionalIncludeDirs>
---				<Patches>
+				<Patches>
 					<Patch xsi:type="ReplaceLine">
 						<FilePath>gcc\mqueue.h</FilePath>
 						<OldLine>typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</OldLine>
 						<NewLine>//typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</NewLine>
 					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>freertos\pthread.c</FilePath>
+						<OldLine>    status = xTaskCreate((TaskFunction_t)_pthread_runStub, NULL /* name */,</OldLine>
+						<NewLine>    status = xTaskCreate((TaskFunction_t)_pthread_runStub, "pthread" /* name */,</NewLine>
+					</Patch>
 				</Patches> 
 			</CopyJob>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\..\FreeRTOSv9.0.0\FreeRTOS</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\..\FreeRTOSv10.1.0\FreeRTOS</SourceFolder>
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<FilesToCopy>source\portable\MemMang\*;source\portable\GCC\ARM_CM3\*;source\portable\GCC\ARM_CM4F\*;-source\portable\*;source\*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
@@ -323,11 +328,11 @@
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\pwmled</SourceFolder>
 			<DestinationFolder>Samples\pwmled</DestinationFolder>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/Board.h</string>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/CC3220SF_LAUNCHXL.c</string>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/CC3220SF_LAUNCHXL.h</string>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/main_nortos.c</string>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled/pwmled.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/Board.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/CC3220SF_LAUNCHXL.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/CC3220SF_LAUNCHXL.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/main_nortos.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/pwmled2.c</string>
 			</AdditionalSources>
 		</SmartSample>		
 		<SmartSample>
