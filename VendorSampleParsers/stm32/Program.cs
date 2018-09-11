@@ -2,6 +2,7 @@
 using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -106,6 +107,12 @@ namespace GeneratorSampleStm32
                     if (filePath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase))
                     {
                         filePath = filePath.Replace("_Keil.lib", "_GCC.a");
+                        if (!File.Exists(Path.Combine(pDirPrj, filePath)))
+                            continue;
+                    }
+                    if (filePath.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase) && filePath.IndexOf("_IAR", StringComparison.InvariantCultureIgnoreCase) != -1)
+                    {
+                        filePath = filePath.Replace("_IAR_ARGB.a", "_GCC.a");
                         if (!File.Exists(Path.Combine(pDirPrj, filePath)))
                             continue;
                     }
@@ -216,16 +223,28 @@ namespace GeneratorSampleStm32
 
             const string Prefix1 = @"C:/QuickStep/STM32Cube_FW_H7_clean/Firmware";
 
+            Regex rgFWFolder = new Regex(@"^(\$\$SYS:VSAMPLE_DIR\$\$)/STM32Cube_FW_([^_]+)_V[^/]+/(.*)$", RegexOptions.IgnoreCase);
+
             public override string MapPath(string path)
             {
-                if (path.StartsWith(Prefix1))
+                if (path?.StartsWith(Prefix1) == true)
                 {
-                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.2.0{path.Substring(Prefix1.Length)}";
+                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.3.0{path.Substring(Prefix1.Length)}";
                     if (!File.Exists(path) && !Directory.Exists(path))
                         throw new Exception("Missing " + path);
                 }
 
-                return base.MapPath(path);
+                string result = base.MapPath(path);
+                if (result?.StartsWith("$$SYS:VSAMPLE_DIR$$/") == true)
+                {
+                    var m = rgFWFolder.Match(result);
+                    if (!m.Success)
+                        throw new Exception("Unexpected path format: " + result);
+
+                    result = $"{m.Groups[1]}/{m.Groups[2]}/{m.Groups[3]}";
+                }
+
+                return result;
             }
         }
 
@@ -266,7 +285,10 @@ namespace GeneratorSampleStm32
             // Finally verify that everything builds
             var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
             expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir, 1);
+            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir, 1);
+
+            if (result.Failed != 0)
+                throw new Exception("Some of the vendor samples have failed the internal test. Fix this before releasing the BSP.");
         }
 
         private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile)
@@ -316,6 +338,22 @@ namespace GeneratorSampleStm32
                         continue;
 
                     var aSamples = GetInfoProjectFromMDK(dir, topLevelDir, addInc);
+                    var scriptDir = Path.Combine(dir, "..", "SW4STM32");
+                    if (Directory.Exists(scriptDir))
+                    {
+                        string[] linkerScripts = Directory.GetFiles(scriptDir, "*.ld", SearchOption.AllDirectories);
+                        if (linkerScripts.Length == 1)
+                        {
+                            foreach (var sample in aSamples)
+                                sample.LinkerScript = Path.GetFullPath(linkerScripts[0]);
+                        }
+                        else
+                        {
+                            //Some sample projects define multiple linker scripts (e.g. STM32F072RBTx_FLASH.ld vs. STM32F072VBTx_FLASH.ld).
+                            //In this case we don't pick the sample-specific linker script and instead go with the regular BSP script for the selected MCU.s
+                        }
+                    }
+
                     aCountSampl += aSamples.Count;
                     allSamples.AddRange(aSamples);
                 }

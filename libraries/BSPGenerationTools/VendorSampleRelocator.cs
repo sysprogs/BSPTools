@@ -61,7 +61,7 @@ namespace BSPGenerationTools
             //Returns null for toolchain-relative paths that need to be excluded
             public virtual string MapPath(string path)
             {
-                if (!Path.IsPathRooted(path))
+                if (string.IsNullOrEmpty(path) || !Path.IsPathRooted(path))
                     return null;
                 path = Path.GetFullPath(path).Replace('/', '\\');
                 if (path.StartsWith(_SampleDir.ToolchainDirectory, StringComparison.InvariantCultureIgnoreCase))
@@ -216,11 +216,19 @@ namespace BSPGenerationTools
                 if (s.AllDependencies == null)
                     continue;
 
-                var deps = s.AllDependencies.Concat(s.SourceFiles).Distinct().Select(d => new ParsedDependency { OriginalFile = d, MappedFile = mapper.MapPath(d) }).Where(d => d.MappedFile != null).ToArray();
+                var deps = s.AllDependencies
+                            .Concat(new[] { s.LinkerScript })
+                            .Concat(s.SourceFiles)
+                            .Distinct()
+                            .Select(d => new ParsedDependency { OriginalFile = d, MappedFile = mapper.MapPath(d) })
+                            .Where(d => d.MappedFile != null)
+                            .ToArray();
 
                 mapper.MapPathList(ref s.HeaderFiles);
                 mapper.MapPathList(ref s.IncludeDirectories);
                 mapper.MapPathList(ref s.SourceFiles);
+
+                s.LinkerScript = mapper.MapPath(s.LinkerScript);
 
                 s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps, s.Configuration.MCUConfiguration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
@@ -237,6 +245,21 @@ namespace BSPGenerationTools
 
                 s.Path = mapper.MapPath(s.Path);
                 s.VirtualPath = BuildVirtualSamplePath(s.Path);
+
+                if (s.LinkerScript != null)
+                {
+                    if (s.LinkerScript.StartsWith(s.Path))
+                        s.LinkerScript = s.LinkerScript.Substring(s.Path.Length).TrimStart('/');
+                    else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$"))
+                    {
+                        //Nothing to do. VisualGDB will automatically expand this.
+                    }
+                    else
+                    {
+                        throw new Exception($"Unexpected linker script path {s.LinkerScript}. VisualGDB may not be able to expand it.");
+                    }
+                }
+
                 finalSamples.Add(s);
             }
 

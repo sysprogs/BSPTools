@@ -328,6 +328,11 @@ namespace StandaloneBSPValidator
             prj.AddBSPFilesToProject(bspDict, frameworkCfg, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, frameworkCfg, frameworkIDs);
 
+            if (flags.LinkerScript != null && !Path.IsPathRooted(flags.LinkerScript))
+            {
+                flags.LinkerScript = Path.Combine(VariableHelper.ExpandVariables(vs.Path, bspDict, frameworkCfg), flags.LinkerScript).Replace('\\', '/');
+            }
+
             //ToolFlags flags = new ToolFlags { CXXFLAGS = "  ", COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
 
             flags.CFLAGS += " -MD";
@@ -729,11 +734,16 @@ namespace StandaloneBSPValidator
                         Directory.CreateDirectory(mcuDir);
                     DateTime start = DateTime.Now;
 
+                    //If any of the source file paths in the vendor sample contains one of those strings, the sample will use the hardware FP mode.
                     string[] hwSubstrings = new[]
                     {
                         @"\ARM_CM4F\port.c",
                         @"ARM_CM7\r0p1\port.c",
                         @"CM4_GCC.a",
+                        @"\ARM_CM4_MPU\port.c",
+                        @"STemWin540_CM4_GCC.a",
+                        @"STemWin540_CM7_GCC.a",
+                        @"libPDMFilter_CM7_GCC",
                     };
 
                     if (vs.SourceFiles.FirstOrDefault(f => ContainsAnySubstrings(f, hwSubstrings)) != null)
@@ -799,7 +809,7 @@ namespace StandaloneBSPValidator
 
             return false;
         }
-        static EmbeddedProjectSample SampleFramwork ;
+
         public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
         {
             TestStatistics stats = new TestStatistics();
@@ -838,8 +848,8 @@ namespace StandaloneBSPValidator
 
                     if (sample.Name == "ValidateGenerateFramwoks")
                     {
-                        SampleFramwork = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(job.BSPPath, "FramworkSamples", "sample.xml"));
-                        LoadedBSP.LoadedSample sampleObj1 = new LoadedBSP.LoadedSample() { Sample = SampleFramwork };
+                        var sampleFramwork = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(job.BSPPath, "FramworkSamples", "sample.xml"));
+                        LoadedBSP.LoadedSample sampleObj1 = new LoadedBSP.LoadedSample() { Sample = sampleFramwork };
                         effectiveMCUs[0].BSP.Samples.Add(sampleObj1);
                         effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 1].Directory = effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 2].Directory.Remove(effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 2].Directory.LastIndexOf("samples")) + "FramworkSamples";
                     }
@@ -853,7 +863,6 @@ namespace StandaloneBSPValidator
 
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
                         DateTime start = DateTime.Now;
-                        SampleFramwork = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(job.BSPPath, "FramworkSamples", "sample.xml"));
 
                         var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules, noValidateReg, job.UndefinedMacros);
                         Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");

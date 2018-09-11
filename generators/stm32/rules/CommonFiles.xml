@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -95,7 +95,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
@@ -169,7 +169,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -462,7 +462,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Utilities</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Utilities</SourceFolder>
 					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
 					<SimpleFileConditions>
