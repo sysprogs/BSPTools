@@ -304,7 +304,7 @@ namespace StandaloneBSPValidator
         }
 
 
-        public static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, VendorSample vs, string mcuDir, string sampleDirPath, bool codeRequiresDebugInfoFlag)
+        public static TestResult TestVendorSampleAndUpdateDependencies(LoadedBSP.LoadedMCU mcu, VendorSample vs, string mcuDir, string sampleDirPath, bool codeRequiresDebugInfoFlag, bool keepDirectoryAfterSuccessfulBuild)
         {
             if (Directory.Exists(mcuDir))
                 Directory.Delete(mcuDir, true);
@@ -365,7 +365,7 @@ namespace StandaloneBSPValidator
             sourceExtensions.Add("cpp", true);
             sourceExtensions.Add("s", true);
 
-            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, null, vs);
+            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, null, vs, keepDirectoryAfterSuccessfulBuild);
         }
 
         private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg, string[] pUndefinedMacros)
@@ -691,8 +691,6 @@ namespace StandaloneBSPValidator
         {
             public int Passed, Failed;
         }
-
-
 
         public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
         {

@@ -196,7 +196,7 @@ namespace BSPGenerationTools
         protected virtual PathMapper CreatePathMapper() => null;
 
 
-        public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, string bspDirectory)
+        public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
         {
             List<VendorSample> finalSamples = new List<VendorSample>();
 
@@ -212,7 +212,7 @@ namespace BSPGenerationTools
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
 
-            foreach (var s in dir.Samples)
+            foreach (var s in sampleList)
             {
                 if (s.AllDependencies == null)
                     continue;
