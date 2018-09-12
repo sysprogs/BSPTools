@@ -130,11 +130,23 @@ namespace StandaloneBSPValidator
             return properties;
         }
 
-        public enum TestResult
+        public enum TestBuildResult
         {
             Succeeded,
             Failed,
             Skipped,
+        }
+
+        public struct TestResult
+        {
+            public TestBuildResult Result;
+            public string LogFile;
+
+            public TestResult(TestBuildResult result, string logFile)
+            {
+                Result = result;
+                LogFile = logFile;
+            }
         }
 
         static Regex RgMainMap = new Regex("^[ \t]+0x[0-9a-fA-F]+[ \t]+main$");
@@ -291,15 +303,16 @@ namespace StandaloneBSPValidator
             }
         }
 
-        static void FillSampleDependenciesFromDepFiles(BSPEngine.VendorSample vs, string sampleBuildDir)
-        {
-            vs.AllDependencies = Directory.GetFiles(sampleBuildDir, "*.d").SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":"))).Distinct().ToArray();
-        }
 
-        private static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, BSPEngine.VendorSample vs, string mcuDir, VendorSampleDirectory sampleDir, bool codeRequiresDebugInfoFlag)
+        public static TestResult TestVendorSample(LoadedBSP.LoadedMCU mcu, VendorSample vs, string mcuDir, string sampleDirPath, bool codeRequiresDebugInfoFlag)
         {
+            if (Directory.Exists(mcuDir))
+                Directory.Delete(mcuDir, true);
+            Directory.CreateDirectory(mcuDir);
+
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
             configuredMCU.Configuration["com.sysprogs.toolchainoptions.arm.libnosys"] = "--specs=nosys.specs";
+
             if (configuredMCU.ExpandedMCU.FLASHSize == 0)
             {
                 configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
@@ -310,10 +323,11 @@ namespace StandaloneBSPValidator
                 foreach (var e in entries)
                     configuredMCU.Configuration[e.Key] = e.Value;
 
-
             var bspDict = configuredMCU.BuildSystemDictionary(default(SystemDirectories));
             bspDict["PROJECTNAME"] = "test";
-            bspDict["SYS:VSAMPLE_DIR"] = sampleDir.Path;
+            if (sampleDirPath != null)
+                bspDict["SYS:VSAMPLE_DIR"] = sampleDirPath;
+
             var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
 
             var projectCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
@@ -403,7 +417,7 @@ namespace StandaloneBSPValidator
                 if (sample.SkipIfNotFound)
                 {
                     Directory.Delete(mcuDir, true);
-                    return TestResult.Skipped;
+                    return new TestResult(TestBuildResult.Skipped, null);
                 }
                 else
                     throw new Exception("Cannot find sample: " + sample.Name);
@@ -484,10 +498,11 @@ namespace StandaloneBSPValidator
             foreach (var ext in sample.SourceFileExtensions.Split(';'))
                 sourceExtensions[ext] = true;
 
+            Console.Write("Building {0}...", Path.GetFileName(mcuDir));
             return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
         }
 
-        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros, BSPEngine.VendorSample vendorSample = null)
+        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros, VendorSample vendorSample = null, bool keepDirectoryAfterSuccessfulBuild = false)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
@@ -560,7 +575,6 @@ namespace StandaloneBSPValidator
                 InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules, nonValidateReg, UndefinedMacros);
             }
 
-            Console.Write("Building {0}...", Path.GetFileName(mcuDir));
             bool buildSucceeded;
             if (true)
             {
@@ -589,15 +603,23 @@ namespace StandaloneBSPValidator
             }
 
             if (!success)
-                return TestResult.Failed;
+            {
+                vendorSample.AllDependencies = null;
+                return new TestResult(TestBuildResult.Failed, Path.Combine(mcuDir, "build.log"));
+            }
 
             if (vendorSample != null)
             {
-                FillSampleDependenciesFromDepFiles(vendorSample, mcuDir);
+                vendorSample.AllDependencies = Directory.GetFiles(mcuDir, "*.d")
+                    .SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":")))
+                    .Distinct()
+                    .ToArray();
             }
 
-            Directory.Delete(mcuDir, true);
-            return TestResult.Succeeded;
+            if (!keepDirectoryAfterSuccessfulBuild)
+                Directory.Delete(mcuDir, true);
+
+            return new TestResult(TestBuildResult.Succeeded, Path.Combine(mcuDir, "build.log"));
         }
 
         private static void ApplyConfiguration(Dictionary<string, string> dict, PropertyDictionary2 values, PropertyDictionary2 values2 = null)
@@ -610,7 +632,7 @@ namespace StandaloneBSPValidator
                     dict[kv.Key] = kv.Value;
         }
 
-        class TestResults : IDisposable
+        class TestResultLogger : IDisposable
         {
             StreamWriter _Writer;
             string _CurSample;
@@ -618,7 +640,7 @@ namespace StandaloneBSPValidator
 
             Dictionary<string, Dictionary<string, TestResult>> _ResultMap = new Dictionary<string, Dictionary<string, TestResult>>();
 
-            public TestResults(string fn)
+            public TestResultLogger(string fn)
             {
                 _Writer = new StreamWriter(fn);
                 _Writer.AutoFlush = true;
@@ -631,11 +653,11 @@ namespace StandaloneBSPValidator
                 _Writer.WriteLine();
                 foreach (var kv in _ResultMap)
                 {
-                    string failed = string.Join(" ", kv.Value.Where(kv2 => kv2.Value == TestResult.Failed).Select(kv2 => kv2.Key));
+                    string failed = string.Join(" ", kv.Value.Where(kv2 => kv2.Value.Result == TestBuildResult.Failed).Select(kv2 => kv2.Key));
                     if (failed != "")
                         failed = ", failed on: ";
-                    _Writer.WriteLine("{0} succeeded on {1} devices{2}", kv.Key, kv.Value.Where(kv2 => kv2.Value == TestResult.Succeeded).Count(), failed);
-                    _Writer.WriteLine("Total test: {0}, failed: {1}", kv.Value.Count(), kv.Value.Where(kv2 => kv2.Value == TestResult.Failed).Count());
+                    _Writer.WriteLine("{0} succeeded on {1} devices{2}", kv.Key, kv.Value.Where(kv2 => kv2.Value.Result == TestBuildResult.Succeeded).Count(), failed);
+                    _Writer.WriteLine("Total test: {0}, failed: {1}", kv.Value.Count(), kv.Value.Where(kv2 => kv2.Value.Result == TestBuildResult.Failed).Count());
                 }
                 _Writer.Dispose();
             }
@@ -670,136 +692,13 @@ namespace StandaloneBSPValidator
             public int Passed, Failed;
         }
 
-        public static TestStatistics TestVendorSamples(VendorSampleDirectory samples, string bspDir, string temporaryDirectory, double testProbability = 1, bool codeRequiresDebugInfoFlag = false)
-        {
-            string defaultToolchainID = "SysGCC-arm-eabi-7.2.0";
 
-            var toolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(defaultToolchainID);
-            if (toolchainPath == null)
-                throw new Exception("Cannot locate toolchain path from registry");
-
-            var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(toolchainPath)));
-            var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.GetFullPath(bspDir))), toolchain);
-            TestStatistics stats = new TestStatistics();
-            int cnt = 0, failed = 0, succeeded = 0;
-            LoadedBSP.LoadedMCU[] MCUs = bsp.MCUs.ToArray();
-            string outputDir = Path.Combine(temporaryDirectory, "VendorSamples");
-            if (!Directory.Exists(outputDir))
-                Directory.CreateDirectory(outputDir);
-            int sampleCount = samples.Samples.Length;
-            Random rng = new Random();
-            using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
-            {
-                r.BeginSample("Vendor Samples");
-                foreach (var vs in samples.Samples)
-                {
-                    LoadedBSP.LoadedMCU mcu;
-                    try
-                    {
-                        var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.'), RegexOptions.IgnoreCase);
-                        mcu = bsp.MCUs.Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
-                        vs.DeviceID = mcu.ExpandedMCU.ID;
-                    }
-                    catch (Exception ex)
-                    {
-                        r.ExceptionSample(ex.Message, "mcu " + vs.DeviceID + " not found in bsp");
-                        Console.WriteLine("bsp have not mcu:" + vs.DeviceID);
-                        continue;
-                    }
-
-                    if (testProbability < 1 && rng.NextDouble() > testProbability)
-                    {
-                        cnt++;
-                        continue;
-                    }
-
-                    string mcuDir = Path.Combine(temporaryDirectory, "VendorSamples", vs.UserFriendlyName);
-                    mcuDir += $"-{mcu.ExpandedMCU.ID}";
-                    if (!Directory.Exists(mcuDir))
-                        Directory.CreateDirectory(mcuDir);
-                    DateTime start = DateTime.Now;
-
-                    //If any of the source file paths in the vendor sample contains one of those strings, the sample will use the hardware FP mode.
-                    string[] hwSubstrings = new[]
-                    {
-                        @"\ARM_CM4F\port.c",
-                        @"ARM_CM7\r0p1\port.c",
-                        @"CM4_GCC.a",
-                        @"\ARM_CM4_MPU\port.c",
-                        @"STemWin540_CM4_GCC.a",
-                        @"STemWin540_CM7_GCC.a",
-                        @"libPDMFilter_CM7_GCC",
-                    };
-
-                    if (vs.SourceFiles.FirstOrDefault(f => ContainsAnySubstrings(f, hwSubstrings)) != null)
-                    {
-                        if (vs.Configuration.MCUConfiguration != null)
-                        {
-                            var dict = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
-                            dict["com.sysprogs.bspoptions.arm.floatmode"] = "-mfloat-abi=hard";
-                            vs.Configuration.MCUConfiguration = new PropertyDictionary2 { Entries = dict.Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value }).ToArray() };
-                        }
-                        else
-                        {
-                            vs.Configuration.MCUConfiguration = new PropertyDictionary2
-                            {
-                                Entries = new PropertyDictionary2.KeyValue[]
-                                    {new PropertyDictionary2.KeyValue {Key = "com.sysprogs.bspoptions.arm.floatmode", Value = "-mfloat-abi=hard"}}
-                            };
-                        }
-                    }
-
-                    vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
-
-                    var result = TestVendorSample(mcu, vs, mcuDir, samples, codeRequiresDebugInfoFlag);
-
-                    Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
-
-                    if (result == TestResult.Failed)
-                        failed++;
-                    else if (result == TestResult.Succeeded)
-                        succeeded++;
-
-                    r.LogTestResult(vs.UserFriendlyName, result);
-                    cnt++;
-                    Console.WriteLine("{0}: {1}% done ({2}/{3} projects, {4} failed)", vs.UserFriendlyName, (cnt * 100) / sampleCount, cnt, sampleCount, failed);
-                }
-                r.EndSample();
-            }
-
-            stats.Passed += succeeded;
-            stats.Failed += failed;
-            if (samples is ConstructedVendorSampleDirectory)
-            {
-                (samples as ConstructedVendorSampleDirectory).ToolchainDirectory = toolchainPath;
-                (samples as ConstructedVendorSampleDirectory).BSPDirectory = Path.GetFullPath(bspDir);
-            }
-            return stats;
-        }
-
-        static bool ContainsAnySubstrings(string s, string[] substrings)
-        {
-            foreach (var sub in substrings)
-                if (s.IndexOf(sub, StringComparison.InvariantCultureIgnoreCase) != -1)
-                    return true;
-            return false;
-        }
-
-        static bool IsNonGCCFile(VendorSample vs, string fn)
-        {
-            if (fn.StartsWith(vs.Path + @"\MDK-ARM", StringComparison.InvariantCultureIgnoreCase))
-                return true;
-            if (fn.Contains("system_nrf52"))
-                return true;
-
-            return false;
-        }
 
         public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
         {
             TestStatistics stats = new TestStatistics();
             Directory.CreateDirectory(temporaryDirectory);
-            using (var r = new TestResults(Path.Combine(temporaryDirectory, "bsptest.log")))
+            using (var r = new TestResultLogger(Path.Combine(temporaryDirectory, "bsptest.log")))
             {
                 LoadedBSP.LoadedMCU[] MCUs;
                 if (job.DeviceRegex == null)
@@ -851,9 +750,9 @@ namespace StandaloneBSPValidator
 
                         var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules, noValidateReg, job.UndefinedMacros);
                         Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
-                        if (result == TestResult.Failed)
+                        if (result.Result == TestBuildResult.Failed)
                             failed++;
-                        else if (result == TestResult.Succeeded)
+                        else if (result.Result == TestBuildResult.Succeeded)
                             succeeded++;
 
                         r.LogTestResult(mcu.ExpandedMCU.ID, result);
@@ -875,53 +774,25 @@ namespace StandaloneBSPValidator
 
         static void Main(string[] args)
         {
-            if (args[0] == "vs")
+            if (args.Length < 2)
+                throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
+
+            var job = XmlTools.LoadObject<TestJob>(args[0]);
+            job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(args[0]));
+            if (job.ToolchainPath.StartsWith("["))
             {
-                if (args.Length < 3)
-                    throw new Exception("Usage: StandaloneBSPValidator vs <VendorSamples dir> <output dir>");
-
-                if (Directory.GetFiles(args[1], "VendorSamples.xml").Count() == 0)
-                {
-                    foreach (var dir in Directory.GetDirectories(args[1]))
-                        foreach (var es in Directory.GetFiles(dir, "VendorSamples.xml"))
-                        {
-                            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(es);
-                            expandedSamples.Path = Path.GetFullPath(Path.Combine(dir, "VendorSamples"));
-                            var testdir = Path.GetDirectoryName(Path.Combine(dir, "VendorSamples")).Split('\\').Reverse().ToArray()[0];
-                            var ts = TestVendorSamples(expandedSamples, dir, Path.Combine(args[2], testdir));
-                        }
-                }
-                else
-                {
-                    var bspDir = args[1];
-                    var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples.xml"));
-                    expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-                    var ts = TestVendorSamples(expandedSamples, bspDir, args[2]);
-                }
+                job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
+                if (job.ToolchainPath == null)
+                    throw new Exception("Cannot locate toolchain path from registry");
             }
-            else
-            {
-                if (args.Length < 2)
-                    throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
 
-                var job = XmlTools.LoadObject<TestJob>(args[0]);
-                job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(args[0]));
-                if (job.ToolchainPath.StartsWith("["))
-                {
-                    job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
-                    if (job.ToolchainPath == null)
-                        throw new Exception("Cannot locate toolchain path from registry");
-                }
+            var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
+            var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(job.BSPPath))), toolchain);
 
-                var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
-                var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(job.BSPPath))), toolchain);
-
-                TestBSP(job, bsp, args[1]);
-            }
+            TestBSP(job, bsp, args[1]);
             return;
-
-
         }
+
         static bool IsNoValid(string pNameFrend, string[] NonValid)
         {
             if (NonValid != null)

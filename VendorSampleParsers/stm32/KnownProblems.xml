@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<KnownSampleProblemDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Entries>
+		<ErrorEntry>
+			<ID>mbedtls_config</ID>
+			<ErrorMessage>fatal error: &lt;mbedtls_config.h&gt;: No such file or directory</ErrorMessage>
+			<Description>Missing mbedtls_config.h</Description>
+		</ErrorEntry>
+	</Entries>
+</KnownSampleProblemDatabase>

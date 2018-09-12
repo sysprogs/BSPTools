@@ -193,9 +193,10 @@ namespace BSPGenerationTools
         }
 
         protected virtual string BuildVirtualSamplePath(string originalPath) => null;
+        protected virtual PathMapper CreatePathMapper() => null;
 
 
-        public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, string bspDirectory, PathMapper mapper = null)
+        public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, string bspDirectory)
         {
             List<VendorSample> finalSamples = new List<VendorSample>();
 
@@ -206,8 +207,8 @@ namespace BSPGenerationTools
                 Directory.Delete(outputDir, true);
             }
 
-            if (mapper == null)
-                mapper = new PathMapper(dir);
+            var mapper = CreatePathMapper() ?? new PathMapper(dir);
+
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
 

@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using VendorSampleParserEngine;
 
 namespace GeneratorSampleStm32
 {
@@ -57,8 +58,8 @@ namespace GeneratorSampleStm32
             List<VendorSample> aLstVSampleOut = new List<VendorSample>();
             int aCntTarget = 0;
             string aFilePrj = pDirPrj + "\\Project.uvprojx";
-            string aNamePrj = pDirPrj.Replace("\\MDK-ARM", "");
-            aNamePrj = aNamePrj.Substring(aNamePrj.LastIndexOf("\\") + 1);
+            string aNamePrj = Path.GetFileName(Path.GetDirectoryName(pDirPrj));
+
             List<string> sourceFiles = new List<string>();
             List<string> includeDirs = new List<string>();
             bool flGetProperty = false;
@@ -167,8 +168,11 @@ namespace GeneratorSampleStm32
 
         class STM32SampleRelocator : VendorSampleRelocator
         {
-            public STM32SampleRelocator()
+            private ConstructedVendorSampleDirectory _Directory;
+
+            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir)
             {
+                _Directory = dir;
                 /*
                     Known problems with trying to map frameworks:
                       HAL:
@@ -214,10 +218,14 @@ namespace GeneratorSampleStm32
             {
                 return string.Join("\\", originalPath.Split('/').Skip(2).Reverse().Skip(1).Reverse());
             }
+
+            protected override PathMapper CreatePathMapper() => new STM32PathMapper(_Directory);
         }
+
         class STM32PathMapper : VendorSampleRelocator.PathMapper
         {
-            public STM32PathMapper(ConstructedVendorSampleDirectory dir) : base(dir)
+            public STM32PathMapper(ConstructedVendorSampleDirectory dir)
+                : base(dir)
             {
             }
 
@@ -250,118 +258,89 @@ namespace GeneratorSampleStm32
             }
         }
 
-
-        static void Main(string[] args)
+        class STM32VendorSampleParser : VendorSampleParser
         {
-            if (args.Length < 2)
-                throw new Exception("Usage: stm32.exe <SW package directory> <temporary directory>");
-            string SDKdir = args[0];
-            string outputDir = @"..\..\Output";
-            const string bspDir = @"..\..\..\..\generators\stm32\output";
-            string tempDir = args[1];
-
-            string sampleListFile = Path.Combine(outputDir, "samples.xml");
-
-            var sampleDir = BuildOrLoadSampleDirectory(SDKdir, outputDir, sampleListFile);
-
-            if (sampleDir.Samples.FirstOrDefault(s => s.AllDependencies != null) == null)
+            public STM32VendorSampleParser() 
+                : base(@"..\..\generators\stm32\output", "STM32 CubeMX Samples")
             {
-                //Perform Pass 1 testing - test the raw VendorSamples in-place
-                StandaloneBSPValidator.Program.TestVendorSamples(sampleDir, bspDir, tempDir);
-                XmlTools.SaveObject(sampleDir, sampleListFile);
             }
 
-            //Insert the samples into the generated BSP
-            var relocator = new STM32SampleRelocator();
-            relocator.InsertVendorSamplesIntoBSP(sampleDir, bspDir, new STM32PathMapper(sampleDir));
+            protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir) => new STM32SampleRelocator(sampleDir);
 
-            var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspDir, "bsp.xml"));
-            bsp.VendorSampleDirectoryPath = "VendorSamples";
-            bsp.VendorSampleCatalogName = "STM32 CubeMX Samples";
-            XmlTools.SaveObject(bsp, Path.Combine(bspDir, "bsp.xml"));
-
-            string archiveName = string.Format("{0}-{1}.vgdbxbsp", bsp.PackageID.Split('.').Last(), bsp.PackageVersion);
-            string statFile = Path.ChangeExtension(archiveName, ".xml");
-            TarPacker.PackDirectoryToTGZ(bspDir, Path.Combine(bspDir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp" && Path.GetFileName(fn) != statFile);
-
-            // Finally verify that everything builds
-            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples", "VendorSamples.xml"));
-            expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            var result = StandaloneBSPValidator.Program.TestVendorSamples(expandedSamples, bspDir, tempDir);
-
-            if (result.Failed != 0)
-                throw new Exception("Some of the vendor samples have failed the internal test. Fix this before releasing the BSP.");
-        }
-
-        private static ConstructedVendorSampleDirectory BuildOrLoadSampleDirectory(string SDKdir, string outputDir, string sampleListFile)
-        {
-            ConstructedVendorSampleDirectory sampleDir;
-            if (File.Exists(sampleListFile) || File.Exists(sampleListFile + ".gz"))
+            static bool IsNonGCCFile(VendorSample vs, string fn)
             {
-                sampleDir = XmlTools.LoadObject<ConstructedVendorSampleDirectory>(sampleListFile);
-                if (sampleDir.SourceDirectory == SDKdir)
-                    return sampleDir;
+                if (fn.StartsWith(vs.Path + @"\MDK-ARM", StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+
+                return false;
             }
 
-            if (Directory.Exists(outputDir))
-                Directory.Delete(outputDir, true);
-            Directory.CreateDirectory(outputDir);
-
-            var samples = ParseVendorSamples(SDKdir);
-            sampleDir = new ConstructedVendorSampleDirectory
+            protected override void AdjustVendorSampleProperties(VendorSample vs)
             {
-                SourceDirectory = SDKdir,
-                Samples = samples.ToArray(),
-            };
+                base.AdjustVendorSampleProperties(vs);
+                vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
+            }
 
-            XmlTools.SaveObject(sampleDir, sampleListFile);
-            return sampleDir;
-        }
-
-        static List<VendorSample> ParseVendorSamples(string SDKdir)
-        {
-            string stm32RulesDir = @"..\..\..\..\generators\stm32\rules\families";
-
-            string[] familyDirs = Directory.GetFiles(stm32RulesDir, "stm32*.xml").Select(f => ExtractFirstSubdir(XmlTools.LoadObject<FamilyDefinition>(f).PrimaryHeaderDir)).ToArray();
-            List<VendorSample> allSamples = new List<VendorSample>();
-
-            foreach (var fam in familyDirs)
+            protected override ParsedVendorSamples ParseVendorSamples(string SDKdir, IVendorSampleFilter filter)
             {
-                List<string> addInc = new List<string>();
-                addInc.Add($@"{SDKdir}\{fam}\Drivers\CMSIS\Include");
-                string topLevelDir = $@"{SDKdir}\{fam}";
+                string stm32RulesDir = @"..\..\..\..\generators\stm32\rules\families";
 
-                int aCountSampl = 0;
-                Console.Write($"Discovering samples for {fam}...");
+                string[] familyDirs = Directory.GetFiles(stm32RulesDir, "stm32*.xml")
+                    .Select(f => ExtractFirstSubdir(XmlTools.LoadObject<FamilyDefinition>(f).PrimaryHeaderDir))
+                    .ToArray();
 
-                foreach (var dir in Directory.GetDirectories(Path.Combine(SDKdir, fam), "Mdk-arm", SearchOption.AllDirectories))
+                List<VendorSample> allSamples = new List<VendorSample>();
+
+                foreach (var fam in familyDirs)
                 {
-                    if (!dir.Contains("Projects") || !(dir.Contains("Examples") || dir.Contains("Applications")))
-                        continue;
+                    List<string> addInc = new List<string>();
+                    addInc.Add($@"{SDKdir}\{fam}\Drivers\CMSIS\Include");
+                    string topLevelDir = $@"{SDKdir}\{fam}";
 
-                    var aSamples = GetInfoProjectFromMDK(dir, topLevelDir, addInc);
-                    var scriptDir = Path.Combine(dir, "..", "SW4STM32");
-                    if (Directory.Exists(scriptDir))
+                    int sampleCount = 0;
+                    Console.WriteLine($"Discovering samples for {fam}...");
+
+                    foreach (var dir in Directory.GetDirectories(Path.Combine(SDKdir, fam), "Mdk-arm", SearchOption.AllDirectories))
                     {
-                        string[] linkerScripts = Directory.GetFiles(scriptDir, "*.ld", SearchOption.AllDirectories);
-                        if (linkerScripts.Length == 1)
+                        if (!dir.Contains("Projects") || !(dir.Contains("Examples") || dir.Contains("Applications")))
+                            continue;
+
+                        string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
+                        if (!filter.ShouldParseSampleForAnyDevice(dir))
+                            continue;   //We are only reparsing a subset of samples
+
+                        var aSamples = GetInfoProjectFromMDK(dir, topLevelDir, addInc);
+
+                        if (aSamples.Count != 0)
+                            Debug.Assert(aSamples[0].UserFriendlyName == sampleName);   //Otherwise quick reparsing won't work.
+
+                        var scriptDir = Path.Combine(dir, "..", "SW4STM32");
+                        if (Directory.Exists(scriptDir))
                         {
-                            foreach (var sample in aSamples)
-                                sample.LinkerScript = Path.GetFullPath(linkerScripts[0]);
+                            string[] linkerScripts = Directory.GetFiles(scriptDir, "*.ld", SearchOption.AllDirectories);
+                            if (linkerScripts.Length == 1)
+                            {
+                                foreach (var sample in aSamples)
+                                    sample.LinkerScript = Path.GetFullPath(linkerScripts[0]);
+                            }
+                            else
+                            {
+                                //Some sample projects define multiple linker scripts (e.g. STM32F072RBTx_FLASH.ld vs. STM32F072VBTx_FLASH.ld).
+                                //In this case we don't pick the sample-specific linker script and instead go with the regular BSP script for the selected MCU.s
+                            }
                         }
-                        else
-                        {
-                            //Some sample projects define multiple linker scripts (e.g. STM32F072RBTx_FLASH.ld vs. STM32F072VBTx_FLASH.ld).
-                            //In this case we don't pick the sample-specific linker script and instead go with the regular BSP script for the selected MCU.s
-                        }
+
+                        sampleCount += aSamples.Count;
+                        allSamples.AddRange(aSamples);
                     }
 
-                    aCountSampl += aSamples.Count;
-                    allSamples.AddRange(aSamples);
+                    Console.WriteLine($"Found {sampleCount} samples for {fam}.");
                 }
-                Console.WriteLine($" {aCountSampl} samples found");
+
+                return new ParsedVendorSamples { VendorSamples = allSamples.ToArray() };
             }
-            return allSamples;
         }
+
+        static void Main(string[] args) => new STM32VendorSampleParser().Run(args);
     }
 }
