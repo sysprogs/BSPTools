@@ -189,10 +189,17 @@ namespace StandaloneBSPValidator
             public List<BuildTask> CompileTasks = new List<BuildTask>();
             public List<BuildTask> OtherTasks = new List<BuildTask>();
 
-            public void GenerateMakeFile(string filePath, string primaryTarget)
+            public void GenerateMakeFile(string filePath, string primaryTarget, IEnumerable<string> comments)
             {
                 using (var sw = new StreamWriter(filePath))
                 {
+                    if (comments != null)
+                    {
+                        foreach (var comment in comments)
+                            sw.WriteLine("#" + comment);
+                        sw.WriteLine();
+                    }
+
                     sw.WriteLine($"all: {primaryTarget}");
                     sw.WriteLine();
                     foreach (var task in CompileTasks.Concat(OtherTasks))
@@ -502,7 +509,17 @@ namespace StandaloneBSPValidator
             return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
         }
 
-        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, bool validateRegisters, LoadedRenamingRule[] renameRules, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, string[] nonValidateReg, string[] UndefinedMacros, VendorSample vendorSample = null, bool keepDirectoryAfterSuccessfulBuild = false)
+        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, 
+            string mcuDir,
+            bool validateRegisters,
+            LoadedRenamingRule[] renameRules, 
+            GeneratedProject prj,
+            ToolFlags flags, 
+            Dictionary<string, bool> sourceExtensions,
+            string[] nonValidateReg,
+            string[] UndefinedMacros,
+            VendorSample vendorSample = null,
+            bool keepDirectoryAfterSuccessfulBuild = false)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
@@ -567,7 +584,29 @@ namespace StandaloneBSPValidator
             if (errorsFound)
                 throw new Exception("Multiple source files with the same name found");
 
-            job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin");
+            List<string> comments = new List<string>();
+            comments.Add("Tool flags:");
+            comments.Add("\tInclude directories:");
+            foreach (var dir in flags.IncludeDirectories ?? new string[0])
+                comments.Add("\t\t" + dir);
+            comments.Add("\tPreprocessor macros:");
+            foreach (var dir in flags.PreprocessorMacros ?? new string[0])
+                comments.Add("\t\t" + dir);
+            comments.Add("\tLibrary directories:");
+            foreach (var dir in flags.AdditionalLibraryDirectories ?? new string[0])
+                comments.Add("\t\t" + dir);
+            comments.Add("\tLibrary names:");
+            foreach (var dir in flags.AdditionalLibraries ?? new string[0])
+                comments.Add("\t\t" + dir);
+            comments.Add("\tExtra linker inputs:");
+            foreach (var dir in flags.AdditionalLinkerInputs ?? new string[0])
+                comments.Add("\t\t" + dir);
+            comments.Add("\tCFLAGS:" + flags.CFLAGS);
+            comments.Add("\tCXXFLAGS:" + flags.CXXFLAGS);
+            comments.Add("\tLDFLAGS:" + flags.LDFLAGS);
+            comments.Add("\tCOMMONFLAGS:" + flags.COMMONFLAGS);
+
+            job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin", comments);
 
             if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && validateRegisters)
             {
@@ -690,6 +729,8 @@ namespace StandaloneBSPValidator
         public struct TestStatistics
         {
             public int Passed, Failed;
+
+            public int Total => Passed + Failed;
         }
 
         public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)

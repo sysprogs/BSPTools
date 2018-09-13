@@ -169,7 +169,7 @@ namespace VendorSampleParserEngine
             }
         }
 
-        private ConstructedVendorSampleDirectory BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(string sampleListFile, string SDKdir, RunMode mode)
+        private ConstructedVendorSampleDirectory BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(string sampleListFile, string SDKdir, RunMode mode, string specificSampleName)
         {
             Console.WriteLine($"Creating sample list...");
             ConstructedVendorSampleDirectory sampleDir = null;
@@ -181,7 +181,7 @@ namespace VendorSampleParserEngine
                     directoryMatches = true;
             }
 
-            if (directoryMatches && mode == RunMode.Release)
+            if (directoryMatches && (mode == RunMode.Release || mode == RunMode.SingleSample))
             {
                 Console.WriteLine($"Loaded {sampleDir.Samples.Length} samples from cache");
                 return sampleDir;
@@ -413,16 +413,24 @@ namespace VendorSampleParserEngine
             Invalid,
             Incremental,
             Release,
-            CleanRelease
+            CleanRelease,
+            SingleSample,
         }
 
         public void Run(string[] args)
         {
             string SDKdir = null;
+            string specificSampleName = null;
             RunMode mode = RunMode.Invalid;
             foreach (var arg in args)
             {
-                if (arg.StartsWith("/"))
+                string singlePrefix = "/single:";
+                if (arg.StartsWith(singlePrefix, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    mode = RunMode.SingleSample;
+                    specificSampleName = arg.Substring(singlePrefix.Length);
+                }
+                else if (arg.StartsWith("/"))
                 {
                     mode = Enum.GetValues(typeof(RunMode)).OfType<RunMode>().First(v => v.ToString().ToLower() == arg.Substring(1).ToLower());
                 }
@@ -434,10 +442,11 @@ namespace VendorSampleParserEngine
             {
                 Console.WriteLine($"Usage: {Path.GetFileName(Assembly.GetEntryAssembly().Location)} <mode> <SW package directory>");
                 Console.WriteLine($"Modes:");
-                Console.WriteLine($"       /incremental  - Only retest/rebuild previously failed samples.");
+                Console.WriteLine($"       /incremental   - Only retest/rebuild previously failed samples.");
                 Console.WriteLine($"                       This doesn't update the BSP archive.");
-                Console.WriteLine($"       /release      - Reuse cached definitions, retest all samples. Update BSP.");
-                Console.WriteLine($"       /cleanRelease - Reparse/retest all samples. Update BSP.");
+                Console.WriteLine($"       /release       - Reuse cached definitions, retest all samples. Update BSP.");
+                Console.WriteLine($"       /cleanRelease  - Reparse/retest all samples. Update BSP.");
+                Console.WriteLine($"       /single:<name> - Run all phases of just one sample.");
                 Console.WriteLine($"Press any key to continue...");
                 Console.ReadKey();
                 Environment.ExitCode = 1;
@@ -460,7 +469,7 @@ namespace VendorSampleParserEngine
 
             string sampleListFile = Path.Combine(CacheDirectory, "Samples.xml");
 
-            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode);
+            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode, specificSampleName);
 
             foreach (var vs in sampleDir.Samples)
             {
@@ -491,6 +500,11 @@ namespace VendorSampleParserEngine
                 case RunMode.CleanRelease:
                     pass1Queue = insertionQueue = sampleDir.Samples;
                     break;
+                case RunMode.SingleSample:
+                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => new VendorSampleID(s).ToString() == specificSampleName).ToArray();
+                    if (pass1Queue.Length == 0)
+                        throw new Exception("No samples match " + specificSampleName);
+                    break;
                 default:
                     throw new Exception("Invalid run mode");
             }
@@ -514,7 +528,7 @@ namespace VendorSampleParserEngine
             bsp.VendorSampleCatalogName = VendorSampleCatalogName;
             XmlTools.SaveObject(bsp, Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
 
-            if (mode != RunMode.Incremental)
+            if (mode != RunMode.Incremental && mode != RunMode.SingleSample)
             {
                 Console.WriteLine("Creating new BSP archive...");
                 string statFile = Path.ChangeExtension(archiveName, ".xml");
@@ -529,13 +543,26 @@ namespace VendorSampleParserEngine
             var finalStats = TestVendorSamplesAndUpdateReportAndDependencies(expandedSamples.Samples, expandedSamples.Path, VendorSamplePass.RelocatedBuild);
             XmlTools.SaveObject(_Report, ReportFile);
 
-            if (mode == RunMode.Incremental)
+            if (mode == RunMode.Incremental || mode == RunMode.SingleSample)
             {
                 Console.WriteLine($"Deleting incomplete {vendorSampleListInBSP}...\n***Re-run in /release mode to produce a valid BSP.");
                 File.Delete(vendorSampleListInBSP);   //Incremental mode only places the samples that are currently built.
             }
 
+            if (finalStats.Failed == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"All {finalStats.Total} tests passed during final pass.");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{finalStats.Passed} out of {finalStats.Total} tests failed during final pass.");
+            }
+
+            Console.ResetColor();
             Console.WriteLine("=============================================");
+            Console.WriteLine($"Overall statistics for v{BSP.BSP.PackageVersion}:");
             List<KeyValuePair<string, string>> fields = new List<KeyValuePair<string, string>>();
             fields.Add(new KeyValuePair<string, string>("Total samples discovered:", sampleDir.Samples.Length.ToString()));
 
