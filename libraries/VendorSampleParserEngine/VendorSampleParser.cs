@@ -521,9 +521,9 @@ namespace VendorSampleParserEngine
                 TarPacker.PackDirectoryToTGZ(BSPDirectory, archiveFilePath, fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp" && Path.GetFileName(fn) != statFile);
             }
 
-            var vendorSampleDirectoryInBSP = Path.Combine(BSPDirectory, VendorSampleDirectoryName);
+            var vendorSampleListInBSP = Path.Combine(BSPDirectory, VendorSampleDirectoryName, "VendorSamples.xml");
             // Finally verify that everything builds
-            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(vendorSampleDirectoryInBSP, "VendorSamples.xml"));
+            var expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(vendorSampleListInBSP);
             expandedSamples.Path = Path.GetFullPath(Path.Combine(BSPDirectory, VendorSampleDirectoryName));
 
             var finalStats = TestVendorSamplesAndUpdateReportAndDependencies(expandedSamples.Samples, expandedSamples.Path, VendorSamplePass.RelocatedBuild);
@@ -531,8 +531,8 @@ namespace VendorSampleParserEngine
 
             if (mode == RunMode.Incremental)
             {
-                Console.WriteLine($"Deleting incomplete {vendorSampleDirectoryInBSP}...\n***Re-run in /release mode to produce a valid BSP.");
-                Directory.Delete(vendorSampleDirectoryInBSP, true);   //Incremental mode only places the samples that are currently built.
+                Console.WriteLine($"Deleting incomplete {vendorSampleListInBSP}...\n***Re-run in /release mode to produce a valid BSP.");
+                File.Delete(vendorSampleListInBSP);   //Incremental mode only places the samples that are currently built.
             }
 
             Console.WriteLine("=============================================");
