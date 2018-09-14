@@ -56,6 +56,10 @@
       <Project>{9fe2706c-e100-4ef2-8498-c25c7ff3b122}</Project>
       <Name>BSPGenerationTools</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\libraries\VendorSampleParserEngine\VendorSampleParserEngine.csproj">
+      <Project>{62944c6c-b57e-449c-8bcc-98f22e665f5f}</Project>
+      <Name>VendorSampleParserEngine</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\StandaloneBSPValidator\StandaloneBSPValidator.csproj">
       <Project>{add117b0-6ac5-4e07-ba8b-8fdf35bdf421}</Project>
       <Name>StandaloneBSPValidator</Name>

@@ -1,3 +1,0 @@
-GNU_INSTALL_ROOT := c:/SysGCC/arm-eabi/bin/
-GNU_VERSION := 7.2.0
-GNU_PREFIX := arm-eabi
