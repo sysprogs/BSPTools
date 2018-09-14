@@ -48,6 +48,7 @@
     <Compile Include="VendorSampleParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataStructures.cs" />
+    <Compile Include="VersionComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\StandaloneBSPValidator\StandaloneBSPValidator.csproj">

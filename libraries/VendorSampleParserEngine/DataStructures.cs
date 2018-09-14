@@ -65,7 +65,9 @@ namespace VendorSampleParserEngine
 
         Dictionary<VendorSampleID, Record> _RecordDictionary = new Dictionary<VendorSampleID, Record>();
 
+        public string BSPID;
         public string BSPVersion;
+
         public Record[]  Records
         {
             get => _RecordDictionary.Values.ToArray();
@@ -158,10 +160,7 @@ namespace VendorSampleParserEngine
             if (matchingEntries == null || matchingEntries.Length == 0)
                 return null;
 
-            if (matchingEntries.Length == 1)
-                return matchingEntries[0];
-
-            throw new Exception($"The error in {logFile} matches several error rules. Change the rule definitions to be mutually exclusive!");
+            return matchingEntries.First();
         }
     }
 }

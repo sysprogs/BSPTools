@@ -1,0 +1,173 @@
+﻿<Window x:Class="VendorSampleReportViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VendorSampleReportViewer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Grid.IsSharedSizeScope="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ToolBar Grid.Row="0">
+            <Button Click="Open_Click">
+                Load reports
+            </Button>
+            <Separator/>
+            <TextBlock Text="Filter:" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}" Width="200" 
+                     VerticalAlignment="Center" Margin="5 0 0 0" BorderBrush="LightGray"/>
+        </ToolBar>
+        <Grid Grid.Row="1" Margin="7 0 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="SampleNameColumn"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Rectangle Stroke="Gray" Width="1" Height="Auto" HorizontalAlignment="Right"/>
+            <Rectangle Stroke="Gray" Width="Auto" Height="1" VerticalAlignment="Bottom"
+                       Grid.ColumnSpan="2"/>
+
+            <ItemsControl Grid.Column="1" 
+                      ItemsSource="{Binding Summaries}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal"
+                                    Width="200"
+                                    Margin="0 5 0 5">
+                                <TextBlock Text="{Binding Version}" Margin="0 0 15 0" VerticalAlignment="Center"
+                                       FontWeight="Bold"/>
+                                <Image Width="16" Height="16" Source="Icons\check16.png" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SucceededTests}"  VerticalAlignment="Center"
+                                       Margin="0 0 5 0" ToolTip="Succeeded projects"/>
+                                <Image Width="16" Height="16" Source="Icons\cancel.png" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding FailedTests}" VerticalAlignment="Center"
+                                       Margin="0 0 5 0" ToolTip="Could not be built initially"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        ToolTip="Failed in BSP. Fix before releasing!">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ReleaseFailedTests}" Value="0">
+                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <Image Width="16" Height="16" Source="Icons\ban16.png" VerticalAlignment="Center"
+                                       Margin="0 0 2 0"/>
+                                    <TextBlock Text="{Binding ReleaseFailedTests}" Margin="0 0 5 0"
+                                           FontWeight="Bold" Foreground="Red" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Rectangle Stroke="Gray" Width="1" Height="Auto" HorizontalAlignment="Right"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+        <ListBox Grid.Row="2" VirtualizingPanel.IsVirtualizing="True" 
+                      ItemsSource="{Binding SampleRows}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="SampleNameColumn"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Name}" Margin="0 0 5 0"/>
+                        <Rectangle Stroke="Gray" Width="1" Height="Auto" 
+                                                   HorizontalAlignment="Right"
+                                                   Margin="0 -2 0 -2"/>
+                        
+                        <ItemsControl ItemsSource="{Binding Cells}" Grid.Column="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Width="200">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Width="16" Height="16" Margin="0 0 5 0">
+                                                <Image.Style>
+                                                    <Style TargetType="Image">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding State}" Value="Succeeded">
+                                                                <Setter Property="Source" Value="Icons/check16.png"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding State}" Value="Failed">
+                                                                <Setter Property="Source" Value="Icons/cancel.png"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding State}" Value="FailedInBSP">
+                                                                <Setter Property="Source" Value="Icons/ban16.png"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                            <TextBlock Text="{Binding KnownError}"/>
+                                        </StackPanel>
+                                        <Rectangle Stroke="Gray" Width="1" Height="Auto"  Grid.Column="1"
+                                                   HorizontalAlignment="Right"
+                                                   Margin="0 -2 0 -2"/>
+                                        <Button Grid.Column="1" Click="OpenLog_Click" HorizontalAlignment="Right">
+                                            <Image Width="16" Height="16" Source="icons\log16.png"/>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ListBox Grid.Row="3" VirtualizingPanel.IsVirtualizing="True" 
+                      ItemsSource="{Binding CategoryRows}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="SampleNameColumn"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Name}" Margin="0 0 5 0"/>
+                        <Rectangle Stroke="Gray" Width="1" Height="Auto" 
+                                                   HorizontalAlignment="Right"
+                                                   Margin="0 -2 0 -2"/>
+
+                        <ItemsControl ItemsSource="{Binding Cells}" Grid.Column="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Width="200">
+                                        <TextBlock Text="{Binding Count}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>

@@ -108,12 +108,13 @@ namespace GeneratorSampleStm32
                     if (filePath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase))
                     {
                         filePath = filePath.Replace("_Keil.lib", "_GCC.a");
+                        filePath = filePath.Replace("_Keil_ARGB.lib", "_GCC_ARGB.a");
                         if (!File.Exists(Path.Combine(pDirPrj, filePath)))
                             continue;
                     }
                     if (filePath.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase) && filePath.IndexOf("_IAR", StringComparison.InvariantCultureIgnoreCase) != -1)
                     {
-                        filePath = filePath.Replace("_IAR_ARGB.a", "_GCC.a");
+                        filePath = filePath.Replace("_IAR_ARGB.a", "_GCC_ARGB.a");
                         if (!File.Exists(Path.Combine(pDirPrj, filePath)))
                             continue;
                     }
@@ -306,7 +307,7 @@ namespace GeneratorSampleStm32
                             continue;
 
                         string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
-                        if (!filter.ShouldParseSampleForAnyDevice(dir))
+                        if (!filter.ShouldParseSampleForAnyDevice(sampleName))
                             continue;   //We are only reparsing a subset of samples
 
                         var aSamples = GetInfoProjectFromMDK(dir, topLevelDir, addInc);

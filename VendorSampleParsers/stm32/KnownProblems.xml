@@ -2,9 +2,34 @@
 <KnownSampleProblemDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Entries>
 		<ErrorEntry>
+			<ID>vfp</ID>
+			<ErrorMessage>uses VFP register arguments,</ErrorMessage>
+			<Description>Incompatible VFP modes</Description>
+		</ErrorEntry>
+		<ErrorEntry>
 			<ID>mbedtls_config</ID>
-			<ErrorMessage>fatal error: &lt;mbedtls_config.h&gt;: No such file or directory</ErrorMessage>
+			<ErrorMessage>fatal error: &amp;lt;mbedtls_config.h&amp;gt;: No such file or directory</ErrorMessage>
 			<Description>Missing mbedtls_config.h</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>stemwin_missing</ID>
+			<ErrorMessage>undefined reference to `GUI_Init'</ErrorMessage>
+			<Description>Missing STEmWin symbols</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>multiple_font</ID>
+			<ErrorMessage>multiple definition of `GUI_Fontarabic60'</ErrorMessage>
+			<Description>Multiple font objects</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>sleep_range</ID>
+			<ErrorMessage>undefined reference to `test_sleep_range1_80mhz'</ErrorMessage>
+			<Description>test_sleep_range1_80mhz</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>rt_misc</ID>
+			<ErrorMessage>rt_misc.h: No such file or directory</ErrorMessage>
+			<Description>No rt_misc.h</Description>
 		</ErrorEntry>
 	</Entries>
 </KnownSampleProblemDatabase>

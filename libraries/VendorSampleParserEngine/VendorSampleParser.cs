@@ -55,7 +55,7 @@ namespace VendorSampleParserEngine
             if (File.Exists(ReportFile))
                 _Report = XmlTools.LoadObject<VendorSampleTestReport>(ReportFile);
             else
-                _Report = new VendorSampleTestReport { BSPVersion = BSP.BSP.PackageVersion };
+                _Report = new VendorSampleTestReport { BSPVersion = BSP.BSP.PackageVersion, BSPID = BSP.BSP.PackageID };
         }
 
         //Used to track samples that could not be parsed, so we can compare the statistics between BSP versions.
