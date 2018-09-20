@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using BSPGenerationTools;
 using VendorSampleParserEngine;
+using System.Text.RegularExpressions;
 
 namespace NordicVendorSampleParser
 {
@@ -91,10 +92,13 @@ namespace NordicVendorSampleParser
             {
             }
 
+            Regex rgSystemFile = new Regex(".*/system_nrf5.*\\.c$");
+
             protected override void AdjustVendorSampleProperties(VendorSample vs)
             {
                 base.AdjustVendorSampleProperties(vs);
                 vs.BSPReferencesAreCopyable = true;
+                vs.SourceFiles = vs.SourceFiles.Where(s => !rgSystemFile.IsMatch(s)).ToArray();
             }
 
             protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir)
