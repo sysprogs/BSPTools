@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.CppUTest</ID>
 	<Name>CppUTest</Name>
-	<Version>3.8r1</Version>
+	<Version>3.8r2</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
 			<HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
