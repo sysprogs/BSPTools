@@ -85,6 +85,17 @@
 			</Patches>			
 		</CopyJob>
 		<CopyJob>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$\googlemock</SourceFolder>
+			<FilesToCopy>src\*.*;include\*.*</FilesToCopy>
+			<TargetFolder></TargetFolder>
+			<AutoIncludeMask>-*</AutoIncludeMask>
+			<AdditionalIncludeDirs>include;.</AdditionalIncludeDirs>
+			<ProjectInclusionMask>-*\gmock-all.cc;-*\gmock_main.cc;*.cc;*.h</ProjectInclusionMask>
+				<SmartFileConditions>
+					<string>Build GoogleMock sources|src\\.*</string>
+				</SmartFileConditions>
+		</CopyJob>
+		<CopyJob>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\platforms</SourceFolder>
 			<FilesToCopy>*</FilesToCopy>
 			<TargetFolder>Platforms</TargetFolder>

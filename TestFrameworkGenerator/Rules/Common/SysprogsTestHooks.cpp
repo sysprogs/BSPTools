@@ -195,7 +195,14 @@ void __attribute__((noinline)) SysprogsTestHook_SelectTests(int testCount, void 
     asm("nop");
 }
 
+#ifdef ANDROID
+extern "C" int __attribute__((weak)) main()
+{
+    return 0;
+}
+#else
 extern "C" int main();
+#endif
 
 void __attribute__((noinline)) SysprogsTestHook_TestStarting(void *pTest)
 {

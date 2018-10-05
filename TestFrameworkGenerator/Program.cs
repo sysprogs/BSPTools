@@ -59,17 +59,21 @@ namespace CppUTest
             var rules = XmlTools.LoadObject<TestFrameworkRules>(Path.Combine(dummyBSPBuilder.Directories.RulesDir, "rules.xml"));
             List<string> projectFiles = new List<string>();
             ToolFlags flags = new ToolFlags();
-            foreach(var job in rules.CopyJobs)
+
+            if (fwObj.Common == null)
+                fwObj.Common = new TestFrameworkDefinition.TestPlatformBuild();
+
+
+            foreach (var job in rules.CopyJobs)
             {
-                PropertyList configurableProperties = null;
-                flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null, ref configurableProperties));
+                flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null, ref fwObj.Common.ConfigurableProperties));
             }
 
             Dictionary<string, FileCondition> matchedConditions = new Dictionary<string, FileCondition>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var cond in dummyBSPBuilder.MatchedFileConditions)
                 matchedConditions[cond.FilePath] = cond;
 
-            var unconditionalFiles = projectFiles.Where(f => !matchedConditions.ContainsKey(f));
+            var platformIndepenentFiles = projectFiles.Where(f => !matchedConditions.ContainsKey(f)).ToList();
             List<string> embeddedFiles = new List<string>();
             List<string> linuxFiles = new List<string>();
             foreach(var f in projectFiles)
@@ -78,27 +82,28 @@ namespace CppUTest
                 if (matchedConditions.TryGetValue(f, out cond))
                 {
                     var eq = (cond.ConditionToInclude as Condition.Equals);
-                    if (eq?.Expression != "$$platform$$")
-                        throw new Exception("Unexpected condition for " + f);
-                    switch(eq.ExpectedValue)
+                    if (eq?.Expression == "$$platform$$")
                     {
-                        case "embedded":
-                            embeddedFiles.Add(f);
-                            break;
-                        case "linux":
-                            linuxFiles.Add(f);
-                            break;
-                        default:
-                            throw new Exception("Invalid platform condition");
+                        dummyBSPBuilder.MatchedFileConditions.Remove(cond);
+                        switch (eq.ExpectedValue)
+                        {
+                            case "embedded":
+                                embeddedFiles.Add(f);
+                                break;
+                            case "linux":
+                                linuxFiles.Add(f);
+                                break;
+                            default:
+                                throw new Exception("Invalid platform condition");
+                        }
                     }
+                    else if (!platformIndepenentFiles.Contains(f))
+                        platformIndepenentFiles.Add(f);
                 }
             }
 
-            if (fwObj.Common == null)
-                fwObj.Common = new TestFrameworkDefinition.TestPlatformBuild();
-
-            fwObj.Common.AdditionalSourceFiles = unconditionalFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f=> dummyBSPBuilder.MakeRelativePath(f)).ToArray();
-            fwObj.Common.AdditionalHeaderFiles = unconditionalFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
+            fwObj.Common.AdditionalSourceFiles = platformIndepenentFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).Select(f=> dummyBSPBuilder.MakeRelativePath(f)).ToArray();
+            fwObj.Common.AdditionalHeaderFiles = platformIndepenentFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).Select(f => dummyBSPBuilder.MakeRelativePath(f)).ToArray();
 
             fwObj.Common.AdditionalIncludeDirs = flags.IncludeDirectories?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
             fwObj.Common.AdditionalPreprocessorMacros = flags.PreprocessorMacros?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
@@ -117,6 +122,11 @@ namespace CppUTest
                 fwObj.Linux.AdditionalIncludeDirs = fwObj.Linux.AdditionalIncludeDirs?.Select(f => dummyBSPBuilder.MakeRelativePath(f))?.ToArray();
             }
 
+            foreach (var cond in dummyBSPBuilder.MatchedFileConditions)
+                cond.FilePath = dummyBSPBuilder.MakeRelativePath(cond.FilePath);    //Substitute $$SYS:BSP_ROOT$$ with $$SYS:TESTFW_BASE$$/...
+
+            fwObj.FileConditions = dummyBSPBuilder.MatchedFileConditions.ToArray();
+
             CopyAndAdjustSamples(dummyBSPBuilder, fwObj.Embedded.Samples);
             CopyAndAdjustSamples(dummyBSPBuilder, fwObj.Common.Samples);
 
@@ -132,6 +142,7 @@ namespace CppUTest
                 PackageID = fwObj.ID,
                 PackageVersion = fwObj.Version,
                 PackageDescription = fwObj.Name,
+                MinimumEngineVersion = "5.4"
             }, Path.ChangeExtension(archiveFile, ".xml"));
         }
 
@@ -170,5 +181,6 @@ namespace CppUTest
         public string PackageID;
         public string PackageDescription;
         public string PackageVersion;
+        public string MinimumEngineVersion;
     }
 }

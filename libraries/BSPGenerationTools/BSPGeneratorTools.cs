@@ -298,10 +298,6 @@ namespace BSPGenerationTools
                     {
                         if ((mem.Flags & MCUMemoryFlags.IsDefaultFLASH) == MCUMemoryFlags.IsDefaultFLASH)
                             foundMainFLASH = true;
-                        if (mem.LoadedFromMemory != null)
-                        {
-                            var foundMem = dev.MemoryMap.Memories.First(m => m.Name == mem.LoadedFromMemory) ?? throw new Exception($"Could not find memory {mem.LoadedFromMemory} referenced by {mem.Name}");
-                        }
                     }
 
                     if (!foundMainFLASH)

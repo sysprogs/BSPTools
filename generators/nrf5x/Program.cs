@@ -862,7 +862,7 @@ namespace nrf5x
             {
                 strPackageID = "com.sysprogs.arm.nordic.nrf5x";
                 strPackageDesc = "Nordic NRF52x Devices";
-                strPAckVersion = "15.0";
+                strPAckVersion = "15.2";
             }
 
 
