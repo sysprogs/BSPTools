@@ -87,9 +87,9 @@ namespace SLab_bsp_generator
         {
             List<StartupFileGenerator.InterruptVector[]> list = new List<StartupFileGenerator.InterruptVector[]>();
             list.Add(StartupFileGenerator.ParseInterruptVectors(startupFileName,
-                     @"const pFunc __Vectors.*",
+                     @"const tVectorEntry[ \t]+__Vectors\[\][ \t]+__attribute__",
                      @"[ \t]*\};",
-                     @"([^ \t,]+)[,]?[ \t]+// ([^\(]+)",
+                     @"\{[ \t]+([^ \t]+)[ \t]+\},[ \t]+/\*(.*)\*/",
                      @"([^ \t,]+)[,]?.*",
                      @"^[ \t]*/.*",
                      null,
