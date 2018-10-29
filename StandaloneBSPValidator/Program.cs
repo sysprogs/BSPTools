@@ -353,6 +353,11 @@ namespace StandaloneBSPValidator
 
             //ToolFlags flags = new ToolFlags { CXXFLAGS = "  ", COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
 
+            if (!string.IsNullOrEmpty(vs.CLanguageStandard))
+                flags.CFLAGS += $" -std={vs.CLanguageStandard}";
+            if (!string.IsNullOrEmpty(vs.CPPLanguageStandard))
+                flags.CXXFLAGS += $" -std={vs.CPPLanguageStandard}";
+
             flags.CFLAGS += " -MD";
             flags.CXXFLAGS += " -MD";
 
@@ -499,6 +504,11 @@ namespace StandaloneBSPValidator
 
             if (!string.IsNullOrEmpty(configuredSample.Sample.Sample.LinkerScript))
                 flags.LinkerScript = VariableHelper.ExpandVariables(configuredSample.Sample.Sample.LinkerScript, bspDict, configuredSample.FrameworkParameters);
+
+            if (!string.IsNullOrEmpty(configuredSample.Sample.Sample.CLanguageStandard))
+                flags.CFLAGS += $" -std={configuredSample.Sample.Sample.CLanguageStandard}";
+            if (!string.IsNullOrEmpty(configuredSample.Sample.Sample.CPPLanguageStandard))
+                flags.CXXFLAGS += $" -std={configuredSample.Sample.Sample.CPPLanguageStandard}";
 
             flags.COMMONFLAGS += " -save-temps ";
             Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);

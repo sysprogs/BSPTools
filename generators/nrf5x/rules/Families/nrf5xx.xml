@@ -763,8 +763,16 @@
 					<Regex>^nRF51.*</Regex>
 				</Option>
 				<Option>
-					<Value>NRF52</Value>
-					<Regex>^nRF52.*</Regex>			
+					<Value>NRF52832</Value>
+					<Regex>^nRF52832.*</Regex>			
+				</Option>					
+				<Option>
+					<Value>NRF52840</Value>
+					<Regex>^nRF52840.*</Regex>			
+				</Option>					
+				<Option>
+					<Value>NRF52810</Value>
+					<Regex>^nRF52810.*</Regex>			
 				</Option>					
 			</Options>
 		</MCUClassifier>

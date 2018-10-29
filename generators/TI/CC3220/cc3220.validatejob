@@ -4,7 +4,7 @@
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
 	<DeviceRegex>CC.*</DeviceRegex>
 	<Samples>
-		<!-- <TestedSample>
+		- <TestedSample>
 			<Name>PWMLED</Name>
 			<DataSections>true</DataSections>
 			<SkipIfNotFound>true</SkipIfNotFound>
@@ -20,7 +20,7 @@
 					</KeyValue>
 				</Entries>
 			</FrameworkConfiguration>
-		</TestedSample> -->
+		</TestedSample> 
 		<TestedSample>
 			<Name>Network Terminal</Name>
 			<DataSections>true</DataSections>
