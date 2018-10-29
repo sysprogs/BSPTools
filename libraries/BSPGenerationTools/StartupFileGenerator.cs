@@ -76,7 +76,7 @@ namespace BSPGenerationTools
 
                     InterruptVector vec = new InterruptVector { Name = m.Groups[nameGroup].Value };
                     if (m.Groups.Count > commentGroup)
-                        vec.OptionalComment = m.Groups[commentGroup].Value;
+                        vec.OptionalComment = m.Groups[commentGroup].Value.Trim();
 
                     string val;
                     if (vec.Name == "0")
