@@ -10,7 +10,7 @@
     <string>com.sysprogs.arm.nordic.nrf5x.boards</string>
     <string>com.sysprogs.arm.nordic.nrf5x.libraries</string>
     <string>com.sysprogs.arm.nordic.nrf51.freertos</string>
-		 <string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
 	<string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
   </RequiredFrameworks>
   <AdditionalSourcesToCopy>
@@ -25,7 +25,11 @@
   </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
-	      <KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.clock_driver_legacy</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
         <Value>yes</Value>
       </KeyValue>
