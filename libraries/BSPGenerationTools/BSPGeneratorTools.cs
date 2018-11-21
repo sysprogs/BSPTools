@@ -932,7 +932,7 @@ namespace BSPGenerationTools
 
     public static class BSPGeneratorTools
     {
-        static CortexCore ParseCoreName(string core)
+        public static CortexCore ParseCoreName(string core)
         {
             switch (core.Replace(" ", ""))
             {

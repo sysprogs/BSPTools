@@ -19,7 +19,7 @@
 			</CopyJob>				
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples</SourceFolder>
-				<FilesToCopy>*</FilesToCopy>
+				<FilesToCopy>-*.obj;-*.map;*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 			</CopyJob>	
@@ -242,7 +242,7 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos</SourceFolder>
 				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*MSP432*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
-				<FilesToCopy>*</FilesToCopy>
+				<FilesToCopy>-*FreeRTOSConfig.h;-*.obj;*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
 				<TargetFolder>kernel\freertos</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
@@ -271,11 +271,11 @@
 				</Patches> 
 			</CopyJob>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\..\FreeRTOSv10.1.0\FreeRTOS</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\FreeRTOSv10.1.1\FreeRTOS</SourceFolder>
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<FilesToCopy>source\portable\MemMang\*;source\portable\GCC\ARM_CM3\*;source\portable\GCC\ARM_CM4F\*;-source\portable\*;source\*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
-				<TargetFolder>FreeRTOS</TargetFolder>
+				<TargetFolder>FreeRTOSv10.1.1\FreeRTOS</TargetFolder>
 				<AdditionalIncludeDirs>source\include;source\portable\GCC\ARM_CM3</AdditionalIncludeDirs>
 				<SmartFileConditions>
 					<string>FreeRTOS Heap Implementation|source\\portable\\MemMang\\heap_4.c=>Heap4 - contiguous heap area;source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing;source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation;source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free();source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area</string>
@@ -301,8 +301,8 @@
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos\builds\CC3220SF_LAUNCHXL\release</SourceFolder>
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<FilesToCopy>FreeRTOSConfig.h</FilesToCopy>
-				<AutoIncludeMask>-*</AutoIncludeMask>	
-				<TargetFolder>FreeRTOS\source\include</TargetFolder>
+				<!--AutoIncludeMask>-*</AutoIncludeMask-->	
+				<TargetFolder>FreeRTOSconfig\source\include</TargetFolder>
 			</CopyJob>	
 			</CopyJobs>
 			<AdditionalSystemVars>
