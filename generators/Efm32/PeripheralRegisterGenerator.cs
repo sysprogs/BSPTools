@@ -39,7 +39,7 @@ namespace SLab_bsp_generator
 
             foreach (var fn in Directory.GetFiles(familyDirectory, fam + "*.h"))
             {
-                string sr = "^" + fam + "[0-9]+.*";
+                string sr = "^" + fam + "[0-9]*.*";
                 if (!Regex.IsMatch(Path.GetFileName(fn), sr, RegexOptions.IgnoreCase))
                     continue;
 
@@ -211,7 +211,7 @@ namespace SLab_bsp_generator
             int sizeArray;
             foreach (var ln in File.ReadAllLines(pFileName))
             {
-                if (ln == "typedef struct")
+                if (ln.Contains("typedef struct"))
                 {
                     lstReg = new List<HardwareRegister>();
                     aStartCheckReg = true;

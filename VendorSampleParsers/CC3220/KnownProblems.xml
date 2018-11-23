@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<KnownSampleProblemDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Entries>
+		<ErrorEntry>
+            <ID>OTA_VENDOR_TOKEN1</ID>
+            <ErrorMessage>error: #error "Please define your personal cloud account token in OTA_VENDOR_TOKEN above</ErrorMessage>
+            <Description>Define your personal cloud account token in OTA_VENDOR_TOKEN above</Description>
+        </ErrorEntry>
+		<ErrorEntry>
+            <ID>-std=c99</ID>
+            <ErrorMessage>error: #error "When compiling with TI-POSIX, you must define -std=c99 (or later).</ErrorMessage>
+            <Description>error: #error "When compiling with TI-POSIX, you must define -std=c99 (or later).</Description>
+        </ErrorEntry>
+	</Entries>
+</KnownSampleProblemDatabase>

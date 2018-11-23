@@ -653,7 +653,8 @@ namespace StandaloneBSPValidator
 
             if (!success)
             {
-                vendorSample.AllDependencies = null;
+                if(vendorSample !=  null)
+                     vendorSample.AllDependencies = null;
                 return new TestResult(TestBuildResult.Failed, Path.Combine(mcuDir, "build.log"));
             }
 
