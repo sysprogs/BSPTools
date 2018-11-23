@@ -20,27 +20,40 @@ namespace KeilProjectImporter
 
         public string UniqueID => "com.sysprogs.project_importers.keil";
 
-        static string TryAdjustPath(string baseDir, string path, IProjectImportService service)
+        public object SettingsControl { get; } = new GUI.KeilImporterSettingsControl();
+        public object Settings
+        {
+            get => _Settings;
+            set => _Settings = value as KeilProjectImporterSettings;
+        }
+
+        KeilProjectImporterSettings _Settings = new KeilProjectImporterSettings();
+
+        string TryAdjustPath(string baseDir, string path, IProjectImportService service)
         {
             try
             {
                 path = path.Trim('\"');
                 var finalPath = Path.GetFullPath(Path.Combine(baseDir, path));
-                //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
-                if (finalPath.IndexOf("\\RVDS\\", StringComparison.InvariantCultureIgnoreCase) != -1)
-                {
-                    var substitute = finalPath.ToLower().Replace("\\rvds\\", "\\gcc\\");
-                    if (File.Exists(substitute) || Directory.Exists(substitute))
-                        finalPath = substitute;
-                }
-                if (finalPath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase) && finalPath.IndexOf("_Keil", StringComparison.InvariantCultureIgnoreCase) != -1)
-                {
-                    string dir = Path.GetDirectoryName(finalPath);
-                    string fn = Path.GetFileName(finalPath);
 
-                    var substitute = Path.Combine(dir, Path.ChangeExtension(fn.ToLower().Replace("_keil", "_gcc"), ".a"));
-                    if (File.Exists(substitute))
-                        finalPath = substitute;
+                if (!_Settings.UseKeilToolchain)
+                {
+                    //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
+                    if (finalPath.IndexOf("\\RVDS\\", StringComparison.InvariantCultureIgnoreCase) != -1)
+                    {
+                        var substitute = finalPath.ToLower().Replace("\\rvds\\", "\\gcc\\");
+                        if (File.Exists(substitute) || Directory.Exists(substitute))
+                            finalPath = substitute;
+                    }
+                    if (finalPath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase) && finalPath.IndexOf("_Keil", StringComparison.InvariantCultureIgnoreCase) != -1)
+                    {
+                        string dir = Path.GetDirectoryName(finalPath);
+                        string fn = Path.GetFileName(finalPath);
+
+                        var substitute = Path.Combine(dir, Path.ChangeExtension(fn.ToLower().Replace("_keil", "_gcc"), ".a"));
+                        if (File.Exists(substitute))
+                            finalPath = substitute;
+                    }
                 }
                 return finalPath;
             }
@@ -84,7 +97,7 @@ namespace KeilProjectImporter
                 {
                     string path = file.SelectSingleNode("FilePath")?.InnerText;
                     string type = file.SelectSingleNode("FileType")?.InnerText;
-                    if (type == "2")
+                    if (type == "2" && !_Settings.UseKeilToolchain)
                     {
                         //This is an assembly file. Keil uses a different assembly syntax than GCC, so we cannot include this file into the project.
                         //The end user will need to include a GCC-specific replacement manually (unless this is the startup file, in which case VisualGDB
@@ -117,7 +130,7 @@ namespace KeilProjectImporter
                 DeviceNameMask = new Regex(deviceName.Replace("x", ".*") + ".*"),
                 OriginalProjectFile = parameters.ProjectFile,
                 RootDirectory = rootDir,
-                GNUTargetID = "arm-eabi",
+                GNUTargetID = _Settings.UseKeilToolchain ? "arm-none-eabi" : "arm-eabi",
                 ReferencedFrameworks = new string[0],   //Unless this is explicitly specified, VisualGDB will try to reference the default frameworks (STM32 HAL) that will conflict with the STM32CubeMX-generated files.
 
                 Configurations = new[]
@@ -133,5 +146,10 @@ namespace KeilProjectImporter
                 }
             };
         }
+    }
+
+    public class KeilProjectImporterSettings
+    {
+        public bool UseKeilToolchain { get; set; }
     }
 }

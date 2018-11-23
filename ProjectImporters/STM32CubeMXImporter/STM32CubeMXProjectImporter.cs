@@ -19,6 +19,8 @@ namespace STM32CubeMXImporter
         public string HelpURL => "https://visualgdb.com/tutorials/arm/stm32/cube/";
 
         public string UniqueID => "com.sysprogs.project_importers.stm32.cubemx";
+        public object SettingsControl => null;
+        public object Settings { get; set; }
 
         public ImportedExternalProject ImportProject(ProjectImportParameters parameters, IProjectImportService service)
         {

@@ -139,6 +139,9 @@ namespace IARProjectFileImporter
 
         public string UniqueID => "com.sysprogs.project_importers.iar";
 
+        public object SettingsControl => null;
+        public object Settings { get; set; }
+
         public ImportedExternalProject ParseEIPFile(string pFileEwp, IProjectImportService service)
         {
             PRJ_DIR = Path.GetDirectoryName(pFileEwp);
