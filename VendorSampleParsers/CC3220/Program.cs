@@ -87,9 +87,14 @@ namespace CC3220VendorSampleParser
 
         class CC3220VendorSampleParser : VendorSampleParser
         {
+            readonly string GCC_ARMCOMPILER_DIR;
+            readonly string XDCTOOLSCORE;
+
             public CC3220VendorSampleParser()
                 : base(@"..\..\generators\TI\CC3220\output", "CC3220 SDK Samples")
             {
+                GCC_ARMCOMPILER_DIR = _SettingsKey.GetValue("GNUARMDirectory") as string ?? throw new Exception("Please specify the GNUARM directory via registry");
+                XDCTOOLSCORE = _SettingsKey.GetValue("XDCToolsDirectory") as string ?? throw new Exception("Please specify the XDCTools directory via registry");
             }
 
             protected override void AdjustVendorSampleProperties(VendorSample vs)
@@ -110,10 +115,11 @@ namespace CC3220VendorSampleParser
                     file.WriteLine(strlog);
                 }
                 Console.WriteLine(strlog);
-            }        string ToAbsolutePath(string strDir,string SDKDir,Dictionary<string,string> constDir)
+            }
+            string ToAbsolutePath(string strDir, string SDKDir, Dictionary<string, string> constDir)
             {
                 foreach (var cd in constDir)
-                    if(strDir.Contains(cd.Key))
+                    if (strDir.Contains(cd.Key))
                         strDir = strDir.Replace($"$({cd.Key})", cd.Value);
 
                 return strDir.Replace("$(GCC_ARMCOMPILER)", GCC_ARMCOMPILER).Replace("$(SIMPLELINK_CC32XX_SDK_INSTALL_DIR)", SDKDir).Replace("$(FREERTOS_INSTALL_DIR)", FREERTOS_INSTALL_DIR).
@@ -132,10 +138,10 @@ namespace CC3220VendorSampleParser
                         outAbsDir = outAbsDir.Remove(outAbsDir.LastIndexOf('\\'));
                     else
                         break;
-                    strDir  = strDir.Remove(0, 2);
+                    strDir = strDir.Remove(0, 2);
 
                     if (strDir != "" && strDir.StartsWith("/"))
-                        strDir  = strDir.Remove(0, 1);
+                        strDir = strDir.Remove(0, 1);
                 }
 
                 return outAbsDir;
@@ -150,7 +156,7 @@ namespace CC3220VendorSampleParser
                 List<string> splitArgs = new List<string>();
                 List<string> lstDef = new List<string>();
                 List<string> lstDirLib = new List<string>();
-                Dictionary<string,string> lstConstDir = new Dictionary<string, string>();
+                Dictionary<string, string> lstConstDir = new Dictionary<string, string>();
                 string aCurDir = Path.GetDirectoryName(nameFile);
                 Boolean flFlags = false;
 
@@ -163,10 +169,10 @@ namespace CC3220VendorSampleParser
                     if (flFlags)
                     {
                         if (ln.Contains(" -I") || ln.Contains(" \"-I"))
-                            lstFileInc.Add(GetUpDir(ToAbsolutePath(ln.Replace("CFLAGS =", "").Replace("\"", "").Replace("-I", "").Trim(' ','\\'),SDKdir, lstConstDir),aCurDir));
+                            lstFileInc.Add(GetUpDir(ToAbsolutePath(ln.Replace("CFLAGS =", "").Replace("\"", "").Replace("-I", "").Trim(' ', '\\'), SDKdir, lstConstDir), aCurDir));
 
                         if (ln.Contains(" -D"))
-                            lstDef.Add(ln.Replace("-D", "").Replace("\"", "").Trim(' ','\\'));
+                            lstDef.Add(ln.Replace("-D", "").Replace("\"", "").Trim(' ', '\\'));
                     }
 
 
@@ -179,16 +185,16 @@ namespace CC3220VendorSampleParser
                         else
                             vs.CPPLanguageStandard = ln.Replace("-std=", "").Trim('\\', ' ', '\t');
 
-                        if (ln.Contains(".obj:"))
+                    if (ln.Contains(".obj:"))
                     {
                         string file = ln.Remove(0, ln.IndexOf(":") + 1).Split('$')[0].Trim(' ');
-                        lstFileC.Add(Path.Combine(GetUpDir(file, aCurDir), file.Replace("../","")));
+                        lstFileC.Add(Path.Combine(GetUpDir(file, aCurDir), file.Replace("../", "")));
                     }
 
                     if (ln.Contains("\"-L"))
                     {
-                        dirLib = ToAbsolutePath(ln.Replace("-L", "").Replace("\"", "").Replace("LFLAGS =", "").Trim(' ', '\\').Replace("$(SIMPLELINK_CC32XX_SDK_INSTALL_DIR)", "$$SYS:BSP_ROOT$$"), SDKdir,lstConstDir);
-                        lstDirLib.Add("-L"+dirLib);
+                        dirLib = ToAbsolutePath(ln.Replace("-L", "").Replace("\"", "").Replace("LFLAGS =", "").Trim(' ', '\\').Replace("$(SIMPLELINK_CC32XX_SDK_INSTALL_DIR)", "$$SYS:BSP_ROOT$$"), SDKdir, lstConstDir);
+                        lstDirLib.Add("-L" + dirLib);
                     }
 
                     if (ln.Contains(" -l:"))
@@ -203,7 +209,7 @@ namespace CC3220VendorSampleParser
                 if (lstFileInc.Where(f => f.Contains("$")).Count() > 0)
                     throw new Exception("Path contains macros " + string.Join(", ", lstFileInc.Where(f => f.Contains("$"))));
 
-               vs.IncludeDirectories = lstFileInc.ToArray();
+                vs.IncludeDirectories = lstFileInc.ToArray();
                 vs.PreprocessorMacros = lstDef.ToArray();
                 vs.SourceFiles = lstFileC.ToArray();
                 vs.DeviceID = "CC3220";
@@ -217,8 +223,6 @@ namespace CC3220VendorSampleParser
 
             string FREERTOS_INSTALL_DIR;
             string GCC_ARMCOMPILER;
-            string GCC_ARMCOMPILER_DIR = @"c:\toolchain1";
-            const string XDCTOOLSCORE = @"c:\ti\xdctools_3_50_08_24_core";//c:\TI\xdctools_3_50_07_20_core";
 
             void UpdateImportMakefile(string SDKdir)
             {
@@ -228,32 +232,38 @@ namespace CC3220VendorSampleParser
 
                 FREERTOS_INSTALL_DIR = Path.Combine(SDKdir, "FreeRTOSv10.1.1");
 
-                for ( int c = 0; c< filestr.Count();c++)
+                for (int c = 0; c < filestr.Count(); c++)
                 {
                     if (filestr[c].StartsWith("FREERTOS_INSTALL_DIR"))
-                        filestr[c] = "FREERTOS_INSTALL_DIR   ?= "+ FREERTOS_INSTALL_DIR.Replace("\\","/");
+                        filestr[c] = "FREERTOS_INSTALL_DIR   ?= " + FREERTOS_INSTALL_DIR.Replace("\\", "/");
                     if (filestr[c].StartsWith("GCC_ARMCOMPILER"))
                         filestr[c] = "GCC_ARMCOMPILER   ?= " + GCC_ARMCOMPILER_DIR.Replace("\\", "/");
-                 }
+                }
 
                 File.Delete(impfile);
-                File.WriteAllLines(impfile,filestr);
+                File.WriteAllLines(impfile, filestr);
             }
-            private void  BuildFreeRtosKernel(string SDKDirfr)
+
+            private void BuildFreeRtosKernel(string SDKDirfr)
             {
-                string makeExecutableTI = Path.Combine(XDCTOOLSCORE,"gmake");
+                string makeExecutableTI = Path.Combine(XDCTOOLSCORE, "gmake");
 
                 LogLine($"Start build FreeRtos Kernel lib " + SDKDirfr);
 
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = $"/c {makeExecutableTI} -j{Environment.ProcessorCount} VERBOSE=1 > logfr.txt 2>&1",
+                    Arguments = $"/c {makeExecutableTI} clean",
                     UseShellExecute = false,
                     WorkingDirectory = SDKDirfr
                 };
 
-             
+                var cleanAction = Process.Start(startInfo);
+                cleanAction.WaitForExit();
+                if (cleanAction.ExitCode != 0)
+                    throw new Exception("Failed to clean" + SDKDirfr);
+                startInfo.Arguments = $"/c {makeExecutableTI} -j{Environment.ProcessorCount} VERBOSE=1 > logfr.txt 2>&1";
+
                 var compiler = Process.Start(startInfo);
                 compiler.WaitForExit();
                 bool buildSucceeded;
@@ -262,31 +272,30 @@ namespace CC3220VendorSampleParser
 
                 Console.ForegroundColor = ConsoleColor.Green;
 
-                if (Directory.GetFiles(SDKDirfr, "*.lib",SearchOption.AllDirectories).Count() == 0)
+                if (Directory.GetFiles(SDKDirfr, "*.lib", SearchOption.AllDirectories).Count() == 0)
                     buildSucceeded = false;
 
                 if (!buildSucceeded)
-                  Console.ForegroundColor = ConsoleColor.Red;
-                
+                    Console.ForegroundColor = ConsoleColor.Red;
+
                 LogLine($"FreeRtos kernel lib: " + (buildSucceeded ? "Succeeded" : "Failed "));
                 Console.ForegroundColor = ConsoleColor.Gray;
             }
+
             protected override ParsedVendorSamples ParseVendorSamples(string SDKdir, IVendorSampleFilter filter)
             {
-              
                 string makeExecutable = ToolchainDirectory + "/bin/make";
 
                 string[] ExampleDirs = Directory.GetFiles(Path.Combine(SDKdir, "examples"), "Makefile", SearchOption.AllDirectories).
-                                                                    Where(s => (s.Contains("gcc") && !s.Contains("tirtos") 
+                                                                    Where(s => (s.Contains("gcc") && !s.Contains("tirtos")
                                                                     && !File.ReadAllText(s).Contains("$(NODE_JS)")
-                                                                    )). ToArray();
-               
+                                                                    )).ToArray();
+
                 GCC_ARMCOMPILER = ((string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue("SysGCC-arm-eabi-7.2.0")).Replace("\\arm-eabi", "");
                 if (GCC_ARMCOMPILER == null)
                     throw new Exception("Cannot locate toolchain path from registry");
 
                 BuildFreeRtosKernel(Path.Combine(SDKdir, @"kernel\freertos\builds\CC3220S_LAUNCHXL\release\gcc"));
-
                 BuildFreeRtosKernel(Path.Combine(SDKdir, @"kernel\freertos\builds\CC3220SF_LAUNCHXL\release\gcc"));
 
                 UpdateImportMakefile(SDKdir);
@@ -305,15 +314,15 @@ namespace CC3220VendorSampleParser
                         continue;
 
                     //if (!makefile.Contains("capturepwmdisplay"))
-                      //  continue;
+                    //  continue;
 
-                     //  if (count++ ==3)
-                       //   break;
+                    //  if (count++ ==3)
+                    //   break;
 
                     string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("gcc\\Makefile", "");
-                   
+
                     var nameLog = Path.Combine(Path.GetDirectoryName(makefile), "log.txt");
-                    
+
                     Console.WriteLine($"Compiling {nameExampl} ...");
 
                     string namefl = "noname";
@@ -321,7 +330,7 @@ namespace CC3220VendorSampleParser
                         Console.WriteLine("NO NAME IN " + makefile);
                     else
                         namefl = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("NAME")).Split('=')[1].Trim(' ').ToUpper();
-                       
+
 
                     var sampleID = new VendorSampleID
                     {
@@ -334,19 +343,24 @@ namespace CC3220VendorSampleParser
                     var startInfo = new ProcessStartInfo
                     {
                         FileName = "cmd.exe",
-                        Arguments = $"/c {makeExecutable} -j{Environment.ProcessorCount} VERBOSE=1 > log.txt 2>&1",
+                        Arguments = $"/c {makeExecutable} clean",
                         UseShellExecute = false,
                         WorkingDirectory = Path.GetDirectoryName(makefile)
                     };
+
+                    var cleanAction = Process.Start(startInfo);
+                    cleanAction.WaitForExit();
+                    if (cleanAction.ExitCode != 0)
+                        throw new Exception("Failed to clean" + makefile);
+
+                    startInfo.Arguments = $"/c {makeExecutable} -j{Environment.ProcessorCount} VERBOSE=1 > log.txt 2>&1";
 
                     var compiler = Process.Start(startInfo);
                     samplesDone++;
 
                     compiler.WaitForExit();
 
-                    bool buildSucceeded;
-
-                    buildSucceeded = compiler.ExitCode == 0;
+                    bool buildSucceeded = compiler.ExitCode == 0;
 
                     Console.ForegroundColor = ConsoleColor.Green;
 
@@ -368,7 +382,7 @@ namespace CC3220VendorSampleParser
                         continue;
                     }
 
-                    var vs = ParseMakFile (makefile,SDKdir);
+                    var vs = ParseMakFile(makefile, SDKdir);
                     vs.Path = Path.GetDirectoryName(makefile);
                     while (Directory.GetFiles(vs.Path, "*.c").Length == 0)
                         vs.Path = Path.GetDirectoryName(vs.Path);
@@ -387,7 +401,7 @@ namespace CC3220VendorSampleParser
                 return new ParsedVendorSamples { VendorSamples = allSamples.ToArray(), FailedSamples = failedSamples.ToArray() };
             }
         }
-        
+
         static void Main(string[] args) => new CC3220VendorSampleParser().Run(args);
 
         //-----------------------------------------------
