@@ -31,6 +31,12 @@ namespace SLab_bsp_generator
                 ShortName = "SiLab_EFM32";
             }
 
+            protected override LinkerScriptTemplate GetTemplateForMCU(MCUBuilder mcu)
+            {
+                var template = base.GetTemplateForMCU(mcu).ShallowCopy();
+                template.SymbolAliases = new[] { new SymbolAlias { Name = "__Vectors", Target = "g_pfnVectors" } };
+                return template;
+            }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
             {
@@ -444,7 +450,7 @@ namespace SLab_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "5.1.2"
+                PackageVersion = "5.6.0"
             };
 
             bspBuilder.Save(bsp, true);

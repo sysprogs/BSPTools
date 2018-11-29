@@ -370,6 +370,7 @@ namespace StandaloneBSPValidator
             flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories).Distinct().ToArray();
             flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
 
+            flags.LDFLAGS = flags.LDFLAGS + " " + vs.LDFLAGS;
             flags = LoadedBSP.ConfiguredMCU.ExpandToolFlags(flags, bspDict, null);
 
             Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);

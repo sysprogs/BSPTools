@@ -27,10 +27,11 @@ namespace VendorSampleParserEngine
 
         readonly KnownSampleProblemDatabase _KnownProblems;
 
+        protected readonly RegistryKey _SettingsKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPTools\VendorSampleParsers");
+
         protected VendorSampleParser(string testedBSPDirectory, string sampleCatalogName)
         {
             VendorSampleCatalogName = sampleCatalogName;
-            RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPTools\VendorSampleParsers");
 
             var baseDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"..\.."));
 
@@ -45,8 +46,8 @@ namespace VendorSampleParserEngine
 
             var toolchainType = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName)).GNUTargetID ?? throw new Exception("The BSP does not define GNU target ID.");
 
-            TestDirectory = key.GetValue("TestDirectory") as string ?? throw new Exception("Registry settings not present. Please apply 'settings.reg'");
-            ToolchainDirectory = key.CreateSubKey("ToolchainDirectories").GetValue(toolchainType) as string ?? throw new Exception($"Location for {toolchainType} toolchain is not configured. Please apply 'settings.reg'");
+            TestDirectory = _SettingsKey.GetValue("TestDirectory") as string ?? throw new Exception("Registry settings not present. Please apply 'settings.reg'");
+            ToolchainDirectory = _SettingsKey.CreateSubKey("ToolchainDirectories").GetValue(toolchainType) as string ?? throw new Exception($"Location for {toolchainType} toolchain is not configured. Please apply 'settings.reg'");
 
             var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(ToolchainDirectory)));
             BSP = LoadedBSP.Load(new BSPEngine.BSPSummary(Environment.ExpandEnvironmentVariables(Path.GetFullPath(BSPDirectory))), toolchain);
