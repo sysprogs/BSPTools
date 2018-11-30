@@ -142,7 +142,6 @@
                                         <Setter Property="Text" Value="If rebuilt since last load"/>
                                     </DataTrigger>
                                 </Style.Triggers>
-                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ESPxxOpenOCDSettingsControl}}"/>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
