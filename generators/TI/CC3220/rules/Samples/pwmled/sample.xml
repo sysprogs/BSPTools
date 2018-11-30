@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Name>PWMLED</Name>
+  <Description>A very basic sample demonstrating how to control the LEDs using the PWM functions.</Description>
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <BinaryFiles />
    <RequiredFrameworks>

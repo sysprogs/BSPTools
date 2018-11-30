@@ -83,6 +83,18 @@ namespace CC3220VendorSampleParser
                 {
                 };
             }
+
+            protected override string BuildVirtualSamplePath(string originalPath)
+            {
+                string[] components = originalPath.Split('/');
+                int trimAtEnd = 0;
+                if (components.Last() == "freertos")
+                    trimAtEnd++;
+
+                components = components.Skip(4).Take(components.Length - 4 - trimAtEnd).ToArray();
+
+                return string.Join("\\", components);
+            }
         }
 
         class CC3220VendorSampleParser : VendorSampleParser
@@ -243,7 +255,6 @@ namespace CC3220VendorSampleParser
 
 
                 var relativePathComponents = relativePath.Split('\\');
-                vs.VirtualPath = string.Join("\\", relativePathComponents.Skip(2).Reverse().Skip(2).Reverse());
                 vs.UserFriendlyName += "-" + relativePathComponents[0];
 
                 return vs;

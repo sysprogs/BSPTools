@@ -249,7 +249,7 @@ namespace BSPGenerationTools
                 s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
 
                 s.Path = mapper.MapPath(s.Path);
-                s.VirtualPath = BuildVirtualSamplePath(s.Path) ?? s.VirtualPath;
+                s.VirtualPath = BuildVirtualSamplePath(s.Path);
 
                 if (s.LinkerScript != null)
                 {

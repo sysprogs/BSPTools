@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Name>Network Terminal</Name>
+  <Description>A comprehensive demo of the Wi-Fi functionality controlled via an on-board UART port.</Description>
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <BinaryFiles />
    <RequiredFrameworks>
