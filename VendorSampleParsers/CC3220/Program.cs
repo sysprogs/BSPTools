@@ -149,7 +149,7 @@ namespace CC3220VendorSampleParser
 
             FrameworkLocator _FrameworkLocator;
 
-            VendorSample ParseMakFile(string nameFile, string SDKdir)
+            VendorSample ParseMakFile(string nameFile, string relativePath, string SDKdir)
             {
                 VendorSample vs = new VendorSample();
                 List<string> lstFileC = new List<string>();
@@ -169,7 +169,12 @@ namespace CC3220VendorSampleParser
                     if (flFlags)
                     {
                         if (ln.Contains(" -I") || ln.Contains(" \"-I"))
+                        {
+                            if (ln.Contains("$(GCC_ARMCOMPILER)"))
+                                continue;   //Toolchain-provided header directories should be handled automatically by toolchain itself.
+
                             lstFileInc.Add(GetUpDir(ToAbsolutePath(ln.Replace("CFLAGS =", "").Replace("\"", "").Replace("-I", "").Trim(' ', '\\'), SDKdir, lstConstDir), aCurDir));
+                        }
 
                         if (ln.Contains(" -D"))
                             lstDef.Add(ln.Replace("-D", "").Replace("\"", "").Trim(' ', '\\'));
@@ -213,8 +218,19 @@ namespace CC3220VendorSampleParser
                 vs.SourceFiles = lstFileC.ToArray();
                 vs.Configuration = new VendorSampleConfiguration
                 {
-                    Frameworks = referencedFrameworks.Where(f => f != null).ToArray()
+                    Frameworks = referencedFrameworks.Where(f => f != null).ToArray(),
                 };
+
+                if (vs.Configuration.Frameworks.Contains("com.sysprogs.arm.ti.cc3220.freertos"))
+                {
+                    AddConfigurationEntries(ref vs.Configuration.Configuration, "com.sysprogs.bspoptions.FreeRTOS_Heap_Implementation=Heap4 - contiguous heap area", "com.sysprogs.bspoptions.FreeRTOS_Port=Software FP");
+                    AddConfigurationEntries(ref vs.Configuration.MCUConfiguration, "com.sysprogs.bspoptions.arm.floatmode=-mfloat-abi=soft");
+                }
+
+                if (vs.Configuration.Frameworks.Contains("com.sysprogs.arm.ti.cc3220.mqtt"))
+                {
+                    AddConfigurationEntries(ref vs.Configuration.Configuration, "com.sysprogs.bspoptions.MQTT_Client=1", "com.sysprogs.bspoptions.MQTT_Server=1");
+                }
 
                 const string BoardSuffix = "_LAUNCHXL";
                 vs.DeviceID = nameFile.Split('\\').Last(component => component.EndsWith(BoardSuffix, StringComparison.InvariantCultureIgnoreCase));
@@ -224,7 +240,27 @@ namespace CC3220VendorSampleParser
                     vs.UserFriendlyName = "noname";
                 else
                     vs.UserFriendlyName = File.ReadAllLines(Path.Combine(aCurDir, "Makefile")).Single(ln => ln.StartsWith("NAME")).Split('=')[1].Trim(' ').ToUpper();
+
+
+                var relativePathComponents = relativePath.Split('\\');
+                vs.VirtualPath = string.Join("\\", relativePathComponents.Skip(2).Reverse().Skip(2).Reverse());
+                vs.UserFriendlyName += "-" + relativePathComponents[0];
+
                 return vs;
+            }
+
+            private void AddConfigurationEntries(ref PropertyDictionary2 configuration, params string[] entries)
+            {
+                PropertyDictionary2.KeyValue[] objs = entries.Select(e =>
+                {
+                    int idx = e.IndexOf('=');
+                    return new PropertyDictionary2.KeyValue { Key = e.Substring(0, idx), Value = e.Substring(idx + 1) };
+                }).ToArray();
+
+                if (configuration == null)
+                    configuration = new PropertyDictionary2 { Entries = objs };
+                else
+                    configuration.Entries = configuration.Entries.Concat(objs).ToArray();
             }
 
             string FREERTOS_INSTALL_DIR;
@@ -294,7 +330,8 @@ namespace CC3220VendorSampleParser
 
                 string makeExecutable = ToolchainDirectory + "/bin/make";
 
-                string[] ExampleDirs = Directory.GetFiles(Path.Combine(SDKdir, "examples"), "Makefile", SearchOption.AllDirectories).
+                string baseExampleDir = Path.Combine(SDKdir, "examples");
+                string[] exampleDirs = Directory.GetFiles(baseExampleDir, "Makefile", SearchOption.AllDirectories).
                                                                     Where(s => (s.Contains("gcc") && !s.Contains("tirtos")
                                                                     && !File.ReadAllText(s).Contains("$(NODE_JS)")
                                                                     )).ToArray();
@@ -314,18 +351,11 @@ namespace CC3220VendorSampleParser
 
                 string outputDir = Path.Combine(TestDirectory, "_MakeBuildLogs");
                 List<UnparseableVendorSample> failedSamples = new List<UnparseableVendorSample>();
-                int count = 0;
 
-                foreach (var makefile in ExampleDirs)
+                foreach (var makefile in exampleDirs)
                 {
                     if (!makefile.Contains("gcc"))
                         continue;
-
-                    //if (!makefile.Contains("capturepwmdisplay"))
-                    //  continue;
-
-                    //  if (count++ ==3)
-                    //   break;
 
                     string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("gcc\\Makefile", "");
 
@@ -380,7 +410,7 @@ namespace CC3220VendorSampleParser
                         failedSamples.Add(new UnparseableVendorSample { BuildLogFile = nameLog, ID = sampleID });
                         Console.ForegroundColor = ConsoleColor.Red;
                     }
-                    LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
+                    LogLine($"{samplesDone}/{exampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
                     Console.ForegroundColor = ConsoleColor.Gray;
 
                     if (!File.Exists(nameLog))
@@ -390,7 +420,9 @@ namespace CC3220VendorSampleParser
                         continue;
                     }
 
-                    var vs = ParseMakFile(makefile, SDKdir);
+                    string relativePath = makefile.Substring(baseExampleDir.Length + 1);
+
+                    var vs = ParseMakFile(makefile, relativePath, SDKdir);
                     vs.Path = Path.GetDirectoryName(makefile);
                     while (Directory.GetFiles(vs.Path, "*.c").Length == 0)
                         vs.Path = Path.GetDirectoryName(vs.Path);

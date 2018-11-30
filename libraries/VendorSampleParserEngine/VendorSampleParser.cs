@@ -336,7 +336,8 @@ namespace VendorSampleParserEngine
                     try
                     {
                         var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.'), RegexOptions.IgnoreCase);
-                        mcu = BSP.MCUs.Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
+                        //We need to find the shortest MCU name that matches the mask (e.g. for CC3220S and CC3220SF we should pick CC3220S).
+                        mcu = BSP.MCUs.OrderBy(m=>m.ExpandedMCU.ID.Length).Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
                         vs.DeviceID = mcu.ExpandedMCU.ID;
                     }
                     catch

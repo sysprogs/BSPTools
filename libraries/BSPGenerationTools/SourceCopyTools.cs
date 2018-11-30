@@ -400,7 +400,7 @@ namespace BSPGenerationTools
                 Directory.CreateDirectory(dir);
 
             List<IRenameRule> rules = new List<IRenameRule>();
-            foreach (var r in (RenameRules ?? "").Split(';').Where(s => s != ""))
+            foreach (var r in (RenameRules ?? "").Split(';').Select(s=>s.Trim()).Where(s => s != ""))
             {
                 int idx = r.IndexOf("=>");
                 rules.Add(new RenameRule { OldName = r.Substring(0, idx), NewName = r.Substring(idx + 2) });

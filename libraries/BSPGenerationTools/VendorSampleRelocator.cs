@@ -147,7 +147,7 @@ namespace BSPGenerationTools
         protected AutoDetectedFramework[] AutoDetectedFrameworks;
         protected PathMapping[] AutoPathMappings;
 
-        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref ParsedDependency[] dependencies, PropertyDictionary2 mcuConfiguration)
+        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref ParsedDependency[] dependencies, VendorSampleConfiguration existingConfiguration)
         {
             List<AutoDetectedFramework> matchedFrameworks = new List<AutoDetectedFramework>();
 
@@ -182,9 +182,13 @@ namespace BSPGenerationTools
 
             return new VendorSampleConfiguration
             {
-                Frameworks = matchedFrameworks.Select(f => f.FrameworkID).Distinct().ToArray(),
-                Configuration = new PropertyDictionary2 { Entries = matchedFrameworks.SelectMany(f => f.Configuration).Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value }).ToArray() },
-                MCUConfiguration = mcuConfiguration
+                Frameworks = matchedFrameworks.Select(f => f.FrameworkID).Concat(existingConfiguration.Frameworks ?? new string[0]).Distinct().ToArray(),
+                Configuration = new PropertyDictionary2
+                {
+                    Entries = matchedFrameworks.SelectMany(f => f.Configuration).Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value })
+                                .Concat(existingConfiguration.Configuration?.Entries ?? new PropertyDictionary2.KeyValue[0]).ToArray()
+                },
+                MCUConfiguration = existingConfiguration.MCUConfiguration
             };
         }
 
@@ -231,7 +235,7 @@ namespace BSPGenerationTools
 
                 s.LinkerScript = mapper.MapPath(s.LinkerScript);
 
-                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps, s.Configuration.MCUConfiguration);
+                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps, s.Configuration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
                 foreach (var dep in deps)

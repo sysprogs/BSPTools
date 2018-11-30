@@ -14,8 +14,14 @@
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
-				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s;ti\drivers\utils\List.c=>drv_list.c;ti\posix\freertos\timer.c=>freertos_timer.c;ti\grlib\display.c=>grlib_display.c;ti\utils\json\source\utils.c=>json_utils.c</RenameRules>
-				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart)\.c$=>drv_{1}.c</AdvancedRenameRules>
+				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s;
+				ti\drivers\utils\List.c=>drv_list.c;
+				ti\posix\freertos\timer.c=>freertos_timer.c;
+				ti\grlib\display.c=>grlib_display.c;
+				ti\utils\json\source\utils.c=>json_utils.c;
+				ti\display\display.c=>ti_display.c
+				</RenameRules>
+				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart|watchdog)\.c$=>drv_{1}.c</AdvancedRenameRules>
 			</CopyJob>				
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples</SourceFolder>
@@ -25,10 +31,11 @@
 			</CopyJob>	
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:RULES_DIR$$</SourceFolder>
-				<FilesToCopy>error.c</FilesToCopy>
+				<FilesToCopy>error.c;os\*</FilesToCopy>
 				<ProjectInclusionMask>*.c</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 				<TargetFolder>support</TargetFolder>
+				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
 			</CopyJob>	
 		</CopyJobs>
 	</CoreFramework>
@@ -373,8 +380,8 @@
 			<Range>display:Display:source\ti\display:
 grlib:Graphics Library:source\ti\grlib:
 atcmd:AT Command Support:source\ti\net\atcmd:
-atcmd:HTTP Client:source\ti\net\http:
-atcmd:SNTP Support:source\ti\net\sntp:
+http:HTTP Client:source\ti\net\http:
+sntp:SNTP Support:source\ti\net\sntp:
 net_utils:Network Utilities:source\ti\net\utils:
 </Range>
 			<Template>
