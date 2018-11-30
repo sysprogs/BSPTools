@@ -73,6 +73,8 @@ namespace BSPGenerationTools
             {
                 foreach (var r in rules.Split(';'))
                 {
+                    if (string.IsNullOrEmpty(r))
+                        continue;
                     var rule = FileMaskToRegexWithFlag(r.Replace('/', '\\'), true);
                     if (rule.Key == null)
                         throw new Exception("Empty rule");
@@ -691,8 +693,12 @@ namespace BSPGenerationTools
             MemoryStream ms = new MemoryStream();
             ser.Serialize(ms, Template);
 
-            foreach (var n in Range.Split(Separator[0]))
+            foreach (var item in Range.Split(Separator[0]))
             {
+                var n = item.Trim('\r');
+                if (n == "")
+                    continue;
+
                 ms.Seek(0, SeekOrigin.Begin);
                 Framework deepCopy = (Framework)ser.Deserialize(ms);
                 Expand(ref deepCopy.Name, n);
@@ -703,6 +709,7 @@ namespace BSPGenerationTools
                     Expand(ref job.SourceFolder, n);
                     Expand(ref job.TargetFolder, n);
                     Expand(ref job.FilesToCopy, n);
+                    Expand(ref job.ProjectInclusionMask, n);
                     Expand(ref job.AdditionalIncludeDirs, n);
                 }
                 yield return deepCopy;

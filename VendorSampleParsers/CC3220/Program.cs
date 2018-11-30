@@ -147,20 +147,20 @@ namespace CC3220VendorSampleParser
                 return outAbsDir;
             }
 
+            FrameworkLocator _FrameworkLocator;
+
             VendorSample ParseMakFile(string nameFile, string SDKdir)
             {
                 VendorSample vs = new VendorSample();
                 List<string> lstFileC = new List<string>();
-                List<string> lstFileLib = new List<string>();
                 List<string> lstFileInc = new List<string>();
                 List<string> splitArgs = new List<string>();
                 List<string> lstDef = new List<string>();
-                List<string> lstDirLib = new List<string>();
                 Dictionary<string, string> lstConstDir = new Dictionary<string, string>();
+                HashSet<string> referencedFrameworks = new HashSet<string>();
                 string aCurDir = Path.GetDirectoryName(nameFile);
                 Boolean flFlags = false;
 
-                string dirLib = "";
                 foreach (var ln in File.ReadAllLines(nameFile))
                 {
                     if (ln.StartsWith("CFLAGS =") || ln.StartsWith("CPPFLAGS ="))
@@ -193,12 +193,11 @@ namespace CC3220VendorSampleParser
 
                     if (ln.Contains("\"-L"))
                     {
-                        dirLib = ToAbsolutePath(ln.Replace("-L", "").Replace("\"", "").Replace("LFLAGS =", "").Trim(' ', '\\').Replace("$(SIMPLELINK_CC32XX_SDK_INSTALL_DIR)", "$$SYS:BSP_ROOT$$"), SDKdir, lstConstDir);
-                        lstDirLib.Add("-L" + dirLib);
+                        //We ignore the library search paths
                     }
 
                     if (ln.Contains(" -l:"))
-                        lstFileLib.Add(ln.Replace("\"", "").Trim(' ', '\\'));
+                        referencedFrameworks.Add(_FrameworkLocator.LocateFrameworkForLibraryFile(ln.Replace("\"", "").Trim(' ', '\\')));
 
                     Match m = Regex.Match(ln, @"([\w]+)[ \t]*:=[ \t]*([$(\w)/]*)");
                     if (m.Success)
@@ -212,8 +211,15 @@ namespace CC3220VendorSampleParser
                 vs.IncludeDirectories = lstFileInc.ToArray();
                 vs.PreprocessorMacros = lstDef.ToArray();
                 vs.SourceFiles = lstFileC.ToArray();
-                vs.DeviceID = "CC3220";
-                vs.LDFLAGS = string.Join(" ", lstDirLib.Distinct().ToArray()) + " " + string.Join(" ", lstFileLib.Distinct().ToArray());
+                vs.Configuration = new VendorSampleConfiguration
+                {
+                    Frameworks = referencedFrameworks.Where(f => f != null).ToArray()
+                };
+
+                const string BoardSuffix = "_LAUNCHXL";
+                vs.DeviceID = nameFile.Split('\\').Last(component => component.EndsWith(BoardSuffix, StringComparison.InvariantCultureIgnoreCase));
+                vs.DeviceID = vs.DeviceID.Substring(0, vs.DeviceID.Length - BoardSuffix.Length);
+
                 if (File.ReadAllLines(Path.Combine(aCurDir, "Makefile")).Where(ln => ln.StartsWith("NAME")).Count() == 0)
                     vs.UserFriendlyName = "noname";
                 else
@@ -284,6 +290,8 @@ namespace CC3220VendorSampleParser
 
             protected override ParsedVendorSamples ParseVendorSamples(string SDKdir, IVendorSampleFilter filter)
             {
+                _FrameworkLocator = new FrameworkLocator(SDKdir, Path.GetFullPath(BSPDirectory + @"\..\rules"));
+
                 string makeExecutable = ToolchainDirectory + "/bin/make";
 
                 string[] ExampleDirs = Directory.GetFiles(Path.Combine(SDKdir, "examples"), "Makefile", SearchOption.AllDirectories).
@@ -398,6 +406,7 @@ namespace CC3220VendorSampleParser
                 LogLine($"Failed samples : {failedSamples.Count}, {(failedSamples.Count / samplesDone) * 100} % from Total");
                 Console.ForegroundColor = ConsoleColor.Gray;
 
+                _FrameworkLocator.ThrowIfUnresolvedLibrariesFound();
                 return new ParsedVendorSamples { VendorSamples = allSamples.ToArray(), FailedSamples = failedSamples.ToArray() };
             }
         }

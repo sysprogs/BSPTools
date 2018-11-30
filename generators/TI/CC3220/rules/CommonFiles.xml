@@ -14,7 +14,7 @@
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
-				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s;ti\drivers\utils\List.c=>drv_list.c;ti\posix\freertos\timer.c=>freertos_timer.c</RenameRules>
+				<RenameRules>ti\drivers\power\PowerCC32XX_asm.sm4g=>PowerCC32XX_asm.s;ti\drivers\utils\List.c=>drv_list.c;ti\posix\freertos\timer.c=>freertos_timer.c;ti\grlib\display.c=>grlib_display.c;ti\utils\json\source\utils.c=>json_utils.c</RenameRules>
 				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart)\.c$=>drv_{1}.c</AdvancedRenameRules>
 			</CopyJob>				
 			<CopyJob>
@@ -100,26 +100,6 @@
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
-		<Framework> <!-- Display -->
-			<Name>Display</Name>
-			<ID>com.sysprogs.arm.ti.cc3220.display</ID>
-			<ProjectFolderName>Display</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<IncompatibleFrameworks>
-			</IncompatibleFrameworks>
-			<RequiredFrameworks>
-			</RequiredFrameworks>
-			<CopyJobs>
-			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\display</SourceFolder>
-				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
-				<FilesToCopy>*</FilesToCopy>
-				<AutoIncludeMask>-*</AutoIncludeMask>	
-				<TargetFolder>source\ti\display</TargetFolder>
-				<AlreadyCopied>true</AlreadyCopied>
-			</CopyJob>	
-			</CopyJobs>
-		</Framework>
 		<Framework> <!-- FatFS -->
 			<Name>FatFS</Name>
 			<ID>com.sysprogs.arm.ti.cc3220.fatfs</ID>
@@ -132,9 +112,9 @@
 			<CopyJobs>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\third_party\fatfs</SourceFolder>
-				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-utils\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-utils\*;-documents\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
 				<FilesToCopy>*</FilesToCopy>
-				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
 				<TargetFolder>source\third_party\fatfs</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
 				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
@@ -145,7 +125,51 @@
 						<OldLine>#include &lt;file.h&gt;</OldLine>
 						<NewLine>#include &lt;sys/file.h&gt;</NewLine>
 					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>ffcio.c</FilePath>
+						<OldLine>int mkdir(const char * path, unsigned int mode)</OldLine>
+						<NewLine>int mkdir(const char * path, mode_t mode)</NewLine>
+					</Patch>
 				</Patches>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework> <!-- net -->
+			<Name>SimpleLink Sockets</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.sl_netsock</ID>
+			<ProjectFolderName>SimpleLink Sockets</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\net</SourceFolder>
+				<ProjectInclusionMask>sl*.c;sl*.h;bsd\*.c;bsd\*.h</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\ti\net</TargetFolder>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework> <!-- SPIFFS -->
+			<Name>SPI FLASH File System</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.spiffs</ID>
+			<ProjectFolderName>SPI FLASH FS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\third_party\spiffs</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-utils\*;-documents\*;-default\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<TargetFolder>source\third_party\spiffs</TargetFolder>
+				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
@@ -169,6 +193,26 @@
 					<string>MQTT Client|client\\.*</string>
 					<string>MQTT Server|server\\.*</string>
 				</SmartFileConditions>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>
+		<Framework> <!-- MQTT -->
+			<Name>JSON support</Name>
+			<ID>com.sysprogs.arm.ti.cc3220.json</ID>
+			<ProjectFolderName>JSON</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\utils\json</SourceFolder>
+				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-utils\*;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>*</FilesToCopy>
+				<AutoIncludeMask>*.h</AutoIncludeMask>	
+				<TargetFolder>source\ti\utils\json</TargetFolder>
+				<PreprocessorMacros>ALLOW_PARSING__TEMPLATE;ALLOW_PARSING__JSON;USE__STANDARD_LIBS</PreprocessorMacros>
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
@@ -322,6 +366,37 @@
 			</ConfigurableProperties>			
 		</Framework>
 	</AdditionalFrameworks>
+	<AdditionalFrameworkTemplates>
+		<FrameworkTemplate>
+			<Separator>&#10;</Separator>
+			<ArgumentSeparator>:</ArgumentSeparator>
+			<Range>display:Display:source\ti\display:
+grlib:Graphics Library:source\ti\grlib:
+atcmd:AT Command Support:source\ti\net\atcmd:
+atcmd:HTTP Client:source\ti\net\http:
+atcmd:SNTP Support:source\ti\net\sntp:
+net_utils:Network Utilities:source\ti\net\utils:
+</Range>
+			<Template>
+				<Name>$$BSPGEN:FRAMEWORKARG1$$</Name>
+				<ID>com.sysprogs.arm.ti.cc3220.$$BSPGEN:FRAMEWORK$$</ID>
+				<RequiredFrameworks>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORKARG1$$</ProjectFolderName>
+				<DefaultEnabled>true</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$BSPGEN:INPUT_DIR$$\$$BSPGEN:FRAMEWORKARG2$$</SourceFolder>
+						<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;*.c;*.h;*.s;*.sm4g</ProjectInclusionMask>
+						<FilesToCopy>*</FilesToCopy>
+						<AutoIncludeMask>*.h</AutoIncludeMask>	
+						<TargetFolder>$$BSPGEN:FRAMEWORKARG2$$</TargetFolder>
+						<AlreadyCopied>true</AlreadyCopied>
+					</CopyJob>	
+				</CopyJobs>			
+			</Template>
+		</FrameworkTemplate>
+	</AdditionalFrameworkTemplates>
 	
 	<SmartSamples>
 		<SmartSample>
