@@ -4,7 +4,7 @@
 		<CopyJobs>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel</SourceFolder>
-				<FilesToCopy>*</FilesToCopy>
+				<FilesToCopy>-*.projectspec;*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 			</CopyJob>				
@@ -25,7 +25,7 @@
 			</CopyJob>				
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples</SourceFolder>
-				<FilesToCopy>-*.obj;-*.map;*</FilesToCopy>
+				<FilesToCopy>-*.obj;-*.map;-*.projectspec;*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>				
 			</CopyJob>	
@@ -256,7 +256,7 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\nortos</SourceFolder>
 				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
-				<FilesToCopy>*</FilesToCopy>
+				<FilesToCopy>-*.projectspec;*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
 				<TargetFolder>kernel\nortos</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
@@ -293,7 +293,7 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos</SourceFolder>
 				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*MSP432*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
-				<FilesToCopy>-*FreeRTOSConfig.h;-*.obj;*</FilesToCopy>
+				<FilesToCopy>-*.projectspec;-*FreeRTOSConfig.h;-*.obj;*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
 				<TargetFolder>kernel\freertos</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>

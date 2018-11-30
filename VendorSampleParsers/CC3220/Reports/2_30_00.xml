@@ -20,8 +20,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3923</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:10.4679119-08:00</TimeOfLastBuild>
+      <BuildDuration>4066</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:38:47.9925302-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -31,8 +31,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>OTA_VENDOR_TOKEN1</KnownProblemID>
-      <BuildDuration>448</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:44:27.2450409-08:00</TimeOfLastBuild>
+      <BuildDuration>505</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:31:52.258993-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -41,8 +41,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3734</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:14.2046126-08:00</TimeOfLastBuild>
+      <BuildDuration>3794</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:38:51.7924232-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -51,8 +51,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3793</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:17.9990655-08:00</TimeOfLastBuild>
+      <BuildDuration>3875</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:38:55.6690888-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -61,8 +61,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3700</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:21.7001948-08:00</TimeOfLastBuild>
+      <BuildDuration>3780</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:38:59.4505909-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -71,8 +71,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3801</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:25.5021167-08:00</TimeOfLastBuild>
+      <BuildDuration>3970</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:03.4215658-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -81,8 +81,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3784</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:29.2877943-08:00</TimeOfLastBuild>
+      <BuildDuration>3758</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:07.1811199-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -91,8 +91,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3668</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:32.9575259-08:00</TimeOfLastBuild>
+      <BuildDuration>3724</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:10.9065334-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -101,8 +101,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3951</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:36.9095846-08:00</TimeOfLastBuild>
+      <BuildDuration>3650</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:14.5580636-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -111,8 +111,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3578</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:40.4877262-08:00</TimeOfLastBuild>
+      <BuildDuration>3648</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:18.206658-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -121,8 +121,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3649</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:44.1378486-08:00</TimeOfLastBuild>
+      <BuildDuration>3647</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:21.8553118-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -131,8 +131,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4118</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:48.2565642-08:00</TimeOfLastBuild>
+      <BuildDuration>3984</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:25.8401635-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -142,8 +142,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>OTA_VENDOR_TOKEN1</KnownProblemID>
-      <BuildDuration>477</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:45:05.4226883-08:00</TimeOfLastBuild>
+      <BuildDuration>481</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:32:29.3760752-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -152,8 +152,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3774</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:52.0328409-08:00</TimeOfLastBuild>
+      <BuildDuration>3730</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:29.5710676-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -162,8 +162,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3735</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:55.7690453-08:00</TimeOfLastBuild>
+      <BuildDuration>3629</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:33.2020569-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -172,8 +172,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3758</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:51:59.5295201-08:00</TimeOfLastBuild>
+      <BuildDuration>3722</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:36.9258466-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -182,8 +182,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3623</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:03.1544796-08:00</TimeOfLastBuild>
+      <BuildDuration>3681</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:40.6076509-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -192,8 +192,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3685</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:06.8404896-08:00</TimeOfLastBuild>
+      <BuildDuration>3731</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:44.3404347-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -202,8 +202,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3716</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:10.5575536-08:00</TimeOfLastBuild>
+      <BuildDuration>3719</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:48.0612238-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -212,8 +212,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3651</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:14.2110733-08:00</TimeOfLastBuild>
+      <BuildDuration>3750</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:51.8130017-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -222,8 +222,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3926</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:18.139045-08:00</TimeOfLastBuild>
+      <BuildDuration>3719</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:55.5337922-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -232,8 +232,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>3676</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:21.8164456-08:00</TimeOfLastBuild>
+      <BuildDuration>3874</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:39:59.4095291-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -242,8 +242,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>5215</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:27.0338598-08:00</TimeOfLastBuild>
+      <BuildDuration>5303</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:04.7128052-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -253,8 +253,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>OTA_VENDOR_TOKEN1</KnownProblemID>
-      <BuildDuration>480</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:45:43.7068384-08:00</TimeOfLastBuild>
+      <BuildDuration>451</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:33:09.0102258-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -263,8 +263,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4599</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:31.6345551-08:00</TimeOfLastBuild>
+      <BuildDuration>4728</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:09.4428499-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -273,8 +273,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4219</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:35.854989-08:00</TimeOfLastBuild>
+      <BuildDuration>4102</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:13.5462532-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -283,8 +283,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4873</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:40.729781-08:00</TimeOfLastBuild>
+      <BuildDuration>4184</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:17.7315245-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -293,8 +293,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4677</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:45.4082223-08:00</TimeOfLastBuild>
+      <BuildDuration>4365</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:22.097294-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -303,8 +303,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4515</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:49.9257637-08:00</TimeOfLastBuild>
+      <BuildDuration>4387</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:26.4858798-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -313,8 +313,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4502</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:54.4299153-08:00</TimeOfLastBuild>
+      <BuildDuration>4253</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:30.7414774-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -323,8 +323,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4524</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:52:58.9563896-08:00</TimeOfLastBuild>
+      <BuildDuration>4205</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:34.9481113-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -333,8 +333,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4468</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:03.4257609-08:00</TimeOfLastBuild>
+      <BuildDuration>4305</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:39.254711-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -343,8 +343,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4145</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:07.5726991-08:00</TimeOfLastBuild>
+      <BuildDuration>3875</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:43.1314483-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -353,8 +353,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4220</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:11.7941253-08:00</TimeOfLastBuild>
+      <BuildDuration>3908</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:47.041174-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -363,8 +363,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4167</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:15.9626356-08:00</TimeOfLastBuild>
+      <BuildDuration>3905</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:50.9479052-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -373,8 +373,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4125</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:20.0890233-08:00</TimeOfLastBuild>
+      <BuildDuration>3930</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:54.8796255-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -383,8 +383,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>5321</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:25.4117466-08:00</TimeOfLastBuild>
+      <BuildDuration>4977</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:40:59.8580213-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -393,8 +393,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4212</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:29.6249299-08:00</TimeOfLastBuild>
+      <BuildDuration>3923</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:03.7827277-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -403,8 +403,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4144</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:33.7705287-08:00</TimeOfLastBuild>
+      <BuildDuration>3927</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:07.7114498-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -413,8 +413,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4402</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:38.1743058-08:00</TimeOfLastBuild>
+      <BuildDuration>4049</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:11.7621321-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -423,8 +423,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4504</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:42.6792094-08:00</TimeOfLastBuild>
+      <BuildDuration>4060</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:15.8238086-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -433,8 +433,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4470</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:47.1503062-08:00</TimeOfLastBuild>
+      <BuildDuration>3903</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:19.7285385-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -443,8 +443,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4401</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:51.5529627-08:00</TimeOfLastBuild>
+      <BuildDuration>3955</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:23.6852502-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -453,8 +453,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4151</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:55.7048785-08:00</TimeOfLastBuild>
+      <BuildDuration>3925</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:27.6119728-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -463,8 +463,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4067</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:53:59.7732765-08:00</TimeOfLastBuild>
+      <BuildDuration>4260</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:31.8745878-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -473,8 +473,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4235</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:04.0098352-08:00</TimeOfLastBuild>
+      <BuildDuration>3942</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:35.8183036-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -483,8 +483,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4100</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:08.1109733-08:00</TimeOfLastBuild>
+      <BuildDuration>3993</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:39.8130031-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -493,8 +493,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4109</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:12.2217287-08:00</TimeOfLastBuild>
+      <BuildDuration>3851</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:43.6647505-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -503,8 +503,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4266</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:16.4881504-08:00</TimeOfLastBuild>
+      <BuildDuration>3921</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:47.5884718-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -513,8 +513,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4087</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:20.576562-08:00</TimeOfLastBuild>
+      <BuildDuration>3838</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:51.4272251-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -523,8 +523,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4099</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:24.676389-08:00</TimeOfLastBuild>
+      <BuildDuration>3984</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:55.4139282-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -533,8 +533,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4160</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:28.837964-08:00</TimeOfLastBuild>
+      <BuildDuration>3960</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:41:59.3746627-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -543,8 +543,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4282</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:33.1209951-08:00</TimeOfLastBuild>
+      <BuildDuration>4084</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:03.4603079-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -553,8 +553,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4371</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:37.4923517-08:00</TimeOfLastBuild>
+      <BuildDuration>3962</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:07.4240193-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -563,8 +563,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4072</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:41.5655204-08:00</TimeOfLastBuild>
+      <BuildDuration>4055</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:11.4807015-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -573,8 +573,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4150</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:45.7172687-08:00</TimeOfLastBuild>
+      <BuildDuration>4242</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:15.7243197-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -583,8 +583,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4601</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:50.3192156-08:00</TimeOfLastBuild>
+      <BuildDuration>4184</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:19.9099563-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -593,8 +593,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4370</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:54.6907852-08:00</TimeOfLastBuild>
+      <BuildDuration>4132</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:24.0426127-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -603,8 +603,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>5286</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:54:59.9769622-08:00</TimeOfLastBuild>
+      <BuildDuration>5104</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:29.1479493-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -614,8 +614,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>OTA_VENDOR_TOKEN1</KnownProblemID>
-      <BuildDuration>464</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:48:20.9641412-08:00</TimeOfLastBuild>
+      <BuildDuration>482</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:35:46.3516072-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -624,8 +624,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4561</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:04.5391434-08:00</TimeOfLastBuild>
+      <BuildDuration>4554</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:33.7034684-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -634,8 +634,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4323</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:08.8632799-08:00</TimeOfLastBuild>
+      <BuildDuration>4122</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:37.8261273-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -644,8 +644,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4513</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:13.3774303-08:00</TimeOfLastBuild>
+      <BuildDuration>4275</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:42.1027359-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -654,8 +654,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4558</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:17.9365073-08:00</TimeOfLastBuild>
+      <BuildDuration>4416</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:46.520297-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -664,8 +664,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4662</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:22.5988753-08:00</TimeOfLastBuild>
+      <BuildDuration>4460</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:50.9818465-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -674,8 +674,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4694</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:27.2943974-08:00</TimeOfLastBuild>
+      <BuildDuration>4565</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:55.5483606-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -684,8 +684,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4344</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:31.6388301-08:00</TimeOfLastBuild>
+      <BuildDuration>4261</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:42:59.8109735-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -694,8 +694,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4598</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:36.2372012-08:00</TimeOfLastBuild>
+      <BuildDuration>4500</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:04.3135084-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -704,8 +704,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4402</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:40.640918-08:00</TimeOfLastBuild>
+      <BuildDuration>3951</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:08.2662234-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -714,8 +714,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4303</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:44.9455403-08:00</TimeOfLastBuild>
+      <BuildDuration>3966</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:12.2339307-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -724,8 +724,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4070</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:49.0167444-08:00</TimeOfLastBuild>
+      <BuildDuration>4153</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:16.3885795-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -734,8 +734,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4219</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:53.2375924-08:00</TimeOfLastBuild>
+      <BuildDuration>4144</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:20.5342294-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -744,8 +744,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>5445</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:55:58.6841647-08:00</TimeOfLastBuild>
+      <BuildDuration>5165</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:25.7005494-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -754,8 +754,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4120</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:02.8052113-08:00</TimeOfLastBuild>
+      <BuildDuration>3948</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:29.6502634-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -764,8 +764,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4152</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:06.9589205-08:00</TimeOfLastBuild>
+      <BuildDuration>4090</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:33.7419307-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -774,8 +774,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4279</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:11.2387731-08:00</TimeOfLastBuild>
+      <BuildDuration>4061</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:37.803609-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -784,8 +784,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4438</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:15.6777453-08:00</TimeOfLastBuild>
+      <BuildDuration>4153</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:41.9572832-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -794,8 +794,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4101</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:19.7794541-08:00</TimeOfLastBuild>
+      <BuildDuration>4218</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:46.1768847-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -804,8 +804,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4280</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:24.0607006-08:00</TimeOfLastBuild>
+      <BuildDuration>3844</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:50.0226332-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -814,58 +814,58 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4092</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:28.1545404-08:00</TimeOfLastBuild>
+      <BuildDuration>4069</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:54.0935465-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>I2CTMP006-rtos</SampleName>
+        <DeviceID>CC3220S</DeviceID>
+      </ID>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3920</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:43:58.0156373-08:00</TimeOfLastBuild>
+    </Record>
+    <Record>
+      <ID>
+        <SampleName>I2SECHO-rtos</SampleName>
+        <DeviceID>CC3220S</DeviceID>
+      </ID>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>4065</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:02.0815303-08:00</TimeOfLastBuild>
+    </Record>
+    <Record>
+      <ID>
+        <SampleName>PWMLED2-rtos</SampleName>
+        <DeviceID>CC3220S</DeviceID>
+      </ID>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>4001</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:06.0846084-08:00</TimeOfLastBuild>
+    </Record>
+    <Record>
+      <ID>
+        <SampleName>SDRAW-rtos</SampleName>
+        <DeviceID>CC3220S</DeviceID>
+      </ID>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3947</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:10.0333261-08:00</TimeOfLastBuild>
+    </Record>
+    <Record>
+      <ID>
+        <SampleName>SPIMASTER-rtos</SampleName>
         <DeviceID>CC3220S</DeviceID>
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
       <BuildDuration>4140</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:32.2967457-08:00</TimeOfLastBuild>
-    </Record>
-    <Record>
-      <ID>
-        <SampleName>I2SECHO-rtos</SampleName>
-        <DeviceID>CC3220S</DeviceID>
-      </ID>
-      <BuildFailedExplicitly>false</BuildFailedExplicitly>
-      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4100</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:36.397976-08:00</TimeOfLastBuild>
-    </Record>
-    <Record>
-      <ID>
-        <SampleName>PWMLED2-rtos</SampleName>
-        <DeviceID>CC3220S</DeviceID>
-      </ID>
-      <BuildFailedExplicitly>false</BuildFailedExplicitly>
-      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4058</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:40.4573229-08:00</TimeOfLastBuild>
-    </Record>
-    <Record>
-      <ID>
-        <SampleName>SDRAW-rtos</SampleName>
-        <DeviceID>CC3220S</DeviceID>
-      </ID>
-      <BuildFailedExplicitly>false</BuildFailedExplicitly>
-      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4043</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:44.5018721-08:00</TimeOfLastBuild>
-    </Record>
-    <Record>
-      <ID>
-        <SampleName>SPIMASTER-rtos</SampleName>
-        <DeviceID>CC3220S</DeviceID>
-      </ID>
-      <BuildFailedExplicitly>false</BuildFailedExplicitly>
-      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4425</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:48.9286246-08:00</TimeOfLastBuild>
+      <TimeOfLastBuild>2018-11-30T14:44:14.1749773-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -874,8 +874,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4310</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:53.238673-08:00</TimeOfLastBuild>
+      <BuildDuration>4136</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:18.3126315-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -884,8 +884,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4125</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:56:57.3652021-08:00</TimeOfLastBuild>
+      <BuildDuration>4070</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:22.3843047-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -894,8 +894,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4136</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:57:01.5015287-08:00</TimeOfLastBuild>
+      <BuildDuration>4016</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:26.4019602-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -904,8 +904,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4094</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:57:05.5960446-08:00</TimeOfLastBuild>
+      <BuildDuration>3991</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:30.3937242-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -914,8 +914,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4182</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:57:09.7795435-08:00</TimeOfLastBuild>
+      <BuildDuration>3887</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:34.2824326-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -924,8 +924,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4101</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:57:13.8821729-08:00</TimeOfLastBuild>
+      <BuildDuration>4058</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:38.34161-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -934,8 +934,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4305</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:57:18.1884824-08:00</TimeOfLastBuild>
+      <BuildDuration>4129</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:42.4721277-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -944,8 +944,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4446</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:57:22.6360688-08:00</TimeOfLastBuild>
+      <BuildDuration>4315</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:46.7890893-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -954,8 +954,8 @@
       </ID>
       <BuildFailedExplicitly>false</BuildFailedExplicitly>
       <LastSucceededPass>RelocatedBuild</LastSucceededPass>
-      <BuildDuration>4094</BuildDuration>
-      <TimeOfLastBuild>2018-11-30T12:57:26.7311199-08:00</TimeOfLastBuild>
+      <BuildDuration>3945</BuildDuration>
+      <TimeOfLastBuild>2018-11-30T14:44:50.7363416-08:00</TimeOfLastBuild>
     </Record>
   </Records>
 </VendorSampleTestReport>
