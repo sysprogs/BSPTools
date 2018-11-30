@@ -51,7 +51,10 @@ namespace CC3220VendorSampleParser
             }
 
             if (matchingFile == null)
+            {
+                //If this triggers for freertos.lib, restart the generator again (the file list is cached before the FreeRTOS library is built)
                 throw new Exception($"Could not find {libraryFile} in the CC3220 SDK");
+            }
 
             return DoLookupFrameworkIDForLibraryFile(matchingFile);
         }

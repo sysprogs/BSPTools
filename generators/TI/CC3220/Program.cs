@@ -127,7 +127,7 @@ namespace CC3200_bsp_generator
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
-                PackageVersion = "2.20.00"
+                PackageVersion = "2.30.00"
             };
             bspBuilder.Save(bsp, !noPack);
 
