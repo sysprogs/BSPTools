@@ -239,6 +239,28 @@ namespace stm32_bsp_generator
             public string SearchedText;
             public string ReplacementText;
             public string RegexFile;
+            public int AnchorDistance;
+            public string AnchorLine;
+
+            public void ApplyAllFile(ref string[] lines, string pfilename)
+            {
+                
+                for(int  i = 0; i< lines.Length;i++)
+                {
+                    if (i + AnchorDistance >= lines.Length)
+                        continue;
+
+                    if (AnchorLine == null)
+                    {
+                        Apply(ref lines[i], pfilename);
+                        continue;
+                    }
+
+                    if (lines[i + AnchorDistance].Trim('\r') == AnchorLine)
+                        Apply(ref lines[i], pfilename);
+
+                }
+            }
 
             public bool Apply(ref string line, string pfilename)
             {
@@ -581,6 +603,8 @@ namespace stm32_bsp_generator
                         continue;
                     if (set.Value.Key == "RCC_Core")
                         continue;
+                    if (set.Value.Key == "DMAMUX_IdRegisters")
+                        continue; 
                     throw new Exception("Unknown set type: " + set.Value.Key);
 
                 }
@@ -606,6 +630,7 @@ namespace stm32_bsp_generator
                         else if (!(set_name.StartsWith("DMAMUX1_Channel0") && dict_repeat_reg_addr[register.Address].StartsWith("DMAMUX1")) &&
                                 !(set_name.StartsWith("FMC_") && dict_repeat_reg_addr[register.Address].StartsWith("FSMC_")) &&
                                 !(set_name.StartsWith("ADC") && dict_repeat_reg_addr[register.Address].StartsWith("ADC1")) &&
+                                !(set_name.StartsWith("AES") && dict_repeat_reg_addr[register.Address].StartsWith("AES")) &&
                                  !(set_name.StartsWith("DAC") && dict_repeat_reg_addr[register.Address].StartsWith("DAC")) &&
                                  !(set_name.StartsWith("COMP") && dict_repeat_reg_addr[register.Address].StartsWith("COMP")) &&
                                 (set_type != "SC_UART") && (set_type != "SC_SPI") && (set_type != "SC_I2C") && (set_type != "COMP") && (set_type != "OPAMP") && (set_type != "OPAMP_Common"))// This register is removed later on anyway as it is an either/or thing
@@ -845,6 +870,8 @@ namespace stm32_bsp_generator
                     else if (set_type == "RCC" && register.Name == "CRRCR")
                         continue;   //Bug: one header is missing the definition stm32l041xx.h
                     else if (set_type == "DCMI" && (register.Name == "RISR" || register.Name == "MISR"))
+                        continue;
+                    else if (set_type == "TAMP" && register.Name == "MISR")
                         continue;
                     else if (subregisters.ContainsKey(set_name + "_" + register.Name))
                     {
@@ -1134,6 +1161,8 @@ namespace stm32_bsp_generator
                     || (line.StartsWith("#define DFSDM_Filter") && line.Contains(" DFSDM1_Filter"))
                     || (line.StartsWith("#define DAC ") && line.Contains(" DAC1"))
                     || (line.Contains("#define USB_OTG") && (line.Contains("USB1_OTG") || line.Contains("USB2_OTG")))//stm32h7
+                    || (line.Contains("#define AES1_") && line.Contains("AES_"))
+                    
                         )
                     continue;
 
@@ -1325,6 +1354,9 @@ namespace stm32_bsp_generator
             string[] lines = fileContents.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             int nextLine = 0;
             bool insideIgnoredBlock = false;
+
+            foreach (var patch in cfg.LinePatches)
+                patch.ApplyAllFile(ref lines,fileName);
             for (; ; )
             {
                 if (nextLine >= lines.Length)
@@ -1334,9 +1366,9 @@ namespace stm32_bsp_generator
                 if (line.Contains(" Instances ***"))
                     break;
 
-                foreach (var patch in cfg.LinePatches)
-                    if (patch.Apply(ref line, Path.GetFileName(fileName)))
-                        break;
+                //foreach (var patch in cfg.LinePatches)
+                  //  if (patch.Apply(ref line, Path.GetFileName(fileName)))
+                    //    break;
 
                 Match m;
                 RegisterID thisReg;
@@ -1400,7 +1432,8 @@ namespace stm32_bsp_generator
                         && !line.Contains("USB_PMAADDR")
                         && !line.Contains("define HRTIM_")  //Not much formal system in comments to parse. Currently ignoring.
                         && !line.Contains("_RST_VALUE")
-                        )
+                        && !line.Contains("TAMP_MISR_")
+                      )
                     {
                         if (result.Count > 0 && !insideIgnoredBlock)
                             errors.AddError(new RegisterParserErrors.BadSubregisterDefinition { FileName = fileName, LineContents = line, LineNumber = nextLine - 1 });

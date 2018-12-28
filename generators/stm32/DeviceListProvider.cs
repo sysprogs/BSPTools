@@ -256,8 +256,8 @@ namespace stm32_bsp_generator
 
                     if (arg.Name == "FLASH")
                         mem.Flags |= MCUMemoryFlags.IsDefaultFLASH;
-                    else
-                        mem.LoadedFromMemory = "FLASH";
+                   // else
+                    //    mem.LoadedFromMemory = "FLASH";
 
                     return mem;
                 }

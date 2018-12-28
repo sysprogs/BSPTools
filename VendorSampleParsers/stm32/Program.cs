@@ -57,7 +57,8 @@ namespace GeneratorSampleStm32
         {
             List<VendorSample> aLstVSampleOut = new List<VendorSample>();
             int aCntTarget = 0;
-            string aFilePrj = pDirPrj + "\\Project.uvprojx";
+            string aFilePrj = Directory.GetFiles(pDirPrj, "*.uvprojx")[0];
+
             string aNamePrj = Path.GetFileName(Path.GetDirectoryName(pDirPrj));
 
             List<string> sourceFiles = new List<string>();
@@ -128,10 +129,14 @@ namespace GeneratorSampleStm32
                     m = Regex.Match(ln, "[ \t]*<IncludePath>(.*)</IncludePath>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
                         sample.IncludeDirectories = m.Groups[1].Value.Split(';').Select(d=>d.TrimEnd('/', '\\')).ToArray();
-
+                    
                     m = Regex.Match(ln, "[ \t]*<Define>(.*)</Define>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
-                        sample.PreprocessorMacros = m.Groups[1].Value.Split(',');
+                    {
+
+                        var d1 = m.Groups[1].Value.Replace(", ","").TrimEnd(',');
+                        sample.PreprocessorMacros = d1.Split(',');
+                    }
                 }
 
 
@@ -305,6 +310,8 @@ namespace GeneratorSampleStm32
                     {
                         if (!dir.Contains("Projects") || !(dir.Contains("Examples") || dir.Contains("Applications")))
                             continue;
+                       // if (!dir.Contains("SysTick") && !(dir.Contains("Toggle") ))
+                         //   continue;
 
                         string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
                         if (!filter.ShouldParseSampleForAnyDevice(sampleName))

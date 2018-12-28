@@ -260,7 +260,7 @@ namespace stm32_bsp_generator
                         return r;
                     };
 
-                //  func();
+               // func();
                 tasks.Add(Task.Run(func));
             }
 
