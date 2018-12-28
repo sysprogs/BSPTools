@@ -112,7 +112,10 @@ namespace KeilProjectImporter
                 }
             }
 
-            List<string> macros = new List<string> { "$$com.sysprogs.bspoptions.primary_memory$$_layout" };
+            List<string> macros = new List<string>();
+            if (!_Settings.UseKeilToolchain)
+                macros.Add("$$com.sysprogs.bspoptions.primary_memory$$_layout");
+
             List<string> includeDirs = new List<string>();
 
             var optionsNode = target.SelectSingleNode("TargetOption/TargetArmAds/Cads/VariousControls");
