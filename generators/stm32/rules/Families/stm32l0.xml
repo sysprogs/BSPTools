@@ -3,14 +3,14 @@
 	<Name>STM32L0</Name>
 	<DeviceRegex>^STM32L0.*</DeviceRegex>
 	<FamilySubdirectory>STM32L0xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.10.0\Drivers\CMSIS\Device\ST\STM32L0xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.10.0\Drivers\CMSIS\Device\ST\STM32L0xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.11.0\Drivers\CMSIS\Device\ST\STM32L0xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.11.0\Drivers\CMSIS\Device\ST\STM32L0xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
 			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32L021xx;STM32L011xx;STM32L051xx;STM32L052xx;STM32L053xx;STM32L062xx;STM32L063xx;STM32L061xx;STM32L031xx;STM32L071xx;STM32L072xx;STM32L073xx;STM32L081xx;STM32L082xx;STM32L083xx;STM32L041xx</AutoOptions>
+			<AutoOptions>STM32L010xB;STM32L010x4;STM32L010x6;STM32L010x8;STM32L021xx;STM32L011xx;STM32L051xx;STM32L052xx;STM32L053xx;STM32L062xx;STM32L063xx;STM32L061xx;STM32L031xx;STM32L071xx;STM32L072xx;STM32L073xx;STM32L081xx;STM32L082xx;STM32L083xx;STM32L041xx</AutoOptions>
 			<Options/>
 		</MCUClassifier>
 	</Subfamilies>
@@ -39,7 +39,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.10.0\Drivers\STM32L0xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.11.0\Drivers\STM32L0xx_HAL_Driver</SourceFolder>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<Patches>
@@ -82,7 +82,7 @@
 					</Patches>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.10.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.11.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
@@ -112,7 +112,7 @@
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.10.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L0_V1.11.0\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>

@@ -27,6 +27,12 @@
 				</Option>
 			</Options>
 		</MCUClassifier>
+		<!--MCUClassifier>
+			<VariableName>com.sysprogs.stm32.legacy_device_family</VariableName>
+			<Required>true</Required>
+			<Options>
+			</Options>
+		</MCUClassifier-->
 	</Subfamilies>
 	<CompilationFlags>
 	<PreprocessorMacros>
@@ -63,6 +69,25 @@
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
 					<ProjectInclusionMask>-*Include\STM32G0????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>					
+					<!--Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>Device\ST\STM32G0xx\Source\Templates\system_STM32G0xx.c</FilePath>
+							<AfterLine>#endif /* HSI_VALUE */</AfterLine>
+							<InsertedLines>
+								<string></string>
+								<string>#if !defined (HSI48_VALUE)</string>
+								<string>	#define HSI48_VALUE ((uint32_t)48000000)</string>
+								<string>#endif</string>
+							</InsertedLines>
+						</Patch>					
+						<Patch xsi:type="InsertLines">
+							<FilePath>Device\ST\STM32G0xx\Source\Templates\system_STM32G0xx.c</FilePath>
+							<AfterLine>#include "STM32G0xx.h"</AfterLine>
+							<InsertedLines>
+								<string>#include &lt;STM32G0xx_hal.h&gt;</string>
+							</InsertedLines>
+						</Patch>					
+					</Patches-->
 				</CopyJob>
 			</CopyJobs>			
 			<ConfigurableProperties>
@@ -100,6 +125,50 @@
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>
+		<!--Framework>
+			<Name>STM32G0 Legacy Peripheral Library</Name>
+			<ID>com.sysprogs.arm.stm32.g0_stdperiph</ID>
+			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.stm32.g0_hal</string>
+			</IncompatibleFrameworks>
+			<ProjectFolderName>StdPeriph</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32G0xx_StdPeriph_Lib_V1.5.0\Libraries\STM32G0xx_StdPeriph_Driver</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>src\STM32G0xx_dac.c</FilePath>
+							<AfterLine>#include "STM32G0xx_dac.h"</AfterLine>
+							<InsertedLines>
+								<string>#include "STM32G0xx_rcc.h"</string>
+							</InsertedLines>
+						</Patch>
+					</Patches>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32G0xx_StdPeriph_Lib_V1.5.0\Libraries\CMSIS</SourceFolder>
+					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
+					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
+					<PreprocessorMacros>$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
+					<ProjectInclusionMask>-*Include\STM32G0????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>Device\ST\STM32G0xx\Include\STM32G0xx.h</FilePath>
+							<AfterLine>#define __STM32G0XX_H</AfterLine>
+							<InsertedLines>
+								<string></string>
+								<string>#ifndef assert_param</string>
+								<string>#define assert_param(expr)</string>
+								<string>#endif</string>
+							</InsertedLines>
+						</Patch>
+					</Patches>
+				</CopyJob>
+			</CopyJobs>			
+		</Framework-->
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>
@@ -109,6 +178,14 @@
 				<string>$$SYS:BSP_ROOT$$/STM32G0xxxx/CMSIS_HAL/Device/ST/STM32G0xx/Source/Templates/system_STM32G0xx.c</string>
 			</AdditionalSources>
 		</SmartSample>
+		<!--SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32G0X</SourceFolder>
+			<DestinationFolder>samples\USB_CDC_STM32G0X</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
+			</AdditionalSources>
+		</SmartSample-->
 	</SmartSamples>
       <AdditionalSystemVars>
         <SysVarEntry>

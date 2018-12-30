@@ -10,6 +10,7 @@
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
 			<IsPrimary>true</IsPrimary>
+			<UnsupportedMCUs>STM32L151C8Tx.*</UnsupportedMCUs>
 			<Options>
 				<Option>
 					<Value>STM32L100xB</Value>
@@ -32,12 +33,12 @@
 					<Regex>STM32L151.[68B]-A$</Regex>
 				</Option>
 				<Option>
-					<Value>STM32L151xC</Value>
-					<Regex>STM32L151.C$</Regex>
+					<Value>STM32L151xCA</Value>
+					<Regex>STM32L151.[C]-A$</Regex>
 				</Option>
 				<Option>
-					<Value>STM32L151xCA</Value>
-					<Regex>STM32L151.C-A$</Regex>
+					<Value>STM32L151xC</Value>
+					<Regex>STM32L151.C$</Regex>
 				</Option>
 				<Option>
 					<Value>STM32L151xD</Value>

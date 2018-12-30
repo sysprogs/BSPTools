@@ -6,20 +6,28 @@
 	<IgnoredSubregisterSuffixes>_EMPTY;_NOVLANTAG;_DONOTSTRIP;_REMAP1;_REMAP2;_REMAP3;_NOREMAP;_PARTIALREMAP;_PARTIALREMAP1;_PARTIALREMAP;_FULLREMAP</IgnoredSubregisterSuffixes>
 	<IgnoredMismatchingSubregisters>USB_HS_PHYC_USB_HS_PHYC_PLL;COMP_CSR_COMP2SW1;COMP_CSR_COMP1SW1;RTC_BKP0R;DMA_SxNDT;AES_DINR;AES_DOUTR;AES_KEYR0;AES_KEYR1;AES_KEYR2;AES_KEYR3;AES_IVR0;AES_IVR1;AES_IVR2;AES_IVR3;RTC_BKP.*;NVIC.*;SysTick.*;SCB_.*;TIM(2|21|22|3)_OR_.*;HRTIM1?_.*</IgnoredMismatchingSubregisters>
 	<IgnoredDefinitionsInBaseAddressArea>SRAM3_SIZE;FLASH_OTP_BANK1_END;FLASH_OTP_BANK2_END;OPAMP12_COMMON;OPAMP1_COMMON;COMP12_COMMON;FSMC_BANK1;FSMC_BANK1_1;FSMC_BANK1_2;FSMC_BANK1_3;FSMC_BANK1_4;FSMC_BANK2;FSMC_BANK3;FSMC_BANK4;SRAM1_SIZE_MAX;SRAM2_SIZE;FMC_BANK1;FMC_BANK;FMC_BANK1_1;FMC_BANK1_2;FMC_BANK1_3;FMC_BANK1_4;FMC_BANK2;FMC_BANK3;FMC_BANK4</IgnoredDefinitionsInBaseAddressArea>
-	<KnownRegistersWithoutSubregisters>IWDG/WINR;OCTOSPIM/PCR[12];GFXMMU/LUT.*;SDMMC[12]/ACKTIME|IDMABSIZE|IDMABASE[01];USB[12]_OTG_[HF]S/GSNPSID|GHWCFG[12];|MDIOS/R.*|WRFR|CWRFR|CRDFR;HSEM/R.*;ETH/MAC.*|DMACSFCSR|MMC.*;SDMMC.*/IPVR;CRYP/DIN;EXTI/D3PCR.*;SYSCFG/UR1;TIM([2356479]|10|11|13|14|12|15|16|17)/AF[21]|TISEL;TIM[23]/AF2;FLASH/KEYR2|OPTSR.*|PRAR_.*|SCAR_.*|WPSN_.*|BOOT_.*;DAC1/DHR12R2|DHR12L2|DHR8R2|DOR2|SHSR2;USB_HS_PHYC/USB_HS_PHYC_TUNE;PWR/PUCRD|PDCRD|PUCRE|PDCRE;OPAMP123_COMMON/OTR;OPAMP12_COMMON/OTR;RTC/BKP.*;JPEG/QMEM[0-9]+|HUFFMIN[0-9]*|HUFFBASE[0-9]*|HUFFSYMB[0-9]*|DHTMEM[0-9]+|HUFFENC_AC[0-9]+|HUFFENC_DC[0-9]+;MDIOS/DINR[0-9]+|DOUTR[0-9]+;COMP56_COMMON/CSR;COMP34_COMMON/CSR;COMP12_COMMON/CSR;OB/DATA[01]|RDP|USER|WRP.*;TSC/.*;FS?MC_Bank1E?/BTCR|BWTR;GPIO.*/LCKR|AFR[LH];FLASH/KEYR|OPTKEYR;DMA[12]_Stream.*/PAR|M0AR|M1AR;ETH/DMARSWTR;DCMI/ESCR|ESUR|CWSTRTR|CWSIZER|DR;CRYP/CSGCM.*|CSGCMCCM.*|DR|DOUT|K[0123][LR]R|IV[01][LR]R;(HASH|HASH_DIGEST)/HR.*|CSR.*|DIN;RNG/DR;TIM.*/OR;DMA2D/IFCR|[FB]GCLUT.*;CMD_BANK1:BTCR.*;GPIO:BRR.*;MEM:(RAM|DMA)PROTR.*|RAMCR;SC_DMA_Channel:DMA(BEG|END)ADD[AB]R;RTC:CALR.*;FW:.*;DMA_Request:.*;SYSCFG:IT_LINE_SR.*|PMC;DMA:RPMCR;SPDIFRX:DR;USB_OTG:GHWCFG3|GDFIFOCFG|GADPCTL;I2C.*/DR;COMP:CSR;DMA:CSELR;USB:EP.*|ISTR|DADDR|BTABLE|LPMCS?R;CRC:POL;LPTIM:OR;FLASH:WRPR[0-9];TIM[0-9]+/OR[0-9]+;FIREWALL:.*;FLASH:PDKEYR;USB_OTG_FS/GSNPSID|GHWCFG1|GHWCFG2;RCC/CKGATENR;SYSCFG/CFGR2|SWPR2;RCC/AHB3ENR</KnownRegistersWithoutSubregisters>
-	<PotentiallyNotSequentialRegisters>TIM_SMCR_TS;TIM_SMCR_SMS</PotentiallyNotSequentialRegisters>
+	<KnownRegistersWithoutSubregisters>COMP12_COMMON/CSR_[ODD]|[EVEN];RTC/OR;IWDG/WINR;OCTOSPIM/PCR[12];GFXMMU/LUT.*;SDMMC[12]/ACKTIME|IDMABSIZE|IDMABASE[01];USB[12]_OTG_[HF]S/GSNPSID|GHWCFG[12];|MDIOS/R.*|WRFR|CWRFR|CRDFR;HSEM/R.*;ETH/MAC.*|DMACSFCSR|MMC.*;SDMMC.*/IPVR;CRYP/DIN;EXTI/D3PCR.*;SYSCFG/UR1;TIM([2356479]|10|11|13|14|12|15|16|17)/AF[21]|TISEL;TIM[23]/AF2;FLASH/KEYR2|OPTSR.*|PRAR_.*|SCAR_.*|WPSN_.*|BOOT_.*;DAC1/DHR12R2|DHR12L2|DHR8R2|DOR2|SHSR2;USB_HS_PHYC/USB_HS_PHYC_TUNE;PWR/PUCRD|PDCRD|PUCRE|PDCRE;OPAMP123_COMMON/OTR;OPAMP12_COMMON/OTR;RTC/BKP.*;JPEG/QMEM[0-9]+|HUFFMIN[0-9]*|HUFFBASE[0-9]*|HUFFSYMB[0-9]*|DHTMEM[0-9]+|HUFFENC_AC[0-9]+|HUFFENC_DC[0-9]+;MDIOS/DINR[0-9]+|DOUTR[0-9]+;COMP56_COMMON/CSR;COMP34_COMMON/CSR;COMP12_COMMON/CSR;OB/DATA[01]|RDP|USER|WRP.*;TSC/.*;FS?MC_Bank1E?/BTCR|BWTR;GPIO.*/LCKR|AFR[LH];FLASH/KEYR|OPTKEYR;DMA[12]_Stream.*/PAR|M0AR|M1AR;ETH/DMARSWTR;DCMI/ESCR|ESUR|CWSTRTR|CWSIZER|DR;CRYP/CSGCM.*|CSGCMCCM.*|DR|DOUT|K[0123][LR]R|IV[01][LR]R;(HASH|HASH_DIGEST)/HR.*|CSR.*|DIN;RNG/DR;TIM.*/OR;DMA2D/IFCR|[FB]GCLUT.*;CMD_BANK1:BTCR.*;GPIO:BRR.*;MEM:(RAM|DMA)PROTR.*|RAMCR;SC_DMA_Channel:DMA(BEG|END)ADD[AB]R;RTC:CALR.*;FW:.*;DMA_Request:.*;SYSCFG:IT_LINE_SR.*|PMC;DMA:RPMCR;SPDIFRX:DR;USB_OTG:GHWCFG3|GDFIFOCFG|GADPCTL;I2C.*/DR;COMP:CSR;DMA:CSELR;USB:EP.*|ISTR|DADDR|BTABLE|LPMCS?R;CRC:POL;LPTIM:OR;FLASH:WRPR[0-9];TIM[0-9]+/OR[0-9]+;FIREWALL:.*;FLASH:PDKEYR;USB_OTG_FS/GSNPSID|GHWCFG1|GHWCFG2;RCC/CKGATENR;SYSCFG/CFGR2|SWPR2;RCC/AHB3ENR</KnownRegistersWithoutSubregisters>
+	<PotentiallyNotSequentialRegisters>TIM_SMCR_TS;TIM_SMCR_SMS;RCC_PLLCFGR_PLLSRC_NONE</PotentiallyNotSequentialRegisters>
 	<RegisterSetRenameRules>
 
 
 <!-->2;RCC/AHB3ENR<-->
-
+		
+		<RegisterSetRenameRule>
+			<OriginalName>DBG</OriginalName>
+			<RegisterNames>APB_FZ1</RegisterNames>
+			<NewRegisterName>APBFZ1</NewRegisterName>
+		</RegisterSetRenameRule>
+		<RegisterSetRenameRule>
+			<OriginalName>DBG</OriginalName>
+			<RegisterNames>APB_FZ2</RegisterNames>
+			<NewRegisterName>APBFZ2</NewRegisterName>
+		</RegisterSetRenameRule>
 		<RegisterSetRenameRule>
 			<OriginalName>COMP</OriginalName>
 			<RegisterNames>SR;ICFR;OR</RegisterNames>
 			<NewName>COMPOPT</NewName>
 		</RegisterSetRenameRule>
-
-		
 		<RegisterSetRenameRule>
 			<OriginalName>ADC12</OriginalName>
 			<RegisterNames>CCR;CSR;CDR</RegisterNames>
@@ -174,6 +182,34 @@
 		</RegisterSetRenameRule>
 	</RegisterSetRenameRules>
 	<LinePatches>
+	
+		<LinePatch>
+			<Prefix>/*</Prefix>
+			<SearchedText>Bits definition for TAMP_MISR register  ************ *****/</SearchedText>
+			<ReplacementText>Bits definition for TAMP_MISR register  *****************/</ReplacementText>
+		</LinePatch>
+		<LinePatch>
+			<Prefix>/*</Prefix>
+			<SearchedText>  Bit definition for LPTIM_OR register  *******************/</SearchedText>
+			<ReplacementText>  Bit definition for LPTIM_CFGR2 register  *******************/</ReplacementText>
+		</LinePatch>
+		<LinePatch>
+			<Prefix>/*</Prefix>
+			<SearchedText>  Bits definition for UCPD_TXORDSET register  **************/</SearchedText>
+			<ReplacementText>  Bits definition for UCPD_TX_ORDSET register  **************/</ReplacementText>
+		</LinePatch>
+		<LinePatch>
+			<Prefix>/*</Prefix>
+			<SearchedText>  Bits definition for UCPD_TXPAYSZ register  ****************/</SearchedText>
+			<ReplacementText>  Bits definition for UCPD_TX_PAYSZ register  ****************/</ReplacementText>
+		</LinePatch>
+		<LinePatch>		
+			<Prefix>/*</Prefix>
+			<SearchedText>  Bits definition for RTC_ALRMASSR register  *************/</SearchedText>
+			<ReplacementText>  Bits definition for RTC_ALRMBSSR register  *************/</ReplacementText>
+			<AnchorLine>#define RTC_ALRMBSSR_MASKSS_Pos      (24U)</AnchorLine>
+			<AnchorDistance>1</AnchorDistance>
+		</LinePatch>
 		<LinePatch>
 		<Prefix>/*</Prefix>
 			<SearchedText>  Bit definition for RCC_APB1RSTR2 register  **************/</SearchedText>
