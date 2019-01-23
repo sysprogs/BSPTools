@@ -238,7 +238,7 @@ namespace NordicVendorSampleParser
                     var sampleID = new VendorSampleID
                     {
                         SampleName = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("PROJECT_NAME")).Split('=')[1].Trim(' ').ToUpper(),
-                        DeviceID = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("TARGETS")).Split('=')[1].Trim(' ').ToUpper()
+                        BoardNameOrDeviceID = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("TARGETS")).Split('=')[1].Trim(' ').ToUpper()
                     };
 
                     if (!filter.ShouldParseSampleForSpecificDevice(sampleID))

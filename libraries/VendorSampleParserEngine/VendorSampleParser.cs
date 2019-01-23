@@ -337,7 +337,7 @@ namespace VendorSampleParserEngine
                     {
                         var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.'), RegexOptions.IgnoreCase);
                         //We need to find the shortest MCU name that matches the mask (e.g. for CC3220S and CC3220SF we should pick CC3220S).
-                        mcu = BSP.MCUs.OrderBy(m=>m.ExpandedMCU.ID.Length).Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
+                        mcu = BSP.MCUs.OrderBy(m => m.ExpandedMCU.ID.Length).Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
                         vs.DeviceID = mcu.ExpandedMCU.ID;
                     }
                     catch
@@ -472,9 +472,15 @@ namespace VendorSampleParserEngine
             string sampleListFile = Path.Combine(CacheDirectory, "Samples.xml");
 
             var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode, specificSampleName);
+            Dictionary<VendorSampleID, string> encounteredIDs = new Dictionary<VendorSampleID, string>();
 
             foreach (var vs in sampleDir.Samples)
             {
+                var id = new VendorSampleID(vs);
+                if (encounteredIDs.TryGetValue(id, out var dir))
+                    throw new Exception("Duplicate sample for " + id);
+                encounteredIDs[new VendorSampleID(vs)] = vs.Path;
+
                 var rec = _Report.ProvideEntryForSample(new VendorSampleID(vs));
                 if (rec.LastSucceededPass < VendorSamplePass.InitialParse)
                     rec.LastSucceededPass = VendorSamplePass.InitialParse;
@@ -483,7 +489,11 @@ namespace VendorSampleParserEngine
             //We cache unadjusted sample definitions to allow tweaking the adjusting code without the need to reparse everything.
             Console.WriteLine("Adjusting sample properties...");
             foreach (var vs in sampleDir.Samples)
+            {
                 AdjustVendorSampleProperties(vs);
+                if (vs.Path == null)
+                    throw new Exception("Missing sample path for " + vs.UserFriendlyName);
+            }
 
             VendorSample[] pass1Queue, insertionQueue;
 
@@ -515,6 +525,12 @@ namespace VendorSampleParserEngine
             {
                 //Test the raw VendorSamples in-place and store AllDependencies
                 TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(new VendorSampleID(vs)));
+
+                foreach (var vs in pass1Queue)
+                {
+                    if (vs.Path == null)
+                        throw new Exception("Missing sample path for " + vs.UserFriendlyName);
+                }
 
                 sampleDir.ToolchainDirectory = ToolchainDirectory;
                 sampleDir.BSPDirectory = Path.GetFullPath(BSPDirectory);

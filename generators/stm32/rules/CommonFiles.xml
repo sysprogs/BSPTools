@@ -169,9 +169,9 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L4_V1.13.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
-					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;-Source\CMSIS_RTOS_V2\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>

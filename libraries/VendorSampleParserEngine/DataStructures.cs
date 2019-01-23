@@ -23,23 +23,23 @@ namespace VendorSampleParserEngine
     public struct VendorSampleID
     {
         public string SampleName;   //Must be the same as VendorSample.UserFriendlyName
-        public string DeviceID;     //Optional. If set, must match VendorSample.DeviceID
+        public string BoardNameOrDeviceID;     //Optional. If set, must match VendorSample.DeviceID
 
         public override string ToString()
         {
-            return $"{SampleName}-{DeviceID}";
+            return $"{SampleName}-{BoardNameOrDeviceID}";
         }
 
         public VendorSampleID(VendorSample sample)
         {
             SampleName = sample.UserFriendlyName;
-            DeviceID = sample.DeviceID;
+            BoardNameOrDeviceID = sample.BoardName ?? sample.DeviceID;
         }
 
         public VendorSampleID(string sampleName, string deviceID)
         {
             SampleName = sampleName;
-            DeviceID = deviceID;
+            BoardNameOrDeviceID = deviceID;
         }
     }
 

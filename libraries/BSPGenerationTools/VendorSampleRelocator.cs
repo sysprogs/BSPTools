@@ -61,9 +61,12 @@ namespace BSPGenerationTools
             //Returns null for toolchain-relative paths that need to be excluded
             public virtual string MapPath(string path)
             {
-                if (string.IsNullOrEmpty(path) || !Path.IsPathRooted(path))
+                if (string.IsNullOrEmpty(path) || (!Path.IsPathRooted(path) && !path.Contains("$$")))
                     return null;
-                path = Path.GetFullPath(path).Replace('/', '\\');
+
+                if (!path.Contains("$$"))
+                    path = Path.GetFullPath(path).Replace('/', '\\');
+
                 if (path.StartsWith(_SampleDir.ToolchainDirectory, StringComparison.InvariantCultureIgnoreCase))
                     return null;
                 if (path.StartsWith(_SampleDir.BSPDirectory, StringComparison.InvariantCultureIgnoreCase))
@@ -248,7 +251,11 @@ namespace BSPGenerationTools
 
                 s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
 
-                s.Path = mapper.MapPath(s.Path);
+                var rawPath = s.Path;
+                s.Path = mapper.MapPath(rawPath);
+                if (s.Path == null)
+                    throw new Exception("Invalid sample path for " + s.UserFriendlyName);
+
                 s.VirtualPath = BuildVirtualSamplePath(s.Path);
 
                 if (s.LinkerScript != null)
