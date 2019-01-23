@@ -61,7 +61,14 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_G0_V1.0.0\Drivers\STM32G0xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-				</CopyJob>
+					<Patches>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>Inc\Legacy\stm32_hal_legacy.h</FilePath>
+							<OldLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7) || defined(STM32H7)</OldLine>
+							<NewLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7) || defined(STM32H7) || defined(STM32G0)</NewLine>
+						</Patch>					
+					</Patches>
+					</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_G0_V1.0.0\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
@@ -171,13 +178,6 @@
 		</Framework-->
 	</AdditionalFrameworks>
 	<SmartSamples>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_STM32G0X</SourceFolder>
-			<DestinationFolder>samples\LEDBlink_STM32G0X</DestinationFolder>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/STM32G0xxxx/CMSIS_HAL/Device/ST/STM32G0xx/Source/Templates/system_STM32G0xx.c</string>
-			</AdditionalSources>
-		</SmartSample>
 		<!--SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32G0X</SourceFolder>
 			<DestinationFolder>samples\USB_CDC_STM32G0X</DestinationFolder>

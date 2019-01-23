@@ -727,7 +727,7 @@ namespace StandaloneBSPValidator
 
             internal void LogTestResult(string mcuID, TestResult result)
             {
-                _Writer.WriteLine("\t{0}: {1}", mcuID, result);
+                _Writer.WriteLine("\t{0}: {1}", mcuID, result.Result);
                 _ThisTestResults[mcuID] = result;
             }
 
