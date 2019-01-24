@@ -87,10 +87,15 @@ namespace VendorSampleParserEngine
                 @"\ARM_CM4F\port.c",
                 @"ARM_CM7\r0p1\port.c",
                 @"CM4_GCC.a",
+                @"CM4_GCC_wc32.a",
+                @"CM78_GCC.a",
+                @"CM7_GCC_wc32.a",
                 @"\ARM_CM4_MPU\port.c",
                 @"STemWin540_CM4_GCC.a",
                 @"STemWin540_CM7_GCC.a",
-                @"libPDMFilter_CM7_GCC",
+                @"STemWin_CM4_wc32",
+                @"STemWin_CM7_wc32",
+                @"libtouchgfx-float-abi-hard.a",
             };
 
         protected virtual bool ShouldFileTriggerHardFloat(string path)
@@ -417,6 +422,7 @@ namespace VendorSampleParserEngine
             Release,
             CleanRelease,
             SingleSample,
+            UpdateErrors,
         }
 
         public void Run(string[] args)
@@ -448,6 +454,7 @@ namespace VendorSampleParserEngine
                 Console.WriteLine($"                       This doesn't update the BSP archive.");
                 Console.WriteLine($"       /release       - Reuse cached definitions, retest all samples. Update BSP.");
                 Console.WriteLine($"       /cleanRelease  - Reparse/retest all samples. Update BSP.");
+                Console.WriteLine($"       /updateErrors  - Re-categorize errors based on KnownProblems.xml");
                 Console.WriteLine($"       /single:<name> - Run all phases of just one sample.");
                 Console.WriteLine($"Press any key to continue...");
                 Console.ReadKey();
@@ -462,6 +469,17 @@ namespace VendorSampleParserEngine
                 Console.WriteLine("* Only retested samples will be saved to BSP!          *");
                 Console.WriteLine("* Re-run in /release mode to build a releasable BSP.   *");
                 Console.WriteLine("********************************************************");
+            }
+
+            if (mode == RunMode.UpdateErrors)
+            {
+                foreach (var rec in _Report.Records)
+                {
+                }
+
+                XmlTools.SaveObject(_Report, ReportFile);
+
+                return;
             }
 
             string archiveName = string.Format("{0}-{1}.vgdbxbsp", BSP.BSP.PackageID.Split('.').Last(), BSP.BSP.PackageVersion);
@@ -575,7 +593,7 @@ namespace VendorSampleParserEngine
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"{finalStats.Passed} out of {finalStats.Total} tests failed during final pass.");
+                Console.WriteLine($"{finalStats.Failed} out of {finalStats.Total} tests failed during final pass.");
             }
 
             Console.ResetColor();

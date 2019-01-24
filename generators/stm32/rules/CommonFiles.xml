@@ -25,6 +25,17 @@
 						<string>Class\\HID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == HID</string>
 						<string>Class\\MSC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == MSC</string>
 					</SimpleFileConditions>
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>core\src\usbd_core.c</FilePath>
+							<AfterLine>#include "usbd_core.h"</AfterLine>
+							<InsertedLines>
+								<string>#ifndef UNUSED</string>
+								<string>#define UNUSED(x) ((void)(x));</string>
+								<string>#endif</string>															
+							</InsertedLines>
+						</Patch>											
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>

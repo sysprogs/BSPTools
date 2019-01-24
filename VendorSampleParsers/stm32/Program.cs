@@ -62,7 +62,7 @@ namespace GeneratorSampleStm32
             if (sampleName == "Master" || sampleName == "Slave" || sampleName == "FreeRTOS" || sampleName == "LedToggling")
                 sampleName = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(dir))) + "_" + sampleName;
             if ((m = rgExamplesSuffix.Match(dir)).Success)
-                sampleName += m.Groups[1].Value;   
+                sampleName += m.Groups[1].Value;
             else if ((m = rgExamplesSuffix2.Match(dir)).Success)
                 sampleName += m.Groups[1].Value;
         }
@@ -125,6 +125,7 @@ namespace GeneratorSampleStm32
                         filePath = filePath.Replace("_Keil_wc16.lib", "_GCC_wc32.a");
                         filePath = filePath.Replace("_Keil.lib", "_GCC.a");
                         filePath = filePath.Replace("_Keil_ARGB.lib", "_GCC_ARGB.a");
+                        filePath = filePath.Replace(@"Keil\touchgfx_core.lib", @"gcc\libtouchgfx-float-abi-hard.a");
                         if (!File.Exists(Path.Combine(pDirPrj, filePath)))
                             continue;
                     }
@@ -133,6 +134,11 @@ namespace GeneratorSampleStm32
                         filePath = filePath.Replace("_IAR_ARGB.a", "_GCC_ARGB.a");
                         if (!File.Exists(Path.Combine(pDirPrj, filePath)))
                             continue;
+                    }
+
+                    if (filePath.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        filePath = filePath.Replace("_wc16", "_wc32");
                     }
 
                     if (!sourceFiles.Contains(filePath))
@@ -148,7 +154,7 @@ namespace GeneratorSampleStm32
                     m = Regex.Match(ln, "[ \t]*<Define>(.*)</Define>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
                     {
-                        sample.PreprocessorMacros = m.Groups[1].Value.Split(',').Select(t => t.Trim()).Where(t => t != "").ToArray();
+                        sample.PreprocessorMacros = m.Groups[1].Value.Replace("&gt;", ">").Replace("&lt;", "<").Split(',').Select(t => t.Trim()).Where(t => t != "").ToArray();
                     }
                 }
 

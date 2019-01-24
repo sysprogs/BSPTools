@@ -31,5 +31,10 @@
 			<ErrorMessage>rt_misc.h: No such file or directory</ErrorMessage>
 			<Description>No rt_misc.h</Description>
 		</ErrorEntry>
+		<ErrorEntry>
+			<ID>multiple_bsp</ID>
+			<ErrorMessage>multiple definition of `HAL_DMA2D_MspDeInit'</ErrorMessage>
+			<Description>Multiple BSP sources</Description>
+		</ErrorEntry>
 	</Entries>
 </KnownSampleProblemDatabase>
