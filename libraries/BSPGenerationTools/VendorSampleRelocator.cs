@@ -219,6 +219,8 @@ namespace BSPGenerationTools
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
 
+            List<string> tooLongPaths = new List<string>();
+
             foreach (var s in sampleList)
             {
                 if (s.AllDependencies == null)
@@ -241,13 +243,18 @@ namespace BSPGenerationTools
                 s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps, s.Configuration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
+                const int ReasonableVendorSampleDirPathLengthForUsers = 120;
+
                 foreach (var dep in deps)
                 {
                     if (dep.MappedFile.StartsWith("$$SYS:BSP_ROOT$$/"))
                         continue;   //The file was already copied
                     copiedFiles[dep.OriginalFile] = dep.MappedFile.Replace(SampleRootDirMarker, outputDir);
-                }
 
+                    int estimatedTargetPathLength = ReasonableVendorSampleDirPathLengthForUsers + dep.MappedFile.Length - SampleRootDirMarker.Length;
+                    if (estimatedTargetPathLength > 254)
+                        tooLongPaths.Add(dep.MappedFile);
+                }
 
                 s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
 
@@ -273,6 +280,11 @@ namespace BSPGenerationTools
                 }
 
                 finalSamples.Add(s);
+            }
+
+            if (tooLongPaths.Count > 0)
+            {
+                throw new Exception($"Found {tooLongPaths.Count} files with excessively long paths. Please update MapPath() in the BSP-specific path mapper to shorten the target paths.");
             }
 
             Console.WriteLine($"Copying {copiedFiles.Count} files...");

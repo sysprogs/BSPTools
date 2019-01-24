@@ -310,6 +310,13 @@ namespace GeneratorSampleStm32
                 }
 
                 result = result?.Replace("/SW4STM32/", "/");
+                if (result?.EndsWith(".ld") == true)
+                {
+                    int idx = result.LastIndexOf('/');
+                    int idx2 = result.LastIndexOf('/', idx - 1);
+                    //Some linker script files have too long paths. Shorten them by moving them one step up.
+                    result = result.Substring(0, idx2) + result.Substring(idx);
+                }
 
                 return result;
             }
