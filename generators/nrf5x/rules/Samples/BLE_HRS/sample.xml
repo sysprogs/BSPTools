@@ -2,7 +2,7 @@
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Name>Bluetooth LE HRS Peripheral</Name>
   <Description>This sample demonstrates the Bluetooth LE Heart Rate Service</Description>
-  <MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+  <MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
   <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
     <string>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</string>
@@ -17,13 +17,15 @@
     <string>com.sysprogs.arm.nordic.nrfx.ble_hrs</string>
     <string>com.sysprogs.arm.nordic.nrf5x.gatt</string>
 	
-	    <string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_link_ctx_manager</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_qwr</string>
     <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.mbedtls</string>
+	<string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_scan</string>
 	
   </RequiredFrameworks>
-  <AdditionalSourcesToCopy>
+  <!--AdditionalSourcesToCopy>
     <AdditionalSourceFile>
       <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</SourcePath>
       <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
@@ -32,9 +34,38 @@
       <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/main.c</SourcePath>
       <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
     </AdditionalSourceFile>
-  </AdditionalSourcesToCopy>
+  </AdditionalSourcesToCopy-->
   <DefaultConfiguration>
     <Entries>
+	   <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.crypto</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ringbuf</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl</Key>
+        <Value>no</Value>
+      </KeyValue>
+	    <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	     <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.queue</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  
 	      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
         <Value>yes</Value>

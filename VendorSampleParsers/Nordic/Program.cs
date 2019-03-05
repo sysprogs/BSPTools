@@ -149,7 +149,13 @@ namespace NordicVendorSampleParser
                 lstFileC.AddRange(splitArgs.Where(ar => (ar.EndsWith(".c") || ar.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase)) && !ar.Contains(@"components/toolchain/") &&
                 !ar.Contains(@"gcc_startup")));
 
+           //    if (ln.Contains("-std"))
+                //    if (ln.Contains("c99"))
+                        vs.CLanguageStandard = "c99";
+                 //   else
+               //         vs.CPPLanguageStandard = ln.Replace("-std=", "").Trim('\\', ' ', '\t');
 
+             
                 //arguments from file
                 var fileArg = splitArgs.SingleOrDefault(ar => ar.StartsWith("@"));
                 if (fileArg != null)
@@ -213,6 +219,9 @@ namespace NordicVendorSampleParser
 
                 string outputDir = Path.Combine(TestDirectory, "_MakeBuildLogs");
                 List<UnparseableVendorSample> failedSamples = new List<UnparseableVendorSample>();
+                int cnt = 0;
+                int nobin = 0;
+                int nolog = 0;
 
                 foreach (var makefile in ExampleDirs)
                 {
@@ -222,16 +231,26 @@ namespace NordicVendorSampleParser
                         LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (" Skipped"));
                         continue;
                     }
-                    //  if (!makefile.Contains(@"publisher"))
-                    //        if(!makefile.Contains(@"keyboard"))
-                    //            continue;
+                    cnt++;
+
+                    /* for debbug
+                     * if (cnt < 80)
+                       {
+                           LogLine($"{cnt}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (" Skipped cnt"));
+                           continue;
+                       }
+                       */
+                    //if (samplesDone > 2)
+                    //    break;
+                    //if(!makefile.Contains(@"debug"))
+                    //   continue;
+                    //-----------------------------------------
 
                     //  if (Directory.Exists(Path.Combine(Path.GetDirectoryName(makefile), "_build")))
                     //      Directory.Delete(Path.Combine(Path.GetDirectoryName(makefile), "_build"), true);
-
                     var nameLog = Path.Combine(Path.GetDirectoryName(makefile), "log.txt");
-                    //                if (File.Exists(nameLog))
-                    //                    File.Delete(nameLog);
+                    // if (File.Exists(nameLog))
+                    //   File.Delete(nameLog);
 
                     Console.WriteLine($"Compiling {nameExampl} ...");
 
@@ -252,32 +271,62 @@ namespace NordicVendorSampleParser
                         WorkingDirectory = Path.GetDirectoryName(makefile)
                     };
 
+                   samplesDone++;
+
                     var buildDir = Path.Combine(startInfo.WorkingDirectory, "_build");
-                    if (Directory.Exists(buildDir))
-                        Directory.Delete(buildDir, true);
-
-                    var compiler = Process.Start(startInfo);
-                    samplesDone++;
-
-                    compiler.WaitForExit();
-
-                    bool buildSucceeded;
-
-                    buildSucceeded = compiler.ExitCode == 0;
-
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    if (!buildSucceeded)
+                    if (Directory.Exists(buildDir) &&  Directory.GetFiles(buildDir,"*.bin",SearchOption.AllDirectories).Count() > 0)
                     {
-                        failedSamples.Add(new UnparseableVendorSample { BuildLogFile = nameLog, ID = sampleID });
-                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + ("Builded"));
+                        Console.ForegroundColor = ConsoleColor.Gray;
                     }
-                    LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
-                    Console.ForegroundColor = ConsoleColor.Gray;
+                    else
+                    
+                        {
+                        try
+                        {
+                            if (Directory.Exists(buildDir))
+                                Directory.Delete(buildDir, true);
+                        }
+                        catch (Exception exc)
+                        {
+                            Console.WriteLine("Error delete: " + exc.Message);
+                        }
+
+                        var compiler = Process.Start(startInfo);
+                        
+                        compiler.WaitForExit();
+
+                        bool buildSucceeded;
+
+                        buildSucceeded = compiler.ExitCode == 0;
+
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        if (!buildSucceeded)
+                        {
+                            failedSamples.Add(new UnparseableVendorSample { BuildLogFile = nameLog, ID = sampleID });
+                            Console.ForegroundColor = ConsoleColor.Red;
+                        }
+                        LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
+                        Console.ForegroundColor = ConsoleColor.Gray;
+
+                        if (!buildSucceeded)
+                            continue;
+                    }
+
 
                     if (!File.Exists(nameLog))
                     {
                         LogLine($"No Log file  " + Path.GetDirectoryName(makefile));
                         Console.WriteLine($"No Log file {1}", Path.GetDirectoryName(makefile));
+                        nolog++;
+                        continue;
+                    }
+                    if (Directory.GetFiles(buildDir, "*.bin", SearchOption.AllDirectories).Count() == 0)
+                    {
+                        LogLine($"No bin file  " + Path.GetDirectoryName(makefile));
+                        Console.WriteLine($"No bin file {1}", Path.GetDirectoryName(makefile));
+                        nobin++;
                         continue;
                     }
 
@@ -294,6 +343,7 @@ namespace NordicVendorSampleParser
 
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 LogLine($"Total samples : {samplesDone}");
+                LogLine($"No Builded samples : {nobin}  No Log samples : {nolog}");
                 LogLine($"Failed samples : {failedSamples.Count}, {(failedSamples.Count / samplesDone) * 100} % from Total");
                 Console.ForegroundColor = ConsoleColor.Gray;
 

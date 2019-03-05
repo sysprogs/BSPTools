@@ -12,6 +12,7 @@
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.bspoptions.nrf5x.defmakmcu$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.defmak$$</string>
+			<string>$$com.sysprogs.bspoptions.nrf5x.defmakseries$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
 			<string>NRF_DFU_SETTINGS_VERSION=1</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.apiversion$$</string>
@@ -23,13 +24,14 @@
 			<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/hal</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/drivers/include</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/drivers</string>			
+			<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/drivers</string>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/external/nrf_oberon</string>
 		</IncludeDirectories>
 		<AdditionalLibraryDirectories>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/SoftdeviceLibraries</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/LinkerScripts</string>
 		</AdditionalLibraryDirectories>
-		<CFLAGS>-std=gnu99 </CFLAGS>
+		<CFLAGS>-std=c99 </CFLAGS>
 	</CompilationFlags>
 	<ConditionalFlags>
 		<ConditionalToolFlags>
@@ -86,32 +88,32 @@
 							<FilePath>examples/ble_peripheral/ble_app_uart/pca10040/s132/config/sdk_config.h</FilePath>
 							<AfterLine>#define SDK_CONFIG_H</AfterLine>
 							<InsertedLines>
-								<string>#include "config.h"</string>								
+								<string>#include "config.h"</string>
 							</InsertedLines>
-						</Patch>	
+						</Patch>
 						<Patch xsi:type="InsertLines">
 							<FilePath>examples/ble_peripheral/ble_app_uart/pca10056/s140/config/sdk_config.h</FilePath>
 							<AfterLine>#define SDK_CONFIG_H</AfterLine>
 							<InsertedLines>
-								<string>#include "config.h"</string>								
+								<string>#include "config.h"</string>
 							</InsertedLines>
-						</Patch>							
+						</Patch>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
 							<OldLine>#define configTOTAL_HEAP_SIZE                                                     ( 4096 )</OldLine>
 							<NewLine>#define configTOTAL_HEAP_SIZE                                                     ( 16384 )</NewLine>
-						</Patch>						
+						</Patch>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
 							<OldLine>#define configMINIMAL_STACK_SIZE                                                  ( 60 )</OldLine>
 							<NewLine>#define configMINIMAL_STACK_SIZE                                                  ( 512 )</NewLine>
-						</Patch>						
+						</Patch>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
 							<OldLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 80 )</OldLine>
 							<NewLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 512 )</NewLine>
-						</Patch>						
-					</Patches>	
+						</Patch>
+					</Patches>
 			</CopyJob>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:RULES_DIR$$\SoftdeviceLibraries</SourceFolder>
@@ -124,12 +126,12 @@
 				<TargetFolder>modules</TargetFolder>
 				<FilesToCopy>nrfx\mdk\system_*</FilesToCopy>
 				<ProjectInclusionMask>nrfx\mdk\system_*.c;nrfx\mdk\system_*.h;*.s</ProjectInclusionMask>
-				<SimpleFileConditions>					
+				<SimpleFileConditions>
 						<string>nrfx\\mdk\\system_nrf51.c: $$SYS:MCU_ID$$ =~ ^nRF518.*</string>
 						<string>nrfx\\mdk\\system_nrf52.c: $$SYS:MCU_ID$$ =~ ^nRF52832.*</string>
 						<string>nrfx\\mdk\\system_nrf52840.c: $$SYS:MCU_ID$$ =~ ^nRF52840.*</string>
 						<string>nrfx\\mdk\\system_nrf52810.c: $$SYS:MCU_ID$$ =~ ^nRF52810.*</string>
-				</SimpleFileConditions>	
+				</SimpleFileConditions>
 			</CopyJob>
 				<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\toolchain</SourceFolder>
@@ -148,7 +150,7 @@
 				<FilesToCopy>*.h;*.c</FilesToCopy>
 				<SimpleFileConditions>
 					<string>.*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
-				</SimpleFileConditions>				
+				</SimpleFileConditions>
 			</CopyJob-->
 		</CopyJobs>
 	</CoreFramework>
@@ -166,8 +168,8 @@
 			<CollapsedByDefault>false</CollapsedByDefault>
 		  </PropertyGroup>
 		</PropertyGroups>
-	</ConfigurableProperties>	
-	<AdditionalFrameworks>	
+	</ConfigurableProperties>
+	<AdditionalFrameworks>
 	<Framework>
 			<Name>Legacy Peripheral Drivers</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.periph_legacy</ID>
@@ -182,19 +184,19 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\integration\nrfx</SourceFolder>
 					<TargetFolder>integration\nrfx</TargetFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
-					
+
 					<ProjectInclusionMask>-*nrf_drv_ppi.c;*</ProjectInclusionMask><!---*_config.h;-->
 					<!--ProjectInclusionMask>-*nrf_drv_ppi.c;-*nrf_drv_rng.c;*</ProjectInclusionMask-->
 					<AutoIncludeMask>*.h</AutoIncludeMask>
-					<SimpleFileConditions>					
+					<SimpleFileConditions>
 						<string>legacy\\nrf_drv_twi*: $$com.sysprogs.bspoptions.nrf5x.twi_driver_legacy$$ == yes</string>
 						<string>legacy\\nrf_drv_swi*: $$com.sysprogs.bspoptions.nrf5x.swi_driver_legacy$$ == yes</string>
 						<string>legacy\\nrf_drv_uart*: $$com.sysprogs.bspoptions.nrf5x.uart_driver_legacy$$ == yes</string>
 						<string>legacy\\nrf_drv_spis.c: $$com.sysprogs.bspoptions.nrf5x.spi_driver_legacy$$ == slave</string>
 						<string>legacy\\nrf_drv_spi.c: $$com.sysprogs.bspoptions.nrf5x.spi_driver_legacy$$ == 5W_master</string>
-						<string>legacy\\nrf_drv_clock*: $$com.sysprogs.bspoptions.nrf5x.clock_driver_legacy$$ == yes</string>			
-					</SimpleFileConditions>				
-				</CopyJob>			
+						<string>legacy\\nrf_drv_clock*: $$com.sysprogs.bspoptions.nrf5x.clock_driver_legacy$$ == yes</string>
+					</SimpleFileConditions>
+				</CopyJob>
 			</CopyJobs>
 				<ConfigurableProperties>
 				<PropertyGroups>
@@ -222,7 +224,7 @@
 				  </PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
-		
+
 		</Framework>
 		<Framework>
 			<Name>Peripheral Drivers (Old)</Name>
@@ -240,9 +242,9 @@
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
 					<AutoIncludeMask>-nrf_soc_nosd\*;*.h</AutoIncludeMask>
-					<SimpleFileConditions>					
-					</SimpleFileConditions>				
-				</CopyJob>			
+					<SimpleFileConditions>
+					</SimpleFileConditions>
+				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
 			<PropertyGroups>
@@ -260,7 +262,7 @@
 			<ID>com.sysprogs.arm.nordic.nrf5x.drivers_ext</ID>
 			<ClassID>com.sysprogs.arm.nordic.nrf5x.drivers_ext</ClassID>
 			<ProjectFolderName>External Peripherals</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>			
+			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\drivers_ext</SourceFolder>
@@ -268,7 +270,7 @@
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
-					</CopyJob>			
+					</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
 			<PropertyGroups>
@@ -298,7 +300,7 @@
 							<FilePath>bootloader\nrf_bootloader_app_start_asm.c</FilePath>
 							<OldLine>void __attribute__ ((noinline)) nrf_bootloader_app_start_impl(uint32_t start_addr)</OldLine>
 							<NewLine>void __attribute__ ((noinline, optimize("-fomit-frame-pointer"))) nrf_bootloader_app_start_impl(uint32_t start_addr)</NewLine>
-						</Patch-->						
+						</Patch-->
 					</Patches>
 				</CopyJob>
 			</CopyJobs>
@@ -344,15 +346,8 @@
 					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
 					<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
 				</CopyJob>
-				<!--CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries\bsp</SourceFolder>
-					<TargetFolder>components\libraries\bsp</TargetFolder>
-					<ProjectInclusionMask>-bsp_btn_ant.*;*.c;*.h</ProjectInclusionMask>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<AlreadyCopied>true</AlreadyCopied>
 
-				</CopyJob-->
-			</CopyJobs>			
+			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
 				  <PropertyGroup>
@@ -376,7 +371,7 @@
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
-			</ConfigurableProperties>			
+			</ConfigurableProperties>
 		</Framework>
 		<Framework>
 			<Name>NRF5x Libraries</Name>
@@ -391,27 +386,28 @@
 					<FilesToCopy>-*_keil*;-*_iar*;*</FilesToCopy>
 					<!-- Conditions are programmatically generated -->
 
-					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-bootloader_dfu\*init_template*;-timer\experimental\*;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-bootloader_dfu\*init_template*;-timer\experimental\*;-*nrf_crypto_svc.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-ant_fs\*;-console\*;*.h</AutoIncludeMask>
 					<Patches>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>ecc\ecc.c</FilePath>
 							<OldLine>#include "uECC.h"</OldLine>
 							<NewLine>//#include "uECC.h"</NewLine>
-						</Patch>						
+						</Patch>
 					</Patches>
 					<PreprocessorMacros>NRF_LOG_BACKEND_SERIAL_USES_RTT=$$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$</PreprocessorMacros>
-					
-
 				</CopyJob>
 				<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
 				<TargetFolder>external</TargetFolder>
 				<FilesToCopy>-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*</FilesToCopy>
-				<ProjectInclusionMask>fprintf\*;segger_rtt\*;-*</ProjectInclusionMask>
-				<AutoIncludeMask>fprintf\*;segger_rtt\*;-*</AutoIncludeMask>
-					<SimpleFileConditions>					
+				<ProjectInclusionMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_oberon\lib\nrf52\liboberon_2.0.5.a;nrf_oberon\*.h;-nrf_cc310_bl\*keil*;-nrf_cc310_bl\*keil*;nrf_cc310_bl\*;nrf_cc310\*libnrf_cc310_0.9.10.a;-*</ProjectInclusionMask>
+				<AutoIncludeMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_cc310_bl\*;nrf_cc310\*;-*</AutoIncludeMask>
+					<SimpleFileConditions>
 						<string>segger_rtt\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$ == 1</string>
+						<string>nrf_oberon\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
+						<string>nrf_cc310\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
+						<string>nrf_cc310_bl\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
 					</SimpleFileConditions>
 			</CopyJob>
 				<CopyJob>
@@ -421,33 +417,16 @@
 					<SimpleFileConditions>
 							<string>nrf_sdh_freertos.c: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
 							<string>.*[^freertos].*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
-					</SimpleFileConditions>					
-					<Patches>
-						<!--Patch xsi:type="InsertLines">
-							<FilePath>softdevice_handler\softdevice_handler.c</FilePath>
-							<AfterLine>    err_code = sd_ble_enable(&amp;app_ram_base);</AfterLine>
-							<InsertedLines>
-								<string></string>
-								<string>    if (app_ram_base &gt; *ram_start &amp;&amp; err_code == NRF_ERROR_NO_MEM)</string>
-								<string>    {</string>
-								<string>        //It the breakpoint below gets triggered, your application reserves too little RAM for the current softdevice configuration.</string>
-								<string>        //In this case, make a project-wide copy of the linker script and adjust the origin and length of the SRAM memory</string>
-								<string>        //according to the value in app_ram_base.</string>
-								<string>        //See the following tutorial for details: https://visualgdb.com/tutorials/arm/nrf51/softdevice_memory</string>
-								<string>        asm("bkpt 255");</string>
-								<string>    }</string>
-							</InsertedLines>
-						</Patch-->						
-					</Patches>
+					</SimpleFileConditions>
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
 				  <PropertyGroup>
 					<Name>nRF5x Libraries</Name>
 					<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
 					<Properties>
-						
+
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>bootloader_dfu</Name>
 						  <UniqueID>bootloader_dfu</UniqueID>
@@ -460,13 +439,13 @@
 						  </SuggestionList>
 						  <DefaultEntryIndex>0</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>		
+						</PropertyEntry>
 						<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
 					</Properties>
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
-			</ConfigurableProperties>			
+			</ConfigurableProperties>
 		</Framework>
 		<Framework>
 			<Name>Bluetooth LE - Common Files</Name>
@@ -481,7 +460,7 @@
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<PreprocessorMacros>BLE_STACK_SUPPORT_REQD</PreprocessorMacros>
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>
 		</Framework>
 		<Framework>
 			<Name>Peripheral Drivers</Name>
@@ -495,24 +474,24 @@
 					<TargetFolder>modules</TargetFolder>
 					<FilesToCopy>-nrfx\mdk\system_*;-nrfx\mdk\ses*.s;nrfx\drivers\*.*;nrfx\hal\*.*;nrfx\soc\*.h;nrfx\mdk\*.c;nrfx\mdk\*.h;-nrfx\mdk\arm_*;-nrfx\mdk\iar_*;nrfx\mdk\*.s;-nrfx\templates\nRF52*.h;-nrfx\templates\nrfx_*.h;nrfx\nrfx.h</FilesToCopy>
 						<ProjectInclusionMask>-*gcc_startup*.s;*.s;*.c;*.h</ProjectInclusionMask>
-						<Patches>	
+						<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>nrfx/mdk/nrf.h</FilePath>
 							<AfterLine>    #ifndef NRF52832_XXAA</AfterLine>
 							<InsertedLines>
-								<string>		#ifndef NRF52810_XXAA</string>								
+								<string>		#ifndef NRF52810_XXAA</string>
 							</InsertedLines>
-						</Patch>	
+						</Patch>
 						<Patch xsi:type="InsertLines">
 							<FilePath>nrfx/mdk/nrf.h</FilePath>
 							<AfterLine>        #define NRF52_SERIES</AfterLine>
 							<InsertedLines>
-								<string>    	#endif</string>								
+								<string>    	#endif</string>
 							</InsertedLines>
-						</Patch>	
-						</Patches>	
+						</Patch>
+						</Patches>
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>
 		</Framework>
 		<Framework>
 			<Name>NRF5x LWIP</Name>
@@ -525,15 +504,15 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\lwip</SourceFolder>
 					<TargetFolder>external\lwip</TargetFolder>
 					<FilesToCopy>-doc\*;*</FilesToCopy>
-					
+
 					<ProjectInclusionMask>-src\api\*;-src\core\snmp\*;-test\*;-src\netif\ppp*;-src\apps\*;-src\core\mem.*;-src\include\lwip\apps\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask>-test\*;-src\include\lwip\apps\*;*.h</AutoIncludeMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/lwip/src/include</AdditionalIncludeDirs>
 				</CopyJob>
-				
+
 			</CopyJobs>
 		</Framework>
-		
+
 		<Framework>
 			<Name>NRF5x Embedded TLS</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.mbedtls</ID>
@@ -541,42 +520,47 @@
 			<ProjectFolderName>MbedTLS</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
-				<CopyJob>					
+				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\mbedtls</SourceFolder>
 					<TargetFolder>external\mbedtls</TargetFolder>
 					<FilesToCopy>-visualc\*;-yotta\*;-scripts\*;*</FilesToCopy>
 					<ProjectInclusionMask>-tests\*;-doxygen\*;-programs\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask>-tests\*;*.h</AutoIncludeMask>
-					<PreprocessorMacros>MBEDTLS_CONFIG_FILE="nrf_tls_config.h";BLE_STACK_SUPPORT_REQD;ENABLE_DEBUG_LOG_SUPPORT</PreprocessorMacros>
-						<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/mbedtls/include</AdditionalIncludeDirs>
+					<PreprocessorMacros>MBEDTLS_CONFIG_FILE="nrf_tls_config.h";BLE_STACK_SUPPORT_REQD;ENABLE_DEBUG_LOG_SUPPORT;MBEDTLS_CTR_DRBG_C</PreprocessorMacros>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/mbedtls/include</AdditionalIncludeDirs>
+
 				</CopyJob>
-				<CopyJob>					
+				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\nrf_tls</SourceFolder>
 					<TargetFolder>external\nrf_tls</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
-					</CopyJob>
-			</CopyJobs>
-		</Framework>
-		<!--Framework>
-			<Name>NRF5x Embedded TLS</Name>
-			<ID>com.sysprogs.arm.nordic.nrf5x.mbedtls</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.mbedtls</ClassID>
-			<ProjectFolderName>MbedTLS</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>					
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\mbedtls</SourceFolder>
-					<TargetFolder>external\mbedtls</TargetFolder>
-					<FilesToCopy>-visualc\*;-yotta\*;-scripts\*;*</FilesToCopy>
-					<ProjectInclusionMask>-tests\*;-doxygen\*;-programs\*;*.c;*.h</ProjectInclusionMask>
-					<AutoIncludeMask>-tests\*;*.h</AutoIncludeMask>
-					<PreprocessorMacros>MBEDTLS_CONFIG_FILE=\"nrf_tls_config.h\";BLE_STACK_SUPPORT_REQD;ENABLE_DEBUG_LOG_SUPPORT</PreprocessorMacros>
-						<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/nrf_tls;$$SYS:BSP_ROOT$$/nRF5x/external/mbedtls/include</AdditionalIncludeDirs>
+					<SimpleFileConditions>
+						<string>mbedtls\\tls_interface.c: $$com.sysprogs.bspoptions.nrf5x.mbedtls.tls_interface$$ == yes</string>
+					</SimpleFileConditions>
 				</CopyJob>
 			</CopyJobs>
-		</Framework-->
+			<ConfigurableProperties>
+				<PropertyGroups>
+				 <PropertyGroup>
+					<Name>NRF5x Embedded TLS</Name>
+					<UniqueID>com.sysprogs.bspoptions.nrf5x.mbedtls.</UniqueID>
+					<Properties>
+					<PropertyEntry xsi:type="Boolean">
+					<Name>tls interface</Name>
+					<UniqueID>tls_interface</UniqueID>
+					<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+					<DefaultValue>false</DefaultValue>
+					<ValueForTrue>yes</ValueForTrue>
+					</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>
+
+		</Framework>
 		<Framework>
 			<Name>Fixed Size Stack &amp; Heap</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.stack_heap</ID>
@@ -588,7 +572,7 @@
 					<FilesToCopy>-*</FilesToCopy>
 					<PreprocessorMacros>__STACK_SIZE=$$com.sysprogs.bspoptions.stackheap.stacksize$$;__HEAP_SIZE=$$com.sysprogs.bspoptions.stackheap.heapsize$$</PreprocessorMacros>
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>
 			  <ConfigurableProperties>
 				<PropertyGroups>
 				  <PropertyGroup>
@@ -602,7 +586,7 @@
 						<MinValue>0</MinValue>
 						<MaxValue>16777216</MaxValue>
 						<Increment>1024</Increment>
-					  </PropertyEntry>		  
+					  </PropertyEntry>
 					  <PropertyEntry xsi:type="Integral">
 						<Name>Fixed heap size</Name>
 						<UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
@@ -618,10 +602,10 @@
 				  </PropertyGroup>
 				</PropertyGroups>
 			  </ConfigurableProperties>
-			
+
 		</Framework>
 		<Framework>
-		
+
 			<Name>FreeRTOS</Name>
 			<ID>com.sysprogs.arm.nordic.nrf51.freertos</ID>
 			<ProjectFolderName>FreeRTOS</ProjectFolderName>
@@ -668,14 +652,14 @@
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
-			</ConfigurableProperties>			
+			</ConfigurableProperties>
 			<AdditionalSystemVars>
 				<SysVarEntry>
 					<Key>com.sysprogs.rtos_type</Key>
 					<Value>com.sysprogs.freertos</Value>
 				</SysVarEntry>
 			</AdditionalSystemVars>
-		</Framework>	
+		</Framework>
 		<Framework>
 			<Name>Nordic IoT Components</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.iot</ID>
@@ -702,17 +686,17 @@
 					<ProjectInclusionMask>-*.a;-mqtt\mqtt_transport_socket.c;-*.lib;*.c</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<PreprocessorMacros>NRF_TLS_MAX_INSTANCE_COUNT=$$com.sysprogs.bspoptions.nrf5x.iot.tls_instance$$</PreprocessorMacros>
-					<Patches>	
-						<Patch xsi:type="InsertLines">									
+					<Patches>
+						<Patch xsi:type="InsertLines">
 							<FilePath>socket\api\socket_api.h</FilePath>
 							<AfterLine>#endif</AfterLine>
 							<InsertedLines>
 								<string>typedef _ssize_t ssize_t;</string>
 							</InsertedLines>
-						</Patch>								
+						</Patch>
 				</Patches>
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
 				  <PropertyGroup>
@@ -728,14 +712,14 @@
 						<MinValue>0</MinValue>
 						<MaxValue>10</MaxValue>
 						<Increment>1</Increment>
-					  </PropertyEntry>		  
-	
+					  </PropertyEntry>
+
 					</Properties>
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
 
-			</ConfigurableProperties>	
+			</ConfigurableProperties>
 		</Framework>
 
 	</AdditionalFrameworks>
@@ -743,80 +727,95 @@
 			<MCUClassifier>
 			<VariableName>com.sysprogs.bspoptions.nrf5x.apiversion</VariableName>
 			<Required>true</Required>
-			<Options>		
+			<Options>
 				<Option>
 					<Value>NRF_SD_BLE_API_VERSION=3</Value>
 					<Regex>^nRF51.*</Regex>
 				</Option>
 				<Option>
 					<Value>NRF_SD_BLE_API_VERSION=6</Value>
-					<Regex>^nRF52.*</Regex>			
-				</Option>					
+					<Regex>^nRF52.*</Regex>
+				</Option>
 			</Options>
 		</MCUClassifier>
 		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.defmakseries</VariableName>
+			<Required>true</Required>
+			<Options>
+				<Option>
+					<Value></Value>
+					<Regex>^nRF51.*</Regex>
+				</Option>
+				<Option>
+					<Value>NRF52_SERIES</Value>
+					<Regex>^nRF52.*</Regex>
+				</Option>
+			</Options>
+		</MCUClassifier>
+
+		<MCUClassifier>
 			<VariableName>com.sysprogs.bspoptions.nrf5x.defmak</VariableName>
 			<Required>true</Required>
-			<Options>		
+			<Options>
 				<Option>
 					<Value>NRF51</Value>
 					<Regex>^nRF51.*</Regex>
 				</Option>
 				<Option>
 					<Value>NRF52832</Value>
-					<Regex>^nRF52832.*</Regex>			
-				</Option>					
+					<Regex>^nRF52832.*</Regex>
+				</Option>
 				<Option>
 					<Value>NRF52840</Value>
-					<Regex>^nRF52840.*</Regex>			
-				</Option>					
+					<Regex>^nRF52840.*</Regex>
+				</Option>
 				<Option>
 					<Value>NRF52810</Value>
-					<Regex>^nRF52810.*</Regex>			
-				</Option>					
+					<Regex>^nRF52810.*</Regex>
+				</Option>
 			</Options>
 		</MCUClassifier>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.bspoptions.nrf5x.defmakmcu</VariableName>
 			<Required>true</Required>
-			<Options>		
+			<Options>
 				<Option>
 					<Value>NRF51822</Value>
-					<Regex>^nRF51822.*</Regex>			
-				</Option>					
+					<Regex>^nRF51822.*</Regex>
+				</Option>
 				<Option>
 					<Value>NRF52832_XXAA</Value>
-					<Regex>^nRF52832_XXAA.*</Regex>			
-				</Option>					
+					<Regex>^nRF52832_XXAA.*</Regex>
+				</Option>
 				<Option>
 					<Value>NRF52832_XXAB</Value>
-					<Regex>^nRF52832_XXAB.*</Regex>			
-				</Option>					
+					<Regex>^nRF52832_XXAB.*</Regex>
+				</Option>
 				<Option>
 					<Value>NRF52840_XXAA</Value>
-					<Regex>^nRF52840.*</Regex>			
-				</Option>					
+					<Regex>^nRF52840.*</Regex>
+				</Option>
 				<Option>
 					<Value>NRF52810_XXAA</Value>
-					<Regex>^nRF52810.*</Regex>			
-				</Option>					
+					<Regex>^nRF52810.*</Regex>
+				</Option>
 			</Options>
 		</MCUClassifier>
-		<MCUClassifier>		
+		<MCUClassifier>
 			<VariableName>com.sysprogs.bspoptions.nrf5x.floatsoft</VariableName>
 			<Required>true</Required>
-			<Options>		
+			<Options>
 				<Option>
 					<Value>-mfloat-abi=soft</Value>
 					<Regex>^nRF51.*</Regex>
 				</Option>
 				<Option>
 					<Value></Value>
-					<Regex>^nRF52.*</Regex>			
-				</Option>					
+					<Regex>^nRF52.*</Regex>
+				</Option>
 			</Options>
 		</MCUClassifier>
-	</Subfamilies>	
+	</Subfamilies>
 	<SmartSamples>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_BSP</SourceFolder>
@@ -890,7 +889,7 @@
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEProximity</SourceFolder>
 			<DestinationFolder>samples\BLEProximity</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
-			<AdditionalSources>		
+			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_proximity/main.c</string>
 			</AdditionalSources>

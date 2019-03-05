@@ -31,13 +31,37 @@
 	</ConditionalError>
   </ConditionalErrors>
   <DefaultConfiguration>
-    	<Entries> <KeyValue><Key>com.sysprogs.bspoptions.nrf5x.iot.context_manager</Key><Value>yes</Value></KeyValue>
-		      <KeyValue>
+    	<Entries>
+	
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.mbedtls.tls_interface</Key>
+				<Value>yes</Value>
+		</KeyValue>   
+	
+		<KeyValue>
+			<Key>com.sysprogs.bspoptions.nrf5x.iot.context_manager</Key>
+			<Value>yes</Value>
+		</KeyValue>
+		
+		<KeyValue>
+			<Key>com.sysprogs.bspoptions.nrf5x.libraries.memobj</Key>
+			<Value>yes</Value>
+		</KeyValue>
+
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.util</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ringbuf</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>

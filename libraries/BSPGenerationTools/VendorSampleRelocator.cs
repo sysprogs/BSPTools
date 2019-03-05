@@ -1,4 +1,4 @@
-﻿using BSPEngine;
+using BSPEngine;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,6 +61,11 @@ namespace BSPGenerationTools
             //Returns null for toolchain-relative paths that need to be excluded
             public virtual string MapPath(string path)
             {
+
+                bool d = Path.IsPathRooted(path);
+                bool h = (!Path.IsPathRooted(path) && !path.Contains("$$"));
+                bool a = !path.Contains("$$");
+
                 if (string.IsNullOrEmpty(path) || (!Path.IsPathRooted(path) && !path.Contains("$$")))
                     return null;
 
