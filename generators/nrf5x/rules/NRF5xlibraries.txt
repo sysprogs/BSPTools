@@ -12,4 +12,4 @@ timer: None=none;Using nRF5x scheduler=normal;Using FreeRTOS=freertos;Using RTX=
 uart: None=;Without FIFO=app_uart;With FIFO=app_uart_fifo
 	uart\\app_uart.c:  == app_uart
 	uart\\app_uart_fifo.c:  == app_uart_fifo
-	uart\\.*: != 
+	uart\\.*: !=

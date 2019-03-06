@@ -19,7 +19,7 @@
     <string>com.sysprogs.arm.nordic.nrf5x.ble_link_ctx_manager</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_qwr</string>
     <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
-	
+			<string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_scan</string>
   </RequiredFrameworks>
   <AdditionalSourcesToCopy>
     <AdditionalSourceFile>
@@ -41,6 +41,25 @@
   </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
+		 <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ringbuf</Key>
+        <Value>yes</Value>
+      </KeyValue>	
+	<KeyValue>
+		  <Key>com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310</Key>
+        <Value>yes</Value>
+      </KeyValue>
+
+	  <KeyValue>
+		  <Key>com.sysprogs.bspoptions.nrf5x.libraries.memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	 
+	 <KeyValue>
+	    <Key>com.sysprogs.arm.nordic.nrf5x.nrf_ble_scan</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  
 	      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
         <Value>yes</Value>

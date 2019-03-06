@@ -43,6 +43,7 @@
 			<TestDirSuffix>-BLE_HRSClient</TestDirSuffix>
 		</TestedSample>
 		<TestedSample>
+			<DeviceRegex>^nRF528(32|40).*$</DeviceRegex>
 			<Name>Bluetooth LE HRS Peripheral</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
@@ -77,8 +78,18 @@
 			</SampleConfiguration>            
 		</TestedSample>
 		
-		<!-- IoT -->
-		
+		<TestedSample>
+			<Name>MQTT publisher (IoT)</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-IoT_MQTT_publisher</TestDirSuffix>
+		</TestedSample>	 
+		<TestedSample>
+			<Name>MQTT subscriber (IoT)</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-IoT_MQTT_subscriber</TestDirSuffix>
+		</TestedSample>	 		
 		<TestedSample>
 			<Name>ICMP Demo (IoT)</Name>
 			<SkipIfNotFound>true</SkipIfNotFound>
@@ -97,18 +108,7 @@
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-IoT_tcp_client</TestDirSuffix>
 		</TestedSample>	 
-		<TestedSample>
-			<Name>MQTT publisher (IoT)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-IoT_MQTT_publisher</TestDirSuffix>
-		</TestedSample>	 
-		<TestedSample>
-			<Name>MQTT subscriber (IoT)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-IoT_MQTT_subscriber</TestDirSuffix>
-		</TestedSample>	 		
+	
 	</Samples>
 	<DeviceParameterSets>
 		<DeviceParameterSet>

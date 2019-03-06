@@ -340,14 +340,20 @@ namespace VendorSampleParserEngine
                     LoadedBSP.LoadedMCU mcu;
                     try
                     {
-                        var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.'), RegexOptions.IgnoreCase);
+                       // bool er = false;
+                       // if (vs.DeviceID.Contains("DEBUG")) || vs.DeviceID.Contains("MBR") || vs.DeviceID.Contains("S1"))
+                         //   er = true;
+                        var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.').Replace("_DEBUG","").Replace("_MBR", "").Replace("_S132", "").Replace("_S140", ""), RegexOptions.IgnoreCase);
                         //We need to find the shortest MCU name that matches the mask (e.g. for CC3220S and CC3220SF we should pick CC3220S).
                         mcu = BSP.MCUs.OrderBy(m => m.ExpandedMCU.ID.Length).Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
                         vs.DeviceID = mcu.ExpandedMCU.ID;
+                        
+                     //   if (!er)
+                       //     continue;
                     }
                     catch
                     {
-                        logger.HandleError($"Could not find {vs.DeviceID} MCU");
+                        logger.HandleError($"Could not find {vs.DeviceID} MCU  , Project: {vs.UserFriendlyName} ");
                         continue;
                     }
 

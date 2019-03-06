@@ -27,3 +27,4 @@ ble_services\ble_tps|TX Power Service
 ble_link_ctx_manager|Ble_Link_CTX_manager
 ble_services\ble_ipsp|IPSP Service
 nrf_ble_qwr|Nrf_Ble_Qwr
+nrf_ble_scan|Nrf_Ble_Scan

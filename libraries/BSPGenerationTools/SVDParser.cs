@@ -21,7 +21,7 @@ namespace BSPGenerationTools
             string access = reg.SelectSingleNode("access")?.InnerText;
             uint addrOff = ParseScaledNonNegativeInteger(reg.SelectSingleNode("addressOffset").InnerText);
             var regSizeProp = reg.SelectSingleNode("size");
-            uint regSize = regSizeProp != null ? ParseScaledNonNegativeInteger(regSizeProp.InnerText) : defaultRegisterSize.Value;
+            uint regSize = regSizeProp != null ? ParseScaledNonNegativeInteger(regSizeProp.InnerText) : defaultRegisterSize ?? 0;
 
             int count = 1, step = 0;
             string dim = reg.SelectSingleNode("dim")?.InnerText;

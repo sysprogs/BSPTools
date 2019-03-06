@@ -29,6 +29,10 @@
   </AdditionalSourcesToCopy>
   <DefaultConfiguration>
     <Entries>
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
 	      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
         <Value>yes</Value>
