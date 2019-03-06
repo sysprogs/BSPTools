@@ -540,10 +540,10 @@ namespace nrf5x
         static void GenerateConditionsLibriries(Framework[] fr, string name_lib)//libraries
         {
             if (name_lib.StartsWith("experimental_"))
-                name_lib = name_lib.Replace("experimental_","");
+                name_lib = name_lib.Replace("experimental_", "");
 
             var compositeProp = ReadCompositePropery($"NRF5x{ name_lib}.txt");
-            
+
             List<PropertyEntry.Boolean> lstProp = new List<PropertyEntry.Boolean>();
 
             lstGenFramworks.Add($"com.sysprogs.arm.nordic.nrf5x.{name_lib}");
@@ -600,33 +600,35 @@ namespace nrf5x
         }
         static void CheckEntriesSample(string DirLibs, string dirSamples)
         {
-            const string  PrefixEntr = "com.sysprogs.bspoptions.nrf5x.libraries.";
+            const string PrefixEntr = "com.sysprogs.bspoptions.nrf5x.libraries.";
             const string strreplace = "experimental_";
-           Dictionary<string,EmbeddedProjectSample> lstSamples = new Dictionary<string, EmbeddedProjectSample>();
-            foreach (var fl in Directory.GetFiles(dirSamples, "*.xml",SearchOption.AllDirectories))
-              lstSamples.Add(fl.Replace(dirSamples,""), XmlTools.LoadObject<EmbeddedProjectSample>(fl));
+            Dictionary<string, EmbeddedProjectSample> lstSamples = new Dictionary<string, EmbeddedProjectSample>();
+            foreach (var fl in Directory.GetFiles(dirSamples, "*.xml", SearchOption.AllDirectories))
+                lstSamples.Add(fl.Replace(dirSamples, ""), XmlTools.LoadObject<EmbeddedProjectSample>(fl));
 
             var lstLibs = Directory.GetDirectories(DirLibs);
-            for(int i = 0; i< lstLibs.Count(); i++)
-              lstLibs[i] = lstLibs[i].Split(new char[] { '\\' }).Reverse().ToArray()[0];
-            
+            for (int i = 0; i < lstLibs.Count(); i++)
+                lstLibs[i] = lstLibs[i].Split(new char[] { '\\' }).Reverse().ToArray()[0];
+
             foreach (var smpl in lstSamples)
                 foreach (var Entri in smpl.Value.DefaultConfiguration.Entries)
-                    if(lstLibs.Where(l => PrefixEntr + l ==  Entri.Key).Count()==0)
+                    if (lstLibs.Where(l => PrefixEntr + l == Entri.Key).Count() == 0)
                     {
-                        Console.WriteLine($"No libary {Entri.Key} in samples " + smpl.Value.Name);
-                        if(Entri.Key.Contains(strreplace))
-                            if(lstLibs.Where(l => PrefixEntr + l == Entri.Key.Replace(strreplace, "")).Count() !=0 )
-                              Entri.Key = Entri.Key.Replace(strreplace,"");
+                        string msg = $"No library {Entri.Key} in samples " + smpl.Value.Name;
+                        Console.WriteLine(msg);
+                        Debug.WriteLine(msg);
+                        if (Entri.Key.Contains(strreplace))
+                            if (lstLibs.Where(l => PrefixEntr + l == Entri.Key.Replace(strreplace, "")).Count() != 0)
+                                Entri.Key = Entri.Key.Replace(strreplace, "");
                     }
 
             foreach (var smpl in lstSamples)
             {
                 var vv = Path.GetDirectoryName(smpl.Key).TrimStart('\\');
-                if (Directory.Exists(Path.Combine(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\Output", "Samples", vv)))
-                    Directory.Delete(Path.Combine(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\Output", "Samples", vv),true);
-                Directory.CreateDirectory(Path.Combine(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\Output", "Samples",vv));
-                XmlTools.SaveObject(smpl.Value, Path.Combine(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\Output", "Samples", smpl.Key.TrimStart('\\')));
+                if (Directory.Exists(Path.Combine(dirSamples, vv)))
+                    Directory.Delete(Path.Combine(dirSamples, vv), true);
+                Directory.CreateDirectory(Path.Combine(dirSamples, vv));
+                XmlTools.SaveObject(smpl.Value, Path.Combine(dirSamples, smpl.Key.TrimStart('\\')));
             }
         }
 
@@ -637,9 +639,9 @@ namespace nrf5x
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
 
-        //    CheckEntriesSample(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\Output\nRF5x\components\libraries",
-        //            Path.Combine(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\rules", "Samples"));
-       //     return;
+            //    CheckEntriesSample(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\Output\nRF5x\components\libraries",
+            //            Path.Combine(@"d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\rules", "Samples"));
+            //     return;
             bool usingIoTSDK = false;
 
 
@@ -659,7 +661,7 @@ namespace nrf5x
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf52810.*", null, bspBuilder.Directories.InputDir));
             }
 
-         
+
             List<MCUBuilder> devices = new List<MCUBuilder>();
             lstGenFramworks = new List<string>();
             lstGenConditions = new List<PropertyDictionary2.KeyValue>();
@@ -688,7 +690,7 @@ namespace nrf5x
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
             List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
-//            bool noPeripheralRegisters = true;
+            //            bool noPeripheralRegisters = true;
             bool noPeripheralRegisters = false;
 
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
@@ -755,7 +757,7 @@ namespace nrf5x
                         }
                     });
                 }
-                
+
                 fam.Definition.AdditionalFrameworks = fam.Definition.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
 
                 // Starting from SDK 14.0 we use the original Nordic startup files & linker scripts as they contain various non-trivial logic
