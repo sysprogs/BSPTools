@@ -847,7 +847,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public void AttachPeripheralRegisters(IEnumerable<MCUDefinitionWithPredicate> registers, string deviceDefinitionFolder = "DeviceDefinitions")
+        public void AttachPeripheralRegisters(IEnumerable<MCUDefinitionWithPredicate> registers, string deviceDefinitionFolder = "DeviceDefinitions", bool throwIfNotFound = true)
         {
             var allFiles = registers.ToArray();
             foreach (var mcu in MCUs)
@@ -872,7 +872,7 @@ namespace BSPGenerationTools
                     }
                 }
 
-                if (!matched)
+                if (!matched && throwIfNotFound)
                     throw new Exception("Cannot find a peripheral register set for " + mcu.Name);
             }
 

@@ -189,7 +189,7 @@ namespace NordicVendorSampleParser
                 }
 
                 if (Directory.GetFiles(aCurDir, "*.ld").Count() > 0)
-                    vs.LinkerScript = Directory.GetFiles(aCurDir, "*.ld")[0].Replace(SDKdir, "$$SYS:BSP_ROOT$$/nRF5x");
+                    vs.LinkerScript = Directory.GetFiles(aCurDir, "*.ld")[0];
 
                 vs.IncludeDirectories = lstFileInc.ToArray();
                 vs.PreprocessorMacros = lstDef.ToArray();
