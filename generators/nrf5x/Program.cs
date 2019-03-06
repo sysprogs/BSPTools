@@ -889,8 +889,8 @@ namespace nrf5x
             bspBuilder.GenerateConditionsBoard(ref frameworks);
             GenFramworkSample();
 
-            CheckEntriesSample(Path.Combine(bspBuilder.Directories.OutputDir, @"nRF5x\components\libraries"),
-                                Path.Combine(bspBuilder.Directories.OutputDir, "Samples"));
+          //  CheckEntriesSample(Path.Combine(bspBuilder.Directories.OutputDir, @"nRF5x\components\libraries"),
+           //                     Path.Combine(bspBuilder.Directories.OutputDir, "Samples"));
 
             Console.WriteLine("Building BSP archive...");
             string strPackageID, strPackageDesc, strPAckVersion;

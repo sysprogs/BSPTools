@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BSPEngine;
 //using BSPGenerationTools;
 using System.Collections.Generic;
@@ -148,14 +148,8 @@ namespace NordicVendorSampleParser
 
                 lstFileC.AddRange(splitArgs.Where(ar => (ar.EndsWith(".c") || ar.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase)) && !ar.Contains(@"components/toolchain/") &&
                 !ar.Contains(@"gcc_startup")));
+                vs.CLanguageStandard = "c99";
 
-           //    if (ln.Contains("-std"))
-                //    if (ln.Contains("c99"))
-                        vs.CLanguageStandard = "c99";
-                 //   else
-               //         vs.CPPLanguageStandard = ln.Replace("-std=", "").Trim('\\', ' ', '\t');
-
-             
                 //arguments from file
                 var fileArg = splitArgs.SingleOrDefault(ar => ar.StartsWith("@"));
                 if (fileArg != null)
