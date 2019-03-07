@@ -10,9 +10,7 @@
 	<CompilationFlags>
 		<COMMONFLAGS>-mabi=aapcs $$com.sysprogs.bspoptions.nrf5x.floatsoft$$</COMMONFLAGS>
 		<PreprocessorMacros>
-			<string>$$com.sysprogs.bspoptions.nrf5x.defmakmcu$$</string>
-			<string>$$com.sysprogs.bspoptions.nrf5x.defmak$$</string>
-			<string>$$com.sysprogs.bspoptions.nrf5x.defmakseries$$</string>
+			<string>$$com.sysprogs.bspoptions.nrf5x.mcumacro$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
 			<string>NRF_DFU_SETTINGS_VERSION=1</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.apiversion$$</string>
@@ -475,20 +473,6 @@
 					<FilesToCopy>-nrfx\mdk\system_*;-nrfx\mdk\ses*.s;nrfx\drivers\*.*;nrfx\hal\*.*;nrfx\soc\*.h;nrfx\mdk\*.c;nrfx\mdk\*.h;-nrfx\mdk\arm_*;-nrfx\mdk\iar_*;nrfx\mdk\*.s;-nrfx\templates\nRF52*.h;-nrfx\templates\nrfx_*.h;nrfx\nrfx.h</FilesToCopy>
 						<ProjectInclusionMask>-*gcc_startup*.s;*.s;*.c;*.h</ProjectInclusionMask>
 						<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>nrfx/mdk/nrf.h</FilePath>
-							<AfterLine>    #ifndef NRF52832_XXAA</AfterLine>
-							<InsertedLines>
-								<string>		#ifndef NRF52810_XXAA</string>
-							</InsertedLines>
-						</Patch>
-						<Patch xsi:type="InsertLines">
-							<FilePath>nrfx/mdk/nrf.h</FilePath>
-							<AfterLine>        #define NRF52_SERIES</AfterLine>
-							<InsertedLines>
-								<string>    	#endif</string>
-							</InsertedLines>
-						</Patch>
 						</Patches>
 				</CopyJob>
 			</CopyJobs>
@@ -713,15 +697,12 @@
 						<MaxValue>10</MaxValue>
 						<Increment>1</Increment>
 					  </PropertyEntry>
-
 					</Properties>
 					<CollapsedByDefault>false</CollapsedByDefault>
 				  </PropertyGroup>
 				</PropertyGroups>
-
 			</ConfigurableProperties>
 		</Framework>
-
 	</AdditionalFrameworks>
 	<Subfamilies>
 			<MCUClassifier>
@@ -729,54 +710,13 @@
 			<Required>true</Required>
 			<Options>
 				<Option>
-					<Value>NRF_SD_BLE_API_VERSION=3</Value>
-					<Regex>^nRF51.*</Regex>
-				</Option>
-				<Option>
 					<Value>NRF_SD_BLE_API_VERSION=6</Value>
 					<Regex>^nRF52.*</Regex>
 				</Option>
 			</Options>
 		</MCUClassifier>
 		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.nrf5x.defmakseries</VariableName>
-			<Required>true</Required>
-			<Options>
-				<Option>
-					<Value></Value>
-					<Regex>^nRF51.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52_SERIES</Value>
-					<Regex>^nRF52.*</Regex>
-				</Option>
-			</Options>
-		</MCUClassifier>
-
-		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.nrf5x.defmak</VariableName>
-			<Required>true</Required>
-			<Options>
-				<Option>
-					<Value>NRF51</Value>
-					<Regex>^nRF51.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52832</Value>
-					<Regex>^nRF52832.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52840</Value>
-					<Regex>^nRF52840.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52810</Value>
-					<Regex>^nRF52810.*</Regex>
-				</Option>
-			</Options>
-		</MCUClassifier>
-		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.nrf5x.defmakmcu</VariableName>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.mcumacro</VariableName>
 			<Required>true</Required>
 			<Options>
 				<Option>

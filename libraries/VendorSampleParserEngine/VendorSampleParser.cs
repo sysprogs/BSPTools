@@ -340,16 +340,10 @@ namespace VendorSampleParserEngine
                     LoadedBSP.LoadedMCU mcu;
                     try
                     {
-                       // bool er = false;
-                       // if (vs.DeviceID.Contains("DEBUG")) || vs.DeviceID.Contains("MBR") || vs.DeviceID.Contains("S1"))
-                         //   er = true;
-                        var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.').Replace("_DEBUG","").Replace("_MBR", "").Replace("_S132", "").Replace("_S140", ""), RegexOptions.IgnoreCase);
+                        var rgFilterID = new Regex(vs.DeviceID.Replace('x', '.').Replace("_DEBUG", "").Replace("_MBR", "").Replace("_S132", "").Replace("_S140", ""), RegexOptions.IgnoreCase);
                         //We need to find the shortest MCU name that matches the mask (e.g. for CC3220S and CC3220SF we should pick CC3220S).
                         mcu = BSP.MCUs.OrderBy(m => m.ExpandedMCU.ID.Length).Where(f => rgFilterID.IsMatch(f.ExpandedMCU.ID)).ToArray()?.First();
                         vs.DeviceID = mcu.ExpandedMCU.ID;
-                        
-                     //   if (!er)
-                       //     continue;
                     }
                     catch
                     {
@@ -388,9 +382,14 @@ namespace VendorSampleParserEngine
 
                     var timePerSample = (DateTime.Now - passStartTime).TotalMilliseconds / samplesProcessed;
 
+                    string displayedSampleName = record.ID.ToString();
+                    int maxNameLength = 50;
+                    if (displayedSampleName.Length > maxNameLength)
+                        displayedSampleName = displayedSampleName.Substring(0, maxNameLength - 3) + "...";
+
                     List<KeyValuePair<string, string>> fields = new List<KeyValuePair<string, string>>();
                     fields.Add(new KeyValuePair<string, string>("Pass:", pass.ToString()));
-                    fields.Add(new KeyValuePair<string, string>("Current sample:", record.ID.ToString()));
+                    fields.Add(new KeyValuePair<string, string>("Current sample:", displayedSampleName));
                     fields.Add(new KeyValuePair<string, string>("Samples processed:", $"{samplesProcessed}/{sampleCount}"));
                     fields.Add(new KeyValuePair<string, string>("Average time per sample:", $"{timePerSample:f0} msec"));
                     fields.Add(new KeyValuePair<string, string>("Failed samples:", $"{samplesFailed}"));

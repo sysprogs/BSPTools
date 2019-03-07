@@ -200,7 +200,7 @@ namespace BSPGenerationTools
         }
 
         protected virtual string BuildVirtualSamplePath(string originalPath) => null;
-        protected virtual PathMapper CreatePathMapper() => null;
+        protected virtual PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => null;
 
 
         public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
@@ -214,7 +214,7 @@ namespace BSPGenerationTools
                 Directory.Delete(outputDir, true);
             }
 
-            var mapper = CreatePathMapper() ?? new PathMapper(dir);
+            var mapper = CreatePathMapper(dir) ?? new PathMapper(dir);
 
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
@@ -267,8 +267,9 @@ namespace BSPGenerationTools
 
                 if (s.LinkerScript != null)
                 {
-                    if (s.LinkerScript.StartsWith(s.Path))
-                        s.LinkerScript = s.LinkerScript.Substring(s.Path.Length).TrimStart('/');
+                    string prefix = s.Path.TrimEnd('/', '\\') + "/";
+                    if (s.LinkerScript.StartsWith(prefix))
+                        s.LinkerScript = s.LinkerScript.Substring(prefix.Length).TrimStart('/');
                     else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$"))
                     {
                         //Nothing to do. VisualGDB will automatically expand this.
