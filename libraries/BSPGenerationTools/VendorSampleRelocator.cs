@@ -270,7 +270,7 @@ namespace BSPGenerationTools
                     string prefix = s.Path.TrimEnd('/', '\\') + "/";
                     if (s.LinkerScript.StartsWith(prefix))
                         s.LinkerScript = s.LinkerScript.Substring(prefix.Length).TrimStart('/');
-                    else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$"))
+                    else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$") || s.LinkerScript.StartsWith("$$SYS:VSAMPLE_DIR$$"))
                     {
                         //Nothing to do. VisualGDB will automatically expand this.
                     }

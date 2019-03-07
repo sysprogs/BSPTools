@@ -8,7 +8,7 @@
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\modules\nrfx\mdk</PrimaryHeaderDir>
 	<Subfamilies></Subfamilies>
 	<CompilationFlags>
-		<COMMONFLAGS>-mabi=aapcs $$com.sysprogs.bspoptions.nrf5x.floatsoft$$</COMMONFLAGS>
+		<COMMONFLAGS>-mabi=aapcs</COMMONFLAGS>
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.bspoptions.nrf5x.mcumacro$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
@@ -738,20 +738,6 @@
 				<Option>
 					<Value>NRF52810_XXAA</Value>
 					<Regex>^nRF52810.*</Regex>
-				</Option>
-			</Options>
-		</MCUClassifier>
-		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.nrf5x.floatsoft</VariableName>
-			<Required>true</Required>
-			<Options>
-				<Option>
-					<Value>-mfloat-abi=soft</Value>
-					<Regex>^nRF51.*</Regex>
-				</Option>
-				<Option>
-					<Value></Value>
-					<Regex>^nRF52.*</Regex>
 				</Option>
 			</Options>
 		</MCUClassifier>
