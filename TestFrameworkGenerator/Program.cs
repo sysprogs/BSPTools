@@ -46,7 +46,7 @@ namespace CppUTest
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-            if (args.Length > 2)
+            if (args.Length < 2)
                 throw new Exception("Usage: TestFrameworkGenerator <Rules subdir> <Source directory>");
             var dummyBSPBuilder = new DummyBSPBuilder(new BSPDirectories(args[1], @"..\..\Output\" + args[0], @"..\..\rules\" + args[0]));
             if (Directory.Exists(dummyBSPBuilder.Directories.OutputDir))

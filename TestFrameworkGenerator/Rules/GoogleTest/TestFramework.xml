@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.googletest</ID>
 	<Name>GoogleTest</Name>
-	<Version>20181002-1.8.1</Version>
+	<Version>20190124-1.8.1</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -39,8 +39,9 @@
 		  <GlobalArgumentTemplate>--gtest_filter=$(PerTestArguments)</GlobalArgumentTemplate>
 		  <PerTestArgumentSeparator>:</PerTestArgumentSeparator>
 		  <PerTestArgumentTemplate>$(1).$(2)</PerTestArgumentTemplate>
-		  <TestIDRegex>(.*)_(.*)</TestIDRegex>
-		</TestSelection>
+          <TestIDRegex>(.*)::(.*)</TestIDRegex>
+          <IDType>SecondaryID</IDType>
+	    </TestSelection>
 		<AdvancedTestDiscoverers>
 		  <TestDiscoverer xsi:type="OutputBasedTestDiscoverer">
 			<CommandLineArguments>--gtest_list_tests</CommandLineArguments>
@@ -50,6 +51,7 @@
 			<UniqueNameFormat>{1}{2}_{4}{5}</UniqueNameFormat>
 			<StructuredInternalNameFormat>{1}{2}.{4}{5}</StructuredInternalNameFormat>
 			<UserFriendlyNameFormat>{1}{2}::{4}{5}</UserFriendlyNameFormat>
+			<SecondaryIDFormat>{1}{2}::{4}{5}</SecondaryIDFormat>
 			<ShortUserFriendlyNameFormat>{4}{5}</ShortUserFriendlyNameFormat>
 			<LocationSymbolFormat>{2}_{4}_Test::TestBody()</LocationSymbolFormat>
 		  </TestDiscoverer>
