@@ -207,6 +207,57 @@ namespace stm32_bsp_generator
                 flashBase = FLASHBase;
                 ramBase = SRAMBase;
             }
+
+            /*
+             *  As of February 2019, some of the STM32 software packages provide legacy versions of the regular HAL source files (e.g. stm32f1xx_hal_can.c) that are mutually exclusive
+             *  with the regular versions of the same files. Instead of hardcoding the specific files for specific families, we detect it programmatically and generate the necessary
+             *  rules on-the-fly in this function.
+             */
+            public void InsertLegacyHALRulesIfNecessary(FamilyDefinition fam)
+            {
+                var halFramework = fam.AdditionalFrameworks.FirstOrDefault(f => f.ClassID == "com.sysprogs.arm.stm32.hal") ?? throw new Exception(fam.Name + " defines no HAL framework");
+                var primaryJob = halFramework.CopyJobs.First();
+                string srcDir = primaryJob.SourceFolder + @"\Src";
+                ExpandVariables(ref srcDir);
+                if (!Directory.Exists(srcDir))
+                    throw new Exception($"The first job for the HAL framework for {fam.Name} does not correspond to the normal source collection");
+
+                var legacyDir = srcDir + @"\Legacy";
+                if (Directory.Exists(legacyDir))
+                {
+                    var fileNames = Directory.GetFiles(legacyDir).Select(Path.GetFileName).ToArray();
+                    string settingName = "com.sysprogs.stm32.legacy_hal_src";
+
+                    List<string> moduleNames = new List<string>();
+
+                    foreach (var file in fileNames)
+                    {
+                        if (!File.Exists(Path.Combine(legacyDir, file)))
+                            throw new Exception($"{Path.Combine(legacyDir, file)} does not have a corresponding non-legacy file");
+
+                        moduleNames.Add(Path.GetFileNameWithoutExtension(file.Substring(file.LastIndexOf('_') + 1)).ToUpper());
+                        primaryJob.SimpleFileConditions = (primaryJob.SimpleFileConditions ?? new string[0]).Concat(new[]
+                        {
+                            $@"Src\\Legacy\\{file}: $${settingName}$$ == 1",
+                            $@"Src\\{file}: $${settingName}$$ != 1",
+                        }).ToArray();
+                    }
+
+                    if (halFramework.ConfigurableProperties == null)
+                        halFramework.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+
+                    halFramework.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated
+                    {
+                        UniqueID = settingName,
+                        Name = "HAL Driver Sources for " + string.Join(" ,", moduleNames),
+                        SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
+                        {
+                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Default"},
+                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "1", UserFriendlyName = "Legacy"}
+                        }
+                    });
+                }
+            }
         }
 
         static IEnumerable<StartupFileGenerator.InterruptVectorTable> ParseStartupFiles(string dir, MCUFamilyBuilder fam)
@@ -260,7 +311,7 @@ namespace stm32_bsp_generator
                         return r;
                     };
 
-               // func();
+                // func();
                 tasks.Add(Task.Run(func));
             }
 
@@ -341,7 +392,11 @@ namespace stm32_bsp_generator
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
-                allFamilies.Add(new STM32FamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
+            {
+                var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
+                bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
+                allFamilies.Add(new STM32FamilyBuilder(bspBuilder, fam));
+            }
 
             var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
@@ -414,7 +469,7 @@ namespace stm32_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "2018.08",
+                PackageVersion = "2018.12",
                 IntelliSenseSetupFile = "stm32_compat.h",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.1",
@@ -425,7 +480,7 @@ namespace stm32_bsp_generator
 
             StringWriter libraryVersionList = new StringWriter();
 
-            foreach(var subdir in Directory.GetDirectories(bspBuilder.Directories.InputDir))
+            foreach (var subdir in Directory.GetDirectories(bspBuilder.Directories.InputDir))
             {
                 var nameOnly = Path.GetFileName(subdir);
                 if (nameOnly.StartsWith("STM32Cube_FW", StringComparison.InvariantCultureIgnoreCase) || nameOnly.IndexOf("_StdPeriph_Lib", StringComparison.InvariantCultureIgnoreCase) != -1)

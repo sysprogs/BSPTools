@@ -15,10 +15,8 @@
     <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
     <string>com.sysprogs.arm.nordic.nrf5x.ble_ipsp</string>
     <string>com.sysprogs.arm.nordic.nrf5x.lwip</string>
-    <string>com.sysprogs.arm.nordic.nrf5x.mbedtls</string>
-	
-	<string>com.sysprogs.arm.nordic.nrf5x.stack_heap</string>
-		
+    <string>com.sysprogs.arm.nordic.nrf5x.mbedtls</string>	
+	<string>com.sysprogs.arm.nordic.nrf5x.stack_heap</string>		
   </RequiredFrameworks>
   <ConditionalErrors>
 	<ConditionalError>
@@ -33,9 +31,29 @@
 	</ConditionalError>
   </ConditionalErrors>
   <DefaultConfiguration>
-    	<Entries> <KeyValue><Key>com.sysprogs.bspoptions.nrf5x.iot.context_manager</Key><Value>yes</Value></KeyValue>
-		      <KeyValue>
-        <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
+    	<Entries>				
+		<KeyValue>
+			<Key>com.sysprogs.bspoptions.nrf5x.mbedtls.tls_interface</Key>
+			<Value>yes</Value>
+		</KeyValue>
+		<KeyValue>
+			<Key>com.sysprogs.bspoptions.nrf5x.iot.context_manager</Key>
+			<Value>yes</Value>
+		</KeyValue>
+		<KeyValue>
+			<Key>com.sysprogs.bspoptions.nrf5x.libraries.memobj</Key>
+			<Value>yes</Value>
+		</KeyValue>
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.log</Key>
+        <Value>yes</Value>
+      </KeyValue>        
+	<KeyValue>
+		<Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ringbuf</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>

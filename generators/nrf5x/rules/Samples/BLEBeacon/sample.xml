@@ -17,20 +17,19 @@
     <string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
 	
   </RequiredFrameworks>
-  <AdditionalSourcesToCopy>
-    <AdditionalSourceFile>
-      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</SourcePath>
-      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
-    </AdditionalSourceFile>
-    <AdditionalSourceFile>
-      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/main.c</SourcePath>
-      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
-    </AdditionalSourceFile>
-  </AdditionalSourcesToCopy>
+
   <DefaultConfiguration>
     <Entries>
+	<KeyValue>
+		  <Key>com.sysprogs.bspoptions.nrf5x.libraries.memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
 	      <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.experimental_memobj</Key>
+        <Value>yes</Value>
+      </KeyValue>
+	  <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.ringbuf</Key>
         <Value>yes</Value>
       </KeyValue>
       <KeyValue>

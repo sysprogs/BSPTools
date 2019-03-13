@@ -260,11 +260,11 @@ namespace BSPGenerationTools
             throw new Exception("File path too long: " + pathInsidePackage);
         }
 
-        internal void ExpandVariables(ref string primaryHeaderDir)
+        public void ExpandVariables(ref string value)
         {
-            if (primaryHeaderDir != null && primaryHeaderDir.Contains("$$"))
+            if (value != null && value.Contains("$$"))
                 foreach (var entry in SystemVars)
-                    primaryHeaderDir = primaryHeaderDir.Replace(entry.Key, entry.Value);
+                    value = value.Replace(entry.Key, entry.Value);
         }
 
         internal void ExpandAdditionalVariables(ref string strSources, SysVarEntry[] AddVariables)
@@ -847,7 +847,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public void AttachPeripheralRegisters(IEnumerable<MCUDefinitionWithPredicate> registers, string deviceDefinitionFolder = "DeviceDefinitions")
+        public void AttachPeripheralRegisters(IEnumerable<MCUDefinitionWithPredicate> registers, string deviceDefinitionFolder = "DeviceDefinitions", bool throwIfNotFound = true)
         {
             var allFiles = registers.ToArray();
             foreach (var mcu in MCUs)
@@ -872,7 +872,7 @@ namespace BSPGenerationTools
                     }
                 }
 
-                if (!matched)
+                if (!matched && throwIfNotFound)
                     throw new Exception("Cannot find a peripheral register set for " + mcu.Name);
             }
 

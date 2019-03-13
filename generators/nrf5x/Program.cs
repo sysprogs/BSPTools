@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2015 Sysprogs OU. All Rights Reserved.
+/* Copyright (c) 2015 Sysprogs OU. All Rights Reserved.
    This software is licensed under the Sysprogs BSP Generator License.
    https://github.com/sysprogs/BSPTools/blob/master/LICENSE
 */
@@ -539,8 +539,10 @@ namespace nrf5x
 
         static void GenerateConditionsLibriries(Framework[] fr, string name_lib)//libraries
         {
+            if (name_lib.StartsWith("experimental_"))
+                name_lib = name_lib.Replace("experimental_", "");
+
             var compositeProp = ReadCompositePropery($"NRF5x{ name_lib}.txt");
-            //  var compositeConditions
 
             List<PropertyEntry.Boolean> lstProp = new List<PropertyEntry.Boolean>();
 
@@ -600,27 +602,14 @@ namespace nrf5x
         static NordicBSPBuilder bspBuilder;
         static void Main(string[] args)
         {
-
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
-            bool usingIoTSDK = false;
 
+            bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
+            bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
+            bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
+            bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf52810.*", null, bspBuilder.Directories.InputDir));
 
-            if (usingIoTSDK)
-            {
-                bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output_i", @"..\..\rules_iot"));
-                //        bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("s1xx_iot", 0x1f000, 0x2800, "nrf52", "IoT", bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
-                //bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", 0x1f000, 0x2800, "nrf52", "IoT", bspBuilder.Directories.InputDir));
-            }
-            else
-            {
-                bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf52810.*", null, bspBuilder.Directories.InputDir));
-            }
             List<MCUBuilder> devices = new List<MCUBuilder>();
             lstGenFramworks = new List<string>();
             lstGenConditions = new List<PropertyDictionary2.KeyValue>();
@@ -637,8 +626,7 @@ namespace nrf5x
 
             devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52.S" });
             devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52840.S" });
-            if (!usingIoTSDK)
-                devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52810.S" });
+            devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52810.S" });
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
@@ -649,7 +637,7 @@ namespace nrf5x
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
             List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
-            bool noPeripheralRegisters = true;
+            bool noPeripheralRegisters = args.Contains("/noperiph");
 
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             List<MCU> mcuDefinitions = new List<MCU>();
@@ -823,8 +811,6 @@ namespace nrf5x
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
                 string dirpca = "pca10040e/s112";
-                if (usingIoTSDK)
-                    dirpca = "pca10040/s132";
                 foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value =dirpca },
                     new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_blank", Value = "pca10040" } }))
                     exampleDirs.Add(sample);
@@ -847,29 +833,15 @@ namespace nrf5x
             bspBuilder.GenerateConditionsBoard(ref frameworks);
             GenFramworkSample();
 
+            //  CheckEntriesSample(Path.Combine(bspBuilder.Directories.OutputDir, @"nRF5x\components\libraries"),
+            //                     Path.Combine(bspBuilder.Directories.OutputDir, "Samples"));
+
             Console.WriteLine("Building BSP archive...");
-            string strPackageID, strPackageDesc, strPAckVersion;
-            if (usingIoTSDK)
-            {
-                strPackageID = "com.sysprogs.arm.nordic.nrf5x-iot";
-                strPackageDesc = "Nordic NRF52 IoT";
-                strPAckVersion = "0.9";
-
-                foreach (var mcu in mcuDefinitions)
-                    mcu.UserFriendlyName = mcu.ID + " (IoT)";
-            }
-            else
-            {
-                strPackageID = "com.sysprogs.arm.nordic.nrf5x";
-                strPackageDesc = "Nordic NRF52x Devices";
-                strPAckVersion = "15.2";
-            }
-
 
             BoardSupportPackage bsp = new BoardSupportPackage
             {
-                PackageID = strPackageID,
-                PackageDescription = strPackageDesc,
+                PackageID = "com.sysprogs.arm.nordic.nrf5x",
+                PackageDescription = "Nordic NRF52x Devices",
                 GNUTargetID = "arm-eabi",
                 GeneratedMakFileName = "nrf5x.mak",
                 MCUFamilies = familyDefinitions.ToArray(),
@@ -877,7 +849,7 @@ namespace nrf5x
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = strPAckVersion,
+                PackageVersion = "15.2",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray(),

@@ -205,6 +205,12 @@ namespace StandaloneBSPValidator
                     foreach (var task in CompileTasks.Concat(OtherTasks))
                     {
                         sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
+
+                        if(!task.AllInputs[0].Contains("/nrf_soc.c") && (task.Arguments.Contains(" -DS1")))//nordic
+                          {
+                            task.Arguments  =  task.Arguments.Replace("/nrf_soc_nosd "," ");
+                          }
+
                         if (task.Arguments.Length > 7000)
                         {
                             string prefixArgs = "", extArgs = task.Arguments;
@@ -352,11 +358,26 @@ namespace StandaloneBSPValidator
             }
 
             //ToolFlags flags = new ToolFlags { CXXFLAGS = "  ", COMMONFLAGS = "-mcpu=cortex-m3  -mthumb", LDFLAGS = "-Wl,-gc-sections -Wl,-Map," + "test.map", CFLAGS = "-ffunction-sections -Os -MD" };
-
+            int idx = flags.CFLAGS.IndexOf("-std=");
             if (!string.IsNullOrEmpty(vs.CLanguageStandard))
+            {
+                if (idx >= 0)
+                {
+                    flags.CFLAGS += ' ';
+                    flags.CFLAGS = flags.CFLAGS.Remove(idx, flags.CFLAGS.IndexOf(' ', idx)-idx);
+                }
                 flags.CFLAGS += $" -std={vs.CLanguageStandard}";
+             }
             if (!string.IsNullOrEmpty(vs.CPPLanguageStandard))
+            {
+                if (idx >= 0)
+                {
+                    flags.CFLAGS += ' ';
+                    flags.CFLAGS = flags.CFLAGS.Remove(idx, flags.CFLAGS.IndexOf(' ', idx)-idx);
+                }
                 flags.CXXFLAGS += $" -std={vs.CPPLanguageStandard}";
+            }
+
 
             flags.CFLAGS += " -MD";
             flags.CXXFLAGS += " -MD";
@@ -727,7 +748,7 @@ namespace StandaloneBSPValidator
 
             internal void LogTestResult(string mcuID, TestResult result)
             {
-                _Writer.WriteLine("\t{0}: {1}", mcuID, result);
+                _Writer.WriteLine("\t{0}: {1}", mcuID, result.Result);
                 _ThisTestResults[mcuID] = result;
             }
 

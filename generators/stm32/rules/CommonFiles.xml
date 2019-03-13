@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -25,6 +25,17 @@
 						<string>Class\\HID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == HID</string>
 						<string>Class\\MSC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == MSC</string>
 					</SimpleFileConditions>
+					<Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>core\src\usbd_core.c</FilePath>
+							<AfterLine>#include "usbd_core.h"</AfterLine>
+							<InsertedLines>
+								<string>#ifndef UNUSED</string>
+								<string>#define UNUSED(x) ((void)(x));</string>
+								<string>#endif</string>															
+							</InsertedLines>
+						</Patch>											
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
@@ -95,7 +106,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Middlewares\ST\STM32_USB_Host_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
@@ -169,9 +180,9 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_L4_V1.13.0\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
-					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;-Source\CMSIS_RTOS_V2\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
@@ -280,7 +291,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Middlewares\Third_Party\LibJPEG</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt;*.bmp;*.jpg</FilesToCopy>
 					<ProjectInclusionMask>-*jpegtran.c;-*jmemmac.c;-*jmemdos.c;-*jmemname.c;-*jmemansi.c;-*jdatasrc_conf_template.c;source\j*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -384,7 +395,7 @@
 			</RequiredFrameworks>		
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\Third_Party\FatFs</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Middlewares\Third_Party\FatFs</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-src\drivers\*;-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -413,7 +424,7 @@
 			
 			<CopyJobs>			
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Middlewares\Third_Party\LwIP</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-doc\*;system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -462,7 +473,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Utilities</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Utilities</SourceFolder>
 					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
 					<SimpleFileConditions>
@@ -517,12 +528,12 @@
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F4X</SourceFolder>
 			<DestinationFolder>samples\HTTP_Netconn_STM32F4X</DestinationFolder>
 			<AdditionalBuildTimeSources>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Src\ethernetif.c</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\ethernetif.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\FreeRTOSConfig.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\lwipopts.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\stm32f4xx_hal_conf.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.21.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\src\system_stm32f4xx.c</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.23.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Src\ethernetif.c</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.23.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\ethernetif.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.23.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\FreeRTOSConfig.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.23.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\lwipopts.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.23.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\stm32f4xx_hal_conf.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F4_V1.23.0\Projects\STM32F429ZI-Nucleo\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\src\system_stm32f4xx.c</string>
 			</AdditionalBuildTimeSources>
 			<Patches>
 				<Patch xsi:type="ReplaceLine">
@@ -541,12 +552,12 @@
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\HTTP_Netconn_STM32F7X</SourceFolder>
 			<DestinationFolder>samples\HTTP_Netconn_STM32F7X</DestinationFolder>
 			<AdditionalBuildTimeSources>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Src\ethernetif.c</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\ethernetif.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\FreeRTOSConfig.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\lwipopts.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\stm32f7xx_hal_conf.h</string>
-				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.12.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\src\system_stm32f7xx.c</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Src\ethernetif.c</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\ethernetif.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\FreeRTOSConfig.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\lwipopts.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\Inc\stm32f7xx_hal_conf.h</string>
+				<string>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F7_V1.14.0\Projects\STM32746G-Discovery\Applications\LwIP\LwIP_HTTP_Server_Netconn_RTOS\src\system_stm32f7xx.c</string>
 			</AdditionalBuildTimeSources>
 			<Patches>
 				<Patch xsi:type="ReplaceLine">

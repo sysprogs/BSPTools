@@ -1,4 +1,4 @@
-﻿using BSPEngine;
+using BSPEngine;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,9 +61,12 @@ namespace BSPGenerationTools
             //Returns null for toolchain-relative paths that need to be excluded
             public virtual string MapPath(string path)
             {
-                if (string.IsNullOrEmpty(path) || !Path.IsPathRooted(path))
+                if (string.IsNullOrEmpty(path) || (!Path.IsPathRooted(path) && !path.Contains("$$")))
                     return null;
-                path = Path.GetFullPath(path).Replace('/', '\\');
+
+                if (!path.Contains("$$"))
+                    path = Path.GetFullPath(path).Replace('/', '\\');
+
                 if (path.StartsWith(_SampleDir.ToolchainDirectory, StringComparison.InvariantCultureIgnoreCase))
                     return null;
                 if (path.StartsWith(_SampleDir.BSPDirectory, StringComparison.InvariantCultureIgnoreCase))
@@ -197,7 +200,7 @@ namespace BSPGenerationTools
         }
 
         protected virtual string BuildVirtualSamplePath(string originalPath) => null;
-        protected virtual PathMapper CreatePathMapper() => null;
+        protected virtual PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => null;
 
 
         public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
@@ -211,10 +214,12 @@ namespace BSPGenerationTools
                 Directory.Delete(outputDir, true);
             }
 
-            var mapper = CreatePathMapper() ?? new PathMapper(dir);
+            var mapper = CreatePathMapper(dir) ?? new PathMapper(dir);
 
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
+
+            List<string> tooLongPaths = new List<string>();
 
             foreach (var s in sampleList)
             {
@@ -238,24 +243,34 @@ namespace BSPGenerationTools
                 s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps, s.Configuration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
+                const int ReasonableVendorSampleDirPathLengthForUsers = 120;
+
                 foreach (var dep in deps)
                 {
                     if (dep.MappedFile.StartsWith("$$SYS:BSP_ROOT$$/"))
                         continue;   //The file was already copied
                     copiedFiles[dep.OriginalFile] = dep.MappedFile.Replace(SampleRootDirMarker, outputDir);
-                }
 
+                    int estimatedTargetPathLength = ReasonableVendorSampleDirPathLengthForUsers + dep.MappedFile.Length - SampleRootDirMarker.Length;
+                    if (estimatedTargetPathLength > 254)
+                        tooLongPaths.Add(dep.MappedFile);
+                }
 
                 s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
 
-                s.Path = mapper.MapPath(s.Path);
+                var rawPath = s.Path;
+                s.Path = mapper.MapPath(rawPath);
+                if (s.Path == null)
+                    throw new Exception("Invalid sample path for " + s.UserFriendlyName);
+
                 s.VirtualPath = BuildVirtualSamplePath(s.Path);
 
                 if (s.LinkerScript != null)
                 {
-                    if (s.LinkerScript.StartsWith(s.Path))
-                        s.LinkerScript = s.LinkerScript.Substring(s.Path.Length).TrimStart('/');
-                    else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$"))
+                    string prefix = s.Path.TrimEnd('/', '\\') + "/";
+                    if (s.LinkerScript.StartsWith(prefix))
+                        s.LinkerScript = s.LinkerScript.Substring(prefix.Length).TrimStart('/');
+                    else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$") || s.LinkerScript.StartsWith("$$SYS:VSAMPLE_DIR$$"))
                     {
                         //Nothing to do. VisualGDB will automatically expand this.
                     }
@@ -266,6 +281,11 @@ namespace BSPGenerationTools
                 }
 
                 finalSamples.Add(s);
+            }
+
+            if (tooLongPaths.Count > 0)
+            {
+                throw new Exception($"Found {tooLongPaths.Count} files with excessively long paths. Please update MapPath() in the BSP-specific path mapper to shorten the target paths.");
             }
 
             Console.WriteLine($"Copying {copiedFiles.Count} files...");
