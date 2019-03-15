@@ -97,17 +97,6 @@ namespace LinkerScriptGenerator
             sw.WriteLine("{");
             Dictionary<string, bool> referencedMemories = new Dictionary<string, bool>();
 
-            string initializedDataSectionLabel = null;
-
-            foreach (var section in _ScriptTemplate.Sections)
-            {
-                if ((section.Flags & SectionFlags.InitializerInMainMemory) != SectionFlags.None)
-                {
-                    string nameAsID = section.Name.TrimStart('.').Replace('.', '_');
-                    initializedDataSectionLabel = "_si" + nameAsID;
-                }
-            }
-
             for (int i = 0; i < _ScriptTemplate.Sections.Count; i++)
             {
                 var section = _ScriptTemplate.Sections[i];
@@ -115,17 +104,10 @@ namespace LinkerScriptGenerator
                 OutputSectionDefinition(sw, "\t", section);
                 referencedMemories[section.TargetMemory] = true;
 
-                if (initializedDataSectionLabel != null && i < (_ScriptTemplate.Sections.Count - 1))
+                if ((section.Flags & SectionFlags.InitializerInMainMemory) != SectionFlags.None)
                 {
-                    bool lastFLASHSection = (section.TargetMemory == _MainFLASH.Name) && (_ScriptTemplate.Sections[i + 1].TargetMemory != _MainFLASH.Name);
-                    bool nextSectionIsMainDataSection = (_ScriptTemplate.Sections[i+1].Flags & SectionFlags.InitializerInMainMemory) != SectionFlags.None;
-                    if ((lastFLASHSection || nextSectionIsMainDataSection) && !RedirectMainFLASHToRAM)
-                    {
-                        sw.WriteLine("{0}. = ALIGN(4);", "\t");   //Align initializer data to DWORD boundary as it's copied DWORD-by-DWORD
-
-                        OutputDefinition(sw, initializedDataSectionLabel, ".", "\t");
-                        initializedDataSectionLabel = null;
-                    }
+                    string nameAsID = section.Name.TrimStart('.').Replace('.', '_');
+                    OutputDefinition(sw, "_si" + nameAsID, "LOADADDR(" + section.Name + ")", "\t");
                 }
             }
 
@@ -176,10 +158,10 @@ namespace LinkerScriptGenerator
 
             if (_Memories.ContainsKey(targetMemory))
             {
-                string loadBase = null;
+                string loadedMemoryName = null;
                 if ((section.Flags & SectionFlags.InitializerInMainMemory) != SectionFlags.None && !RedirectMainFLASHToRAM)
                 {
-                    loadBase = "_si" + nameAsID;
+                    loadedMemoryName = _MainFLASH.Name;
                     //OutputDefinition(sw, loadBase, ".", padding);
                 }
 
@@ -187,10 +169,7 @@ namespace LinkerScriptGenerator
                 if ((section.Flags & SectionFlags.NoLoad) != SectionFlags.None)
                     modifiers += " (NOLOAD)";
 
-                if (loadBase != null)
-                    sw.WriteLine("{0}{1}{2} : AT({3})", padding, section.Name, modifiers, loadBase);
-                else
-                    sw.WriteLine("{0}{1}{2} :", padding, section.Name, modifiers);
+                sw.WriteLine("{0}{1}{2} :", padding, section.Name, modifiers);
 
                 sw.WriteLine(padding + "{");
 
@@ -202,9 +181,6 @@ namespace LinkerScriptGenerator
                     sw.WriteLine("{0}\t. = ALIGN({1});", padding, alignment);
 
                 string startLabel = ".";
-
-                if ((section.Flags & SectionFlags.InitializerInMainMemory) != SectionFlags.None && RedirectMainFLASHToRAM)
-                    startLabel = OutputDefinition(sw, "_si" + nameAsID, startLabel, padding + "\t");
 
                 if ((section.Flags & SectionFlags.DefineShortLabels) != SectionFlags.None)
                     startLabel = OutputDefinition(sw, "_s" + nameAsID, startLabel, padding + "\t");
@@ -256,7 +232,10 @@ namespace LinkerScriptGenerator
                 if (!string.IsNullOrEmpty(section.CustomEndLabel))
                     sw.WriteLine("{0}\t{1} = {2};", padding, section.CustomEndLabel, endLabel);
 
-                sw.WriteLine(padding + "}" + " > " + targetMemory);
+                if (loadedMemoryName == null)
+                    sw.WriteLine(padding + "}" + " > " + targetMemory);
+                else
+                    sw.WriteLine(padding + "}" + " > " + targetMemory + " AT >" + loadedMemoryName);
             }
             else
                 sw.WriteLine(padding + "# {0} not defined in {1}", targetMemory, _MemoryTemplate.DeviceName);
