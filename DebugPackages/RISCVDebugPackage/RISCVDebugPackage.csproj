@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -55,7 +55,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\sysprogs\support\OpenOCDPackage\OpenOCDPackage.csproj">
+    <ProjectReference Include="..\..\..\..\..\products\VisualGDB\support\OpenOCDPackage\OpenOCDPackage.csproj">
       <Project>{84589bb6-390b-49ec-a412-d7cadc0ee289}</Project>
       <Name>OpenOCDPackage</Name>
     </ProjectReference>
