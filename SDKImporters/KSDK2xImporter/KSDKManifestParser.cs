@@ -748,5 +748,11 @@ namespace KSDK2xImporter
             }
             return limit;
         }
+
+        public bool IsCompatibleWithToolchain(LoadedToolchain toolchain)
+        {
+            var id = toolchain?.Toolchain?.GNUTargetID?.ToLower();
+            return id?.Contains("arm") ?? true;
+        }
     }
 }
