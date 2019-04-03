@@ -193,9 +193,8 @@ namespace ESP8266DebugPackage
             return true;
         }
 
-        public static List<ProgrammableRegion> BuildProgrammableBlocksFromSettings(IDebugStartService service, IESP32Settings settings)
+        public static bool BuildProgrammableBlocksFromSynthesizedESPIDFVariables(IDebugStartService service, out List<ProgrammableRegion> blocks)
         {
-            List<ProgrammableRegion> blocks;
             if (service.MCU.Configuration.TryGetValue("com.sysprogs.esp32.esptool.binaries.count", out var tmp) && int.TryParse(tmp, out var binaryCount) && binaryCount > 0)
             {
                 blocks = new List<ProgrammableRegion>();
@@ -210,6 +209,19 @@ namespace ESP8266DebugPackage
                         Offset = int.Parse(service.MCU.Configuration[$"com.sysprogs.esp32.esptool.binaries[{i}].address"])
                     });
                 }
+                return true;
+            }
+
+            blocks = null;
+            return false;
+        }
+
+        public static List<ProgrammableRegion> BuildProgrammableBlocksFromSettings(IDebugStartService service, IESP32Settings settings)
+        {
+            List<ProgrammableRegion> blocks;
+            if (BuildProgrammableBlocksFromSynthesizedESPIDFVariables(service, out blocks))
+            {
+                //Nothing to do. Successfully built the block list.
             }
             else
             {
@@ -255,17 +267,22 @@ namespace ESP8266DebugPackage
             public override void ConnectGDBToStub(IDebugStartService service, ISimpleGDBSession session)
             {
                 bool programNow;
-                switch (_Settings.ProgramMode)
+                if (_Settings.ProgramFLASHUsingExternalTool)
+                    programNow = false;
+                else
                 {
-                    case ProgramMode.Disabled:
-                        programNow = false;
-                        break;
-                    case ProgramMode.Auto:
-                        programNow = !service.IsCurrentFirmwareAlreadyProgrammed();
-                        break;
-                    default:
-                        programNow = true;
-                        break;
+                    switch (_Settings.ProgramMode)
+                    {
+                        case ProgramMode.Disabled:
+                            programNow = false;
+                            break;
+                        case ProgramMode.Auto:
+                            programNow = !service.IsCurrentFirmwareAlreadyProgrammed();
+                            break;
+                        default:
+                            programNow = true;
+                            break;
+                    }
                 }
 
                 foreach (var cmd in _Settings.StartupCommands)
@@ -280,7 +297,7 @@ namespace ESP8266DebugPackage
                         }
                         else
                         {
-                            var sequence = ESP8266StartupSequence.BuildSequence(service, (ESP8266OpenOCDSettings)_Settings, (l, i) => session.SendInformationalOutput(l), programNow);
+                            var sequence = ESP8266StartupSequence.BuildSequence(service, (ESP8266OpenOCDSettings)_Settings, (l, i) => session.SendInformationalOutput(l), programNow, _Context.Method?.Directory);
                             using (var ctx = session.CreateScopedProgressReporter("Programming FLASH", new string[] { "Programming FLASH..." }))
                             {
                                 if (RunSequence(ctx, service, session, sequence))

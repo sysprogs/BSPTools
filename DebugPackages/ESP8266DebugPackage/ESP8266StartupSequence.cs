@@ -126,7 +126,7 @@ namespace ESP8266DebugPackage
             {
                 cmds.Add(QueueInvocation(1, region.Offset.ToString(), region.Size.ToString(), null, 0, 0, false, string.Format("Failed to erase the FLASH region starting at 0x{0:x}", region.Offset)));
 
-                for (int off = 0; off < region.Size; )
+                for (int off = 0; off < region.Size;)
                 {
                     int todo = Math.Min(region.Size - off, DataBufferSize);
                     int alignment = 4;
@@ -137,7 +137,7 @@ namespace ESP8266DebugPackage
                 }
             }
         }
-        public static CustomStartupSequence BuildSequence(BSPEngine.IDebugStartService service, ESP8266OpenOCDSettings settings, BSPEngine.LiveMemoryLineHandler lineHandler, bool programFLASH)
+        public static CustomStartupSequence BuildSequence(BSPEngine.IDebugStartService service, ESP8266OpenOCDSettings settings, BSPEngine.LiveMemoryLineHandler lineHandler, bool programFLASH, string debugMethodDirectory = null)
         {
             List<CustomStartStep> cmds = new List<CustomStartStep>();
             cmds.Add(new CustomStartStep("mon reset halt",
@@ -161,9 +161,15 @@ namespace ESP8266DebugPackage
                 if (programFLASH)
                 {
                     string bspPath = bspDict["SYS:BSP_ROOT"];
-                    List<ProgrammableRegion> regions = BuildFLASHImages(service, settings, lineHandler);
+                    List<ProgrammableRegion> regions;
+
+                    if (!ESP32DebugController.BuildProgrammableBlocksFromSynthesizedESPIDFVariables(service, out regions))  //Same variable names are reused between ESP32 and ESP8266 for backward compatibility.
+                        regions = BuildFLASHImages(service, settings, lineHandler);
 
                     string loader = bspPath + @"\sysprogs\flashprog\ESP8266FlashProg.bin";
+                    if (!File.Exists(loader) && debugMethodDirectory != null)
+                        loader = debugMethodDirectory + @"\sysprogs\flashprog\ESP8266FlashProg.bin";
+
                     if (!File.Exists(loader))
                         throw new Exception("FLASH loader not found: " + loader);
 
