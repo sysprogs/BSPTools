@@ -118,7 +118,8 @@
     <Resource Include="GUI\Icons\bulb16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildThisFileDir)..\..\AutoVersion.props" />
+  <Import Project="$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props" 
+		  Condition="Exists('$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props')"/>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
