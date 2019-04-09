@@ -238,7 +238,7 @@ namespace NordicVendorSampleParser
                 string outputDir = Path.Combine(TestDirectory, "_MakeBuildLogs");
                 List<UnparseableVendorSample> failedSamples = new List<UnparseableVendorSample>();
                 int samplesDone = 0, samplesWithoutBinaryFile = 0, samplesWithoutLogFile = 0;
-
+ 
                 foreach (var makefile in ExampleDirs)
                 {
                     string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("armgcc\\Makefile", "");

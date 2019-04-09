@@ -608,7 +608,7 @@ namespace nrf5x
             bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
             bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
             bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
-            bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf52810.*", null, bspBuilder.Directories.InputDir));
+            bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf5281.*", null, bspBuilder.Directories.InputDir));
 
             List<MCUBuilder> devices = new List<MCUBuilder>();
             lstGenFramworks = new List<string>();
@@ -627,6 +627,7 @@ namespace nrf5x
             devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52.S" });
             devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52840.S" });
             devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52810.S" });
+            devices.Add(new MCUBuilder { Name = "nRF52811_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52811.S" });
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
@@ -782,7 +783,7 @@ namespace nrf5x
                         }
                     });
 
-                    if (mcu.Name.StartsWith("nRF52") && !mcu.Name.StartsWith("nRF52810"))
+                    if (mcu.Name.StartsWith("nRF52") && !mcu.Name.StartsWith("nRF5281"))
                     {
                         var prop = mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode") as PropertyEntry.Enumerated;
                         var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
@@ -795,6 +796,8 @@ namespace nrf5x
                         defaultConfig = "pca10056/s140";
                     else if (mcu.Name.StartsWith("nRF52810"))
                         defaultConfig = "pca10040e/s112";
+                    else if (mcu.Name.StartsWith("nRF52811"))
+                        defaultConfig = "pca10056e/s112";
                     else
                         defaultConfig = "pca10040/s132";
 
@@ -849,7 +852,7 @@ namespace nrf5x
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "15.2",
+                PackageVersion = "15.3",
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                 MinimumEngineVersion = "5.0",
                 ConditionalFlags = condFlags.ToArray(),

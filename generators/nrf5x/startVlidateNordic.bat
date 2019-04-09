@@ -1,1 +1,1 @@
-D:\DataJon\Projects\sysprogs\BSPTools\StandaloneBSPValidator\bin\Debug\StandaloneBSPValidator.exe d:\DataJon\Projects\sysprogs\BSPTools\generators\nrf5x\nrf5x.validatejob d:\DataJon\Projects\sysprogs\TestOut\nrf5x_22
+D:\DataJon\Projects\sysprogs\BSPToolsKraken\BSPTools\StandaloneBSPValidator\bin\Debug\StandaloneBSPValidator.exe d:\DataJon\Projects\sysprogs\BSPToolsKraken\BSPTools\generators\nrf5x\nrf5x.validatejob d:\DataJon\Projects\sysprogs\TestOut\nrf5x_22
