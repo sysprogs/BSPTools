@@ -42,9 +42,6 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BSPEngine">
-      <HintPath>..\..\BSPEngine.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -120,6 +117,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props" 
 		  Condition="Exists('$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props')"/>
+  <Import Project="..\..\BSPEngine.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
