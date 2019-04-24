@@ -181,7 +181,8 @@ namespace IARProjectFileImporter
 
             result.Configurations = allConfigurations.ToArray();
             result.OriginalProjectFile = pFileEwp;
-            result.DeviceNameMask = new Regex(".*" + deviceName + ".*", RegexOptions.IgnoreCase);
+
+            result.DeviceNameMask = new Regex(".*" + deviceName.Replace('x', '.') + ".*", RegexOptions.IgnoreCase);
             if (result.Configurations.Length == 1)
                 result.Configurations[0].Name = null;
 
