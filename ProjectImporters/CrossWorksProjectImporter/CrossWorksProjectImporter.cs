@@ -157,6 +157,21 @@ namespace CrossWorksProjectFileImporter
             if (string.IsNullOrEmpty(deviceName))
                 throw new Exception("Target name is unspecified");
 
+            string[] internalMacros = commonConfig.GetAttribute("macros")?.Split(';');
+            string vectorFile = null;
+            foreach(var im in internalMacros ?? new string[0])
+            {
+                int idx = im.IndexOf('=');
+                if (idx != -1)
+                {
+                    string mk = im.Substring(0, idx).Trim();
+                    string mv = im.Substring(idx + 1).Trim();
+                    systemDirectories[mk] = mv;
+                    if (mk == "DeviceVectorsFile")
+                        vectorFile = mv;
+                }
+            }
+
             string[] macros = commonConfig.GetAttribute("c_preprocessor_definitions")?.Split(';');
             string[] includeDirs = (commonConfig.GetAttribute("c_system_include_directories") + ";" + commonConfig.GetAttribute("c_user_include_directories"))?.Split(';');
             if (crossWorksDir != null)
@@ -165,6 +180,8 @@ namespace CrossWorksProjectFileImporter
             string[] additionalLinkerInputs = commonConfig.GetAttribute("linker_additional_files")?.Split(';');
 
             macros = macros.Concat(new[] { "__CROSSWORKS_ARM", "STARTUP_FROM_RESET" }).ToArray();
+            if (vectorFile != null)
+                macros = macros.Concat(new[] { $"__VECTORS=\"{vectorFile}\"" }).ToArray();
 
             string frequency = commonConfig.GetAttribute("oscillator_frequency");
             if (frequency?.EndsWith("MHz") == true && int.TryParse(frequency.Substring(0, frequency.Length - 3), out int frequencyInMhz))
@@ -237,7 +254,7 @@ namespace CrossWorksProjectFileImporter
                 if (el.Name == "file")
                 {
                     string relPath = ExpandVariables(el.GetAttribute("file_name"), expander, service);
-                    if (!string.IsNullOrEmpty(relPath) && !relPath.EndsWith("$(DeviceVectorsFile)"))
+                    if (!string.IsNullOrEmpty(relPath) && !relPath.EndsWith(".vec"))
                     {
                         string fullPath = Path.Combine(Path.GetDirectoryName(parameters.ProjectFile), relPath);
                         constructedDir.AddFile(fullPath, relPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase));
