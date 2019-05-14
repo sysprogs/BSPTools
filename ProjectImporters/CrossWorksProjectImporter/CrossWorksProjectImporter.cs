@@ -108,6 +108,7 @@ namespace CrossWorksProjectFileImporter
 
             var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Rowley Associates Limited\CrossWorks for ARM\Installer");
             service.Logger.LogLine("Detecting CrossWorks directory...");
+            string crossWorksDir = null;
             if (key != null)
             {
                 foreach (var kn in key.GetSubKeyNames().OrderByDescending(k => k))
@@ -120,7 +121,7 @@ namespace CrossWorksProjectFileImporter
                         if (destDir != null && Directory.Exists(destDir))
                         {
                             service.Logger.LogLine($"Found {destDir}");
-                            systemDirectories["StudioDir"] = destDir;
+                            systemDirectories["StudioDir"] = crossWorksDir = destDir;
                             break;
                         }
                     }
@@ -158,6 +159,9 @@ namespace CrossWorksProjectFileImporter
 
             string[] macros = commonConfig.GetAttribute("c_preprocessor_definitions")?.Split(';');
             string[] includeDirs = (commonConfig.GetAttribute("c_system_include_directories") + ";" + commonConfig.GetAttribute("c_user_include_directories"))?.Split(';');
+            if (crossWorksDir != null)
+                includeDirs = includeDirs.Concat(new[] { crossWorksDir + "/include" }).ToArray();
+
             string[] additionalLinkerInputs = commonConfig.GetAttribute("linker_additional_files")?.Split(';');
 
             macros = macros.Concat(new[] { "__CROSSWORKS_ARM", "STARTUP_FROM_RESET" }).ToArray();
@@ -233,7 +237,7 @@ namespace CrossWorksProjectFileImporter
                 if (el.Name == "file")
                 {
                     string relPath = ExpandVariables(el.GetAttribute("file_name"), expander, service);
-                    if (!string.IsNullOrEmpty(relPath))
+                    if (!string.IsNullOrEmpty(relPath) && !relPath.EndsWith("$(DeviceVectorsFile)"))
                     {
                         string fullPath = Path.Combine(Path.GetDirectoryName(parameters.ProjectFile), relPath);
                         constructedDir.AddFile(fullPath, relPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase));
