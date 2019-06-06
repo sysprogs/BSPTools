@@ -276,7 +276,7 @@ namespace GeneratorSampleStm32
                 return string.Join("\\", originalPath.Split('/').Skip(2).Reverse().Skip(1).Reverse());
             }
 
-            protected override PathMapper CreatePathMapper() => new STM32PathMapper(_Directory);
+            protected override PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => new STM32PathMapper(_Directory);
         }
 
         class STM32PathMapper : VendorSampleRelocator.PathMapper
