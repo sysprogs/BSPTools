@@ -282,7 +282,7 @@ namespace stm32_bsp_generator
             }
         }
 
-        private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam)
+        private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice)
         {
             var mainClassifier = fam.Definition.Subfamilies.First(f => f.IsPrimary);
             List<Task<MCUDefinitionWithPredicate>> tasks = new List<Task<MCUDefinitionWithPredicate>>();
@@ -295,8 +295,8 @@ namespace stm32_bsp_generator
                 if (subfamily.Length != 11 && subfamily.Length != 12)
                     continue;
 
-                /*if (subfamily != "stm32f301x8")
-                 continue;*/
+                if (specificDevice != null && subfamily != specificDevice)
+                    continue;
 
                 Func<MCUDefinitionWithPredicate> func = () =>
                     {
@@ -311,8 +311,10 @@ namespace stm32_bsp_generator
                         return r;
                     };
 
-                // func();
-                tasks.Add(Task.Run(func));
+                if (specificDevice != null)
+                    func();
+                else
+                    tasks.Add(Task.Run(func));
             }
 
             Task.WaitAll(tasks.ToArray());
@@ -413,6 +415,7 @@ namespace stm32_bsp_generator
             List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
             bool noPeripheralRegisters = args.Contains("/noperiph");
+            string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
 
             //var files = string.Join("\r\n", File.ReadAllLines(@"E:\ware\Logfile.CSV").Select(l => l.Split(',')[4].Trim('\"')).Distinct().OrderBy(x => x).ToArray());
 
@@ -435,12 +438,13 @@ namespace stm32_bsp_generator
 
                 fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
                 if (!noPeripheralRegisters)
-                    fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam));
+                    fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam, specificDeviceForDebuggingPeripheralRegisterGenerator),
+                        throwIfNotFound: specificDeviceForDebuggingPeripheralRegisterGenerator == null);
 
                 familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
                 fam.GenerateLinkerScripts(false);
                 foreach (var mcu in fam.MCUs)
-                    mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters));
+                    mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null));
 
                 foreach (var fw in fam.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);

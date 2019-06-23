@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2015 Sysprogs OU. All Rights Reserved.
+﻿/* Copyright (c) 2015-2019 Sysprogs OU. All Rights Reserved.
    This software is licensed under the Sysprogs BSP Generator License.
    https://github.com/sysprogs/BSPTools/blob/master/LICENSE
 */
@@ -660,7 +660,6 @@ namespace stm32_bsp_generator
                         string reg_name = register.Name;
                         HardwareRegister[] registers2 = registerset_types[nested_types[set_type + "_" + reg_name]].Registers;
                         registers.Remove(register);
-                        i--;
 
                         foreach (var register2 in registers2)
                         {
@@ -678,7 +677,8 @@ namespace stm32_bsp_generator
                                 register2_cpy.SubRegisters = subregisters[nested_types[set_type + "_" + reg_name] + "_" + register2_cpy.Name].ToArray();
                             else if (((nested_types[set_type + "_" + reg_name] != "CAN_TxMailBox")) && // Does not have any subregisters for any of its registers
                                 ((nested_types[set_type + "_" + reg_name] != "CAN_FilterRegister")) && // Does not have any subregisters for any of its registers
-                                ((nested_types[set_type + "_" + reg_name] != "CAN_FIFOMailBox"))) // Does not have any subregisters for any of its registers
+                                ((nested_types[set_type + "_" + reg_name] != "CAN_FIFOMailBox")) && // Does not have any subregisters for any of its registers
+                                !nested_types[set_type + "_" + reg_name].StartsWith("HRTIM_"))
                                 throw new Exception("No subregisters found for register " + register2_cpy.Name + "!");
 
                             register2_cpy.Name = reg_name + "_" + register2_cpy.Name; // Make nested name to collapse the hierarchy
@@ -690,6 +690,8 @@ namespace stm32_bsp_generator
                                 throw new Exception("Register address for" + set_name + "_" + register2_cpy.Name + " is already used by " + dict_repeat_reg_addr[register2_cpy.Address] + "!");
                             i++;
                         }
+
+                        i--;
                     }
                     else if (set_type.StartsWith("HRTIM"))
                     {
@@ -1013,7 +1015,7 @@ namespace stm32_bsp_generator
             dict_type_sizes["uint16_t"] = 16;
             dict_type_sizes["uint8_t"] = 8;
 
-            Regex struct_regex = new Regex(@"typedef struct[ \t]*\r?\n\{[ \t]*\r?\n([^}]*)\r?\n\}[ \t\r?\n]*([A-Za-z0-9_]*)_(Global)?TypeDef;");
+            Regex struct_regex = new Regex(@"typedef struct[ \t]*\r?\n?\{[ \t]*\r?\n([^}]*)\r?\n\}[ \t\r?\n]*([A-Za-z0-9_]*)_(Global)?TypeDef;");
 
             var structs = struct_regex.Matches(file);
             foreach (Match strct in structs)
@@ -1021,7 +1023,7 @@ namespace stm32_bsp_generator
                 HardwareRegisterSet set = new HardwareRegisterSet() { UserFriendlyName = strct.Groups[2].Value, ExpressionPrefix = strct.Groups[2].Value + "->" };
                 int set_size = 0;
 
-                RegexOptions option = RegexOptions.IgnoreCase;
+                RegexOptions option = RegexOptions.IgnoreCase | RegexOptions.Compiled;
                 Regex register_regex = new Regex(@"[ \t]*(__IO|__I)*[ ]*(?:const )*[ ]*([^ #\r?\n]*)[ ]*(?:const )*([^\[;#\r?\n]*)[\[]?([0-9xXa-fA-F]+)*[\]]?;[ ]*(/\*)*(!<)*[ ]?([^,*\r?\n]*)[,]?[ ]*(Ad[d]?ress)*( offset:)*[ ]*([0-9xXa-fA-F]*)[ ]?[-]?[ ]?([^ *\r?\n]*)[ ]*(\*/)*[ ]*(\r?\n)*", option);
 
                 var regs = register_regex.Matches(strct.Groups[1].Value);
@@ -1439,7 +1441,14 @@ namespace stm32_bsp_generator
                             errors.AddError(new RegisterParserErrors.BadSubregisterDefinition { FileName = fileName, LineContents = line, LineNumber = nextLine - 1 });
                     }
 
-                    continue;
+                    Regex rgRegisterGuessedFromField = new Regex("#define[ \t]+([A-Z0-9]+)_([A-Z0-9]+)_[A-Z0-9_]+_(Pos|Msk)");
+
+                    if (line.StartsWith("/************") && (nextLine < (lines.Length - 1)) && (m = rgRegisterGuessedFromField.Match(lines[nextLine])).Success)
+                    {
+                        thisReg = new RegisterID(m.Groups[1].Value, m.Groups[2].Value);
+                    }
+                    else
+                        continue;
                 }
 
                 if (thisReg.RegName.Contains("/"))
@@ -1555,6 +1564,8 @@ namespace stm32_bsp_generator
                                 subreg_name != "FLASH_OPTR_SRAM2_RST" &&
                                 !subreg_name.StartsWith("HSEM_") &&
                                 subreg_name != "FDCAN_HPMS_MSI" &&
+                                subreg_name != "HRTIM_TIMCR_PSHPLL" &&
+                                subreg_name != "HRTIM_TIMISR_RST" &&
                                 subreg_name != "RCC_PLLCKSELR_PLLSRC_HSE")
 
                             {
