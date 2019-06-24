@@ -53,7 +53,6 @@ namespace stm32_bsp_generator
 
                 var peripherals = LocateStructsReferencedInBaseExpressions(parsedFile);
                 var subregisters = PeripheralSubregisterParser.LocatePossibleSubregisterDefinitions(parsedFile);
-                               
 
                 HardwareRegisterSet[] existingSets = XmlTools.LoadObject<HardwareRegisterSet[]>(Path.ChangeExtension(fn, ".xml"));
 

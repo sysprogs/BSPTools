@@ -56,6 +56,16 @@ namespace BSPGenerationTools.Parsing
         }
     }
 
+    public class SubregisterCollection
+    {
+        public readonly List<NamedSubregister> Subregisters = new List<NamedSubregister>();
+
+        public void AddSubregister(NamedSubregister subreg)
+        {
+            Subregisters.Add(subreg);
+        }
+    }
+
     public class ParsedStructure
     {
         public class Entry
@@ -66,24 +76,34 @@ namespace BSPGenerationTools.Parsing
             public string TrailingComment;
             public int ArraySize;
 
-            public List<NamedSubregister> Subregisters = new List<NamedSubregister>();
+            public Dictionary<int, SubregisterCollection> Subregisters = new Dictionary<int, SubregisterCollection>();
 
             public override string ToString()
             {
                 return Name;
             }
+
+            public void AddSubregister(NamedSubregister subreg, int? strippedIndex)
+            {
+                if (!Subregisters.TryGetValue(strippedIndex ?? -1, out var coll))
+                    Subregisters[strippedIndex ?? -1] = coll = new SubregisterCollection();
+
+                coll.AddSubregister(subreg);
+            }
         }
 
         public readonly string Name;
         public readonly Entry[] Entries;
-        public Dictionary<string, Entry> EntriesByName = new Dictionary<string, Entry>();
 
+        public readonly Dictionary<string, Entry> EntriesByName;
+        public readonly Dictionary<string, IGrouping<string, Entry>> EntriesByNameWithoutTrailingIndex;
 
         public ParsedStructure(string name, Entry[] entries)
         {
             Name = name;
             Entries = entries;
             EntriesByName = entries.ToDictionary(e => e.Name);
+            EntriesByNameWithoutTrailingIndex = entries.GroupBy(e => e.Name.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')).ToDictionary(g=>g.Key);
         }
 
         public override string ToString()

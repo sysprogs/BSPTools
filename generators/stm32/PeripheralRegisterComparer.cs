@@ -53,7 +53,7 @@ namespace stm32_bsp_generator
                             _MismatchingRegisters++;
                         }
 
-                        var newSubregisters = reg.OriginalField?.Subregisters ?? new List<NamedSubregister>();
+                        var newSubregisters = reg.OriginalField?.Subregisters?.FirstOrDefault().Value?.Subregisters ?? new List<NamedSubregister>();
 
                         _TotalOldSubregisters += oldReg.SubRegisters?.Length ?? 0;
                         _TotalNewSubregisters += newSubregisters.Count;

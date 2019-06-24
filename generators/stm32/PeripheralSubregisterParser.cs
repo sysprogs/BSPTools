@@ -72,19 +72,17 @@ namespace stm32_bsp_generator
         {
             None = 0,
             StripIndicies = 1,
-            ReplaceXes = 2,
-            InvokeCustomRules = 4,
+            ExpandIndicies = 2,
+            ReplaceXes = 4,
+            InvokeCustomRules = 8,
         }
 
         static bool RunSingleSubregisterLocatingPass(ParsedStructure str,
                                                      string[] nameComponents,
                                                      int skippedComponents,
                                                      SubregisterMatchingFlags flags,
-                                                     out ParsedStructure.Entry entry,
-                                                     out string subregisterName,
-                                                     out int strippedIndex)
+                                                     out MatchedStructureField[] result)
         {
-            strippedIndex = -1;
             for (int i = 1; i < (nameComponents.Length - skippedComponents); i++)
             {
                 string[] nameForMatching = nameComponents.Skip(skippedComponents).Take(i).ToArray();
@@ -92,7 +90,7 @@ namespace stm32_bsp_generator
                 if (flags.HasFlag(SubregisterMatchingFlags.ReplaceXes))
                     nameForMatching = nameForMatching.Select(s => s.Replace("Sx", "").Replace("Lx", "").Replace("x", "")).ToArray();
 
-                int discardedIndex = -1;
+                int? discardedIndex = null;
                 if (flags.HasFlag(SubregisterMatchingFlags.StripIndicies))
                 {
                     string lastComponent = nameForMatching.Last();
@@ -120,35 +118,62 @@ namespace stm32_bsp_generator
                 if (flags.HasFlag(SubregisterMatchingFlags.InvokeCustomRules))
                     ManualPeripheralRegisterRules.ApplyKnownNameTransformations(ref nameForMatching);
 
-                if (str.EntriesByName.TryGetValue(string.Join("_", nameForMatching), out entry))
+                if (str.EntriesByName.TryGetValue(string.Join("_", nameForMatching), out var entry))
                 {
-                    subregisterName = string.Join("_", nameComponents.Skip(skippedComponents + 1));
-                    strippedIndex = discardedIndex;
+                    result = new MatchedStructureField[]
+                    {
+                        new MatchedStructureField
+                        {
+                            SubregisterName = string.Join("_", nameComponents.Skip(skippedComponents + 1)),
+                            Entry = entry,
+                            StrippedIndex = discardedIndex,
+                        }
+                    };
+                    return true;
+                }
+
+                if (flags.HasFlag(SubregisterMatchingFlags.ExpandIndicies) && str.EntriesByNameWithoutTrailingIndex.TryGetValue(string.Join("_", nameForMatching), out var entries))
+                {
+                    result = entries.Select(f =>
+                        new MatchedStructureField
+                        {
+                            SubregisterName = string.Join("_", nameComponents.Skip(skippedComponents + 1)),
+                            Entry = f,
+                            StrippedIndex = discardedIndex,
+                        }
+                    ).ToArray();
                     return true;
                 }
             }
 
-            entry = null;
-            subregisterName = null;
+            result = null;
             return false;
         }
-        static bool TryLocateFieldForSubregisterMacroName(ParsedStructure str, string[] nameComponents, int skippedComponents, out ParsedStructure.Entry entry, out string subregisterName, out int strippedIndex)
+
+        struct MatchedStructureField
+        {
+            public ParsedStructure.Entry Entry;
+            public string SubregisterName;
+            public int? StrippedIndex;
+        }
+
+        static bool TryLocateFieldForSubregisterMacroName(ParsedStructure str, string[] nameComponents, int skippedComponents, out MatchedStructureField[] result)
         {
             //Pass 1. Try locating a structure field with the exact name of the macro (e.g. MODER for GPIO_MODER_xxx). 
             //We also iterate multi-component names for rare special cases (e.g. UCPD_TX_ORDSET_TXORDSET would split into UCPD->TX_ORDSET, not UCPD->TX)
-            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.None, out entry, out subregisterName, out strippedIndex))
+            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.None, out result))
                 return true;
 
             //Pass 2. Try discarding instance numbers from the field name.
-            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.StripIndicies, out entry, out subregisterName, out strippedIndex))
+            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.StripIndicies | SubregisterMatchingFlags.ExpandIndicies, out result))
                 return true;
 
             //Pass 3. Try discarding 'x' and 'Sx' strings. E.g. 'DMA_SxCR_MBURST' becomes 'DMA_CR_MBURST' and will get matched to DMA->CR.
-            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.ReplaceXes, out entry, out subregisterName, out strippedIndex))
+            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.ReplaceXes, out result))
                 return true;
 
             //Pass 4. Apply hardcoded name transformations that cannot be realistically guessed (e.g. OSPEEDR -> OSPEEDER). We should keep the amount of them to a minimum.
-            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.InvokeCustomRules, out entry, out subregisterName, out strippedIndex))
+            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.InvokeCustomRules, out result))
                 return true;
 
             return false;
@@ -178,19 +203,17 @@ namespace stm32_bsp_generator
                     string[] components = subreg.Name.Split('_');
 
                     ParsedStructure structureObj;
-
-                    ParsedStructure.Entry entry = null;
-                    string subregisterName = null;
-                    int strippedIndex = -1;
+                    MatchedStructureField[] foundFields = null;
 
                     if (!parsedFile.Structures.TryGetValue(components[0] + "_TypeDef", out structureObj) ||
-                        !TryLocateFieldForSubregisterMacroName(structureObj, components, 1, out entry, out subregisterName, out strippedIndex))
+                        !TryLocateFieldForSubregisterMacroName(structureObj, components, 1, out foundFields))
                     {
+
                         foreach (var s in parsedFile.Structures.Values)
                             if (s.Name.StartsWith(components[0]))
                             {
                                 int prefixLen = CountMatchingItems(s.Name.Split('_'), components);
-                                if (TryLocateFieldForSubregisterMacroName(s, components, prefixLen, out entry, out subregisterName, out strippedIndex))
+                                if (TryLocateFieldForSubregisterMacroName(s, components, prefixLen, out foundFields))
                                 {
                                     structureObj = s;
                                     break;
@@ -198,12 +221,9 @@ namespace stm32_bsp_generator
                             }
                     }
 
-                    if (entry != null)
+                    foreach(var f in foundFields ?? new MatchedStructureField[0])
                     {
-                        entry.Subregisters.Add(subreg);
-                    }
-                    else
-                    {
+                        f.Entry.AddSubregister(subreg, f.StrippedIndex);
                     }
                 }
             }
