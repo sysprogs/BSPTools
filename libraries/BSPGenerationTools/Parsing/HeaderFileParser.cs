@@ -50,21 +50,33 @@ namespace BSPGenerationTools.Parsing
         public string Name;
         public int Offset, BitCount;
 
+        public ulong Mask => ((1UL << BitCount) - 1) << Offset;
+
         public override string ToString()
         {
             return Name;
         }
     }
 
-    public class SubregisterCollection
+    public struct SubregisterWithConstraints
     {
-        public readonly List<NamedSubregister> Subregisters = new List<NamedSubregister>();
+        public NamedSubregister Subregister;
+        public int? RegisterInstanceFilter;
+        public string PeripheralInstanceFilter;
+        public string SubregisterName;
 
-        public void AddSubregister(NamedSubregister subreg)
+        public override string ToString()
         {
-            Subregisters.Add(subreg);
+            string r = Subregister.Name;
+            if (RegisterInstanceFilter != null)
+                r += $" [reg#={RegisterInstanceFilter}]";
+            if (PeripheralInstanceFilter != null)
+                r += $" [periph={PeripheralInstanceFilter}]";
+
+            return r;
         }
     }
+
 
     public class ParsedStructure
     {
@@ -76,19 +88,22 @@ namespace BSPGenerationTools.Parsing
             public string TrailingComment;
             public int ArraySize;
 
-            public Dictionary<int, SubregisterCollection> Subregisters = new Dictionary<int, SubregisterCollection>();
+            public List<SubregisterWithConstraints> Subregisters = new List<SubregisterWithConstraints>();
 
             public override string ToString()
             {
                 return Name;
             }
 
-            public void AddSubregister(NamedSubregister subreg, int? strippedIndex)
+            public void AddSubregister(NamedSubregister subreg, int? strippedIndex, string specificInstanceName, string subregisterName)
             {
-                if (!Subregisters.TryGetValue(strippedIndex ?? -1, out var coll))
-                    Subregisters[strippedIndex ?? -1] = coll = new SubregisterCollection();
-
-                coll.AddSubregister(subreg);
+                Subregisters.Add(new SubregisterWithConstraints
+                {
+                    Subregister = subreg,
+                    SubregisterName = subregisterName,
+                    PeripheralInstanceFilter = specificInstanceName,
+                    RegisterInstanceFilter = strippedIndex,
+                });
             }
         }
 
@@ -155,10 +170,12 @@ namespace BSPGenerationTools.Parsing
     public class HeaderFileParser
     {
         private string _FilePath;
+        private readonly ParseReportWriter.SingleDeviceFamilyHandle _ReportWriter;
 
-        public HeaderFileParser(string fn)
+        public HeaderFileParser(string fn, ParseReportWriter.SingleDeviceFamilyHandle reportWriter)
         {
             _FilePath = fn;
+            _ReportWriter = reportWriter;
         }
 
         class PreprocessorMacroGroupBuilder
@@ -275,22 +292,6 @@ namespace BSPGenerationTools.Parsing
             ExtractStructureDefinitions(tokens, result.Structures);
             return result;
         }
-
-        public class WarningEventArgs : EventArgs
-        {
-            public string File;
-            public int Line;
-            public string Text;
-
-            public WarningEventArgs(string file, int line, string text)
-            {
-                File = file;
-                Line = line;
-                Text = text;
-            }
-        }
-
-        public event EventHandler<WarningEventArgs> Warning;
 
         private void ExtractStructureDefinitions(List<SimpleToken> tokens, Dictionary<string, ParsedStructure> structures)
         {
@@ -417,7 +418,7 @@ namespace BSPGenerationTools.Parsing
 
         private void ReportUnexpectedToken(SimpleToken token)
         {
-            Warning?.Invoke(this, new WarningEventArgs(_FilePath, token.Line, $"Unexpected '{token.Value}'"));
+            _ReportWriter.HandleUnexpectedToken(token);
         }
 
     }

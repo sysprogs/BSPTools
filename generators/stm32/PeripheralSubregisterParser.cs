@@ -7,33 +7,15 @@ using BSPGenerationTools.Parsing;
 
 namespace stm32_bsp_generator
 {
-    public class PossibleSubregisterDefinition
+    class PeripheralSubregisterParser
     {
-        public struct PossibleName
+        private ParseReportWriter.SingleDeviceFamilyHandle _ReportWriter;
+
+        public PeripheralSubregisterParser(ParseReportWriter.SingleDeviceFamilyHandle reportWriter)
         {
-            public string Peripheral;
-            public string Register;
+            _ReportWriter = reportWriter;
         }
 
-        public struct Subregister
-        {
-            public string Name;
-            public int FirstBit;
-            public int BitCount;
-        }
-
-        public PossibleName[] PossibleNames;
-        public Subregister[] Subregisters;
-    }
-
-    public struct PossibleSubregisterSet
-    {
-        public List<PossibleSubregisterDefinition> Subregisters;
-
-    }
-
-    static class PeripheralSubregisterParser
-    {
         private static bool ExtractFirstBitAndSize(ulong val, out int size, out int firstBit)
         {
             firstBit = 0;
@@ -75,9 +57,10 @@ namespace stm32_bsp_generator
             ExpandIndicies = 2,
             ReplaceXes = 4,
             InvokeCustomRules = 8,
+            MergeAdjacentNameComponents = 16,
         }
 
-        static bool RunSingleSubregisterLocatingPass(ParsedStructure str,
+        bool RunSingleSubregisterLocatingPass(ParsedStructure str,
                                                      string[] nameComponents,
                                                      int skippedComponents,
                                                      SubregisterMatchingFlags flags,
@@ -103,7 +86,7 @@ namespace stm32_bsp_generator
                     {
                         int j = lastComponent.Length;
                         while (j > 0 && char.IsNumber(lastComponent[j - 1]))
-                            j--;                            
+                            j--;
 
                         if (j > 0 && j < lastComponent.Length)
                         {
@@ -117,6 +100,9 @@ namespace stm32_bsp_generator
 
                 if (flags.HasFlag(SubregisterMatchingFlags.InvokeCustomRules))
                     ManualPeripheralRegisterRules.ApplyKnownNameTransformations(ref nameForMatching);
+
+                if (flags.HasFlag(SubregisterMatchingFlags.MergeAdjacentNameComponents))
+                    nameForMatching = new[] { string.Join("", nameForMatching) };
 
                 if (str.EntriesByName.TryGetValue(string.Join("_", nameForMatching), out var entry))
                 {
@@ -157,7 +143,7 @@ namespace stm32_bsp_generator
             public int? StrippedIndex;
         }
 
-        static bool TryLocateFieldForSubregisterMacroName(ParsedStructure str, string[] nameComponents, int skippedComponents, out MatchedStructureField[] result)
+        bool TryLocateFieldForSubregisterMacroName(ParsedStructure str, string[] nameComponents, int skippedComponents, out MatchedStructureField[] result)
         {
             //Pass 1. Try locating a structure field with the exact name of the macro (e.g. MODER for GPIO_MODER_xxx). 
             //We also iterate multi-component names for rare special cases (e.g. UCPD_TX_ORDSET_TXORDSET would split into UCPD->TX_ORDSET, not UCPD->TX)
@@ -176,15 +162,16 @@ namespace stm32_bsp_generator
             if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.InvokeCustomRules, out result))
                 return true;
 
+            //Pass 5. Fix registers that don't have an underscore in the field names. APBx_FZ => APBxFZ
+            if (RunSingleSubregisterLocatingPass(str, nameComponents, skippedComponents, SubregisterMatchingFlags.MergeAdjacentNameComponents, out result))
+                return true;
+
             return false;
         }
 
-        public static PossibleSubregisterSet LocatePossibleSubregisterDefinitions(ParsedHeaderFile parsedFile)
+        public void AttachSubregisterDefinitions(ParsedHeaderFile parsedFile, PeripheralRegisterGenerator2.DiscoveredPeripheral[] peripherals)
         {
-            PossibleSubregisterSet result = new PossibleSubregisterSet
-            {
-                Subregisters = new List<PossibleSubregisterDefinition>()
-            };
+            var peripheralsByName = peripherals.ToDictionary(p => p.Name);
 
             foreach (var grp in parsedFile.PreprocessorMacroGroups)
             {
@@ -200,35 +187,56 @@ namespace stm32_bsp_generator
 
                 foreach (var subreg in subregisters)
                 {
-                    string[] components = subreg.Name.Split('_');
+                    MatchedStructureField[] foundFields = LocateMatchingFields(parsedFile, subreg.Name, peripheralsByName, out var specificInstanceName);
 
-                    ParsedStructure structureObj;
-                    MatchedStructureField[] foundFields = null;
-
-                    if (!parsedFile.Structures.TryGetValue(components[0] + "_TypeDef", out structureObj) ||
-                        !TryLocateFieldForSubregisterMacroName(structureObj, components, 1, out foundFields))
+                    if (foundFields == null || foundFields.Length == 0)
                     {
-
-                        foreach (var s in parsedFile.Structures.Values)
-                            if (s.Name.StartsWith(components[0]))
-                            {
-                                int prefixLen = CountMatchingItems(s.Name.Split('_'), components);
-                                if (TryLocateFieldForSubregisterMacroName(s, components, prefixLen, out foundFields))
-                                {
-                                    structureObj = s;
-                                    break;
-                                }
-                            }
+                        _ReportWriter.HandleOrphanedSubregisterMacro(grp, subreg);
                     }
-
-                    foreach(var f in foundFields ?? new MatchedStructureField[0])
+                    else
                     {
-                        f.Entry.AddSubregister(subreg, f.StrippedIndex);
+                        foreach (var f in foundFields)
+                        {
+                            f.Entry.AddSubregister(subreg, f.StrippedIndex, specificInstanceName, f.SubregisterName);
+                        }
                     }
                 }
             }
+        }
 
-            return result;
+        private MatchedStructureField[] LocateMatchingFields(ParsedHeaderFile parsedFile,
+                                                                    string subregisterName,
+                                                                    Dictionary<string, PeripheralRegisterGenerator2.DiscoveredPeripheral> peripheralsByName,
+                                                                    out string specificInstanceName)
+        {
+            ParsedStructure structureObj;
+            MatchedStructureField[] foundFields = null;
+
+            string[] components = subregisterName.Split('_');
+            specificInstanceName = null;
+
+            if (parsedFile.Structures.TryGetValue(components[0] + "_TypeDef", out structureObj) &&
+                TryLocateFieldForSubregisterMacroName(structureObj, components, 1, out foundFields))
+            {
+                return foundFields;
+            }
+
+            if (peripheralsByName.TryGetValue(components[0], out var periph) &&
+                TryLocateFieldForSubregisterMacroName(periph.Structure, components, 1, out foundFields))
+            {
+                specificInstanceName = periph.Name;
+                return foundFields;
+            }
+
+            foreach (var s in parsedFile.Structures.Values)
+                if (s.Name.StartsWith(components[0]))
+                {
+                    int prefixLen = CountMatchingItems(s.Name.Split('_'), components);
+                    if (TryLocateFieldForSubregisterMacroName(s, components, prefixLen, out foundFields))
+                        return foundFields;
+                }
+
+            return null;
         }
 
         /*
@@ -238,7 +246,7 @@ namespace stm32_bsp_generator
                 #define ADC_ISR_ADRDY_Msk         (0x1U << ADC_ISR_ADRDY_Pos)
 
          */
-        private static NamedSubregister[] ExtractNewStyleSubregisters(ParsedHeaderFile parsedFile, PreprocessorMacro[] newStyleMacros)
+        private NamedSubregister[] ExtractNewStyleSubregisters(ParsedHeaderFile parsedFile, PreprocessorMacro[] newStyleMacros)
         {
             List<NamedSubregister> result = new List<NamedSubregister>();
             Dictionary<string, int> positionsByName = new Dictionary<string, int>();
@@ -260,7 +268,7 @@ namespace stm32_bsp_generator
                 {
                     if (!ExtractFirstBitAndSize(value.Value, out var size, out var firstBit))
                     {
-                        //TODO: warning
+                        _ReportWriter.HandleInvalidNewStyleBitMask(macro.Name, value.Value);
                     }
                     else
                         bitCountsByName[key] = size;
@@ -277,7 +285,7 @@ namespace stm32_bsp_generator
         /*
             This method extracts the subregister macros for blocks that don't have any new-style (XXX_Pos/XXX_Msk) definitions.
          */
-        private static NamedSubregister[] ExtractLegacySubregisters(ParsedHeaderFile parsedFile, List<PreprocessorMacro> macros)
+        private NamedSubregister[] ExtractLegacySubregisters(ParsedHeaderFile parsedFile, List<PreprocessorMacro> macros)
         {
             List<NamedSubregister> result = new List<NamedSubregister>();
             var resolver = new BasicExpressionResolver(false);

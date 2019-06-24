@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPGenerationTools;
 using BSPGenerationTools.Parsing;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace stm32_bsp_generator
     {
         public struct DiscoveredPeripheral
         {
-            public struct Register
+            public class Register
             {
                 public string Name;
                 public uint Offset;
@@ -22,10 +23,64 @@ namespace stm32_bsp_generator
                 public bool IsReadOnly;
 
                 public ParsedStructure.Entry OriginalField;
+                public int ZeroBasedIndex;
 
                 public override string ToString()
                 {
                     return Name;
+                }
+
+                public HardwareRegister ToHardwareRegister(DiscoveredPeripheral peripheral)
+                {
+                    return new HardwareRegister
+                    {
+                        Address = $"0x{peripheral.ResolvedBaseAddress + Offset:x8}",
+                        Name = Name,
+                        ReadOnly = IsReadOnly,
+                        SizeInBits = SizeInBytes * 8,
+                        SubRegisters = BuildSubregisterList(peripheral)
+                    };
+                }
+
+                private HardwareSubRegister[] BuildSubregisterList(DiscoveredPeripheral peripheral)
+                {
+                    if (OriginalField.Subregisters == null)
+                        return null;
+
+                    var qualifyingSubregisters = OriginalField.Subregisters.Where(sr => SubregisterMatchesContext(sr, peripheral)).OrderBy(r => r.Subregister.Offset).ToArray();
+
+                    ulong coveredMask = 0;
+                    List<HardwareSubRegister> result = new List<HardwareSubRegister>();
+                    foreach (var r in qualifyingSubregisters)
+                    {
+                        if ((coveredMask & r.Subregister.Mask) != 0)
+                            continue;   //Overlap with previous values
+
+                        coveredMask |= r.Subregister.Mask;
+
+                        result.Add(new HardwareSubRegister
+                        {
+                            FirstBit = r.Subregister.Offset,
+                            SizeInBits = r.Subregister.BitCount,
+                            Name = r.SubregisterName
+                        });
+                    }
+
+                    if (result.Count == 0)
+                        return null;
+
+                    return result.ToArray();
+                }
+
+                private bool SubregisterMatchesContext(SubregisterWithConstraints sr, DiscoveredPeripheral peripheral)
+                {
+                    if (sr.PeripheralInstanceFilter != null && sr.PeripheralInstanceFilter != peripheral.Name)
+                        return false;
+
+                    if (sr.RegisterInstanceFilter != null && sr.RegisterInstanceFilter != ZeroBasedIndex)
+                        return false;
+
+                    return true;
                 }
             }
 
@@ -40,26 +95,61 @@ namespace stm32_bsp_generator
             }
         }
 
-     
+
         public static void TestEntry()
         {
-            PeripheralRegisterComparer comparer = new PeripheralRegisterComparer();
-            foreach (var fn in Directory.GetFiles(@"E:\temp\stm32registers", "*.h"))
+            //PeripheralRegisterComparer comparer = new PeripheralRegisterComparer();
+            using (var reportWriter = new ParseReportWriter(@"e:\temp\stm32registers.log"))
             {
-                var parser = new HeaderFileParser(fn);
-                var parsedFile = parser.ParseHeaderFile();
+                foreach (var fn in Directory.GetFiles(@"E:\temp\stm32registers", "*.h"))
+                {
+                    var newSets = GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, CortexCore.Invalid, reportWriter);
 
-                string shortName = Path.GetFileNameWithoutExtension(fn);
+                    //HardwareRegisterSet[] existingSets = XmlTools.LoadObject<HardwareRegisterSet[]>(Path.ChangeExtension(fn, ".xml"));
+                    XmlTools.SaveObject(newSets, Path.Combine(Path.GetDirectoryName(fn), "new", Path.ChangeExtension(Path.GetFileName(fn), ".xml")));
 
-                var peripherals = LocateStructsReferencedInBaseExpressions(parsedFile);
-                var subregisters = PeripheralSubregisterParser.LocatePossibleSubregisterDefinitions(parsedFile);
-
-                HardwareRegisterSet[] existingSets = XmlTools.LoadObject<HardwareRegisterSet[]>(Path.ChangeExtension(fn, ".xml"));
-
-                comparer.CompareRegisterSets(peripherals, existingSets, shortName);
+                    string shortName = Path.GetFileNameWithoutExtension(fn);
+                    //comparer.CompareRegisterSets(peripherals, existingSets, shortName);
+                }
             }
 
-            comparer.ShowStatistics();
+            //comparer.ShowStatistics();
+        }
+
+        public static HardwareRegisterSet[] GeneratePeripheralRegisterDefinitionsFromHeaderFile(string peripheralHeaderFile, CortexCore core, ParseReportWriter reportWriter)
+        {
+            using (var handle = reportWriter.BeginParsingFile(peripheralHeaderFile))
+            {
+                var parser = new HeaderFileParser(peripheralHeaderFile, handle);
+                var parsedFile = parser.ParseHeaderFile();
+
+                var peripherals = LocateStructsReferencedInBaseExpressions(parsedFile);
+                var subregisterParser = new PeripheralSubregisterParser(handle);
+
+                subregisterParser.AttachSubregisterDefinitions(parsedFile, peripherals);
+
+                List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
+                string coreFile = $@"../../../CoreReg/OutCorexx/{core}.xml";
+                if (core != CortexCore.Invalid)
+                {
+                    if (!File.Exists(coreFile))
+                        throw new Exception("Unknown ARM core: " + core);
+
+                    sets.Add(XmlTools.LoadObject<HardwareRegisterSet>(coreFile));
+                }
+
+                foreach (var peripheral in peripherals)
+                {
+                    sets.Add(new HardwareRegisterSet
+                    {
+                        Registers = peripheral.Registers.Select(r => r.ToHardwareRegister(peripheral)).ToArray(),
+                        UserFriendlyName = peripheral.Name,
+                        ExpressionPrefix = peripheral.Name + "->",
+                    });
+                }
+
+                return sets.ToArray();
+            }
         }
 
         private static DiscoveredPeripheral[] LocateStructsReferencedInBaseExpressions(ParsedHeaderFile parsedFile)
@@ -190,14 +280,15 @@ namespace stm32_bsp_generator
                         if (field.ArraySize > 1)
                             nameSuffix = $"[{i}]";
 
-                        if (!field.Name.StartsWith("RESERVED"))
+                        if (!field.Name.StartsWith("RESERVED", StringComparison.InvariantCultureIgnoreCase))
                             _Registers.Add(new DiscoveredPeripheral.Register
                             {
                                 Offset = (uint)ctx.CurrentOffset,
                                 Name = field.Name + nameSuffix,
                                 SizeInBytes = size,
                                 IsReadOnly = isReadOnly,
-                                OriginalField = field
+                                OriginalField = field,
+                                ZeroBasedIndex = i,
                             });
 
                         ctx.CurrentOffset += size;

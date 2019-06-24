@@ -53,7 +53,7 @@ namespace stm32_bsp_generator
                             _MismatchingRegisters++;
                         }
 
-                        var newSubregisters = reg.OriginalField?.Subregisters?.FirstOrDefault().Value?.Subregisters ?? new List<NamedSubregister>();
+                        var newSubregisters = reg.OriginalField?.Subregisters;
 
                         _TotalOldSubregisters += oldReg.SubRegisters?.Length ?? 0;
                         _TotalNewSubregisters += newSubregisters.Count;
@@ -66,7 +66,7 @@ namespace stm32_bsp_generator
 
                         foreach (var sr in newSubregisters)
                         {
-                            int firstBit = sr.Offset;
+                            int firstBit = sr.Subregister.Offset;
 
                             if (oldSubregistersByOffset.TryGetValue(firstBit, out var val))
                                 oldSubregistersByOffset.Remove(firstBit);
