@@ -40,21 +40,9 @@ namespace stm32_bsp_generator
             }
         }
 
-        static int CountMatchingItems(string[] left, string[] right)
-        {
-            int len = Math.Min(left.Length, right.Length);
-            for (int i = 0; i < len; i++)
-                if (left[i] != right[i])
-                    return i;
-
-            return len;
-        }
-
+     
         public static void TestEntry()
         {
-            int unmappedL1 = 0;
-            int mappedL1 = 0;
-
             PeripheralRegisterComparer comparer = new PeripheralRegisterComparer();
             foreach (var fn in Directory.GetFiles(@"E:\temp\stm32registers", "*.h"))
             {
@@ -64,63 +52,12 @@ namespace stm32_bsp_generator
                 string shortName = Path.GetFileNameWithoutExtension(fn);
 
                 var peripherals = LocateStructsReferencedInBaseExpressions(parsedFile);
-
-                foreach(var grp in parsedFile.PreprocessorMacroGroups)
-                {
-                    if (grp.CommentText.Contains("******") && 
-                        grp.CommentText.Contains(" definition") &&
-                        grp.Macros.FirstOrDefault(m=>m.Name.EndsWith("_Pos")).Name != null)
-                    {
-                        foreach(var macro in grp.Macros)
-                        {
-                            string[] components = macro.Name.Split('_');
-                            if (components.Length < 2)
-                                continue;
-
-                            string finalRegisterName = components[1];
-
-                            if (components.Last() == "Pos")
-                            {
-                                ParsedStructure structureObj;
-                                if (!parsedFile.Structures.TryGetValue(components[0] + "_TypeDef", out structureObj))
-                                {
-                                    foreach(var s in parsedFile.Structures.Values)
-                                        if (s.Name.StartsWith(components[0]))
-                                        {
-                                            int prefixLen = CountMatchingItems(s.Name.Split('_'), components);
-                                            var registerName = string.Join("_", components.Skip(prefixLen).Take(components.Length - prefixLen - 2));
-
-                                            if (s.EntriesByName.ContainsKey(registerName))
-                                            {
-                                                structureObj = s;
-                                                finalRegisterName = registerName;
-                                                break;
-                                            }
-                                        }
-                                }
-
-                                ParsedStructure.Entry entry = null;
-                                if (structureObj?.EntriesByName.TryGetValue(finalRegisterName, out entry) == true)
-                                {
-                                    var posExpression = parsedFile.ResolveMacrosRecursively(macro.Value);
-                                    int position = (int)BasicExpressionResolver.ResolveAddressExpression(posExpression).Value;
-
-                                    entry.Subregisters.Add(position);
-                                    mappedL1++;
-                                }
-                                else
-                                {
-                                    unmappedL1++;
-                                }
-                            }
-                        }
-                    }
-                }
+                var subregisters = PeripheralSubregisterParser.LocatePossibleSubregisterDefinitions(parsedFile);
+                               
 
                 HardwareRegisterSet[] existingSets = XmlTools.LoadObject<HardwareRegisterSet[]>(Path.ChangeExtension(fn, ".xml"));
 
-                comparer.CompareRegisterSets(peripherals, existingSets);
-
+                comparer.CompareRegisterSets(peripherals, existingSets, shortName);
             }
 
             comparer.ShowStatistics();
@@ -144,6 +81,8 @@ namespace stm32_bsp_generator
                 present at the specified address.
             */
 
+            var resolver = new BasicExpressionResolver(true);
+
             foreach (var macro in parsedFile.PreprocessorMacros.Values)
             {
                 foreach (var token in macro.Value)
@@ -159,7 +98,7 @@ namespace stm32_bsp_generator
 
                         try
                         {
-                            addr = BasicExpressionResolver.ResolveAddressExpression(addressExpression);
+                            addr = resolver.ResolveAddressExpression(addressExpression);
                         }
                         catch (BasicExpressionResolver.UnexpectedNonNumberException ex)
                         {

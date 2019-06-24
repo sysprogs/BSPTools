@@ -63,9 +63,9 @@ namespace BSPGenerationTools.Parsing
                 _CharacterClassMap[i] = TokenType.Identifier;
 
             _CharacterClassMap[' '] = _CharacterClassMap['\t'] = _CharacterClassMap['\r'] = _CharacterClassMap['\n'] = TokenType.Whitespace;
-            foreach (char ch in "!@#$%^&*,./~+-=:;|?")
+            foreach (char ch in "!@#$%^&*,./~+-=:;|?<>")
                 _CharacterClassMap[ch] = TokenType.Operator;
-            foreach (char ch in "()[]{}<>")
+            foreach (char ch in "()[]{}")
                 _CharacterClassMap[ch] = TokenType.Bracket;
             _CharacterClassMap['\"'] = TokenType.StringLiteral;
             _CharacterClassMap['\''] = TokenType.CharacterLiteral;

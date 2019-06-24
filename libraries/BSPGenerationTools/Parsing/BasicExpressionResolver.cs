@@ -5,9 +5,16 @@ using System.Text;
 
 namespace BSPGenerationTools.Parsing
 {
-    public static class BasicExpressionResolver
+    public class BasicExpressionResolver
     {
-        public static TypedInteger ResolveAddressExpression(SimpleToken[] addressExpression)
+        private readonly bool _ThrowOnFailure;
+
+        public BasicExpressionResolver(bool throwOnFailure)
+        {
+            _ThrowOnFailure = throwOnFailure;
+        }
+
+        public TypedInteger ResolveAddressExpression(SimpleToken[] addressExpression)
         {
             var reader = new SimpleTokenReader(addressExpression.ToList());
             reader.ReadNext(true);
@@ -22,7 +29,7 @@ namespace BSPGenerationTools.Parsing
             public bool IsAPointer => Type?.Count(t => t.Value == "*") > 0;
         }
 
-        static TypedInteger ResolveAddressExpressionRecursively(SimpleTokenReader reader)
+        TypedInteger ResolveAddressExpressionRecursively(SimpleTokenReader reader)
         {
             TypedInteger value = null;
 
@@ -41,6 +48,9 @@ namespace BSPGenerationTools.Parsing
                 reader.ReadNext(true);
                 var next = ReadSingleAtom(reader);
 
+                if (value == null || next == null)
+                    return null;
+
                 switch(op)
                 {
                     case "+":
@@ -55,6 +65,12 @@ namespace BSPGenerationTools.Parsing
 
                         value = new TypedInteger { Value = value.Value + next.Value, Type = value.Type };
                         break;
+                    case "<<":
+                        if (next.IsAPointer || value.IsAPointer)
+                            throw new Exception("Cannot shift pointers");
+
+                        value = new TypedInteger { Value = value.Value << (int)next.Value, Type = value.Type };
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
@@ -64,7 +80,7 @@ namespace BSPGenerationTools.Parsing
         }
 
         //On entry, reader should point to the first available token. On exit, it will point to the first token AFTER the read expression.
-        static TypedInteger ReadSingleAtom(SimpleTokenReader reader)
+        TypedInteger ReadSingleAtom(SimpleTokenReader reader)
         {
             if (reader.Current.Type == CppTokenizer.TokenType.Bracket && reader.Current.Value == "(")
             {
@@ -96,7 +112,8 @@ namespace BSPGenerationTools.Parsing
                     }
 
                     TypedInteger value = ReadSingleAtom(reader);
-                    value.Type = typeTokens.ToArray();
+                    if (value != null)
+                        value.Type = typeTokens.ToArray();
                     return value;
                 }
                 else
@@ -112,19 +129,27 @@ namespace BSPGenerationTools.Parsing
             else if (reader.Current.Type == CppTokenizer.TokenType.Identifier)
             {
                 var token = reader.Current;
-                try
+                ulong? value = HeaderFileParser.TryParseMaybeHex(token.Value);
+
+                reader.ReadNext(true);
+
+                if (!value.HasValue)
                 {
-                    ulong value = HeaderFileParser.ParseMaybeHex(token.Value);
-                    reader.ReadNext(true);
-                    return new TypedInteger { Value = value };
+                    if (_ThrowOnFailure)
+                        throw new UnexpectedNonNumberException(token);
+                    else
+                        return null;
                 }
-                catch (FormatException)
-                {
-                    throw new UnexpectedNonNumberException(token);
-                }
+
+                return new TypedInteger { Value = value.Value };
             }
             else
-                throw new Exception("Invalid atom: " + reader.Current.Value);
+            {
+                if (_ThrowOnFailure)
+                    throw new Exception("Invalid atom: " + reader.Current.Value);
+                else
+                    return null;
+            }
         }
 
         public class UnexpectedNonNumberException : Exception

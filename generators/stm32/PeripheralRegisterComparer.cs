@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,10 @@ namespace stm32_bsp_generator
 
         int _OldRegistersWithSubregisters, _OldRegistersWithSubregistersGone, _NewRegistersWithSubregisters;
 
-        internal void CompareRegisterSets(PeripheralRegisterGenerator2.DiscoveredPeripheral[] peripherals, HardwareRegisterSet[] existingSets)
+        HashSet<string> _UniqueRegisters = new HashSet<string>();
+        StreamWriter _Log = File.CreateText(@"e:\temp\registers.txt");
+
+        internal void CompareRegisterSets(PeripheralRegisterGenerator2.DiscoveredPeripheral[] peripherals, HardwareRegisterSet[] existingSets, string mcu)
         {
             Dictionary<ulong, HardwareRegister> oldRegisters = new Dictionary<ulong, HardwareRegister>();
             foreach (var set in existingSets)
@@ -31,6 +35,7 @@ namespace stm32_bsp_generator
             }
 
             Dictionary<ulong, HardwareRegister> remainingOldRegisters = new Dictionary<ulong, HardwareRegister>(oldRegisters);
+            _Log.WriteLine($"--- {mcu} ---");
 
             foreach (var set in peripherals)
             {
@@ -48,7 +53,7 @@ namespace stm32_bsp_generator
                             _MismatchingRegisters++;
                         }
 
-                        var newSubregisters = reg.OriginalField?.Subregisters ?? new List<int>();
+                        var newSubregisters = reg.OriginalField?.Subregisters ?? new List<NamedSubregister>();
 
                         _TotalOldSubregisters += oldReg.SubRegisters?.Length ?? 0;
                         _TotalNewSubregisters += newSubregisters.Count;
@@ -61,7 +66,7 @@ namespace stm32_bsp_generator
 
                         foreach (var sr in newSubregisters)
                         {
-                            int firstBit = sr;
+                            int firstBit = sr.Offset;
 
                             if (oldSubregistersByOffset.TryGetValue(firstBit, out var val))
                                 oldSubregistersByOffset.Remove(firstBit);
@@ -77,6 +82,8 @@ namespace stm32_bsp_generator
                             if (newSubregisters.Count == 0)
                             {
                                 _OldRegistersWithSubregistersGone++;
+                                _Log.WriteLine($"{set.Name}->{reg.Name}");
+                                _UniqueRegisters.Add($"{set.Name}->{reg.Name}");
                                 //Debug.WriteLine($"{set.Name}->{reg.Name}");
                             }
                         }
@@ -99,6 +106,8 @@ namespace stm32_bsp_generator
 
         internal void ShowStatistics()
         {
+            _Log.Dispose();
+            File.WriteAllLines(@"e:\temp\registers.unique", _UniqueRegisters);
             Debug.WriteLine($"Registers added: {_RegistersAdded}/{_RegistersTotal}");
             Debug.WriteLine($"Registers removed: {_RegistersRemoved}/{_RegistersTotal}");
             Debug.WriteLine($"Registers mismatching: {_MismatchingRegisters}/{_RegistersTotal}");

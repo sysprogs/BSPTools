@@ -45,6 +45,17 @@ namespace BSPGenerationTools.Parsing
         }
     }
 
+    public struct NamedSubregister
+    {
+        public string Name;
+        public int Offset, BitCount;
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
     public class ParsedStructure
     {
         public class Entry
@@ -55,7 +66,12 @@ namespace BSPGenerationTools.Parsing
             public string TrailingComment;
             public int ArraySize;
 
-            public List<int> Subregisters = new List<int>();
+            public List<NamedSubregister> Subregisters = new List<NamedSubregister>();
+
+            public override string ToString()
+            {
+                return Name;
+            }
         }
 
         public readonly string Name;
@@ -361,6 +377,22 @@ namespace BSPGenerationTools.Parsing
                 return ulong.Parse(text.Substring(2), NumberStyles.AllowHexSpecifier, null);
             else
                 return ulong.Parse(text);
+        }
+
+        public static ulong? TryParseMaybeHex(string text)
+        {
+            text = text.TrimEnd('U', 'L');
+            bool done;
+            ulong result;
+            if (text.StartsWith("0x"))
+                done = ulong.TryParse(text.Substring(2), NumberStyles.AllowHexSpecifier, null, out result);
+            else
+                done = ulong.TryParse(text, out result);
+
+            if (done)
+                return result;
+            else
+                return null;
         }
 
         private void ReportUnexpectedToken(SimpleToken token)
