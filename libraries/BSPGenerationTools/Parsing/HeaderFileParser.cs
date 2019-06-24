@@ -54,10 +54,21 @@ namespace BSPGenerationTools.Parsing
 
             public string TrailingComment;
             public int ArraySize;
+
+            public List<int> Subregisters = new List<int>();
         }
 
-        public string Name;
-        public Entry[] Entries;
+        public readonly string Name;
+        public readonly Entry[] Entries;
+        public Dictionary<string, Entry> EntriesByName = new Dictionary<string, Entry>();
+
+
+        public ParsedStructure(string name, Entry[] entries)
+        {
+            Name = name;
+            Entries = entries;
+            EntriesByName = entries.ToDictionary(e => e.Name);
+        }
 
         public override string ToString()
         {
@@ -67,13 +78,21 @@ namespace BSPGenerationTools.Parsing
 
     public class PreprocessorMacroGroup
     {
-        public SimpleToken PrecedingComment;
+        public List<string> HeaderComments = new List<string>();
+        public string CommentText => string.Join("\n", HeaderComments);
+
         public List<PreprocessorMacro> Macros = new List<PreprocessorMacro>();
+
+        public override string ToString()
+        {
+            return HeaderComments.FirstOrDefault() ?? "";
+        }
     }
 
     public class PreprocessorMacroCollection
     {
         public Dictionary<string, PreprocessorMacro> PreprocessorMacros = new Dictionary<string, PreprocessorMacro>();
+        public PreprocessorMacroGroup[] PreprocessorMacroGroups;
 
         public SimpleToken[] ResolveMacrosRecursively(SimpleToken[] tokens, int maxLevel = 100)
         {
@@ -108,13 +127,34 @@ namespace BSPGenerationTools.Parsing
 
         class PreprocessorMacroGroupBuilder
         {
+            List<PreprocessorMacroGroup> _Groups = new List<PreprocessorMacroGroup>();
+
+            PreprocessorMacroGroup _ConstructedGroup;
+
             public void OnPreprocessorMacroDefined(PreprocessorMacro macro)
             {
+                _ConstructedGroup?.Macros?.Add(macro);
             }
 
-            public void OnTokenProcessed(CppTokenizer.Token token, bool isFirstTokenInLine)
+            public void OnTokenizedLineProcessed(CppTokenizer.Token[] tokens, string line)
             {
+                if (tokens.Length == 0)
+                    return;
+
+                if (tokens.Length == 1 && tokens[0].Type == CppTokenizer.TokenType.Comment)
+                {
+                    var text = tokens[0].GetText(line);
+                    if (_ConstructedGroup == null || _ConstructedGroup.Macros.Count > 0)
+                        _Groups.Add(_ConstructedGroup = new PreprocessorMacroGroup());
+                    _ConstructedGroup.HeaderComments.Add(text);
+                }
+                else
+                {
+                    _ConstructedGroup = null;
+                }
             }
+
+            public PreprocessorMacroGroup[] ExportGroups() => _Groups.ToArray();
         }
 
         List<SimpleToken> TokenizeFileAndFillPreprocessorMacroCollection(string[] lines, PreprocessorMacroCollection collection)
@@ -169,10 +209,10 @@ namespace BSPGenerationTools.Parsing
                 else
                 {
                     bool isFirstToken = true;
+                    builder.OnTokenizedLineProcessed(tokens, line);
 
                     foreach (var token in tokens)
                     {
-                        builder.OnTokenProcessed(token, isFirstToken);
 
                         if (token.Type == CppTokenizer.TokenType.Comment && result.Count > 0 && result[result.Count - 1].Type == CppTokenizer.TokenType.Comment)
                         {
@@ -188,6 +228,7 @@ namespace BSPGenerationTools.Parsing
                 }
             }
 
+            collection.PreprocessorMacroGroups = builder.ExportGroups();
             return result;
         }
 
@@ -262,7 +303,7 @@ namespace BSPGenerationTools.Parsing
                         if (token.Type != CppTokenizer.TokenType.Identifier)
                             ReportUnexpectedToken(token);
                         else
-                            structures[token.Value] = new ParsedStructure { Name = token.Value, Entries = entries.ToArray() };
+                            structures[token.Value] = new ParsedStructure(token.Value, entries.ToArray());
 
                         break;
                     }
