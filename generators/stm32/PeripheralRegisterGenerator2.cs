@@ -12,14 +12,16 @@ namespace stm32_bsp_generator
 {
     static class PeripheralRegisterGenerator2
     {
-        struct DiscoveredPeripheral
+        public struct DiscoveredPeripheral
         {
             public struct Register
             {
                 public string Name;
-                public int Offset;
+                public uint Offset;
                 public int SizeInBytes;
                 public bool IsReadOnly;
+
+                public HardwareSubRegister[] Subregisters;
 
                 public override string ToString()
                 {
@@ -40,6 +42,7 @@ namespace stm32_bsp_generator
 
         public static void TestEntry()
         {
+            PeripheralRegisterComparer comparer = new PeripheralRegisterComparer();
             foreach (var fn in Directory.GetFiles(@"E:\temp\stm32registers", "*.h"))
             {
                 var parser = new HeaderFileParser(fn);
@@ -47,51 +50,14 @@ namespace stm32_bsp_generator
 
                 string shortName = Path.GetFileNameWithoutExtension(fn);
 
-                var structs = LocateStructsReferencedInBaseExpressions(parsedFile);
+                var peripherals = LocateStructsReferencedInBaseExpressions(parsedFile);
                 HardwareRegisterSet[] existingSets = XmlTools.LoadObject<HardwareRegisterSet[]>(Path.ChangeExtension(fn, ".xml"));
 
-                Dictionary<ulong, HardwareRegisterSet> existingSetByAddr = new Dictionary<ulong, HardwareRegisterSet>();
-                Dictionary<ulong, DiscoveredPeripheral> enumeratedPeripherals = new Dictionary<ulong, DiscoveredPeripheral>();
+                comparer.CompareRegisterSets(peripherals, existingSets);
 
-                foreach (var set in existingSets)
-                {
-                    if (set.UserFriendlyName.StartsWith("ARM "))
-                        continue;
-                    existingSetByAddr[HeaderFileParser.ParseMaybeHex(set.Registers[0].Address)] = set;
-                }
-
-                foreach (var newPeripheral in structs)
-                {
-                    if (enumeratedPeripherals.TryGetValue(newPeripheral.ResolvedBaseAddress, out var oldInstance))
-                    {
-                        continue;
-                    }
-
-                    enumeratedPeripherals[newPeripheral.ResolvedBaseAddress] = newPeripheral;
-
-                    var addr = newPeripheral.ResolvedBaseAddress + (uint)newPeripheral.Registers.First().Offset;
-
-                    if (existingSetByAddr.TryGetValue(addr, out var set))
-                    {
-                        //if (s.Name != set.UserFriendlyName)
-                        //  Debug.WriteLine($"Mismatching name: {s.Name} != {set.UserFriendlyName} for {shortName}");
-
-                        if (set.Registers.Length > newPeripheral.Registers.Length)
-                        {
-
-                        }
-
-                        existingSetByAddr.Remove(addr);
-                    }
-                    else
-                    {
-                        //Debug.WriteLine($"Nothing found at address 0x{s.ResolvedBaseAddress:x8} ({s.Name}) for {shortName}");
-                    }
-                }
-
-                foreach (var kv in existingSetByAddr)
-                    Debug.WriteLine($"Unmatched old register set: {kv.Value} for {shortName}");
             }
+
+            comparer.ShowStatistics();
         }
 
         private static DiscoveredPeripheral[] LocateStructsReferencedInBaseExpressions(ParsedHeaderFile parsedFile)
@@ -222,7 +188,7 @@ namespace stm32_bsp_generator
                             nameSuffix = $"[{i}]";
 
                         if (!field.Name.StartsWith("RESERVED"))
-                            _Registers.Add(new DiscoveredPeripheral.Register { Offset = ctx.CurrentOffset, Name = field.Name + nameSuffix, SizeInBytes = size, IsReadOnly = isReadOnly });
+                            _Registers.Add(new DiscoveredPeripheral.Register { Offset = (uint)ctx.CurrentOffset, Name = field.Name + nameSuffix, SizeInBytes = size, IsReadOnly = isReadOnly });
 
                         ctx.CurrentOffset += size;
                     }

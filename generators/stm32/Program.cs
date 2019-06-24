@@ -379,6 +379,9 @@ namespace stm32_bsp_generator
 
         static void Main(string[] args)
         {
+            PeripheralRegisterGenerator2.TestEntry();
+            return;
+
             if (args.Length < 2)
                 throw new Exception("Usage: stm32.exe <SW package directory> <STM32Cube directory>");
 
