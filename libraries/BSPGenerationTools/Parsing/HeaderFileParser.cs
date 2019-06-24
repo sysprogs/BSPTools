@@ -74,6 +74,21 @@ namespace BSPGenerationTools.Parsing
     public class PreprocessorMacroCollection
     {
         public Dictionary<string, PreprocessorMacro> PreprocessorMacros = new Dictionary<string, PreprocessorMacro>();
+
+        public SimpleToken[] ResolveMacrosRecursively(SimpleToken[] tokens, int maxLevel = 100)
+        {
+            if (maxLevel < 0)
+                throw new Exception("Possible circular reference while resolving macros. Please check the call stack. for the macro name.");
+
+            List<SimpleToken> result = new List<SimpleToken>();
+            foreach (var token in tokens)
+                if (token.Type == CppTokenizer.TokenType.Identifier && PreprocessorMacros.TryGetValue(token.Value, out var macro))
+                    result.AddRange(ResolveMacrosRecursively(macro.Value, maxLevel - 1));
+                else
+                    result.Add(token);
+
+            return result.ToArray();
+        }
     }
 
     public class ParsedHeaderFile : PreprocessorMacroCollection
@@ -180,47 +195,8 @@ namespace BSPGenerationTools.Parsing
         {
             ParsedHeaderFile result = new ParsedHeaderFile { Path = _FilePath };
             var tokens = TokenizeFileAndFillPreprocessorMacroCollection(File.ReadAllLines(_FilePath), result);
-            ExtractStructureDefinitions(tokens, result.Structures, parameters);
+            ExtractStructureDefinitions(tokens, result.Structures);
             return result;
-        }
-
-        class SimpleTokenReader
-        {
-            private int _Index;
-            private List<SimpleToken> _Tokens;
-
-            public SimpleTokenReader(List<SimpleToken> tokens)
-            {
-                _Index = -1;
-                _Tokens = tokens;
-            }
-
-            public bool EOF => _Index >= _Tokens.Count;
-
-            public SimpleToken ReadNext(bool skipComments)
-            {
-                if (!EOF)
-                {
-                    _Index++;
-                    while (skipComments && Current.Type == CppTokenizer.TokenType.Comment)
-                    {
-                        _Index++;
-                    }
-                }
-
-                return Current;
-            }
-
-            public SimpleToken Current
-            {
-                get
-                {
-                    if (EOF)
-                        return new SimpleToken();
-                    else
-                        return _Tokens[_Index];
-                }
-            }
         }
 
         public class WarningEventArgs : EventArgs
@@ -239,7 +215,7 @@ namespace BSPGenerationTools.Parsing
 
         public event EventHandler<WarningEventArgs> Warning;
 
-        private void ExtractStructureDefinitions(List<SimpleToken> tokens, Dictionary<string, ParsedStructure> structures, HeaderFileParseParameters parameters)
+        private void ExtractStructureDefinitions(List<SimpleToken> tokens, Dictionary<string, ParsedStructure> structures)
         {
             SimpleTokenReader reader = new SimpleTokenReader(tokens);
 
@@ -315,7 +291,7 @@ namespace BSPGenerationTools.Parsing
             {
                 if (tokensInThisStatement[idx].Value != "]")
                     throw new Exception("Unexpected bracket at the end of a structure statement");
-                
+
                 arraySize = (int)ParseMaybeHex(tokensInThisStatement[idx - 1].Value);
                 if (tokensInThisStatement[idx - 2].Value != "[")
                     throw new Exception("Unexpected bracket at the end of a structure statement");
@@ -339,6 +315,7 @@ namespace BSPGenerationTools.Parsing
 
         public static ulong ParseMaybeHex(string text)
         {
+            text = text.TrimEnd('U', 'L');
             if (text.StartsWith("0x"))
                 return ulong.Parse(text.Substring(2), NumberStyles.AllowHexSpecifier, null);
             else
@@ -349,5 +326,6 @@ namespace BSPGenerationTools.Parsing
         {
             Warning?.Invoke(this, new WarningEventArgs(_FilePath, token.Line, $"Unexpected '{token.Value}'"));
         }
+
     }
 }
