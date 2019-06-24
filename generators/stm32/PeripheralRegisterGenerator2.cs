@@ -95,27 +95,6 @@ namespace stm32_bsp_generator
             }
         }
 
-
-        public static void TestEntry()
-        {
-            //PeripheralRegisterComparer comparer = new PeripheralRegisterComparer();
-            using (var reportWriter = new ParseReportWriter(@"e:\temp\stm32registers.log"))
-            {
-                foreach (var fn in Directory.GetFiles(@"E:\temp\stm32registers", "*.h"))
-                {
-                    var newSets = GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, CortexCore.Invalid, reportWriter);
-
-                    //HardwareRegisterSet[] existingSets = XmlTools.LoadObject<HardwareRegisterSet[]>(Path.ChangeExtension(fn, ".xml"));
-                    XmlTools.SaveObject(newSets, Path.Combine(Path.GetDirectoryName(fn), "new", Path.ChangeExtension(Path.GetFileName(fn), ".xml")));
-
-                    string shortName = Path.GetFileNameWithoutExtension(fn);
-                    //comparer.CompareRegisterSets(peripherals, existingSets, shortName);
-                }
-            }
-
-            //comparer.ShowStatistics();
-        }
-
         public static HardwareRegisterSet[] GeneratePeripheralRegisterDefinitionsFromHeaderFile(string peripheralHeaderFile, CortexCore core, ParseReportWriter reportWriter)
         {
             using (var handle = reportWriter.BeginParsingFile(peripheralHeaderFile))

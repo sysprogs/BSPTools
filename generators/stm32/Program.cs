@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
+using BSPGenerationTools.Parsing;
 
 namespace stm32_bsp_generator
 {
@@ -282,13 +283,11 @@ namespace stm32_bsp_generator
             }
         }
 
-        private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice)
+        private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice, ParseReportWriter writer)
         {
             var mainClassifier = fam.Definition.Subfamilies.First(f => f.IsPrimary);
-            List<Task<MCUDefinitionWithPredicate>> tasks = new List<Task<MCUDefinitionWithPredicate>>();
-            Console.Write("Parsing {0} registers in background threads", fam.Definition.Name);
-            RegisterParserErrors errors = new RegisterParserErrors();
-
+            List<MCUDefinitionWithPredicate> result = new List<MCUDefinitionWithPredicate>();
+            Console.Write("Parsing {0} registers using the new parsing logic...", fam.Definition.Name);
             foreach (var fn in Directory.GetFiles(dir, "*.h"))
             {
                 string subfamily = Path.GetFileNameWithoutExtension(fn);
@@ -298,38 +297,18 @@ namespace stm32_bsp_generator
                 if (specificDevice != null && subfamily != specificDevice)
                     continue;
 
-                Func<MCUDefinitionWithPredicate> func = () =>
-                    {
-                        RegisterParserConfiguration cfg = XmlTools.LoadObject<RegisterParserConfiguration>(fam.BSP.Directories.RulesDir + @"\PeripheralRegisters.xml");
-                        var r = new MCUDefinitionWithPredicate
-                        {
-                            MCUName = subfamily,
-                            RegisterSets = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegisters(fn, cfg, errors, fam.MCUs[0].Core),
-                            MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
-                        };
-                        Console.Write(".");
-                        return r;
-                    };
+                var r = new MCUDefinitionWithPredicate
+                {
+                    MCUName = subfamily,
+                    RegisterSets = PeripheralRegisterGenerator2.GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, fam.MCUs[0].Core, writer),
+                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
+                };
 
-                if (specificDevice != null)
-                    func();
-                else
-                    tasks.Add(Task.Run(func));
-            }
-
-            Task.WaitAll(tasks.ToArray());
-            var errorCnt = errors.ErrorCount;
-            if (errorCnt != 0)
-            {
-                // throw new Exception("Found " + errorCnt + " errors while parsing headers");
-
-                for (int i = 0; i < errors.ErrorCount; i++)
-                    Console.WriteLine("\n er  " + i + "  -  " + errors.DetalErrors(i));
-
+                result.Add(r);
             }
 
             Console.WriteLine("done");
-            return from r in tasks select r.Result;
+            return result;
         }
 
 
@@ -379,9 +358,6 @@ namespace stm32_bsp_generator
 
         static void Main(string[] args)
         {
-            PeripheralRegisterGenerator2.TestEntry();
-            return;
-
             if (args.Length < 2)
                 throw new Exception("Usage: stm32.exe <SW package directory> <STM32Cube directory>");
 
@@ -389,118 +365,121 @@ namespace stm32_bsp_generator
             IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
 
             var bspBuilder = new STM32BSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"), args[1]);
-
-            var devices = provider.LoadDeviceList(bspBuilder);
-            if (devices.Where(d => d.FlashSize == 0).Count() > 0)
-                throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
-
-
-            List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
-            foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
+            Directory.CreateDirectory(@"..\..\Logs");
+            using (var wr = new ParseReportWriter(@"..\..\Logs\registers.log"))
             {
-                var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
-                bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
-                allFamilies.Add(new STM32FamilyBuilder(bspBuilder, fam));
-            }
+                var devices = provider.LoadDeviceList(bspBuilder);
+                if (devices.Where(d => d.FlashSize == 0).Count() > 0)
+                    throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
-            var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
-            if (rejects.Count > 0)
-            {
-                Console.WriteLine("Globally unsupported MCUs:");
-                foreach (var r in rejects)
-                    Console.WriteLine("\t{0}", r.Name);
-            }
-
-            List<MCUFamily> familyDefinitions = new List<MCUFamily>();
-            List<MCU> mcuDefinitions = new List<MCU>();
-            List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
-
-            bool noPeripheralRegisters = args.Contains("/noperiph");
-            string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
-
-            //var files = string.Join("\r\n", File.ReadAllLines(@"E:\ware\Logfile.CSV").Select(l => l.Split(',')[4].Trim('\"')).Distinct().OrderBy(x => x).ToArray());
-
-            var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
-            foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
-                frameworks.Add(fw);
-
-            List<ConditionalToolFlags> allConditionalToolFlags = new List<ConditionalToolFlags>();
-
-            foreach (var fam in allFamilies)
-            {
-                bspBuilder.GetMemoryMcu(fam);
-                var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
-                if (rejectedMCUs.Length != 0)
+                List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+                foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 {
-                    Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
-                    foreach (var mcu in rejectedMCUs)
-                        Console.WriteLine("\t{0}", mcu.Name);
+                    var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
+                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
+                    allFamilies.Add(new STM32FamilyBuilder(bspBuilder, fam));
                 }
 
-                fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
-                if (!noPeripheralRegisters)
-                    fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam, specificDeviceForDebuggingPeripheralRegisterGenerator),
-                        throwIfNotFound: specificDeviceForDebuggingPeripheralRegisterGenerator == null);
+                var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
-                familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
-                fam.GenerateLinkerScripts(false);
-                foreach (var mcu in fam.MCUs)
-                    mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null));
+                if (rejects.Count > 0)
+                {
+                    Console.WriteLine("Globally unsupported MCUs:");
+                    foreach (var r in rejects)
+                        Console.WriteLine("\t{0}", r.Name);
+                }
 
-                foreach (var fw in fam.GenerateFrameworkDefinitions())
+                List<MCUFamily> familyDefinitions = new List<MCUFamily>();
+                List<MCU> mcuDefinitions = new List<MCU>();
+                List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+                List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
+
+                bool noPeripheralRegisters = args.Contains("/noperiph");
+                string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
+
+                //var files = string.Join("\r\n", File.ReadAllLines(@"E:\ware\Logfile.CSV").Select(l => l.Split(',')[4].Trim('\"')).Distinct().OrderBy(x => x).ToArray());
+
+                var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
+                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
 
-                foreach (var sample in fam.CopySamples())
+                List<ConditionalToolFlags> allConditionalToolFlags = new List<ConditionalToolFlags>();
+
+                foreach (var fam in allFamilies)
+                {
+                    bspBuilder.GetMemoryMcu(fam);
+                    var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
+                    if (rejectedMCUs.Length != 0)
+                    {
+                        Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
+                        foreach (var mcu in rejectedMCUs)
+                            Console.WriteLine("\t{0}", mcu.Name);
+                    }
+
+                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
+                    if (!noPeripheralRegisters)
+                        fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam, specificDeviceForDebuggingPeripheralRegisterGenerator, wr),
+                            throwIfNotFound: specificDeviceForDebuggingPeripheralRegisterGenerator == null);
+
+                    familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
+                    fam.GenerateLinkerScripts(false);
+                    foreach (var mcu in fam.MCUs)
+                        mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null));
+
+                    foreach (var fw in fam.GenerateFrameworkDefinitions())
+                        frameworks.Add(fw);
+
+                    foreach (var sample in fam.CopySamples())
+                        exampleDirs.Add(sample);
+
+                    if (fam.Definition.ConditionalFlags != null)
+                        allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
+                }
+
+                foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
                     exampleDirs.Add(sample);
 
-                if (fam.Definition.ConditionalFlags != null)
-                    allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
+                var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
+                exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
+
+                BoardSupportPackage bsp = new BoardSupportPackage
+                {
+                    PackageID = "com.sysprogs.arm.stm32",
+                    PackageDescription = "STM32 Devices",
+                    GNUTargetID = "arm-eabi",
+                    GeneratedMakFileName = "stm32.mak",
+                    MCUFamilies = familyDefinitions.ToArray(),
+                    SupportedMCUs = mcuDefinitions.ToArray(),
+                    Frameworks = frameworks.ToArray(),
+                    Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    PackageVersion = "2018.12",
+                    IntelliSenseSetupFile = "stm32_compat.h",
+                    FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
+                    MinimumEngineVersion = "5.1",
+                    FirstCompatibleVersion = "3.0",
+                    InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
+                    ConditionalFlags = allConditionalToolFlags.ToArray()
+                };
+
+                StringWriter libraryVersionList = new StringWriter();
+
+                foreach (var subdir in Directory.GetDirectories(bspBuilder.Directories.InputDir))
+                {
+                    var nameOnly = Path.GetFileName(subdir);
+                    if (nameOnly.StartsWith("STM32Cube_FW", StringComparison.InvariantCultureIgnoreCase) || nameOnly.IndexOf("_StdPeriph_Lib", StringComparison.InvariantCultureIgnoreCase) != -1)
+                        libraryVersionList.WriteLine(nameOnly);
+                }
+
+                File.WriteAllText(Path.Combine(bspBuilder.BSPRoot, "SDKVersions.txt"), libraryVersionList.ToString());
+
+                bspBuilder.ValidateBSP(bsp);
+
+                File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
+                Console.WriteLine("Saving BSP...");
+                bspBuilder.Save(bsp, true);
             }
-
-            foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
-                exampleDirs.Add(sample);
-
-            var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
-            exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
-
-            BoardSupportPackage bsp = new BoardSupportPackage
-            {
-                PackageID = "com.sysprogs.arm.stm32",
-                PackageDescription = "STM32 Devices",
-                GNUTargetID = "arm-eabi",
-                GeneratedMakFileName = "stm32.mak",
-                MCUFamilies = familyDefinitions.ToArray(),
-                SupportedMCUs = mcuDefinitions.ToArray(),
-                Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                PackageVersion = "2018.12",
-                IntelliSenseSetupFile = "stm32_compat.h",
-                FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                MinimumEngineVersion = "5.1",
-                FirstCompatibleVersion = "3.0",
-                InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
-                ConditionalFlags = allConditionalToolFlags.ToArray()
-            };
-
-            StringWriter libraryVersionList = new StringWriter();
-
-            foreach (var subdir in Directory.GetDirectories(bspBuilder.Directories.InputDir))
-            {
-                var nameOnly = Path.GetFileName(subdir);
-                if (nameOnly.StartsWith("STM32Cube_FW", StringComparison.InvariantCultureIgnoreCase) || nameOnly.IndexOf("_StdPeriph_Lib", StringComparison.InvariantCultureIgnoreCase) != -1)
-                    libraryVersionList.WriteLine(nameOnly);
-            }
-
-            File.WriteAllText(Path.Combine(bspBuilder.BSPRoot, "SDKVersions.txt"), libraryVersionList.ToString());
-
-            bspBuilder.ValidateBSP(bsp);
-
-            File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
-            Console.WriteLine("Saving BSP...");
-            bspBuilder.Save(bsp, true);
         }
 
 

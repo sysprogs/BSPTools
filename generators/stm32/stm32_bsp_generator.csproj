@@ -46,7 +46,6 @@
     <Compile Include="DeviceListProvider.cs" />
     <Compile Include="ManualPeripheralRegisterRules.cs" />
     <Compile Include="PeripheralRegisterComparer.cs" />
-    <Compile Include="PeripheralRegisterGenerator.cs" />
     <Compile Include="PeripheralRegisterGenerator2.cs" />
     <Compile Include="PeripheralSubregisterParser.cs" />
     <Compile Include="Program.cs" />
