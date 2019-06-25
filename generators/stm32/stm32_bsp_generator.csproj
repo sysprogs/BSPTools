@@ -44,10 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DeviceListProvider.cs" />
-    <Compile Include="ManualPeripheralRegisterRules.cs" />
-    <Compile Include="PeripheralRegisterComparer.cs" />
-    <Compile Include="PeripheralRegisterGenerator2.cs" />
-    <Compile Include="PeripheralSubregisterParser.cs" />
+    <Compile Include="Peripherals\ManualPeripheralRegisterRules.cs" />
+    <Compile Include="Peripherals\PeripheralRegisterComparer.cs" />
+    <Compile Include="Peripherals\PeripheralRegisterGenerator2.cs" />
+    <Compile Include="Peripherals\PeripheralSubregisterParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StartupGenerator.cs" />
