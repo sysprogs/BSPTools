@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>STM32H7_M4</Name>
-	<DeviceRegex>^STM32H7.*M4$</DeviceRegex>
+	<Name>STM32H7</Name>
+	<DeviceRegex>^STM32H7.*[^M4]$</DeviceRegex>
 	<FamilySubdirectory>STM32H7xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$STM32:H7_DIR$$\Drivers\CMSIS\Device\ST\STM32H7xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$STM32:H7_DIR$$\Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
@@ -18,8 +18,8 @@
 	</Subfamilies>
 	<CompilationFlags>
 <PreprocessorMacros>	
-		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
-		<string>CORE_CM4</string>	
+		<string>$$com.sysprogs.bspoptions.primary_memory$$_layoutCORE_CM7</string>		
+		<string>CORE_CM7</string>
 	</PreprocessorMacros>
 			<IncludeDirectories>
 			<string>.</string>
@@ -35,21 +35,24 @@
 			<ID>com.sysprogs.arm.stm32.h7_hal</ID>
 			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
 			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.h7_stdperiph</string>
 			</IncompatibleFrameworks>
 			<ProjectFolderName>HAL</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\STM32H7xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$STM32:H7_DIR$$\Drivers\STM32H7xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 					<Patches>	
-						
+						<!--Patch xsi:type="ReplaceLine">
+							<FilePath>Inc\Legacy\stm32_hal_legacy.h</FilePath>
+							<OldLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7)</OldLine>
+							<NewLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7) || defined(STM32H7)</NewLine>
+						</Patch-->	
 					</Patches>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$STM32:H7_DIR$$\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-*Examples\*;-DSP\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
@@ -60,19 +63,21 @@
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>
-		<!--Framework>
+		<Framework>
 			<Name>STM32H743I_EVAL drivers</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.stm32h743i_eval</ID>
 			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.h7_hal</string>
 			</RequiredFrameworks>
-
+			<!--IncompatibleFrameworks>	
+				<string>com.sysprogs.arm.stm32.stm32756G_eval</string>
+			</IncompatibleFrameworks-->
 			<ProjectFolderName>Board</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\BSP\STM32H743I_EVAL</SourceFolder>
+					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H743I_EVAL</SourceFolder>
 					<TargetFolder>BSP\STM32H743I_EVAL</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
@@ -111,7 +116,7 @@
 		<Framework>
 			<Name>STM32H7xx_Nucleo_144</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.nucleo144</ID>
-
+			<!-- Do not set the ClassID for this framework as otherwise it will conflict with STM32H743I-Eval BSP framework -->
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.h7_hal</string>
 			</RequiredFrameworks>
@@ -119,7 +124,7 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\BSP\STM32H7xx_Nucleo_144</SourceFolder>
+					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H7xx_Nucleo_144</SourceFolder>
 					<TargetFolder>BSP\STM32H7xx_Nucleo_144</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
@@ -140,14 +145,14 @@
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$STM32:H7_DIR$$\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<FilesToCopy>Device*system_stm*.c</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>			
-		</Framework-->
+		</Framework>
 	</AdditionalFrameworks>
-	<!--AdditionalFrameworkTemplates>
+	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
 			<Range>ampire480272 ampire640480 exc7200 ft5336 mfxstm32l152 n25q128a n25q512a ov9655 rk043fn48h s5k5cag stmpe811 ts3510 wm8994 lan8742</Range>
 			<Template>
@@ -160,7 +165,7 @@
 				<DefaultEnabled>true</DefaultEnabled>
 				<CopyJobs>
 					<CopyJob>
-						<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_H7_V1.4.0\Drivers\BSP\Components</SourceFolder>
+						<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\Components</SourceFolder>
 						<TargetFolder>BSP\Components</TargetFolder>
 						<FilesToCopy>$$BSPGEN:FRAMEWORK$$\*;Common\*</FilesToCopy>
 						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
@@ -168,9 +173,8 @@
 				</CopyJobs>			
 			</Template>
 		</FrameworkTemplate>
-	</AdditionalFrameworkTemplates-->
+	</AdditionalFrameworkTemplates>
 	<SmartSamples>
-
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32H7X</SourceFolder>
 			<DestinationFolder>samples\USB_CDC_STM32H7X</DestinationFolder>
@@ -179,7 +183,10 @@
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
 			</AdditionalSources>
 		</SmartSample>
-
+		<!--SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LCD_STM32H7X</SourceFolder>
+			<DestinationFolder>samples\LCD_STM32H7X</DestinationFolder>
+		</SmartSample-->
 	</SmartSamples>
       <AdditionalSystemVars>
         <SysVarEntry>

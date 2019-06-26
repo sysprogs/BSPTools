@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using BSPGenerationTools.Parsing;
+using Microsoft.Win32;
 
 namespace stm32_bsp_generator
 {
@@ -24,6 +25,7 @@ namespace stm32_bsp_generator
         public class STM32BSPBuilder : BSPBuilder
         {
             List<KeyValuePair<Regex, MemoryLayout>> _SpecialMemoryLayouts = new List<KeyValuePair<Regex, MemoryLayout>>();
+            public readonly STM32SDKCollection SDKList;
 
             public void GetMemoryMcu(MCUFamilyBuilder pfam)
             {
@@ -137,6 +139,13 @@ namespace stm32_bsp_generator
             {
                 STM32CubeDir = cubeDir;
                 ShortName = "STM32";
+
+                SDKList = XmlTools.LoadObject<STM32SDKCollection>(Path.Combine(dirs.InputDir, SDKFetcher.SDKListFileName));
+
+                foreach(var sdk in SDKList.SDKs)
+                {
+                    SystemVars[$"STM32:{sdk.Family.ToUpper()}_DIR"] = Directory.GetDirectories(Path.Combine(dirs.InputDir, sdk.FolderName), "STM32Cube_FW_*").First();
+                }
             }
 
             public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
@@ -358,13 +367,22 @@ namespace stm32_bsp_generator
 
         static void Main(string[] args)
         {
-            if (args.Length < 2)
-                throw new Exception("Usage: stm32.exe <SW package directory> <STM32Cube directory>");
+            var regKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPGenerators\STM32");
+            var sdkRoot = regKey.GetValue("SDKRoot") as string ?? throw new Exception("Please specify STM32 SDK root via registry");
+            var cubeRoot = regKey.GetValue("CubeMXRoot") as string ?? throw new Exception("Please specify STM32CubeMX location via registry");
+
+            if (args.Contains("/fetch"))
+            {
+                SDKFetcher.FetchLatestSDKs(sdkRoot, cubeRoot);
+                return;
+            }
+            
+            string rulesetName = "classic";
 
             ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
             IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
 
-            var bspBuilder = new STM32BSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"), args[1]);
+            var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output", @"..\..\rules\" + rulesetName), cubeRoot);
             Directory.CreateDirectory(@"..\..\Logs");
             using (var wr = new ParseReportWriter(@"..\..\Logs\registers.log"))
             {
@@ -454,7 +472,7 @@ namespace stm32_bsp_generator
                     Frameworks = frameworks.ToArray(),
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    PackageVersion = "2018.12",
+                    PackageVersion = bspBuilder.SDKList.BSPVersion,
                     IntelliSenseSetupFile = "stm32_compat.h",
                     FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                     MinimumEngineVersion = "5.1",
@@ -463,16 +481,7 @@ namespace stm32_bsp_generator
                     ConditionalFlags = allConditionalToolFlags.ToArray()
                 };
 
-                StringWriter libraryVersionList = new StringWriter();
-
-                foreach (var subdir in Directory.GetDirectories(bspBuilder.Directories.InputDir))
-                {
-                    var nameOnly = Path.GetFileName(subdir);
-                    if (nameOnly.StartsWith("STM32Cube_FW", StringComparison.InvariantCultureIgnoreCase) || nameOnly.IndexOf("_StdPeriph_Lib", StringComparison.InvariantCultureIgnoreCase) != -1)
-                        libraryVersionList.WriteLine(nameOnly);
-                }
-
-                File.WriteAllText(Path.Combine(bspBuilder.BSPRoot, "SDKVersions.txt"), libraryVersionList.ToString());
+                XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
 
                 bspBuilder.ValidateBSP(bsp);
 

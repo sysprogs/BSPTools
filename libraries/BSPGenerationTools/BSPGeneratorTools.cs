@@ -157,8 +157,8 @@ namespace BSPGenerationTools
             }
 
             Directories = dirs;
-            SystemVars["$$BSPGEN:INPUT_DIR$$"] = dirs.InputDir;
-            SystemVars["$$BSPGEN:RULES_DIR$$"] = dirs.RulesDir;
+            SystemVars["BSPGEN:INPUT_DIR"] = dirs.InputDir;
+            SystemVars["BSPGEN:RULES_DIR"] = dirs.RulesDir;
             if (linkerScriptTemplate != null && linkerScriptLevel >= 0)
                 LDSTemplate = XmlTools.LoadObject<LinkerScriptTemplate>(linkerScriptTemplate);
             BSPRoot = dirs.OutputDir;
@@ -263,8 +263,7 @@ namespace BSPGenerationTools
         public void ExpandVariables(ref string value)
         {
             if (value != null && value.Contains("$$"))
-                foreach (var entry in SystemVars)
-                    value = value.Replace(entry.Key, entry.Value);
+                value = BSPEngine.VariableHelper.ExpandVariables(value, SystemVars);
         }
 
         internal void ExpandAdditionalVariables(ref string strSources, SysVarEntry[] AddVariables)
@@ -310,7 +309,7 @@ namespace BSPGenerationTools
                     {
                         totalErrors++;
                         Console.WriteLine($"{fw.Key} ClassID corresponds to more then 1 framework on {dev.ID}:");
-                        foreach(var fwObj in fw)
+                        foreach (var fwObj in fw)
                             Console.WriteLine($"    {fwObj.ID}");
                         Console.WriteLine($"This will break referencing those frameworks via VisualGDB Project Properties. Specify MCUFilterRegex for those frameworks to ensure only 1 is compatible with each device.");
                         Console.WriteLine();

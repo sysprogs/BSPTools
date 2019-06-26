@@ -3,8 +3,8 @@
 	<Name>STM32F1</Name>
 	<DeviceRegex>^STM32F1.*</DeviceRegex>
 	<FamilySubdirectory>STM32F1xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.7.0\Drivers\CMSIS\Device\ST\STM32F1xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.7.0\Drivers\CMSIS\Device\ST\STM32F1xx\Source\Templates\gcc</StartupFileDir>
+	<PrimaryHeaderDir>$$STM32:F1_DIR$$\Drivers\CMSIS\Device\ST\STM32F1xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$STM32:F1_DIR$$\Drivers\CMSIS\Device\ST\STM32F1xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
@@ -133,12 +133,12 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.7.0\Drivers\STM32F1xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$STM32:F1_DIR$$\Drivers\STM32F1xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.7.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$STM32:F1_DIR$$\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
@@ -185,7 +185,7 @@
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_F1_V1.7.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$STM32:F1_DIR$$\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>
@@ -202,11 +202,11 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<PreprocessorMacros>$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>

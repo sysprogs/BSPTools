@@ -210,10 +210,11 @@ namespace stm32_bsp_generator
                     Memories = db.LookupMemories(parsedMCU.RPN, parsedMCU.RefName);
                     if (Memories.Length < 1)
                     {
-                        if(parsedMCU.strCore!="")
+                        if (parsedMCU.strCore != "")
                             Memories = db.LookupMemoriesTwoCore(parsedMCU.RPN, parsedMCU.strCore, parsedMCU.RefName);
                         if (Memories.Length < 1)
                             throw new Exception("Could not locate memories for " + parsedMCU.Name);
+                    }
 
                     for (int i = 0; i < Memories.Length; i++)
                     {

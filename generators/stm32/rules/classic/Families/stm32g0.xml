@@ -1,43 +1,43 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Name>STM32G4</Name>
-	<DeviceRegex>^STM32G4.*</DeviceRegex>
-	<FamilySubdirectory>STM32G4xxxx</FamilySubdirectory>
-	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_G4_V1.0.0\Drivers\CMSIS\Device\ST\STM32G4xx\Include</PrimaryHeaderDir>
-	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_G4_V1.0.0\Drivers\CMSIS\Device\ST\STM32G4xx\Source\Templates\gcc</StartupFileDir>
+	<Name>STM32G0</Name>
+	<DeviceRegex>^STM32G0.*</DeviceRegex>
+	<FamilySubdirectory>STM32G0xxxx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$STM32:G0_DIR$$\Drivers\CMSIS\Device\ST\STM32G0xx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$STM32:G0_DIR$$\Drivers\CMSIS\Device\ST\STM32G0xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>	
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
 			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32G431xx;STM32G441xx;STM32G471xx;STM32G473xx;STM32G474xx;STM32G484xx;STM32G4gbk1cb</AutoOptions> 
+			<AutoOptions>STM32G030xx;STM32G031xx;STM32G041xx;STM32G070xx;STM32G071xx;STM32G081xx</AutoOptions> 
 			<UnsupportedMCUs></UnsupportedMCUs>
 			<Options>
-				<!--Option>
-					<Value>STM32G430xx</Value>
+				<Option>
+					<Value>STM32G030xx</Value>
 					<Regex>STM32F030.*</Regex>
 				</Option>
 				<Option>
-					<Value>STM32G431xx</Value>
+					<Value>STM32G031xx</Value>
 					<Regex>STM32F031.*</Regex>
 				</Option>
 				<Option>
-					<Value>STM32G440xx</Value>
+					<Value>STM32G040xx</Value>
 					<Regex>STM32F041.*</Regex>
 				</Option>
 								
 				<Option>
-					<Value>STM32G470xx</Value>
+					<Value>STM32G070xx</Value>
 					<Regex>STM32F070.*</Regex>
 				</Option>
 				<Option>
-					<Value>STM32G471xx</Value>
+					<Value>STM32G071xx</Value>
 					<Regex>STM32F071.*</Regex>
 				</Option>
 				<Option>
-					<Value>STM32G481xx</Value>
+					<Value>STM32G081xx</Value>
 					<Regex>STM32F081.*</Regex>
-				</Option-->
+				</Option>
 			</Options>
 		</MCUClassifier>
 		<!--MCUClassifier>
@@ -61,34 +61,53 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>STM32G4Cube HAL</Name>
-			<ID>com.sysprogs.arm.stm32.g4_hal</ID>
+			<Name>STM32G0Cube HAL</Name>
+			<ID>com.sysprogs.arm.stm32.g0_hal</ID>
 			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
 			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.g4_stdperiph</string>
+				<string>com.sysprogs.arm.stm32.g0_stdperiph</string>
 			</IncompatibleFrameworks>
 			<ProjectFolderName>HAL</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_G4_V1.0.0\Drivers\STM32G4xx_HAL_Driver</SourceFolder>
+					<SourceFolder>$$STM32:G0_DIR$$\Drivers\STM32G0xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-					<!--Patches>
+					<Patches>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>Inc\Legacy\stm32_hal_legacy.h</FilePath>
 							<OldLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7) || defined(STM32H7)</OldLine>
-							<NewLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7) || defined(STM32H7) || defined(STM32G4)</NewLine>
+							<NewLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7) || defined(STM32H7) || defined(STM32G0)</NewLine>
 						</Patch>					
-					</Patches-->
+					</Patches>
 					</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_G4_V1.0.0\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-DSP\*;*.h;*.c</FilesToCopy>
+					<SourceFolder>$$STM32:G0_DIR$$\Drivers\CMSIS</SourceFolder>
+					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
-					<ProjectInclusionMask>-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\STM32G4????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>							
+					<ProjectInclusionMask>-*Include\STM32G0????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>					
+					<!--Patches>
+						<Patch xsi:type="InsertLines">
+							<FilePath>Device\ST\STM32G0xx\Source\Templates\system_STM32G0xx.c</FilePath>
+							<AfterLine>#endif /* HSI_VALUE */</AfterLine>
+							<InsertedLines>
+								<string></string>
+								<string>#if !defined (HSI48_VALUE)</string>
+								<string>	#define HSI48_VALUE ((uint32_t)48000000)</string>
+								<string>#endif</string>
+							</InsertedLines>
+						</Patch>					
+						<Patch xsi:type="InsertLines">
+							<FilePath>Device\ST\STM32G0xx\Source\Templates\system_STM32G0xx.c</FilePath>
+							<AfterLine>#include "STM32G0xx.h"</AfterLine>
+							<InsertedLines>
+								<string>#include &lt;STM32G0xx_hal.h&gt;</string>
+							</InsertedLines>
+						</Patch>					
+					</Patches-->
 				</CopyJob>
 			</CopyJobs>			
 			<ConfigurableProperties>
@@ -109,18 +128,18 @@
 			</ConfigurableProperties>      
 		</Framework>
 		<Framework>
-			<Name>STM32G4 Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.g4_systeminit</ID>
+			<Name>STM32G0 Default System Init File</Name>
+			<ID>com.sysprogs.arm.stm32.g0_systeminit</ID>
 			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
 			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.g4_hal</string>
+				<string>com.sysprogs.arm.stm32.g0_hal</string>
 			</RequiredFrameworks>
 			<ProjectFolderName>SystemInit</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
 					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM32Cube_FW_G4_V1.0.0\Drivers\CMSIS</SourceFolder>
+					<SourceFolder>$$STM32:G0_DIR$$\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<FilesToCopy>*system_stm*.c</FilesToCopy>
 				</CopyJob>
@@ -128,19 +147,27 @@
 		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>
+		<!--SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32G0X</SourceFolder>
+			<DestinationFolder>samples\USB_CDC_STM32G0X</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
+			</AdditionalSources>
+		</SmartSample-->
 	</SmartSamples>
       <AdditionalSystemVars>
         <SysVarEntry>
           <Key>com.sysprogs.stm32.hal_header_prefix</Key>
-          <Value>STM32G4xx</Value>
+          <Value>STM32G0xx</Value>
         </SysVarEntry>
         <SysVarEntry>
           <Key>com.sysprogs.bspoptions.stm32.hal_system_file</Key>
-          <Value>STM32G4xxxx/CMSIS_HAL/Device/ST/STM32G4xx/Source/Templates/system_STM32G4xx.c</Value>
+          <Value>STM32G0xxxx/CMSIS_HAL/Device/ST/STM32G0xx/Source/Templates/system_STM32G0xx.c</Value>
         </SysVarEntry>
         <SysVarEntry>
           <Key>com.sysprogs.bspoptions.stm32.hal_config_template_file</Key>
-          <Value>STM32G4xxxx/STM32G4xx_HAL_Driver/Inc/STM32G4xx_hal_conf_template.h</Value>
+          <Value>STM32G0xxxx/STM32G0xx_HAL_Driver/Inc/STM32G0xx_hal_conf_template.h</Value>
         </SysVarEntry>
       </AdditionalSystemVars>
 </FamilyDefinition>
