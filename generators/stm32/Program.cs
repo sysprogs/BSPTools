@@ -142,7 +142,7 @@ namespace stm32_bsp_generator
 
                 SDKList = XmlTools.LoadObject<STM32SDKCollection>(Path.Combine(dirs.InputDir, SDKFetcher.SDKListFileName));
 
-                foreach(var sdk in SDKList.SDKs)
+                foreach (var sdk in SDKList.SDKs)
                 {
                     SystemVars[$"STM32:{sdk.Family.ToUpper()}_DIR"] = Directory.GetDirectories(Path.Combine(dirs.InputDir, sdk.FolderName), "STM32Cube_FW_*").First();
                 }
@@ -376,7 +376,7 @@ namespace stm32_bsp_generator
                 SDKFetcher.FetchLatestSDKs(sdkRoot, cubeRoot);
                 return;
             }
-            
+
             string rulesetName = "classic";
 
             ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
@@ -390,12 +390,53 @@ namespace stm32_bsp_generator
                 if (devices.Where(d => d.FlashSize == 0).Count() > 0)
                     throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
-
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+                string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
+
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 {
                     var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
                     bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
+
+                    if (File.Exists(extraFrameworksFile))
+                    {
+                        int idx = fam.PrimaryHeaderDir.IndexOf('\\');
+                        string baseDir = fam.PrimaryHeaderDir.Substring(0, idx);
+                        if (!baseDir.StartsWith("$$STM32:"))
+                            throw new Exception("Invalid base directory. Please recheck the family definition.");
+
+                        var dict = new Dictionary<string, string>
+                        {
+                            { "STM32:FAMILY" , fam.Name },
+                            { "STM32:FAMILY_DIR" , baseDir },
+                        };
+
+                        var extraFrameworkFamily = XmlTools.LoadObject<FamilyDefinition>(extraFrameworksFile);
+
+                        //USB host/device libraries are not always compatible between different device families. Hence we need to ship separate per-family copies of those.
+                        var expandedExtraFrameworks = extraFrameworkFamily.AdditionalFrameworks.Select(fw =>
+                        {
+                            fw.ID = VariableHelper.ExpandVariables(fw.ID, dict);
+                            foreach (var job in fw.CopyJobs)
+                            {
+                                job.SourceFolder = VariableHelper.ExpandVariables(job.SourceFolder, dict);
+                                job.TargetFolder = VariableHelper.ExpandVariables(job.TargetFolder, dict);
+                            }
+
+                            return fw;
+                        });
+
+                        //Furthermore, some families do not include a USB host peripheral and hence do not contain a USB Host library. We need to skip it automatically.
+                        var extraFrameworksWithoutMissingFolders = expandedExtraFrameworks.Where(fw => fw.CopyJobs.Count(j =>
+                        {
+                            string expandedJobSourceDir = j.SourceFolder;
+                            bspBuilder.ExpandVariables(ref expandedJobSourceDir);
+                            return !Directory.Exists(expandedJobSourceDir);
+                        }) == 0);
+
+                        fam.AdditionalFrameworks = fam.AdditionalFrameworks.Concat(extraFrameworksWithoutMissingFolders).ToArray();
+                    }
+
                     allFamilies.Add(new STM32FamilyBuilder(bspBuilder, fam));
                 }
 
@@ -415,8 +456,6 @@ namespace stm32_bsp_generator
 
                 bool noPeripheralRegisters = args.Contains("/noperiph");
                 string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
-
-                //var files = string.Join("\r\n", File.ReadAllLines(@"E:\ware\Logfile.CSV").Select(l => l.Split(',')[4].Trim('\"')).Distinct().OrderBy(x => x).ToArray());
 
                 var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
                 foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
