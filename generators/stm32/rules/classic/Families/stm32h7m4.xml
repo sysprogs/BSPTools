@@ -17,11 +17,11 @@
 		</MCUClassifier>
 	</Subfamilies>
 	<CompilationFlags>
-<PreprocessorMacros>	
+	<PreprocessorMacros>	
 		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
 		<string>CORE_CM4</string>	
 	</PreprocessorMacros>
-			<IncludeDirectories>
+	<IncludeDirectories>
 			<string>.</string>
 		</IncludeDirectories>
 	</CompilationFlags>

@@ -13,10 +13,10 @@
 				<CopyJob>
 					<SourceFolder>$$STM32:L4_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
-					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;-Source\CMSIS_RTOS_V2\*;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/$$com.sysprogs.bspoptions.stm32.freertos.cmsis$$;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
 					<SimpleFileConditions>
 						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_1</string>
 						<string>Source\\portable\\MemMang\\heap_2.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_2</string>
@@ -30,6 +30,8 @@
 						<string>Source\\portable\\GCC\\ARM_CM4F\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4F</string>
 						<string>Source\\portable\\GCC\\ARM_CM7\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7/r0p1</string>
 						<string>Source\\portable\\GCC\\ARM_CM7_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7_MPU/r0p1</string>
+						<string>Source\\CMSIS_RTOS\\.*: $$com.sysprogs.bspoptions.stm32.freertos.cmsis$$ == CMSIS_RTOS</string>
+						<string>Source\\CMSIS_RTOS_V2\\.*: $$com.sysprogs.bspoptions.stm32.freertos.cmsis$$ == CMSIS_RTOS_V2</string>
 					</SimpleFileConditions>
 				<Patches>
 					<Patch xsi:type="ReplaceLine">
@@ -48,10 +50,12 @@
 			<ConfigurableProperties>
 				<PropertyGroups>
 				  <PropertyGroup>
+				    <Name>FreeRTOS</Name>
+					<UniqueID>com.sysprogs.bspoptions.stm32.freertos</UniqueID>
 					<Properties>
 						<PropertyEntry xsi:type="Enumerated">
-						  <Name>FreeRTOS Heap Implementation</Name>
-						  <UniqueID>com.sysprogs.bspoptions.stm32.freertos.heap</UniqueID>
+						  <Name>Heap Implementation</Name>
+						  <UniqueID>heap</UniqueID>
 						  <SuggestionList>
 							<Suggestion><InternalValue>heap_1</InternalValue><UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>heap_2</InternalValue><UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName></Suggestion>
@@ -63,8 +67,8 @@
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>
 						<PropertyEntry xsi:type="Enumerated">
-						  <Name>FreeRTOS CPU Core support</Name>
-						  <UniqueID>com.sysprogs.bspoptions.stm32.freertos.portcore</UniqueID>
+						  <Name>CPU Core support</Name>
+						  <UniqueID>portcore</UniqueID>
 						  <SuggestionList>
 							<Suggestion><InternalValue>CM0</InternalValue><UserFriendlyName>ARM Cortex M0</UserFriendlyName></Suggestion>
 							<Suggestion><InternalValue>CM3</InternalValue><UserFriendlyName>ARM Cortex M3 or M4 with Software FP</UserFriendlyName></Suggestion>
@@ -75,6 +79,16 @@
 							<Suggestion><InternalValue>CM7_MPU/r0p1</InternalValue><UserFriendlyName>ARM Cortex M7 with MPU</UserFriendlyName></Suggestion>
 						  </SuggestionList>
 						  <DefaultEntryIndex>1</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>CMSIS RTOS Interface Version</Name>
+						  <UniqueID>cmsis</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>CMSIS_RTOS</InternalValue><UserFriendlyName>v1</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CMSIS_RTOS_V2</InternalValue><UserFriendlyName>v2</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
 						  <AllowFreeEntry>false</AllowFreeEntry>
 						</PropertyEntry>
 					</Properties>
