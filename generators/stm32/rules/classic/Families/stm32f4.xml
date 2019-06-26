@@ -111,10 +111,9 @@
 	<PreprocessorMacros>
 		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
 	</PreprocessorMacros>
-	
-		<IncludeDirectories>
-			<string>.</string>
-		</IncludeDirectories>
+	<IncludeDirectories>
+		<string>.</string>
+	</IncludeDirectories>
 	</CompilationFlags>
 	<CoreFramework>
 		<CopyJobs>
@@ -122,63 +121,11 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>STM32F4Cube HAL</Name>
-			<ID>com.sysprogs.arm.stm32.f4_hal</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.f4_stdperiph</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>HAL</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:F4_DIR$$\Drivers\STM32F4xx_HAL_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$STM32:F4_DIR$$\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-DSP\*;*.h;*.c</FilesToCopy>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32f4????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>		
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32f4xx\Source\Templates\system_stm32f4xx.c</FilePath>
-							<AfterLine>#include "stm32f4xx.h"</AfterLine>
-							<InsertedLines>
-								<string>#include &lt;stm32f4xx_hal.h&gt;</string>
-							</InsertedLines>
-						</Patch>					
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-		<Framework>
-			<Name>STM32F4 Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.f4_systeminit</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.f4_hal</string>
-			</RequiredFrameworks>
-			<ProjectFolderName>SystemInit</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<AlreadyCopied>true</AlreadyCopied>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<SourceFolder>$$STM32:F4_DIR$$\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>*system_stm*.c</FilesToCopy>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-		<Framework>
 			<Name>STM32F4 Legacy Peripheral Library</Name>
-			<ID>com.sysprogs.arm.stm32.f4_stdperiph</ID>
+			<ID>com.sysprogs.arm.stm32.STM32F4_stdperiph</ID>
 			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
 			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.f4_hal</string>
+				<string>com.sysprogs.arm.stm32.STM32F4_hal</string>
 			</IncompatibleFrameworks>
 			<ProjectFolderName>StdPeriph</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>

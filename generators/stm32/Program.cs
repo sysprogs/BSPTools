@@ -396,7 +396,6 @@ namespace stm32_bsp_generator
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 {
                     var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
-                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
 
                     if (File.Exists(extraFrameworksFile))
                     {
@@ -405,9 +404,13 @@ namespace stm32_bsp_generator
                         if (!baseDir.StartsWith("$$STM32:"))
                             throw new Exception("Invalid base directory. Please recheck the family definition.");
 
+                        string famName = fam.Name;
+                        if (famName.EndsWith("_M4"))
+                            famName = famName.Substring(0, famName.Length - 3);
+
                         var dict = new Dictionary<string, string>
                         {
-                            { "STM32:FAMILY" , fam.Name },
+                            { "STM32:FAMILY" , famName },
                             { "STM32:FAMILY_DIR" , baseDir },
                         };
 
@@ -417,6 +420,9 @@ namespace stm32_bsp_generator
                         var expandedExtraFrameworks = extraFrameworkFamily.AdditionalFrameworks.Select(fw =>
                         {
                             fw.ID = VariableHelper.ExpandVariables(fw.ID, dict);
+                            fw.Name = VariableHelper.ExpandVariables(fw.Name, dict);
+                            fw.RequiredFrameworks = ExpandVariables(fw.RequiredFrameworks, dict);
+                            fw.IncompatibleFrameworks = ExpandVariables(fw.IncompatibleFrameworks, dict);
                             foreach (var job in fw.CopyJobs)
                             {
                                 job.SourceFolder = VariableHelper.ExpandVariables(job.SourceFolder, dict);
@@ -437,6 +443,7 @@ namespace stm32_bsp_generator
                         fam.AdditionalFrameworks = fam.AdditionalFrameworks.Concat(extraFrameworksWithoutMissingFolders).ToArray();
                     }
 
+                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
                     allFamilies.Add(new STM32FamilyBuilder(bspBuilder, fam));
                 }
 
@@ -530,6 +537,10 @@ namespace stm32_bsp_generator
             }
         }
 
+        private static string[] ExpandVariables(string[] strings, Dictionary<string, string> dict)
+        {
+            return strings?.Select(s => VariableHelper.ExpandVariables(s, dict))?.ToArray();
+        }
 
         static void CompareMCULists(string MCUList1, string MCUList2)
         {

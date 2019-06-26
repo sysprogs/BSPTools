@@ -15,7 +15,7 @@
 		</MCUClassifier>
 	</Subfamilies>
 	<CompilationFlags>
-<PreprocessorMacros>
+	<PreprocessorMacros>
 		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
 	</PreprocessorMacros>
 			<IncludeDirectories>
@@ -27,57 +27,6 @@
 		</CopyJobs>
 	</CoreFramework>
 	<AdditionalFrameworks>
-		<Framework>
-			<Name>STM32L4Cube HAL</Name>
-			<ID>com.sysprogs.arm.stm32.l4_hal</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
-			<IncompatibleFrameworks>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>HAL</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:L4_DIR$$\Drivers\STM32L4xx_HAL_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$STM32:L4_DIR$$\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-DSP\Projects\*;-DSP\Examples\*;-DSP\Source\*;-DSP\DSP_Lib_TestSuite\*;*.h;*.c</FilesToCopy>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32l4????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>		
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32L4xx\Source\Templates\system_stm32l4xx.c</FilePath>
-							<AfterLine>#include "stm32l4xx.h"</AfterLine>
-							<InsertedLines>
-								<string>#include &lt;stm32l4xx_hal.h&gt;</string>
-							</InsertedLines>
-						</Patch>					
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-		<Framework>
-			<Name>STM32L4 Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.l4_systeminit</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.l4_hal</string>
-			</RequiredFrameworks>
-			<ProjectFolderName>SystemInit</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$STM32:L4_DIR$$\Drivers\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>Device*system_stm*.c</FilesToCopy>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>

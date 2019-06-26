@@ -43,6 +43,6 @@
 	</PropertyGroups>
 	</ConfigurableProperties>
 	<RequiredFrameworks>
-		<string>com.sysprogs.arm.stm32.f1_stdperiph</string>
+		<string>com.sysprogs.arm.stm32.stdperiph</string>
 	</RequiredFrameworks>
 </EmbeddedProjectSample>

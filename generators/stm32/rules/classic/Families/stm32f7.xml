@@ -24,10 +24,9 @@
 	<PreprocessorMacros>
 		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
 	</PreprocessorMacros>
-	
-		<IncludeDirectories>
-			<string>.</string>
-		</IncludeDirectories>
+	<IncludeDirectories>
+		<string>.</string>
+	</IncludeDirectories>
 	</CompilationFlags>
 	<CoreFramework>
 		<CopyJobs>
@@ -35,45 +34,12 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>STM32F7Cube HAL</Name>
-			<ID>com.sysprogs.arm.stm32.f7_hal</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
-			<IncompatibleFrameworks>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>HAL</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Drivers\STM32F7xx_HAL_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-DSP\*;*.h;*.c</FilesToCopy>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32f7????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>		
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32f7xx\Source\Templates\system_stm32f7xx.c</FilePath>
-							<AfterLine>#include "stm32f7xx.h"</AfterLine>
-							<InsertedLines>
-								<string>#include &lt;stm32f7xx_hal.h&gt;</string>
-							</InsertedLines>
-						</Patch>					
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-		<Framework>
 			<Name>STM32F746G-Discovery drivers</Name>
 			<Filter>STM32F746.*</Filter>
 			<ID>com.sysprogs.arm.stm32.bspdrv.stm32f746g-discovery</ID>
 			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.f7_hal</string>
+				<string>com.sysprogs.arm.stm32.STM32F7_hal</string>
 			</RequiredFrameworks>
 			<IncompatibleFrameworks>
 				<string>com.sysprogs.arm.stm32.stm32756G_eval</string>
@@ -123,7 +89,7 @@
 			<ID>com.sysprogs.arm.stm32.bspdrv.stm32756G_eval</ID>
 			<Filter>STM32F756.*</Filter>
 			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.f7_hal</string>
+				<string>com.sysprogs.arm.stm32.STM32F7_hal</string>
 			</RequiredFrameworks>
 			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<IncompatibleFrameworks>
@@ -174,24 +140,6 @@
 				</PropertyGroups>
 			</ConfigurableProperties>			
 		</Framework>
-		<Framework>
-			<Name>STM32F7 Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.f7_systeminit</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.f7_hal</string>
-			</RequiredFrameworks>
-			<ProjectFolderName>SystemInit</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$STM32:F7_DIR$$\Drivers\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>Device*system_stm*.c</FilesToCopy>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
 	</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
@@ -200,7 +148,7 @@
 				<Name>$$BSPGEN:FRAMEWORK$$ Driver</Name>
 				<ID>com.sysprogs.arm.stm32.bspdrv.f7_$$BSPGEN:FRAMEWORK$$</ID>
 				<RequiredFrameworks>
-					<string>com.sysprogs.arm.stm32.f7_hal</string>
+					<string>com.sysprogs.arm.stm32.STM32F7_hal</string>
 				</RequiredFrameworks>
 				<ProjectFolderName>$$BSPGEN:FRAMEWORK$$ Driver</ProjectFolderName>
 				<DefaultEnabled>true</DefaultEnabled>

@@ -31,44 +31,11 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>STM32H7Cube HAL</Name>
-			<ID>com.sysprogs.arm.stm32.h7_hal</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
-			<IncompatibleFrameworks>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>HAL</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Drivers\STM32H7xx_HAL_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-					<Patches>	
-						<!--Patch xsi:type="ReplaceLine">
-							<FilePath>Inc\Legacy\stm32_hal_legacy.h</FilePath>
-							<OldLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7)</OldLine>
-							<NewLine>#if defined(STM32L0) || defined(STM32L4) || defined(STM32F4) || defined(STM32F2) || defined(STM32F7) || defined(STM32H7)</NewLine>
-						</Patch-->	
-					</Patches>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-*Examples\*;-DSP\*;*.h;*.c</FilesToCopy>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-*Include\stm32h7????.h*;-*system_*.c;-RTOS2\Template\*;*</ProjectInclusionMask>
-					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;*.h</AutoIncludeMask>		
-					<Patches>											
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-		<Framework>
 			<Name>STM32H743I_EVAL drivers</Name>
 			<ID>com.sysprogs.arm.stm32.bspdrv.stm32h743i_eval</ID>
 			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
 			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.h7_hal</string>
+				<string>com.sysprogs.arm.stm32.STM32H7_hal</string>
 			</RequiredFrameworks>
 			<!--IncompatibleFrameworks>	
 				<string>com.sysprogs.arm.stm32.stm32756G_eval</string>
@@ -118,7 +85,7 @@
 			<ID>com.sysprogs.arm.stm32.bspdrv.nucleo144</ID>
 			<!-- Do not set the ClassID for this framework as otherwise it will conflict with STM32H743I-Eval BSP framework -->
 			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.h7_hal</string>
+				<string>com.sysprogs.arm.stm32.STM32H7_hal</string>
 			</RequiredFrameworks>
 			<ProjectFolderName>Nucleo144</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
@@ -132,24 +99,6 @@
 			</CopyJobs>			
 			<ConfigurableProperties>				
 			</ConfigurableProperties>			
-		</Framework>
-		<Framework>
-			<Name>STM32H7 Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.h7_systeminit</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.h7_hal</string>
-			</RequiredFrameworks>
-			<ProjectFolderName>SystemInit</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$STM32:H7_DIR$$\Drivers\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>Device*system_stm*.c</FilesToCopy>
-				</CopyJob>
-			</CopyJobs>			
 		</Framework>
 	</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>

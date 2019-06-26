@@ -6,7 +6,6 @@
 	<PrimaryHeaderDir>$$STM32:F0_DIR$$\Drivers\CMSIS\Device\ST\STM32F0xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:F0_DIR$$\Drivers\CMSIS\Device\ST\STM32F0xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
-	
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
@@ -136,89 +135,11 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>STM32F0Cube HAL</Name>
-			<ID>com.sysprogs.arm.stm32.f0_hal</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.f0_stdperiph</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>HAL</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:F0_DIR$$\Drivers\STM32F0xx_HAL_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$STM32:F0_DIR$$\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
-					<ProjectInclusionMask>-*Include\stm32f0????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>					
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32F0xx\Source\Templates\system_stm32f0xx.c</FilePath>
-							<AfterLine>#endif /* HSI_VALUE */</AfterLine>
-							<InsertedLines>
-								<string></string>
-								<string>#if !defined (HSI48_VALUE)</string>
-								<string>	#define HSI48_VALUE ((uint32_t)48000000)</string>
-								<string>#endif</string>
-							</InsertedLines>
-						</Patch>					
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32F0xx\Source\Templates\system_stm32f0xx.c</FilePath>
-							<AfterLine>#include "stm32f0xx.h"</AfterLine>
-							<InsertedLines>
-								<string>#include &lt;stm32f0xx_hal.h&gt;</string>
-							</InsertedLines>
-						</Patch>					
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-			<ConfigurableProperties>
-				<PropertyGroups>
-                    <PropertyGroup>
-                        <Properties>
-                            <PropertyEntry xsi:type="Boolean">
-								<Name>Support legacy HAL API</Name>
-                                <UniqueID>com.sysprogs.bspoptions.stm32.hal_legacy</UniqueID>
-                                <ValueForTrue>USE_HAL_LEGACY</ValueForTrue>
-                                <ValueForFalse></ValueForFalse>
-                                <DefaultValue>true</DefaultValue>
-                            </PropertyEntry> 
-						</Properties>
-                        <CollapsedByDefault>false</CollapsedByDefault>
-                    </PropertyGroup>
-                </PropertyGroups>
-			</ConfigurableProperties>      
-		</Framework>
-		<Framework>
-			<Name>STM32F0 Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.f0_systeminit</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.f0_hal</string>
-			</RequiredFrameworks>
-			<ProjectFolderName>SystemInit</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$STM32:F0_DIR$$\Drivers\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>*system_stm*.c</FilesToCopy>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-		<Framework>
 			<Name>STM32F0 Legacy Peripheral Library</Name>
-			<ID>com.sysprogs.arm.stm32.f0_stdperiph</ID>
+			<ID>com.sysprogs.arm.stm32.STM32F0_stdperiph</ID>
 			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
 			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.f0_hal</string>
+				<string>com.sysprogs.arm.stm32.STM32F0_hal</string>
 			</IncompatibleFrameworks>
 			<ProjectFolderName>StdPeriph</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>

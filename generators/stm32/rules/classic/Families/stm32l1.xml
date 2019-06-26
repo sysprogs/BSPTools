@@ -139,58 +139,6 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>STM32L1Cube HAL</Name>
-			<ID>com.sysprogs.arm.stm32.l1_hal</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.l1_stdperiph</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>HAL</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:L1_DIR$$\Drivers\STM32L1xx_HAL_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$STM32:L1_DIR$$\Drivers\CMSIS</SourceFolder>
-					<FilesToCopy>-DSP\*;*.h;*.c</FilesToCopy>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32l1????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-RTOS\Template\*;*.h</AutoIncludeMask>		
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32l1xx\Source\Templates\system_stm32l1xx.c</FilePath>
-							<AfterLine>#include "stm32l1xx.h"</AfterLine>
-							<InsertedLines>
-								<string>#include &lt;stm32l1xx_hal.h&gt;</string>
-							</InsertedLines>
-						</Patch>					
-					</Patches>
-				</CopyJob>
-			</CopyJobs>				    
-		</Framework>
-		<Framework>
-			<Name>STM32L1 Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.l1_systeminit</ID>
-			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.l1_hal</string>
-			</RequiredFrameworks>
-			<ProjectFolderName>SystemInit</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<AlreadyCopied>true</AlreadyCopied>
-					<SourceFolder>$$STM32:L1_DIR$$\Drivers\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>*system_stm*.c</FilesToCopy>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-		<Framework>
 			<Name>STM32L1 Legacy Peripheral Library</Name>
 			<ID>com.sysprogs.arm.stm32.l1_stdperiph</ID>
 			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>

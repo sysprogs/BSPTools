@@ -2,6 +2,65 @@
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<AdditionalFrameworks>
 		<Framework>
+			<Name>$$STM32:FAMILY$$ HAL Library</Name>
+			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_hal</ID>
+			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_stdperiph</string>
+			</IncompatibleFrameworks>
+			<ProjectFolderName>HAL</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>
+					<FilesToCopy>-*Examples\*;-DSP\*;-DSP_Lib\*;*.h;*.c</FilesToCopy>
+					<TargetFolder>CMSIS_HAL</TargetFolder>
+					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
+					<ProjectInclusionMask>-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32??????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;*.h</AutoIncludeMask>					
+				</CopyJob>
+			</CopyJobs>			
+			<ConfigurableProperties>
+				<PropertyGroups>
+                    <PropertyGroup>
+                        <Properties>
+                            <PropertyEntry xsi:type="Boolean">
+								<Name>Support legacy HAL API</Name>
+                                <UniqueID>com.sysprogs.bspoptions.stm32.hal_legacy</UniqueID>
+                                <ValueForTrue>USE_HAL_LEGACY</ValueForTrue>
+                                <ValueForFalse></ValueForFalse>
+                                <DefaultValue>true</DefaultValue>
+                            </PropertyEntry> 
+						</Properties>
+                        <CollapsedByDefault>false</CollapsedByDefault>
+                    </PropertyGroup>
+                </PropertyGroups>
+			</ConfigurableProperties>      
+		</Framework>
+		<Framework>
+			<Name>$$STM32:FAMILY$$ Default System Init File</Name>
+			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_systeminit</ID>
+			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_hal</string>
+			</RequiredFrameworks>
+			<ProjectFolderName>SystemInit</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<AlreadyCopied>true</AlreadyCopied>
+					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>
+					<TargetFolder>CMSIS_HAL</TargetFolder>
+					<FilesToCopy>*system_stm*.c</FilesToCopy>
+				</CopyJob>
+			</CopyJobs>			
+		</Framework>
+		<Framework>
 			<Name>STM32 USB Device Library</Name>
 			<ID>com.sysprogs.arm.stm32.usbdev.$$STM32:FAMILY$$</ID>
 			<ClassID>com.sysprogs.arm.stm32.usbdev</ClassID>
