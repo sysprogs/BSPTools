@@ -14,6 +14,7 @@
 	</ConfigurableProperties>
 	<RequiredFrameworks>
 		<string>com.sysprogs.arm.stm32.hal</string>
+		<string>com.sysprogs.arm.stm32.ll</string>
 		<string>com.sysprogs.arm.stm32.usbdev</string>
 	</RequiredFrameworks>
 	<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>

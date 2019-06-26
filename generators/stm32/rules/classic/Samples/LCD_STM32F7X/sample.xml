@@ -5,8 +5,9 @@
 	<MCUFilterRegex>STM32F7.*</MCUFilterRegex>
 	<RequiredFrameworks>
 		<string>com.sysprogs.arm.stm32.hal</string>
+		<string>com.sysprogs.arm.stm32.ll</string>
 		<string>com.sysprogs.arm.stm32.bspdrv.stm32f746g-discovery</string>
-		<string>com.sysprogs.arm.stm32.f7_systeminit</string>
+		<string>com.sysprogs.arm.stm32.hal_systeminit</string>
 	</RequiredFrameworks>
 	  <DefaultConfiguration>
     <Entries>

@@ -16,6 +16,10 @@
 						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
 						<Value>GPIOA</Value>
 					</KeyValue>
+					<KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.freertoscmsis</Key>
+						<Value>CMSIS_RTOS</Value>
+					</KeyValue>
 				</Entries>
 			</SampleConfiguration>
 		 </TestedSample> 

@@ -51,7 +51,7 @@
 				<PropertyGroups>
 				  <PropertyGroup>
 				    <Name>FreeRTOS</Name>
-					<UniqueID>com.sysprogs.bspoptions.stm32.freertos</UniqueID>
+					<UniqueID>com.sysprogs.bspoptions.stm32.freertos.</UniqueID>
 					<Properties>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>Heap Implementation</Name>

@@ -263,7 +263,7 @@ namespace stm32_bsp_generator
                             _Registers.Add(new DiscoveredPeripheral.Register
                             {
                                 Offset = (uint)ctx.CurrentOffset,
-                                Name = field.Name + nameSuffix,
+                                Name = prefix + field.Name + nameSuffix,
                                 SizeInBytes = size,
                                 IsReadOnly = isReadOnly,
                                 OriginalField = field,

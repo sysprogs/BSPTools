@@ -36,48 +36,4 @@
 			</SampleConfiguration>
 		 </TestedSample>
 	</Samples>
-	<RegisterRenamingRules>
-		<RegisterRenamingRule>
-			<RegisterSetRegex>OCTOSPIM|GFXMMU</RegisterSetRegex>
-			<RegisterRegex>PCR|LUT</RegisterRegex>
-			<Offset>-1</Offset>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterSetRegex>DSI</RegisterSetRegex>
-			<RegisterRegex>TCCR|WPCR|ISR|IER|FIR</RegisterRegex>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterSetRegex>EXTI</RegisterSetRegex>
-			<RegisterRegex>TSR|CR</RegisterRegex>
-			<Offset>-1</Offset>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterSetRegex>HASH|HASH_DIGEST</RegisterSetRegex>
-			<RegisterRegex>HR|CSR</RegisterRegex>
-			<Offset>-1</Offset>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterSetRegex>JPEG</RegisterSetRegex>
-			<RegisterRegex>QMEM[0-3]|HUFFMIN|HUFFBASE|HUFFSYMB|DHTMEM|HUFFENC_[AD]C[0-1]</RegisterRegex>
-			<Offset>-1</Offset>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterRegex>AFR</RegisterRegex>
-			<Mode>HighLow</Mode>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterRegex>IOGXCR|EXTICR|BTCR|BWTR|RAM|FGCLUT|BGCLUT|SDCR|SDTR|DIEPTXF|IT_LINE_SR</RegisterRegex>
-			<Offset>-1</Offset>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterRegex>sTxMailBox|sFIFOMailBox|sFilterRegister</RegisterRegex>
-			<Offset>-1</Offset>
-			<Mode>WithSuffix</Mode>
-		</RegisterRenamingRule>
-		<RegisterRenamingRule>
-			<RegisterSetRegex>HSEM</RegisterSetRegex>
-			<RegisterRegex>R|RLR</RegisterRegex>
-			<Offset>-1</Offset>
-		</RegisterRenamingRule>
-	</RegisterRenamingRules>
 </TestJob>

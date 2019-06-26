@@ -20,7 +20,7 @@ int main(void)
 	GPIO_InitStructure.Pin = GPIO_PIN_$$com.sysprogs.examples.ledblink.LEDBIT$$;
 
 	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
 	GPIO_InitStructure.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init($$com.sysprogs.examples.ledblink.LEDPORT$$, &GPIO_InitStructure);
 

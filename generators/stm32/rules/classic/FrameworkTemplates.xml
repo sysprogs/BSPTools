@@ -2,9 +2,13 @@
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<AdditionalFrameworks>
 		<Framework>
+			<!-- Warning: some parts of the HAL library depend on functions implemented in the LL library, hence HAL-based projects now must reference both HAL and LL frameworks. -->
 			<Name>$$STM32:FAMILY$$ HAL Library</Name>
 			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_hal</ID>
 			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_ll</string>
+			</RequiredFrameworks>
 			<IncompatibleFrameworks>
 				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_stdperiph</string>
 			</IncompatibleFrameworks>
@@ -14,33 +18,54 @@
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*_template.?;*</ProjectInclusionMask>
+					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
+					<ProjectInclusionMask>-*_template.?;-&gt;.*stm32[^\\]+_ll_[^\\]+$;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-*Examples\*;-DSP\*;-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.hal_legacy$$</PreprocessorMacros>
-					<ProjectInclusionMask>-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32??????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;*.h</AutoIncludeMask>					
+					<PreprocessorMacros></PreprocessorMacros>
+					<ProjectInclusionMask>-Examples\*;-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32??????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;-NN\*;-Core_A\*;*.h</AutoIncludeMask>					
+				</CopyJob>
+			</CopyJobs>			
+		</Framework>
+		<Framework>
+			<Name>$$STM32:FAMILY$$ Low-level Driver Library</Name>
+			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_ll</ID>
+			<ClassID>com.sysprogs.arm.stm32.ll</ClassID>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_stdperiph</string>
+			</IncompatibleFrameworks>
+			<ProjectFolderName>LL</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver</SourceFolder>
+					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
+					<ProjectInclusionMask>&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
+					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.ll_driver$$</PreprocessorMacros>
+					<AlreadyCopied>true</AlreadyCopied>
+					<AdditionalIncludeDirs>Inc;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Core/Include</AdditionalIncludeDirs>
 				</CopyJob>
 			</CopyJobs>			
 			<ConfigurableProperties>
 				<PropertyGroups>
-                    <PropertyGroup>
-                        <Properties>
-                            <PropertyEntry xsi:type="Boolean">
-								<Name>Support legacy HAL API</Name>
-                                <UniqueID>com.sysprogs.bspoptions.stm32.hal_legacy</UniqueID>
-                                <ValueForTrue>USE_HAL_LEGACY</ValueForTrue>
-                                <ValueForFalse></ValueForFalse>
-                                <DefaultValue>true</DefaultValue>
-                            </PropertyEntry> 
-						</Properties>
-                        <CollapsedByDefault>false</CollapsedByDefault>
-                    </PropertyGroup>
-                </PropertyGroups>
-			</ConfigurableProperties>      
+				  <PropertyGroup>
+					<Properties>
+					  <PropertyEntry xsi:type="Boolean">
+						<Name>Enable Advanced Low-Level Driver Functions</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.ll_driver</UniqueID>
+						<ValueForTrue>USE_FULL_LL_DRIVER</ValueForTrue>
+						<ValueForFalse></ValueForFalse>
+					  </PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
 		</Framework>
 		<Framework>
 			<Name>$$STM32:FAMILY$$ Default System Init File</Name>

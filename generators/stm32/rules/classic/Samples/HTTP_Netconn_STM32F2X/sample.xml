@@ -7,5 +7,6 @@
 		<string>com.sysprogs.arm.stm32.freertos</string>
 		<string>com.sysprogs.arm.stm32.LwIP</string>
 		<string>com.sysprogs.arm.stm32.hal</string>
+		<string>com.sysprogs.arm.stm32.ll</string>
 	</RequiredFrameworks>
 </EmbeddedProjectSample>

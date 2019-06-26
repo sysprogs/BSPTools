@@ -6,6 +6,7 @@
   <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
     <string>com.sysprogs.arm.stm32.hal</string>
+	<string>com.sysprogs.arm.stm32.ll</string>
   </RequiredFrameworks>
   <AdditionalSourcesToCopy>
     <AdditionalSourceFile>

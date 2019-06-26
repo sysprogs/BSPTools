@@ -262,10 +262,34 @@ namespace stm32_bsp_generator
                         Name = "HAL Driver Sources for " + string.Join(" ,", moduleNames),
                         SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
                         {
-                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Default"},
-                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "1", UserFriendlyName = "Legacy"}
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Default"},
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "1", UserFriendlyName = "Legacy"}
                         }
                     });
+                }
+
+                Regex rgLegacyDefineCheck = new Regex(@"#if( defined|def)[ \(]+(USE_LEGACY|USE_HAL_LEGACY)");
+                string legacyDefineName = null;
+                foreach(var line in File.ReadAllLines(Directory.GetFiles(srcDir + @"\..\Inc", "stm32*hal_def.h")[0]))
+                {
+                    var m = rgLegacyDefineCheck.Match(line);
+                    if (m.Success)
+                    {
+                        legacyDefineName = m.Groups[2].Value;
+                    }
+                }
+
+                if (legacyDefineName != null)
+                {
+                    halFramework.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Boolean
+                    {
+                        UniqueID = "com.sysprogs.bspoptions.stm32.hal_legacy",
+                        Name = "Support legacy HAL API",
+                        ValueForTrue = legacyDefineName,
+                        DefaultValue = true,
+                    });
+
+                    halFramework.CopyJobs[0].PreprocessorMacros += ";$$com.sysprogs.bspoptions.stm32.hal_legacy$$";
                 }
             }
         }
@@ -427,6 +451,7 @@ namespace stm32_bsp_generator
                             {
                                 job.SourceFolder = VariableHelper.ExpandVariables(job.SourceFolder, dict);
                                 job.TargetFolder = VariableHelper.ExpandVariables(job.TargetFolder, dict);
+                                job.AdditionalIncludeDirs = VariableHelper.ExpandVariables(job.AdditionalIncludeDirs, dict);
                             }
 
                             return fw;
