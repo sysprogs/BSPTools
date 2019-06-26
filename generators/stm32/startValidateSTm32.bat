@@ -1,0 +1,1 @@
+f:\Projects\Sysprogs\BSPTools\StandaloneBSPValidator\bin\Debug\StandaloneBSPValidator.exe  f:\Projects\Sysprogs\BSPTools\generators\stm32\stm32AllFam.validatejob  f:\Projects\Sysprogs\TestOutASL4
