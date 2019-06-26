@@ -515,7 +515,7 @@ namespace stm32_bsp_generator
                     IntelliSenseSetupFile = "stm32_compat.h",
                     FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
                     MinimumEngineVersion = "5.1",
-                    FirstCompatibleVersion = "3.0",
+                    FirstCompatibleVersion = "2019.06",
                     InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
                     ConditionalFlags = allConditionalToolFlags.ToArray()
                 };

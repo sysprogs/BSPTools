@@ -16,7 +16,7 @@
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32_USB_Device_Library/Core/Inc;$$SYS:BSP_ROOT$$/STM32_USB_Device_Library/Class/$$com.sysprogs.bspoptions.stm32.usb.devclass$$/Inc</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>Core/Inc;Class/$$com.sysprogs.bspoptions.stm32.usb.devclass$$/Inc</AdditionalIncludeDirs>
 					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
 					<SimpleFileConditions>
 						<string>Class\\AUDIO\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == AUDIO</string>

@@ -539,7 +539,7 @@ namespace BSPGenerationTools
                 }
 
             if (AdditionalIncludeDirs != null)
-                includeDirs.AddRange(AdditionalIncludeDirs.Split(';').Select(d => MapIncludeDir(absTarget, d)));
+                includeDirs.AddRange(AdditionalIncludeDirs.Split(';').Select(d => MapIncludeDir(absTarget, subdir, d)));
 
             return new ToolFlags
             {
@@ -548,7 +548,7 @@ namespace BSPGenerationTools
             };
         }
 
-        private string MapIncludeDir(string absTarget, string dir)
+        private string MapIncludeDir(string absTarget, string subdir, string dir)
         {
             if (dir.StartsWith("$$SYS:BSP_ROOT$$/"))
                 return dir;
@@ -558,15 +558,20 @@ namespace BSPGenerationTools
 
                 if (dir == ".")
                     return ".";
-                else if (dir == "?")
+
+                var relativeTargetFolder = TargetFolder;
+                if (!string.IsNullOrEmpty(subdir))
+                    relativeTargetFolder = subdir + "/" + TargetFolder;
+
+                if (dir == "?")
                 {
-                    relPath = TargetFolder;
+                    relPath = relativeTargetFolder;
                     dir = ".";
                 }
                 else
-                    relPath = Path.Combine(TargetFolder, dir);
+                    relPath = Path.Combine(relativeTargetFolder, dir).Replace('\\', '/');
 
-                if (!Directory.Exists(Path.Combine(absTarget, dir)))
+                if (!dir.Contains("$$") && !Directory.Exists(Path.Combine(absTarget, dir)))
                     throw new Exception("Invalid explicit include dir: " + dir);
 
                 if (relPath == "")
