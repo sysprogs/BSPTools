@@ -108,7 +108,7 @@ namespace stm32_bsp_generator
                 subregisterParser.AttachSubregisterDefinitions(parsedFile, peripherals);
 
                 List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
-                string coreFile = $@"../../../CoreReg/OutCorexx/{core}.xml";
+                string coreFile = $@"../../../CoreReg/OutCorexx/core_{core}.xml";
                 if (core != CortexCore.Invalid)
                 {
                     if (!File.Exists(coreFile))

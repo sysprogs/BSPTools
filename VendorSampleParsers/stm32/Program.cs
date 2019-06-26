@@ -24,7 +24,7 @@ namespace GeneratorSampleStm32
 
             foreach (var sf in lstDir)
             {
-                string fn = sf;
+                string fn = sf.Trim(' ');
                 fn = fn.Replace(@"/RVDS/", @"/GCC/");
                 fn = fn.Replace(@"\RVDS\", @"\GCC\");
 
@@ -118,6 +118,8 @@ namespace GeneratorSampleStm32
                     if (filePath.StartsWith(@"./") || filePath.StartsWith(@".\"))
                         filePath = pDirPrj + filePath.Substring(1);
                     if (filePath.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+                    if (filePath.EndsWith(".txt", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
                     if (filePath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase))
@@ -294,7 +296,7 @@ namespace GeneratorSampleStm32
             {
                 if (path?.StartsWith(Prefix1) == true)
                 {
-                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.3.0{path.Substring(Prefix1.Length)}";
+                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.4.0{path.Substring(Prefix1.Length)}";
                     if (!File.Exists(path) && !Directory.Exists(path))
                         throw new Exception("Missing " + path);
                 }

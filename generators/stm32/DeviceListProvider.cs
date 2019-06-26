@@ -184,6 +184,16 @@ namespace stm32_bsp_generator
 
                 return node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
             }
+            internal RawMemory[] LookupMemoriesTwoCore(string RPN,string Core, string RefName)
+            {
+                XmlElement node;
+                if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
+                {
+                    throw new Exception("Could not find memory layout for " + RefName);
+                }
+
+                return node.SelectNodes($"memories/C{Core}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
+            }
         }
 
         public class CubeProvider : IDeviceListProvider
@@ -199,7 +209,11 @@ namespace stm32_bsp_generator
                     MCU = parsedMCU;
                     Memories = db.LookupMemories(parsedMCU.RPN, parsedMCU.RefName);
                     if (Memories.Length < 1)
-                        throw new Exception("Could not locate memories for " + parsedMCU.Name);
+                    {
+                        if(parsedMCU.strCore!="")
+                            Memories = db.LookupMemoriesTwoCore(parsedMCU.RPN, parsedMCU.strCore, parsedMCU.RefName);
+                        if (Memories.Length < 1)
+                            throw new Exception("Could not locate memories for " + parsedMCU.Name);
 
                     for (int i = 0; i < Memories.Length; i++)
                     {
@@ -220,7 +234,9 @@ namespace stm32_bsp_generator
                     {
                         if (layout.Memories.FirstOrDefault(m => m.Name == "SRAM") == null)
                         {
-                            var ram1 = layout.Memories.First(m => m.Name == "RAM_D1");
+                            var ram1 = layout.Memories. FirstOrDefault( m => m.Name == "RAM_D1");
+                            if (ram1==null) 
+                                ram1 = layout.Memories.First(m => m.Name == "RAM_D2");
                             ram1.Name = "SRAM";
                         }
                     }
@@ -270,6 +286,7 @@ namespace stm32_bsp_generator
                 public readonly string RPN;     //Short name (e.g.STM32F031C4)
 
                 public CortexCore Core;
+                public string strCore;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
                 public int[] RAMs;
                 public int FLASH;
@@ -281,7 +298,7 @@ namespace stm32_bsp_generator
                     return doc.DocumentElement;
                 }
 
-                public ParsedMCU(XmlElement n, string familyDir, DeviceMemoryDatabase db)
+                public ParsedMCU(XmlElement n, string familyDir, DeviceMemoryDatabase db,int numcore = 0)
                 {
                     Name = n.GetAttribute("Name");
                     RefName = n.GetAttribute("RefName");
@@ -290,29 +307,50 @@ namespace stm32_bsp_generator
                     //var mcuDef = LoadMCUDefinition(familyDir, Name);
                     //var nsmgr2 = new XmlNamespaceManager(mcuDef.OwnerDocument.NameTable);
                     //nsmgr2.AddNamespace("mcu", "http://mcd.rou.st.com/modules.php?name=mcu");
+                    strCore = "";
 
                     var core = n.SelectSingleNode("Core").InnerText;
-                    switch (core)
+
+                    core = n.SelectNodes("Core")[numcore].InnerText;
+                   
+                        switch (core)
                     {
+                        case "Arm Cortex-M0":
                         case "ARM Cortex-M0":
                             Core = CortexCore.M0;
+                            strCore = "M0";
                             break;
+                        case "Arm Cortex-M0+":
                         case "ARM Cortex-M0+":
                             Core = CortexCore.M0Plus;
+                            strCore = "M0p";
                             break;
+                        case "Arm Cortex-M3":
                         case "ARM Cortex-M3":
                             Core = CortexCore.M3;
+                            strCore = "M3";
                             break;
+                        case "Arm Cortex-M4":
                         case "ARM Cortex-M4":
                             Core = CortexCore.M4;
+                            strCore = "M4";
                             break;
+                        case "Arm Cortex-M7":
+                        case "Arm Cortex-A7": //MP1 2 Core: A7, M4
+                        case "ARM Cortex-A7": //MP1 2 Core: A7, M4
                         case "ARM Cortex-M7":
                             Core = CortexCore.M7;
+                            strCore = "M7";
                             break;
                         default:
                             throw new Exception("Don't know how to map core: " + core);
                     }
-
+                    if (numcore > 0)
+                    {
+                        Name += "_" + strCore;
+                        //   RefName += "_" + strCore;
+                        RPN += "_" + strCore;
+                    }
                     Memories = db.LookupMemories(RPN, RefName);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
@@ -360,7 +398,15 @@ namespace stm32_bsp_generator
                 var db = new DeviceMemoryDatabase(bspBuilder.STM32CubeDir);
 
                 doc.Load(Path.Combine(familyDir, @"families.xml"));
-                var rawMCUs = doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>().Select(n => new ParsedMCU(n, familyDir, db)).ToArray();
+                List<ParsedMCU> lstMCUs= new List<ParsedMCU>();
+                foreach (var m in doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>())
+                {
+                    for (int icore = 0; icore < m.SelectNodes("Core").Count; icore++)
+                    
+                        lstMCUs.Add(new ParsedMCU(m, familyDir, db, icore));
+                    
+                }
+                var rawMCUs = lstMCUs.ToArray();
 
                 foreach (var grp in rawMCUs.GroupBy(m => m.RPN))
                 {
@@ -379,6 +425,9 @@ namespace stm32_bsp_generator
                         }
                     }
                 }
+                for (int i = 0; i < result.Count(); i++)
+                    if (result[i].Name.ToUpper().StartsWith("STM32MP1"))
+                    { result.RemoveAt(i); i--; }
 
                 return result;
             }
