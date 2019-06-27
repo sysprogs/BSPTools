@@ -24,6 +24,21 @@
 			</SampleConfiguration>
 		 </TestedSample> 
 		 <TestedSample>
+ 			<Name>LEDBlink (Low-Level API)</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<DeviceRegex>STM32F407VG|STM32F746NG|STM32F411RE|STM32H743ZI</DeviceRegex>
+			<ValidateRegisters>false</ValidateRegisters>
+			<TestDirSuffix>-LL</TestDirSuffix>
+			<SampleConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
+						<Value>GPIOA</Value>
+					</KeyValue>
+				</Entries>
+			</SampleConfiguration>
+		 </TestedSample> 
+		 <TestedSample>
  			<Name>STM32F207ZG-Nucleo HTTP Server</Name>
 			<SkipIfNotFound>true</SkipIfNotFound>
 			<DeviceRegex>STM32F207ZG</DeviceRegex>

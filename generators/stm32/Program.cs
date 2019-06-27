@@ -420,6 +420,9 @@ namespace stm32_bsp_generator
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
 
+                Dictionary<string, STM32SDKCollection.SDK> sdksByVariable = bspBuilder.SDKList.SDKs.ToDictionary(s => $"$$STM32:{s.Family}_DIR$$");
+                List <STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
+
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 {
                     var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
@@ -434,6 +437,8 @@ namespace stm32_bsp_generator
                         string baseFamName = fam.Name;
                         if (baseFamName.EndsWith("_M4"))
                             baseFamName = baseFamName.Substring(0, baseFamName.Length - 3);
+
+                        referencedSDKs.Add(sdksByVariable[baseDir]);
 
                         var dict = new Dictionary<string, string>
                         {
@@ -556,6 +561,7 @@ namespace stm32_bsp_generator
                     ConditionalFlags = allConditionalToolFlags.ToArray()
                 };
 
+                bspBuilder.SDKList.SDKs = referencedSDKs.ToArray();
                 XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
 
                 bspBuilder.ValidateBSP(bsp);

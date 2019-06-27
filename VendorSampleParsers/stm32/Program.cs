@@ -1,5 +1,6 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
+using stm32_bsp_generator;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -347,26 +348,24 @@ namespace GeneratorSampleStm32
                 vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
             }
 
+
             protected override ParsedVendorSamples ParseVendorSamples(string SDKdir, IVendorSampleFilter filter)
             {
-                string stm32RulesDir = @"..\..\..\..\generators\stm32\rules\families";
-
-                string[] familyDirs = Directory.GetFiles(stm32RulesDir, "stm32*.xml")
-                    .Select(f => ExtractFirstSubdir(XmlTools.LoadObject<FamilyDefinition>(f).PrimaryHeaderDir))
-                    .ToArray();
+                var SDKs = XmlTools.LoadObject<STM32SDKCollection>(Path.Combine(BSPDirectory, "SDKVersions.xml"));
 
                 List<VendorSample> allSamples = new List<VendorSample>();
 
-                foreach (var fam in familyDirs)
+                foreach (var sdk in SDKs.SDKs)
                 {
                     List<string> addInc = new List<string>();
-                    addInc.Add($@"{SDKdir}\{fam}\Drivers\CMSIS\Include");
-                    string topLevelDir = $@"{SDKdir}\{fam}";
+                    string topLevelDir = Directory.GetDirectories(Path.Combine(SDKdir, sdk.FolderName), "STM32Cube_*")[0];
+
+                    addInc.Add($@"{topLevelDir}\Drivers\CMSIS\Include");
 
                     int sampleCount = 0;
-                    Console.WriteLine($"Discovering samples for {fam}...");
+                    Console.WriteLine($"Discovering samples for {sdk.Family}...");
 
-                    foreach (var boardDir in Directory.GetDirectories(Path.Combine(SDKdir, fam, "Projects")))
+                    foreach (var boardDir in Directory.GetDirectories(Path.Combine(topLevelDir, "Projects")))
                     {
                         string boardName = Path.GetFileName(boardDir);
 
@@ -404,7 +403,7 @@ namespace GeneratorSampleStm32
                         }
                     }
 
-                    Console.WriteLine($"Found {sampleCount} samples for {fam}.");
+                    Console.WriteLine($"Found {sampleCount} samples for {sdk.Family}.");
                 }
 
                 return new ParsedVendorSamples { VendorSamples = allSamples.ToArray() };
