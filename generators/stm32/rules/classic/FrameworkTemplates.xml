@@ -3,14 +3,14 @@
 	<AdditionalFrameworks>
 		<Framework>
 			<!-- Warning: some parts of the HAL library depend on functions implemented in the LL library, hence HAL-based projects now must reference both HAL and LL frameworks. -->
-			<Name>$$STM32:FAMILY$$ HAL Library</Name>
-			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_hal</ID>
+			<Name>$$STM32:FAMILY_EX$$ HAL Library</Name>
+			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_hal</ID>
 			<ClassID>com.sysprogs.arm.stm32.hal</ClassID>
 			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_ll</string>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_ll</string>
 			</RequiredFrameworks>
 			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_stdperiph</string>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_stdperiph</string>
 			</IncompatibleFrameworks>
 			<ProjectFolderName>HAL</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
@@ -32,11 +32,11 @@
 			</CopyJobs>			
 		</Framework>
 		<Framework>
-			<Name>$$STM32:FAMILY$$ Low-level Driver Library</Name>
-			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_ll</ID>
+			<Name>$$STM32:FAMILY_EX$$ Low-level Driver Library</Name>
+			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_ll</ID>
 			<ClassID>com.sysprogs.arm.stm32.ll</ClassID>
 			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_stdperiph</string>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_stdperiph</string>
 			</IncompatibleFrameworks>
 			<ProjectFolderName>LL</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
@@ -68,11 +68,11 @@
 			</ConfigurableProperties>			
 		</Framework>
 		<Framework>
-			<Name>$$STM32:FAMILY$$ Default System Init File</Name>
-			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_systeminit</ID>
+			<Name>$$STM32:FAMILY_EX$$ Default System Init File</Name>
+			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_systeminit</ID>
 			<ClassID>com.sysprogs.arm.stm32.hal_systeminit</ClassID>
 			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY$$_hal</string>
+				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_hal</string>
 			</RequiredFrameworks>
 			<ProjectFolderName>SystemInit</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>

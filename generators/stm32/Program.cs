@@ -431,13 +431,14 @@ namespace stm32_bsp_generator
                         if (!baseDir.StartsWith("$$STM32:"))
                             throw new Exception("Invalid base directory. Please recheck the family definition.");
 
-                        string famName = fam.Name;
-                        if (famName.EndsWith("_M4"))
-                            famName = famName.Substring(0, famName.Length - 3);
+                        string baseFamName = fam.Name;
+                        if (baseFamName.EndsWith("_M4"))
+                            baseFamName = baseFamName.Substring(0, baseFamName.Length - 3);
 
                         var dict = new Dictionary<string, string>
                         {
-                            { "STM32:FAMILY" , famName },
+                            { "STM32:FAMILY_EX" , fam.Name },
+                            { "STM32:FAMILY" , baseFamName },
                             { "STM32:FAMILY_DIR" , baseDir },
                         };
 

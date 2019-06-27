@@ -8,7 +8,7 @@ int main(void)
 
 	//Warning: if the line below triggers an error, $$com.sysprogs.examples.ledblink.LEDPORT$$ is not connected to a AHB1 (Group 1) on this device.
 	//In this case, please search the stm32xxxx_ll_bus.h file for 'PERIPH_$$com.sysprogs.examples.ledblink.LEDPORT$$' to find out the correct
-	//macro name and use it to replace LL_AHB1_GRP1_PERIPH_$$com.sysprogs.examples.lBedblink.LEDPORT$$ below. 
+	//macro name and use it to replace LL_AHB1_GRP1_PERIPH_$$com.sysprogs.examples.lBedblink.LEDPORT$$ and LL_AHB1_GRP1_EnableClock() below. 
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_$$com.sysprogs.examples.ledblink.LEDPORT$$);
 	LL_GPIO_SetPinMode($$com.sysprogs.examples.ledblink.LEDPORT$$, LL_GPIO_PIN_$$com.sysprogs.examples.ledblink.LEDBIT$$, LL_GPIO_MODE_OUTPUT);
 	LL_GPIO_SetPinOutputType($$com.sysprogs.examples.ledblink.LEDPORT$$, LL_GPIO_PIN_$$com.sysprogs.examples.ledblink.LEDBIT$$, LL_GPIO_OUTPUT_PUSHPULL);
