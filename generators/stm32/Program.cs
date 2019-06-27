@@ -397,8 +397,11 @@ namespace stm32_bsp_generator
 
             if (args.Contains("/fetch"))
             {
+                //This will load the latest SDK list from the STM32CubeMX directory and will fetch/unpack them to our SDKRoot directory.
+                //Before running this, ensure the STM32CubeMX has the up-to-date SDK definitions (using the 'check for update' function), as
+                //otherwise the BSP generator will fetch the old versions.
+
                 SDKFetcher.FetchLatestSDKs(sdkRoot, cubeRoot);
-                return;
             }
 
             string rulesetName = "classic";
