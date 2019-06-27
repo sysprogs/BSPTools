@@ -1,4 +1,5 @@
 ^LEDBlink$
+^LEDBlink_LL$
 ^LEDBlink_STM
 ^FreeRTOS
 ^USB_CDC_

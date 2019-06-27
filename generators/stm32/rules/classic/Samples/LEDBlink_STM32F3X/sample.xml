@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>LEDBlink (StdPeriph)</Name>
-	<Description>This project demonstrates a blinking LED using the older StdPeriph library.</Description>
+    <Description>A classical blinking LED example using the deprecated StdPeriph API.</Description>
 	<MCUFilterRegex>STM32F3.*</MCUFilterRegex>
 	<ConfigurableProperties>
 	<PropertyGroups>
