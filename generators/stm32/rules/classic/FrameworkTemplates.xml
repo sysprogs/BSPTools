@@ -48,7 +48,7 @@
 					<ProjectInclusionMask>&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.ll_driver$$</PreprocessorMacros>
 					<AlreadyCopied>true</AlreadyCopied>
-					<AdditionalIncludeDirs>Inc;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Core/Include</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>Inc;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Core/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Include</AdditionalIncludeDirs>
 				</CopyJob>
 			</CopyJobs>			
 			<ConfigurableProperties>
