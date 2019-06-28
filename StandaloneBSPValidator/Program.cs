@@ -206,10 +206,10 @@ namespace StandaloneBSPValidator
                     {
                         sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
 
-                        if(!task.AllInputs[0].Contains("/nrf_soc.c") && (task.Arguments.Contains(" -DS1")))//nordic
-                          {
-                            task.Arguments  =  task.Arguments.Replace("/nrf_soc_nosd "," ");
-                          }
+                        if (!task.AllInputs[0].Contains("/nrf_soc.c") && (task.Arguments.Contains(" -DS1")))//nordic
+                        {
+                            task.Arguments = task.Arguments.Replace("/nrf_soc_nosd ", " ");
+                        }
 
                         if (task.Arguments.Length > 7000)
                         {
@@ -364,16 +364,16 @@ namespace StandaloneBSPValidator
                 if (idx >= 0)
                 {
                     flags.CFLAGS += ' ';
-                    flags.CFLAGS = flags.CFLAGS.Remove(idx, flags.CFLAGS.IndexOf(' ', idx)-idx);
+                    flags.CFLAGS = flags.CFLAGS.Remove(idx, flags.CFLAGS.IndexOf(' ', idx) - idx);
                 }
                 flags.CFLAGS += $" -std={vs.CLanguageStandard}";
-             }
+            }
             if (!string.IsNullOrEmpty(vs.CPPLanguageStandard))
             {
                 if (idx >= 0)
                 {
                     flags.CFLAGS += ' ';
-                    flags.CFLAGS = flags.CFLAGS.Remove(idx, flags.CFLAGS.IndexOf(' ', idx)-idx);
+                    flags.CFLAGS = flags.CFLAGS.Remove(idx, flags.CFLAGS.IndexOf(' ', idx) - idx);
                 }
                 flags.CXXFLAGS += $" -std={vs.CPPLanguageStandard}";
             }
@@ -521,8 +521,8 @@ namespace StandaloneBSPValidator
 
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
-          //  if(sampleObj.Sample.LinkerScript!=null)
-           //     flags.LinkerScript = sampleObj.Sample.LinkerScript;
+            //  if(sampleObj.Sample.LinkerScript!=null)
+            //     flags.LinkerScript = sampleObj.Sample.LinkerScript;
 
             if (!string.IsNullOrEmpty(configuredSample.Sample.Sample.LinkerScript))
                 flags.LinkerScript = VariableHelper.ExpandVariables(configuredSample.Sample.Sample.LinkerScript, bspDict, configuredSample.FrameworkParameters);
@@ -541,12 +541,12 @@ namespace StandaloneBSPValidator
             return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
         }
 
-        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu, 
+        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu,
             string mcuDir,
             bool validateRegisters,
-            LoadedRenamingRule[] renameRules, 
+            LoadedRenamingRule[] renameRules,
             GeneratedProject prj,
-            ToolFlags flags, 
+            ToolFlags flags,
             Dictionary<string, bool> sourceExtensions,
             string[] nonValidateReg,
             string[] UndefinedMacros,
@@ -595,7 +595,6 @@ namespace StandaloneBSPValidator
                         AllInputs = new[] { sfE },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
                         Arguments = $"-c $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o {obj}".Replace('\\', '/').Replace("/\"", "\\\""),
-
                     });
                 }
             }
@@ -675,8 +674,8 @@ namespace StandaloneBSPValidator
 
             if (!success)
             {
-                if(vendorSample !=  null)
-                     vendorSample.AllDependencies = null;
+                if (vendorSample != null)
+                    vendorSample.AllDependencies = null;
                 return new TestResult(TestBuildResult.Failed, Path.Combine(mcuDir, "build.log"));
             }
 

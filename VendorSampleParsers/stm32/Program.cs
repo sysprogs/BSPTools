@@ -60,7 +60,7 @@ namespace GeneratorSampleStm32
         static void AppendSamplePrefixFromPath(ref string sampleName, string dir)  //Otherwise we get ambiguous sample IDs
         {
             Match m;
-            if (sampleName == "Master" || sampleName == "Slave" || sampleName == "FreeRTOS" || sampleName == "LedToggling")
+            if (sampleName == "Master" || sampleName == "Slave" || sampleName == "FreeRTOS" || sampleName == "LedToggling" || sampleName == "HelloWorld")
                 sampleName = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(dir))) + "_" + sampleName;
             if ((m = rgExamplesSuffix.Match(dir)).Success)
                 sampleName += m.Groups[1].Value;
@@ -158,6 +158,13 @@ namespace GeneratorSampleStm32
                     if (m.Success && m.Groups[1].Value != "")
                     {
                         sample.PreprocessorMacros = m.Groups[1].Value.Replace("&gt;", ">").Replace("&lt;", "<").Split(',').Select(t => t.Trim()).Where(t => t != "").ToArray();
+
+                        for (int i = 0; i < sample.PreprocessorMacros.Length; i++)
+                            if (sample.PreprocessorMacros[i].Contains("\"<"))
+                            {
+                                //This is likely the MBEDTLS_CONFIG_FILE="<mbedtls_config.h>" macro. We need to remove the quotes, as VisualGDB will automatically escape it anyway.
+                                sample.PreprocessorMacros[i] = sample.PreprocessorMacros[i].Replace("\"<", "<").Replace(">\"", ">");
+                            }
                     }
                 }
 
@@ -263,7 +270,7 @@ namespace GeneratorSampleStm32
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/STM32[^/\\]+xx_HAL_Driver/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32{1}xx_HAL_Driver/{2}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/CMSIS/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/CMSIS_HAL/{2}"),
 
-                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Middlewares/ST/STM32_USB_(Host|Device)_Library/(.*)", "$$SYS:BSP_ROOT$$/STM32_USB_{2}_Library/{3}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Middlewares/ST/STM32_USB_(Host|Device)_Library/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32_USB_{2}_Library/{3}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Middlewares/Third_Party/(FreeRTOS)/(.*)", "$$SYS:BSP_ROOT$$/{2}/{3}"),
                 };
             }
@@ -291,13 +298,13 @@ namespace GeneratorSampleStm32
 
             const string Prefix1 = @"C:/QuickStep/STM32Cube_FW_H7_clean/Firmware";
 
-            Regex rgFWFolder = new Regex(@"^(\$\$SYS:VSAMPLE_DIR\$\$)/STM32Cube_FW_([^_]+)_V[^/]+/(.*)$", RegexOptions.IgnoreCase);
+            Regex rgFWFolder = new Regex(@"^(\$\$SYS:VSAMPLE_DIR\$\$)/[^/]+/STM32Cube_FW_([^_]+)_V[^/]+/(.*)$", RegexOptions.IgnoreCase);
 
             public override string MapPath(string path)
             {
                 if (path?.StartsWith(Prefix1) == true)
                 {
-                    path = $@"{_SampleDir.SourceDirectory}\STM32Cube_FW_H7_V1.4.0{path.Substring(Prefix1.Length)}";
+                    path = $@"{_SampleDir.SourceDirectory}/H7_1.4.0/STM32Cube_FW_H7_V1.4.0/{path.Substring(Prefix1.Length)}";
                     if (!File.Exists(path) && !Directory.Exists(path))
                         throw new Exception("Missing " + path);
                 }

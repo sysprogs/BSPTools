@@ -561,7 +561,7 @@ namespace stm32_bsp_generator
                     ConditionalFlags = allConditionalToolFlags.ToArray()
                 };
 
-                bspBuilder.SDKList.SDKs = referencedSDKs.ToArray();
+                bspBuilder.SDKList.SDKs = referencedSDKs.Distinct().ToArray();
                 XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
 
                 bspBuilder.ValidateBSP(bsp);
