@@ -216,6 +216,7 @@ namespace NordicVendorSampleParser
                 vs.SourceFiles = lstFileC.ToArray();
                 vs.DeviceID = File.ReadAllLines(Path.Combine(aCurDir, "Makefile")).Single(ln => ln.StartsWith("TARGETS")).Split('=')[1].Trim(' ').ToUpper();
                 vs.UserFriendlyName = aProjectName;
+                vs.NoImplicitCopy = true;
                 return vs;
             }
 
