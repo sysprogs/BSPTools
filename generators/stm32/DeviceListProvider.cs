@@ -174,7 +174,7 @@ namespace stm32_bsp_generator
                 }
             }
 
-            internal RawMemory[] LookupMemories(string RPN, string RefName)
+            internal RawMemory[] LookupMemories(string RPN, string RefName, out string[] linkerScripts)
             {
                 XmlElement node;
                 if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
@@ -182,9 +182,10 @@ namespace stm32_bsp_generator
                     throw new Exception("Could not find memory layout for " + RefName);
                 }
 
+                linkerScripts = node.SelectNodes("SW4STM32/linkers/linker").OfType<XmlElement>().Select(n => n.InnerText).ToArray();
                 return node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
             }
-            internal RawMemory[] LookupMemoriesTwoCore(string RPN,string Core, string RefName)
+            internal RawMemory[] LookupMemoriesTwoCore(string RPN, string Core, string RefName)
             {
                 XmlElement node;
                 if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
@@ -201,13 +202,14 @@ namespace stm32_bsp_generator
             public class STM32MCUBuilder : MCUBuilder
             {
                 private readonly ParsedMCU MCU;
+                public readonly string[] PredefinedLinkerScripts;
 
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
 
                 public STM32MCUBuilder(ParsedMCU parsedMCU, DeviceMemoryDatabase db)
                 {
                     MCU = parsedMCU;
-                    Memories = db.LookupMemories(parsedMCU.RPN, parsedMCU.RefName);
+                    Memories = db.LookupMemories(parsedMCU.RPN, parsedMCU.RefName, out PredefinedLinkerScripts);
                     if (Memories.Length < 1)
                     {
                         if (parsedMCU.strCore != "")
@@ -235,8 +237,8 @@ namespace stm32_bsp_generator
                     {
                         if (layout.Memories.FirstOrDefault(m => m.Name == "SRAM") == null)
                         {
-                            var ram1 = layout.Memories. FirstOrDefault( m => m.Name == "RAM_D1");
-                            if (ram1==null) 
+                            var ram1 = layout.Memories.FirstOrDefault(m => m.Name == "RAM_D1");
+                            if (ram1 == null)
                                 ram1 = layout.Memories.First(m => m.Name == "RAM_D2");
                             ram1.Name = "SRAM";
                         }
@@ -273,7 +275,7 @@ namespace stm32_bsp_generator
 
                     if (arg.Name == "FLASH")
                         mem.Flags |= MCUMemoryFlags.IsDefaultFLASH;
-                   // else
+                    // else
                     //    mem.LoadedFromMemory = "FLASH";
 
                     return mem;
@@ -285,6 +287,8 @@ namespace stm32_bsp_generator
                 public readonly string Name;    //Generic name, may contain brackets (e.g. STM32F031C(4-6)Tx)
                 public readonly string RefName; //Specialized name (e.g. STM32F031C4Tx)
                 public readonly string RPN;     //Short name (e.g.STM32F031C4)
+
+                public readonly string[] LinkerScripts;
 
                 public CortexCore Core;
                 public string strCore;
@@ -299,7 +303,7 @@ namespace stm32_bsp_generator
                     return doc.DocumentElement;
                 }
 
-                public ParsedMCU(XmlElement n, string familyDir, DeviceMemoryDatabase db,int numcore = 0)
+                public ParsedMCU(XmlElement n, string familyDir, DeviceMemoryDatabase db, int numcore = 0)
                 {
                     Name = n.GetAttribute("Name");
                     RefName = n.GetAttribute("RefName");
@@ -313,8 +317,8 @@ namespace stm32_bsp_generator
                     var core = n.SelectSingleNode("Core").InnerText;
 
                     core = n.SelectNodes("Core")[numcore].InnerText;
-                   
-                        switch (core)
+
+                    switch (core)
                     {
                         case "Arm Cortex-M0":
                         case "ARM Cortex-M0":
@@ -352,7 +356,7 @@ namespace stm32_bsp_generator
                         //   RefName += "_" + strCore;
                         RPN += "_" + strCore;
                     }
-                    Memories = db.LookupMemories(RPN, RefName);
+                    Memories = db.LookupMemories(RPN, RefName, out LinkerScripts);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
@@ -399,13 +403,13 @@ namespace stm32_bsp_generator
                 var db = new DeviceMemoryDatabase(bspBuilder.STM32CubeDir);
 
                 doc.Load(Path.Combine(familyDir, @"families.xml"));
-                List<ParsedMCU> lstMCUs= new List<ParsedMCU>();
+                List<ParsedMCU> lstMCUs = new List<ParsedMCU>();
                 foreach (var m in doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>())
                 {
                     for (int icore = 0; icore < m.SelectNodes("Core").Count; icore++)
-                    
+
                         lstMCUs.Add(new ParsedMCU(m, familyDir, db, icore));
-                    
+
                 }
                 var rawMCUs = lstMCUs.ToArray();
 

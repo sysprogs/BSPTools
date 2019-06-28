@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>FreeRTOS</Name>
+			<ID>com.sysprogs.arm.stm32.freertos</ID>
+			<ProjectFolderName>FreeRTOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/$$com.sysprogs.bspoptions.stm32.freertos.cmsis$$;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
+					<SimpleFileConditions>
+						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_1</string>
+						<string>Source\\portable\\MemMang\\heap_2.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_2</string>
+						<string>Source\\portable\\MemMang\\heap_3.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_3</string>
+						<string>Source\\portable\\MemMang\\heap_4.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_4</string>
+						<string>Source\\portable\\MemMang\\heap_5.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_5</string>
+						<string>Source\\portable\\GCC\\ARM_CM0\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM0</string>
+						<string>Source\\portable\\GCC\\ARM_CM3\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM3</string>
+						<string>Source\\portable\\GCC\\ARM_CM3_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM3_MPU</string>
+						<string>Source\\portable\\GCC\\ARM_CM4_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4_MPU</string>
+						<string>Source\\portable\\GCC\\ARM_CM4F\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM4F</string>
+						<string>Source\\portable\\GCC\\ARM_CM7\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7/r0p1</string>
+						<string>Source\\portable\\GCC\\ARM_CM7_MPU\\.*: $$com.sysprogs.bspoptions.stm32.freertos.portcore$$ == CM7_MPU/r0p1</string>
+						<string>Source\\CMSIS_RTOS\\.*: $$com.sysprogs.bspoptions.stm32.freertos.cmsis$$ == CMSIS_RTOS</string>
+						<string>Source\\CMSIS_RTOS_V2\\.*: $$com.sysprogs.bspoptions.stm32.freertos.cmsis$$ == CMSIS_RTOS_V2</string>
+					</SimpleFileConditions>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+						<OldLine>#ifndef __VFP_FP__</OldLine>
+						<NewLine>#if !defined(__VFP_FP__) || defined(__SOFTFP__)</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+						<OldLine>	#error This port can only be used when the project options are configured to enable hardware floating point support.</OldLine>
+						<NewLine>	#error This port can only be used when the project options are configured to enable hardware floating point support. Please switch to hardware FP or select a different FreeRTOS port on the Frameworks page of VisualGDB Project Properties.</NewLine>
+					</Patch>
+				</Patches>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+				    <Name>FreeRTOS</Name>
+					<UniqueID>com.sysprogs.bspoptions.stm32.freertos.</UniqueID>
+					<Properties>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>Heap Implementation</Name>
+						  <UniqueID>heap</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>heap_1</InternalValue><UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_2</InternalValue><UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_3</InternalValue><UserFriendlyName>Heap3 - use newlib malloc()/free()</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_4</InternalValue><UserFriendlyName>Heap4 - contiguous heap area</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>heap_5</InternalValue><UserFriendlyName>Heap5 - scattered heap area</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>3</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>CPU Core support</Name>
+						  <UniqueID>portcore</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>CM0</InternalValue><UserFriendlyName>ARM Cortex M0</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM3</InternalValue><UserFriendlyName>ARM Cortex M3 or M4 with Software FP</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM3_MPU</InternalValue><UserFriendlyName>ARM Cortex M3 with MPU</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM4_MPU</InternalValue><UserFriendlyName>ARM Cortex M4 with MPU</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM4F</InternalValue><UserFriendlyName>ARM Cortex M4 with Hardware FP</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM7/r0p1</InternalValue><UserFriendlyName>ARM Cortex M7</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CM7_MPU/r0p1</InternalValue><UserFriendlyName>ARM Cortex M7 with MPU</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>1</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+						<PropertyEntry xsi:type="Enumerated">
+						  <Name>CMSIS RTOS Interface Version</Name>
+						  <UniqueID>cmsis</UniqueID>
+						  <SuggestionList>
+							<Suggestion><InternalValue>CMSIS_RTOS</InternalValue><UserFriendlyName>v1</UserFriendlyName></Suggestion>
+							<Suggestion><InternalValue>CMSIS_RTOS_V2</InternalValue><UserFriendlyName>v2</UserFriendlyName></Suggestion>
+						  </SuggestionList>
+						  <DefaultEntryIndex>0</DefaultEntryIndex>
+						  <AllowFreeEntry>false</AllowFreeEntry>
+						</PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.rtos_type</Key>
+					<Value>com.sysprogs.freertos</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
+		</Framework>
+		<Framework>
+			<Name>STM32 Utilities</Name>
+			<ID>com.sysprogs.arm.stm32.utilities</ID>
+			<ProjectFolderName>Utilities</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WB_DIR$$\Utilities</SourceFolder>
+					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
+					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
+					<SimpleFileConditions>
+						<string>CPU\\*: $$com.sysprogs.bspoptions.stm32.utils.cpu$$ == 1</string>
+						<string>Fonts\\*: $$com.sysprogs.bspoptions.stm32.utils.fonts$$ == 1</string>
+						<string>Log\\*: $$com.sysprogs.bspoptions.stm32.utils.log$$ == 1</string>
+					</SimpleFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Name>STM32 Utilities</Name>
+					<UniqueID>com.sysprogs.bspoptions.stm32.utils.</UniqueID>
+					<Properties>
+						<PropertyEntry xsi:type="Boolean"><Name>CPU Usage Monitor (FreeRTOS)</Name><UniqueID>cpu</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>Fonts</Name><UniqueID>fonts</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
+						<PropertyEntry xsi:type="Boolean"><Name>LCD Logging Support</Name><UniqueID>log</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+	</AdditionalFrameworks>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>
+			<DestinationFolder>samples\LEDBlink</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
+			</AdditionalSources>
+		</SmartSample>
+	</SmartSamples>
+	<InitializationCodeInsertionPoints>
+		<CodeInsertionPoint>
+			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\}]+\n([ \t]+)(HAL_Init[ \t]*\([ \t]*\);)[ \t\r]*\n([ \t]+)(SystemClock_Config[ \t]*\([ \t]*\);)</Regex>
+			<InitGroupNumber>5</InitGroupNumber>
+			<InsertAfterGroup>true</InsertAfterGroup>
+			<IndentationGroupNumber>4</IndentationGroupNumber>
+		</CodeInsertionPoint>	
+		<CodeInsertionPoint>
+			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\}]+\n([ \t]+)(HAL_Init[ \t]*\([ \t]*\);)</Regex>
+			<InitGroupNumber>3</InitGroupNumber>
+			<IndentationGroupNumber>2</IndentationGroupNumber>
+			<InsertAfterGroup>true</InsertAfterGroup>
+		</CodeInsertionPoint>
+	</InitializationCodeInsertionPoints>
+</FamilyDefinition>

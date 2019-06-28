@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using BSPGenerationTools.Parsing;
 using Microsoft.Win32;
+using stm32_bsp_generator.Rulesets;
 
 namespace stm32_bsp_generator
 {
@@ -270,7 +271,7 @@ namespace stm32_bsp_generator
 
                 Regex rgLegacyDefineCheck = new Regex(@"#if( defined|def)[ \(]+(USE_LEGACY|USE_HAL_LEGACY)");
                 string legacyDefineName = null;
-                foreach(var line in File.ReadAllLines(Directory.GetFiles(srcDir + @"\..\Inc", "stm32*hal_def.h")[0]))
+                foreach (var line in File.ReadAllLines(Directory.GetFiles(srcDir + @"\..\Inc", "stm32*hal_def.h")[0]))
                 {
                     var m = rgLegacyDefineCheck.Match(line);
                     if (m.Success)
@@ -376,17 +377,10 @@ namespace stm32_bsp_generator
 
         }
 
-        class STM32FamilyBuilder : MCUFamilyBuilder
+        enum STM32Ruleset
         {
-            public STM32FamilyBuilder(BSPBuilder bspBuilder, FamilyDefinition definition) : base(bspBuilder, definition)
-            {
-            }
-
-            protected override void OnMissingSampleFile(MissingSampleFileArgs args)
-            {
-                return;
-                base.OnMissingSampleFile(args);
-            }
+            Classic,
+            STM32WB
         }
 
         static void Main(string[] args)
@@ -404,12 +398,15 @@ namespace stm32_bsp_generator
                 SDKFetcher.FetchLatestSDKs(sdkRoot, cubeRoot);
             }
 
-            string rulesetName = "classic";
+            string rulesetName = args.FirstOrDefault(a => a.StartsWith("/rules:"))?.Substring(7) ?? STM32Ruleset.Classic.ToString();
+            STM32Ruleset ruleset = Enum.GetValues(typeof(STM32Ruleset))
+                .OfType<STM32Ruleset>()
+                .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), rulesetName) == 0);
 
             ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
             IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
 
-            var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output", @"..\..\rules\" + rulesetName), cubeRoot);
+            var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output\" + rulesetName, @"..\..\rules\" + rulesetName), cubeRoot);
             Directory.CreateDirectory(@"..\..\Logs");
             using (var wr = new ParseReportWriter(@"..\..\Logs\registers.log"))
             {
@@ -419,9 +416,11 @@ namespace stm32_bsp_generator
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
+                if (!File.Exists(extraFrameworksFile) && File.Exists(Path.ChangeExtension(extraFrameworksFile, ".txt")))
+                    extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, File.ReadAllText(Path.ChangeExtension(extraFrameworksFile, ".txt")));
 
                 Dictionary<string, STM32SDKCollection.SDK> sdksByVariable = bspBuilder.SDKList.SDKs.ToDictionary(s => $"$$STM32:{s.Family}_DIR$$");
-                List <STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
+                List<STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
 
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 {
@@ -478,12 +477,21 @@ namespace stm32_bsp_generator
                     }
 
                     bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
-                    allFamilies.Add(new STM32FamilyBuilder(bspBuilder, fam));
+                    switch (ruleset)
+                    {
+                        case STM32Ruleset.STM32WB:
+                            allFamilies.Add(new STM32WBFamilyBuilder(bspBuilder, fam));
+                            break;
+                        case STM32Ruleset.Classic:
+                        default:
+                            allFamilies.Add(new STM32ClassicFamilyBuilder(bspBuilder, fam));
+                            break;
+                    }
                 }
 
                 var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
-                if (rejects.Count > 0)
+                if (rejects.Count > 0 && ruleset == STM32Ruleset.Classic)
                 {
                     Console.WriteLine("Globally unsupported MCUs:");
                     foreach (var r in rejects)
@@ -522,6 +530,7 @@ namespace stm32_bsp_generator
 
                     familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
                     fam.GenerateLinkerScripts(false);
+
                     foreach (var mcu in fam.MCUs)
                         mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null));
 
@@ -541,25 +550,17 @@ namespace stm32_bsp_generator
                 var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
                 exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
 
-                BoardSupportPackage bsp = new BoardSupportPackage
-                {
-                    PackageID = "com.sysprogs.arm.stm32",
-                    PackageDescription = "STM32 Devices",
-                    GNUTargetID = "arm-eabi",
-                    GeneratedMakFileName = "stm32.mak",
-                    MCUFamilies = familyDefinitions.ToArray(),
-                    SupportedMCUs = mcuDefinitions.ToArray(),
-                    Frameworks = frameworks.ToArray(),
-                    Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    PackageVersion = bspBuilder.SDKList.BSPVersion,
-                    IntelliSenseSetupFile = "stm32_compat.h",
-                    FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                    MinimumEngineVersion = "5.1",
-                    FirstCompatibleVersion = "2019.06",
-                    InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
-                    ConditionalFlags = allConditionalToolFlags.ToArray()
-                };
+                var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.Directories.RulesDir, "BSPTemplate.xml"));
+
+                bsp.MCUFamilies = familyDefinitions.ToArray();
+                bsp.SupportedMCUs = mcuDefinitions.ToArray();
+                bsp.Frameworks = frameworks.ToArray();
+                bsp.Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
+                bsp.TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
+                bsp.PackageVersion = bspBuilder.SDKList.BSPVersion;
+                bsp.FileConditions = bspBuilder.MatchedFileConditions.ToArray();
+                bsp.InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints;
+                bsp.ConditionalFlags = allConditionalToolFlags.ToArray();
 
                 bspBuilder.SDKList.SDKs = referencedSDKs.Distinct().ToArray();
                 XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));

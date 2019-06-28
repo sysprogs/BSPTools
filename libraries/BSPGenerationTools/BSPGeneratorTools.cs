@@ -373,7 +373,7 @@ namespace BSPGenerationTools
 
         public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables) => GenerateFamilyObject(defineConfigurationVariables ? CoreSpecificFlags.All : CoreSpecificFlags.None);
 
-        public MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate, bool allowExcludingStartupFiles = false)
+        public virtual MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate, bool allowExcludingStartupFiles = false)
         {
             var family = new MCUFamily { ID = Definition.Name };
 
@@ -588,7 +588,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public Dictionary<string, MemoryLayout> GenerateLinkerScripts(bool generalizeWherePossible)
+        public virtual Dictionary<string, MemoryLayout> GenerateLinkerScripts(bool generalizeWherePossible)
         {
             string ldsDirectory = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, "LinkerScripts");
             Directory.CreateDirectory(ldsDirectory);
