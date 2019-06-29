@@ -120,8 +120,6 @@ namespace GeneratorSampleStm32
                         filePath = pDirPrj + filePath.Substring(1);
                     if (filePath.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
                         continue;
-                    if (filePath.EndsWith(".txt", StringComparison.InvariantCultureIgnoreCase))
-                        continue;
 
                     if (filePath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -152,7 +150,7 @@ namespace GeneratorSampleStm32
                 {
                     m = Regex.Match(ln, "[ \t]*<IncludePath>(.*)</IncludePath>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
-                        sample.IncludeDirectories = m.Groups[1].Value.Split(';').Select(d => d.TrimEnd('/', '\\')).ToArray();
+                        sample.IncludeDirectories = m.Groups[1].Value.Split(';').Select(FixIncludePath).ToArray();
 
                     m = Regex.Match(ln, "[ \t]*<Define>(.*)</Define>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
@@ -229,6 +227,14 @@ namespace GeneratorSampleStm32
             }
 
             return aLstVSampleOut;
+        }
+
+        private static string FixIncludePath(string path)
+        {
+            path = path.TrimEnd('/', '\\');
+            if (path.StartsWith("/../"))
+                path = path.Substring(1);
+            return path;
         }
 
         static string ExtractFirstSubdir(string dir) => dir.Split('\\')[1];
@@ -334,8 +340,8 @@ namespace GeneratorSampleStm32
 
         class STM32VendorSampleParser : VendorSampleParser
         {
-            public STM32VendorSampleParser()
-                : base(@"..\..\generators\stm32\output", "STM32 CubeMX Samples")
+            public STM32VendorSampleParser(string ruleset)
+                : base(@"..\..\generators\stm32\output\" + ruleset, "STM32 CubeMX Samples", ruleset)
             {
             }
 
@@ -417,6 +423,19 @@ namespace GeneratorSampleStm32
             }
         }
 
-        static void Main(string[] args) => new STM32VendorSampleParser().Run(args);
+        static void Main(string[] args)
+        {
+            List<string> regularArgs = new List<string>();
+            string ruleset = "classic";
+            foreach (var arg in args)
+            {
+                if (arg.StartsWith("/rules:"))
+                    ruleset = arg.Substring(7);
+                else
+                    regularArgs.Add(arg);
+            }
+
+            new STM32VendorSampleParser(ruleset).Run(regularArgs.ToArray());
+        }
     }
 }
