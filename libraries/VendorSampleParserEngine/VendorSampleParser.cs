@@ -29,7 +29,7 @@ namespace VendorSampleParserEngine
 
         protected readonly RegistryKey _SettingsKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPTools\VendorSampleParsers");
 
-        protected VendorSampleParser(string testedBSPDirectory, string sampleCatalogName)
+        protected VendorSampleParser(string testedBSPDirectory, string sampleCatalogName, string subdir = null)
         {
             VendorSampleCatalogName = sampleCatalogName;
 
@@ -41,6 +41,13 @@ namespace VendorSampleParserEngine
             BSPDirectory = Path.GetFullPath(Path.Combine(baseDirectory, testedBSPDirectory));
             CacheDirectory = Path.Combine(baseDirectory, "Cache");
             var reportDirectory = Path.Combine(baseDirectory, "Reports");
+
+            if (!string.IsNullOrEmpty(subdir))
+            {
+                CacheDirectory = Path.Combine(CacheDirectory, subdir);
+                reportDirectory = Path.Combine(reportDirectory, subdir);
+            }
+
             Directory.CreateDirectory(CacheDirectory);
             Directory.CreateDirectory(reportDirectory);
 

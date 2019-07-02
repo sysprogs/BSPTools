@@ -299,10 +299,28 @@ namespace BSPGenerationTools
             {
                 foreach (var str in SmartFileConditions)
                 {
+                    var grp = configurableProperties.PropertyGroups.FirstOrDefault();
+                    if (grp == null)
+                        configurableProperties.PropertyGroups.Insert(0, grp = new PropertyGroup { });
+
                     int idx = str.IndexOf('|');
                     string name = str.Substring(0, idx);
-                    string id = "com.sysprogs.bspoptions." + name.Replace(' ', '_');
+                    string idWithoutPrefix, idWithprefix;
+                    if (string.IsNullOrEmpty(grp.UniqueID))
+                        idWithoutPrefix = idWithprefix = "com.sysprogs.bspoptions." + name.Replace(' ', '_');
+                    else
+                    {
+                        idWithoutPrefix = name.Replace(' ', '_');
+                        idWithprefix = grp.UniqueID + idWithoutPrefix;
+                    }
                     string[] values = str.Substring(idx + 1).Split(';');
+
+                    bool defaultOn = true;
+                    if (name.StartsWith("-"))
+                    {
+                        defaultOn = false;
+                        name = name.Substring(1);
+                    }
 
                     PropertyEntry entry;
                     if (values.Length == 1)
@@ -321,9 +339,9 @@ namespace BSPGenerationTools
                             value = val.Substring(idx + 2);
                         }
 
-                        allConditions.Add($"{regex}: $${id}$$ == {value}");
+                        allConditions.Add($"{regex}: $${idWithprefix}$$ == {value}");
 
-                        entry = new PropertyEntry.Boolean { ValueForTrue = value, Name = name, UniqueID = id, DefaultValue = true };
+                        entry = new PropertyEntry.Boolean { ValueForTrue = value, Name = name, UniqueID = idWithoutPrefix, DefaultValue = defaultOn };
                     }
                     else
                     {
@@ -334,19 +352,16 @@ namespace BSPGenerationTools
                             idx = val.IndexOf("=>");
                             string regex = val.Substring(0, idx);
                             string value = val.Substring(idx + 2);
-                            allConditions.Add($"{regex}: $${id}$$ == {value}");
+                            if (regex != "")
+                                allConditions.Add($"{regex}: $${idWithprefix}$$ == {value}");
                             suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = value });
                         }
 
-                        entry = new PropertyEntry.Enumerated { Name = name, UniqueID = id, SuggestionList = suggestions.ToArray() };
+                        entry = new PropertyEntry.Enumerated { Name = name, UniqueID = idWithoutPrefix, SuggestionList = suggestions.ToArray() };
                     }
 
                     if (configurableProperties?.PropertyGroups == null)
                         configurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
-
-                    var grp = configurableProperties.PropertyGroups.FirstOrDefault(g => g.Name == null && g.UniqueID == null);
-                    if (grp == null)
-                        configurableProperties.PropertyGroups.Insert(0, grp = new PropertyGroup());
 
                     grp.Properties.Add(entry);
                 }
