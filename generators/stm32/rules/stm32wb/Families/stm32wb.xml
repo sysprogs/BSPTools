@@ -196,6 +196,13 @@
 			<SourceFolder>$$STM32:WB_DIR$$\Projects\P-NUCLEO-WB55.Nucleo\Applications\BLE\BLE_HeartRate</SourceFolder>
 			<DestinationFolder>Samples/Nucleo/BLE_HeartRate</DestinationFolder>
 			<CopyFilters>-Binary\*;-EWARM\*;-MDK-ARM\*;-SW4STM32\*;*</CopyFilters>
+			<Patches>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>Core\Inc\app_conf.h</FilePath>
+					<OldLine>#define CFG_DEBUGGER_SUPPORTED    0</OldLine>
+					<NewLine>#define CFG_DEBUGGER_SUPPORTED    1</NewLine>
+				</Patch>					
+			</Patches>
 			<EmbeddedSample>
 				<Name>Heart Rate Service Demo</Name>
 				<Description>A basic HRS service demo for the STM32Nucleo board</Description>
