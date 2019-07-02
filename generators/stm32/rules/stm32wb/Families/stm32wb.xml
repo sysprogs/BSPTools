@@ -16,7 +16,6 @@
 	</Subfamilies>
 	<CompilationFlags>
 	<PreprocessorMacros>
-		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
 	</PreprocessorMacros>
 			<IncludeDirectories>
 			<string>.</string>
