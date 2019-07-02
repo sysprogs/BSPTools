@@ -305,6 +305,14 @@ namespace BSPGenerationTools
 
                     int idx = str.IndexOf('|');
                     string name = str.Substring(0, idx);
+
+                    bool defaultOn = true;
+                    if (name.StartsWith("-"))
+                    {
+                        defaultOn = false;
+                        name = name.Substring(1);
+                    }
+
                     string idWithoutPrefix, idWithprefix;
                     if (string.IsNullOrEmpty(grp.UniqueID))
                         idWithoutPrefix = idWithprefix = "com.sysprogs.bspoptions." + name.Replace(' ', '_');
@@ -315,12 +323,7 @@ namespace BSPGenerationTools
                     }
                     string[] values = str.Substring(idx + 1).Split(';');
 
-                    bool defaultOn = true;
-                    if (name.StartsWith("-"))
-                    {
-                        defaultOn = false;
-                        name = name.Substring(1);
-                    }
+          
 
                     PropertyEntry entry;
                     if (values.Length == 1)

@@ -34,7 +34,7 @@
 	<AdditionalFrameworks>
 		<Framework>
 			<Name>Bluetooth LE Support</Name>
-			<ID>com.sysprogs.arm.stm32.ble</ID>
+			<ID>com.sysprogs.arm.stm32.ble.core</ID>
 			<ProjectFolderName>BLE</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<RequiredFrameworks>
@@ -83,7 +83,7 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.hal</string>
-				<string>com.sysprogs.arm.stm32.ble</string>
+				<string>com.sysprogs.arm.stm32.ble.core</string>
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
@@ -158,8 +158,129 @@
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
+		<Framework>
+			<Name>OpenThread IoT Library</Name>
+			<ID>com.sysprogs.arm.stm32.openthread</ID>
+			<ProjectFolderName>OpenThread</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<PreprocessorMacros>OPENTHREAD_CONFIG_FILE=$$com.sysprogs.bspoptions.stm32.openthread_config_file$$</PreprocessorMacros>				
+					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN\thread</SourceFolder>
+					<TargetFolder>STM32_WPAN/thread</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>*</FilesToCopy>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<CollapsedByDefault>false</CollapsedByDefault>
+					<Properties>
+					  <PropertyEntry xsi:type="String">
+						<Name>OpenThread Configuration File Name</Name>
+						<UniqueID>com.sysprogs.bspoptions.stm32.openthread_config_file</UniqueID>
+						<DefaultValue>&lt;openthread_api_config_ftd.h&gt;</DefaultValue>
+					  </PropertyEntry>
+					</Properties>					
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>	
+			</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$STM32:WB_DIR$$\Projects\P-NUCLEO-WB55.Nucleo\Applications\BLE\BLE_HeartRate</SourceFolder>
+			<DestinationFolder>Samples/Nucleo/BLE_HeartRate</DestinationFolder>
+			<CopyFilters>-Binary\*;-EWARM\*;-MDK-ARM\*;-SW4STM32\*;*</CopyFilters>
+			<EmbeddedSample>
+				<Name>Heart Rate Service Demo</Name>
+				<Description>A basic HRS service demo for the STM32Nucleo board</Description>
+				<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+				<AdditionalIncludeDirectories>
+					<string>Core/Inc</string>
+					<string>STM32_WPAN/App</string>
+				</AdditionalIncludeDirectories>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.ble.core</string>
+					<string>com.sysprogs.arm.stm32.ble.thread</string>
+					<string>com.sysprogs.arm.stm32.stm32bsp</string>
+					<string>com.sysprogs.arm.stm32.ble_utilities</string>
+					<string>com.sysprogs.arm.stm32.openthread</string>
+					<string>com.sysprogs.arm.stm32.hal</string>
+					<string>com.sysprogs.arm.stm32.ll</string>
+				</RequiredFrameworks>
+				<DefaultConfiguration>
+					<Entries>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Blood_Pressure_Service</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Cable_Replacement_Service_(ST)</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Device_Information_Service</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.End_Device_Service_(ST)</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Human_Interface_Device_Service</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Heart_Rate_Service</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Health_Thermometer_Service</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Immediate_Alert_Service</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Link_Loss_Service</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Mesh</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.OTA_Service_(ST)</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.Peer-to-Peer_Service_(ST)</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.TX_Power_Service</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.Virtual_COM_Port_Support</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.Board_Type</Key>
+						<Value>NUCLEO-WB55</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.Adafruit_Shield_Support</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.External_Components</Key>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.openthread_config_file</Key>
+						<Value>&lt;openthread_api_config_ftd.h&gt;</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ll_driver</Key>
+						<Value />
+					  </KeyValue>
+					</Entries>
+				</DefaultConfiguration>
+			</EmbeddedSample>
+		</SmartSample>
 	</SmartSamples>
       <AdditionalSystemVars>
         <SysVarEntry>
