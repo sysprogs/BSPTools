@@ -90,10 +90,10 @@
 						<!-- '-' in front of the name means 'disabled by default' -->
 						<string>-Virtual COM Port Support[vcp]|vcp\\.*</string>
 						<string>-OpenThread Support[openthread]|tl\\tl_thread_hci\.(c|h)</string>
-						<string>-SHCI command support[shci]|shci\\.*</string>
-						<string>-LHCI command support[lhci]|lhci\\.*</string>
-						<string>-SHCI_TL command support[shci_tl]|tl\\shci_tl.*</string>
-						<string>-HCI_TL command support[hci_tl]|tl\\hci_tl.*</string>
+						<string>SHCI command support[shci]|shci\\.*</string>
+						<string>LHCI command support[lhci]|lhci\\.*</string>
+						<string>SHCI_TL command support[shci_tl]|tl\\shci_tl.*</string>
+						<string>HCI_TL command support[hci_tl]|tl\\hci_tl.*</string>
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
@@ -197,81 +197,113 @@ P-NUCLEO-WB55.USBDongle\\.*=>NUCLEO-WB55 (USB Dongle)[dongle]
 					<string>Core/Inc</string>
 					<string>STM32_WPAN/App</string>
 				</AdditionalIncludeDirectories>
-				<RequiredFrameworks>
-					<string>com.sysprogs.arm.stm32.ble.core</string>
-					<string>com.sysprogs.arm.stm32.ble.thread</string>
+				  <RequiredFrameworks>
 					<string>com.sysprogs.arm.stm32.stm32bsp</string>
-					<string>com.sysprogs.arm.stm32.ble_utilities</string>
-					<string>com.sysprogs.arm.stm32.openthread</string>
 					<string>com.sysprogs.arm.stm32.hal</string>
-					<string>com.sysprogs.arm.stm32.ll</string>
-				</RequiredFrameworks>
-				<DefaultConfiguration>
+					<string>com.sysprogs.arm.stm32.ble.core</string>
+					<string>com.sysprogs.arm.stm32.ble_utilities</string>
+					<string>com.sysprogs.arm.stm32.ble.thread</string>
+				  </RequiredFrameworks>
+				  <DefaultConfiguration>
 					<Entries>
 					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Blood_Pressure_Service</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Cable_Replacement_Service_(ST)</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Device_Information_Service</Key>
-						<Value>1</Value>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.End_Device_Service_(ST)</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Human_Interface_Device_Service</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Heart_Rate_Service</Key>
-						<Value>1</Value>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Health_Thermometer_Service</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Immediate_Alert_Service</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Link_Loss_Service</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Mesh</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.OTA_Service_(ST)</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.Peer-to-Peer_Service_(ST)</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ble.TX_Power_Service</Key>
-					  </KeyValue>
-					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.thread_iface.Virtual_COM_Port_Support</Key>
-					  </KeyValue>
-					  <KeyValue>
 						<Key>com.sysprogs.bspoptions.stm32.board.Board_Type</Key>
-						<Value>NUCLEO-WB55</Value>
+						<Value>nucleo</Value>
 					  </KeyValue>
 					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.board.Adafruit_Shield_Support</Key>
+						<Key>com.sysprogs.bspoptions.stm32.ble.dis</Key>
+						<Value>1</Value>
 					  </KeyValue>
 					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.board.External_Components</Key>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.hci_tl</Key>
+						<Value>1</Value>
 					  </KeyValue>
 					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.openthread_config_file</Key>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hrs</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.wb_utils.scheduler</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.shci</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.shci_tl</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.openthread.config_file</Key>
 						<Value>&lt;openthread_api_config_ftd.h&gt;</Value>
 					  </KeyValue>
 					  <KeyValue>
-						<Key>com.sysprogs.bspoptions.stm32.ll_driver</Key>
+						<Key>com.sysprogs.bspoptions.stm32.board.Adafruit_Shield_Support</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.External_Components</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.bls</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.crs_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.eds_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hids</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hts</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.ias</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.lls</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.mesh</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.otas_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.p2p_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.tps</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.vcp</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.openthread</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.lhci</Key>
 						<Value />
 					  </KeyValue>
 					</Entries>
-				</DefaultConfiguration>
+				  </DefaultConfiguration>
 			</EmbeddedSample>
 		</SmartSample>
 	</SmartSamples>

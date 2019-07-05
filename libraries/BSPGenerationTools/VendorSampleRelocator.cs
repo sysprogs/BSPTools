@@ -221,7 +221,7 @@ namespace BSPGenerationTools
         protected virtual PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => null;
 
 
-        public void InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
+        public virtual Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
         {
             List<VendorSample> finalSamples = new List<VendorSample>();
 
@@ -324,6 +324,8 @@ namespace BSPGenerationTools
             {
                 XmlTools.SaveObjectToStream(finalDir, gs);
             }
+
+            return copiedFiles;
         }
     }
 }

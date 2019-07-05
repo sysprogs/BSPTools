@@ -285,6 +285,36 @@ namespace GeneratorSampleStm32
                 };
             }
 
+            public override Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
+            {
+                var copiedFiles = base.InsertVendorSamplesIntoBSP(dir, sampleList, bspDirectory);
+
+                Regex rgDebugger = new Regex("#define[ \t]+CFG_DEBUGGER_SUPPORTED[ \t]+(0)$");
+
+                foreach (var kv in copiedFiles)
+                {
+                    if (kv.Value.EndsWith("app_conf.h", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var lines = File.ReadAllLines(kv.Value);
+                        bool modified = false;
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            var m = rgDebugger.Match(lines[i]);
+                            if (m.Success)
+                            {
+                                lines[i] = lines[i].Substring(0, m.Groups[1].Index) + "1";
+                                modified = true;
+                            }
+                        }
+
+                        if (modified)
+                            File.WriteAllLines(kv.Value, lines);
+                    }
+                }
+
+                return copiedFiles;
+            }
+
             protected override void FilterPreprocessorMacros(ref string[] macros)
             {
                 base.FilterPreprocessorMacros(ref macros);

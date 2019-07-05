@@ -51,7 +51,8 @@ namespace BSPGenerationTools
             internal Dictionary<string, ConditionHandle> ConditionsPerFile = new Dictionary<string, ConditionHandle>();
             internal Dictionary<string, ConditionHandle> ConditionsPerMacro = new Dictionary<string, ConditionHandle>();
             internal Dictionary<string, string> FreeformMacros = new Dictionary<string, string>();
-
+            internal Dictionary<string, string> MinimalConfiguration = new Dictionary<string, string>();
+            internal List<string> IncludeDirs = new List<string>();
 
             public Handle(ReverseFileConditionBuilder reverseFileConditionBuilder, string id)
             {
@@ -69,11 +70,6 @@ namespace BSPGenerationTools
 
             public void AttachFile(string encodedPath, ConditionHandle conditionHandle = null)
             {
-                if (encodedPath.Contains("DispTools.c"))
-                {
-
-                }
-
                 if (ConditionsPerFile.ContainsKey(encodedPath))
                     _Builder.FlagIncomplete(ReverseFileConditionWarning.MultipleConditionsPerFile);
                 ConditionsPerFile[encodedPath] = conditionHandle;
@@ -95,6 +91,26 @@ namespace BSPGenerationTools
                     throw new Exception("Invalid macro regex");
 
                 FreeformMacros[macroRegex] = macroName;
+            }
+
+            public void AttachMinimalConfigurationValue(string key, string value)
+            {
+                MinimalConfiguration[key] = value;
+            }
+
+            internal void AttachIncludeDir(string mappedDir)
+            {
+                IncludeDirs.Add(mappedDir);
+            }
+
+            internal ReverseConditionTable.Framework ToFrameworkDefinition()
+            {
+                return new ReverseConditionTable.Framework
+                {
+                    ID = FrameworkID,
+                    IncludeDirs = IncludeDirs.ToArray(),
+                    MinimalConfiguration = MinimalConfiguration.Select(kv => new SysVarEntry { Key = kv.Key, Value = kv.Value }).ToArray()
+                };
             }
         }
 
@@ -122,7 +138,7 @@ namespace BSPGenerationTools
             Dictionary<ConditionHandle, int> conditionIndicies = new Dictionary<ConditionHandle, int>();
 
             var allFrameworkHandles = new[] { RootHandle }.Concat(_HandlesByFramework.Values).ToArray();
-            ReverseConditionTable result = new ReverseConditionTable { FrameworkIDs = allFrameworkHandles.Select(h => h.FrameworkID).ToArray() };
+            ReverseConditionTable result = new ReverseConditionTable { Frameworks = allFrameworkHandles.Select(h => h.ToFrameworkDefinition()).ToArray() };
 
             for (int i = 0; i < allFrameworkHandles.Length; i++)
             {
@@ -190,11 +206,18 @@ namespace BSPGenerationTools
             public int FrameworkIndex;
         }
 
+        public class Framework
+        {
+            public string ID;
+            public SysVarEntry[] MinimalConfiguration;
+            public string[] IncludeDirs;
+        }
+
         public List<Condition> ConditionTable = new List<Condition>();
         public List<ObjectEntry> FileTable = new List<ObjectEntry>();
         public List<ObjectEntry> MacroTable = new List<ObjectEntry>();
         public List<FreeFormMacroEntry> FreeFormMacros = new List<FreeFormMacroEntry>();
-        public string[] FrameworkIDs;
+        public Framework[] Frameworks;
     }
 
     [Flags]

@@ -354,6 +354,8 @@ namespace BSPGenerationTools
                         var item = def.Items[0];
                         allConditions.Add(new ConditionRecord($"{item.Key}: $${def.IDWithPrefix}$$ == {item.Value.ID}", reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Value.ID)));
 
+                        reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, "");
+
                         grp.Properties.Add(new PropertyEntry.Boolean
                         {
                             ValueForTrue = item.Value.ID,
@@ -365,12 +367,14 @@ namespace BSPGenerationTools
                     else
                     {
                         List<PropertyEntry.Enumerated.Suggestion> suggestions = new List<PropertyEntry.Enumerated.Suggestion>();
+                        int? emptyIndex = null;
 
                         foreach (var item in def.Items)
                         {
                             if (item.Key == "")
                             {
                                 // 'None' value. No conditions will trigger when this is selected.
+                                emptyIndex = suggestions.Count;
                             }
                             else
                             {
@@ -379,6 +383,8 @@ namespace BSPGenerationTools
 
                             suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = item.Value.ID, UserFriendlyName = item.Value.Name });
                         }
+
+                        reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, suggestions[emptyIndex ?? def.DefaultItemIndex].InternalValue);
 
                         grp.Properties.Add(new PropertyEntry.Enumerated
                         {
@@ -401,14 +407,17 @@ namespace BSPGenerationTools
 
                         if (item.Key.StartsWith("@"))
                         {
-                            grp.Properties.Add(new PropertyEntry.String
+                            var prop = new PropertyEntry.String
                             {
                                 Name = def.Name,
                                 UniqueID = def.IDWithoutPrefix,
                                 DefaultValue = item.Key.TrimStart('@'),
-                            });
+                            };
+
+                            grp.Properties.Add(prop);
 
                             reverseConditions?.AttachFreeformPreprocessorMacro(def.ExtraArguments[0], def.IDWithPrefix);
+                            reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, prop.DefaultValue);
                         }
                         else
                         {
@@ -422,6 +431,7 @@ namespace BSPGenerationTools
 
                             string expandedMacro = string.Format(def.ExtraArguments[0], item.Key);
                             reverseConditions?.AttachPreprocessorMacro(expandedMacro, reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Key));
+                            reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, "");
                         }
                     }
                     else
@@ -435,6 +445,8 @@ namespace BSPGenerationTools
                             string expandedMacro = string.Format(def.ExtraArguments[0], item.Key);
                             reverseConditions?.AttachPreprocessorMacro(expandedMacro, reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Key));
                         }
+
+                        reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, suggestions[def.DefaultItemIndex].InternalValue);
 
                         grp.Properties.Add(new PropertyEntry.Enumerated
                         {
@@ -648,7 +660,14 @@ namespace BSPGenerationTools
                 }
 
             if (AdditionalIncludeDirs != null)
-                includeDirs.AddRange(AdditionalIncludeDirs.Split(';').Select(d => MapIncludeDir(absTarget, subdir, d)));
+            {
+                foreach(var dir in AdditionalIncludeDirs.Split(';'))
+                {
+                    var mappedDir = MapIncludeDir(absTarget, subdir, dir);
+                    reverseConditions?.AttachIncludeDir(mappedDir);
+                    includeDirs.Add(mappedDir);
+                }
+            }
 
             return new ToolFlags
             {

@@ -11,7 +11,7 @@ namespace BSPGenerationTools
     {
         public class RequestedConfiguration
         {
-            public string FrameworkID;
+            public ReverseConditionTable.Framework Framework;
             public SysVarEntry[] Configuration;
         }
 
@@ -19,7 +19,7 @@ namespace BSPGenerationTools
         {
             public Regex Regex;
             public string VariableName;
-            public string FrameworkID;
+            public ReverseConditionTable.Framework Framework;
         }
 
         readonly Dictionary<string, RequestedConfiguration> _ConfigurationByFile;
@@ -36,7 +36,7 @@ namespace BSPGenerationTools
             {
                 _FreeFormMacros.Add(new FreeFormMacro
                 {
-                    FrameworkID = table.FrameworkIDs[macro.FrameworkIndex],
+                    Framework = table.Frameworks[macro.FrameworkIndex],
                     Regex = new Regex(macro.Regex),
                     VariableName = macro.Value
                 });
@@ -48,7 +48,7 @@ namespace BSPGenerationTools
             Dictionary<string, RequestedConfiguration> result = new Dictionary<string, RequestedConfiguration>();
             foreach (var entry in list)
             {
-                var cfg = new RequestedConfiguration { FrameworkID = table.FrameworkIDs[entry.FrameworkIndex] };
+                var cfg = new RequestedConfiguration { Framework = table.Frameworks[entry.FrameworkIndex] };
                 if (entry.ConditionIndex != 0)
                     cfg.Configuration = table.ConditionTable[entry.ConditionIndex - 1].RequestedConfiguration;
 
@@ -83,11 +83,13 @@ namespace BSPGenerationTools
 
             MatchingFlags flags = MatchingFlags.None;
 
-            LocateAndRemoveMatchingEntries(sourceList, _ConfigurationByFile, requestedConfiguration, frameworks, ref flags);
-            LocateAndRemoveMatchingEntries(macroList, _ConfigurationByMacro, requestedConfiguration, frameworks, ref flags);
+            var frameworkObjects = new HashSet<ReverseConditionTable.Framework>();
 
-            LocateAndRemoveMatchingEntries(headerList, _ConfigurationByFile, requestedConfiguration, frameworks, ref flags, ObjectMatchingMode.MatchIfConfigurationMatches);
-            LocateAndRemoveMatchingEntries(dependencyList, _ConfigurationByFile, requestedConfiguration, frameworks, ref flags, ObjectMatchingMode.MatchIfConfigurationMatches);
+            LocateAndRemoveMatchingEntries(sourceList, _ConfigurationByFile, requestedConfiguration, frameworkObjects, ref flags);
+            LocateAndRemoveMatchingEntries(macroList, _ConfigurationByMacro, requestedConfiguration, frameworkObjects, ref flags);
+
+            LocateAndRemoveMatchingEntries(headerList, _ConfigurationByFile, requestedConfiguration, frameworkObjects, ref flags, ObjectMatchingMode.MatchIfConfigurationMatches);
+            LocateAndRemoveMatchingEntries(dependencyList, _ConfigurationByFile, requestedConfiguration, frameworkObjects, ref flags, ObjectMatchingMode.MatchIfConfigurationMatches);
 
             for (int i = 0; i < macroList.Count; i++)
             {
@@ -122,6 +124,18 @@ namespace BSPGenerationTools
                 preprocesorMacros = macroList.ToArray();
                 includeDirs = includeList.ToArray();
 
+                foreach(var fwObj in frameworkObjects)
+                {
+                    frameworks.Add(fwObj.ID);
+                    foreach(var kv in fwObj.MinimalConfiguration ?? new SysVarEntry[0])
+                    {
+                        //Unless a configuration value was explicitly detected from the macros/files, set it to 'disabled' (that might be different from the GUI default).
+                        //This ensures that each vendor sample excludes the conditional items that were present in the original vendor sample, even if they are enabled by default.
+                        if (!requestedConfiguration.ContainsKey(kv.Key))
+                            requestedConfiguration[kv.Key] = kv.Value;
+                    }
+                }
+
                 var dependencySet = new HashSet<string>();
                 foreach (var dep in dependencyList)
                     dependencySet.Add(dep);
@@ -133,7 +147,7 @@ namespace BSPGenerationTools
         static void LocateAndRemoveMatchingEntries(List<string> items,
             Dictionary<string, RequestedConfiguration> rules,
             Dictionary<string, string> requestedConfiguration,
-            HashSet<string> frameworks,
+            HashSet<ReverseConditionTable.Framework> frameworks,
             ref MatchingFlags flags,
             ObjectMatchingMode mode = ObjectMatchingMode.MatchAndUpdateConfiguration)
         {
@@ -144,18 +158,18 @@ namespace BSPGenerationTools
 
                 flags |= MatchingFlags.FoundItems;
 
-                if (rule.FrameworkID != null)
+                if (rule.Framework != null)
                 {
                     if (mode == ObjectMatchingMode.MatchIfConfigurationMatches)
                     {
                         //We are matching the secondary objects (e.g. headers). 
                         //If the framework (and configuration) providing them is already pulled, just remove the file from the list.
                         //If not, don't remove it and don't pull the framework.
-                        if (!frameworks.Contains(rule.FrameworkID))
+                        if (!frameworks.Contains(rule.Framework))
                             continue;
                     }
                     else
-                        frameworks.Add(rule.FrameworkID);
+                        frameworks.Add(rule.Framework);
                 }
 
                 bool skip = false;
