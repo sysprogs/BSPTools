@@ -136,6 +136,8 @@ namespace BSPGenerationTools
 
     public abstract class BSPBuilder
     {
+        public readonly ReverseFileConditionBuilder ReverseFileConditions = new ReverseFileConditionBuilder();
+
         public LinkerScriptTemplate LDSTemplate;
         public readonly string BSPRoot;
         public string ShortName;
@@ -562,7 +564,7 @@ namespace BSPGenerationTools
         {
             if (Definition.CoreFramework != null)
                 foreach (var job in Definition.CoreFramework.CopyJobs)
-                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties));
+                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties, BSP.ReverseFileConditions.RootHandle));
         }
 
         class MemoryComparer : IEqualityComparer<Memory>
@@ -685,7 +687,7 @@ namespace BSPGenerationTools
 
                     ToolFlags flags = new ToolFlags();
                     foreach (var job in fw.CopyJobs)
-                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties));
+                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties, BSP.ReverseFileConditions.GetHandleForFramework(fw)));
 
                     fwDef.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
                     fwDef.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();

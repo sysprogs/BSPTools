@@ -125,7 +125,11 @@
 					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
 					<SmartFileConditions>
 						<!-- '-' in front of the name means 'disabled by default' -->
-						<string>Board Type|=>None;P-NUCLEO-WB55.Nucleo\\.*=>NUCLEO-WB55;P-NUCLEO-WB55.USBDongle\\.*=>NUCLEO-WB55 (USB Dongle)</string>
+						<string>Board Type|
+=>None;
+P-NUCLEO-WB55.Nucleo\\.*=>NUCLEO-WB55[nucleo];
+P-NUCLEO-WB55.USBDongle\\.*=>NUCLEO-WB55 (USB Dongle)[dongle]
+						</string>
 						<string>-Adafruit Shield Support|Adafruit_Shield\\.*</string>
 						<string>-External Components|Components\\.*</string>
 					</SmartFileConditions>

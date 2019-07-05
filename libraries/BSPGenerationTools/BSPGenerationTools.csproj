@@ -46,6 +46,7 @@
     <Compile Include="Parsing\ParseReportWriter.cs" />
     <Compile Include="Parsing\SimpleTokenReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReverseFileConditionBuilder.cs" />
     <Compile Include="SourceCopyTools.cs" />
     <Compile Include="StartupFileGenerator.cs" />
     <Compile Include="SVDParser.cs" />

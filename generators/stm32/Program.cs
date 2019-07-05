@@ -567,6 +567,8 @@ namespace stm32_bsp_generator
 
                 bspBuilder.ValidateBSP(bsp);
 
+                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, ruleset == STM32Ruleset.STM32WB);
+
                 File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
                 Console.WriteLine("Saving BSP...");
                 bspBuilder.Save(bsp, true);
