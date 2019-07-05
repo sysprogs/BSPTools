@@ -243,7 +243,8 @@ namespace GeneratorSampleStm32
         {
             private ConstructedVendorSampleDirectory _Directory;
 
-            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir)
+            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping)
+                : base(optionalConditionTableForFrameworkMapping)
             {
                 _Directory = dir;
                 /*
@@ -348,7 +349,15 @@ namespace GeneratorSampleStm32
             {
             }
 
-            protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir) => new STM32SampleRelocator(sampleDir);
+            protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir)
+            {
+                ReverseConditionTable table = null;
+                var conditionTableFile = Path.Combine(BSPDirectory, ReverseFileConditionBuilder.ReverseConditionListFileName + ".gz");
+                if (File.Exists(conditionTableFile))
+                    table = XmlTools.LoadObject<ReverseConditionTable>(conditionTableFile);
+
+                return new STM32SampleRelocator(sampleDir, table);
+            }
 
             static bool IsNonGCCFile(VendorSample vs, string fn)
             {

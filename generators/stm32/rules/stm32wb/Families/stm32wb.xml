@@ -95,7 +95,8 @@
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN</AdditionalIncludeDirs>
 					<SmartFileConditions>
 						<!-- '-' in front of the name means 'disabled by default' -->
-						<string>-Virtual COM Port Support|vcp\\.*</string>
+						<string>-Virtual COM Port Support[vcp]|vcp\\.*</string>
+						<string>-OpenThread Support[openthread]|tl\\tl_thread_hci\.(c|h)</string>
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>

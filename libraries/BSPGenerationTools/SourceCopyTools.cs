@@ -411,7 +411,18 @@ namespace BSPGenerationTools
                             reverseConditions?.AttachFreeformPreprocessorMacro(def.ExtraArguments[0], def.IDWithPrefix);
                         }
                         else
-                            throw new NotImplementedException("Exact syntax for this is to be defined");
+                        {
+                            grp.Properties.Add(new PropertyEntry.Boolean
+                            {
+                                Name = def.Name,
+                                UniqueID = def.IDWithoutPrefix,
+                                ValueForTrue = item.Key,
+                                DefaultValue = def.IsDefaultOn ?? true,
+                            });
+
+                            string expandedMacro = string.Format(def.ExtraArguments[0], item.Key);
+                            reverseConditions?.AttachPreprocessorMacro(expandedMacro, reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Key));
+                        }
                     }
                     else
                     {

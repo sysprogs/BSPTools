@@ -11,6 +11,14 @@ namespace BSPGenerationTools
 {
     public class VendorSampleRelocator
     {
+        public VendorSampleRelocator(ReverseConditionTable optionalConditionTableForFrameworkMapping = null)
+        {
+            if (optionalConditionTableForFrameworkMapping != null)
+                _ConditionMatcher = new ReverseFileConditionMatcher(optionalConditionTableForFrameworkMapping);
+        }
+
+        readonly ReverseFileConditionMatcher _ConditionMatcher;
+
         public static void ValidateVendorSampleDependencies(ConstructedVendorSampleDirectory dir, string toolchainDir)
         {
             using (var sw = File.CreateText(@"e:\temp\0.txt"))
@@ -83,7 +91,7 @@ namespace BSPGenerationTools
             }
         }
 
-        protected struct ParsedDependency
+        public struct ParsedDependency
         {
             public string OriginalFile;
             public string MappedFile;
@@ -150,7 +158,7 @@ namespace BSPGenerationTools
         protected AutoDetectedFramework[] AutoDetectedFrameworks;
         protected PathMapping[] AutoPathMappings;
 
-        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref ParsedDependency[] dependencies, VendorSampleConfiguration existingConfiguration)
+        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref string[] preprocessorMacros, ref ParsedDependency[] dependencies, VendorSampleConfiguration existingConfiguration)
         {
             List<AutoDetectedFramework> matchedFrameworks = new List<AutoDetectedFramework>();
 
@@ -183,13 +191,23 @@ namespace BSPGenerationTools
 
             dependencies = dependencies.Where(d => d.MappedFile != null).ToArray();
 
+            HashSet<string> extraFrameworks = new HashSet<string>();
+            Dictionary<string, string> extraConfiguration = new Dictionary<string, string>();
+
+            foreach (var fw in matchedFrameworks)
+                foreach (var kv in fw.Configuration)
+                    extraConfiguration[kv.Key] = kv.Value;
+            foreach (var kv in existingConfiguration.Configuration?.Entries ?? new PropertyDictionary2.KeyValue[0])
+                extraConfiguration[kv.Key] = kv.Value;
+
+            _ConditionMatcher?.DetectKnownFrameworksAndFilterPaths(ref sources, ref headers, ref includeDirs, ref preprocessorMacros, ref dependencies, extraFrameworks, extraConfiguration);
+
             return new VendorSampleConfiguration
             {
-                Frameworks = matchedFrameworks.Select(f => f.FrameworkID).Concat(existingConfiguration.Frameworks ?? new string[0]).Distinct().ToArray(),
-                Configuration = new PropertyDictionary2
+                Frameworks = matchedFrameworks.Select(f => f.FrameworkID).Concat(existingConfiguration.Frameworks ?? new string[0]).Concat(extraFrameworks).Distinct().ToArray(),
+                Configuration = new PropertyDictionary2()
                 {
-                    Entries = matchedFrameworks.SelectMany(f => f.Configuration).Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value })
-                                .Concat(existingConfiguration.Configuration?.Entries ?? new PropertyDictionary2.KeyValue[0]).ToArray()
+                    Entries = extraConfiguration.Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value}).ToArray()
                 },
                 MCUConfiguration = existingConfiguration.MCUConfiguration
             };
@@ -240,7 +258,7 @@ namespace BSPGenerationTools
 
                 s.LinkerScript = mapper.MapPath(s.LinkerScript);
 
-                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref deps, s.Configuration);
+                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref s.PreprocessorMacros, ref deps, s.Configuration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
                 const int ReasonableVendorSampleDirPathLengthForUsers = 120;
