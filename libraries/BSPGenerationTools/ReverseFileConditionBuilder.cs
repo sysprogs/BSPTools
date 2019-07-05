@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BSPGenerationTools
 {
@@ -38,7 +40,7 @@ namespace BSPGenerationTools
 
             public void AttachFile(string file) => _Handle.AttachFile(file, this);
 
-            public ReverseConditionTable.Condition ToConditionRecord() => new ReverseConditionTable.Condition { FrameworkID = _Handle.FrameworkID, RequestedConfiguration = _RequiredConfiguration };
+            public ReverseConditionTable.Condition ToConditionRecord() => new ReverseConditionTable.Condition { RequestedConfiguration = _RequiredConfiguration };
         }
 
         public class Handle
@@ -47,6 +49,9 @@ namespace BSPGenerationTools
             public readonly string FrameworkID;
 
             internal Dictionary<string, ConditionHandle> ConditionsPerFile = new Dictionary<string, ConditionHandle>();
+            internal Dictionary<string, ConditionHandle> ConditionsPerMacro = new Dictionary<string, ConditionHandle>();
+            internal Dictionary<string, string> FreeformMacros = new Dictionary<string, string>();
+
 
             public Handle(ReverseFileConditionBuilder reverseFileConditionBuilder, string id)
             {
@@ -67,6 +72,24 @@ namespace BSPGenerationTools
                 if (ConditionsPerFile.ContainsKey(encodedPath))
                     _Builder.FlagIncomplete(ReverseFileConditionWarning.MultipleConditionsPerFile);
                 ConditionsPerFile[encodedPath] = conditionHandle;
+            }
+
+            public void AttachPreprocessorMacro(string macro, ConditionHandle conditionHandle = null)
+            {
+                if (ConditionsPerMacro.ContainsKey(macro))
+                    _Builder.FlagIncomplete(ReverseFileConditionWarning.MultipleConditionsPerMacro);
+                ConditionsPerMacro[macro] = conditionHandle;
+            }
+
+            public void AttachFreeformPreprocessorMacro(string macro, string macroName)
+            {
+                var macroRegex = Regex.Escape(macro).Replace("\\{0}", "(.*)");
+                var regex = new Regex(macroRegex);
+                var m = regex.Match(string.Format(macro, "TEST"));
+                if (!m.Success || m.Groups[1].Value != "TEST")
+                    throw new Exception("Invalid macro regex");
+
+                FreeformMacros[macroRegex] = macroName;
             }
         }
 
@@ -90,24 +113,51 @@ namespace BSPGenerationTools
                     return;
             }
 
-            List<ReverseConditionTable.Condition> conditions = new List<ReverseConditionTable.Condition>();
-            List<ReverseConditionTable.FileEntry> files = new List<ReverseConditionTable.FileEntry>();
 
             Dictionary<ConditionHandle, int> conditionIndicies = new Dictionary<ConditionHandle, int>();
 
-            foreach (var handle in _HandlesByFramework.Values.Concat(new[] { RootHandle}))
-                foreach(var cond in handle.ConditionsPerFile)
-                {
-                    if (!conditionIndicies.TryGetValue(cond.Value, out var index))
-                    {
-                        conditionIndicies[cond.Value] = index = conditions.Count;
-                        conditions.Add(cond.Value.ToConditionRecord());
-                    }
+            var allFrameworkHandles = new[] { RootHandle }.Concat(_HandlesByFramework.Values).ToArray();
+            ReverseConditionTable result = new ReverseConditionTable { FrameworkIDs = allFrameworkHandles.Select(h => h.FrameworkID).ToArray() };
 
-                    files.Add(new ReverseConditionTable.FileEntry { Path = cond.Key, ConditionIndex = index });
+            for (int i = 0; i < allFrameworkHandles.Length; i++)
+            {
+                ConvertObjectConditions(allFrameworkHandles[i].ConditionsPerFile, result.ConditionTable, result.FileTable, conditionIndicies, i);
+                ConvertObjectConditions(allFrameworkHandles[i].ConditionsPerMacro, result.ConditionTable, result.MacroTable, conditionIndicies, i);
+
+                foreach(var kv in allFrameworkHandles[i].FreeformMacros)
+                {
+                    result.FreeFormMacros.Add(new ReverseConditionTable.FreeFormMacroEntry
+                    {
+                        Regex = kv.Key,
+                        Value = kv.Value,
+                        FrameworkIndex = i,
+                    });
+                }
+            }
+
+            using (var fs = File.Create(Path.Combine(outputDir, ReverseConditionListFileName + ".gz")))
+            using (var gs = new GZipStream(fs, CompressionMode.Compress))
+            {
+                XmlTools.SaveObjectToStream(result, gs);
+            }
+        }
+
+        private static void ConvertObjectConditions(Dictionary<string, ConditionHandle> conditionsToConvert, List<ReverseConditionTable.Condition> allConditions, List<ReverseConditionTable.ObjectEntry> result, Dictionary<ConditionHandle, int> conditionIndicies, int i)
+        {
+            foreach (var cond in conditionsToConvert)
+            {
+                int index = 0;
+                if (cond.Value != null)
+                {
+                    if (!conditionIndicies.TryGetValue(cond.Value, out index))
+                    {
+                        conditionIndicies[cond.Value] = index = allConditions.Count + 1;
+                        allConditions.Add(cond.Value.ToConditionRecord());
+                    }
                 }
 
-            XmlTools.SaveObject(new ReverseConditionTable { ConditionTable = conditions.ToArray(), FileTable = files.ToArray() }, Path.Combine(outputDir, ReverseConditionListFileName));
+                result.Add(new ReverseConditionTable.ObjectEntry { ObjectName = cond.Key, ConditionIndex = index, FrameworkIndex = i });
+            }
         }
 
         public const string ReverseConditionListFileName = "ReverseFileConditions.xml";
@@ -118,18 +168,28 @@ namespace BSPGenerationTools
     {
         public struct Condition
         {
-            public string FrameworkID;
             public SysVarEntry[] RequestedConfiguration;
         }
 
-        public struct FileEntry
+        public struct ObjectEntry
         {
-            public string Path;
+            public string ObjectName;
             public int ConditionIndex;
+            public int FrameworkIndex;
         }
 
-        public Condition[] ConditionTable;
-        public FileEntry[] FileTable;
+        public struct FreeFormMacroEntry
+        {
+            public string Regex;
+            public string Value;
+            public int FrameworkIndex;
+        }
+
+        public List<Condition> ConditionTable = new List<Condition>();
+        public List<ObjectEntry> FileTable = new List<ObjectEntry>();
+        public List<ObjectEntry> MacroTable = new List<ObjectEntry>();
+        public List<FreeFormMacroEntry> FreeFormMacros = new List<FreeFormMacroEntry>();
+        public string[] FrameworkIDs;
     }
 
     [Flags]
@@ -138,5 +198,6 @@ namespace BSPGenerationTools
         None = 0,
         HasRegularConditions = 1,
         MultipleConditionsPerFile = 2,
+        MultipleConditionsPerMacro = 4,
     }
 }

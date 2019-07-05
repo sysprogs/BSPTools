@@ -236,6 +236,8 @@ namespace BSPGenerationTools
 
         public string SmartPropertyGroup;   //Syntax: [Name]|[Prefix]
         public string[] SmartFileConditions; //Will be automatically translated to SimpleFileConditions & properties. Option name|list of (regex => option value). See CC3220 BSP for examples.
+        public string[] SmartPreprocessorMacros;
+
         public bool AlreadyCopied;  //The files have been copied (and patched) by some previous jobs. This job is defined only to add the files to the project.
         public string[] GuardedFiles;
         public string SymlinkResolutionMask;
@@ -306,31 +308,12 @@ namespace BSPGenerationTools
             }
         }
 
-        struct NameAndID
-        {
-            public string Name;
-            public string ID;
-
-            public NameAndID(string str)
-            {
-                int idx = str.IndexOf('[');
-                if (idx == -1)
-                {
-                    Name = str;
-                    ID = Name.Replace(' ', '_');
-                }
-                else
-                {
-                    Name = str.Substring(0, idx).Trim();
-                    ID = str.Substring(idx + 1).TrimEnd(']', ' ');
-                }
-            }
-        }
 
         public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties, ReverseFileConditionBuilder.Handle reverseConditions)
         {
             List<ParsedCondition> conditions = null;
             List<ConditionRecord> allConditions = new List<ConditionRecord>();
+            List<string> preprocessorMacros = new List<string>();
 
             if (SimpleFileConditions != null)
             {
@@ -338,7 +321,14 @@ namespace BSPGenerationTools
                 reverseConditions?.FlagIncomplete(ReverseFileConditionWarning.HasRegularConditions);
             }
 
-            if (SmartFileConditions != null)
+            if (!string.IsNullOrEmpty(PreprocessorMacros))
+            {
+                preprocessorMacros.AddRange(PreprocessorMacros.Split(';'));
+                foreach(var macro in preprocessorMacros)
+                    reverseConditions?.AttachPreprocessorMacro(macro, null);
+            }
+
+            if (SmartFileConditions != null || SmartPreprocessorMacros != null)
             {
                 PropertyGroup grp;
                 if (configurableProperties == null)
@@ -355,78 +345,94 @@ namespace BSPGenerationTools
                         configurableProperties.PropertyGroups.Insert(0, grp = new PropertyGroup { });
                 }
 
-                foreach (var str in SmartFileConditions)
+                foreach (var str in SmartFileConditions ?? new string[0])
                 {
-                    int idx = str.IndexOf('|');
+                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID);
 
-                    bool defaultOn = !str.StartsWith("-");
-                    NameAndID name = new NameAndID(str.Substring(0, idx).TrimStart('-'));
-
-                    string idWithoutPrefix, idWithPrefix;
-                    if (string.IsNullOrEmpty(grp.UniqueID))
-                        idWithoutPrefix = idWithPrefix = "com.sysprogs.bspoptions." + name.ID;
-                    else
+                    if (def.Items.Length == 1)
                     {
-                        idWithoutPrefix = name.ID;
-                        idWithPrefix = grp.UniqueID + idWithoutPrefix;
-                    }
-                    string[] values = str.Substring(idx + 1).Split(';');
+                        var item = def.Items[0];
+                        allConditions.Add(new ConditionRecord($"{item.Key}: $${def.IDWithPrefix}$$ == {item.Value.ID}", reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Value.ID)));
 
-                    PropertyEntry entry;
-                    if (values.Length == 1)
-                    {
-                        var val = values[0];
-                        string regex, value;
-                        idx = val.IndexOf("=>");
-                        if (idx == -1)
+                        grp.Properties.Add(new PropertyEntry.Boolean
                         {
-                            regex = val;
-                            value = "1";
-                        }
-                        else
-                        {
-                            regex = val.Substring(0, idx);
-                            value = val.Substring(idx + 2);
-                        }
-
-                        allConditions.Add(new ConditionRecord($"{regex}: $${idWithPrefix}$$ == {value}", reverseConditions?.CreateSimpleCondition(idWithPrefix, value)));
-
-                        entry = new PropertyEntry.Boolean { ValueForTrue = value, Name = name.Name, UniqueID = idWithoutPrefix, DefaultValue = defaultOn };
+                            ValueForTrue = item.Value.ID,
+                            Name = def.Name,
+                            UniqueID = def.IDWithoutPrefix,
+                            DefaultValue = def.IsDefaultOn != false
+                        });
                     }
                     else
                     {
                         List<PropertyEntry.Enumerated.Suggestion> suggestions = new List<PropertyEntry.Enumerated.Suggestion>();
-                        int defaultIndex = 0;
 
-                        foreach (var rawVal in values)
+                        foreach (var item in def.Items)
                         {
-                            string val = rawVal.Trim();
-                            idx = val.IndexOf("=>");
-                            string regex = val.Substring(0, idx);
-                            var value = new NameAndID(val.Substring(idx + 2));
-                            if (regex == "")
+                            if (item.Key == "")
                             {
                                 // 'None' value. No conditions will trigger when this is selected.
                             }
                             else
-                                allConditions.Add(new ConditionRecord($"{regex}: $${idWithPrefix}$$ == {value.ID}", reverseConditions?.CreateSimpleCondition(idWithPrefix, value.ID)));
-
-                            string suggestionName = value.Name;
-                            if (suggestionName.StartsWith("*"))
                             {
-                                suggestionName = suggestionName.TrimStart('*');
-                                defaultIndex = suggestions.Count;
+                                allConditions.Add(new ConditionRecord($"{item.Key}: $${def.IDWithPrefix}$$ == {item.Value.ID}", reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Value.ID)));
                             }
-                            suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = value.ID, UserFriendlyName = suggestionName });
+
+                            suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = item.Value.ID, UserFriendlyName = item.Value.Name });
                         }
 
-                        entry = new PropertyEntry.Enumerated { Name = name.Name, UniqueID = idWithoutPrefix, SuggestionList = suggestions.ToArray(), DefaultEntryIndex = defaultIndex };
+                        grp.Properties.Add(new PropertyEntry.Enumerated
+                        {
+                            Name = def.Name,
+                            UniqueID = def.IDWithoutPrefix,
+                            SuggestionList = suggestions.ToArray(),
+                            DefaultEntryIndex = def.DefaultItemIndex
+                        });
                     }
+                }
 
-                    if (configurableProperties?.PropertyGroups == null)
-                        configurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
+                foreach (var str in SmartPreprocessorMacros ?? new string[0])
+                {
+                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID, 1);
+                    preprocessorMacros.Add(string.Format(def.ExtraArguments[0], "$$" + def.IDWithPrefix + "$$"));
 
-                    grp.Properties.Add(entry);
+                    if (def.Items.Length == 1)
+                    {
+                        var item = def.Items[0];
+
+                        if (item.Key.StartsWith("@"))
+                        {
+                            grp.Properties.Add(new PropertyEntry.String
+                            {
+                                Name = def.Name,
+                                UniqueID = def.IDWithoutPrefix,
+                                DefaultValue = item.Key.TrimStart('@'),
+                            });
+
+                            reverseConditions?.AttachFreeformPreprocessorMacro(def.ExtraArguments[0], def.IDWithPrefix);
+                        }
+                        else
+                            throw new NotImplementedException("Exact syntax for this is to be defined");
+                    }
+                    else
+                    {
+                        List<PropertyEntry.Enumerated.Suggestion> suggestions = new List<PropertyEntry.Enumerated.Suggestion>();
+
+                        foreach (var item in def.Items)
+                        {
+                            suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = item.Key, UserFriendlyName = item.Value.Name });
+
+                            string expandedMacro = string.Format(def.ExtraArguments[0], item.Key);
+                            reverseConditions?.AttachPreprocessorMacro(expandedMacro, reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Key));
+                        }
+
+                        grp.Properties.Add(new PropertyEntry.Enumerated
+                        {
+                            Name = def.Name,
+                            UniqueID = def.IDWithoutPrefix,
+                            SuggestionList = suggestions.ToArray(),
+                            DefaultEntryIndex = def.DefaultItemIndex
+                        });
+                    }
                 }
             }
 
@@ -631,7 +637,7 @@ namespace BSPGenerationTools
 
             return new ToolFlags
             {
-                PreprocessorMacros = (PreprocessorMacros == null) ? null : PreprocessorMacros.Split(';'),
+                PreprocessorMacros = (preprocessorMacros.Count == 0) ? null : preprocessorMacros.ToArray(),
                 IncludeDirectories = includeDirs.ToArray()
             };
         }

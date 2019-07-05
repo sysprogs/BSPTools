@@ -23,12 +23,12 @@
 Source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing[heap_1];
 Source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation[heap_2];
 Source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()[heap_3];
-Source\\portable\\MemMang\\heap_4.c=>*Heap4 - contiguous heap area[heap_4];
+Source\\portable\\MemMang\\heap_4.c=>+Heap4 - contiguous heap area[heap_4];
 Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 						</string>
 						<string>CPU Core support[portcore]|
 Source\\portable\\GCC\\ARM_CM0\\.*=>ARM Cortex M0[CM0];
-Source\\portable\\GCC\\ARM_CM3\\.*=>*ARM Cortex M3 or M4 with Software FP[CM3];
+Source\\portable\\GCC\\ARM_CM3\\.*=>+ARM Cortex M3 or M4 with Software FP[CM3];
 Source\\portable\\GCC\\ARM_CM3_MPU\\.*=>ARM Cortex M3 with MPU[CM3_MPU];
 Source\\portable\\GCC\\ARM_CM4_MPU\\.*=>ARM Cortex M4 with MPU[CM4_MPU];
 Source\\portable\\GCC\\ARM_CM4F\\.*=>ARM Cortex M4 with Hardware FP[CM4F];
@@ -36,7 +36,7 @@ Source\\portable\\GCC\\ARM_CM7\\.*=>ARM Cortex M7[CM7/r0p1];
 Source\\portable\\GCC\\ARM_CM7_MPU\\.*=>ARM Cortex M7 with MPU[CM7_MPU/r0p1]
 						</string>
 						<string>CMSIS RTOS Interface Version[cmsis]|
-Source\\CMSIS_RTOS\\.*=>*v1[CMSIS_RTOS];				
+Source\\CMSIS_RTOS\\.*=>+v1[CMSIS_RTOS];				
 Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
 						</string>
 					</SmartFileConditions>

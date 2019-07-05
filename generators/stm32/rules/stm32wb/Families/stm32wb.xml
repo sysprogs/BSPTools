@@ -172,28 +172,17 @@ P-NUCLEO-WB55.USBDongle\\.*=>NUCLEO-WB55 (USB Dongle)[dongle]
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<PreprocessorMacros>OPENTHREAD_CONFIG_FILE=$$com.sysprogs.bspoptions.stm32.openthread_config_file$$</PreprocessorMacros>				
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.openthread.|OpenThread</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>OpenThread Configuration File Name[config_file]|OPENTHREAD_CONFIG_FILE={0}|@&lt;openthread_api_config_ftd.h&gt;</string>
+					</SmartPreprocessorMacros>
 					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN\thread</SourceFolder>
 					<TargetFolder>STM32_WPAN/thread</TargetFolder>
 					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>*</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<CollapsedByDefault>false</CollapsedByDefault>
-					<Properties>
-					  <PropertyEntry xsi:type="String">
-						<Name>OpenThread Configuration File Name</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.openthread_config_file</UniqueID>
-						<DefaultValue>&lt;openthread_api_config_ftd.h&gt;</DefaultValue>
-					  </PropertyEntry>
-					</Properties>					
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>	
-			</Framework>
+		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>

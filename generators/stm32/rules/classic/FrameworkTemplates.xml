@@ -101,15 +101,21 @@
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>Core/Inc;Class/$$com.sysprogs.bspoptions.stm32.usb.devclass$$/Inc</AdditionalIncludeDirs>
-					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
-					<SimpleFileConditions>
-						<string>Class\\AUDIO\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == AUDIO</string>
-						<string>Class\\CDC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == CDC</string>
-						<string>Class\\CustomHID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == CustomHID</string>
-						<string>Class\\DFU\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == DFU</string>
-						<string>Class\\HID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == HID</string>
-						<string>Class\\MSC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == MSC</string>
-					</SimpleFileConditions>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.usb.|USB Device</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>USB Device Class[devclass]|
+Class\\AUDIO\\.*=>Audio Device[AUDIO];
+Class\\CDC\\.*=>+Communications Device (CDC)[CDC];
+Class\\CustomHID\\.*=>Custom Human Interface Device (CustomHID)[CustomHID];
+Class\\DFU\\.*=>Device Firmware Update (DFU)[DFU];
+Class\\HID\\.*=>Human Interface Device (HID)[HID];
+Class\\MSC\\.*=>Mass Storage (MSC)[MSC];
+=>None[none]
+</string>
+					</SmartFileConditions>
+					<SmartPreprocessorMacros>
+						<string>USB Device Speed[speed]|USE_USB_{0}|FS=>USB 2.0 Full Speed;HS=>USB 2.0 High Speed</string>
+					</SmartPreprocessorMacros>
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>core\src\usbd_core.c</FilePath>
@@ -123,65 +129,7 @@
 					</Patches>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Properties>
-					    <PropertyEntry xsi:type="Enumerated">
-						<Name>USB Device Class</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.usb.devclass</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<SuggestionList>
-						  <Suggestion>
-							<UserFriendlyName>Audio Device</UserFriendlyName>
-							<InternalValue>AUDIO</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Communications Device (CDC)</UserFriendlyName>
-							<InternalValue>CDC</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Custom Human Interface Device (CustomHID)</UserFriendlyName>
-							<InternalValue>CustomHID</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Device Firmware Update (DFU)</UserFriendlyName>
-							<InternalValue>DFU</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Human Interface Device (HID)</UserFriendlyName>
-							<InternalValue>HID</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Mass Storage (MSC)</UserFriendlyName>
-							<InternalValue>MSC</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>None</UserFriendlyName>
-							<InternalValue>none</InternalValue>
-						  </Suggestion>
-						</SuggestionList>
-						<DefaultEntryIndex>1</DefaultEntryIndex>
-						<AllowFreeEntry>false</AllowFreeEntry>
-					  </PropertyEntry>
-						<PropertyEntry xsi:type="Enumerated">
-						  <Name>USB Device Speed</Name>
-						  <UniqueID>com.sysprogs.bspoptions.stm32.usb.speed</UniqueID>
-						  <Description>Specifies the USB peripheral (USB_FS vs USB_HS) used by the device</Description>
-						  <SuggestionList>
-							<Suggestion><InternalValue>FS</InternalValue><UserFriendlyName>USB 2.0 Full Speed</UserFriendlyName></Suggestion>
-							<Suggestion><InternalValue>HS</InternalValue><UserFriendlyName>USB 2.0 High Speed</UserFriendlyName></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>0</DefaultEntryIndex>
-						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
 		</Framework>
-
 		<Framework>
 			<Name>STM32 USB Host Library</Name>
 			<ID>com.sysprogs.arm.stm32.usbhost.$$STM32:FAMILY$$</ID>
