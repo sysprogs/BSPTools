@@ -564,7 +564,8 @@ namespace BSPGenerationTools
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
 
-                if (projectContents.IsMatch(f))
+                bool includedInProject = projectContents.IsMatch(f);
+                if (includedInProject)
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
 
                 bool foundCondition = false;
@@ -576,13 +577,16 @@ namespace BSPGenerationTools
                         {
                             bsp.MatchedFileConditions.Add(new FileCondition { ConditionToInclude = cond.Condition, FilePath = encodedPath });
                             cond.UseCount++;
-                            cond.ReverseConditionHandle?.AttachFile(encodedPath);
+
+                            if (includedInProject)
+                                cond.ReverseConditionHandle?.AttachFile(encodedPath);
+
                             foundCondition = true;
                             break;
                         }
                 }
 
-                if (!foundCondition)
+                if (!foundCondition && includedInProject)
                     reverseConditions?.AttachFile(encodedPath);
             }
 

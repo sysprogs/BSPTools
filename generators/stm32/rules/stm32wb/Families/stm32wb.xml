@@ -48,36 +48,28 @@
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN/ble</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.ble.|Bluetooth LE Services</SmartPropertyGroup>
 					<SmartFileConditions>
 						<!-- '-' in front of the name means 'disabled by default' -->
-						<string>-Blood Pressure Service|.*\\bls\.(h|c)</string>
-						<string>-Cable Replacement Service (ST)|.*\\crs_stm\.(h|c)</string>
-						<string>-Device Information Service|.*\\dis\.(h|c)</string>
-						<string>-End Device Service (ST)|.*\\eds_stm\.(h|c)</string>
-						<string>-Human Interface Device Service|.*\\hids\.(h|c)</string>
-						<string>-Heart Rate Service|.*\\hrs\.(h|c)</string>
-						<string>-Health Thermometer Service|.*\\hts\.(h|c)</string>
-						<string>-Immediate Alert Service|.*\\ias\.(h|c)</string>
-						<string>-Link Loss Service|.*\\lls\.(h|c)</string>
-						<string>-Mesh|.*\\mesh\.(h|c)</string>
-						<string>-OTA Service (ST)|.*\\otas_stm\.(h|c)</string>
-						<string>-Peer-to-Peer Service (ST)|.*\\p2p_stm\.(h|c)</string>
-						<string>-TX Power Service|.*\\tps\.(h|c)</string>
+						<string>-Blood Pressure Service[bls]|.*\\bls\.(h|c)</string>
+						<string>-Cable Replacement Service (ST)[crs_st]|.*\\crs_stm\.(h|c)</string>
+						<string>-Device Information Service[dis]|.*\\dis\.(h|c)</string>
+						<string>-End Device Service (ST)[eds_st]|.*\\eds_stm\.(h|c)</string>
+						<string>-Human Interface Device Service[hids]|.*\\hids\.(h|c)</string>
+						<string>-Heart Rate Service[hrs]|.*\\hrs\.(h|c)</string>
+						<string>-Health Thermometer Service[hts]|.*\\hts\.(h|c)</string>
+						<string>-Immediate Alert Service[ias]|.*\\ias\.(h|c)</string>
+						<string>-Link Loss Service[lls]|.*\\lls\.(h|c)</string>
+						<string>-Mesh[mesh]|.*\\mesh\.(h|c)</string>
+						<string>-OTA Service (ST)[otas_st]|.*\\otas_stm\.(h|c)</string>
+						<string>-Peer-to-Peer Service (ST)[p2p_st]|.*\\p2p_stm\.(h|c)</string>
+						<string>-TX Power Service[tps]|.*\\tps\.(h|c)</string>
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-				    <Name>Bluetooth LE Services</Name>
-					<UniqueID>com.sysprogs.bspoptions.stm32.ble.</UniqueID>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
 		</Framework>
 		<Framework>
-			<Name>BLE Thread Interface</Name>
+			<Name>IoT Thread Interface</Name>
 			<ID>com.sysprogs.arm.stm32.ble.thread</ID>
 			<ProjectFolderName>BLE Thread</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
@@ -93,22 +85,18 @@
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.thread_iface.|IoT Thread Interface</SmartPropertyGroup>
 					<SmartFileConditions>
 						<!-- '-' in front of the name means 'disabled by default' -->
 						<string>-Virtual COM Port Support[vcp]|vcp\\.*</string>
 						<string>-OpenThread Support[openthread]|tl\\tl_thread_hci\.(c|h)</string>
+						<string>-SHCI command support[shci]|shci\\.*</string>
+						<string>-LHCI command support[lhci]|lhci\\.*</string>
+						<string>-SHCI_TL command support[shci_tl]|tl\\shci_tl.*</string>
+						<string>-HCI_TL command support[hci_tl]|tl\\hci_tl.*</string>
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-				    <Name>Bluetooth LE Thread Interface</Name>
-					<UniqueID>com.sysprogs.bspoptions.stm32.thread_iface.</UniqueID>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
 		</Framework>
 		<Framework>
 			<Name>Development Board Support</Name>
@@ -160,6 +148,10 @@ P-NUCLEO-WB55.USBDongle\\.*=>NUCLEO-WB55 (USB Dongle)[dongle]
 					<TargetFolder>STM32_WPAN/utilities</TargetFolder>
 					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>*</FilesToCopy>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wb_utils.|STM32WB Utilities</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>-Scheduler[scheduler]|scheduler.*</string>
+					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>

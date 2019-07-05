@@ -127,8 +127,6 @@ namespace BSPGenerationTools
                     dependencySet.Add(dep);
 
                 dependencies = dependencies.Where(d => dependencySet.Contains(d.MappedFile)).ToArray();
-
-
             }
         }
 

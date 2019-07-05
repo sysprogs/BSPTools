@@ -69,6 +69,11 @@ namespace BSPGenerationTools
 
             public void AttachFile(string encodedPath, ConditionHandle conditionHandle = null)
             {
+                if (encodedPath.Contains("DispTools.c"))
+                {
+
+                }
+
                 if (ConditionsPerFile.ContainsKey(encodedPath))
                     _Builder.FlagIncomplete(ReverseFileConditionWarning.MultipleConditionsPerFile);
                 ConditionsPerFile[encodedPath] = conditionHandle;

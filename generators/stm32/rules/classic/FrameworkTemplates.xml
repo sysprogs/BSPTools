@@ -18,8 +18,9 @@
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<!-- Note: stm32xxxx_ll_usb.c actually requires HAL headers -->
 					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
-					<ProjectInclusionMask>-*_template.?;-&gt;.*stm32[^\\]+_ll_[^\\]+$;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*_template.?;*stm32??xx_ll_usb.?;-&gt;.*stm32[^\\]+_ll_[^\\]+$;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>
@@ -47,9 +48,10 @@
 					<SmartPreprocessorMacros>
 						<string>-Enable Advanced Low-Level Driver Functions[driver]|{0}|USE_FULL_LL_DRIVER</string>
 					</SmartPreprocessorMacros>
+
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
-					<ProjectInclusionMask>&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
+					<ProjectInclusionMask>-*stm32??xx_ll_usb.?;&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<AlreadyCopied>true</AlreadyCopied>
 					<AdditionalIncludeDirs>Inc;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Core/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Include</AdditionalIncludeDirs>
