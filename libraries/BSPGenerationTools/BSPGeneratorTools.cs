@@ -301,7 +301,7 @@ namespace BSPGenerationTools
                             foundMainFLASH = true;
                     }
 
-                    if (!foundMainFLASH)
+                    if (!foundMainFLASH && dev.FamilyID != "STM32MP1")
                         throw new Exception($"Memory map for {dev.ID} does not contain a FLASH memory");
                 }
 

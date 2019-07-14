@@ -118,7 +118,7 @@ namespace BSPGenerationTools.Parsing
             Name = name;
             Entries = entries;
             EntriesByName = entries.ToDictionary(e => e.Name);
-            EntriesByNameWithoutTrailingIndex = entries.GroupBy(e => e.Name.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')).ToDictionary(g=>g.Key);
+            EntriesByNameWithoutTrailingIndex = entries.GroupBy(e => e.Name.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')).ToDictionary(g => g.Key);
         }
 
         public override string ToString()
@@ -370,11 +370,24 @@ namespace BSPGenerationTools.Parsing
                 if (tokensInThisStatement[idx].Value != "]")
                     throw new Exception("Unexpected bracket at the end of a structure statement");
 
-                arraySize = (int)ParseMaybeHex(tokensInThisStatement[idx - 1].Value);
-                if (tokensInThisStatement[idx - 2].Value != "[")
-                    throw new Exception("Unexpected bracket at the end of a structure statement");
+                if (tokensInThisStatement[idx - 2].Value == "[")
+                {
+                    //Simple "Type Name[Size];" statement.
+                    arraySize = (int)ParseMaybeHex(tokensInThisStatement[idx - 1].Value);
+                    idx -= 3;
+                }
+                else
+                {
+                    int start = idx - 1;
+                    while (start > 0 && tokensInThisStatement[start].Value != "[")
+                        start--;
 
-                idx -= 3;
+                    if (start <= 0)
+                        throw new Exception("Could not find '[' for array size");
+
+                    arraySize = (int)new BasicExpressionResolver(true).ResolveAddressExpression(tokensInThisStatement.Skip(start + 1).Take(idx - start - 1).ToArray()).Value;
+                    idx = start - 1;
+                }
             }
 
             if (tokensInThisStatement[idx].Type != CppTokenizer.TokenType.Identifier)

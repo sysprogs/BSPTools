@@ -804,6 +804,9 @@ namespace BSPGenerationTools
                         _Cache.Add(new KeyValuePair<Regex, string>(new Regex(ao.Replace('x', '.')), ao));
             }
 
+            if (name.EndsWith("_M4"))
+                name = name.Substring(0, name.Length - 3) + "xx";   //E.g. STM32MP151A_M4 => STM32MP151Axx
+
             foreach (var kv in _Cache)
                 if (kv.Key.IsMatch(name))
                     return kv.Value;

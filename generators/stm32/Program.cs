@@ -282,6 +282,9 @@ namespace stm32_bsp_generator
 
                 if (legacyDefineName != null)
                 {
+                    if (halFramework.ConfigurableProperties == null)
+                        halFramework.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+
                     halFramework.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Boolean
                     {
                         UniqueID = "com.sysprogs.bspoptions.stm32.hal_legacy",
@@ -311,8 +314,16 @@ namespace stm32_bsp_generator
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
                     MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
-                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn, "g_pfnVectors:", @"/\*{10,999}|^[^/\*]+\*/
-                $", @"^[ \t]+\.word[ \t]+([^ ]+)", null, @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*", ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)", 1, 2)
+                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn, 
+                        tableStart: "g_pfnVectors:",
+                        tableEnd: @"/\*{10,999}|^[^/\*]+\*/
+                $",
+                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ ]+)", 
+                        vectorLineB: null, 
+                        ignoredLine: @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*|// External Interrupts",
+                        macroDef: ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)", 
+                        nameGroup: 1,
+                        commentGroup: 2)
                 };
             }
         }
@@ -325,8 +336,17 @@ namespace stm32_bsp_generator
             foreach (var fn in Directory.GetFiles(dir, "*.h"))
             {
                 string subfamily = Path.GetFileNameWithoutExtension(fn);
+                string subfamilyForMatching = subfamily;
                 if (subfamily.Length != 11 && subfamily.Length != 12)
-                    continue;
+                {
+                    if (subfamily.EndsWith("_cm4", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        //This is a header file for the Cortex-M4 core of an STM32MP1 device
+                        subfamilyForMatching = subfamily.Substring(0, subfamily.Length - 4);
+                    }
+                    else
+                        continue;
+                }
 
                 if (specificDevice != null && subfamily != specificDevice)
                     continue;
@@ -335,7 +355,7 @@ namespace stm32_bsp_generator
                 {
                     MCUName = subfamily,
                     RegisterSets = PeripheralRegisterGenerator2.GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, fam.MCUs[0].Core, writer),
-                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
+                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamilyForMatching) == 0,
                 };
 
                 result.Add(r);
@@ -380,7 +400,8 @@ namespace stm32_bsp_generator
         enum STM32Ruleset
         {
             Classic,
-            STM32WB
+            STM32WB,
+            STM32MP1
         }
 
         static void Main(string[] args)
@@ -411,7 +432,7 @@ namespace stm32_bsp_generator
             using (var wr = new ParseReportWriter(@"..\..\Logs\registers.log"))
             {
                 var devices = provider.LoadDeviceList(bspBuilder);
-                if (devices.Where(d => d.FlashSize == 0).Count() > 0)
+                if (devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP1")).Count() > 0)
                     throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
@@ -481,6 +502,9 @@ namespace stm32_bsp_generator
                     {
                         case STM32Ruleset.STM32WB:
                             allFamilies.Add(new STM32WBFamilyBuilder(bspBuilder, fam));
+                            break;
+                        case STM32Ruleset.STM32MP1:
+                            allFamilies.Add(new STM32MP1FamilyBuilder(bspBuilder, fam));
                             break;
                         case STM32Ruleset.Classic:
                         default:

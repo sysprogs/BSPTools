@@ -159,6 +159,7 @@ namespace stm32_bsp_generator
                                 type = MemoryType.FLASH;
                                 break;
                             case "RAM":
+                            case "RAM1":
                             case "RAM2":
                             case "CCMRAM":
                             case "DTCMRAM":
@@ -237,9 +238,10 @@ namespace stm32_bsp_generator
                     {
                         if (layout.Memories.FirstOrDefault(m => m.Name == "SRAM") == null)
                         {
-                            var ram1 = layout.Memories.FirstOrDefault(m => m.Name == "RAM_D1");
-                            if (ram1 == null)
-                                ram1 = layout.Memories.First(m => m.Name == "RAM_D2");
+                            var ram1 = layout.Memories.FirstOrDefault(m => m.Name == "RAM_D1") ??
+                                       layout.Memories.FirstOrDefault(m => m.Name == "RAM_D2") ??
+                                       layout.Memories.FirstOrDefault(m => m.Name == "RAM1") ??
+                                       throw new Exception("Failed to locate RAM1");
                             ram1.Name = "SRAM";
                         }
                     }
@@ -407,9 +409,9 @@ namespace stm32_bsp_generator
                 foreach (var m in doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>())
                 {
                     for (int icore = 0; icore < m.SelectNodes("Core").Count; icore++)
-
+                    {
                         lstMCUs.Add(new ParsedMCU(m, familyDir, db, icore));
-
+                    }
                 }
                 var rawMCUs = lstMCUs.ToArray();
 
@@ -430,9 +432,6 @@ namespace stm32_bsp_generator
                         }
                     }
                 }
-                for (int i = 0; i < result.Count(); i++)
-                    if (result[i].Name.ToUpper().StartsWith("STM32MP1"))
-                    { result.RemoveAt(i); i--; }
 
                 return result;
             }

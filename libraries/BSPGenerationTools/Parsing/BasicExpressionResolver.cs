@@ -54,6 +54,7 @@ namespace BSPGenerationTools.Parsing
                 switch(op)
                 {
                     case "+":
+                    case "-":
                         if (next.IsAPointer)
                             throw new Exception("Cannot add pointers");
 
@@ -63,7 +64,11 @@ namespace BSPGenerationTools.Parsing
                             throw new NotImplementedException();
                         }
 
-                        value = new TypedInteger { Value = value.Value + next.Value, Type = value.Type };
+                        if (op == "+")
+                            value = new TypedInteger { Value = value.Value + next.Value, Type = value.Type };
+                        else
+                            value = new TypedInteger { Value = value.Value - next.Value, Type = value.Type };
+
                         break;
                     case "<<":
                         if (next.IsAPointer || value.IsAPointer)

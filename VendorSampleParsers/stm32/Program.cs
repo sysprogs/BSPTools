@@ -423,6 +423,7 @@ namespace GeneratorSampleStm32
                     foreach (var boardDir in Directory.GetDirectories(Path.Combine(topLevelDir, "Projects")))
                     {
                         string boardName = Path.GetFileName(boardDir);
+                        int samplesForThisBoard = 0;
 
                         foreach (var dir in Directory.GetDirectories(boardDir, "Mdk-arm", SearchOption.AllDirectories))
                         {
@@ -454,8 +455,31 @@ namespace GeneratorSampleStm32
                             }
 
                             sampleCount += aSamples.Count;
+                            samplesForThisBoard += aSamples.Count;
                             allSamples.AddRange(aSamples);
                         }
+
+                        if (samplesForThisBoard == 0)
+                        {
+                            foreach (var dir in Directory.GetDirectories(boardDir, "SW4STM32", SearchOption.AllDirectories))
+                            {
+                                string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
+                                AppendSamplePrefixFromPath(ref sampleName, dir);
+
+                                if (!filter.ShouldParseSampleForAnyDevice(sampleName))
+                                    continue;   //We are only reparsing a subset of samples
+
+                                var aSamples = ProjectParsers.SW4STM32ProjectParser.ParseProjectFolder(dir, topLevelDir, boardName, addInc);
+
+                                if (aSamples.Count != 0)
+                                    Debug.Assert(aSamples[0].UserFriendlyName == sampleName);   //Otherwise quick reparsing won't work.
+
+                                sampleCount += aSamples.Count;
+                                samplesForThisBoard += aSamples.Count;
+                                allSamples.AddRange(aSamples);
+                            }
+                        }
+
                     }
 
                     Console.WriteLine($"Found {sampleCount} samples for {sdk.Family}.");
