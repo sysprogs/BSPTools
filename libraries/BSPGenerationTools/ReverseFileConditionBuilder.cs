@@ -124,7 +124,7 @@ namespace BSPGenerationTools
             return handle;
         }
 
-        public void SaveIfConsistent(string outputDir, bool throwIfInconsistent)
+        public void SaveIfConsistent(string outputDir, PropertyDictionary2 renamedFileTable, bool throwIfInconsistent)
         {
             if (Warnings != ReverseFileConditionWarning.None)
             {
@@ -134,11 +134,14 @@ namespace BSPGenerationTools
                     return;
             }
 
-
             Dictionary<ConditionHandle, int> conditionIndicies = new Dictionary<ConditionHandle, int>();
 
             var allFrameworkHandles = new[] { RootHandle }.Concat(_HandlesByFramework.Values).ToArray();
-            ReverseConditionTable result = new ReverseConditionTable { Frameworks = allFrameworkHandles.Select(h => h.ToFrameworkDefinition()).ToArray() };
+            ReverseConditionTable result = new ReverseConditionTable
+            {
+                Frameworks = allFrameworkHandles.Select(h => h.ToFrameworkDefinition()).ToArray(),
+                RenamedFileTable = renamedFileTable,
+            };
 
             for (int i = 0; i < allFrameworkHandles.Length; i++)
             {
@@ -218,6 +221,7 @@ namespace BSPGenerationTools
         public List<ObjectEntry> MacroTable = new List<ObjectEntry>();
         public List<FreeFormMacroEntry> FreeFormMacros = new List<FreeFormMacroEntry>();
         public Framework[] Frameworks;
+        public PropertyDictionary2 RenamedFileTable;
     }
 
     [Flags]

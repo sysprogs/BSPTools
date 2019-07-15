@@ -29,7 +29,9 @@ namespace BSPGenerationTools
 
         public ReverseFileConditionMatcher(ReverseConditionTable table)
         {
-            _ConfigurationByFile = TranslateObjectList(table, table.FileTable);
+            var fileDict = PropertyDictionary2.ReadPropertyDictionary(table.RenamedFileTable);
+
+            _ConfigurationByFile = TranslateObjectList(table, table.FileTable, fileDict);
             _ConfigurationByMacro = TranslateObjectList(table, table.MacroTable);
 
             foreach (var macro in table.FreeFormMacros)
@@ -43,7 +45,7 @@ namespace BSPGenerationTools
             }
         }
 
-        static Dictionary<string, RequestedConfiguration> TranslateObjectList(ReverseConditionTable table, IEnumerable<ReverseConditionTable.ObjectEntry> list)
+        static Dictionary<string, RequestedConfiguration> TranslateObjectList(ReverseConditionTable table, IEnumerable<ReverseConditionTable.ObjectEntry> list, Dictionary<string, string> optionalDictionary = null)
         {
             Dictionary<string, RequestedConfiguration> result = new Dictionary<string, RequestedConfiguration>();
             foreach (var entry in list)
@@ -52,7 +54,11 @@ namespace BSPGenerationTools
                 if (entry.ConditionIndex != 0)
                     cfg.Configuration = table.ConditionTable[entry.ConditionIndex - 1].RequestedConfiguration;
 
-                result[entry.ObjectName] = cfg;
+                string key = entry.ObjectName;
+                if (optionalDictionary != null && optionalDictionary.TryGetValue(key, out var val))
+                    key = val;
+
+                result[key] = cfg;
             }
 
             return result;
@@ -94,7 +100,7 @@ namespace BSPGenerationTools
             for (int i = 0; i < macroList.Count; i++)
             {
                 bool match = false;
-                foreach(var rule in _FreeFormMacros)
+                foreach (var rule in _FreeFormMacros)
                 {
                     var m = rule.Regex.Match(macroList[i]);
                     if (m.Success)
@@ -124,10 +130,10 @@ namespace BSPGenerationTools
                 preprocesorMacros = macroList.ToArray();
                 includeDirs = includeList.ToArray();
 
-                foreach(var fwObj in frameworkObjects)
+                foreach (var fwObj in frameworkObjects)
                 {
                     frameworks.Add(fwObj.ID);
-                    foreach(var kv in fwObj.MinimalConfiguration ?? new SysVarEntry[0])
+                    foreach (var kv in fwObj.MinimalConfiguration ?? new SysVarEntry[0])
                     {
                         //Unless a configuration value was explicitly detected from the macros/files, set it to 'disabled' (that might be different from the GUI default).
                         //This ensures that each vendor sample excludes the conditional items that were present in the original vendor sample, even if they are enabled by default.

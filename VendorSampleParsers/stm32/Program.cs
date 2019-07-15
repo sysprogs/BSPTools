@@ -281,7 +281,8 @@ namespace GeneratorSampleStm32
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Middlewares/Third_Party/(FreeRTOS)/(.*)", "$$SYS:BSP_ROOT$$/{2}/{3}"),
 
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/WB/Middlewares/ST/STM32_WPAN(.*)", "$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN{1}"),
-                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/WB/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32WBxxxx/BSP/{1}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(WB)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP1/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
                 };
             }
 

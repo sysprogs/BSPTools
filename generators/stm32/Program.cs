@@ -224,7 +224,7 @@ namespace stm32_bsp_generator
              *  with the regular versions of the same files. Instead of hardcoding the specific files for specific families, we detect it programmatically and generate the necessary
              *  rules on-the-fly in this function.
              */
-            public void InsertLegacyHALRulesIfNecessary(FamilyDefinition fam)
+            public void InsertLegacyHALRulesIfNecessary(FamilyDefinition fam, ReverseFileConditionBuilder reverseFileConditions)
             {
                 var halFramework = fam.AdditionalFrameworks.FirstOrDefault(f => f.ClassID == "com.sysprogs.arm.stm32.hal") ?? throw new Exception(fam.Name + " defines no HAL framework");
                 var primaryJob = halFramework.CopyJobs.First();
@@ -294,6 +294,8 @@ namespace stm32_bsp_generator
                     });
 
                     halFramework.CopyJobs[0].PreprocessorMacros += ";$$com.sysprogs.bspoptions.stm32.hal_legacy$$";
+
+                    reverseFileConditions?.GetHandleForFramework(halFramework)?.AttachMinimalConfigurationValue("com.sysprogs.bspoptions.stm32.hal_legacy", "");
                 }
             }
         }
@@ -497,7 +499,7 @@ namespace stm32_bsp_generator
                         fam.AdditionalFrameworks = fam.AdditionalFrameworks.Concat(extraFrameworksWithoutMissingFolders).ToArray();
                     }
 
-                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
+                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam, bspBuilder.ReverseFileConditions);
                     switch (ruleset)
                     {
                         case STM32Ruleset.STM32WB:
@@ -591,7 +593,7 @@ namespace stm32_bsp_generator
 
                 bspBuilder.ValidateBSP(bsp);
 
-                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, ruleset == STM32Ruleset.STM32WB);
+                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), ruleset == STM32Ruleset.STM32WB);
 
                 File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
                 Console.WriteLine("Saving BSP...");

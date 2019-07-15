@@ -54,6 +54,25 @@ namespace GeneratorSampleStm32.ProjectParsers
 
             result.BoardName = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.board");
             string mcu = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.mcu");
+            List<string> libs = new List<string>();
+
+            string[] libraryPaths = linkerNode.LookupOptionValueAsList("gnu.c.link.option.paths", true);
+            foreach(var lib in linkerNode.LookupOptionValueAsList("gnu.c.link.option.libs", true))
+            {
+                if (!lib.StartsWith(":"))
+                    throw new Exception("Unexpected library file format: " + lib);
+
+                foreach(var libDir in libraryPaths)
+                {
+                    string candidate = Path.Combine(cprojectDir, "Build", libDir, $"{lib.Substring(1)}");
+                    if (File.Exists(candidate))
+                    {
+                        libs.Add(Path.GetFullPath(candidate));
+                        break;
+                    }
+                }
+
+            }
 
             if (mcu.EndsWith("x"))
             {
@@ -71,7 +90,7 @@ namespace GeneratorSampleStm32.ProjectParsers
 
             result.LinkerScript = Path.GetFullPath(linkerScript);
 
-            result.SourceFiles = ParseSourceList(project, cprojectDir).ToArray();
+            result.SourceFiles = ParseSourceList(project, cprojectDir).Concat(libs).ToArray();
             result.Path = Path.GetDirectoryName(sw4projectDir);
             return result;
         }
@@ -117,10 +136,10 @@ namespace GeneratorSampleStm32.ProjectParsers
             return (element.SelectSingleNode($"option[starts-with(@id, '{optionName}')]/@value") as XmlAttribute ?? throw new Exception("Missing " + optionName)).Value;
         }
 
-        public static string[] LookupOptionValueAsList(this XmlNode element, string optionName)
+        public static string[] LookupOptionValueAsList(this XmlNode element, string optionName, bool isOptional = false)
         {
             string[] result = element.SelectNodes($"option[starts-with(@id, '{optionName}')]/listOptionValue/@value").OfType<XmlAttribute>().Select(a => a.Value).ToArray();
-            if (result.Length == 0)
+            if (result.Length == 0 && !isOptional)
                 throw new Exception("No values found for " + optionName);
             return result;
         }

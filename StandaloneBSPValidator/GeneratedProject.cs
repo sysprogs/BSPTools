@@ -105,21 +105,7 @@ namespace StandaloneBSPValidator
                 }
         }
 
-        class FileEqualityComparer : IEqualityComparer<string>
-        {
-            public bool Equals(string b1, string b2)
-            {
-                if (Path.GetFileName(b1) == Path.GetFileName(b2))
-                    return true;
-                else
-                    return false;
-            }
-            public int GetHashCode(string bx)
-            {
-                int hCode = 0;
-                return hCode.GetHashCode();
-            }
-        }
+
         public void AddBSPFilesToProject(Dictionary<string, string> SystemDictionary, Dictionary<string, string> frameworkConfig, Dictionary<string, bool> frameworkIDs)
         {
             if (MCU.ExpandedMCU.AdditionalSourceFiles != null && MCU.ExpandedMCU.AdditionalSourceFiles.Length > 0)
@@ -144,8 +130,7 @@ namespace StandaloneBSPValidator
             foreach (var fw in _Frameworks)
             {
                 var files = fw.AdditionalSourceFiles.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
-                foreach (var file in files)
-                    if (!_SourceFiles.Contains(file, new FileEqualityComparer())) _SourceFiles.Add(file);
+                _SourceFiles.AddRange(files);
 
                 files = fw.AdditionalLibraries?.Where(fn => !MCU.BSP.ShouldSkipFile(fn, SystemDictionary, frameworkConfig, frameworkIDs)).Select(fn => VariableHelper.ExpandVariables(fn, SystemDictionary, frameworkConfig));
                 if (files != null)

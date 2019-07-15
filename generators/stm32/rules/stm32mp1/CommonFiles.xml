@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$STM32:MP1_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -80,6 +80,32 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>OpenAMP</Name>
+			<ID>com.sysprogs.arm.stm32.openamp</ID>
+			<ProjectFolderName>OpenAMP</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:MP1_DIR$$\Middlewares\Third_Party\OpenAMP</SourceFolder>
+					<FilesToCopy>-CMakeLists.txt;*.c;*.h;*.url;*.txt</FilesToCopy>
+					<AdvancedRenameRules>libmetal\\lib\\(device|init|io|shmem|log)\.c=>libmetal_{1}.c</AdvancedRenameRules>
+					<ProjectInclusionMask>-*\zynq*;-*\microblaze*;-*\template\*;open-amp\lib\*;libmetal\lib\system\generic\*;-libmetal\lib\system\*;libmetal\lib\*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<PreprocessorMacros>METAL_INTERNAL;NO_ATOMIC_64_SUPPORT;METAL_MAX_DEVICE_REGIONS=2;VIRTIO_SLAVE_ONLY</PreprocessorMacros>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/OpenAMP/open-amp/lib/include;$$SYS:BSP_ROOT$$/OpenAMP/libmetal/lib/include;$$SYS:BSP_ROOT$$/OpenAMP/virtual_driver</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.openamp.|OpenAMP</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>-Redirect printf() output to OpenAMP[proxy]|^open-amp\\lib\\proxy\\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<AdditionalSystemVars>
+			</AdditionalSystemVars>
 		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>

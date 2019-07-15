@@ -173,6 +173,24 @@ namespace BSPGenerationTools
             Directory.CreateDirectory(dirs.OutputDir);
         }
 
+        public PropertyDictionary2 ExportRenamedFileTable()
+        {
+            List<PropertyDictionary2.KeyValue> result = new List<PropertyDictionary2.KeyValue>();
+            foreach(var kv in RenamedFileTable)
+            {
+                if (!kv.Key.StartsWith(Directories.OutputDir))
+                    throw new Exception("Unexpected renamed file");
+
+                string relativePath = kv.Key.Substring(Directories.OutputDir.Length).TrimStart('\\', '/').Replace('\\', '/');
+                int idx = relativePath.LastIndexOf('/');
+                string relativeDir = relativePath.Substring(0, idx);
+
+                result.Add(new PropertyDictionary2.KeyValue { Value = "$$SYS:BSP_ROOT$$/" + relativePath, Key = $"$$SYS:BSP_ROOT$$/{relativeDir}/{kv.Value}" });
+            }
+
+            return new PropertyDictionary2 { Entries = result.ToArray() };
+        }
+
         void DeleteDirectoryWithRetries(string dir)
         {
             for (int retry = 0; ; retry++)

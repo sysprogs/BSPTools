@@ -182,6 +182,12 @@ namespace StandaloneBSPValidator
                 proc.BeginOutputReadLine();
                 return proc;
             }
+
+            internal void AttachDisambiguationSuffix(string suffix)
+            {
+                int idx = PrimaryOutput.LastIndexOf('.');
+                PrimaryOutput = PrimaryOutput.Substring(0, idx) + suffix + PrimaryOutput.Substring(idx);
+            }
         }
 
         class BuildJob
@@ -317,7 +323,12 @@ namespace StandaloneBSPValidator
         }
 
 
-        public static TestResult TestVendorSampleAndUpdateDependencies(LoadedBSP.LoadedMCU mcu, VendorSample vs, string mcuDir, string sampleDirPath, bool codeRequiresDebugInfoFlag, bool keepDirectoryAfterSuccessfulBuild)
+        public static TestResult TestVendorSampleAndUpdateDependencies(LoadedBSP.LoadedMCU mcu, 
+            VendorSample vs, 
+            string mcuDir, 
+            string sampleDirPath,
+            bool codeRequiresDebugInfoFlag,
+            BSPValidationFlags validationFlags)
         {
             if (Directory.Exists(mcuDir))
                 Directory.Delete(mcuDir, true);
@@ -399,7 +410,7 @@ namespace StandaloneBSPValidator
             sourceExtensions.Add("cpp", true);
             sourceExtensions.Add("s", true);
 
-            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, null, vs, keepDirectoryAfterSuccessfulBuild);
+            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, null, vs, validationFlags);
         }
 
         private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg, string[] pUndefinedMacros)
@@ -551,30 +562,10 @@ namespace StandaloneBSPValidator
             string[] nonValidateReg,
             string[] UndefinedMacros,
             VendorSample vendorSample = null,
-            bool keepDirectoryAfterSuccessfulBuild = false)
+            BSPValidationFlags validationFlags = BSPValidationFlags.None)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
-
-            job.OtherTasks.Add(new BuildTask
-            {
-                Executable = prefix + "g++",
-                Arguments = $"{flags.StartGroup} {flags.EffectiveLDFLAGS} $^ {flags.EndGroup} -o $@",
-                AllInputs = prj.SourceFiles.Where(f => sourceExtensions.ContainsKey(Path.GetExtension(f).TrimStart('.')))
-                .Select(f => Path.ChangeExtension(Path.GetFileName(f), ".o"))
-                .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)))
-                .ToArray(),
-                PrimaryOutput = "test.elf",
-            });
-
-            job.OtherTasks.Add(new BuildTask
-            {
-                Executable = prefix + "objcopy",
-                Arguments = "-O binary $< $@",
-                AllInputs = new[] { "test.elf" },
-                PrimaryOutput = "test.bin",
-            });
-
 
             foreach (var sf in prj.SourceFiles)
             {
@@ -594,7 +585,7 @@ namespace StandaloneBSPValidator
                         PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sfE), ".o"),
                         AllInputs = new[] { sfE },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o {obj}".Replace('\\', '/').Replace("/\"", "\\\""),
+                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o $@".Replace('\\', '/').Replace("/\"", "\\\""),
                     });
                 }
             }
@@ -605,6 +596,10 @@ namespace StandaloneBSPValidator
             {
                 if (g.Count() > 1)
                 {
+                    int i = 0;
+                    foreach (var j2 in g)
+                        j2.AttachDisambiguationSuffix($"_{++i}");
+
                     Console.WriteLine($"ERROR: {g.Key} corresponds to the following files:");
                     foreach (var f in g)
                         Console.WriteLine("\t" + f.AllInputs.FirstOrDefault());
@@ -612,8 +607,26 @@ namespace StandaloneBSPValidator
                 }
             }
 
-            if (errorsFound)
+            if (errorsFound && (validationFlags & BSPValidationFlags.ResolveNameCollisions) == BSPValidationFlags.None)
                 throw new Exception("Multiple source files with the same name found");
+
+            job.OtherTasks.Add(new BuildTask
+            {
+                Executable = prefix + "g++",
+                Arguments = $"{flags.StartGroup} {flags.EffectiveLDFLAGS} $^ {flags.EndGroup} -o $@",
+                AllInputs = job.CompileTasks.Select(t=>t.PrimaryOutput)
+                    .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)))
+                    .ToArray(),
+                PrimaryOutput = "test.elf",
+            });
+
+            job.OtherTasks.Add(new BuildTask
+            {
+                Executable = prefix + "objcopy",
+                Arguments = "-O binary $< $@",
+                AllInputs = new[] { "test.elf" },
+                PrimaryOutput = "test.bin",
+            });
 
             List<string> comments = new List<string>();
             comments.Add("Tool flags:");
@@ -687,7 +700,7 @@ namespace StandaloneBSPValidator
                     .ToArray();
             }
 
-            if (!keepDirectoryAfterSuccessfulBuild)
+            if ((validationFlags & BSPValidationFlags.KeepDirectoryAfterSuccessfulTest) == BSPValidationFlags.None)
                 Directory.Delete(mcuDir, true);
 
             return new TestResult(TestBuildResult.Succeeded, Path.Combine(mcuDir, "build.log"));
@@ -937,4 +950,17 @@ namespace StandaloneBSPValidator
             }
         }
     }
+
+    [Flags]
+    public enum BSPValidationFlags
+    {
+        None = 0,
+        KeepDirectoryAfterSuccessfulTest = 1,
+
+        //Enabling this flag will automatically resolve the condition where multiple sources with the same name exist in different directories.
+        //This can be enabled for Pass 1 tests (in-place build) only if the conflicts will get resolved by attaching embedded frameworks that have the files renamed (e.g. STM32MP1).
+        //!!!DO NOT ENABLE THIS OPTION FOR PASS 2 TESTS!!! MSBuild and Make backends to not support colliding source file names, so projects containing them will not build.
+        ResolveNameCollisions = 2,
+    }
+
 }

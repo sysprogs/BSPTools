@@ -1,6 +1,7 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
 using Microsoft.Win32;
+using StandaloneBSPValidator;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -103,6 +104,7 @@ namespace VendorSampleParserEngine
                 @"STemWin_CM4_wc32",
                 @"STemWin_CM7_wc32",
                 @"libtouchgfx-float-abi-hard.a",
+                @"network_runtime.a",   //STM32MP1
             };
 
         protected virtual bool ShouldFileTriggerHardFloat(string path)
@@ -325,7 +327,8 @@ namespace VendorSampleParserEngine
             }
         }
 
-        StandaloneBSPValidator.Program.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples, string sampleDirPath, VendorSamplePass pass, Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null, double testProbability = 1)
+
+        StandaloneBSPValidator.Program.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples, string sampleDirPath, VendorSamplePass pass, Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null, double testProbability = 1, BSPValidationFlags validationFlags = BSPValidationFlags.None)
         {
             Console.WriteLine($"Building {samples.Length} samples...");
             if (pass != VendorSamplePass.RelocatedBuild && pass != VendorSamplePass.InPlaceBuild)
@@ -369,7 +372,11 @@ namespace VendorSampleParserEngine
                     string mcuDir = Path.Combine(outputDir, record.ID.ToString());
                     DateTime start = DateTime.Now;
 
-                    var result = StandaloneBSPValidator.Program.TestVendorSampleAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, keepDirectoryAfterSuccessfulBuild?.Invoke(vs) ?? false);
+                    var thisSampleFlags = validationFlags;
+                    if (keepDirectoryAfterSuccessfulBuild?.Invoke(vs) == true)
+                        thisSampleFlags |= BSPValidationFlags.KeepDirectoryAfterSuccessfulTest;
+
+                    var result = StandaloneBSPValidator.Program.TestVendorSampleAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, thisSampleFlags);
                     record.BuildDuration = (int)(DateTime.Now - start).TotalMilliseconds;
                     record.TimeOfLastBuild = DateTime.Now;
 
@@ -554,7 +561,7 @@ namespace VendorSampleParserEngine
             if (pass1Queue.Length > 0)
             {
                 //Test the raw VendorSamples in-place and store AllDependencies
-                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(new VendorSampleID(vs)));
+                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(new VendorSampleID(vs)), validationFlags: BSPValidationFlags.ResolveNameCollisions);
 
                 foreach (var vs in pass1Queue)
                 {

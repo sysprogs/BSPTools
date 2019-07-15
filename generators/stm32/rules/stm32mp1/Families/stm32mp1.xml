@@ -35,6 +35,43 @@
 		</CopyJobs>
 	</CoreFramework>
 	<AdditionalFrameworks>
+		<!-- As of v1.0, this framework would require 2 orthogonal sets of conditions (board type + subset of included features), that is not supported by VisualGDB.
+		     This could be solved by splitting the framework into multiple frameworks instead.
+		<Framework>
+			<Name>Development Board Support</Name>
+			<ID>com.sysprogs.arm.stm32.stm32bsp</ID>
+			<ProjectFolderName>Board</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:MP1_DIR$$\Drivers\BSP</SourceFolder>
+					<TargetFolder>BSP</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
+					<SmartFileConditions>
+						<string>Board Type|
+=>None;
+STM32MP15xx_DISCO\\.*=>STM32MP15xx_DISCO;
+STM32MP15xx_EVAL\\.*=>STM32MP15xx_EVAL
+						</string>
+						<string>-Bus Support[bus]|.*_bus\..*</string>
+						<string>-PMU Support[pmu]|.*_stpmu1\..*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+				    <Name>Development Board</Name>
+					<UniqueID>com.sysprogs.bspoptions.stm32.board.</UniqueID>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework> -->
 	</AdditionalFrameworks>
 	<SmartSamples>
 	</SmartSamples>
