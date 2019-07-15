@@ -275,6 +275,7 @@ namespace GeneratorSampleStm32
                 AutoPathMappings = new PathMapping[]
                 {
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/STM32[^/\\]+xx_HAL_Driver/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32{1}xx_HAL_Driver/{2}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/CMSIS/DSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/DSP/{2}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/CMSIS/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/CMSIS_HAL/{2}"),
 
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Middlewares/ST/STM32_USB_(Host|Device)_Library/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32_USB_{2}_Library/{3}"),

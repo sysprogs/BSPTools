@@ -72,6 +72,23 @@ STM32MP15xx_EVAL\\.*=>STM32MP15xx_EVAL
 				</PropertyGroups>
 			</ConfigurableProperties>			
 		</Framework> -->
+		<Framework>
+			<Name>DSP Functions</Name>
+			<ID>com.sysprogs.arm.stm32.dsp.STM32MP1</ID>
+			<ClassID>com.sysprogs.arm.stm32.dsp</ClassID>
+			<ProjectFolderName>DSP</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:MP1_DIR$$\Drivers\CMSIS\DSP</SourceFolder>
+					<TargetFolder>DSP</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-Examples\*;-*template_*;*.c;*.h</ProjectInclusionMask>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>
 	</SmartSamples>
