@@ -29,6 +29,8 @@ namespace RISCVDebugPackage
         {
         }
 
+        public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Collapsed;
+
         protected override void InsertResetAndHaltCommands(int idxLoad, QuickSetupDatabase.ProgrammingInterface iface, QuickSetupDatabase.TargetDeviceFamily device)
         {
             const string unprotectCommand = "mon flash protect 0 64 last off";

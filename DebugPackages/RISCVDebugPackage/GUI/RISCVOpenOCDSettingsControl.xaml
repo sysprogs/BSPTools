@@ -231,8 +231,8 @@
             <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="Try using manual reset mode if the firmware doesn't start after programming."/>
         </Grid>
 
-        <TextBlock Text="Program FLASH memory:" Grid.Row="8"/>
-        <ListBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding ProgramMode}" Margin="{StaticResource TableElementMargin}">
+        <TextBlock Text="Program FLASH memory:" Grid.Row="8" Visibility="{Binding ProgramOptionVisibility}"/>
+        <ListBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding ProgramMode}" Margin="{StaticResource TableElementMargin}"  Visibility="{Binding ProgramOptionVisibility}">
             <ListBox.ItemsSource>
                 <coll:ArrayList>
                     <bspe:ProgramMode>Enabled</bspe:ProgramMode>
