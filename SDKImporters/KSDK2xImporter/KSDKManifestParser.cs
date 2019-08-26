@@ -725,15 +725,16 @@ namespace KSDK2xImporter
             };
         }
 
-        public string GenerateBSPForSDK(string directory, IWarningSink sink)
+        public ImportedExternalSDK GenerateBSPForSDK(ImportedSDKLocation location, ISDKImportHost host)
         {
-            var bsp = ParseKSDKManifest(directory, sink);
-            bsp.Save(directory);
+            var bsp = ParseKSDKManifest(location.Directory, host.WarningSink);
+            bsp.Save(location.Directory);
 
-            return bsp.BSP.PackageID;
+            return new ImportedExternalSDK { BSPID = bsp.BSP.PackageID };
         }
 
         public string Name => "MCUXpresso SDK";
+        public string UniqueID => "com.sysprogs.sdkimporters.nxp.ksdk";
         public string CommandName => "Import an MCUXpresso SDK";
         public string Target => "arm-eabi";
         public string OpenFileFilter => "MCUXpresso SDK Manifest Files|*manifest*.xml";

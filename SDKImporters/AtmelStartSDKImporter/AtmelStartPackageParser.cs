@@ -13,6 +13,7 @@ namespace AtmelStartSDKImporter
     public class AtmelStartPackageParser : ISDKImporter
     {
         public string Name => "Atmel START Project";
+        public string UniqueID => "com.sysprogs.sdkimporters.atmel.start";
 
         public string CommandName => "Import an Atmel START Project";
 
@@ -28,7 +29,36 @@ namespace AtmelStartSDKImporter
 
         public ImportedExternalSDK GenerateBSPForSDK(ImportedSDKLocation location, ISDKImportHost host)
         {
-            throw new NotImplementedException();
+            string temporaryDir = Path.Combine(host.GetDefaultDirectoryForImportedSDKs("arm-eabi"), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(temporaryDir);
+
+            try
+            {
+                host.ExtractZIPFile(location.OriginallySelectedFile, temporaryDir);
+
+                var bsp = GenerateBSPForSTARTProject(temporaryDir, host.WarningSink);
+
+                string newDir = Path.Combine(Path.GetDirectoryName(temporaryDir), bsp.PackageID);
+                if (Directory.Exists(newDir))
+                {
+                    if (!host.AskWarn($"{newDir} already exists. Overwrite?"))
+                        throw new OperationCanceledException();
+
+                    host.DeleteDirectoryRecursively(newDir);
+                }
+
+                Directory.Move(temporaryDir, newDir);
+                return new ImportedExternalSDK { BSPID = bsp.PackageID, Directory = newDir };
+            }
+            catch
+            {
+                try
+                {
+                    host.DeleteDirectoryRecursively(temporaryDir);
+                }
+                catch { }
+                throw;
+            }
         }
 
         struct DetectedLinkerScripts
@@ -215,7 +245,7 @@ namespace AtmelStartSDKImporter
             return memories.ToArray();
         }
 
-        public static void GenerateBSPForSTARTProject(string extractedProjectDirectory, IWarningSink sink)
+        public static BoardSupportPackage GenerateBSPForSTARTProject(string extractedProjectDirectory, IWarningSink sink)
         {
             var gpdscFile = Path.Combine(extractedProjectDirectory, "AtmelStart.gpdsc");
             if (!File.Exists(gpdscFile))
@@ -305,6 +335,7 @@ namespace AtmelStartSDKImporter
             FixGPDSCErrors(bsp, mcu, extractedProjectDirectory, flagsFromMakefile, linkerScripts.RelativeFLASHScript);
 
             XmlTools.SaveObject(bsp, Path.Combine(extractedProjectDirectory, LoadedBSP.PackageFileName));
+            return bsp;
         }
 
         private static void FixGPDSCErrors(BoardSupportPackage bsp, MCU mcu, string extractedProjectDirectory, FlagsFromMakefile flagsFromMakefile, string relativeFLASHScript)
