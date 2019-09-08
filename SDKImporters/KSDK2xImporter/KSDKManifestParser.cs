@@ -275,7 +275,7 @@ namespace KSDK2xImporter
                 int FLASHSize, RAMSize;
                 if (!int.TryParse((devNode.SelectSingleNode("memory/@flash_size_kb")?.Value ?? ""), out FLASHSize))
                     int.TryParse((devNode.SelectSingleNode("total_memory/@flash_size_kb")?.Value ?? ""), out FLASHSize);
-                    
+
                 if (!int.TryParse((devNode.SelectSingleNode("memory/@ram_size_kb")?.Value ?? ""), out RAMSize))
                     int.TryParse((devNode.SelectSingleNode("total_memory/@ram_size_kb")?.Value ?? ""), out RAMSize);
 
@@ -284,6 +284,21 @@ namespace KSDK2xImporter
 
                 families.Add(mcuFamily);
                 string svdFile = null;
+
+                string freeRTOSComponentID = "middleware.freertos." + dev.DeviceName;
+
+                foreach (var componentNode in doc.SelectNodes($"//components/component").OfType<XmlElement>())
+                {
+                    string id = componentNode.GetAttribute("id");
+                    if (id?.Contains(".freertos.") == true)
+                    {
+                        if (componentNode.SelectNodes("source/files[@mask='FreeRTOS.h']").Count > 0)
+                        {
+                            freeRTOSComponentID = id;
+                            break;
+                        }
+                    }
+                }
 
                 //Map each component to an instance of EmbeddedFramework
                 foreach (XmlNode componentNode in doc.SelectNodes($"//components/component"))
@@ -369,11 +384,10 @@ namespace KSDK2xImporter
                     List<string> sourceFiles = new List<string>();
                     List<string> libFiles = new List<string>();
 
-                    var IDFr = fwPrefix + idComponent; 
+                    var IDFr = fwPrefix + idComponent;
 
                     foreach (ParsedSource src in componentNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSource(e, dev)))
                     {
-
                         if (src.Exclude)
                             continue;
 
@@ -393,7 +407,7 @@ namespace KSDK2xImporter
                                     FilePath = file.BSPPath,
                                     ConditionToInclude = new Condition.ReferencesFramework
                                     {
-                                        FrameworkID = fwPrefix + "middleware.freertos." + dev.DeviceName
+                                        FrameworkID = fwPrefix + freeRTOSComponentID
                                     }
                                 });
 
