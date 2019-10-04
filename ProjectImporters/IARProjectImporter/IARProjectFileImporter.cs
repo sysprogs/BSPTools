@@ -39,6 +39,7 @@ namespace IARProjectFileImporter
                     }
                     else
                         fileConfiguration.IsExcludedFromBuild = false;
+
                     configurations.Add(fileConfiguration);
                 }
 
@@ -61,19 +62,22 @@ namespace IARProjectFileImporter
                 string extension = Path.GetExtension(file.FullPath);
                 file.IsHeader = extension.StartsWith("h", StringComparison.InvariantCultureIgnoreCase);
 
-                //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
-                if (file.FullPath.IndexOf("\\IAR\\", StringComparison.InvariantCultureIgnoreCase) != -1)
+                if (!_Settings.UseIARToolchain)
                 {
-                    var substitute = file.FullPath.ToLower().Replace("\\iar\\", "\\gcc\\");
-                    if (File.Exists(substitute))
-                        file.FullPath = substitute;
-                }
+                    //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
+                    if (file.FullPath.IndexOf("\\IAR\\", StringComparison.InvariantCultureIgnoreCase) != -1)
+                    {
+                        var substitute = file.FullPath.ToLower().Replace("\\iar\\", "\\gcc\\");
+                        if (File.Exists(substitute))
+                            file.FullPath = substitute;
+                    }
 
-                string nameOnly = Path.GetFileName(file.FullPath);
-                if (nameOnly.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase) && nameOnly.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    //IAR startup files are not compatible with gcc and are not needed either as VisualGDB provides its own startup files.
-                    continue;
+                    string nameOnly = Path.GetFileName(file.FullPath);
+                    if (nameOnly.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase) && nameOnly.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        //IAR startup files are not compatible with gcc and are not needed either as VisualGDB provides its own startup files.
+                        continue;
+                    }
                 }
 
                 result.Add(file);
@@ -90,12 +94,12 @@ namespace IARProjectFileImporter
             if (xmlNodeList != null)
                 foreach (XmlElement CntGroup in xmlNodeList)
                 {
-                    ImportedExternalProject.VirtualDirectory aOutGroup = new ImportedExternalProject.VirtualDirectory();
-                    aOutGroup.Files = GetFilesInGroup(CntGroup);
+                    ImportedExternalProject.VirtualDirectory dir = new ImportedExternalProject.VirtualDirectory();
+                    dir.Files = GetFilesInGroup(CntGroup);
                     string name = CntGroup.SelectSingleNode("name").InnerText;
-                    aOutGroup.Name = name;
-                    aOutGroup.Subdirectories = ConvertGroupToVirtualDirectoryRecursively(CntGroup);
-                    result.Add(aOutGroup);
+                    dir.Name = name;
+                    dir.Subdirectories = ConvertGroupToVirtualDirectoryRecursively(CntGroup);
+                    result.Add(dir);
                 }
             return result;
         }
@@ -139,8 +143,14 @@ namespace IARProjectFileImporter
 
         public string UniqueID => "com.sysprogs.project_importers.iar";
 
-        public object SettingsControl => null;
-        public object Settings { get; set; }
+        public object SettingsControl { get; } = new GUI.IARImporterSettingsControl();
+        public object Settings
+        {
+            get => _Settings;
+            set => _Settings = value as IARProjectImporterSettings;
+        }
+
+        IARProjectImporterSettings _Settings = new IARProjectImporterSettings();
 
         public ImportedExternalProject ParseEIPFile(string pFileEwp, IProjectImportService service)
         {
@@ -174,6 +184,7 @@ namespace IARProjectFileImporter
                 Files = null,
                 Subdirectories = ConvertGroupToVirtualDirectoryRecursively(doc.SelectSingleNode("//project"))
             };
+
             result.RootDirectory = RootDirectory;
             
             if (deviceName == "")
@@ -195,5 +206,10 @@ namespace IARProjectFileImporter
         {
             return ParseEIPFile(parameters.ProjectFile, service);
         }
+    }
+
+    public class IARProjectImporterSettings
+    {
+        public bool UseIARToolchain { get; set; }
     }
 }
