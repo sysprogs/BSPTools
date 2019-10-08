@@ -144,7 +144,7 @@ namespace SLab_bsp_generator
         private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam)
         {
             List<MCUDefinitionWithPredicate> RegistersPeriphs = new List<MCUDefinitionWithPredicate>();
-            Dictionary<string, HardwareRegisterSet[]> periphs = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegistersEFM32(dir + "\\Include", fam.Definition.FamilySubdirectory);
+            Dictionary<string, HardwareRegisterSet[]> periphs = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegistersEFM32(dir + "\\Include", fam.Definition.FamilySubdirectory, fam.MCUs.Select(m=>m.Name).ToArray());
 
             foreach (var subfamily in periphs.Keys)
             {
@@ -154,18 +154,16 @@ namespace SLab_bsp_generator
             return RegistersPeriphs;
         }
 
-        static List<MCUBuilder> RemoveDuplicateMCU(ref List<MCUBuilder> rawmcu_list)
+        static void ValidateMCUNames(List<MCUBuilder> rawmcu_list)
         {
             foreach (var amcu in rawmcu_list)
             {
-                var idx = amcu.Name.IndexOf("-");
-                if (idx > 0)
-                    amcu.Name = amcu.Name.Remove(idx);
-                amcu.Name = amcu.Name.Replace(" ", "");
-                if (amcu.Name.EndsWith("G")) amcu.Name = amcu.Name.Remove(amcu.Name.Length - 1, 1);
-
+                var idx = amcu.Name.IndexOfAny(new[] { ' ', '-' });
+                if (idx >= 0)
+                    throw new Exception("MCU name should not contain '-' or ' '");
+                if (amcu.Name.EndsWith("G"))
+                    throw new Exception("MCU name should not end with 'G'");
             }
-            return rawmcu_list;
         }
 
         static bool IsMcuFull(MCUBuilder mcu)
@@ -294,7 +292,7 @@ namespace SLab_bsp_generator
 
                 var devices = GetMCUsForFamily(dir);
                 Console.WriteLine($"    {familyName}: {devices.Count} devices");
-                RemoveDuplicateMCU(ref devices);
+                ValidateMCUNames(devices);
 
                 if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
                     throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
