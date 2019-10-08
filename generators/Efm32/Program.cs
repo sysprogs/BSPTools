@@ -221,21 +221,18 @@ namespace SLab_bsp_generator
 
             return mcu;
         }
-        public static List<MCUBuilder> GetMcuFromSDK(string dirSDK)
+        public static List<MCUBuilder> GetMCUsForFamily(string familyDir)
         {
             List<MCUBuilder> rawmcu_list = new List<MCUBuilder>();
 
-            foreach (var flinc in Directory.GetFiles(Path.Combine(dirSDK, @"platform\Device\SiliconLabs"), "*.h", SearchOption.AllDirectories))
+            foreach (var flinc in Directory.GetFiles(familyDir, "*.h", SearchOption.AllDirectories))
             {
                 if (!flinc.ToLower().Contains("include") || Path.GetFileName(flinc).Contains("_"))
                     continue;
                 var MCU = GetMcuFromFile(flinc);
 
                 if (MCU != null)
-                {
                     rawmcu_list.Add(MCU);
-                    Console.WriteLine($@"Added {MCU.Name}");
-                }
                 else
                     Console.WriteLine($@"no mcu file {flinc}");
                 //if (rawmcu_list.Count() == 20)
@@ -274,69 +271,38 @@ namespace SLab_bsp_generator
                 return result;
             }
         }
-        static string SetDeviceRegex(string Famaly, string[] AllNamesFam)
-        {
-            string DevReg = "^" + Famaly + ".*";
-            if (Famaly == "EFM32G")
-                return "^EFM32G[^G].*";
-            if (Famaly == "MGM1")
-                return "^MGM1[^23].*";
-            if (Famaly == "BGM1")
-                return "^BGM1[^3].*";
-            var AddFam = AllNamesFam.Where(f => (f.Contains(Famaly)));
-            if (AddFam.Count() > 2)
-                throw new Exception("AddFam.Count() ");
-            foreach (var sd in AddFam)
-            {
-                if (sd.EndsWith(Famaly))
-                    continue;
-                string sd1 = sd.Remove(0, sd.LastIndexOf("\\") + 1);
-                if (!sd1.StartsWith(Famaly))
-                    throw new Exception("Regex not start ");
 
-
-
-                var devr1 = sd1.Replace(Famaly, "");
-                DevReg = "^" + Famaly + "[^" + devr1 + "].*".ToUpper();
-            }
-
-            return DevReg.ToUpper();
-
-        }
         static void Main(string[] args)
         {
             if (args.Length < 1)
                 throw new Exception("Usage: EFM32.exe <SLab SW package directory>");
 
             var bspBuilder = new SLabBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-            /*
-              var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuSiliconLabs.csv",
-                  "Part No.", "Flash (kB)", "Ram (kB)", "MCU Core", true);
-              RemoveDuplicateMCU(ref devices);
-              var devicesOld = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuSiliconLabsOld.csv",
-                  "Part No.", "Flash (kB)", "Ram (kB)", "MCU Core", true);
-            RemoveDuplicateMCU(ref devicesOld);
-              
-
-            foreach (var d in devicesOld)
-                if (!devices.Contains(d))
-                    devices.Add(d);
-            */
-            var devices = GetMcuFromSDK(bspBuilder.Directories.InputDir);
-            RemoveDuplicateMCU(ref devices);
-            if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
-                throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
-
 
             List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
             var ignoredFamilyNames = File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, "rulesfamaly.txt"));
 
             string DirDevices = Path.Combine(bspBuilder.Directories.InputDir, @"platform\Device\SiliconLabs");
             string[] allFamilySubdirectories = Directory.GetDirectories(DirDevices);
-            foreach (var fl in allFamilySubdirectories)
+            Console.WriteLine("Enumerating devices...");
+            foreach (var dir in allFamilySubdirectories)
             {
-                string vNameSubDir = Path.GetFileNameWithoutExtension(fl);
-                string StartupFile = Directory.GetFiles(Path.Combine(DirDevices, vNameSubDir, @"Source\GCC"), "startup_*.c")[0].Replace(bspBuilder.Directories.InputDir, @"$$BSPGEN:INPUT_DIR$$");
+                string familyName = Path.GetFileNameWithoutExtension(dir);
+
+                if (ignoredFamilyNames.FirstOrDefault(n => dir.Contains(n)) != null)
+                    continue;
+
+                var devices = GetMCUsForFamily(dir);
+                Console.WriteLine($"    {familyName}: {devices.Count} devices");
+                RemoveDuplicateMCU(ref devices);
+
+                if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
+                    throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
+
+                if (devices.Count == 0)
+                    throw new Exception("No devices for " + familyName);
+
+                string StartupFile = Directory.GetFiles(Path.Combine(DirDevices, familyName, @"Source\GCC"), "startup_*.c")[0].Replace(bspBuilder.Directories.InputDir, @"$$BSPGEN:INPUT_DIR$$");
 
                 var copyJob = new CopyJob()
                 {
@@ -344,36 +310,27 @@ namespace SLab_bsp_generator
                     TargetFolder = "Devices",
                     ProjectInclusionMask = "*.c",
                     AutoIncludeMask = "*.h",
-                    SourceFolder = DirDevices + "\\" + vNameSubDir
+                    SourceFolder = DirDevices + "\\" + familyName
                 };
 
-                bool flignore = false;
-                foreach (var igf in ignoredFamilyNames)
-                    if (fl.Contains(igf))
-                        flignore = true;
-
-                if (flignore)
-                    continue;
-
-                allFamilies.Add(new MCUFamilyBuilder(bspBuilder, new FamilyDefinition()
+                var fam = new MCUFamilyBuilder(bspBuilder, new FamilyDefinition()
                 {
-                    Name = vNameSubDir,
-                    DeviceRegex = SetDeviceRegex(vNameSubDir.ToUpper(), allFamilySubdirectories),
-                    FamilySubdirectory = vNameSubDir,
+                    Name = familyName,
+                    FamilySubdirectory = familyName,
                     PrimaryHeaderDir = "$$BSPGEN:INPUT_DIR$$",
                     StartupFileDir = StartupFile,
                     CoreFramework = new Framework() { CopyJobs = new[] { copyJob } },
                     Subfamilies = new MCUClassifier[] { }.ToArray()
-                }));
+                });
 
+                fam.MCUs.AddRange(devices);
+                allFamilies.Add(fam);
             }
 
-            var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
             List<MCUFamily> familyDefinitions = new List<MCUFamily>();
             List<MCU> mcuDefinitions = new List<MCU>();
             List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
             List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
-
 
             bool noPeripheralRegisters = args.Contains("/noperiph");
             List<KeyValuePair<string, string>> macroToHeaderMap = new List<KeyValuePair<string, string>>();
@@ -390,8 +347,13 @@ namespace SLab_bsp_generator
             foreach (var sample in commonPseudofamily.CopySamples())
                 exampleDirs.Add(sample);
 
+            Console.WriteLine("Processing families...");
+
+            int cnt = 0;
+
             foreach (var fam in allFamilies)
             {
+                Console.WriteLine($"    {fam.Definition.Name} ({++cnt}/{allFamilies.Count})...");
                 var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
                 if (rejectedMCUs.Length != 0)
                 {
@@ -439,11 +401,11 @@ namespace SLab_bsp_generator
                 Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "5.6.0"
+                PackageVersion = "5.8.3"
             };
 
+            Console.WriteLine("Saving BSP...");
             bspBuilder.Save(bsp, true);
-
         }
     }
 }

@@ -5,8 +5,6 @@
 	<DeviceRegex>EFM32.*</DeviceRegex>
 	<NonValidatedRegisters>
 		<string>RESERVED</string></NonValidatedRegisters>
-
-		
 	<Samples>
 		<TestedSample>
 			<Name>LEDBlink</Name>
