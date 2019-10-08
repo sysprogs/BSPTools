@@ -585,7 +585,7 @@ namespace StandaloneBSPValidator
                         PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sfE), ".o"),
                         AllInputs = new[] { sfE },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolFlags.FlagEscapingMode.ForMakefile)} -o $@".Replace('\\', '/').Replace("/\"", "\\\""),
+                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolchainSubtype.GCC, ToolFlags.FlagEscapingMode.ForMakefile)} -o $@".Replace('\\', '/').Replace("/\"", "\\\""),
                     });
                 }
             }
