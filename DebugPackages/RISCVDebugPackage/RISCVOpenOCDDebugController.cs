@@ -44,7 +44,7 @@ namespace RISCVDebugPackage
             OpenOCDCommandLine cmdLine = OpenOCDCommandLine.Parse(settings.CommandLine, startService.CommandLineHelper);
             if (context.ResolvedDevices?.Interface != null)
             {
-                if (context.ResolvedDevices.AllCompatibleDevices.Length > 1)
+                if (context.ResolvedDevices.AllCompatibleDevices.Length > 1 || settings.AlwaysPassSerialNumber)
                 {
                     var db = new QuickSetupDatabase(false, context.Method.Directory);
                     var matchingIface = db.AllInterfaces.FirstOrDefault(i => i.ID == context.ResolvedDevices.Interface.ID);
