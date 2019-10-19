@@ -100,6 +100,18 @@ namespace ESP8266DebugPackage
             }
 
             protected override bool RunLoadCommand(IDebugStartService service, ISimpleGDBSession session, string cmd) => _Controller.LoadFLASH(_Context, service, session, (ESP32OpenOCDSettings)_Settings, this);
+
+            protected override bool ShouldIgnoreErrorLine(string line)
+            {
+                if (base.ShouldIgnoreErrorLine(line))
+                    return true;
+                if (line.Contains("virt2phys"))
+                    return true;    //Looks to be by design in recent OpenOCD update
+                if (line.Contains("No symbols for FreeRTOS"))
+                    return true;    //Not relevant
+
+                return false;
+            }
         }
 
 
@@ -175,7 +187,7 @@ namespace ESP8266DebugPackage
                             var result = session.RunGDBCommand($"mon program_esp32 \"{path}\" 0x{blk.Offset:x}");
                             bool succeeded = result.StubOutput?.FirstOrDefault(l => l.Contains("** Programming Finished **")) != null;
                             if (!succeeded)
-                                throw new Exception("FLASH programming failed. Please review the gdb/OpenOCD logs for details.");
+                                throw new Exception("FLASH programming failed. Please try unplugging the board and plugging it back. If nothing helps, please review the gdb/OpenOCD logs for details.");
                             var m = result.StubOutput.Select(l => rgWriteXBytes.Match(l)).FirstOrDefault(m2 => m2.Success);
                             if (m == null)
                                 throw new Exception("FLASH programming did not report the amount of written bytes. Please review the gdb/OpenOCD logs for details.");
