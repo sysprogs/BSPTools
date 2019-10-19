@@ -37,6 +37,35 @@ namespace STM32CubeMXImporter
                 FillFlatFileCollectionRecursively(subdir, fileList);
         }
 
+        static void FixInvalidPathsRecursively(ImportedExternalProject.VirtualDirectory dir, string baseDir, ref Dictionary<string, string> allFilesUnderProjectDir)
+        {
+            foreach(var file in dir.Files)
+            {
+                if (!File.Exists(file.FullPath))
+                {
+                    if (allFilesUnderProjectDir == null)
+                    {
+                        allFilesUnderProjectDir = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+                        foreach(var fn in Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories))
+                        {
+                            var key = Path.GetFileName(fn);
+                            if (allFilesUnderProjectDir.ContainsKey(key))
+                                allFilesUnderProjectDir[key] = null;
+                            else
+                                allFilesUnderProjectDir[key] = fn;
+                        }
+                    }
+
+                    if (allFilesUnderProjectDir.TryGetValue(Path.GetFileName(file.FullPath), out var fullPath) && fullPath != null)
+                        file.FullPath = fullPath;
+                }
+            }
+
+            foreach (var subdir in dir.Subdirectories ?? new List<ImportedExternalProject.VirtualDirectory>())
+                FixInvalidPathsRecursively(subdir, baseDir, ref allFilesUnderProjectDir);
+        }
+
+
         //STM32CubeMX v5.3.0 does not reference some of the FreeRTOS-specific files and references an incorrect system file.
         //The method below detects and fixes this condition.
         static void ApplyFreeRTOSFixes(ImportedExternalProject.ConstructedVirtualDirectory dir, ref string[] includeDirs, ref PropertyDictionary2 mcuConfiguration)
@@ -211,6 +240,9 @@ namespace STM32CubeMXImporter
                 macros.Add("USE_FREERTOS");
                 ApplyFreeRTOSFixes(rootDir, ref includeDirs, ref mcuConfiguration);
             }
+
+            Dictionary<string, string> temporaryExistingFileCollection = null;
+            FixInvalidPathsRecursively(rootDir, baseDir, ref temporaryExistingFileCollection);
 
             deviceName = deviceName.TrimEnd('x');
             deviceName = deviceName.Substring(0, deviceName.Length - 1);
