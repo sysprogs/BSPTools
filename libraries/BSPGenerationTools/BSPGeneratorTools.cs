@@ -59,6 +59,8 @@ namespace BSPGenerationTools
         public string LinkerScriptPath;
         public string StartupFile;
         public string MCUDefinitionFile;
+        public MemoryLayout AttachedMemoryLayout;
+
         public override bool Equals(Object obj)
         {
             //MCUBuilder m1 = (MCUBuilder)obj;
@@ -117,7 +119,36 @@ namespace BSPGenerationTools
             if (sysVars.Count > 0)
                 mcu.AdditionalSystemVars = sysVars.ToArray();
 
-            bspBuilder.GetMemoryBases(out mcu.FLASHBase, out mcu.RAMBase);
+            if ((AttachedMemoryLayout?.Memories?.Count ?? 0) > 0)
+            {
+                var flash = AttachedMemoryLayout.Memories.FirstOrDefault(m => m.Type == MemoryType.FLASH);
+                var ram = AttachedMemoryLayout.Memories.FirstOrDefault(m => m.Type == MemoryType.RAM);
+
+                if (flash != null)
+                {
+                    mcu.FLASHBase = flash.Start;
+                    mcu.FLASHSize = (int)flash.Size;
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: could not find default FLASH for {mcu.ID}");
+                }
+
+                if (ram != null)
+                {
+                    mcu.RAMBase = ram.Start;
+                    mcu.RAMSize = (int)ram.Size;
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: could not find default RAM for {mcu.ID}");
+                }
+
+                mcu.MemoryMap = AttachedMemoryLayout.ToMemoryMap();
+            }
+            else
+                bspBuilder.GetMemoryBases(out mcu.FLASHBase, out mcu.RAMBase);
+
             return mcu;
         }
     }
@@ -176,7 +207,7 @@ namespace BSPGenerationTools
         public PropertyDictionary2 ExportRenamedFileTable()
         {
             List<PropertyDictionary2.KeyValue> result = new List<PropertyDictionary2.KeyValue>();
-            foreach(var kv in RenamedFileTable)
+            foreach (var kv in RenamedFileTable)
             {
                 if (!kv.Key.StartsWith(Directories.OutputDir))
                     throw new Exception("Unexpected renamed file");
@@ -667,6 +698,7 @@ namespace BSPGenerationTools
                 layout.DeviceName = generalizedName;
 
                 BSP.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, FamilyFilePrefix, mcu, layout, generalizedName);
+                mcu.AttachedMemoryLayout = layout;
             }
 
             return memoryLayouts;
@@ -1073,6 +1105,33 @@ namespace BSPGenerationTools
             updatedFamily.AdditionalSourceFiles = LoadedBSP.Combine(familyToCopy.AdditionalSourceFiles, updatedFamily.AdditionalSourceFiles);
             updatedFamily.AdditionalHeaderFiles = LoadedBSP.Combine(familyToCopy.AdditionalHeaderFiles, updatedFamily.AdditionalHeaderFiles);
             updatedFamily.AdditionalMakefileLines = LoadedBSP.Combine(familyToCopy.AdditionalMakefileLines, updatedFamily.AdditionalMakefileLines);
+        }
+    }
+
+    public static class Extensions
+    {
+        static MCUMemory MakeMCUMemory(Memory arg)
+        {
+            var mem = new MCUMemory
+            {
+                Address = arg.Start,
+                Size = arg.Size,
+                Name = arg.Name,
+            };
+
+            if (arg.Name == "FLASH")
+                mem.Flags |= MCUMemoryFlags.IsDefaultFLASH;
+
+            return mem;
+        }
+
+        public static AdvancedMemoryMap ToMemoryMap(this MemoryLayout layout)
+        {
+            var result = layout?.Memories?.Select(MakeMCUMemory)?.ToArray();
+            if (result != null)
+                return new AdvancedMemoryMap { Memories = result };
+            else
+                return null;
         }
     }
 }

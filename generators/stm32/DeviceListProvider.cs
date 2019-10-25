@@ -258,29 +258,9 @@ namespace stm32_bsp_generator
                     mcu.RAMBase = sram.Start;
                     mcu.RAMSize = (int)sram.Size;
 
-                    mcu.MemoryMap = new AdvancedMemoryMap
-                    {
-                        Memories = layout.Memories.Select(MakeMCUMemory).ToArray()
-                    };
+                    mcu.MemoryMap = layout.ToMemoryMap();
 
                     return mcu;
-                }
-
-                private MCUMemory MakeMCUMemory(Memory arg)
-                {
-                    var mem = new MCUMemory
-                    {
-                        Address = arg.Start,
-                        Size = arg.Size,
-                        Name = arg.Name,
-                    };
-
-                    if (arg.Name == "FLASH")
-                        mem.Flags |= MCUMemoryFlags.IsDefaultFLASH;
-                    // else
-                    //    mem.LoadedFromMemory = "FLASH";
-
-                    return mem;
                 }
             }
 
