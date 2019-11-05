@@ -99,3 +99,5 @@ void ReportTestFailure(const char *pFormat, ...);
 
 #define BITS_EQUAL(expected, actual, mask) ((((expected) & (mask)) == ((actual) & (mask))) || (ReportTestFailure("Unexpected value: expected %x, found %x", (expected) & (mask), (actual) & (mask)), 0))
 #define FAIL(text) ReportTestFailure(text)
+
+void OutputTestMessage(const char *pMessage);

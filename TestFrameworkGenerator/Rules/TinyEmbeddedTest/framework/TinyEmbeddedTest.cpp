@@ -97,3 +97,32 @@ void ReportTestFailure(const char *pFormat, ...)
 	throw std::exception();
 #endif
 }
+
+
+void OutputTestMessage(const char *pMessage)
+{
+	SysprogsTestHook_OutputMessage(tmsInfo, pMessage);
+}
+
+#ifndef TINY_EMBEDDED_TEST_HOOK_STDIO
+#define TINY_EMBEDDED_TEST_HOOK_STDIO 0
+#endif
+
+#if TINY_EMBEDDED_TEST_HOOK_STDIO
+int _isatty()
+{
+	return 1;
+}
+
+#ifdef __IAR_SYSTEMS_ICC__
+extern "C" size_t __write(int fd, const unsigned char *pBuffer, size_t size)
+#else
+extern "C" int _write(int fd, char *pBuffer, int size)
+#endif
+{
+	SysprogsTestHook_OutputMessageEx(tmsInfo, pBuffer, size);
+	//If we return less than [size], the newlib will retry the write call for the remaining bytes.
+	//However if we are running the the non-blocking mode, we actually want to skip the extra data to avoid slowdown.
+	return size;
+}
+#endif
