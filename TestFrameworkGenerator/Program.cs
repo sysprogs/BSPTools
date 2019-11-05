@@ -168,12 +168,4 @@ namespace CppUTest
     {
         public CopyJob[] CopyJobs;
     }
-
-    public class TestFrameworkSummary
-    {
-        public string PackageID;
-        public string PackageDescription;
-        public string PackageVersion;
-        public string MinimumEngineVersion;
-    }
 }

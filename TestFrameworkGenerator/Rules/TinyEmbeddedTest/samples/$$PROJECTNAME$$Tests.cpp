@@ -32,6 +32,7 @@ TEST_GROUP(DemoTestGroup)
 
 TEST(DemoTestGroup, FailingTest)
 {
+	OutputTestMessage("Hello from the failing test\n");
     LONGS_EQUAL(1, 1);
     FAIL("This test failed");
 }
@@ -67,5 +68,5 @@ TEST(DemoTestGroup, SuccessfulTest1)
 TEST(DemoTestGroup, SuccessfulTest2)
 {
 	//This test should succeed;
-	printf("Hello from Test #2");
+	OutputTestMessage("Hello from Test #2\n");
 }

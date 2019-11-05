@@ -97,7 +97,7 @@
 					<Name>Redirect printf() to Test Output window</Name>
 					<UniqueID>com.sysprogs.testsettings.redirect_stdio</UniqueID>
 					<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-					<DefaultValue>true</DefaultValue>
+					<DefaultValue>false</DefaultValue>
 					<ValueForTrue>1</ValueForTrue>
 					<ValueForFalse>0</ValueForFalse>
 				  </PropertyEntry>
