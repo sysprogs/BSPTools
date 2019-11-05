@@ -2,9 +2,9 @@
 #include <stdio.h>
 
 /*
-	This is a very basic sample demonstrating the Sysprogs TinyEmbeddedTest framework.
-	The framework is a minimalistic embedded testing framework that aims at minimizing the memory footprint.
-	It uses assertion macros and test/test group syntax from the CppUTest framework [https://cpputest.github.io/manual.html]
+    This is a very basic sample demonstrating the Sysprogs TinyEmbeddedTest framework.
+    The framework is a minimalistic embedded testing framework that aims at minimizing the memory footprint.
+    It uses assertion macros and test/test group syntax from the CppUTest framework [https://cpputest.github.io/manual.html]
 */
 
 TEST_GROUP(DemoTestGroup)
@@ -18,28 +18,28 @@ TEST_GROUP(DemoTestGroup)
     {
         asm("nop");
     }
-	
-	void TestSetup(TestInstance *)
-	{
-		asm("nop");
-	}
-	
-	void TestTeardown(TestInstance *)
-	{
-		asm("nop");
-	}
+    
+    void TestSetup(TestInstance *)
+    {
+        asm("nop");
+    }
+    
+    void TestTeardown(TestInstance *)
+    {
+        asm("nop");
+    }
 };
 
 TEST(DemoTestGroup, FailingTest)
 {
-	OutputTestMessage("Hello from the failing test\n");
+    OutputTestMessage("Hello from the failing test\n");
     LONGS_EQUAL(1, 1);
     FAIL("This test failed");
 }
 
 TEST(DemoTestGroup, SuccessfulTest1)
 {
-	//This test should succeed
+    //This test should succeed
     CHECK(true);
     CHECK_FALSE(false);
     CHECK_EQUAL(1, 1);
@@ -67,6 +67,6 @@ TEST(DemoTestGroup, SuccessfulTest1)
 
 TEST(DemoTestGroup, SuccessfulTest2)
 {
-	//This test should succeed;
-	OutputTestMessage("Hello from Test #2\n");
+    //This test should succeed;
+    OutputTestMessage("Hello from Test #2\n");
 }
