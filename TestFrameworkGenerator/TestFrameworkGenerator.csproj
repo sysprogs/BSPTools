@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SysprogsCore">
-      <HintPath>..\..\..\sysprogs\SysprogsCore\bin\Debug\SysprogsCore.dll</HintPath>
+      <HintPath>..\..\..\..\components\SysprogsCore\bin\Debug\SysprogsCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -43,7 +43,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="VisualGDBCore">
-      <HintPath>..\..\..\sysprogs\VisualGDB\VisualGDB\bin\Debug\VisualGDBCore.dll</HintPath>
+      <HintPath>..\..\..\..\products\VisualGDB\VisualGDB\bin\Debug\VisualGDBCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
