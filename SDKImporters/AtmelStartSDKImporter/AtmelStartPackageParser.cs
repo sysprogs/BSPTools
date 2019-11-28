@@ -13,7 +13,10 @@ namespace AtmelStartSDKImporter
     public class AtmelStartPackageParser : ISDKImporter
     {
         public string Name => "Atmel START Project";
-        public string UniqueID => "com.sysprogs.sdkimporters.atmel.start";
+
+        public const string ID = "com.sysprogs.sdkimporters.atmel.start";
+
+        public string UniqueID => ID;
 
         public string CommandName => "Import an Atmel START Project";
 
@@ -310,6 +313,7 @@ namespace AtmelStartSDKImporter
                 PackageID = "com.sysprogs.atstart." + device,
                 GNUTargetID = "arm-eabi",
                 PackageDescription = $"{device} Support",
+                BSPImporterID = ID,
                 MCUFamilies = new[] { new MCUFamily { ID = "ATSTART" } },
                 SupportedMCUs = new[] { mcu },
                 Frameworks = xml.SelectNodes("package/components/component").OfType<XmlElement>().Select(GenerateFrameworkForComponent).Where(f => f != null).ToArray(),
@@ -371,6 +375,7 @@ namespace AtmelStartSDKImporter
             return new EmbeddedFramework
             {
                 ID = $"com.sysprogs.atstart.{name}",
+                UserFriendlyName = name,
                 ProjectFolderName = name,
                 DefaultEnabled = true,
 

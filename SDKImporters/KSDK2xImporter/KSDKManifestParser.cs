@@ -730,6 +730,7 @@ namespace KSDK2xImporter
                     FileConditions = allConditions.ToArray(),
                     VendorSampleCatalogName = "KSDK Samples",
                     EmbeddedSamples = allFrameworks.Where(f => f.OriginalType == "project_template").Select(f => f.ToProjectSample(alwaysIncludedFrameworks)).ToArray(),
+                    BSPImporterID = ID,
                 },
 
                 VendorSampleDirectory = new VendorSampleDirectory
@@ -747,8 +748,10 @@ namespace KSDK2xImporter
             return new ImportedExternalSDK { BSPID = bsp.BSP.PackageID };
         }
 
+        public const string ID = "com.sysprogs.sdkimporters.nxp.ksdk";
+
         public string Name => "MCUXpresso SDK";
-        public string UniqueID => "com.sysprogs.sdkimporters.nxp.ksdk";
+        public string UniqueID => ID;
         public string CommandName => "Import an MCUXpresso SDK";
         public string Target => "arm-eabi";
         public string OpenFileFilter => "MCUXpresso SDK Manifest Files|*manifest*.xml";
