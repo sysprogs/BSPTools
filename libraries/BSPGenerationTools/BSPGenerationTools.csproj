@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BSPReportWriter.cs" />
     <Compile Include="BSPGeneratorTools.cs" />
     <Compile Include="Parsing\BasicExpressionResolver.cs" />
     <Compile Include="Parsing\CppTokenizer.cs" />

@@ -317,6 +317,11 @@ namespace stm32_bsp_generator
                             Core = CortexCore.M3;
                             strCore = "M3";
                             break;
+                        case "Arm Cortex-M33":
+                        case "ARM Cortex-M33":
+                            Core = CortexCore.M33;
+                            strCore = "M33";
+                            break;
                         case "Arm Cortex-M4":
                         case "ARM Cortex-M4":
                             Core = CortexCore.M4;
@@ -332,12 +337,13 @@ namespace stm32_bsp_generator
                         default:
                             throw new Exception("Don't know how to map core: " + core);
                     }
+
                     if (numcore > 0)
                     {
                         Name += "_" + strCore;
-                        //   RefName += "_" + strCore;
                         RPN += "_" + strCore;
                     }
+
                     Memories = db.LookupMemories(RPN, RefName, out LinkerScripts);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();

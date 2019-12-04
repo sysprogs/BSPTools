@@ -429,9 +429,8 @@ namespace stm32_bsp_generator
             ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
             IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
 
-            var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output\" + rulesetName, @"..\..\rules\" + rulesetName), cubeRoot);
-            Directory.CreateDirectory(@"..\..\Logs");
-            using (var wr = new ParseReportWriter(@"..\..\Logs\registers.log"))
+            using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output\" + rulesetName, @"..\..\rules\" + rulesetName, @"..\..\Logs\" + rulesetName), cubeRoot))
+            using (var wr = new ParseReportWriter(Path.Combine(bspBuilder.Directories.LogDir, "registers.log")))
             {
                 var devices = provider.LoadDeviceList(bspBuilder);
                 if (devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP1")).Count() > 0)
@@ -517,11 +516,15 @@ namespace stm32_bsp_generator
 
                 var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
-                if (rejects.Count > 0 && ruleset == STM32Ruleset.Classic)
+                if (ruleset == STM32Ruleset.Classic)
                 {
-                    Console.WriteLine("Globally unsupported MCUs:");
                     foreach (var r in rejects)
-                        Console.WriteLine("\t{0}", r.Name);
+                    {
+                        if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB"))
+                            continue;
+
+                        bspBuilder.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
+                    }
                 }
 
                 List<MCUFamily> familyDefinitions = new List<MCUFamily>();
@@ -541,13 +544,7 @@ namespace stm32_bsp_generator
                 foreach (var fam in allFamilies)
                 {
                     bspBuilder.GetMemoryMcu(fam);
-                    var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
-                    if (rejectedMCUs.Length != 0)
-                    {
-                        Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
-                        foreach (var mcu in rejectedMCUs)
-                            Console.WriteLine("\t{0}", mcu.Name);
-                    }
+                    fam.RemoveUnsupportedMCUs();
 
                     fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
                     if (!noPeripheralRegisters)
@@ -597,7 +594,7 @@ namespace stm32_bsp_generator
 
                 File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
                 Console.WriteLine("Saving BSP...");
-                bspBuilder.Save(bsp, true);
+                bspBuilder.Save(bsp, false);
             }
         }
 

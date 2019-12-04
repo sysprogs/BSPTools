@@ -10,7 +10,7 @@
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
 			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32G431xx;STM32G441xx;STM32G471xx;STM32G473xx;STM32G474xx;STM32G484xx;STM32G4gbk1cb</AutoOptions> 
+			<AutoOptions>STM32G431xx;STM32G441xx;STM32G471xx;STM32G473xx;STM32G483xx;STM32G474xx;STM32G484xx;STM32GBK1CB</AutoOptions> 
 			<UnsupportedMCUs></UnsupportedMCUs>
 			<Options>
 			</Options>

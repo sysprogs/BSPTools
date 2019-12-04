@@ -24,6 +24,7 @@ namespace BSPGenerationTools
         M0,
         M0Plus,
         M3,
+        M33,
         M4,
         M4_NOFPU,
         M7,
@@ -155,19 +156,21 @@ namespace BSPGenerationTools
 
     public struct BSPDirectories
     {
-        public readonly string InputDir, OutputDir, RulesDir;
+        public readonly string InputDir, OutputDir, RulesDir, LogDir;
 
-        public BSPDirectories(string inputDir, string outputDir, string rulesDir)
+        public BSPDirectories(string inputDir, string outputDir, string rulesDir, string logDir)
         {
             InputDir = inputDir;
             OutputDir = outputDir;
             RulesDir = rulesDir;
+            LogDir = logDir;
         }
     }
 
-    public abstract class BSPBuilder
+    public abstract class BSPBuilder : IDisposable
     {
         public readonly ReverseFileConditionBuilder ReverseFileConditions = new ReverseFileConditionBuilder();
+        public readonly BSPReportWriter Report;
 
         public LinkerScriptTemplate LDSTemplate;
         public readonly string BSPRoot;
@@ -182,6 +185,8 @@ namespace BSPGenerationTools
 
         public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = null, int linkerScriptLevel = 4)
         {
+            Report = new BSPReportWriter(dirs.LogDir);
+
             if (linkerScriptTemplate == null)
             {
                 for (int i = 0; i < linkerScriptLevel; i++)
@@ -385,6 +390,11 @@ namespace BSPGenerationTools
             if (totalErrors > 0)
                 throw new Exception($"Found {totalErrors} validation errors. Please check the generator output.");
         }
+
+        public void Dispose()
+        {
+            Report.Dispose();
+        }
     }
 
     public class MCUFamilyBuilder
@@ -520,6 +530,11 @@ namespace BSPGenerationTools
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m3 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
                     coreName = "M3";
+                    break;
+                case CortexCore.M33:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
+                    coreName = "M33";
                     break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16";
@@ -805,7 +820,14 @@ namespace BSPGenerationTools
                             string source = src;
                             BSP.ExpandVariables(ref source);
                             string targetPath = Path.Combine(destFolder, Path.GetFileName(source));
-                            File.Copy(source, targetPath);
+                            try
+                            {
+                                File.Copy(source, targetPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                BSP.Report.ReportMergeableError("Failed to copy sample file", $"{source} => {targetPath}: {ex.Message}");
+                            }
                         }
                     }
 
@@ -814,9 +836,17 @@ namespace BSPGenerationTools
                         {
                             foreach (var fn in p.FilePath.Split(';'))
                             {
-                                List<string> allLines = File.ReadAllLines(Path.Combine(destFolder, fn)).ToList();
-                                p.Apply(allLines);
-                                File.WriteAllLines(Path.Combine(destFolder, fn), allLines);
+                                string path = Path.Combine(destFolder, fn);
+                                try
+                                {
+                                    List<string> allLines = File.ReadAllLines(path).ToList();
+                                    p.Apply(allLines);
+                                    File.WriteAllLines(Path.Combine(destFolder, fn), allLines);
+                                }
+                                catch (Exception ex)
+                                {
+                                    BSP.Report.ReportMergeableError("Failed to patch file", $"{path}: {ex.Message}");
+                                }
                             }
                         }
 
@@ -951,7 +981,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public MCUBuilder[] RemoveUnsupportedMCUs(bool throwIfUnexpected)
+        public MCUBuilder[] RemoveUnsupportedMCUs()
         {
             List<MCUBuilder> removedMCUs = new List<MCUBuilder>();
             foreach (var classifier in Definition.Subfamilies)
@@ -961,12 +991,13 @@ namespace BSPGenerationTools
 
                 var removed = MCUs.Where(m => classifier.TryMatchMCUName(m.Name) == null).ToArray();
                 MCUs = MCUs.Where(m => classifier.TryMatchMCUName(m.Name) != null).ToList();
-                if (throwIfUnexpected)
+                var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
+                foreach (var mcu in removed)
                 {
-                    var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
-                    foreach (var mcu in removed)
-                        if (rgUnsupported == null || !rgUnsupported.IsMatch(mcu.Name))
-                            throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized " + mcu.Name);
+                    if (rgUnsupported?.IsMatch(mcu.Name) == true)
+                        BSP.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Ignored unsupported MCU(s)", mcu.Name, true);
+                    else
+                        BSP.Report.ReportMergeableError("Unsupported MCU(s) found. Please update the MCUClassifier tags.", mcu.Name, true);
                 }
 
                 removedMCUs.AddRange(removed);
