@@ -78,7 +78,7 @@
 		</Framework>
 		<Framework>
 			<Name>STM32 USB Device Library</Name>
-			<ID>com.sysprogs.arm.stm32.usbdev.$$STM32:FAMILY$$</ID>
+			<ID>com.sysprogs.arm.stm32.usbdev.$$STM32:FAMILY_EX$$</ID>
 			<ClassID>com.sysprogs.arm.stm32.usbdev</ClassID>
 			<ProjectFolderName>USB Device</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
@@ -123,7 +123,7 @@ Class\\MSC\\.*=>Mass Storage (MSC)[MSC];
 		</Framework>
 		<Framework>
 			<Name>STM32 USB Host Library</Name>
-			<ID>com.sysprogs.arm.stm32.usbhost.$$STM32:FAMILY$$</ID>
+			<ID>com.sysprogs.arm.stm32.usbhost.$$STM32:FAMILY_EX$$</ID>
 			<ClassID>com.sysprogs.arm.stm32.usbhost</ClassID>
 			<ProjectFolderName>USB Host</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>

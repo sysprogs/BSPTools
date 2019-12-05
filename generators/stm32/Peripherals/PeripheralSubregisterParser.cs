@@ -66,7 +66,7 @@ namespace stm32_bsp_generator
                                                      SubregisterMatchingFlags flags,
                                                      out MatchedStructureField[] result)
         {
-            for (int i = 1; i < (nameComponents.Length - skippedComponents); i++)
+            for (int i = 1; i <= (nameComponents.Length - skippedComponents); i++)
             {
                 string[] nameForMatching = nameComponents.Skip(skippedComponents).Take(i).ToArray();
 

@@ -25,53 +25,8 @@ namespace stm32_bsp_generator
     {
         public class STM32BSPBuilder : BSPBuilder
         {
-            List<KeyValuePair<Regex, MemoryLayout>> _SpecialMemoryLayouts = new List<KeyValuePair<Regex, MemoryLayout>>();
             public readonly STM32SDKCollection SDKList;
 
-            public void GetMemoryMcu(MCUFamilyBuilder pfam)
-            {
-                if (pfam.FamilyFilePrefix.StartsWith("STM32W1"))
-                {
-                    string kvStr = "STM32W108HB";
-                    MemoryLayout layoutW1 = new MemoryLayout { DeviceName = "STM32W108xx", Memories = new List<Memory>() };
-                    layoutW1.Memories.Add(new Memory
-                    {
-                        Name = "FLASH",
-                        Access = MemoryAccess.Undefined,// Readable | MemoryAccess.Writable | MemoryAccess.Executable
-                        Type = MemoryType.FLASH,
-                        Start = 0x08000000,
-                        Size = 128 * 1024
-                    });
-
-                    layoutW1.Memories.Add(new Memory
-                    {
-                        Name = "SRAM",
-                        Access = MemoryAccess.Undefined,// MemoryAccess.Writable,
-                        Type = MemoryType.RAM,
-                        Start = 0x20000000,
-                        Size = 8 * 1024
-                    });
-
-                    _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(kvStr.Replace('x', '.') + ".*"), layoutW1));
-
-                }
-                else
-                {
-                    string aDirIcf = pfam.Definition.StartupFileDir;
-                    if (!aDirIcf.EndsWith("gcc"))
-                        throw new Exception("No GCC startup template");
-                    aDirIcf = aDirIcf.Replace("\\gcc", "\\iar\\linker");
-                    if (!Directory.Exists(aDirIcf))
-                        throw new Exception("No dir " + aDirIcf);
-
-                    foreach (var fnIcf in Directory.GetFiles(aDirIcf, "stm32*_flash.icf"))
-                    {
-                        string kvStr = Path.GetFileName(fnIcf).Replace("_flash.icf", "");
-                        var regex = new Regex(kvStr.Replace('x', '.') + ".*", RegexOptions.IgnoreCase);
-                        _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(regex, GetLayoutFromICF(fnIcf, kvStr)));
-                    }
-                }
-            }
             const int NO_DATA = -1;
 
             public override string GetMCUTypeMacro(MCUBuilder mcu)
@@ -156,32 +111,11 @@ namespace stm32_bsp_generator
 
             public readonly string STM32CubeDir;
 
-            static void VerifyMemories(string mcu, MemoryLayout newLayout, MemoryLayout compatLayout, string name)
-            {
-                return; //The sizes parsed from the ICF files don't match the ST datasheets and the XML definitions
-
-                var mem1 = compatLayout.Memories.First(m => m.Name == name);
-                var mem2 = newLayout.Memories.First(m => m.Name == name);
-
-                if (mem1.Size != mem2.Size)
-                    Console.WriteLine($"Mismatching {name} size for {mcu}: was {mem1.Size}, now {mem2.Size}");
-                if (mem1.Start != mem2.Start)
-                    throw new Exception($"Mismatching {name} offset for {mcu}");
-            }
-
             public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
-                MemoryLayout compatLayout = _SpecialMemoryLayouts.FirstOrDefault(m => m.Key.IsMatch(mcu.Name)).Value;
-
                 if (mcu is DeviceListProviders.CubeProvider.STM32MCUBuilder stMCU)
                 {
-                    var newLayout = stMCU.ToMemoryLayout(true);
-
-                    if (compatLayout != null)
-                    {
-                        VerifyMemories(mcu.Name, newLayout, compatLayout, "FLASH");
-                        VerifyMemories(mcu.Name, newLayout, compatLayout, "SRAM");
-                    }
+                    var newLayout = stMCU.ToMemoryLayout(family.BSP.Report);
                     return newLayout;
                 }
 
@@ -543,7 +477,6 @@ namespace stm32_bsp_generator
 
                 foreach (var fam in allFamilies)
                 {
-                    bspBuilder.GetMemoryMcu(fam);
                     fam.RemoveUnsupportedMCUs();
 
                     fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));

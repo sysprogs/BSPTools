@@ -565,7 +565,7 @@ namespace StandaloneBSPValidator
             BSPValidationFlags validationFlags = BSPValidationFlags.None)
         {
             BuildJob job = new BuildJob();
-            string prefix = string.Format("{0}\\{1}\\{2}-", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.GNUTargetID);
+            string prefix = string.Format("{0}\\{1}\\{2}", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.Prefix);
 
             foreach (var sf in prj.SourceFiles)
             {

@@ -30,6 +30,17 @@ namespace LinkerScriptGenerator
             _ScriptTemplate = scriptTemplate;
             _MemoryTemplate = memoryTemplate;
 
+            foreach (var mem in memoryTemplate.Memories)
+            {
+                if (mem.IsPrimary)
+                {
+                    if (mem.Type == MemoryType.FLASH)
+                        _MainFLASH = mem;
+                    else if (mem.Type == MemoryType.RAM)
+                        _MainRAM = mem;
+                }
+            }
+
             if (memoryTemplate.Memories == null)
                 throw new Exception("Memory list cannot be empty");
             foreach (var mem in memoryTemplate.Memories)
@@ -87,7 +98,7 @@ namespace LinkerScriptGenerator
             OutputSectionDefinitions(sw);
 
             if (_ScriptTemplate.SymbolAliases != null)
-                foreach(var alias in _ScriptTemplate.SymbolAliases)
+                foreach (var alias in _ScriptTemplate.SymbolAliases)
                     sw.WriteLine($"PROVIDE({alias.Name} = {alias.Target});");
         }
 
@@ -100,7 +111,7 @@ namespace LinkerScriptGenerator
             for (int i = 0; i < _ScriptTemplate.Sections.Count; i++)
             {
                 var section = _ScriptTemplate.Sections[i];
-                
+
                 OutputSectionDefinition(sw, "\t", section);
                 referencedMemories[section.TargetMemory] = true;
 

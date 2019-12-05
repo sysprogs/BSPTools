@@ -231,20 +231,34 @@ namespace stm32_bsp_generator
                     Memories = Memories.OrderBy(m => m.SortWeight).ToArray();
                 }
 
-                public MemoryLayout ToMemoryLayout(bool patchMemoryNames)
+                public MemoryLayout ToMemoryLayout(BSPReportWriter report)
                 {
                     var layout = new MemoryLayout { DeviceName = Name, Memories = Memories.Select(m => m.ToMemoryDefinition()).ToList() };
-                    if (patchMemoryNames)
+
+                    Memory ram;
+
+                    if (MCU.Name.StartsWith("STM32H7"))
                     {
-                        if (layout.Memories.FirstOrDefault(m => m.Name == "SRAM") == null)
-                        {
-                            var ram1 = layout.Memories.FirstOrDefault(m => m.Name == "RAM_D1") ??
-                                       layout.Memories.FirstOrDefault(m => m.Name == "RAM_D2") ??
-                                       layout.Memories.FirstOrDefault(m => m.Name == "RAM1") ??
-                                       throw new Exception("Failed to locate RAM1");
-                            ram1.Name = "SRAM";
-                        }
+                        if (MCU.Name.EndsWith("M4"))
+                            ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000));
+                        else
+                            ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x24000000));
                     }
+                    else
+                    {
+                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, 
+                            MemoryLocationRule.ByName("SRAM"),
+                            MemoryLocationRule.ByName("RAM_D1"),
+                            MemoryLocationRule.ByName("RAM_D2"),
+                            MemoryLocationRule.ByName("RAM1"));
+                    }
+
+                    if (ram == null)
+                        report.ReportMergeableError("Could not locate RAM compatible with STM32H7 system file", MCU.Name, true);
+
+                    if (layout.TryLocateAndMarkPrimaryMemory(MemoryType.FLASH, MemoryLocationRule.ByName("FLASH")) == null)
+                        throw new Exception("No FLASH found");
+
                     return layout;
                 }
 
@@ -252,11 +266,14 @@ namespace stm32_bsp_generator
                 {
                     var mcu = base.GenerateDefinition(fam, bspBuilder, requirePeripheralRegisters, allowIncompleteDefinition, flagsToAdd);
 
-                    var layout = ToMemoryLayout(true);
-                    var sram = layout.Memories.First(m => m.Name == "SRAM");
+                    var layout = ToMemoryLayout(fam.BSP.Report);
+                    var sram = layout.Memories.FirstOrDefault(m => m.Type == MemoryType.RAM && m.IsPrimary);
 
-                    mcu.RAMBase = sram.Start;
-                    mcu.RAMSize = (int)sram.Size;
+                    if (sram != null)
+                    {
+                        mcu.RAMBase = sram.Start;
+                        mcu.RAMSize = (int)sram.Size;
+                    }
 
                     mcu.MemoryMap = layout.ToMemoryMap();
 
