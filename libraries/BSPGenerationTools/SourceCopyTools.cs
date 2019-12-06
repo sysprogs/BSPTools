@@ -231,8 +231,13 @@ namespace BSPGenerationTools
         public string ProjectInclusionMask = "*"; //<MASKLIST> that will be added in the Solution Explorer
         public string PreprocessorMacros;   //semicolon-separated macros
         public string AdditionalIncludeDirs;    //Semicolon-separated, full path starting with $$SYS:BSP_ROOT$$
+
         public string[] SimpleFileConditions;   //See <CONDITION SYNTAX> above
+
+        public string SmartPropertyGroup;   //Syntax: [Name]|[Prefix]
         public string[] SmartFileConditions; //Will be automatically translated to SimpleFileConditions & properties. Option name|list of (regex => option value). See CC3220 BSP for examples.
+        public string[] SmartPreprocessorMacros;
+
         public bool AlreadyCopied;  //The files have been copied (and patched) by some previous jobs. This job is defined only to add the files to the project.
         public string[] GuardedFiles;
         public string SymlinkResolutionMask;
@@ -247,6 +252,8 @@ namespace BSPGenerationTools
             public Regex Regex;
             public Condition Condition;
             public int UseCount;
+
+            public ReverseFileConditionBuilder.ConditionHandle ReverseConditionHandle;
 
             public override string ToString()
             {
@@ -289,66 +296,166 @@ namespace BSPGenerationTools
             public bool Matches(string targetFile) => OldName.IsMatch(targetFile);
         }
 
-        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties)
+        struct ConditionRecord
+        {
+            public string Condition;
+            public ReverseFileConditionBuilder.ConditionHandle Handle;
+
+            public ConditionRecord(string condition, ReverseFileConditionBuilder.ConditionHandle handle)
+            {
+                Condition = condition;
+                Handle = handle;
+            }
+        }
+
+
+        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties, ReverseFileConditionBuilder.Handle reverseConditions)
         {
             List<ParsedCondition> conditions = null;
-            List<string> allConditions = new List<string>();
-            if (SimpleFileConditions != null)
-                allConditions.AddRange(SimpleFileConditions);
-            if (SmartFileConditions != null)
-            {
-                foreach (var str in SmartFileConditions)
-                {
-                    int idx = str.IndexOf('|');
-                    string name = str.Substring(0, idx);
-                    string id = "com.sysprogs.bspoptions." + name.Replace(' ', '_');
-                    string[] values = str.Substring(idx + 1).Split(';');
+            List<ConditionRecord> allConditions = new List<ConditionRecord>();
+            List<string> preprocessorMacros = new List<string>();
 
-                    PropertyEntry entry;
-                    if (values.Length == 1)
+            if (SimpleFileConditions != null)
+            {
+                allConditions.AddRange(SimpleFileConditions.Select(c => new ConditionRecord(c, null)));
+                reverseConditions?.FlagIncomplete(ReverseFileConditionWarning.HasRegularConditions);
+            }
+
+            if (!string.IsNullOrEmpty(PreprocessorMacros))
+            {
+                preprocessorMacros.AddRange(PreprocessorMacros.Split(';'));
+                foreach(var macro in preprocessorMacros)
+                    reverseConditions?.AttachPreprocessorMacro(macro, null);
+            }
+
+            if (SmartFileConditions != null || SmartPreprocessorMacros != null)
+            {
+                PropertyGroup grp;
+                if (configurableProperties == null)
+                    configurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
+                if (!string.IsNullOrEmpty(SmartPropertyGroup))
+                {
+                    string[] elements = SmartPropertyGroup.Split('|');
+                    configurableProperties.PropertyGroups.Add(grp = new PropertyGroup { Name = elements[1], UniqueID = elements[0] });
+                }
+                else
+                {
+                    grp = configurableProperties.PropertyGroups.FirstOrDefault();
+                    if (grp == null)
+                        configurableProperties.PropertyGroups.Insert(0, grp = new PropertyGroup { });
+                }
+
+                foreach (var str in SmartFileConditions ?? new string[0])
+                {
+                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID);
+
+                    if (def.Items.Length == 1)
                     {
-                        var val = values[0];
-                        string regex, value;
-                        idx = val.IndexOf("=>");
-                        if (idx == -1)
+                        var item = def.Items[0];
+                        allConditions.Add(new ConditionRecord($"{item.Key}: $${def.IDWithPrefix}$$ == {item.Value.ID}", reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Value.ID)));
+
+                        reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, "");
+
+                        grp.Properties.Add(new PropertyEntry.Boolean
                         {
-                            regex = val;
-                            value = "1";
+                            ValueForTrue = item.Value.ID,
+                            Name = def.Name,
+                            UniqueID = def.IDWithoutPrefix,
+                            DefaultValue = def.IsDefaultOn != false
+                        });
+                    }
+                    else
+                    {
+                        List<PropertyEntry.Enumerated.Suggestion> suggestions = new List<PropertyEntry.Enumerated.Suggestion>();
+                        int? emptyIndex = null;
+
+                        foreach (var item in def.Items)
+                        {
+                            if (item.Key == "")
+                            {
+                                // 'None' value. No conditions will trigger when this is selected.
+                                emptyIndex = suggestions.Count;
+                            }
+                            else
+                            {
+                                allConditions.Add(new ConditionRecord($"{item.Key}: $${def.IDWithPrefix}$$ == {item.Value.ID}", reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Value.ID)));
+                            }
+
+                            suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = item.Value.ID, UserFriendlyName = item.Value.Name });
+                        }
+
+                        reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, suggestions[emptyIndex ?? def.DefaultItemIndex].InternalValue);
+
+                        grp.Properties.Add(new PropertyEntry.Enumerated
+                        {
+                            Name = def.Name,
+                            UniqueID = def.IDWithoutPrefix,
+                            SuggestionList = suggestions.ToArray(),
+                            DefaultEntryIndex = def.DefaultItemIndex
+                        });
+                    }
+                }
+
+                foreach (var str in SmartPreprocessorMacros ?? new string[0])
+                {
+                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID, 1);
+                    preprocessorMacros.Add(string.Format(def.ExtraArguments[0], "$$" + def.IDWithPrefix + "$$"));
+
+                    if (def.Items.Length == 1)
+                    {
+                        var item = def.Items[0];
+
+                        if (item.Key.StartsWith("@"))
+                        {
+                            var prop = new PropertyEntry.String
+                            {
+                                Name = def.Name,
+                                UniqueID = def.IDWithoutPrefix,
+                                DefaultValue = item.Key.TrimStart('@'),
+                            };
+
+                            grp.Properties.Add(prop);
+
+                            reverseConditions?.AttachFreeformPreprocessorMacro(def.ExtraArguments[0], def.IDWithPrefix);
+                            reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, prop.DefaultValue);
                         }
                         else
                         {
-                            regex = val.Substring(0, idx);
-                            value = val.Substring(idx + 2);
+                            grp.Properties.Add(new PropertyEntry.Boolean
+                            {
+                                Name = def.Name,
+                                UniqueID = def.IDWithoutPrefix,
+                                ValueForTrue = item.Key,
+                                DefaultValue = def.IsDefaultOn ?? true,
+                            });
+
+                            string expandedMacro = string.Format(def.ExtraArguments[0], item.Key);
+                            reverseConditions?.AttachPreprocessorMacro(expandedMacro, reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Key));
+                            reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, "");
                         }
-
-                        allConditions.Add($"{regex}: $${id}$$ == {value}");
-
-                        entry = new PropertyEntry.Boolean { ValueForTrue = value, Name = name, UniqueID = id, DefaultValue = true };
                     }
                     else
                     {
                         List<PropertyEntry.Enumerated.Suggestion> suggestions = new List<PropertyEntry.Enumerated.Suggestion>();
 
-                        foreach (var val in values)
+                        foreach (var item in def.Items)
                         {
-                            idx = val.IndexOf("=>");
-                            string regex = val.Substring(0, idx);
-                            string value = val.Substring(idx + 2);
-                            allConditions.Add($"{regex}: $${id}$$ == {value}");
-                            suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = value });
+                            suggestions.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = item.Key, UserFriendlyName = item.Value.Name });
+
+                            string expandedMacro = string.Format(def.ExtraArguments[0], item.Key);
+                            reverseConditions?.AttachPreprocessorMacro(expandedMacro, reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Key));
                         }
 
-                        entry = new PropertyEntry.Enumerated { Name = name, UniqueID = id, SuggestionList = suggestions.ToArray() };
+                        reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, suggestions[def.DefaultItemIndex].InternalValue);
+
+                        grp.Properties.Add(new PropertyEntry.Enumerated
+                        {
+                            Name = def.Name,
+                            UniqueID = def.IDWithoutPrefix,
+                            SuggestionList = suggestions.ToArray(),
+                            DefaultEntryIndex = def.DefaultItemIndex
+                        });
                     }
-
-                    if (configurableProperties?.PropertyGroups == null)
-                        configurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
-
-                    var grp = configurableProperties.PropertyGroups.FirstOrDefault(g => g.Name == null && g.UniqueID == null);
-                    if (grp == null)
-                        configurableProperties.PropertyGroups.Insert(0, grp = new PropertyGroup());
-
-                    grp.Properties.Add(entry);
                 }
             }
 
@@ -357,14 +464,14 @@ namespace BSPGenerationTools
                 conditions = new List<ParsedCondition>();
                 foreach (var cond in allConditions)
                 {
-                    int idx = cond.IndexOf(':');
+                    int idx = cond.Condition.IndexOf(':');
                     if (idx == -1)
                         throw new Exception("Invalid simple condition format");
 
-                    Regex rgFile = new Regex(cond.Substring(0, idx), RegexOptions.IgnoreCase);
-                    string rawCond = cond.Substring(idx + 1).Trim();
+                    Regex rgFile = new Regex(cond.Condition.Substring(0, idx), RegexOptions.IgnoreCase);
+                    string rawCond = cond.Condition.Substring(idx + 1).Trim();
                     Condition parsedCond = ParseCondition(rawCond);
-                    conditions.Add(new ParsedCondition { Regex = rgFile, Condition = parsedCond });
+                    conditions.Add(new ParsedCondition { Regex = rgFile, Condition = parsedCond, ReverseConditionHandle = cond.Handle });
                 }
             }
 
@@ -469,8 +576,11 @@ namespace BSPGenerationTools
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
 
-                if (projectContents.IsMatch(f))
+                bool includedInProject = projectContents.IsMatch(f);
+                if (includedInProject)
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
+
+                bool foundCondition = false;
 
                 if (conditions != null)
                 {
@@ -479,9 +589,17 @@ namespace BSPGenerationTools
                         {
                             bsp.MatchedFileConditions.Add(new FileCondition { ConditionToInclude = cond.Condition, FilePath = encodedPath });
                             cond.UseCount++;
+
+                            if (includedInProject)
+                                cond.ReverseConditionHandle?.AttachFile(encodedPath);
+
+                            foundCondition = true;
                             break;
                         }
                 }
+
+                if (!foundCondition && includedInProject)
+                    reverseConditions?.AttachFile(encodedPath);
             }
 
             if (AdditionalProjectFiles != null)
@@ -542,11 +660,18 @@ namespace BSPGenerationTools
                 }
 
             if (AdditionalIncludeDirs != null)
-                includeDirs.AddRange(AdditionalIncludeDirs.Split(';').Select(d => MapIncludeDir(absTarget, subdir, d)));
+            {
+                foreach(var dir in AdditionalIncludeDirs.Split(';'))
+                {
+                    var mappedDir = MapIncludeDir(absTarget, subdir, dir);
+                    reverseConditions?.AttachIncludeDir(mappedDir);
+                    includeDirs.Add(mappedDir);
+                }
+            }
 
             return new ToolFlags
             {
-                PreprocessorMacros = (PreprocessorMacros == null) ? null : PreprocessorMacros.Split(';'),
+                PreprocessorMacros = (preprocessorMacros.Count == 0) ? null : preprocessorMacros.ToArray(),
                 IncludeDirectories = includeDirs.ToArray()
             };
         }
@@ -678,6 +803,9 @@ namespace BSPGenerationTools
                     foreach (var ao in AutoOptions.Split(';'))
                         _Cache.Add(new KeyValuePair<Regex, string>(new Regex(ao.Replace('x', '.')), ao));
             }
+
+            if (name.EndsWith("_M4"))
+                name = name.Substring(0, name.Length - 3) + "xx";   //E.g. STM32MP151A_M4 => STM32MP151Axx
 
             foreach (var kv in _Cache)
                 if (kv.Key.IsMatch(name))

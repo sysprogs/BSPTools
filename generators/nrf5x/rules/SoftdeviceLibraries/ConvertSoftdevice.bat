@@ -1,3 +1,4 @@
+REM Usage: ConvertSoftdevice.bat <Softdevice Name> <Intermediate Hex file name> -mfloat-abi=<...>
 set ARM_GCC_PREFIX=arm-eabi-
 cd /d %~dp0
 

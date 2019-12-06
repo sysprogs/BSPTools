@@ -334,7 +334,7 @@ namespace InfineonXMC_bsp_generator
                 Frameworks = frameworks.ToArray(),
                 Examples = exampleDirs.ToArray(),
                 FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "2.1.8"
+                PackageVersion = "2.1.24"
             };
 
             bspBuilder.Save(bsp, true);

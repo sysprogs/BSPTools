@@ -66,7 +66,7 @@ namespace CppUTest
 
             foreach (var job in rules.CopyJobs)
             {
-                flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null, ref fwObj.Common.ConfigurableProperties));
+                flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null, ref fwObj.Common.ConfigurableProperties, null));
             }
 
             Dictionary<string, FileCondition> matchedConditions = new Dictionary<string, FileCondition>(StringComparer.InvariantCultureIgnoreCase);
@@ -137,13 +137,6 @@ namespace CppUTest
             Console.WriteLine("Building archive...");
             string archiveFile = Path.Combine(dummyBSPBuilder.Directories.OutputDir, archiveName);
             TarPacker.PackDirectoryToTGZ(outDir, archiveFile, fn => Path.GetExtension(fn).ToLower() != ".vgdbxtfp");
-            XmlTools.SaveObject(new TestFrameworkSummary
-            {
-                PackageID = fwObj.ID,
-                PackageVersion = fwObj.Version,
-                PackageDescription = fwObj.Name,
-                MinimumEngineVersion = "5.4"
-            }, Path.ChangeExtension(archiveFile, ".xml"));
         }
 
 
@@ -174,13 +167,5 @@ namespace CppUTest
     public class TestFrameworkRules
     {
         public CopyJob[] CopyJobs;
-    }
-
-    public class TestFrameworkSummary
-    {
-        public string PackageID;
-        public string PackageDescription;
-        public string PackageVersion;
-        public string MinimumEngineVersion;
     }
 }

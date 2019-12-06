@@ -51,6 +51,9 @@
     <Compile Include="Peripherals\PeripheralSubregisterParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rulesets\STM32ClassicFamilyBuilder.cs" />
+    <Compile Include="Rulesets\STM32MP1FamilyBuilder.cs" />
+    <Compile Include="Rulesets\STM32WBFamilyBuilder.cs" />
     <Compile Include="SDKFetcher.cs" />
     <Compile Include="StartupGenerator.cs" />
   </ItemGroup>

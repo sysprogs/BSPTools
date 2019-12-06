@@ -13,47 +13,55 @@ namespace stm32_bsp_generator
 {
     class SDKFetcher
     {
-        struct PackCollection
-        {
-            public string Version, Status;
-            public string[] FirmwareReleases;
-
-            public override string ToString()
-            {
-                return Version;
-            }
-        }
-
         public static void FetchLatestSDKs(string sdkRoot, string cubeRoot)
         {
             Directory.CreateDirectory(sdkRoot);
             var xml = new XmlDocument();
             xml.Load(cubeRoot + @"\db\plugins\updater\STMupdaters.xml");
 
-            var databases = xml.DocumentElement.ChildNodes.OfType<XmlElement>().First(e => e.Name == "DataBases");
-
-            PackCollection[] packs = databases.ChildNodes.OfType<XmlElement>().Where(e => e.Name == "DataBase").Select(db =>
+            var firmwaresNode = xml.DocumentElement.ChildNodes.OfType<XmlElement>().First(e => e.Name == "Firmwares");
+            List<ReleaseDefinition> releases = new List<ReleaseDefinition>();
+            foreach(var firmwareNode in firmwaresNode.OfType<XmlElement>().Where(e => e.Name == "Firmware"))
             {
-                var desc = db.ChildNodes.OfType<XmlElement>().First(e => e.Name == "PackDescription");
+                var packDescriptionNodes = firmwareNode.ChildNodes.OfType<XmlElement>().Where(e => e.Name == "PackDescription").ToArray();
+                if (packDescriptionNodes.Length == 0)
+                    continue;
 
-                return new PackCollection
+                foreach (var node in packDescriptionNodes)
                 {
-                    Version = desc.GetAttribute("Release"),
-                    Status = desc.GetAttribute("Status"),
-                    FirmwareReleases = db.ChildNodes.OfType<XmlElement>().Where(e => e.Name == "FirmwareRelease").Select(e => e.GetAttribute("Release")).ToArray()
-                };
+                    var r = new ReleaseDefinition(node);
+                    if (r.Release.IsValid)
+                        releases.Add(r);
+                }
+            }
 
-            }).ToArray();
+            List<ReleaseDefinition> bestReleaseForEachFamily = new List<ReleaseDefinition>();
 
-            var latestPack = packs.Where(p => p.Status == "New").ToArray();
-            if (latestPack.Length != 1)
-                throw new Exception("Unexpected count of 'New' packs in the STM32CubeMX database: " + latestPack.Length);
+            foreach (var g in releases.GroupBy(r => r.Family))
+            {
+                var newReleases = g.Where(r => r.Status == "New").ToArray();
+                if (newReleases.Length > 1 && newReleases.Count(r => r.HasPatch) > 0)
+                    newReleases = newReleases.Where(r => r.HasPatch).ToArray(); //Prefer patched releases to unpatched ones.
 
+                if (newReleases.Length == 0 && g.Count() == 1) //Experimental pre-release family
+                {
+                    continue;
+                }
+
+                if (newReleases.Length == 1)
+                {
+                    bestReleaseForEachFamily.Add(newReleases[0]);
+                    continue;
+                }
+
+                throw new Exception($"Don't know how to pick the best release for {g.Key}. Investigate and add missing logic here.");
+            }
+            
             var now = DateTime.Now;
 
             STM32SDKCollection expectedSDKs = new STM32SDKCollection
             {
-                SDKs = latestPack[0].FirmwareReleases.Select(s => s.Split('.')).Where(c => c[0] == "FW").Select(c => new STM32SDKCollection.SDK(c)).ToArray(),
+                SDKs = bestReleaseForEachFamily.Select(c => new STM32SDKCollection.SDK(c)).ToArray(),
                 BSPVersion = $"{now.Year}.{now.Month:d2}",
             };
 
@@ -74,12 +82,10 @@ namespace stm32_bsp_generator
                 }
 
                 Directory.CreateDirectory(targetDir);
-                Console.WriteLine($"Downloading {sdk.URL}...");
-                string archive = Path.Combine(targetDir, Path.GetFileName(sdk.URL));
-                wc.DownloadFile(sdk.URL, archive);
-                Console.WriteLine($"Unpacking {Path.GetFileName(sdk.URL)}...");
-                using (var za = new ZipArchive(File.OpenRead(archive)))
-                    za.ExtractToDirectory(targetDir);
+                DownloadAndUnpack(wc, sdk.URL, targetDir);
+
+                if (sdk.PatchURL != null)
+                    DownloadAndUnpack(wc, sdk.PatchURL, targetDir);
 
                 XmlTools.SaveObject(sdk, markerFile);
                 newSDKsFetched++;
@@ -89,7 +95,88 @@ namespace stm32_bsp_generator
                 XmlTools.SaveObject(expectedSDKs, Path.Combine(sdkRoot, SDKListFileName));
         }
 
+        private static void DownloadAndUnpack(WebClient wc, string URL, string targetDir)
+        {
+            Console.WriteLine($"Downloading {URL}...");
+            string archive = Path.Combine(targetDir, Path.GetFileName(URL));
+            wc.DownloadFile(URL, archive);
+            Console.WriteLine($"Unpacking {Path.GetFileName(URL)}...");
+            using (var za = new ZipArchive(File.OpenRead(archive)))
+            {
+                foreach(var e in za.Entries)
+                {
+                    var targetPath = Path.Combine(targetDir, e.FullName);
+                    if (e.FullName.EndsWith("/"))
+                    {
+                        if (e.Length != 0)
+                            throw new Exception("Unexpected directory entry");
+                        Directory.CreateDirectory(targetPath);
+                    }
+                    else
+                        e.ExtractToFile(targetPath, true);
+                }
+            }
+        }
+
         public const string SDKListFileName = "SDKs.xml";
+    }
+
+    internal struct STPackVersion
+    {
+        public readonly string[] Specifier;
+        public readonly string Value;
+        public override string ToString() => Value;
+        public bool IsValid => !string.IsNullOrEmpty(Value);
+
+        public STPackVersion(string value)
+        {
+            Value = null;
+            Specifier = null;
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                var specifier = value.Split('.');
+                if (specifier.Length > 2 && specifier[0] == "FW")
+                {
+                    Value = value;
+                    Specifier = value.Split('.');
+                }
+            }
+        }
+
+        public string Version => string.Join(".", Specifier.Skip(2));
+
+        public string URL
+        {
+            get
+            {
+                string shortVersion = Version.Replace(".", "");
+                return $"http://sw-center.st.com/packs/resource/firmware/stm32cube_fw_{Family.ToLower()}_v{shortVersion}.zip";
+            }
+        }
+
+        public string Family => Specifier[1];
+    }
+
+    internal struct ReleaseDefinition
+    {
+        public readonly string Status;
+        public readonly STPackVersion Release, Patch;
+
+        public bool HasPatch => Patch.IsValid;
+        public string Family => Release.Family;
+
+        public ReleaseDefinition(XmlElement e)
+        {
+            Release = new STPackVersion(e.GetAttribute("Release"));
+            Patch = new STPackVersion(e.GetAttribute("Patch"));
+            Status = e.GetAttribute("Status");
+        }
+
+        public override string ToString()
+        {
+            return Release.ToString();
+        }
     }
 
     public class STM32SDKCollection
@@ -97,16 +184,26 @@ namespace stm32_bsp_generator
         public struct SDK
         {
             public string Family;
-            public string Version;
-            public string URL;
+            public string Version, PatchVersion;
+            public string URL, PatchURL;
 
-            public SDK(string[] specifier)
+            internal SDK(ReleaseDefinition release)
             {
-                Family = specifier[1];
-                Version = string.Join(".", specifier.Skip(2));
-                string shortVersion = Version.Replace(".", "");
+                Family = release.Family;
+                Version = release.Release.Version;
 
-                URL = $"http://sw-center.st.com/packs/resource/firmware/stm32cube_fw_{Family.ToLower()}_v{shortVersion}.zip";
+                if (release.HasPatch)
+                {
+                    URL = release.Release.URL;
+                    PatchVersion = release.Patch.Version;
+                    PatchURL = release.Patch.URL;
+                }
+                else
+                {
+                    URL = release.Release.URL;
+                    PatchVersion = null;
+                    PatchURL = null;
+                }
             }
 
             public string FolderName => $"{Family}_{Version}";

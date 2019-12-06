@@ -172,6 +172,8 @@ namespace stm32_bsp_generator
                         {
                             if (ex.Token.Value == "SDMMC_BASE")
                                 continue;   //Known bug in STM32H7. The value is used, but not defined anywhere
+                            if (ex.Token.Value == "LCD_BASE" || ex.Token.Value == "JPGDEC_BASE")
+                                continue;   //Known bug in STM32MP1. The value is used, but not defined anywhere
                             throw;
                         }
 

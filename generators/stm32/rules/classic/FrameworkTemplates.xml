@@ -18,14 +18,15 @@
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
+					<!-- Note: stm32xxxx_ll_usb.c actually requires HAL headers -->
 					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
-					<ProjectInclusionMask>-*_template.?;-&gt;.*stm32[^\\]+_ll_[^\\]+$;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*_template.?;*stm32??xx_ll_usb.?;-&gt;.*stm32[^\\]+_ll_[^\\]+$;*</ProjectInclusionMask>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>
 					<FilesToCopy>-*Examples\*;-DSP\*;-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
+					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;USE_HAL_DRIVER</PreprocessorMacros>
 					<ProjectInclusionMask>-Examples\*;-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32??????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;-NN\*;-Core_A\*;*.h</AutoIncludeMask>					
 				</CopyJob>
@@ -43,29 +44,19 @@
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver</SourceFolder>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.ll_|Low-level Driver Library</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>-Enable Advanced Low-Level Driver Functions[driver]|{0}|USE_FULL_LL_DRIVER</string>
+					</SmartPreprocessorMacros>
+
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
-					<ProjectInclusionMask>&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
-					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;$$com.sysprogs.bspoptions.stm32.ll_driver$$</PreprocessorMacros>
+					<ProjectInclusionMask>-*stm32??xx_ll_usb.?;&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
+					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<AlreadyCopied>true</AlreadyCopied>
 					<AdditionalIncludeDirs>Inc;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Core/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Include</AdditionalIncludeDirs>
 				</CopyJob>
 			</CopyJobs>			
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Properties>
-					  <PropertyEntry xsi:type="Boolean">
-						<Name>Enable Advanced Low-Level Driver Functions</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.ll_driver</UniqueID>
-						<ValueForTrue>USE_FULL_LL_DRIVER</ValueForTrue>
-						<ValueForFalse></ValueForFalse>
-					  </PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
 		</Framework>
 		<Framework>
 			<Name>$$STM32:FAMILY_EX$$ Default System Init File</Name>
@@ -87,7 +78,7 @@
 		</Framework>
 		<Framework>
 			<Name>STM32 USB Device Library</Name>
-			<ID>com.sysprogs.arm.stm32.usbdev.$$STM32:FAMILY$$</ID>
+			<ID>com.sysprogs.arm.stm32.usbdev.$$STM32:FAMILY_EX$$</ID>
 			<ClassID>com.sysprogs.arm.stm32.usbdev</ClassID>
 			<ProjectFolderName>USB Device</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
@@ -101,15 +92,21 @@
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>Core/Inc;Class/$$com.sysprogs.bspoptions.stm32.usb.devclass$$/Inc</AdditionalIncludeDirs>
-					<PreprocessorMacros>USE_USB_$$com.sysprogs.bspoptions.stm32.usb.speed$$</PreprocessorMacros>
-					<SimpleFileConditions>
-						<string>Class\\AUDIO\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == AUDIO</string>
-						<string>Class\\CDC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == CDC</string>
-						<string>Class\\CustomHID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == CustomHID</string>
-						<string>Class\\DFU\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == DFU</string>
-						<string>Class\\HID\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == HID</string>
-						<string>Class\\MSC\\: $$com.sysprogs.bspoptions.stm32.usb.devclass$$ == MSC</string>
-					</SimpleFileConditions>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.usb.|USB Device</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>USB Device Class[devclass]|
+Class\\AUDIO\\.*=>Audio Device[AUDIO];
+Class\\CDC\\.*=>+Communications Device (CDC)[CDC];
+Class\\CustomHID\\.*=>Custom Human Interface Device (CustomHID)[CustomHID];
+Class\\DFU\\.*=>Device Firmware Update (DFU)[DFU];
+Class\\HID\\.*=>Human Interface Device (HID)[HID];
+Class\\MSC\\.*=>Mass Storage (MSC)[MSC];
+=>None[none]
+</string>
+					</SmartFileConditions>
+					<SmartPreprocessorMacros>
+						<string>USB Device Speed[speed]|USE_USB_{0}|FS=>USB 2.0 Full Speed;HS=>USB 2.0 High Speed</string>
+					</SmartPreprocessorMacros>
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>core\src\usbd_core.c</FilePath>
@@ -123,68 +120,10 @@
 					</Patches>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Properties>
-					    <PropertyEntry xsi:type="Enumerated">
-						<Name>USB Device Class</Name>
-						<UniqueID>com.sysprogs.bspoptions.stm32.usb.devclass</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<SuggestionList>
-						  <Suggestion>
-							<UserFriendlyName>Audio Device</UserFriendlyName>
-							<InternalValue>AUDIO</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Communications Device (CDC)</UserFriendlyName>
-							<InternalValue>CDC</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Custom Human Interface Device (CustomHID)</UserFriendlyName>
-							<InternalValue>CustomHID</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Device Firmware Update (DFU)</UserFriendlyName>
-							<InternalValue>DFU</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Human Interface Device (HID)</UserFriendlyName>
-							<InternalValue>HID</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>Mass Storage (MSC)</UserFriendlyName>
-							<InternalValue>MSC</InternalValue>
-						  </Suggestion>
-						  <Suggestion>
-							<UserFriendlyName>None</UserFriendlyName>
-							<InternalValue>none</InternalValue>
-						  </Suggestion>
-						</SuggestionList>
-						<DefaultEntryIndex>1</DefaultEntryIndex>
-						<AllowFreeEntry>false</AllowFreeEntry>
-					  </PropertyEntry>
-						<PropertyEntry xsi:type="Enumerated">
-						  <Name>USB Device Speed</Name>
-						  <UniqueID>com.sysprogs.bspoptions.stm32.usb.speed</UniqueID>
-						  <Description>Specifies the USB peripheral (USB_FS vs USB_HS) used by the device</Description>
-						  <SuggestionList>
-							<Suggestion><InternalValue>FS</InternalValue><UserFriendlyName>USB 2.0 Full Speed</UserFriendlyName></Suggestion>
-							<Suggestion><InternalValue>HS</InternalValue><UserFriendlyName>USB 2.0 High Speed</UserFriendlyName></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>0</DefaultEntryIndex>
-						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
 		</Framework>
-
 		<Framework>
 			<Name>STM32 USB Host Library</Name>
-			<ID>com.sysprogs.arm.stm32.usbhost.$$STM32:FAMILY$$</ID>
+			<ID>com.sysprogs.arm.stm32.usbhost.$$STM32:FAMILY_EX$$</ID>
 			<ClassID>com.sysprogs.arm.stm32.usbhost</ClassID>
 			<ProjectFolderName>USB Host</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>

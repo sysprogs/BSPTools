@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>FreeRTOS</Name>
+			<ID>com.sysprogs.arm.stm32.freertos</ID>
+			<ProjectFolderName>FreeRTOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:MP1_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/$$com.sysprogs.bspoptions.stm32.freertos.cmsis$$;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.freertos.|FreeRTOS</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>Heap Implementation[heap]|
+Source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing[heap_1];
+Source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation[heap_2];
+Source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()[heap_3];
+Source\\portable\\MemMang\\heap_4.c=>+Heap4 - contiguous heap area[heap_4];
+Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
+						</string>
+						<string>CPU Core support[portcore]|
+Source\\portable\\GCC\\ARM_CM0\\.*=>ARM Cortex M0[CM0];
+Source\\portable\\GCC\\ARM_CM3\\.*=>+ARM Cortex M3 or M4 with Software FP[CM3];
+Source\\portable\\GCC\\ARM_CM3_MPU\\.*=>ARM Cortex M3 with MPU[CM3_MPU];
+Source\\portable\\GCC\\ARM_CM4_MPU\\.*=>ARM Cortex M4 with MPU[CM4_MPU];
+Source\\portable\\GCC\\ARM_CM4F\\.*=>ARM Cortex M4 with Hardware FP[CM4F];
+Source\\portable\\GCC\\ARM_CM7\\.*=>ARM Cortex M7[CM7/r0p1];
+Source\\portable\\GCC\\ARM_CM7_MPU\\.*=>ARM Cortex M7 with MPU[CM7_MPU/r0p1]
+						</string>
+						<string>CMSIS RTOS Interface Version[cmsis]|
+Source\\CMSIS_RTOS\\.*=>+v1[CMSIS_RTOS];				
+Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
+						</string>
+					</SmartFileConditions>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+						<OldLine>#ifndef __VFP_FP__</OldLine>
+						<NewLine>#if !defined(__VFP_FP__) || defined(__SOFTFP__)</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+						<OldLine>	#error This port can only be used when the project options are configured to enable hardware floating point support.</OldLine>
+						<NewLine>	#error This port can only be used when the project options are configured to enable hardware floating point support. Please switch to hardware FP or select a different FreeRTOS port on the Frameworks page of VisualGDB Project Properties.</NewLine>
+					</Patch>
+				</Patches>
+				</CopyJob>
+			</CopyJobs>
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.rtos_type</Key>
+					<Value>com.sysprogs.freertos</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
+		</Framework>
+		<Framework>
+			<Name>STM32 Utilities</Name>
+			<ID>com.sysprogs.arm.stm32.utilities</ID>
+			<ProjectFolderName>Utilities</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:MP1_DIR$$\Utilities</SourceFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*_template.h;*.c;*.h</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.utils.|STM32 Utilities</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>Resource Manager[resmsg]|ResourcesManager\\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>OpenAMP</Name>
+			<ID>com.sysprogs.arm.stm32.openamp</ID>
+			<ProjectFolderName>OpenAMP</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:MP1_DIR$$\Middlewares\Third_Party\OpenAMP</SourceFolder>
+					<FilesToCopy>-CMakeLists.txt;*.c;*.h;*.url;*.txt</FilesToCopy>
+					<AdvancedRenameRules>libmetal\\lib\\(device|init|io|shmem|log)\.c=>libmetal_{1}.c</AdvancedRenameRules>
+					<ProjectInclusionMask>-*\zynq*;-*\microblaze*;-*\template\*;open-amp\lib\*;libmetal\lib\system\generic\*;-libmetal\lib\system\*;libmetal\lib\*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<PreprocessorMacros>METAL_INTERNAL;NO_ATOMIC_64_SUPPORT;METAL_MAX_DEVICE_REGIONS=2;VIRTIO_SLAVE_ONLY</PreprocessorMacros>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/OpenAMP/open-amp/lib/include;$$SYS:BSP_ROOT$$/OpenAMP/libmetal/lib/include;$$SYS:BSP_ROOT$$/OpenAMP/virtual_driver</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.openamp.|OpenAMP</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>-Redirect printf() output to OpenAMP[proxy]|^open-amp\\lib\\proxy\\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<AdditionalSystemVars>
+			</AdditionalSystemVars>
+		</Framework>
+	</AdditionalFrameworks>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink</SourceFolder>
+			<DestinationFolder>samples\LEDBlink</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_system_file$$</string>
+				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
+			</AdditionalSources>
+		</SmartSample>
+	</SmartSamples>
+	<InitializationCodeInsertionPoints>
+		<CodeInsertionPoint>
+			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\}]+\n([ \t]+)(HAL_Init[ \t]*\([ \t]*\);)[ \t\r]*\n([ \t]+)(SystemClock_Config[ \t]*\([ \t]*\);)</Regex>
+			<InitGroupNumber>5</InitGroupNumber>
+			<InsertAfterGroup>true</InsertAfterGroup>
+			<IndentationGroupNumber>4</IndentationGroupNumber>
+		</CodeInsertionPoint>	
+		<CodeInsertionPoint>
+			<Regex>int[ \t]+main[ \t]*\([ \t]*(void|)[ \t]*\)[ \t\r\n]*\{[^\}]+\n([ \t]+)(HAL_Init[ \t]*\([ \t]*\);)</Regex>
+			<InitGroupNumber>3</InitGroupNumber>
+			<IndentationGroupNumber>2</IndentationGroupNumber>
+			<InsertAfterGroup>true</InsertAfterGroup>
+		</CodeInsertionPoint>
+	</InitializationCodeInsertionPoints>
+</FamilyDefinition>

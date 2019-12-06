@@ -2,7 +2,8 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.tinyembtest</ID>
 	<Name>TinyEmbeddedTest</Name>
-	<Version>1.2</Version>
+	<Version>1.3</Version>
+	<MinimumEngineVersion>5.5.2</MinimumEngineVersion>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -14,6 +15,7 @@
 		<AdditionalPreprocessorMacros>
 			<string>SYSPROGS_TEST_PLATFORM_EMBEDDED</string>
 			<string>TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE=$$com.sysprogs.testsettings.testendmode$$</string>
+			<string>TINY_EMBEDDED_TEST_HOOK_STDIO=$$com.sysprogs.testsettings.redirect_stdio$$</string>
 		</AdditionalPreprocessorMacros>
 		<AdditionalIncludeDirs>
 		</AdditionalIncludeDirs>
@@ -21,7 +23,10 @@
 			<string>com.sysprogs.embedded.semihosting_and_profiler@1.1</string>
 		</RequiredFrameworks>
 		<InitializationLines>
-			<string>RunAllTests();</string>
+			<string>if (IsRunningUnitTests())</string>
+			<string>{</string>
+			<string>    RunAllTests();</string>
+			<string>}</string>
 		</InitializationLines>
 	</Embedded>
 	<Common>
@@ -88,6 +93,14 @@
 						<DefaultEntryIndex>0</DefaultEntryIndex>
 						<AllowFreeEntry>false</AllowFreeEntry>
 					  </PropertyEntry>
+				  <PropertyEntry xsi:type="Boolean">
+					<Name>Redirect printf() to Test Output window</Name>
+					<UniqueID>com.sysprogs.testsettings.redirect_stdio</UniqueID>
+					<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+					<DefaultValue>false</DefaultValue>
+					<ValueForTrue>1</ValueForTrue>
+					<ValueForFalse>0</ValueForFalse>
+				  </PropertyEntry>
 			  </Properties>
 				<CollapsedByDefault>false</CollapsedByDefault>
 			  </PropertyGroup>
@@ -95,6 +108,7 @@
 		</ConfigurableProperties>
 		<IncludeLines>
 			<string>#include &lt;TinyEmbeddedTest.h&gt;</string>
+			<string>#include &lt;SysprogsTestHooks.h&gt;</string>
 		</IncludeLines>
 		<RequiredFunctions>
 			<string>_Z11RunAllTestsv</string>

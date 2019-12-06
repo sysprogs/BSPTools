@@ -1,4 +1,5 @@
 #include "SysprogsTestHooks.h"
+#include <FastSemihosting.h>
 #include <string.h>
 
 #ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
@@ -236,12 +237,15 @@ void __attribute__((noinline)) SysprogsTestHook_TestEnded()
     WriteTestOutput(&hdr, sizeof(hdr), 0, 0);
 }
 
-
 void __attribute__((noinline)) SysprogsTestHook_OutputMessage(TestMessageSeverity severity, const char *pMessage)
+{
+	SysprogsTestHook_OutputMessageEx(severity, pMessage, pMessage ? strlen(pMessage) : 0);
+}
+
+void __attribute__((noinline)) SysprogsTestHook_OutputMessageEx(TestMessageSeverity severity, const char *pMessage, int length)
 {
     TestOutputSynchronizer sync;
     
-    int length = pMessage ? strlen(pMessage) : 0;
     const unsigned char hdr[] = { strpOutputMessage, (unsigned char)severity };
     WriteTestPacketSize(length + sizeof(hdr) + 1, &hdr, sizeof(hdr));
     WriteTestOutput(pMessage, length, "", 1);
@@ -269,6 +273,14 @@ void __attribute__((noinline)) SysprogsTestHook_TestFailed(void *pTest, const ch
         WriteTestOutput(&ch, 1, 0, 0);
         WriteTestOutput(pDetails, detailsLen - 2, "", 1);
     }
+}
+
+static volatile int s_IsRunningUnitTests;
+
+int __attribute__((noinline)) IsRunningUnitTests()
+{
+	InitializeFastSemihosting(); //VisualGDB will set s_IsRunningUnitTests in response to this call.
+	return s_IsRunningUnitTests;
 }
 
 void __attribute__((noinline)) SysprogsTestHook_TestsCompleted()

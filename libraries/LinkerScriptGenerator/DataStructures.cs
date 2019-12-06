@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 using System.Xml;
+using System.Linq;
 
 namespace LinkerScriptGenerator
 {
@@ -38,6 +39,7 @@ namespace LinkerScriptGenerator
         public uint Size;
         public MemoryAccess Access;
         public MemoryType Type;
+        public bool IsPrimary;  //Primary FLASH or SRAM
 
         public override string ToString()
         {
@@ -144,6 +146,47 @@ namespace LinkerScriptGenerator
         }
     }
 
+    public abstract class MemoryLocationRule
+    {
+        public abstract bool IsMatch(Memory memory);
+
+        class ByNameImpl : MemoryLocationRule
+        {
+            public readonly string[] Names;
+
+            public ByNameImpl(string[] names)
+            {
+                Names = names;
+            }
+
+            public override bool IsMatch(Memory memory)
+            {
+                foreach (var n in Names)
+                    if (n == memory.Name)
+                        return true;
+                return false;
+            }
+        }
+
+        class ByAddressImpl : MemoryLocationRule
+        {
+            public readonly ulong Address;
+
+            public ByAddressImpl(ulong address)
+            {
+                Address = address;
+            }
+
+            public override bool IsMatch(Memory memory)
+            {
+                return memory.Start == Address;
+            }
+        }
+
+        public static MemoryLocationRule ByName(params string[] names) => new ByNameImpl(names);
+        public static MemoryLocationRule ByAddress(ulong address) => new ByAddressImpl(address);
+    }
+
     public class MemoryLayout
     {
         public string DeviceName;
@@ -155,6 +198,21 @@ namespace LinkerScriptGenerator
             foreach (var m in Memories)
                 r.Memories.Add(m.Clone());
             return r;
+        }
+
+        public Memory TryLocateAndMarkPrimaryMemory(MemoryType type, params MemoryLocationRule[] rules)
+        {
+            foreach(var rule in rules)
+            {
+                var mem = Memories.FirstOrDefault(m => m.Type == type && rule.IsMatch(m));
+                if (mem != null)
+                {
+                    mem.IsPrimary = true;
+                    return mem;
+                }
+            }
+
+            return null;
         }
     }
 

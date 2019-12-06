@@ -66,7 +66,7 @@ namespace stm32_bsp_generator
                                                      SubregisterMatchingFlags flags,
                                                      out MatchedStructureField[] result)
         {
-            for (int i = 1; i < (nameComponents.Length - skippedComponents); i++)
+            for (int i = 1; i <= (nameComponents.Length - skippedComponents); i++)
             {
                 string[] nameForMatching = nameComponents.Skip(skippedComponents).Take(i).ToArray();
 
@@ -292,16 +292,26 @@ namespace stm32_bsp_generator
 
             foreach (var macro in macros)
             {
-                var expression = parsedFile.ResolveMacrosRecursively(macro.Value);
+                BasicExpressionResolver.TypedInteger value;
+                if (macro.Value.Length == 4 && macro.Value[0].Value == "B" && macro.Value[1].Value == "(" && macro.Value[3].Value == ")")
+                {
+                    //This is the B(number) macro used in STM32MP1 headers
+                    value = new BasicExpressionResolver.TypedInteger { Value = 1U << int.Parse(macro.Value[2].Value) };
+                }
+                else
+                {
 
-                if (expression.Length == 0)
-                    continue;
+                    var expression = parsedFile.ResolveMacrosRecursively(macro.Value);
 
-                //We are only interested in the ((type)0xVALUE) macros
-                if (expression.Count(t => t.Type != CppTokenizer.TokenType.Bracket && (t.Type != CppTokenizer.TokenType.Identifier)) > 0)
-                    continue;
+                    if (expression.Length == 0)
+                        continue;
 
-                var value = resolver.ResolveAddressExpression(expression);
+                    //We are only interested in the ((type)0xVALUE) macros
+                    if (expression.Count(t => t.Type != CppTokenizer.TokenType.Bracket && (t.Type != CppTokenizer.TokenType.Identifier)) > 0)
+                        continue;
+
+                    value = resolver.ResolveAddressExpression(expression);
+                }
 
                 if (value != null && ExtractFirstBitAndSize(value.Value, out var size, out var firstBit))
                 {

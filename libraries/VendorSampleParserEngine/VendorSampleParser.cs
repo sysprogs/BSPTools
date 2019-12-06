@@ -1,6 +1,7 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
 using Microsoft.Win32;
+using StandaloneBSPValidator;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,7 +30,7 @@ namespace VendorSampleParserEngine
 
         protected readonly RegistryKey _SettingsKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPTools\VendorSampleParsers");
 
-        protected VendorSampleParser(string testedBSPDirectory, string sampleCatalogName)
+        protected VendorSampleParser(string testedBSPDirectory, string sampleCatalogName, string subdir = null)
         {
             VendorSampleCatalogName = sampleCatalogName;
 
@@ -41,6 +42,13 @@ namespace VendorSampleParserEngine
             BSPDirectory = Path.GetFullPath(Path.Combine(baseDirectory, testedBSPDirectory));
             CacheDirectory = Path.Combine(baseDirectory, "Cache");
             var reportDirectory = Path.Combine(baseDirectory, "Reports");
+
+            if (!string.IsNullOrEmpty(subdir))
+            {
+                CacheDirectory = Path.Combine(CacheDirectory, subdir);
+                reportDirectory = Path.Combine(reportDirectory, subdir);
+            }
+
             Directory.CreateDirectory(CacheDirectory);
             Directory.CreateDirectory(reportDirectory);
 
@@ -96,6 +104,7 @@ namespace VendorSampleParserEngine
                 @"STemWin_CM4_wc32",
                 @"STemWin_CM7_wc32",
                 @"libtouchgfx-float-abi-hard.a",
+                @"network_runtime.a",   //STM32MP1
             };
 
         protected virtual bool ShouldFileTriggerHardFloat(string path)
@@ -318,7 +327,8 @@ namespace VendorSampleParserEngine
             }
         }
 
-        StandaloneBSPValidator.Program.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples, string sampleDirPath, VendorSamplePass pass, Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null, double testProbability = 1)
+
+        StandaloneBSPValidator.Program.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples, string sampleDirPath, VendorSamplePass pass, Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null, double testProbability = 1, BSPValidationFlags validationFlags = BSPValidationFlags.None)
         {
             Console.WriteLine($"Building {samples.Length} samples...");
             if (pass != VendorSamplePass.RelocatedBuild && pass != VendorSamplePass.InPlaceBuild)
@@ -362,7 +372,11 @@ namespace VendorSampleParserEngine
                     string mcuDir = Path.Combine(outputDir, record.ID.ToString());
                     DateTime start = DateTime.Now;
 
-                    var result = StandaloneBSPValidator.Program.TestVendorSampleAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, keepDirectoryAfterSuccessfulBuild?.Invoke(vs) ?? false);
+                    var thisSampleFlags = validationFlags;
+                    if (keepDirectoryAfterSuccessfulBuild?.Invoke(vs) == true)
+                        thisSampleFlags |= BSPValidationFlags.KeepDirectoryAfterSuccessfulTest;
+
+                    var result = StandaloneBSPValidator.Program.TestVendorSampleAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, thisSampleFlags);
                     record.BuildDuration = (int)(DateTime.Now - start).TotalMilliseconds;
                     record.TimeOfLastBuild = DateTime.Now;
 
@@ -547,7 +561,7 @@ namespace VendorSampleParserEngine
             if (pass1Queue.Length > 0)
             {
                 //Test the raw VendorSamples in-place and store AllDependencies
-                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(new VendorSampleID(vs)));
+                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(new VendorSampleID(vs)), validationFlags: BSPValidationFlags.ResolveNameCollisions);
 
                 foreach (var vs in pass1Queue)
                 {
@@ -562,7 +576,7 @@ namespace VendorSampleParserEngine
 
             //Insert the samples into the generated BSP
             var relocator = CreateRelocator(sampleDir);
-            relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory);
+            var copiedFiles = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory);
 
             var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
             bsp.VendorSampleDirectoryPath = VendorSampleDirectoryName;

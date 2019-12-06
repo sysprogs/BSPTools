@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>STM32WB</Name>
+	<DeviceRegex>^STM32WB.*</DeviceRegex>
+	<FamilySubdirectory>STM32WBxxxx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$STM32:WB_DIR$$\Drivers\CMSIS\Device\ST\STM32WBxx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$STM32:WB_DIR$$\Drivers\CMSIS\Device\ST\STM32WBxx\Source\Templates\gcc</StartupFileDir>
+	<Subfamilies>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
+			<Required>true</Required>
+			<IsPrimary>true</IsPrimary>
+			<AutoOptions>STM32WB55xx</AutoOptions>
+			<Options/>
+		</MCUClassifier>
+	</Subfamilies>
+	<CompilationFlags>
+	<PreprocessorMacros>
+	</PreprocessorMacros>
+	<IncludeDirectories>
+		<string>.</string>
+	</IncludeDirectories>
+	</CompilationFlags>
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask/>
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>Bluetooth LE Support</Name>
+			<ID>com.sysprogs.arm.stm32.ble.core</ID>
+			<ProjectFolderName>BLE</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN\ble\core</SourceFolder>
+					<TargetFolder>STM32_WPAN/ble/core</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN/ble</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.ble.|Bluetooth LE Services</SmartPropertyGroup>
+					<SmartFileConditions>
+						<!-- '-' in front of the name means 'disabled by default' -->
+						<string>-Blood Pressure Service[bls]|.*\\bls\.(h|c)</string>
+						<string>-Cable Replacement Service (ST)[crs_st]|.*\\crs_stm\.(h|c)</string>
+						<string>-Device Information Service[dis]|.*\\dis\.(h|c)</string>
+						<string>-End Device Service (ST)[eds_st]|.*\\eds_stm\.(h|c)</string>
+						<string>-Human Interface Device Service[hids]|.*\\hids\.(h|c)</string>
+						<string>-Heart Rate Service[hrs]|.*\\hrs\.(h|c)</string>
+						<string>-Health Thermometer Service[hts]|.*\\hts\.(h|c)</string>
+						<string>-Immediate Alert Service[ias]|.*\\ias\.(h|c)</string>
+						<string>-Link Loss Service[lls]|.*\\lls\.(h|c)</string>
+						<string>-Mesh[mesh]|.*\\mesh\.(h|c)</string>
+						<string>-OTA Service (ST)[otas_st]|.*\\otas_stm\.(h|c)</string>
+						<string>-Peer-to-Peer Service (ST)[p2p_st]|.*\\p2p_stm\.(h|c)</string>
+						<string>-TX Power Service[tps]|.*\\tps\.(h|c)</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>IoT Thread Interface</Name>
+			<ID>com.sysprogs.arm.stm32.ble.thread</ID>
+			<ProjectFolderName>BLE Thread</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+				<string>com.sysprogs.arm.stm32.ble.core</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN\interface\patterns\ble_thread</SourceFolder>
+					<TargetFolder>STM32_WPAN/interface/patterns/ble_thread</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.thread_iface.|IoT Thread Interface</SmartPropertyGroup>
+					<SmartFileConditions>
+						<!-- '-' in front of the name means 'disabled by default' -->
+						<string>-Virtual COM Port Support[vcp]|vcp\\.*</string>
+						<string>-OpenThread Support[openthread]|tl\\tl_thread_hci\.(c|h)</string>
+						<string>SHCI command support[shci]|shci\\.*</string>
+						<string>LHCI command support[lhci]|lhci\\.*</string>
+						<string>SHCI_TL command support[shci_tl]|tl\\shci_tl.*</string>
+						<string>HCI_TL command support[hci_tl]|tl\\hci_tl.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Development Board Support</Name>
+			<ID>com.sysprogs.arm.stm32.stm32bsp</ID>
+			<ProjectFolderName>Board</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WB_DIR$$\Drivers\BSP</SourceFolder>
+					<TargetFolder>BSP</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
+					<SmartFileConditions>
+						<!-- '-' in front of the name means 'disabled by default' -->
+						<string>Board Type|
+=>None;
+P-NUCLEO-WB55.Nucleo\\.*=>NUCLEO-WB55[nucleo];
+P-NUCLEO-WB55.USBDongle\\.*=>NUCLEO-WB55 (USB Dongle)[dongle]
+						</string>
+						<string>-Adafruit Shield Support|Adafruit_Shield\\.*</string>
+						<string>-External Components|Components\\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+				    <Name>Development Board</Name>
+					<UniqueID>com.sysprogs.bspoptions.stm32.board.</UniqueID>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			</ConfigurableProperties>			
+		</Framework>
+		<Framework>
+			<Name>Bluetooth LE Utilities</Name>
+			<ID>com.sysprogs.arm.stm32.ble_utilities</ID>
+			<ProjectFolderName>BLE Utilities</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN\utilities</SourceFolder>
+					<TargetFolder>STM32_WPAN/utilities</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>*</FilesToCopy>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wb_utils.|STM32WB Utilities</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>-Scheduler[scheduler]|scheduler.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>OpenThread IoT Library</Name>
+			<ID>com.sysprogs.arm.stm32.openthread</ID>
+			<ProjectFolderName>OpenThread</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.openthread.|OpenThread</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>OpenThread Configuration File Name[config_file]|OPENTHREAD_CONFIG_FILE={0}|@&lt;openthread_api_config_ftd.h&gt;</string>
+					</SmartPreprocessorMacros>
+					<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN\thread</SourceFolder>
+					<TargetFolder>STM32_WPAN/thread</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>*</FilesToCopy>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+	</AdditionalFrameworks>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$STM32:WB_DIR$$\Projects\P-NUCLEO-WB55.Nucleo\Applications\BLE\BLE_HeartRate</SourceFolder>
+			<DestinationFolder>Samples/Nucleo/BLE_HeartRate</DestinationFolder>
+			<CopyFilters>-Binary\*;-EWARM\*;-MDK-ARM\*;-SW4STM32\*;*</CopyFilters>
+			<Patches>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>Core\Inc\app_conf.h</FilePath>
+					<OldLine>#define CFG_DEBUGGER_SUPPORTED    0</OldLine>
+					<NewLine>#define CFG_DEBUGGER_SUPPORTED    1</NewLine>
+				</Patch>					
+			</Patches>
+			<EmbeddedSample>
+				<Name>Heart Rate Service Demo</Name>
+				<Description>A basic HRS service demo for the STM32Nucleo board</Description>
+				<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+				<AdditionalIncludeDirectories>
+					<string>Core/Inc</string>
+					<string>STM32_WPAN/App</string>
+				</AdditionalIncludeDirectories>
+				  <RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.stm32bsp</string>
+					<string>com.sysprogs.arm.stm32.hal</string>
+					<string>com.sysprogs.arm.stm32.ble.core</string>
+					<string>com.sysprogs.arm.stm32.ble_utilities</string>
+					<string>com.sysprogs.arm.stm32.ble.thread</string>
+				  </RequiredFrameworks>
+				  <DefaultConfiguration>
+					<Entries>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.Board_Type</Key>
+						<Value>nucleo</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.dis</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.hci_tl</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hrs</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.wb_utils.scheduler</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.shci</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.shci_tl</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.openthread.config_file</Key>
+						<Value>&lt;openthread_api_config_ftd.h&gt;</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.Adafruit_Shield_Support</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.External_Components</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.bls</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.crs_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.eds_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hids</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hts</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.ias</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.lls</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.mesh</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.otas_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.p2p_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.tps</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.vcp</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.openthread</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.lhci</Key>
+						<Value />
+					  </KeyValue>
+					</Entries>
+				  </DefaultConfiguration>
+			</EmbeddedSample>
+		</SmartSample>
+	</SmartSamples>
+      <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.stm32.hal_header_prefix</Key>
+          <Value>stm32wbxx</Value>
+        </SysVarEntry>
+        <SysVarEntry>
+          <Key>com.sysprogs.bspoptions.stm32.hal_system_file</Key>
+          <Value>STM32WBxxxx/CMSIS_HAL/Device/ST/STM32WBxx/Source/Templates/system_stm32wbxx.c</Value>
+        </SysVarEntry>
+        <SysVarEntry>
+          <Key>com.sysprogs.bspoptions.stm32.hal_config_template_file</Key>
+          <Value>STM32WBxxxx/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_conf_template.h</Value>
+        </SysVarEntry>
+      </AdditionalSystemVars>
+</FamilyDefinition>

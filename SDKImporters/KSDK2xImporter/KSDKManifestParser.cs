@@ -275,7 +275,7 @@ namespace KSDK2xImporter
                 int FLASHSize, RAMSize;
                 if (!int.TryParse((devNode.SelectSingleNode("memory/@flash_size_kb")?.Value ?? ""), out FLASHSize))
                     int.TryParse((devNode.SelectSingleNode("total_memory/@flash_size_kb")?.Value ?? ""), out FLASHSize);
-                    
+
                 if (!int.TryParse((devNode.SelectSingleNode("memory/@ram_size_kb")?.Value ?? ""), out RAMSize))
                     int.TryParse((devNode.SelectSingleNode("total_memory/@ram_size_kb")?.Value ?? ""), out RAMSize);
 
@@ -284,6 +284,21 @@ namespace KSDK2xImporter
 
                 families.Add(mcuFamily);
                 string svdFile = null;
+
+                string freeRTOSComponentID = "middleware.freertos." + dev.DeviceName;
+
+                foreach (var componentNode in doc.SelectNodes($"//components/component").OfType<XmlElement>())
+                {
+                    string id = componentNode.GetAttribute("id");
+                    if (id?.Contains(".freertos.") == true)
+                    {
+                        if (componentNode.SelectNodes("source/files[@mask='FreeRTOS.h']").Count > 0)
+                        {
+                            freeRTOSComponentID = id;
+                            break;
+                        }
+                    }
+                }
 
                 //Map each component to an instance of EmbeddedFramework
                 foreach (XmlNode componentNode in doc.SelectNodes($"//components/component"))
@@ -369,11 +384,10 @@ namespace KSDK2xImporter
                     List<string> sourceFiles = new List<string>();
                     List<string> libFiles = new List<string>();
 
-                    var IDFr = fwPrefix + idComponent; 
+                    var IDFr = fwPrefix + idComponent;
 
                     foreach (ParsedSource src in componentNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSource(e, dev)))
                     {
-
                         if (src.Exclude)
                             continue;
 
@@ -393,7 +407,7 @@ namespace KSDK2xImporter
                                     FilePath = file.BSPPath,
                                     ConditionToInclude = new Condition.ReferencesFramework
                                     {
-                                        FrameworkID = fwPrefix + "middleware.freertos." + dev.DeviceName
+                                        FrameworkID = fwPrefix + freeRTOSComponentID
                                     }
                                 });
 
@@ -716,6 +730,7 @@ namespace KSDK2xImporter
                     FileConditions = allConditions.ToArray(),
                     VendorSampleCatalogName = "KSDK Samples",
                     EmbeddedSamples = allFrameworks.Where(f => f.OriginalType == "project_template").Select(f => f.ToProjectSample(alwaysIncludedFrameworks)).ToArray(),
+                    BSPImporterID = ID,
                 },
 
                 VendorSampleDirectory = new VendorSampleDirectory
@@ -725,15 +740,18 @@ namespace KSDK2xImporter
             };
         }
 
-        public string GenerateBSPForSDK(string directory, IWarningSink sink)
+        public ImportedExternalSDK GenerateBSPForSDK(ImportedSDKLocation location, ISDKImportHost host)
         {
-            var bsp = ParseKSDKManifest(directory, sink);
-            bsp.Save(directory);
+            var bsp = ParseKSDKManifest(location.Directory, host.WarningSink);
+            bsp.Save(location.Directory);
 
-            return bsp.BSP.PackageID;
+            return new ImportedExternalSDK { BSPID = bsp.BSP.PackageID };
         }
 
+        public const string ID = "com.sysprogs.sdkimporters.nxp.ksdk";
+
         public string Name => "MCUXpresso SDK";
+        public string UniqueID => ID;
         public string CommandName => "Import an MCUXpresso SDK";
         public string Target => "arm-eabi";
         public string OpenFileFilter => "MCUXpresso SDK Manifest Files|*manifest*.xml";

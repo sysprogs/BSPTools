@@ -1,1 +1,1 @@
-..\ESP8266DebugPackage\ilmerge bin\Release\RISCVDebugPackage.dll bin\Release\OpenOCDPackage2.dll /out:bin\RISCVDebugPackage.dll /targetplatform:2.0
+E:\projects\sysprogs\products\VisualGDB\_MergedBinaries\ILMerge.exe bin\Release\RISCVDebugPackage.dll bin\Release\OpenOCDPackage2.dll /out:bin\RISCVDebugPackage.dll /targetplatform:2.0

@@ -14,7 +14,7 @@ namespace SLab_bsp_generator
         private static Dictionary<string, int> STANDARD_TYPE_SIZES = new Dictionary<string, int>()
             { { "uint32_t", 32 }, { "uint16_t", 16 }, { "uint8_t", 8 } };
 
-        public static Dictionary<string, HardwareRegisterSet[]> GenerateFamilyPeripheralRegistersEFM32(string familyDirectory, string fam)
+        public static Dictionary<string, HardwareRegisterSet[]> GenerateFamilyPeripheralRegistersEFM32(string familyDirectory, string fam, string[] deviceNames)
         {
 
             // Create the hardware register sets for each subfamily
@@ -28,20 +28,19 @@ namespace SLab_bsp_generator
             Dictionary<string, int> aDicSizeTypeDefStuct = new Dictionary<string, int>();
             int aSizeStruct = 0;
 
-            foreach (var fn in Directory.GetFiles(familyDirectory, fam + "_*.h"))
+            foreach (var peripheralSpecificFiles in Directory.GetFiles(familyDirectory, fam + "_*.h"))
             {
-                var aHRegs = ProcessRegisterSetNamesList(fn, ref lstRegCustomType);
+                var aHRegs = ProcessRegisterSetNamesList(peripheralSpecificFiles, ref lstRegCustomType);
 
                 if (aHRegs != null)
                     sets.AddRange(aHRegs);
             }
 
-
-            foreach (var fn in Directory.GetFiles(familyDirectory, fam + "*.h"))
+            foreach (var dev in deviceNames)
             {
-                string sr = "^" + fam + "[0-9]*.*";
-                if (!Regex.IsMatch(Path.GetFileName(fn), sr, RegexOptions.IgnoreCase))
-                    continue;
+                string fn = Path.Combine(familyDirectory, dev + ".h");
+                if (!File.Exists(fn))
+                    throw new Exception("Missing " + fn);
 
                 setsCustom = ProcessRegisterSetNamesList(fn, ref lstRegCustomType);
                 List<HardwareRegisterSet> setsCustomMcu = new List<HardwareRegisterSet>();

@@ -24,6 +24,7 @@ namespace BSPGenerationTools
         M0,
         M0Plus,
         M3,
+        M33,
         M4,
         M4_NOFPU,
         M7,
@@ -59,6 +60,8 @@ namespace BSPGenerationTools
         public string LinkerScriptPath;
         public string StartupFile;
         public string MCUDefinitionFile;
+        public MemoryLayout AttachedMemoryLayout;
+
         public override bool Equals(Object obj)
         {
             //MCUBuilder m1 = (MCUBuilder)obj;
@@ -117,25 +120,58 @@ namespace BSPGenerationTools
             if (sysVars.Count > 0)
                 mcu.AdditionalSystemVars = sysVars.ToArray();
 
-            bspBuilder.GetMemoryBases(out mcu.FLASHBase, out mcu.RAMBase);
+            if ((AttachedMemoryLayout?.Memories?.Count ?? 0) > 0)
+            {
+                var flash = AttachedMemoryLayout.Memories.FirstOrDefault(m => m.Type == MemoryType.FLASH);
+                var ram = AttachedMemoryLayout.Memories.FirstOrDefault(m => m.Type == MemoryType.RAM);
+
+                if (flash != null)
+                {
+                    mcu.FLASHBase = flash.Start;
+                    mcu.FLASHSize = (int)flash.Size;
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: could not find default FLASH for {mcu.ID}");
+                }
+
+                if (ram != null)
+                {
+                    mcu.RAMBase = ram.Start;
+                    mcu.RAMSize = (int)ram.Size;
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: could not find default RAM for {mcu.ID}");
+                }
+
+                mcu.MemoryMap = AttachedMemoryLayout.ToMemoryMap();
+            }
+            else
+                bspBuilder.GetMemoryBases(out mcu.FLASHBase, out mcu.RAMBase);
+
             return mcu;
         }
     }
 
     public struct BSPDirectories
     {
-        public readonly string InputDir, OutputDir, RulesDir;
+        public readonly string InputDir, OutputDir, RulesDir, LogDir;
 
-        public BSPDirectories(string inputDir, string outputDir, string rulesDir)
+        public BSPDirectories(string inputDir, string outputDir, string rulesDir, string logDir)
         {
             InputDir = inputDir;
             OutputDir = outputDir;
             RulesDir = rulesDir;
+            LogDir = logDir;
         }
     }
 
-    public abstract class BSPBuilder
+    public abstract class BSPBuilder : IDisposable
     {
+        public readonly ReverseFileConditionBuilder ReverseFileConditions = new ReverseFileConditionBuilder();
+        public readonly BSPReportWriter Report;
+
         public LinkerScriptTemplate LDSTemplate;
         public readonly string BSPRoot;
         public string ShortName;
@@ -149,6 +185,8 @@ namespace BSPGenerationTools
 
         public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = null, int linkerScriptLevel = 4)
         {
+            Report = new BSPReportWriter(dirs.LogDir);
+
             if (linkerScriptTemplate == null)
             {
                 for (int i = 0; i < linkerScriptLevel; i++)
@@ -169,6 +207,24 @@ namespace BSPGenerationTools
                 Console.WriteLine(" done");
             }
             Directory.CreateDirectory(dirs.OutputDir);
+        }
+
+        public PropertyDictionary2 ExportRenamedFileTable()
+        {
+            List<PropertyDictionary2.KeyValue> result = new List<PropertyDictionary2.KeyValue>();
+            foreach (var kv in RenamedFileTable)
+            {
+                if (!kv.Key.StartsWith(Directories.OutputDir))
+                    throw new Exception("Unexpected renamed file");
+
+                string relativePath = kv.Key.Substring(Directories.OutputDir.Length).TrimStart('\\', '/').Replace('\\', '/');
+                int idx = relativePath.LastIndexOf('/');
+                string relativeDir = relativePath.Substring(0, idx);
+
+                result.Add(new PropertyDictionary2.KeyValue { Value = "$$SYS:BSP_ROOT$$/" + relativePath, Key = $"$$SYS:BSP_ROOT$$/{relativeDir}/{kv.Value}" });
+            }
+
+            return new PropertyDictionary2 { Entries = result.ToArray() };
         }
 
         void DeleteDirectoryWithRetries(string dir)
@@ -299,7 +355,7 @@ namespace BSPGenerationTools
                             foundMainFLASH = true;
                     }
 
-                    if (!foundMainFLASH)
+                    if (!foundMainFLASH && dev.FamilyID != "STM32MP1")
                         throw new Exception($"Memory map for {dev.ID} does not contain a FLASH memory");
                 }
 
@@ -333,6 +389,11 @@ namespace BSPGenerationTools
 
             if (totalErrors > 0)
                 throw new Exception($"Found {totalErrors} validation errors. Please check the generator output.");
+        }
+
+        public void Dispose()
+        {
+            Report.Dispose();
         }
     }
 
@@ -373,7 +434,7 @@ namespace BSPGenerationTools
 
         public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables) => GenerateFamilyObject(defineConfigurationVariables ? CoreSpecificFlags.All : CoreSpecificFlags.None);
 
-        public MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate, bool allowExcludingStartupFiles = false)
+        public virtual MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate, bool allowExcludingStartupFiles = false)
         {
             var family = new MCUFamily { ID = Definition.Name };
 
@@ -470,6 +531,11 @@ namespace BSPGenerationTools
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
                     coreName = "M3";
                     break;
+                case CortexCore.M33:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
+                    coreName = "M33";
+                    break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
@@ -562,7 +628,7 @@ namespace BSPGenerationTools
         {
             if (Definition.CoreFramework != null)
                 foreach (var job in Definition.CoreFramework.CopyJobs)
-                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties));
+                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties, BSP.ReverseFileConditions.RootHandle));
         }
 
         class MemoryComparer : IEqualityComparer<Memory>
@@ -588,7 +654,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public Dictionary<string, MemoryLayout> GenerateLinkerScripts(bool generalizeWherePossible)
+        public virtual Dictionary<string, MemoryLayout> GenerateLinkerScripts(bool generalizeWherePossible)
         {
             string ldsDirectory = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, "LinkerScripts");
             Directory.CreateDirectory(ldsDirectory);
@@ -647,6 +713,7 @@ namespace BSPGenerationTools
                 layout.DeviceName = generalizedName;
 
                 BSP.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, FamilyFilePrefix, mcu, layout, generalizedName);
+                mcu.AttachedMemoryLayout = layout;
             }
 
             return memoryLayouts;
@@ -685,7 +752,7 @@ namespace BSPGenerationTools
 
                     ToolFlags flags = new ToolFlags();
                     foreach (var job in fw.CopyJobs)
-                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties));
+                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties, BSP.ReverseFileConditions.GetHandleForFramework(fw)));
 
                     fwDef.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
                     fwDef.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
@@ -753,7 +820,14 @@ namespace BSPGenerationTools
                             string source = src;
                             BSP.ExpandVariables(ref source);
                             string targetPath = Path.Combine(destFolder, Path.GetFileName(source));
-                            File.Copy(source, targetPath);
+                            try
+                            {
+                                File.Copy(source, targetPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                BSP.Report.ReportMergeableError("Failed to copy sample file", $"{source} => {targetPath}: {ex.Message}");
+                            }
                         }
                     }
 
@@ -762,9 +836,17 @@ namespace BSPGenerationTools
                         {
                             foreach (var fn in p.FilePath.Split(';'))
                             {
-                                List<string> allLines = File.ReadAllLines(Path.Combine(destFolder, fn)).ToList();
-                                p.Apply(allLines);
-                                File.WriteAllLines(Path.Combine(destFolder, fn), allLines);
+                                string path = Path.Combine(destFolder, fn);
+                                try
+                                {
+                                    List<string> allLines = File.ReadAllLines(path).ToList();
+                                    p.Apply(allLines);
+                                    File.WriteAllLines(Path.Combine(destFolder, fn), allLines);
+                                }
+                                catch (Exception ex)
+                                {
+                                    BSP.Report.ReportMergeableError("Failed to patch file", $"{path}: {ex.Message}");
+                                }
                             }
                         }
 
@@ -899,7 +981,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public MCUBuilder[] RemoveUnsupportedMCUs(bool throwIfUnexpected)
+        public MCUBuilder[] RemoveUnsupportedMCUs()
         {
             List<MCUBuilder> removedMCUs = new List<MCUBuilder>();
             foreach (var classifier in Definition.Subfamilies)
@@ -909,12 +991,13 @@ namespace BSPGenerationTools
 
                 var removed = MCUs.Where(m => classifier.TryMatchMCUName(m.Name) == null).ToArray();
                 MCUs = MCUs.Where(m => classifier.TryMatchMCUName(m.Name) != null).ToList();
-                if (throwIfUnexpected)
+                var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
+                foreach (var mcu in removed)
                 {
-                    var rgUnsupported = string.IsNullOrEmpty(classifier.UnsupportedMCUs) ? null : new Regex(classifier.UnsupportedMCUs);
-                    foreach (var mcu in removed)
-                        if (rgUnsupported == null || !rgUnsupported.IsMatch(mcu.Name))
-                            throw new Exception(mcu.Name + " is not marked as unsupported, but cannot be categorized " + mcu.Name);
+                    if (rgUnsupported?.IsMatch(mcu.Name) == true)
+                        BSP.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Ignored unsupported MCU(s)", mcu.Name, true);
+                    else
+                        BSP.Report.ReportMergeableError("Unsupported MCU(s) found. Please update the MCUClassifier tags.", mcu.Name, true);
                 }
 
                 removedMCUs.AddRange(removed);
@@ -1053,6 +1136,33 @@ namespace BSPGenerationTools
             updatedFamily.AdditionalSourceFiles = LoadedBSP.Combine(familyToCopy.AdditionalSourceFiles, updatedFamily.AdditionalSourceFiles);
             updatedFamily.AdditionalHeaderFiles = LoadedBSP.Combine(familyToCopy.AdditionalHeaderFiles, updatedFamily.AdditionalHeaderFiles);
             updatedFamily.AdditionalMakefileLines = LoadedBSP.Combine(familyToCopy.AdditionalMakefileLines, updatedFamily.AdditionalMakefileLines);
+        }
+    }
+
+    public static class Extensions
+    {
+        static MCUMemory MakeMCUMemory(Memory arg)
+        {
+            var mem = new MCUMemory
+            {
+                Address = arg.Start,
+                Size = arg.Size,
+                Name = arg.Name,
+            };
+
+            if (arg.Name == "FLASH")
+                mem.Flags |= MCUMemoryFlags.IsDefaultFLASH;
+
+            return mem;
+        }
+
+        public static AdvancedMemoryMap ToMemoryMap(this MemoryLayout layout)
+        {
+            var result = layout?.Memories?.Select(MakeMCUMemory)?.ToArray();
+            if (result != null)
+                return new AdvancedMemoryMap { Memories = result };
+            else
+                return null;
         }
     }
 }

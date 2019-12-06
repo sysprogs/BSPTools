@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using BSPGenerationTools.Parsing;
 using Microsoft.Win32;
+using stm32_bsp_generator.Rulesets;
 
 namespace stm32_bsp_generator
 {
@@ -24,53 +25,8 @@ namespace stm32_bsp_generator
     {
         public class STM32BSPBuilder : BSPBuilder
         {
-            List<KeyValuePair<Regex, MemoryLayout>> _SpecialMemoryLayouts = new List<KeyValuePair<Regex, MemoryLayout>>();
             public readonly STM32SDKCollection SDKList;
 
-            public void GetMemoryMcu(MCUFamilyBuilder pfam)
-            {
-                if (pfam.FamilyFilePrefix.StartsWith("STM32W1"))
-                {
-                    string kvStr = "STM32W108HB";
-                    MemoryLayout layoutW1 = new MemoryLayout { DeviceName = "STM32W108xx", Memories = new List<Memory>() };
-                    layoutW1.Memories.Add(new Memory
-                    {
-                        Name = "FLASH",
-                        Access = MemoryAccess.Undefined,// Readable | MemoryAccess.Writable | MemoryAccess.Executable
-                        Type = MemoryType.FLASH,
-                        Start = 0x08000000,
-                        Size = 128 * 1024
-                    });
-
-                    layoutW1.Memories.Add(new Memory
-                    {
-                        Name = "SRAM",
-                        Access = MemoryAccess.Undefined,// MemoryAccess.Writable,
-                        Type = MemoryType.RAM,
-                        Start = 0x20000000,
-                        Size = 8 * 1024
-                    });
-
-                    _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(new Regex(kvStr.Replace('x', '.') + ".*"), layoutW1));
-
-                }
-                else
-                {
-                    string aDirIcf = pfam.Definition.StartupFileDir;
-                    if (!aDirIcf.EndsWith("gcc"))
-                        throw new Exception("No GCC startup template");
-                    aDirIcf = aDirIcf.Replace("\\gcc", "\\iar\\linker");
-                    if (!Directory.Exists(aDirIcf))
-                        throw new Exception("No dir " + aDirIcf);
-
-                    foreach (var fnIcf in Directory.GetFiles(aDirIcf, "stm32*_flash.icf"))
-                    {
-                        string kvStr = Path.GetFileName(fnIcf).Replace("_flash.icf", "");
-                        var regex = new Regex(kvStr.Replace('x', '.') + ".*", RegexOptions.IgnoreCase);
-                        _SpecialMemoryLayouts.Add(new KeyValuePair<Regex, MemoryLayout>(regex, GetLayoutFromICF(fnIcf, kvStr)));
-                    }
-                }
-            }
             const int NO_DATA = -1;
 
             public override string GetMCUTypeMacro(MCUBuilder mcu)
@@ -155,32 +111,11 @@ namespace stm32_bsp_generator
 
             public readonly string STM32CubeDir;
 
-            static void VerifyMemories(string mcu, MemoryLayout newLayout, MemoryLayout compatLayout, string name)
-            {
-                return; //The sizes parsed from the ICF files don't match the ST datasheets and the XML definitions
-
-                var mem1 = compatLayout.Memories.First(m => m.Name == name);
-                var mem2 = newLayout.Memories.First(m => m.Name == name);
-
-                if (mem1.Size != mem2.Size)
-                    Console.WriteLine($"Mismatching {name} size for {mcu}: was {mem1.Size}, now {mem2.Size}");
-                if (mem1.Start != mem2.Start)
-                    throw new Exception($"Mismatching {name} offset for {mcu}");
-            }
-
             public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
-                MemoryLayout compatLayout = _SpecialMemoryLayouts.FirstOrDefault(m => m.Key.IsMatch(mcu.Name)).Value;
-
                 if (mcu is DeviceListProviders.CubeProvider.STM32MCUBuilder stMCU)
                 {
-                    var newLayout = stMCU.ToMemoryLayout(true);
-
-                    if (compatLayout != null)
-                    {
-                        VerifyMemories(mcu.Name, newLayout, compatLayout, "FLASH");
-                        VerifyMemories(mcu.Name, newLayout, compatLayout, "SRAM");
-                    }
+                    var newLayout = stMCU.ToMemoryLayout(family.BSP.Report);
                     return newLayout;
                 }
 
@@ -223,7 +158,7 @@ namespace stm32_bsp_generator
              *  with the regular versions of the same files. Instead of hardcoding the specific files for specific families, we detect it programmatically and generate the necessary
              *  rules on-the-fly in this function.
              */
-            public void InsertLegacyHALRulesIfNecessary(FamilyDefinition fam)
+            public void InsertLegacyHALRulesIfNecessary(FamilyDefinition fam, ReverseFileConditionBuilder reverseFileConditions)
             {
                 var halFramework = fam.AdditionalFrameworks.FirstOrDefault(f => f.ClassID == "com.sysprogs.arm.stm32.hal") ?? throw new Exception(fam.Name + " defines no HAL framework");
                 var primaryJob = halFramework.CopyJobs.First();
@@ -270,7 +205,7 @@ namespace stm32_bsp_generator
 
                 Regex rgLegacyDefineCheck = new Regex(@"#if( defined|def)[ \(]+(USE_LEGACY|USE_HAL_LEGACY)");
                 string legacyDefineName = null;
-                foreach(var line in File.ReadAllLines(Directory.GetFiles(srcDir + @"\..\Inc", "stm32*hal_def.h")[0]))
+                foreach (var line in File.ReadAllLines(Directory.GetFiles(srcDir + @"\..\Inc", "stm32*hal_def.h")[0]))
                 {
                     var m = rgLegacyDefineCheck.Match(line);
                     if (m.Success)
@@ -281,6 +216,9 @@ namespace stm32_bsp_generator
 
                 if (legacyDefineName != null)
                 {
+                    if (halFramework.ConfigurableProperties == null)
+                        halFramework.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+
                     halFramework.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Boolean
                     {
                         UniqueID = "com.sysprogs.bspoptions.stm32.hal_legacy",
@@ -290,6 +228,8 @@ namespace stm32_bsp_generator
                     });
 
                     halFramework.CopyJobs[0].PreprocessorMacros += ";$$com.sysprogs.bspoptions.stm32.hal_legacy$$";
+
+                    reverseFileConditions?.GetHandleForFramework(halFramework)?.AttachMinimalConfigurationValue("com.sysprogs.bspoptions.stm32.hal_legacy", "");
                 }
             }
         }
@@ -310,8 +250,16 @@ namespace stm32_bsp_generator
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
                     MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
-                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn, "g_pfnVectors:", @"/\*{10,999}|^[^/\*]+\*/
-                $", @"^[ \t]+\.word[ \t]+([^ ]+)", null, @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*", ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)", 1, 2)
+                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn, 
+                        tableStart: "g_pfnVectors:",
+                        tableEnd: @"/\*{10,999}|^[^/\*]+\*/
+                $",
+                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ ]+)", 
+                        vectorLineB: null, 
+                        ignoredLine: @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*|// External Interrupts",
+                        macroDef: ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)", 
+                        nameGroup: 1,
+                        commentGroup: 2)
                 };
             }
         }
@@ -324,8 +272,17 @@ namespace stm32_bsp_generator
             foreach (var fn in Directory.GetFiles(dir, "*.h"))
             {
                 string subfamily = Path.GetFileNameWithoutExtension(fn);
+                string subfamilyForMatching = subfamily;
                 if (subfamily.Length != 11 && subfamily.Length != 12)
-                    continue;
+                {
+                    if (subfamily.EndsWith("_cm4", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        //This is a header file for the Cortex-M4 core of an STM32MP1 device
+                        subfamilyForMatching = subfamily.Substring(0, subfamily.Length - 4);
+                    }
+                    else
+                        continue;
+                }
 
                 if (specificDevice != null && subfamily != specificDevice)
                     continue;
@@ -334,7 +291,7 @@ namespace stm32_bsp_generator
                 {
                     MCUName = subfamily,
                     RegisterSets = PeripheralRegisterGenerator2.GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, fam.MCUs[0].Core, writer),
-                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
+                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamilyForMatching) == 0,
                 };
 
                 result.Add(r);
@@ -376,17 +333,11 @@ namespace stm32_bsp_generator
 
         }
 
-        class STM32FamilyBuilder : MCUFamilyBuilder
+        enum STM32Ruleset
         {
-            public STM32FamilyBuilder(BSPBuilder bspBuilder, FamilyDefinition definition) : base(bspBuilder, definition)
-            {
-            }
-
-            protected override void OnMissingSampleFile(MissingSampleFileArgs args)
-            {
-                return;
-                base.OnMissingSampleFile(args);
-            }
+            Classic,
+            STM32WB,
+            STM32MP1
         }
 
         static void Main(string[] args)
@@ -404,24 +355,28 @@ namespace stm32_bsp_generator
                 SDKFetcher.FetchLatestSDKs(sdkRoot, cubeRoot);
             }
 
-            string rulesetName = "classic";
+            string rulesetName = args.FirstOrDefault(a => a.StartsWith("/rules:"))?.Substring(7) ?? STM32Ruleset.Classic.ToString();
+            STM32Ruleset ruleset = Enum.GetValues(typeof(STM32Ruleset))
+                .OfType<STM32Ruleset>()
+                .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), rulesetName) == 0);
 
             ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
             IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
 
-            var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output", @"..\..\rules\" + rulesetName), cubeRoot);
-            Directory.CreateDirectory(@"..\..\Logs");
-            using (var wr = new ParseReportWriter(@"..\..\Logs\registers.log"))
+            using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output\" + rulesetName, @"..\..\rules\" + rulesetName, @"..\..\Logs\" + rulesetName), cubeRoot))
+            using (var wr = new ParseReportWriter(Path.Combine(bspBuilder.Directories.LogDir, "registers.log")))
             {
                 var devices = provider.LoadDeviceList(bspBuilder);
-                if (devices.Where(d => d.FlashSize == 0).Count() > 0)
+                if (devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP1")).Count() > 0)
                     throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
+                if (!File.Exists(extraFrameworksFile) && File.Exists(Path.ChangeExtension(extraFrameworksFile, ".txt")))
+                    extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, File.ReadAllText(Path.ChangeExtension(extraFrameworksFile, ".txt")));
 
                 Dictionary<string, STM32SDKCollection.SDK> sdksByVariable = bspBuilder.SDKList.SDKs.ToDictionary(s => $"$$STM32:{s.Family}_DIR$$");
-                List <STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
+                List<STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
 
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 {
@@ -477,17 +432,33 @@ namespace stm32_bsp_generator
                         fam.AdditionalFrameworks = fam.AdditionalFrameworks.Concat(extraFrameworksWithoutMissingFolders).ToArray();
                     }
 
-                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam);
-                    allFamilies.Add(new STM32FamilyBuilder(bspBuilder, fam));
+                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam, bspBuilder.ReverseFileConditions);
+                    switch (ruleset)
+                    {
+                        case STM32Ruleset.STM32WB:
+                            allFamilies.Add(new STM32WBFamilyBuilder(bspBuilder, fam));
+                            break;
+                        case STM32Ruleset.STM32MP1:
+                            allFamilies.Add(new STM32MP1FamilyBuilder(bspBuilder, fam));
+                            break;
+                        case STM32Ruleset.Classic:
+                        default:
+                            allFamilies.Add(new STM32ClassicFamilyBuilder(bspBuilder, fam));
+                            break;
+                    }
                 }
 
                 var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
-                if (rejects.Count > 0)
+                if (ruleset == STM32Ruleset.Classic)
                 {
-                    Console.WriteLine("Globally unsupported MCUs:");
                     foreach (var r in rejects)
-                        Console.WriteLine("\t{0}", r.Name);
+                    {
+                        if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB"))
+                            continue;
+
+                        bspBuilder.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
+                    }
                 }
 
                 List<MCUFamily> familyDefinitions = new List<MCUFamily>();
@@ -506,14 +477,7 @@ namespace stm32_bsp_generator
 
                 foreach (var fam in allFamilies)
                 {
-                    bspBuilder.GetMemoryMcu(fam);
-                    var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
-                    if (rejectedMCUs.Length != 0)
-                    {
-                        Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
-                        foreach (var mcu in rejectedMCUs)
-                            Console.WriteLine("\t{0}", mcu.Name);
-                    }
+                    fam.RemoveUnsupportedMCUs();
 
                     fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
                     if (!noPeripheralRegisters)
@@ -522,6 +486,7 @@ namespace stm32_bsp_generator
 
                     familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
                     fam.GenerateLinkerScripts(false);
+
                     foreach (var mcu in fam.MCUs)
                         mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null));
 
@@ -541,34 +506,28 @@ namespace stm32_bsp_generator
                 var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
                 exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
 
-                BoardSupportPackage bsp = new BoardSupportPackage
-                {
-                    PackageID = "com.sysprogs.arm.stm32",
-                    PackageDescription = "STM32 Devices",
-                    GNUTargetID = "arm-eabi",
-                    GeneratedMakFileName = "stm32.mak",
-                    MCUFamilies = familyDefinitions.ToArray(),
-                    SupportedMCUs = mcuDefinitions.ToArray(),
-                    Frameworks = frameworks.ToArray(),
-                    Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    PackageVersion = bspBuilder.SDKList.BSPVersion,
-                    IntelliSenseSetupFile = "stm32_compat.h",
-                    FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                    MinimumEngineVersion = "5.1",
-                    FirstCompatibleVersion = "2019.06",
-                    InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,
-                    ConditionalFlags = allConditionalToolFlags.ToArray()
-                };
+                var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.Directories.RulesDir, "BSPTemplate.xml"));
+
+                bsp.MCUFamilies = familyDefinitions.ToArray();
+                bsp.SupportedMCUs = mcuDefinitions.ToArray();
+                bsp.Frameworks = frameworks.ToArray();
+                bsp.Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
+                bsp.TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
+                bsp.PackageVersion = bspBuilder.SDKList.BSPVersion;
+                bsp.FileConditions = bspBuilder.MatchedFileConditions.ToArray();
+                bsp.InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints;
+                bsp.ConditionalFlags = allConditionalToolFlags.ToArray();
 
                 bspBuilder.SDKList.SDKs = referencedSDKs.Distinct().ToArray();
                 XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
 
                 bspBuilder.ValidateBSP(bsp);
 
+                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), ruleset == STM32Ruleset.STM32WB);
+
                 File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
                 Console.WriteLine("Saving BSP...");
-                bspBuilder.Save(bsp, true);
+                bspBuilder.Save(bsp, false);
             }
         }
 

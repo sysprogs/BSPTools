@@ -120,8 +120,6 @@ namespace GeneratorSampleStm32
                         filePath = pDirPrj + filePath.Substring(1);
                     if (filePath.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
                         continue;
-                    if (filePath.EndsWith(".txt", StringComparison.InvariantCultureIgnoreCase))
-                        continue;
 
                     if (filePath.EndsWith(".lib", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -152,7 +150,7 @@ namespace GeneratorSampleStm32
                 {
                     m = Regex.Match(ln, "[ \t]*<IncludePath>(.*)</IncludePath>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
-                        sample.IncludeDirectories = m.Groups[1].Value.Split(';').Select(d => d.TrimEnd('/', '\\')).ToArray();
+                        sample.IncludeDirectories = m.Groups[1].Value.Split(';').Select(FixIncludePath).ToArray();
 
                     m = Regex.Match(ln, "[ \t]*<Define>(.*)</Define>[ \t]*");
                     if (m.Success && m.Groups[1].Value != "")
@@ -231,13 +229,22 @@ namespace GeneratorSampleStm32
             return aLstVSampleOut;
         }
 
+        private static string FixIncludePath(string path)
+        {
+            path = path.TrimEnd('/', '\\');
+            if (path.StartsWith("/../"))
+                path = path.Substring(1);
+            return path;
+        }
+
         static string ExtractFirstSubdir(string dir) => dir.Split('\\')[1];
 
         class STM32SampleRelocator : VendorSampleRelocator
         {
             private ConstructedVendorSampleDirectory _Directory;
 
-            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir)
+            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping)
+                : base(optionalConditionTableForFrameworkMapping)
             {
                 _Directory = dir;
                 /*
@@ -268,11 +275,46 @@ namespace GeneratorSampleStm32
                 AutoPathMappings = new PathMapping[]
                 {
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/STM32[^/\\]+xx_HAL_Driver/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32{1}xx_HAL_Driver/{2}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/CMSIS/DSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/DSP/{2}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/CMSIS/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/CMSIS_HAL/{2}"),
 
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Middlewares/ST/STM32_USB_(Host|Device)_Library/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32_USB_{2}_Library/{3}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Middlewares/Third_Party/(FreeRTOS)/(.*)", "$$SYS:BSP_ROOT$$/{2}/{3}"),
+
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/WB/Middlewares/ST/STM32_WPAN(.*)", "$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN{1}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(WB)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP1/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
                 };
+            }
+
+            public override Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
+            {
+                var copiedFiles = base.InsertVendorSamplesIntoBSP(dir, sampleList, bspDirectory);
+
+                Regex rgDebugger = new Regex("#define[ \t]+CFG_DEBUGGER_SUPPORTED[ \t]+(0)$");
+
+                foreach (var kv in copiedFiles)
+                {
+                    if (kv.Value.EndsWith("app_conf.h", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var lines = File.ReadAllLines(kv.Value);
+                        bool modified = false;
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            var m = rgDebugger.Match(lines[i]);
+                            if (m.Success)
+                            {
+                                lines[i] = lines[i].Substring(0, m.Groups[1].Index) + "1";
+                                modified = true;
+                            }
+                        }
+
+                        if (modified)
+                            File.WriteAllLines(kv.Value, lines);
+                    }
+                }
+
+                return copiedFiles;
             }
 
             protected override void FilterPreprocessorMacros(ref string[] macros)
@@ -334,12 +376,20 @@ namespace GeneratorSampleStm32
 
         class STM32VendorSampleParser : VendorSampleParser
         {
-            public STM32VendorSampleParser()
-                : base(@"..\..\generators\stm32\output", "STM32 CubeMX Samples")
+            public STM32VendorSampleParser(string ruleset)
+                : base(@"..\..\generators\stm32\output\" + ruleset, "STM32 CubeMX Samples", ruleset)
             {
             }
 
-            protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir) => new STM32SampleRelocator(sampleDir);
+            protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir)
+            {
+                ReverseConditionTable table = null;
+                var conditionTableFile = Path.Combine(BSPDirectory, ReverseFileConditionBuilder.ReverseConditionListFileName + ".gz");
+                if (File.Exists(conditionTableFile))
+                    table = XmlTools.LoadObject<ReverseConditionTable>(conditionTableFile);
+
+                return new STM32SampleRelocator(sampleDir, table);
+            }
 
             static bool IsNonGCCFile(VendorSample vs, string fn)
             {
@@ -375,6 +425,7 @@ namespace GeneratorSampleStm32
                     foreach (var boardDir in Directory.GetDirectories(Path.Combine(topLevelDir, "Projects")))
                     {
                         string boardName = Path.GetFileName(boardDir);
+                        int samplesForThisBoard = 0;
 
                         foreach (var dir in Directory.GetDirectories(boardDir, "Mdk-arm", SearchOption.AllDirectories))
                         {
@@ -406,8 +457,31 @@ namespace GeneratorSampleStm32
                             }
 
                             sampleCount += aSamples.Count;
+                            samplesForThisBoard += aSamples.Count;
                             allSamples.AddRange(aSamples);
                         }
+
+                        if (samplesForThisBoard == 0)
+                        {
+                            foreach (var dir in Directory.GetDirectories(boardDir, "SW4STM32", SearchOption.AllDirectories))
+                            {
+                                string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
+                                AppendSamplePrefixFromPath(ref sampleName, dir);
+
+                                if (!filter.ShouldParseSampleForAnyDevice(sampleName))
+                                    continue;   //We are only reparsing a subset of samples
+
+                                var aSamples = ProjectParsers.SW4STM32ProjectParser.ParseProjectFolder(dir, topLevelDir, boardName, addInc);
+
+                                if (aSamples.Count != 0)
+                                    Debug.Assert(aSamples[0].UserFriendlyName == sampleName);   //Otherwise quick reparsing won't work.
+
+                                sampleCount += aSamples.Count;
+                                samplesForThisBoard += aSamples.Count;
+                                allSamples.AddRange(aSamples);
+                            }
+                        }
+
                     }
 
                     Console.WriteLine($"Found {sampleCount} samples for {sdk.Family}.");
@@ -417,6 +491,19 @@ namespace GeneratorSampleStm32
             }
         }
 
-        static void Main(string[] args) => new STM32VendorSampleParser().Run(args);
+        static void Main(string[] args)
+        {
+            List<string> regularArgs = new List<string>();
+            string ruleset = "classic";
+            foreach (var arg in args)
+            {
+                if (arg.StartsWith("/rules:"))
+                    ruleset = arg.Substring(7);
+                else
+                    regularArgs.Add(arg);
+            }
+
+            new STM32VendorSampleParser(ruleset).Run(regularArgs.ToArray());
+        }
     }
 }

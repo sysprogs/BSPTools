@@ -39,6 +39,7 @@ namespace IARProjectFileImporter
                     }
                     else
                         fileConfiguration.IsExcludedFromBuild = false;
+
                     configurations.Add(fileConfiguration);
                 }
 
@@ -54,26 +55,29 @@ namespace IARProjectFileImporter
 
                 var file = new ImportedExternalProject.ImportedFile
                 {
-                    FullPath = ExpandPath(fileNode.SelectSingleNode("name").InnerText ?? ""),
+                    FullPath = ExpandRelativePath(fileNode.SelectSingleNode("name").InnerText ?? ""),
                     Configurations = configurations.ToList(),
                 };
 
                 string extension = Path.GetExtension(file.FullPath);
                 file.IsHeader = extension.StartsWith("h", StringComparison.InvariantCultureIgnoreCase);
 
-                //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
-                if (file.FullPath.IndexOf("\\IAR\\", StringComparison.InvariantCultureIgnoreCase) != -1)
+                if (!_Settings.UseIARToolchain)
                 {
-                    var substitute = file.FullPath.ToLower().Replace("\\iar\\", "\\gcc\\");
-                    if (File.Exists(substitute))
-                        file.FullPath = substitute;
-                }
+                    //Try automatically replacing IAR-specific files with GCC-specific versions (this will only work if the directory structure stores them in 'IAR' and 'GCC' subdirectories respectively).
+                    if (file.FullPath.IndexOf("\\IAR\\", StringComparison.InvariantCultureIgnoreCase) != -1)
+                    {
+                        var substitute = file.FullPath.ToLower().Replace("\\iar\\", "\\gcc\\");
+                        if (File.Exists(substitute))
+                            file.FullPath = substitute;
+                    }
 
-                string nameOnly = Path.GetFileName(file.FullPath);
-                if (nameOnly.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase) && nameOnly.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    //IAR startup files are not compatible with gcc and are not needed either as VisualGDB provides its own startup files.
-                    continue;
+                    string nameOnly = Path.GetFileName(file.FullPath);
+                    if (nameOnly.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase) && nameOnly.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        //IAR startup files are not compatible with gcc and are not needed either as VisualGDB provides its own startup files.
+                        continue;
+                    }
                 }
 
                 result.Add(file);
@@ -82,36 +86,39 @@ namespace IARProjectFileImporter
             return result;
         }
 
-        public List<ImportedExternalProject.VirtualDirectory> ConvertGroupToVirtualDirectoryRecursively(XmlNode pGroup)
+        public ImportedExternalProject.VirtualDirectory ConvertGroupToVirtualDirectoryRecursively(XmlNode projectOrGroup, string name)
         {
-            List<ImportedExternalProject.VirtualDirectory> result = new List<ImportedExternalProject.VirtualDirectory>();
+            ImportedExternalProject.VirtualDirectory result = new ImportedExternalProject.VirtualDirectory
+            {
+                Name = name,
+                Files = GetFilesInGroup(projectOrGroup),
+                Subdirectories = new List<ImportedExternalProject.VirtualDirectory>(),
+            };
 
-            var xmlNodeList = pGroup.SelectNodes("group");
-            if (xmlNodeList != null)
-                foreach (XmlElement CntGroup in xmlNodeList)
-                {
-                    ImportedExternalProject.VirtualDirectory aOutGroup = new ImportedExternalProject.VirtualDirectory();
-                    aOutGroup.Files = GetFilesInGroup(CntGroup);
-                    string name = CntGroup.SelectSingleNode("name").InnerText;
-                    aOutGroup.Name = name;
-                    aOutGroup.Subdirectories = ConvertGroupToVirtualDirectoryRecursively(CntGroup);
-                    result.Add(aOutGroup);
-                }
+            foreach (XmlElement subGroup in projectOrGroup.SelectNodes("group"))
+            {
+                ImportedExternalProject.VirtualDirectory dir = ConvertGroupToVirtualDirectoryRecursively(subGroup, subGroup.SelectSingleNode("name").InnerText);
+                result.Subdirectories.Add(dir);
+            }
+
             return result;
         }
 
-        public string ExpandPath(string pPath)
+        public string ExpandRelativePath(string path)
         {
-            string projectDir = PRJ_DIR;
-            while (pPath.IndexOf(@"\..") > 0)
+            if (path == null)
+                return null;
+
+            string tmpDir = ProjectDirectory;
+            while (path.IndexOf(@"\..") > 0)
             {
-                pPath = pPath.Remove(pPath.IndexOf(@"\.."), 3);
-                projectDir = projectDir.Remove(projectDir.LastIndexOf(@"\"));
+                path = path.Remove(path.IndexOf(@"\.."), 3);
+                tmpDir = tmpDir.Remove(tmpDir.LastIndexOf(@"\"));
             }
 
-            pPath = pPath.Replace("$PROJ_DIR$", projectDir);
+            path = path.Replace("$PROJ_DIR$", tmpDir);
 
-            return pPath;
+            return path;
         }
 
         public ImportedExternalProject.InvariantProjectBuildSettings ExtractInvariantBuildSettings(XmlNode pNode)
@@ -121,13 +128,13 @@ namespace IARProjectFileImporter
             if (pNode != null)
             {
                 st.PreprocessorMacros = pNode.SelectNodes("option[name=\"CCDefines\"]/state").OfType<XmlElement>().Select(el => el.InnerText).ToArray();
-                st.IncludeDirectories = pNode.SelectNodes("(option[name=\"CCIncludePath2\"]|option[name=\"newCCIncludePaths\"])/state").OfType<XmlElement>().Select(el => ExpandPath(el.InnerText)).ToArray();
+                st.IncludeDirectories = pNode.SelectNodes("(option[name=\"CCIncludePath2\"]|option[name=\"newCCIncludePaths\"])/state").OfType<XmlElement>().Select(el => ExpandRelativePath(el.InnerText)).ToArray();
                 st.GeneratePreprocessorOutput = pNode.SelectSingleNode("option[name=\"CCPreprocFile\"]/state")?.InnerText == "1" ? true : false;
             }
             return st;
         }
 
-        public static string PRJ_DIR;
+        public string ProjectDirectory;
 
         public string Name => "IAR";
 
@@ -139,12 +146,18 @@ namespace IARProjectFileImporter
 
         public string UniqueID => "com.sysprogs.project_importers.iar";
 
-        public object SettingsControl => null;
-        public object Settings { get; set; }
-
-        public ImportedExternalProject ParseEIPFile(string pFileEwp, IProjectImportService service)
+        public object SettingsControl { get; } = new GUI.IARImporterSettingsControl();
+        public object Settings
         {
-            PRJ_DIR = Path.GetDirectoryName(pFileEwp);
+            get => _Settings;
+            set => _Settings = value as IARProjectImporterSettings;
+        }
+
+        IARProjectImporterSettings _Settings = new IARProjectImporterSettings();
+
+        public ImportedExternalProject ParseEWPFile(string pFileEwp, IProjectImportService service)
+        {
+            ProjectDirectory = Path.GetDirectoryName(pFileEwp);
             ImportedExternalProject result = new ImportedExternalProject();
             XmlDocument doc = new XmlDocument();
             doc.Load(pFileEwp);
@@ -156,26 +169,28 @@ namespace IARProjectFileImporter
                 configuration.Name = prjNode.SelectSingleNode($"name").InnerText ?? "NONAME_PRJ";
                 allConfigurations.Add(configuration);
 
-                var tPrjSetting = ExtractInvariantBuildSettings(prjNode);
+                configuration.Settings = ExtractInvariantBuildSettings(prjNode);
 
-                //string aIcfFile = ExpandPath(prjNode.SelectSingleNode("settings/data/option[name=\"IlinkIcfFile\"]/state").InnerText);
-                deviceName = prjNode.SelectSingleNode("(settings/data/option[name=\"OGChipSelectEditMenu\"]|settings/data/option[name=\"OGChipSelectMenu\"])/state")?.InnerText?.Split(' ', '\t')[0] ?? "";
-                //tPrjSetting.LinkerScript = aIcfFile;
+                string toolchain = prjNode.SelectSingleNode("toolchain/name")?.InnerText;
 
-                configuration.Settings = tPrjSetting;
+                string icfFile = ExpandRelativePath(prjNode.SelectSingleNode("settings/data/option[name=\"IlinkIcfFile\"]/state")?.InnerText);
+                string overrideIcfFile = prjNode.SelectSingleNode("settings/data/option[name=\"IlinkIcfOverride\"]/state")?.InnerText;
+
+                configuration.IsStaticLibrary = prjNode.SelectSingleNode("settings/data/option[name=\"GOutputBinary\"]/state")?.InnerText == "0";
+                
+                string thisDeviceName = prjNode.SelectSingleNode("(settings/data/option[name=\"OGChipSelectEditMenu\"]|settings/data/option[name=\"OGChipSelectMenu\"])/state")?.InnerText?.Split(' ', '\t')[0] ?? "";
+                if (!string.IsNullOrEmpty(thisDeviceName))
+                    deviceName = thisDeviceName;
+
+                if (_Settings.UseIARToolchain && overrideIcfFile == "1" && !string.IsNullOrEmpty(icfFile))
+                    configuration.Settings.LinkerScript = icfFile.Replace("$TOOLKIT_DIR$", "$(ToolchainDir)/" + toolchain);
             }
 
             if (allConfigurations.Count == 0)
                 service.Logger.LogLine("Warning: No Configurations found in " + pFileEwp);
 
-            ImportedExternalProject.VirtualDirectory RootDirectory = new ImportedExternalProject.VirtualDirectory
-            {
-                Name = "Root",
-                Files = null,
-                Subdirectories = ConvertGroupToVirtualDirectoryRecursively(doc.SelectSingleNode("//project"))
-            };
-            result.RootDirectory = RootDirectory;
-            
+            result.RootDirectory = ConvertGroupToVirtualDirectoryRecursively(doc.SelectSingleNode("//project") ?? throw new Exception("Failed to locate root project node"), null);
+
             if (deviceName == "")
                 service.Logger.LogLine($"Warning: {pFileEwp} does not specify the device name");
 
@@ -190,10 +205,15 @@ namespace IARProjectFileImporter
 
             return result;
         }
-        
+
         public ImportedExternalProject ImportProject(ProjectImportParameters parameters, IProjectImportService service)
         {
-            return ParseEIPFile(parameters.ProjectFile, service);
+            return ParseEWPFile(parameters.ProjectFile, service);
         }
+    }
+
+    public class IARProjectImporterSettings
+    {
+        public bool UseIARToolchain { get; set; }
     }
 }
