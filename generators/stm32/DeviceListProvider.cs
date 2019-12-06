@@ -175,26 +175,24 @@ namespace stm32_bsp_generator
                 }
             }
 
-            internal RawMemory[] LookupMemories(string RPN, string RefName, out string[] linkerScripts)
+            internal RawMemory[] LookupMemories(string RPN, string RefName, string explicitCore, out string[] linkerScripts)
             {
                 XmlElement node;
                 if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
-                {
                     throw new Exception("Could not find memory layout for " + RefName);
-                }
 
                 linkerScripts = node.SelectNodes("SW4STM32/linkers/linker").OfType<XmlElement>().Select(n => n.InnerText).ToArray();
-                return node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
-            }
-            internal RawMemory[] LookupMemoriesTwoCore(string RPN, string Core, string RefName)
-            {
-                XmlElement node;
-                if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
+
+                var memories = node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
+                if (memories.Length == 0)
                 {
-                    throw new Exception("Could not find memory layout for " + RefName);
+                    if (explicitCore == null)
+                        throw new Exception("Missing memories for " + RefName);
+
+                    memories = node.SelectNodes($"memories/C{explicitCore}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
                 }
 
-                return node.SelectNodes($"memories/C{Core}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
+                return memories;
             }
         }
 
@@ -203,21 +201,16 @@ namespace stm32_bsp_generator
             public class STM32MCUBuilder : MCUBuilder
             {
                 private readonly ParsedMCU MCU;
-                public readonly string[] PredefinedLinkerScripts;
-
+                public string[] PredefinedLinkerScripts => MCU.LinkerScripts;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
 
                 public STM32MCUBuilder(ParsedMCU parsedMCU, DeviceMemoryDatabase db)
                 {
                     MCU = parsedMCU;
-                    Memories = db.LookupMemories(parsedMCU.RPN, parsedMCU.RefName, out PredefinedLinkerScripts);
-                    if (Memories.Length < 1)
-                    {
-                        if (parsedMCU.strCore != "")
-                            Memories = db.LookupMemoriesTwoCore(parsedMCU.RPN, parsedMCU.strCore, parsedMCU.RefName);
-                        if (Memories.Length < 1)
-                            throw new Exception("Could not locate memories for " + parsedMCU.Name);
-                    }
+
+                    Memories = parsedMCU.Memories.ToArray();
+                    if (Memories.Length == 0)
+                        throw new Exception("Could not locate memories for " + parsedMCU.Name);
 
                     for (int i = 0; i < Memories.Length; i++)
                     {
@@ -240,13 +233,13 @@ namespace stm32_bsp_generator
                     if (MCU.Name.StartsWith("STM32H7"))
                     {
                         if (MCU.Name.EndsWith("M4"))
-                            ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000));
+                            ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000), MemoryLocationRule.ByName("RAM_D2"));
                         else
                             ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x24000000));
                     }
                     else
                     {
-                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, 
+                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM,
                             MemoryLocationRule.ByName("SRAM"),
                             MemoryLocationRule.ByName("RAM_D1"),
                             MemoryLocationRule.ByName("RAM_D2"),
@@ -254,7 +247,7 @@ namespace stm32_bsp_generator
                     }
 
                     if (ram == null)
-                        report.ReportMergeableError("Could not locate RAM compatible with STM32H7 system file", MCU.Name, true);
+                        report.ReportMergeableError("Could not locate primary RAM for the MCU(s)", MCU.Name, true);
 
                     if (layout.TryLocateAndMarkPrimaryMemory(MemoryType.FLASH, MemoryLocationRule.ByName("FLASH")) == null)
                         throw new Exception("No FLASH found");
@@ -289,11 +282,12 @@ namespace stm32_bsp_generator
 
                 public readonly string[] LinkerScripts;
 
-                public CortexCore Core;
-                public string strCore;
+                public readonly CortexCore Core;
+                public readonly string CoreSuffix;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
-                public int[] RAMs;
-                public int FLASH;
+
+                public readonly int[] RAMs;
+                public readonly int FLASH;
 
                 static XmlElement LoadMCUDefinition(string familyDir, string name)
                 {
@@ -302,66 +296,57 @@ namespace stm32_bsp_generator
                     return doc.DocumentElement;
                 }
 
-                public ParsedMCU(XmlElement n, string familyDir, DeviceMemoryDatabase db, int numcore = 0)
+                static CortexCore ParseCore(string coreText)
+                {
+                    switch (coreText)
+                    {
+                        case "M0":
+                            return CortexCore.M0;
+                        case "M0+":
+                            return CortexCore.M0Plus;
+                        case "M3":
+                            return CortexCore.M3;
+                        case "M33":
+                            return CortexCore.M33;
+                        case "M4":
+                            return CortexCore.M4;
+                        case "M7":
+                            return CortexCore.M7;
+                        case "A7":
+                            return CortexCore.A7;
+                        default:
+                            throw new Exception("Don't know how to map core: " + coreText);
+                    }
+                }
+
+                public ParsedMCU(XmlElement n, string familyDir, DeviceMemoryDatabase db, string[] cores, int coreIndex)
                 {
                     Name = n.GetAttribute("Name");
                     RefName = n.GetAttribute("RefName");
                     RPN = n.GetAttribute("RPN");
 
-                    //var mcuDef = LoadMCUDefinition(familyDir, Name);
-                    //var nsmgr2 = new XmlNamespaceManager(mcuDef.OwnerDocument.NameTable);
-                    //nsmgr2.AddNamespace("mcu", "http://mcd.rou.st.com/modules.php?name=mcu");
-                    strCore = "";
+                    const string prefix = "Arm Cortex-";
+                    if (!cores[coreIndex].StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase))
+                        throw new Exception("Unknown core: " + cores[coreIndex]);
 
-                    var core = n.SelectSingleNode("Core").InnerText;
+                    string shortCore = cores[coreIndex].Substring(prefix.Length);
+                    Core = ParseCore(shortCore);
 
-                    core = n.SelectNodes("Core")[numcore].InnerText;
-
-                    switch (core)
+                    if (cores.Length > 1)
                     {
-                        case "Arm Cortex-M0":
-                        case "ARM Cortex-M0":
-                            Core = CortexCore.M0;
-                            strCore = "M0";
-                            break;
-                        case "Arm Cortex-M0+":
-                        case "ARM Cortex-M0+":
-                            Core = CortexCore.M0Plus;
-                            strCore = "M0p";
-                            break;
-                        case "Arm Cortex-M3":
-                        case "ARM Cortex-M3":
-                            Core = CortexCore.M3;
-                            strCore = "M3";
-                            break;
-                        case "Arm Cortex-M33":
-                        case "ARM Cortex-M33":
-                            Core = CortexCore.M33;
-                            strCore = "M33";
-                            break;
-                        case "Arm Cortex-M4":
-                        case "ARM Cortex-M4":
-                            Core = CortexCore.M4;
-                            strCore = "M4";
-                            break;
-                        case "Arm Cortex-M7":
-                        case "Arm Cortex-A7": //MP1 2 Core: A7, M4
-                        case "ARM Cortex-A7": //MP1 2 Core: A7, M4
-                        case "ARM Cortex-M7":
-                            Core = CortexCore.M7;
-                            strCore = "M7";
-                            break;
-                        default:
-                            throw new Exception("Don't know how to map core: " + core);
-                    }
+                        CoreSuffix = shortCore.Replace('+', 'p');
 
-                    if (numcore > 0)
-                    {
-                        Name += "_" + strCore;
-                        RPN += "_" + strCore;
+                        if (coreIndex > 0)
+                        {
+                            //Secondary core uses a special name.
+                            Name += "_" + CoreSuffix;
+                            RPN += "_" + CoreSuffix;
+                        }
                     }
+                    else
+                        CoreSuffix = null;
 
-                    Memories = db.LookupMemories(RPN, RefName, out LinkerScripts);
+                    Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
@@ -411,9 +396,11 @@ namespace stm32_bsp_generator
                 List<ParsedMCU> lstMCUs = new List<ParsedMCU>();
                 foreach (var m in doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>())
                 {
-                    for (int icore = 0; icore < m.SelectNodes("Core").Count; icore++)
+                    string[] cores = m.SelectNodes("Core").OfType<XmlNode>().Select(n => n.InnerText).ToArray();
+
+                    for (int i = 0; i < cores.Length; i++)
                     {
-                        lstMCUs.Add(new ParsedMCU(m, familyDir, db, icore));
+                        lstMCUs.Add(new ParsedMCU(m, familyDir, db, cores, i));
                     }
                 }
                 var rawMCUs = lstMCUs.ToArray();
