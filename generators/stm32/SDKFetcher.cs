@@ -17,7 +17,12 @@ namespace stm32_bsp_generator
         {
             Directory.CreateDirectory(sdkRoot);
             var xml = new XmlDocument();
-            xml.Load(cubeRoot + @"\db\plugins\updater\STMupdaters.xml");
+            var catalogFile = cubeRoot + @"\db\plugins\updater\STMupdaters.xml";
+            var daysOld = (DateTime.Now - File.GetLastWriteTime(catalogFile)).TotalDays;
+            if (daysOld > 14)
+                throw new Exception($"STM32CubeMX device list {daysOld:f0} days old. Please update STM32CubeMX.");
+
+            xml.Load(catalogFile);
 
             var firmwaresNode = xml.DocumentElement.ChildNodes.OfType<XmlElement>().First(e => e.Name == "Firmwares");
             List<ReleaseDefinition> releases = new List<ReleaseDefinition>();
