@@ -104,19 +104,13 @@ namespace stm32_bsp_generator
                 }
             }
 
-            public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
-            {
-                base.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, familyFilePrefix, mcu, layout, generalizedName);
-            }
-
             public readonly string STM32CubeDir;
 
-            public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
+            public override MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 if (mcu is DeviceListProviders.CubeProvider.STM32MCUBuilder stMCU)
                 {
-                    var newLayout = stMCU.ToMemoryLayout(family.BSP.Report);
-                    return newLayout;
+                    return stMCU.ToMemoryLayout(family.BSP.Report);
                 }
 
                 throw new Exception($"{mcu.Name} is not provided by the STM32CubeMX-based MCU locator. Please ensure we get the actual memory map for this device, as guessing it from totals often yields wrong results.");
@@ -143,7 +137,7 @@ namespace stm32_bsp_generator
                 });
 
 
-                return layout;
+                return new MemoryLayoutAndSubstitutionRules(layout);
             }
 
 

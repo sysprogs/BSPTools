@@ -289,7 +289,8 @@ namespace BSPGenerationTools
             XmlTools.SaveObject(lst, Path.Combine(BSPRoot, Path.ChangeExtension(archiveName, ".xml")));
         }
 
-        public abstract MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family);
+
+        public abstract MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family);
 
         public abstract void GetMemoryBases(out uint flashBase, out uint ramBase);
 
@@ -298,15 +299,19 @@ namespace BSPGenerationTools
             return LDSTemplate;
         }
 
-        public virtual void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
+        public virtual void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory,
+            string familyFilePrefix,
+            MCUBuilder mcu,
+            MemoryLayoutAndSubstitutionRules layout,
+            string generalizedName)
         {
-            using (var gen = new LdsFileGenerator(GetTemplateForMCU(mcu), layout))
+            using (var gen = new LdsFileGenerator(GetTemplateForMCU(mcu), layout.Layout))
             {
                 using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_flash.lds")))
-                    gen.GenerateLdsFile(sw);
-                gen.RedirectMainFLASHToRAM = true;
+                    gen.GenerateLdsFile(sw, null);
+
                 using (var sw = new StreamWriter(Path.Combine(ldsDirectory, generalizedName + "_sram.lds")))
-                    gen.GenerateLdsFile(sw);
+                    gen.GenerateLdsFile(sw, layout.MemorySubstitutionsForRAMScript ?? gen.CreateDefaultFLASHToRAMSubstitutionMap());
 
                 mcu.LinkerScriptPath = string.Format("$$SYS:BSP_ROOT$$/{0}LinkerScripts/{1}_$${2}$$.lds", familyFilePrefix, generalizedName, MCUFamilyBuilder.PrimaryMemoryOptionName);
             }
@@ -657,13 +662,17 @@ namespace BSPGenerationTools
             }
         }
 
-        public virtual Dictionary<string, MemoryLayout> GenerateLinkerScripts(bool generalizeWherePossible)
+        public class MemoryLayoutCollection : Dictionary<string, MemoryLayoutAndSubstitutionRules>
+        {
+        }
+
+        public virtual MemoryLayoutCollection GenerateLinkerScripts(bool generalizeWherePossible)
         {
             string ldsDirectory = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, "LinkerScripts");
             Directory.CreateDirectory(ldsDirectory);
 
             Dictionary<string, bool> generalizationResults = new Dictionary<string, bool>();
-            Dictionary<string, MemoryLayout> memoryLayouts = new Dictionary<string, MemoryLayout>();
+            var memoryLayouts = new MemoryLayoutCollection();
 
             foreach (var mcu in MCUs)
                 memoryLayouts[mcu.Name] = BSP.GetMemoryLayout(mcu, this);
@@ -695,7 +704,7 @@ namespace BSPGenerationTools
                             foreach (var kv in memoryLayouts)
                                 if (regex.IsMatch(kv.Key))
                                 {
-                                    if (!Enumerable.SequenceEqual(kv.Value.Memories, layout.Memories, comparer))
+                                    if (!Enumerable.SequenceEqual(kv.Value.Layout.Memories, layout.Layout.Memories, comparer))
                                     {
                                         generalized = false;
                                         break;
@@ -713,10 +722,10 @@ namespace BSPGenerationTools
                 if (!generalized)
                     generalizedName = mcu.Name;
 
-                layout.DeviceName = generalizedName;
+                layout.Layout.DeviceName = generalizedName;
 
                 BSP.GenerateLinkerScriptsAndUpdateMCU(ldsDirectory, FamilyFilePrefix, mcu, layout, generalizedName);
-                mcu.AttachedMemoryLayout = layout;
+                mcu.AttachedMemoryLayout = layout.Layout;
             }
 
             return memoryLayouts;
@@ -1166,6 +1175,18 @@ namespace BSPGenerationTools
                 return new AdvancedMemoryMap { Memories = result };
             else
                 return null;
+        }
+    }
+
+    public struct MemoryLayoutAndSubstitutionRules
+    {
+        public MemoryLayout Layout;
+        public Dictionary<string, string> MemorySubstitutionsForRAMScript;
+
+        public MemoryLayoutAndSubstitutionRules(MemoryLayout layout, Dictionary<string, string> memorySubstitutionRulesForRAMMode = null)
+        {
+            Layout = layout;
+            MemorySubstitutionsForRAMScript = memorySubstitutionRulesForRAMMode;
         }
     }
 }

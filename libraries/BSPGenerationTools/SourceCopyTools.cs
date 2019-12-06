@@ -612,8 +612,9 @@ namespace BSPGenerationTools
             }
 
             var unusedConditions = conditions?.Where(c => c.UseCount == 0)?.ToArray();
-            if ((unusedConditions?.Length ?? 0) != 0)
-                throw new Exception(string.Format("Found {0} unused conditions. Please recheck your rules.", unusedConditions.Length));
+            if (unusedConditions != null)
+                foreach (var cond in unusedConditions)
+                    bsp.Report.ReportMergeableError("Unused condition(s) for copy job", cond.ToString());
 
             if (Patches != null)
                 foreach (var p in Patches)
