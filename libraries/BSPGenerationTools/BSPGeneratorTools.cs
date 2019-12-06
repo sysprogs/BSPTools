@@ -28,6 +28,7 @@ namespace BSPGenerationTools
         M4,
         M4_NOFPU,
         M7,
+        A7,
         R5F,
     }
 
@@ -555,6 +556,8 @@ namespace BSPGenerationTools
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mfpu=vfpv3-d16 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CR5" };
                     break;
+                case CortexCore.A7:
+                    throw new Exception("Cortex-A7 core requires a Linux-based toolchain.");
                 default:
                     throw new Exception("Unsupported core type");
             }

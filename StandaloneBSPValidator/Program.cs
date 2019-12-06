@@ -413,7 +413,7 @@ namespace StandaloneBSPValidator
             return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, null, vs, validationFlags);
         }
 
-        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg, string[] pUndefinedMacros)
+        static void CreateEmptyDirectoryForTestingMCU(string mcuDir)
         {
             const int RepeatCount = 20;
             for (var i = 0; i < RepeatCount; ++i)
@@ -443,7 +443,10 @@ namespace StandaloneBSPValidator
                 }
                 Thread.Sleep(50);
             }
+        }
 
+        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg, string[] pUndefinedMacros)
+        {
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
             if (configuredMCU.ExpandedMCU.FLASHSize == 0)
             {
@@ -461,12 +464,13 @@ namespace StandaloneBSPValidator
             {
                 if (sample.SkipIfNotFound)
                 {
-                    Directory.Delete(mcuDir, true);
                     return new TestResult(TestBuildResult.Skipped, null);
                 }
                 else
                     throw new Exception("Cannot find sample: " + sample.Name);
             }
+
+            CreateEmptyDirectoryForTestingMCU(mcuDir);
 
             string[] frameworks = sampleObj.Sample.RequiredFrameworks ?? new string[0];
 
