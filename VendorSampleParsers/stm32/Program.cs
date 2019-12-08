@@ -19,11 +19,11 @@ namespace GeneratorSampleStm32
 
     class Program
     {
-        static public List<string> ToAbsolutePath(string dir, string topLevelDir, List<string> lstDir)
+        static public List<string> ToAbsolutePaths(string dir, string topLevelDir, List<string> relativePaths)
         {
             List<string> srcAbc = new List<string>();
 
-            foreach (var sf in lstDir)
+            foreach (var sf in relativePaths)
             {
                 string fn = sf.Trim(' ');
                 fn = fn.Replace(@"/RVDS/", @"/GCC/");
@@ -45,7 +45,10 @@ namespace GeneratorSampleStm32
                         if (Directory.Exists(fn2))
                             fn = fn2;
                         else
+                        {
                             Console.WriteLine("Missing file/directory: " + fn);
+                            continue;
+                        }
                     }
                 }
 
@@ -174,12 +177,12 @@ namespace GeneratorSampleStm32
                     AppendSamplePrefixFromPath(ref sample.UserFriendlyName, pDirPrj);
 
                     sample.BoardName = aTarget;
-                    sample.SourceFiles = ToAbsolutePath(pDirPrj, topLevelDir, sourceFiles).ToArray();
+                    sample.SourceFiles = ToAbsolutePaths(pDirPrj, topLevelDir, sourceFiles).ToArray();
 
                     foreach (var fl in sample.IncludeDirectories)
                         includeDirs.Add(fl);
                     includeDirs.AddRange(extraIncludeDirs);
-                    sample.IncludeDirectories = ToAbsolutePath(pDirPrj, topLevelDir, includeDirs).ToArray();
+                    sample.IncludeDirectories = ToAbsolutePaths(pDirPrj, topLevelDir, includeDirs).ToArray();
 
                     string readmeFile = Path.Combine(pDirPrj, @"..\readme.txt");
                     if (File.Exists(readmeFile))

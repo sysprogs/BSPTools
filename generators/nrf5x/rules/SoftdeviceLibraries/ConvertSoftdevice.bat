@@ -1,5 +1,6 @@
+@echo off
 REM Usage: ConvertSoftdevice.bat <Softdevice Name> <Intermediate Hex file name> -mfloat-abi=<...>
-set ARM_GCC_PREFIX=arm-eabi-
+set ARM_GCC_PREFIX=arm-none-eabi-
 cd /d %~dp0
 
 %ARM_GCC_PREFIX%gcc empty.c -c -o %1_softdevice.o -mcpu=cortex-m4 -mthumb %3

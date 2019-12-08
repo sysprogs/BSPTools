@@ -26,8 +26,8 @@ namespace LinkerScriptGenerator
             var scriptTemplate = LoadObject<LinkerScriptTemplate>(args[0]);
             var memoryTemplate = LoadObject<MemoryLayout>(args[1]);
             using (var fs = new StreamWriter(args[2]))
-            using (var generator = new LdsFileGenerator(scriptTemplate, memoryTemplate){RedirectMainFLASHToRAM = true})
-                generator.GenerateLdsFile(fs);
+            using (var generator = new LdsFileGenerator(scriptTemplate, memoryTemplate))
+                generator.GenerateLdsFile(fs, null);
         }
 
         public static _Ty LoadObject<_Ty>(string xmlFile, params Type[] extraTypes) where _Ty : new()

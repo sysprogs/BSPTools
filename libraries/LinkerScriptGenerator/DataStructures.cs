@@ -200,19 +200,26 @@ namespace LinkerScriptGenerator
             return r;
         }
 
-        public Memory TryLocateAndMarkPrimaryMemory(MemoryType type, params MemoryLocationRule[] rules)
+        public Memory TryLocateMemory(MemoryType type, params MemoryLocationRule[] rules)
         {
-            foreach(var rule in rules)
+            foreach (var rule in rules)
             {
                 var mem = Memories.FirstOrDefault(m => m.Type == type && rule.IsMatch(m));
                 if (mem != null)
-                {
-                    mem.IsPrimary = true;
                     return mem;
-                }
             }
 
             return null;
+        }
+
+
+        public Memory TryLocateAndMarkPrimaryMemory(MemoryType type, params MemoryLocationRule[] rules)
+        {
+            var mem = TryLocateMemory(type, rules);
+            if (mem != null)
+                mem.IsPrimary = true;
+
+            return mem;
         }
     }
 

@@ -782,7 +782,7 @@ namespace StandaloneBSPValidator
             public int Total => Passed + Failed;
         }
 
-        public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory)
+        public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory, Regex additionalMCUFilter = null)
         {
             TestStatistics stats = new TestStatistics();
             Directory.CreateDirectory(temporaryDirectory);
@@ -817,6 +817,9 @@ namespace StandaloneBSPValidator
                         Regex rgDevice = new Regex(sample.DeviceRegex);
                         effectiveMCUs = MCUs.Where(mcu => rgDevice.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
                     }
+
+                    if (additionalMCUFilter != null)
+                        effectiveMCUs = effectiveMCUs.Where(mcu => additionalMCUFilter.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
 
                     if (sample.Name == "ValidateGenerateFramwoks")
                     {

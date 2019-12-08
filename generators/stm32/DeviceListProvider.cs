@@ -224,35 +224,42 @@ namespace stm32_bsp_generator
                     Memories = Memories.OrderBy(m => m.SortWeight).ToArray();
                 }
 
-                public MemoryLayout ToMemoryLayout(BSPReportWriter report)
+                public MemoryLayoutAndSubstitutionRules ToMemoryLayout(BSPReportWriter report)
                 {
                     var layout = new MemoryLayout { DeviceName = Name, Memories = Memories.Select(m => m.ToMemoryDefinition()).ToList() };
 
-                    Memory ram;
+                    const string FLASHMemoryName = "FLASH";
 
-                    if (MCU.Name.StartsWith("STM32H7"))
+                    Memory ram;
+                    Dictionary<string, string> memorySubstitutionRulesForRAMMode = null;
+
+                    if (MCU.Name.StartsWith("STM32H7") && MCU.Name.EndsWith("M4"))
                     {
-                        if (MCU.Name.EndsWith("M4"))
-                            ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000), MemoryLocationRule.ByName("RAM_D2"));
-                        else
-                            ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x24000000));
+                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000), MemoryLocationRule.ByName("RAM_D2"));
                     }
                     else
                     {
-                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM,
-                            MemoryLocationRule.ByName("SRAM"),
-                            MemoryLocationRule.ByName("RAM_D1"),
-                            MemoryLocationRule.ByName("RAM_D2"),
-                            MemoryLocationRule.ByName("RAM1"));
+                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x20000000));
+                    }
+
+                    if (MCU.Name.StartsWith("STM32H7") && !MCU.Name.EndsWith("M4"))
+                    {
+                        //STM32H7 system file expects the ISR to be located at address 0x24000000  (D1_AXISRAM_BASE) and not at 0x20000000.
+                        var mainMemoryForRAMMode = layout.TryLocateMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x24000000), MemoryLocationRule.ByName("RAM_D2")) ?? throw new Exception("Failed to locate main memory for RAM mode");
+
+                        memorySubstitutionRulesForRAMMode = new Dictionary<string, string> { 
+                            { FLASHMemoryName, mainMemoryForRAMMode.Name } ,
+                            { ram.Name, mainMemoryForRAMMode.Name } ,
+                        };
                     }
 
                     if (ram == null)
                         report.ReportMergeableError("Could not locate primary RAM for the MCU(s)", MCU.Name, true);
 
-                    if (layout.TryLocateAndMarkPrimaryMemory(MemoryType.FLASH, MemoryLocationRule.ByName("FLASH")) == null)
+                    if (layout.TryLocateAndMarkPrimaryMemory(MemoryType.FLASH, MemoryLocationRule.ByName(FLASHMemoryName)) == null)
                         throw new Exception("No FLASH found");
 
-                    return layout;
+                    return new MemoryLayoutAndSubstitutionRules(layout, memorySubstitutionRulesForRAMMode);
                 }
 
                 public override MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false, MCUFamilyBuilder.CoreSpecificFlags flagsToAdd = MCUFamilyBuilder.CoreSpecificFlags.All)
@@ -260,7 +267,7 @@ namespace stm32_bsp_generator
                     var mcu = base.GenerateDefinition(fam, bspBuilder, requirePeripheralRegisters, allowIncompleteDefinition, flagsToAdd);
 
                     var layout = ToMemoryLayout(fam.BSP.Report);
-                    var sram = layout.Memories.FirstOrDefault(m => m.Type == MemoryType.RAM && m.IsPrimary);
+                    var sram = layout.Layout.Memories.FirstOrDefault(m => m.Type == MemoryType.RAM && m.IsPrimary);
 
                     if (sram != null)
                     {
@@ -268,7 +275,7 @@ namespace stm32_bsp_generator
                         mcu.RAMSize = (int)sram.Size;
                     }
 
-                    mcu.MemoryMap = layout.ToMemoryMap();
+                    mcu.MemoryMap = layout.Layout.ToMemoryMap();
 
                     return mcu;
                 }
@@ -285,6 +292,8 @@ namespace stm32_bsp_generator
                 public readonly CortexCore Core;
                 public readonly string CoreSuffix;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
+
+                public bool IsMultiCore => CoreSuffix != null;
 
                 public readonly int[] RAMs;
                 public readonly int FLASH;

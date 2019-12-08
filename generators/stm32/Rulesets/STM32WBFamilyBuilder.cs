@@ -23,7 +23,7 @@ namespace stm32_bsp_generator.Rulesets
             return base.GenerateFamilyObject(flagsToGenerate & ~CoreSpecificFlags.PrimaryMemory, allowExcludingStartupFiles);
         }
 
-        public override Dictionary<string, MemoryLayout> GenerateLinkerScripts(bool generalizeWherePossible)
+        public override MemoryLayoutCollection GenerateLinkerScripts(bool generalizeWherePossible)
         {
             foreach (var mcu in MCUs)
             {
