@@ -406,54 +406,6 @@
 				<AutoIncludeMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_cc310_bl\*;nrf_cc310\*;-*</AutoIncludeMask>
 					<SimpleFileConditions>
 						<string>segger_rtt\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$ == 1</string>
-						
-						<!--string>nrf_oberon\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string-->
-						<string>nrf_oberon\\lib\\cortex-m4\\soft-float\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						<string>nrf_oberon\\lib\\cortex-m4\\hard-float\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						
-						<string>nrf_oberon\\lib\\cortex-m33\\soft-float\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						<string>nrf_oberon\\lib\\cortex-m33\\hard-float\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						
-						<string>nrf_oberon\\lib\\cortex-m0\\short-wchar\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m0 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes </string>
-
-						<string>nrf_oberon\\lib\\cortex-m4\\soft-float\\short-wchar\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						<string>nrf_oberon\\lib\\cortex-m4\\hard-float\\short-wchar\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						
-						<string>nrf_oberon\\lib\\cortex-m33\\soft-float\\short-wchar\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						<string>nrf_oberon\\lib\\cortex-m33\\hard-float\\short-wchar\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_oberon$$ == yes</string>
-						
-						<string>nrf_oberon\\lib\\cortex-m0\\liboberon_2.0.*.a.*: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m0</string>
-
-						
-						<!--string>nrf_cc310\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string-->
-						<string>nrf_cc310\\lib\\cortex-m4\\soft-float\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-						<string>nrf_cc310\\lib\\cortex-m4\\hard-float\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-						
-						<string>nrf_cc310\\lib\\cortex-m33\\soft-float\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-						<string>nrf_cc310\\lib\\cortex-m33\\hard-float\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-					
-			
-						<string>nrf_cc310\\lib\\cortex-m4\\soft-float\\short-wchar\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-						<string>nrf_cc310\\lib\\cortex-m4\\hard-float\\short-wchar\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-						
-						<string>nrf_cc310\\lib\\cortex-m33\\soft-float\\short-wchar\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-						<string>nrf_cc310\\lib\\cortex-m33\\hard-float\\short-wchar\\libnrf_cc310_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310$$ == yes</string>
-
-						<!--string>nrf_cc310_bl\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string-->
-						<string>nrf_cc310_bl\\lib\\cortex-m4\\soft-float\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-						<string>nrf_cc310_bl\\lib\\cortex-m4\\hard-float\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-						
-						<string>nrf_cc310_bl\\lib\\cortex-m33\\soft-float\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-						<string>nrf_cc310_bl\\lib\\cortex-m33\\hard-float\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ != yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-						
-					
-						<string>nrf_cc310_bl\\lib\\cortex-m4\\soft-float\\short-wchar\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-						<string>nrf_cc310_bl\\lib\\cortex-m4\\hard-float\\short-wchar\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m4 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-						
-						<string>nrf_cc310_bl\\lib\\cortex-m33\\soft-float\\short-wchar\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=soft &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-						<string>nrf_cc310_bl\\lib\\cortex-m33\\hard-float\\short-wchar\\libnrf_cc310_bl_0.9.12.a: $$com.sysprogs.bspoptions.arm.floatmode$$ ==-mfloat-abi=hard &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.cortex$$==m33 &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.wshort$$ == yes &amp;&amp; $$com.sysprogs.bspoptions.nrf5x.libraries.nrf_cc310_bl$$ == yes</string>
-			
-			
 					</SimpleFileConditions>
 			</CopyJob>
 				<CopyJob>
@@ -471,44 +423,6 @@
 				  <PropertyGroup>
 					<Name>nRF5x Libraries</Name>
 					<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
-					
-					<Properties>
-						<PropertyEntry xsi:type="Boolean">
-						<Name>nrf_oberon</Name>
-						<UniqueID>nrf_oberon</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<DefaultValue>false</DefaultValue>
-						<ValueForTrue>yes</ValueForTrue>
-						</PropertyEntry>
-					</Properties>
-					<Properties>
-						<PropertyEntry xsi:type="Boolean">
-						<Name>nrf_cc310_bl</Name>
-						<UniqueID>nrf_cc310_bl</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<DefaultValue>false</DefaultValue>
-						<ValueForTrue>yes</ValueForTrue>
-						</PropertyEntry>
-					</Properties>			
-					<Properties>
-						<PropertyEntry xsi:type="Boolean">
-						<Name>nrf_cc310</Name>
-						<UniqueID>nrf_cc310</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<DefaultValue>false</DefaultValue>
-						<ValueForTrue>yes</ValueForTrue>
-						</PropertyEntry>
-					</Properties>
-					
-					<Properties>
-						<PropertyEntry xsi:type="Boolean">
-						<Name>wshort</Name>
-						<UniqueID>wshort</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<DefaultValue>false</DefaultValue>
-						<ValueForTrue>yes</ValueForTrue>
-						</PropertyEntry>
-					</Properties>
 					<Properties>
 						<PropertyEntry xsi:type="Enumerated">
 						  <Name>bootloader_dfu</Name>
