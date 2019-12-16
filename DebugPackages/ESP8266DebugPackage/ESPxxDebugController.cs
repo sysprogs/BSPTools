@@ -94,6 +94,8 @@ namespace ESP8266DebugPackage
                 _Context = context;
             }
 
+            public override ILiveMemoryEvaluator CreateLiveMemoryEvaluator(IDebugStartService service) => null;
+
             protected override bool SkipCommandOnAttach(string cmd)
             {
                 return base.SkipCommandOnAttach(cmd);
@@ -272,6 +274,8 @@ namespace ESP8266DebugPackage
                 _Controller = controller;
                 _Context = context;
             }
+
+            public override ILiveMemoryEvaluator CreateLiveMemoryEvaluator(IDebugStartService service) => null;
 
             protected override bool SkipCommandOnAttach(string cmd) => throw new NotSupportedException();
             protected override bool RunLoadCommand(IDebugStartService service, ISimpleGDBSession session, string cmd) => throw new NotSupportedException();
