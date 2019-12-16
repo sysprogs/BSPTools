@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace VendorSampleParserEngine
@@ -20,35 +21,21 @@ namespace VendorSampleParserEngine
         Final = RelocatedBuild
     }
 
-    public struct VendorSampleID
-    {
-        public string SampleName;   //Must be the same as VendorSample.UserFriendlyName
-        public string BoardNameOrDeviceID;     //Optional. If set, must match VendorSample.DeviceID
-
-        public override string ToString()
-        {
-            return $"{SampleName}-{BoardNameOrDeviceID}";
-        }
-
-        public VendorSampleID(VendorSample sample)
-        {
-            SampleName = sample.UserFriendlyName;
-            BoardNameOrDeviceID = sample.BoardName ?? sample.DeviceID;
-        }
-
-        public VendorSampleID(string sampleName, string deviceID)
-        {
-            SampleName = sampleName;
-            BoardNameOrDeviceID = deviceID;
-        }
-    }
-
-
     public class VendorSampleTestReport
     {
         public class Record
         {
-            public VendorSampleID ID;
+            [XmlAnyElement("ID")]
+            public XmlNode[] LegacyID
+            {
+                get => null;
+                set
+                {
+                    UniqueID = value[0].SelectSingleNode("SampleName").InnerText + "-" + value[0].SelectSingleNode("BoardNameOrDeviceID").InnerText;
+                }
+            }
+
+            public string UniqueID;
 
             public bool BuildFailedExplicitly;
             public VendorSamplePass LastSucceededPass;
@@ -59,11 +46,11 @@ namespace VendorSampleParserEngine
 
             public override string ToString()
             {
-                return $"{ID} => {LastSucceededPass}";
+                return $"{UniqueID} => {LastSucceededPass}";
             }
         }
 
-        Dictionary<VendorSampleID, Record> _RecordDictionary = new Dictionary<VendorSampleID, Record>();
+        Dictionary<string, Record> _RecordDictionary = new Dictionary<string, Record>();
 
         public string BSPID;
         public string BSPVersion;
@@ -76,19 +63,19 @@ namespace VendorSampleParserEngine
                 _RecordDictionary.Clear();
                 if (value != null)
                     foreach (var rec in value)
-                        _RecordDictionary[rec.ID] = rec;
+                        _RecordDictionary[rec.UniqueID] = rec;
             }
         }
 
-        public Record ProvideEntryForSample(VendorSampleID id)
+        public Record ProvideEntryForSample(string id)
         {
             if (_RecordDictionary.TryGetValue(id, out var rec))
                 return rec;
             else
-                return _RecordDictionary[id] = new Record { ID = id };
+                return _RecordDictionary[id] = new Record { UniqueID = id };
         }
 
-        public bool ShouldBuildIncrementally(VendorSampleID id, VendorSamplePass pass)
+        public bool ShouldBuildIncrementally(string id, VendorSamplePass pass)
         {
             if (!_RecordDictionary.TryGetValue(id, out var rec))
                 return true;    //The sample was never built. build it now.
@@ -103,7 +90,7 @@ namespace VendorSampleParserEngine
                 return true;    //The sample must have failed at later point, or was never tested all the way to the final pass. Rebuild it.
         }
 
-        internal bool HasSampleFailed(VendorSampleID id)
+        internal bool HasSampleFailed(string id)
         {
             if (!_RecordDictionary.TryGetValue(id, out var rec))
                 return false;

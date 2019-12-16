@@ -36,5 +36,10 @@
 			<ErrorMessage>multiple definition of `HAL_DMA2D_MspDeInit'</ErrorMessage>
 			<Description>Multiple BSP sources</Description>
 		</ErrorEntry>
+		<ErrorEntry>
+			<ID>invalid_external_flash_placement</ID>
+			<ErrorMessage>section `.ExtFlashSection' will not fit in </ErrorMessage>
+			<Description>External FLASH</Description>
+		</ErrorEntry>
 	</Entries>
 </KnownSampleProblemDatabase>

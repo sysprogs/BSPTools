@@ -738,10 +738,10 @@
         <SampleName>Demonstrations</SampleName>
         <BoardNameOrDeviceID>STM32091C_EVAL</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2221</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T17:46:04.5599441-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>4855</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:22.3018909-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -3960,8 +3960,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>703</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T17:52:15.6689636-08:00</TimeOfLastBuild>
+      <BuildDuration>874</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:21:38.0805362-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -6510,8 +6510,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>744</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T17:57:10.0050846-08:00</TimeOfLastBuild>
+      <BuildDuration>909</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:21:38.9945965-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -7830,8 +7830,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>809</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T17:59:16.4002966-08:00</TimeOfLastBuild>
+      <BuildDuration>958</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:21:39.9556657-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -10160,8 +10160,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1948</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:07:02.0785531-08:00</TimeOfLastBuild>
+      <BuildDuration>2155</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:21:42.1128057-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -11470,8 +11470,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1743</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:10:30.109791-08:00</TimeOfLastBuild>
+      <BuildDuration>1878</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:21:43.9939222-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -12790,8 +12790,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>733</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:13:48.217658-08:00</TimeOfLastBuild>
+      <BuildDuration>814</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:21:44.811973-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -15600,8 +15600,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>269</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:20:10.8425151-08:00</TimeOfLastBuild>
+      <BuildDuration>268</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:21:45.0819921-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -16880,8 +16880,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>41357</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:28:11.5778002-08:00</TimeOfLastBuild>
+      <BuildDuration>45904</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:22:30.9899726-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -16890,8 +16890,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>22745</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:28:34.3349915-08:00</TimeOfLastBuild>
+      <BuildDuration>24320</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:22:55.3215579-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -17070,8 +17070,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2156</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:29:14.5731021-08:00</TimeOfLastBuild>
+      <BuildDuration>2524</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:22:57.8667193-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -18030,8 +18030,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>41925</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:37:44.755833-08:00</TimeOfLastBuild>
+      <BuildDuration>41832</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:23:39.7024383-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -18040,8 +18040,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>26313</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:38:11.0852154-08:00</TimeOfLastBuild>
+      <BuildDuration>26287</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:06.0051535-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19471,8 +19471,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>2592</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:29.7706439-08:00</TimeOfLastBuild>
+      <BuildDuration>2659</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:08.689326-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19482,8 +19482,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>2809</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:32.5848269-08:00</TimeOfLastBuild>
+      <BuildDuration>2565</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:11.2584873-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19493,8 +19493,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>2848</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:35.4380116-08:00</TimeOfLastBuild>
+      <BuildDuration>2948</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:14.2106782-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19504,8 +19504,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>2723</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:38.1661903-08:00</TimeOfLastBuild>
+      <BuildDuration>3461</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:17.6749036-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19515,8 +19515,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_font</KnownProblemID>
-      <BuildDuration>3745</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:41.9154373-08:00</TimeOfLastBuild>
+      <BuildDuration>4199</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:21.8781816-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19526,8 +19526,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_font</KnownProblemID>
-      <BuildDuration>3737</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:45.6616784-08:00</TimeOfLastBuild>
+      <BuildDuration>3869</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:25.7554313-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19537,8 +19537,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>2249</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:47.9208229-08:00</TimeOfLastBuild>
+      <BuildDuration>2851</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:28.6166145-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19548,8 +19548,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>2471</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:50.3969833-08:00</TimeOfLastBuild>
+      <BuildDuration>2708</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:31.3287911-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19559,8 +19559,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>6164</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:44:56.5673843-08:00</TimeOfLastBuild>
+      <BuildDuration>6531</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:37.863219-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19570,8 +19570,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>6090</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:45:02.6617826-08:00</TimeOfLastBuild>
+      <BuildDuration>6967</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:44.8346719-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19581,8 +19581,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>3386</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:45:06.0530035-08:00</TimeOfLastBuild>
+      <BuildDuration>3534</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:48.3729007-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -19592,8 +19592,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>multiple_bsp</KnownProblemID>
-      <BuildDuration>3164</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:45:09.2232102-08:00</TimeOfLastBuild>
+      <BuildDuration>3621</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:24:51.9981382-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -20072,8 +20072,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>8079</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:47:29.0342923-08:00</TimeOfLastBuild>
+      <BuildDuration>8321</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:00.323675-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -20082,8 +20082,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>12075</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:47:41.1230796-08:00</TimeOfLastBuild>
+      <BuildDuration>12470</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:12.8054849-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -21712,8 +21712,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>6320</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T18:54:48.4858409-08:00</TimeOfLastBuild>
+      <BuildDuration>6642</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:19.4669177-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -23632,8 +23632,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1962</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:01:33.9022052-08:00</TimeOfLastBuild>
+      <BuildDuration>1970</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:21.4470478-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -24052,8 +24052,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>778</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:02:29.3204486-08:00</TimeOfLastBuild>
+      <BuildDuration>799</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:22.2480998-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -24862,8 +24862,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2743</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:04:17.9298077-08:00</TimeOfLastBuild>
+      <BuildDuration>2966</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:25.216294-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -25072,8 +25072,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2231</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:05:25.5397647-08:00</TimeOfLastBuild>
+      <BuildDuration>2340</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:27.5604525-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -27312,8 +27312,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>8259</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:14:05.4931969-08:00</TimeOfLastBuild>
+      <BuildDuration>9792</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:37.3560803-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -27332,8 +27332,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2056</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:14:09.9614585-08:00</TimeOfLastBuild>
+      <BuildDuration>2203</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:39.5732252-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -28872,8 +28872,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>12271</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:20:59.8637702-08:00</TimeOfLastBuild>
+      <BuildDuration>12616</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:52.1930437-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -29652,8 +29652,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1472</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:24:02.5564594-08:00</TimeOfLastBuild>
+      <BuildDuration>1855</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:25:54.0681687-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -30452,8 +30452,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>54560</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:29:51.5048861-08:00</TimeOfLastBuild>
+      <BuildDuration>64880</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:26:58.9512854-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -30462,8 +30462,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>22841</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:30:14.358224-08:00</TimeOfLastBuild>
+      <BuildDuration>23077</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:27:22.0392971-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -32882,8 +32882,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>4812</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:38:44.3782568-08:00</TimeOfLastBuild>
+      <BuildDuration>5581</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:27:27.649628-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -33592,8 +33592,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>11944</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:41:50.2613328-08:00</TimeOfLastBuild>
+      <BuildDuration>12313</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:27:39.9714303-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -34082,8 +34082,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1917</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:43:19.2051135-08:00</TimeOfLastBuild>
+      <BuildDuration>2119</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:27:42.1125686-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -34532,8 +34532,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>776</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:44:07.4722468-08:00</TimeOfLastBuild>
+      <BuildDuration>786</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:27:42.9036266-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -35322,8 +35322,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>5329</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:46:02.0996939-08:00</TimeOfLastBuild>
+      <BuildDuration>6066</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:27:48.9720164-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -35332,8 +35332,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>6706</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:46:08.8091323-08:00</TimeOfLastBuild>
+      <BuildDuration>8921</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:27:57.8965936-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -35412,8 +35412,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>46805</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:48:39.7599375-08:00</TimeOfLastBuild>
+      <BuildDuration>49320</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:28:47.2208004-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -36612,8 +36612,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>46796</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T19:58:22.4255154-08:00</TimeOfLastBuild>
+      <BuildDuration>47971</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:35.2449175-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -38582,8 +38582,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2303</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:04:54.7130007-08:00</TimeOfLastBuild>
+      <BuildDuration>2583</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:37.8820912-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -39992,8 +39992,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2590</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:07:26.1066292-08:00</TimeOfLastBuild>
+      <BuildDuration>2671</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:40.5562636-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -42182,8 +42182,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2248</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:11:33.2806852-08:00</TimeOfLastBuild>
+      <BuildDuration>2461</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:43.0204234-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -42192,8 +42192,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2338</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:11:35.6238375-08:00</TimeOfLastBuild>
+      <BuildDuration>2307</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:45.3305724-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -42232,8 +42232,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>255</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:11:47.5156094-08:00</TimeOfLastBuild>
+      <BuildDuration>189</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:45.5225866-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -42392,8 +42392,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1834</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:12:05.7977958-08:00</TimeOfLastBuild>
+      <BuildDuration>2012</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:47.5367199-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -45062,8 +45062,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>855</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:17:52.3433172-08:00</TimeOfLastBuild>
+      <BuildDuration>935</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:48.4737786-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -45542,8 +45542,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2083</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:18:53.9023149-08:00</TimeOfLastBuild>
+      <BuildDuration>2372</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:50.8489337-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -46042,8 +46042,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1735</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:20:30.7086013-08:00</TimeOfLastBuild>
+      <BuildDuration>1759</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:29:52.6130484-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -46340,20 +46340,20 @@
         <SampleName>FLASH_SwapBank</SampleName>
         <BoardNameOrDeviceID>NUCLEO-H743ZI-FLASH_SwapBank_Bank1</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1845</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:21:34.8067675-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3022</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:25.3310963-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FLASH_SwapBank</SampleName>
         <BoardNameOrDeviceID>NUCLEO-H743ZI-FLASH_SwapBank_Bank2</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1794</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:21:36.6038833-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>1912</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:27.2452125-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -46970,10 +46970,10 @@
         <SampleName>Templates</SampleName>
         <BoardNameOrDeviceID>NUCLEO-H743ZI</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>5150</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:23:34.0815156-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>7385</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:34.6326931-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -47620,160 +47620,160 @@
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_QSPI_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2162</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:23:54.4506665-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2371</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:37.0058483-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XiP_QSPI_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2230</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:23:56.6856003-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2412</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:39.4200026-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_QSPI_ExternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2125</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:23:58.8155776-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2408</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:41.8291569-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_NOR_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2245</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:01.0635871-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2464</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:44.2953213-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_NOR_ExternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2215</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:03.2826182-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2320</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:46.6174718-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_NOR_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1970</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:05.256666-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2381</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:49.0006267-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-BootROM_ExternalSRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2245</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:07.5057339-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2315</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:51.3177774-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_FreeRTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-BootROM_ExternalSDRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2221</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:09.730819-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2338</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:53.6579278-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_QSPI_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2788</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:12.5219463-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2852</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:56.512115-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_QSPI_ExternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2509</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:15.0360707-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2724</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T08:59:59.2382913-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_QSPI_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2450</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:17.4901941-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2773</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:02.0134708-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_NOR_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2554</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:20.0473422-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3022</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:05.0376695-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_NOR_ExternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2439</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:22.4914773-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2913</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:07.9528541-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-XIP_NOR_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2620</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:25.115638-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2658</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:10.6130305-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-BootROM_ExternalSRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2707</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:27.82679-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2677</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:13.2932043-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>ExtMem_Application_LedToggling</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-BootROM_ExternalSDRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2375</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:30.2059318-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2852</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:16.1473893-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -47790,20 +47790,20 @@
         <SampleName>FatFs_MultiDrives</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3264</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:36.2473233-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3739</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:19.8886325-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FatFs_MultiDrives</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3228</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:39.4795336-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3692</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:23.5828734-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -47830,40 +47830,40 @@
         <SampleName>FatFs_USBDisk_RTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3119</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:47.7720729-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3441</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:27.0260961-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FatFs_USBDisk_RTOS</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3175</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:50.9522768-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3421</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:30.4493224-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FatFs_USBDisk_Standalone</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2777</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:53.7344582-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3019</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:33.4705151-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FatFs_USBDisk_Standalone</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2468</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:24:56.205618-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2906</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:36.3797042-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -47902,8 +47902,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2684</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:25:07.2483357-08:00</TimeOfLastBuild>
+      <BuildDuration>2887</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:07.5009114-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -47912,8 +47912,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2851</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:25:10.1025238-08:00</TimeOfLastBuild>
+      <BuildDuration>2899</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:10.4041009-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48022,8 +48022,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3479</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:25:49.7570976-08:00</TimeOfLastBuild>
+      <BuildDuration>3604</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:14.0113361-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48032,8 +48032,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3072</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:25:52.8332977-08:00</TimeOfLastBuild>
+      <BuildDuration>3512</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:17.5275633-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48042,8 +48042,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3757</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:25:56.5945423-08:00</TimeOfLastBuild>
+      <BuildDuration>4575</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:22.1058619-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48052,8 +48052,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3720</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:00.3197834-08:00</TimeOfLastBuild>
+      <BuildDuration>4026</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:26.1371215-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48062,8 +48062,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3340</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:03.664002-08:00</TimeOfLastBuild>
+      <BuildDuration>3547</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:29.6873534-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48072,8 +48072,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3044</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:06.7111984-08:00</TimeOfLastBuild>
+      <BuildDuration>3595</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:31:33.2865848-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48120,70 +48120,70 @@
         <SampleName>Audio_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2790</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:32.5508817-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3123</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:39.5049081-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>CDC_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2602</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:35.156048-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2870</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:42.3770949-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>CDC_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2696</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:37.856225-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2741</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:45.1202715-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>CustomHID_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2499</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:40.3593846-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2968</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:48.0904654-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>CustomHID_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2627</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:42.9895565-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3225</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:51.3166777-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>DFU_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2550</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:45.5437245-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2641</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:53.9598467-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>DFU_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2571</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:48.1188888-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2903</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:56.8650347-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48200,100 +48200,100 @@
         <SampleName>HID_LPM_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2365</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:53.4002323-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2405</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:00:59.2721896-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>HID_LPM_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2314</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:55.7173827-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2482</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:01.7573537-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>HID_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2615</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:26:58.335555-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2839</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:04.5985368-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>HID_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2698</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:01.0447367-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2839</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:07.4397217-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>MSC_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2774</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:03.8239097-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3016</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:10.4579192-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>MSC_Standalone_Device</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBD-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2803</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:06.6310958-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3009</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:13.4691138-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>AUDIO_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3282</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:09.9163062-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3631</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:17.1013509-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>AUDIO_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3147</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:13.0665091-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3522</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:20.625581-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>CDC_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2892</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:15.9617025-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3552</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:24.1798075-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>CDC_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3277</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:19.2429111-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3884</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:28.0650619-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48310,120 +48310,120 @@
         <SampleName>DynamicSwitch_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3905</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:26.9604142-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>4346</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:32.4133426-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>DynamicSwitch_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3937</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:30.9016715-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>4207</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:36.6226186-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FWupgrade_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3158</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:34.0658798-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3708</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:40.3328584-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FWupgrade_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3161</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:37.2310809-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3587</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:43.9210921-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>HID_RTOS_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3374</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:40.6152997-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3647</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:47.5703309-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>HID_RTOS_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3360</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:43.9805207-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3855</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:51.4275776-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>HID_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2632</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:46.6176911-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3136</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:54.5657817-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>HID_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2969</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:49.5908875-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3132</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:01:57.6999847-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>MSC_RTOS_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3770</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:53.3661314-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>4197</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:01.8992618-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>MSC_RTOS_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3793</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:27:57.163375-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>4100</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:06.0015272-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>MSC_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-FS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3306</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:28:00.4735895-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3692</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:09.6967645-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>MSC_Standalone_Host</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-STM32H743I-EVAL_USBH-HS</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3398</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:28:03.8758104-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>3798</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:13.4970101-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -48880,20 +48880,20 @@
         <SampleName>FLASH_SwapBank</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-FLASH_SwapBank_Bank1</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2011</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:30:29.8132918-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2372</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:15.8701671-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FLASH_SwapBank</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL-FLASH_SwapBank_Bank2</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2010</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:30:31.8264212-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2087</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:17.9593033-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -49800,20 +49800,20 @@
         <SampleName>Templates</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>5623</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:08.8165202-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>5991</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:23.9526898-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>Templates_LL</SampleName>
         <BoardNameOrDeviceID>STM32H743I-EVAL</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1421</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:10.2446135-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>1530</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:25.4847897-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -54590,60 +54590,60 @@
         <SampleName>FreeRTOS_Mail</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2304</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:18.5521507-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2488</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:27.9749541-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FreeRTOS_Mail</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2319</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:20.8743051-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2622</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:30.5991255-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FreeRTOS_Mail</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-BootROM_ExternalSDRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2414</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:23.2934598-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2532</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:33.1332894-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FreeRTOS_ThreadCreation</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2473</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:25.7706234-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2488</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:35.6224503-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FreeRTOS_ThreadCreation</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2409</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:28.183784-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2573</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:38.197618-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>FreeRTOS_ThreadCreation</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-BootROM_ExternalSDRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2345</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:34:30.5349315-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2480</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:40.6797767-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -54712,8 +54712,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>47545</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:36:15.7217667-08:00</TimeOfLastBuild>
+      <BuildDuration>48820</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:34:28.8579992-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -54760,30 +54760,30 @@
         <SampleName>GPIO_IOToggle</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2216</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:36:28.4275907-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2420</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:43.1019367-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>GPIO_IOToggle</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>2164</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:36:30.5957327-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2649</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:45.7541074-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>GPIO_IOToggle</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-BootROM_ExternalSDRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1940</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:36:32.5398582-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2547</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:48.3032739-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -54880,30 +54880,30 @@
         <SampleName>Template_Project</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>5874</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:36:59.3286013-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>6181</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:02:54.4856758-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>Template_Project</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-XIP_QSPI_ExternalSDRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>5751</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:37:05.0859703-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>6077</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:03:00.5650715-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>Template_Project</SampleName>
         <BoardNameOrDeviceID>STM32H750B-DK-BootROM_ExternalSDRAM_InternalSRAM</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>5810</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:37:10.9003486-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>6128</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:03:06.6964709-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -58942,8 +58942,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>744</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:45:28.5327456-08:00</TimeOfLastBuild>
+      <BuildDuration>796</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:34:55.7267378-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -61392,8 +61392,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>724</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:49:50.5657679-08:00</TimeOfLastBuild>
+      <BuildDuration>738</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:34:56.4677852-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -62192,8 +62192,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1616</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:50:59.5092473-08:00</TimeOfLastBuild>
+      <BuildDuration>1742</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:34:58.2118985-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -62552,8 +62552,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InPlaceBuild</LastSucceededPass>
-      <BuildDuration>1259</BuildDuration>
-      <TimeOfLastBuild>2019-12-07T11:17:17.4544184-08:00</TimeOfLastBuild>
+      <BuildDuration>1936</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:03:08.6345935-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -62872,8 +62872,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>54002</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:53:55.7337015-08:00</TimeOfLastBuild>
+      <BuildDuration>55788</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:35:57.4767569-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -63230,20 +63230,20 @@
         <SampleName>STemWin</SampleName>
         <BoardNameOrDeviceID>32L4R9IDISCOVERY-STemWin-STM32L4R9I-Discovery</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>13476</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:55:38.0593461-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>29116</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:03:37.7554864-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
         <SampleName>STemWin</SampleName>
         <BoardNameOrDeviceID>32L4R9IDISCOVERY-STemWin-STM32L4R9I-Discovery_OoB</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>13770</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:55:51.8572377-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>28832</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:04:06.5903604-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -63540,10 +63540,10 @@
         <SampleName>BSP</SampleName>
         <BoardNameOrDeviceID>B-L475E-IOT01A</BoardNameOrDeviceID>
       </ID>
-      <BuildFailedExplicitly>true</BuildFailedExplicitly>
-      <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>559</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:57:06.4450834-08:00</TimeOfLastBuild>
+      <BuildFailedExplicitly>false</BuildFailedExplicitly>
+      <LastSucceededPass>RelocatedBuild</LastSucceededPass>
+      <BuildDuration>2531</BuildDuration>
+      <TimeOfLastBuild>2019-12-08T09:04:09.1235233-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -64282,8 +64282,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1774</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T20:58:43.4625909-08:00</TimeOfLastBuild>
+      <BuildDuration>1877</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:36:58.1956969-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -65043,8 +65043,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>sleep_range</KnownProblemID>
-      <BuildDuration>1519</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:00:12.0603511-08:00</TimeOfLastBuild>
+      <BuildDuration>1586</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:36:59.7847971-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -65723,8 +65723,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1288</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:01:47.0015148-08:00</TimeOfLastBuild>
+      <BuildDuration>1350</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:01.1378905-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -65733,8 +65733,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1312</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:01:48.3176008-08:00</TimeOfLastBuild>
+      <BuildDuration>1365</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:02.5049738-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -65753,8 +65753,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1329</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:01:51.1347869-08:00</TimeOfLastBuild>
+      <BuildDuration>1314</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:03.8220617-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -66014,8 +66014,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>sleep_range</KnownProblemID>
-      <BuildDuration>1547</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:02:26.2250636-08:00</TimeOfLastBuild>
+      <BuildDuration>1594</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:05.4181653-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -66885,8 +66885,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>sleep_range</KnownProblemID>
-      <BuildDuration>1552</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:04:34.5263953-08:00</TimeOfLastBuild>
+      <BuildDuration>1621</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:07.0432719-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -67525,8 +67525,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>795</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:05:43.802896-08:00</TimeOfLastBuild>
+      <BuildDuration>781</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:07.827322-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -68565,8 +68565,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1284</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:07:27.1376089-08:00</TimeOfLastBuild>
+      <BuildDuration>1250</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:09.0794037-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -68575,8 +68575,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1315</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:07:28.4566937-08:00</TimeOfLastBuild>
+      <BuildDuration>1321</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:10.4034895-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -68595,8 +68595,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1313</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:07:31.2038733-08:00</TimeOfLastBuild>
+      <BuildDuration>1249</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:11.6555712-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -68996,8 +68996,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>sleep_range</KnownProblemID>
-      <BuildDuration>1613</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:08:31.1107737-08:00</TimeOfLastBuild>
+      <BuildDuration>1726</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:13.3836827-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -69686,8 +69686,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>826</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:09:43.6234797-08:00</TimeOfLastBuild>
+      <BuildDuration>807</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:14.1937356-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -70867,8 +70867,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>sleep_range</KnownProblemID>
-      <BuildDuration>1815</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:11:48.9026152-08:00</TimeOfLastBuild>
+      <BuildDuration>2119</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:16.3148716-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -71407,8 +71407,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>5468</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:13:42.494994-08:00</TimeOfLastBuild>
+      <BuildDuration>5763</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:22.081248-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -71577,8 +71577,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>1308</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:14:11.4138745-08:00</TimeOfLastBuild>
+      <BuildDuration>1287</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:23.3773295-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -71588,8 +71588,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>rt_misc</KnownProblemID>
-      <BuildDuration>1047</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:14:12.4649405-08:00</TimeOfLastBuild>
+      <BuildDuration>1123</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:24.5264072-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -71599,8 +71599,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>rt_misc</KnownProblemID>
-      <BuildDuration>1017</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:14:13.4850093-08:00</TimeOfLastBuild>
+      <BuildDuration>1152</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:25.6824845-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -71610,8 +71610,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>rt_misc</KnownProblemID>
-      <BuildDuration>1045</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:14:14.5350761-08:00</TimeOfLastBuild>
+      <BuildDuration>1035</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:26.7205492-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -71621,8 +71621,8 @@
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
       <KnownProblemID>rt_misc</KnownProblemID>
-      <BuildDuration>1027</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:14:15.5651437-08:00</TimeOfLastBuild>
+      <BuildDuration>1185</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:27.9076311-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -72481,8 +72481,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>4178</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:17:15.4997878-08:00</TimeOfLastBuild>
+      <BuildDuration>4276</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:32.1869042-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -72491,8 +72491,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>3943</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:17:19.4490482-08:00</TimeOfLastBuild>
+      <BuildDuration>4211</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:36.402177-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>
@@ -73021,8 +73021,8 @@
       </ID>
       <BuildFailedExplicitly>true</BuildFailedExplicitly>
       <LastSucceededPass>InitialParse</LastSucceededPass>
-      <BuildDuration>4819</BuildDuration>
-      <TimeOfLastBuild>2019-12-06T21:19:12.9104182-08:00</TimeOfLastBuild>
+      <BuildDuration>4830</BuildDuration>
+      <TimeOfLastBuild>2019-12-07T17:37:41.2364907-08:00</TimeOfLastBuild>
     </Record>
     <Record>
       <ID>

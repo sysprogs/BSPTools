@@ -57,20 +57,6 @@ namespace GeneratorSampleStm32
             return srcAbc;
         }
 
-        static Regex rgExamplesSuffix = new Regex(@"\\Examples(_[^\\]+)\\", RegexOptions.IgnoreCase);
-        static Regex rgExamplesSuffix2 = new Regex(@"\\Applications\\USB(_Host|_Device)\\", RegexOptions.IgnoreCase);
-
-        static void AppendSamplePrefixFromPath(ref string sampleName, string dir)  //Otherwise we get ambiguous sample IDs
-        {
-            Match m;
-            if (sampleName == "Master" || sampleName == "Slave" || sampleName == "FreeRTOS" || sampleName == "LedToggling" || sampleName == "HelloWorld")
-                sampleName = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(dir))) + "_" + sampleName;
-            if ((m = rgExamplesSuffix.Match(dir)).Success)
-                sampleName += m.Groups[1].Value;
-            else if ((m = rgExamplesSuffix2.Match(dir)).Success)
-                sampleName += m.Groups[1].Value;
-        }
-
         static public List<VendorSample> GetInfoProjectFromMDK(string pDirPrj, string topLevelDir, string boardName, List<string> extraIncludeDirs)
         {
             List<VendorSample> aLstVSampleOut = new List<VendorSample>();
@@ -174,7 +160,7 @@ namespace GeneratorSampleStm32
                 {
                     sample.Path = Path.GetDirectoryName(pDirPrj);
                     sample.UserFriendlyName = aNamePrj;
-                    AppendSamplePrefixFromPath(ref sample.UserFriendlyName, pDirPrj);
+                    //AppendSamplePrefixFromPath(ref sample.UserFriendlyName, pDirPrj);
 
                     sample.BoardName = aTarget;
                     sample.SourceFiles = ToAbsolutePaths(pDirPrj, topLevelDir, sourceFiles).ToArray();
@@ -408,6 +394,7 @@ namespace GeneratorSampleStm32
                 vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
             }
 
+            const bool UseLegacySampleParser = false;
 
             protected override ParsedVendorSamples ParseVendorSamples(string SDKdir, IVendorSampleFilter filter)
             {
@@ -422,6 +409,9 @@ namespace GeneratorSampleStm32
 
                     addInc.Add($@"{topLevelDir}\Drivers\CMSIS\Include");
 
+                    if (!filter.ShouldParseAnySamplesInsideDirectory(topLevelDir))
+                        continue;
+
                     int sampleCount = 0;
                     Console.WriteLine($"Discovering samples for {sdk.Family}...");
 
@@ -430,54 +420,62 @@ namespace GeneratorSampleStm32
                         string boardName = Path.GetFileName(boardDir);
                         int samplesForThisBoard = 0;
 
-                        foreach (var dir in Directory.GetDirectories(boardDir, "Mdk-arm", SearchOption.AllDirectories))
+                        if (UseLegacySampleParser)
                         {
-                            string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
-                            AppendSamplePrefixFromPath(ref sampleName, dir);
-
-                            if (!filter.ShouldParseSampleForAnyDevice(sampleName))
-                                continue;   //We are only reparsing a subset of samples
-
-                            var aSamples = GetInfoProjectFromMDK(dir, topLevelDir, boardName, addInc);
-
-                            if (aSamples.Count != 0)
-                                Debug.Assert(aSamples[0].UserFriendlyName == sampleName);   //Otherwise quick reparsing won't work.
-
-                            var scriptDir = Path.Combine(dir, "..", "SW4STM32");
-                            if (Directory.Exists(scriptDir))
+                            foreach (var dir in Directory.GetDirectories(boardDir, "Mdk-arm", SearchOption.AllDirectories))
                             {
-                                string[] linkerScripts = Directory.GetFiles(scriptDir, "*.ld", SearchOption.AllDirectories);
-                                if (linkerScripts.Length == 1)
-                                {
-                                    foreach (var sample in aSamples)
-                                        sample.LinkerScript = Path.GetFullPath(linkerScripts[0]);
-                                }
-                                else
-                                {
-                                    //Some sample projects define multiple linker scripts (e.g. STM32F072RBTx_FLASH.ld vs. STM32F072VBTx_FLASH.ld).
-                                    //In this case we don't pick the sample-specific linker script and instead go with the regular BSP script for the selected MCU.s
-                                }
-                            }
+                                string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
 
-                            sampleCount += aSamples.Count;
-                            samplesForThisBoard += aSamples.Count;
-                            allSamples.AddRange(aSamples);
+                                if (!filter.ShouldParseAnySamplesInsideDirectory(dir))
+                                    continue;   //We are only reparsing a subset of samples
+
+                                var aSamples = GetInfoProjectFromMDK(dir, topLevelDir, boardName, addInc);
+
+                                if (aSamples.Count != 0)
+                                    Debug.Assert(aSamples[0].UserFriendlyName == sampleName);   //Otherwise quick reparsing won't work.
+
+                                foreach (var sample in aSamples)
+                                    filter?.OnSampleParsed(sample);
+
+                                var scriptDir = Path.Combine(dir, "..", "SW4STM32");
+
+                                if (Directory.Exists(scriptDir))
+                                {
+                                    string[] linkerScripts = Directory.GetFiles(scriptDir, "*.ld", SearchOption.AllDirectories);
+                                    if (linkerScripts.Length != 0)
+                                    {
+                                        var distinctLinkerScripts = linkerScripts.Select(s => File.ReadAllText(s)).Distinct().Count();
+
+                                        if (distinctLinkerScripts == 1)
+                                        {
+                                            foreach (var sample in aSamples)
+                                                sample.LinkerScript = Path.GetFullPath(linkerScripts[0]);
+                                        }
+                                        else
+                                        {
+                                            //Some sample projects define multiple linker scripts (e.g. STM32F072RBTx_FLASH.ld vs. STM32F072VBTx_FLASH.ld).
+                                            //In this case we don't pick the sample-specific linker script and instead go with the regular BSP script for the selected MCU.
+                                        }
+                                    }
+                                }
+
+                                sampleCount += aSamples.Count;
+                                samplesForThisBoard += aSamples.Count;
+                                allSamples.AddRange(aSamples);
+                            }
                         }
 
                         if (samplesForThisBoard == 0)
                         {
                             foreach (var dir in Directory.GetDirectories(boardDir, "SW4STM32", SearchOption.AllDirectories))
                             {
-                                string sampleName = Path.GetFileName(Path.GetDirectoryName(dir));
-                                AppendSamplePrefixFromPath(ref sampleName, dir);
-
-                                if (!filter.ShouldParseSampleForAnyDevice(sampleName))
+                                if (!filter.ShouldParseAnySamplesInsideDirectory(dir))
                                     continue;   //We are only reparsing a subset of samples
 
-                                var aSamples = ProjectParsers.SW4STM32ProjectParser.ParseProjectFolder(dir, topLevelDir, boardName, addInc);
+                                var aSamples = ProjectParsers.SW4STM32ProjectParser.ParseProjectFolder(dir, topLevelDir, boardDir, addInc);
 
-                                if (aSamples.Count != 0)
-                                    Debug.Assert(aSamples[0].UserFriendlyName == sampleName);   //Otherwise quick reparsing won't work.
+                                foreach (var sample in aSamples)
+                                    filter?.OnSampleParsed(sample);
 
                                 sampleCount += aSamples.Count;
                                 samplesForThisBoard += aSamples.Count;

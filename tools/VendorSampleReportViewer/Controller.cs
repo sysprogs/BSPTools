@@ -191,6 +191,9 @@ namespace VendorSampleReportViewer
                 .Reverse()
                 .ToArray();
 
+            if (lastReports.Length == 0)
+                return;
+
             BSPID = lastReports.Last().BSPID;
             Summaries = lastReports.Select(r => new ReportSummary(r)).ToArray();
 

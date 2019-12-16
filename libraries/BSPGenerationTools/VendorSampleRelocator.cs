@@ -281,7 +281,8 @@ namespace BSPGenerationTools
                 if (s.Path == null)
                     throw new Exception("Invalid sample path for " + s.UserFriendlyName);
 
-                s.VirtualPath = BuildVirtualSamplePath(s.Path);
+                if (s.VirtualPath == null)
+                    s.VirtualPath = BuildVirtualSamplePath(s.Path);
 
                 if (s.LinkerScript != null)
                 {

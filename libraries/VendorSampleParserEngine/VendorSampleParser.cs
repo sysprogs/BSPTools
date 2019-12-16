@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using StandaloneBSPValidator;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -71,7 +72,7 @@ namespace VendorSampleParserEngine
         public struct UnparseableVendorSample
         {
             public string BuildLogFile;
-            public VendorSampleID ID;
+            public string UniqueID;
         }
 
         public struct ParsedVendorSamples
@@ -138,53 +139,105 @@ namespace VendorSampleParserEngine
         //The parser can return more samples than requested, or just call ShouldParseSampleForAnyDevice() and parse matching samples for all CPUs. The framework will handle this automatically.
         protected interface IVendorSampleFilter
         {
-            bool ShouldParseSampleForAnyDevice(string sampleNameWithoutDevice);
-            bool ShouldParseSampleForSpecificDevice(VendorSampleID sampleID);
+            bool ShouldParseAnySamplesInsideDirectory(string directory);
+            void OnSampleParsed(VendorSample sample);
         }
 
         class VendorSampleFilter : IVendorSampleFilter
         {
-            HashSet<string> _NamesToParse = new HashSet<string>();
-            HashSet<VendorSampleID> _IDsToParse = new HashSet<VendorSampleID>();
+            class PathEntry
+            {
+                public Dictionary<string, PathEntry> SubEntries = new Dictionary<string, PathEntry>(StringComparer.InvariantCultureIgnoreCase);
+
+                internal void RememberSamplePathRecursively(string[] components, int index)
+                {
+                    if (!SubEntries.TryGetValue(components[index], out var subEntry))
+                        SubEntries[components[index]] = subEntry = new PathEntry();
+
+                    if (++index < components.Length)
+                        subEntry.RememberSamplePathRecursively(components, index);
+                }
+            }
+
+            PathEntry _RootDir = new PathEntry();
             bool _ParseAll;
 
-            public bool IsEmpty => !_ParseAll && _NamesToParse.Count == 0;
+            public bool IsEmpty => !_ParseAll && _RootDir.SubEntries.Count == 0;
 
-            public VendorSampleFilter(VendorSampleTestReport report)
+            public VendorSampleFilter()
             {
-                if (report == null)
-                    _ParseAll = true;
-                else
+                _ParseAll = true;
+            }
+
+            public VendorSampleFilter(VendorSampleTestReport report, IEnumerable<VendorSample> alreadyDiscoveredSamples)
+            {
+                Dictionary<string, string> sampleDirectories = new Dictionary<string, string>();
+                foreach (var s in alreadyDiscoveredSamples)
+                    sampleDirectories[s.InternalUniqueID] = s.Path;
+
+                foreach (var rec in report.Records)
                 {
-                    foreach (var rec in report.Records)
+                    if (rec.BuildFailedExplicitly)
                     {
-                        if (rec.BuildFailedExplicitly)
-                        {
-                            _NamesToParse.Add(rec.ID.SampleName);
-                            _IDsToParse.Add(rec.ID);
-                        }
+                        RememberSamplePath(sampleDirectories[rec.UniqueID].Replace('/', '\\').Split('\\'));
                     }
                 }
             }
 
-            public bool ShouldParseSampleForAnyDevice(string sampleNameWithoutDevice)
+            private void RememberSamplePath(string[] components)
             {
-                if (_ParseAll)
-                    return true;
-
-                return _NamesToParse.Contains(sampleNameWithoutDevice);
+                _RootDir.RememberSamplePathRecursively(components, 0);
             }
 
-            public bool ShouldParseSampleForSpecificDevice(VendorSampleID sampleID)
+            public void OnSampleParsed(VendorSample sample)
+            {
+            }
+
+            public bool ShouldParseAnySamplesInsideDirectory(string directory)
             {
                 if (_ParseAll)
                     return true;
 
-                return _IDsToParse.Contains(sampleID);
+                string[] components = directory.Replace('/', '\\').Split('\\');
+                PathEntry e = _RootDir;
+                foreach (var c in components)
+                {
+                    if (!e.SubEntries.TryGetValue(c, out e))
+                        return false;
+                }
+
+                return true;
             }
         }
 
-        private ConstructedVendorSampleDirectory BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(string sampleListFile, string SDKdir, RunMode mode, string specificSampleName)
+        class SingleSampleFilter : IVendorSampleFilter
+        {
+            private VendorSample _ExistingSample;
+            private readonly string _Path;
+
+            public SingleSampleFilter(VendorSample existingSample)
+            {
+                _ExistingSample = existingSample;
+                _Path = Path.GetFullPath(_ExistingSample.Path);
+            }
+
+            public void OnSampleParsed(VendorSample sample)
+            {
+                if (_ExistingSample.InternalUniqueID == sample.InternalUniqueID)
+                    Debugger.Break();
+            }
+
+            public bool ShouldParseAnySamplesInsideDirectory(string directory)
+            {
+                if (_Path.StartsWith(directory, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+
+                return false;
+            }
+        }
+
+
+        private ConstructedVendorSampleDirectory BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(string sampleListFile, string SDKdir, RunMode mode, string specificSampleName, bool reparseSingleSample)
         {
             Console.WriteLine($"Creating sample list...");
             ConstructedVendorSampleDirectory sampleDir = null;
@@ -196,19 +249,24 @@ namespace VendorSampleParserEngine
                     directoryMatches = true;
             }
 
-            if (directoryMatches && (mode == RunMode.Release || mode == RunMode.SingleSample))
+            if (directoryMatches && (mode == RunMode.Release || (mode == RunMode.SingleSample && !reparseSingleSample)))
             {
                 Console.WriteLine($"Loaded {sampleDir.Samples.Length} samples from cache");
                 return sampleDir;
             }
 
-            VendorSampleFilter filter;
-            if (!directoryMatches || mode != RunMode.Incremental)
-                filter = new VendorSampleFilter(null);
+            IVendorSampleFilter filter;
+            if (mode == RunMode.SingleSample && sampleDir != null)
+            {
+                var existingSample = sampleDir.Samples.FirstOrDefault(s => s.InternalUniqueID == specificSampleName) ?? throw new Exception("Unknown sample specified via command line: " + specificSampleName);
+                filter = new SingleSampleFilter(existingSample);
+            }
+            else if (!directoryMatches || mode != RunMode.Incremental || sampleDir == null)
+                filter = new VendorSampleFilter();
             else
-                filter = new VendorSampleFilter(_Report);
+                filter = new VendorSampleFilter(_Report, sampleDir.Samples);
 
-            if (!filter.IsEmpty)
+            if ((filter as VendorSampleFilter)?.IsEmpty != true)
             {
                 var samples = ParseVendorSamples(SDKdir, filter);
 
@@ -217,12 +275,12 @@ namespace VendorSampleParserEngine
                     //We don't update the report yet, even if the samples were previously marked as 'parse failed'. 
                     //This status will get overridden once the samples are tested.
 
-                    Dictionary<VendorSampleID, VendorSample> newSampleDict = new Dictionary<VendorSampleID, VendorSample>();
+                    Dictionary<string, VendorSample> newSampleDict = new Dictionary<string, VendorSample>();
                     foreach (var vs in samples.VendorSamples)
-                        newSampleDict[new VendorSampleID(vs)] = vs;
+                        newSampleDict[vs.InternalUniqueID] = vs;
 
                     for (int i = 0; i < sampleDir.Samples.Length; i++)
-                        if (newSampleDict.TryGetValue(new VendorSampleID(sampleDir.Samples[i]), out var newSampleDefinition))
+                        if (newSampleDict.TryGetValue(sampleDir.Samples[i].InternalUniqueID, out var newSampleDefinition))
                             sampleDir.Samples[i] = newSampleDefinition;
                 }
                 else
@@ -237,7 +295,7 @@ namespace VendorSampleParserEngine
                 if (samples.FailedSamples != null)
                 {
                     foreach (var fs in samples.FailedSamples)
-                        StoreError(_Report.ProvideEntryForSample(fs.ID), fs.BuildLogFile, VendorSamplePass.InitialParse);
+                        StoreError(_Report.ProvideEntryForSample(fs.UniqueID), fs.BuildLogFile, VendorSamplePass.InitialParse);
                 }
 
                 XmlTools.SaveObject(sampleDir, sampleListFile);
@@ -318,17 +376,17 @@ namespace VendorSampleParserEngine
             {
                 _TotalSamples++;
                 if (!record.BuildFailedExplicitly)
-                    _FileStream.WriteLine($"{record.ID} succeded in {record.BuildDuration} milliseconds");
+                    _FileStream.WriteLine($"{record.UniqueID} succeded in {record.BuildDuration} milliseconds");
                 else
                 {
-                    _FileStream.WriteLine($"{record.ID} FAILED");
+                    _FileStream.WriteLine($"{record.UniqueID} FAILED");
                     _FailedSamples++;
                 }
             }
         }
 
 
-        StandaloneBSPValidator.Program.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples, string sampleDirPath, VendorSamplePass pass, Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null, double testProbability = 1, BSPValidationFlags validationFlags = BSPValidationFlags.None)
+        Program.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples, string sampleDirPath, VendorSamplePass pass, Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null, double testProbability = 1, BSPValidationFlags validationFlags = BSPValidationFlags.None)
         {
             Console.WriteLine($"Building {samples.Length} samples...");
             if (pass != VendorSamplePass.RelocatedBuild && pass != VendorSamplePass.InPlaceBuild)
@@ -367,9 +425,9 @@ namespace VendorSampleParserEngine
                         continue;
                     }
 
-                    VendorSampleTestReport.Record record = _Report.ProvideEntryForSample(new VendorSampleID(vs));
+                    VendorSampleTestReport.Record record = _Report.ProvideEntryForSample(vs.InternalUniqueID);
 
-                    string mcuDir = Path.Combine(outputDir, record.ID.ToString());
+                    string mcuDir = Path.Combine(outputDir, record.UniqueID);
                     DateTime start = DateTime.Now;
 
                     var thisSampleFlags = validationFlags;
@@ -396,7 +454,7 @@ namespace VendorSampleParserEngine
 
                     var timePerSample = (DateTime.Now - passStartTime).TotalMilliseconds / samplesProcessed;
 
-                    string displayedSampleName = record.ID.ToString();
+                    string displayedSampleName = record.UniqueID;
                     int maxNameLength = 50;
                     if (displayedSampleName.Length > maxNameLength)
                         displayedSampleName = displayedSampleName.Substring(0, maxNameLength - 3) + "...";
@@ -449,6 +507,8 @@ namespace VendorSampleParserEngine
             string SDKdir = null;
             string specificSampleName = null;
             RunMode mode = RunMode.Invalid;
+            bool reparse = false;
+
             foreach (var arg in args)
             {
                 string singlePrefix = "/single:";
@@ -457,6 +517,8 @@ namespace VendorSampleParserEngine
                     mode = RunMode.SingleSample;
                     specificSampleName = arg.Substring(singlePrefix.Length);
                 }
+                else if (arg == "/reparse")
+                    reparse = true;
                 else if (arg.StartsWith("/"))
                 {
                     mode = Enum.GetValues(typeof(RunMode)).OfType<RunMode>().First(v => v.ToString().ToLower() == arg.Substring(1).ToLower());
@@ -475,6 +537,7 @@ namespace VendorSampleParserEngine
                 Console.WriteLine($"       /cleanRelease  - Reparse/retest all samples. Update BSP.");
                 Console.WriteLine($"       /updateErrors  - Re-categorize errors based on KnownProblems.xml");
                 Console.WriteLine($"       /single:<name> - Run all phases of just one sample.");
+                Console.WriteLine($"           /reparse   - reparse the single sample definition");
                 Console.WriteLine($"Press any key to continue...");
                 Console.ReadKey();
                 Environment.ExitCode = 1;
@@ -508,17 +571,16 @@ namespace VendorSampleParserEngine
 
             string sampleListFile = Path.Combine(CacheDirectory, "Samples.xml");
 
-            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode, specificSampleName);
-            Dictionary<VendorSampleID, string> encounteredIDs = new Dictionary<VendorSampleID, string>();
+            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode, specificSampleName, reparse);
+            Dictionary<string, string> encounteredIDs = new Dictionary<string, string>();
 
             foreach (var vs in sampleDir.Samples)
             {
-                var id = new VendorSampleID(vs);
-                if (encounteredIDs.TryGetValue(id, out var dir))
-                    throw new Exception("Duplicate sample for " + id);
-                encounteredIDs[new VendorSampleID(vs)] = vs.Path;
+                if (encounteredIDs.TryGetValue(vs.InternalUniqueID, out var dir))
+                    throw new Exception("Duplicate sample for " + vs.InternalUniqueID);
+                encounteredIDs[vs.InternalUniqueID] = vs.Path;
 
-                var rec = _Report.ProvideEntryForSample(new VendorSampleID(vs));
+                var rec = _Report.ProvideEntryForSample(vs.InternalUniqueID);
                 if (rec.LastSucceededPass < VendorSamplePass.InitialParse)
                     rec.LastSucceededPass = VendorSamplePass.InitialParse;
             }
@@ -537,7 +599,7 @@ namespace VendorSampleParserEngine
             switch (mode)
             {
                 case RunMode.Incremental:
-                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => _Report.ShouldBuildIncrementally(new VendorSampleID(s), VendorSamplePass.InPlaceBuild)).ToArray();
+                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => _Report.ShouldBuildIncrementally(s.InternalUniqueID, VendorSamplePass.InPlaceBuild)).ToArray();
                     break;
                 case RunMode.Release:
                     insertionQueue = sampleDir.Samples;
@@ -550,7 +612,7 @@ namespace VendorSampleParserEngine
                     pass1Queue = insertionQueue = sampleDir.Samples;
                     break;
                 case RunMode.SingleSample:
-                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => new VendorSampleID(s).ToString() == specificSampleName).ToArray();
+                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => s.InternalUniqueID == specificSampleName).ToArray();
                     if (pass1Queue.Length == 0)
                         throw new Exception("No samples match " + specificSampleName);
                     break;
@@ -561,7 +623,7 @@ namespace VendorSampleParserEngine
             if (pass1Queue.Length > 0)
             {
                 //Test the raw VendorSamples in-place and store AllDependencies
-                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(new VendorSampleID(vs)), validationFlags: BSPValidationFlags.ResolveNameCollisions);
+                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(vs.InternalUniqueID), validationFlags: BSPValidationFlags.ResolveNameCollisions);
 
                 foreach (var vs in pass1Queue)
                 {
