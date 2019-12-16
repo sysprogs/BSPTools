@@ -223,8 +223,6 @@ namespace VendorSampleParserEngine
 
             public void OnSampleParsed(VendorSample sample)
             {
-                if (_ExistingSample.InternalUniqueID == sample.InternalUniqueID)
-                    Debugger.Break();
             }
 
             public bool ShouldParseAnySamplesInsideDirectory(string directory)
@@ -237,7 +235,7 @@ namespace VendorSampleParserEngine
         }
 
 
-        private ConstructedVendorSampleDirectory BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(string sampleListFile, string SDKdir, RunMode mode, string specificSampleName, bool reparseSingleSample)
+        private ConstructedVendorSampleDirectory BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(string sampleListFile, string SDKdir, RunMode mode, string specificSampleName)
         {
             Console.WriteLine($"Creating sample list...");
             ConstructedVendorSampleDirectory sampleDir = null;
@@ -249,7 +247,7 @@ namespace VendorSampleParserEngine
                     directoryMatches = true;
             }
 
-            if (directoryMatches && (mode == RunMode.Release || (mode == RunMode.SingleSample && !reparseSingleSample)))
+            if (directoryMatches && mode == RunMode.Release)
             {
                 Console.WriteLine($"Loaded {sampleDir.Samples.Length} samples from cache");
                 return sampleDir;
@@ -507,7 +505,6 @@ namespace VendorSampleParserEngine
             string SDKdir = null;
             string specificSampleName = null;
             RunMode mode = RunMode.Invalid;
-            bool reparse = false;
 
             foreach (var arg in args)
             {
@@ -517,8 +514,6 @@ namespace VendorSampleParserEngine
                     mode = RunMode.SingleSample;
                     specificSampleName = arg.Substring(singlePrefix.Length);
                 }
-                else if (arg == "/reparse")
-                    reparse = true;
                 else if (arg.StartsWith("/"))
                 {
                     mode = Enum.GetValues(typeof(RunMode)).OfType<RunMode>().First(v => v.ToString().ToLower() == arg.Substring(1).ToLower());
@@ -537,7 +532,6 @@ namespace VendorSampleParserEngine
                 Console.WriteLine($"       /cleanRelease  - Reparse/retest all samples. Update BSP.");
                 Console.WriteLine($"       /updateErrors  - Re-categorize errors based on KnownProblems.xml");
                 Console.WriteLine($"       /single:<name> - Run all phases of just one sample.");
-                Console.WriteLine($"           /reparse   - reparse the single sample definition");
                 Console.WriteLine($"Press any key to continue...");
                 Console.ReadKey();
                 Environment.ExitCode = 1;
@@ -571,7 +565,7 @@ namespace VendorSampleParserEngine
 
             string sampleListFile = Path.Combine(CacheDirectory, "Samples.xml");
 
-            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode, specificSampleName, reparse);
+            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode, specificSampleName);
             Dictionary<string, string> encounteredIDs = new Dictionary<string, string>();
 
             foreach (var vs in sampleDir.Samples)

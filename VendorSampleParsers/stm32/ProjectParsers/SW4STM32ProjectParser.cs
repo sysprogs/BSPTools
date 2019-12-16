@@ -1,4 +1,6 @@
 ﻿using BSPEngine;
+using BSPGenerationTools;
+using BSPGenerationTools.Parsing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,9 +12,31 @@ using System.Xml;
 
 namespace GeneratorSampleStm32.ProjectParsers
 {
-    class SW4STM32ProjectParser
+    class SW4STM32ProjectParser : IDisposable
     {
-        public static List<VendorSample> ParseProjectFolder(string projectDir, string topLevelDir, string boardDir, List<string> extraIncludeDirs)
+        private MCU[] _SupportedMCUs;
+        HashSet<string> _SupportedMCUNames = new HashSet<string>();
+        BSPReportWriter _Report;
+
+        public SW4STM32ProjectParser(string reportDir, MCU[] supportedMCUs)
+        {
+            _Report = new BSPReportWriter(reportDir);
+            _SupportedMCUs = supportedMCUs;
+            foreach (var mcu in _SupportedMCUs)
+                _SupportedMCUNames.Add(mcu.ID);
+        }
+
+        abstract class MultiConfigurationContext
+        {
+            public class MultiCore : MultiConfigurationContext
+            {
+                public string DeviceSuffix;
+                public string UserFriendlyNameSuffix;
+            }
+        }
+
+
+        public List<VendorSample> ParseProjectFolder(string projectDir, string topLevelDir, string boardDir, List<string> extraIncludeDirs)
         {
             List<VendorSample> result = new List<VendorSample>();
 
@@ -37,52 +61,73 @@ namespace GeneratorSampleStm32.ProjectParsers
                 XmlDocument project = new XmlDocument();
                 project.Load(Path.Combine(projectFileDir, ".project"));
 
-                var errors = new ParseErrorCollection();
-                try
-                {
-                    var sample = ParseSingleProject(cproject, project, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir, Path.GetFileName(boardDir), errors);
-                    sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs).ToArray();
-                    sample.VirtualPath = string.Join("\\", virtualPathComponents);
-                    sample.UserFriendlyName = virtualPathComponents.Last();
-                    sample.InternalUniqueID = string.Join("-", virtualPathComponents);
+                var cconfigurationNodes = cproject.SelectNodes("cproject/storageModule[@moduleId='org.eclipse.cdt.core.settings']/cconfiguration").OfType<XmlElement>().ToArray();
+                if (cconfigurationNodes.Length == 0)
+                    throw new Exception("No 'cconfiguration' nodes found");
 
-                    result.Add(sample);
-                }
-                catch (Exception ex)
+                if (cconfigurationNodes.Length > 1)
                 {
-                    errors.AddError(ex.Message);
+                    var nonReleaseNodes = cconfigurationNodes.Where(n => !n.GetAttribute("id").Contains(".release.")).ToArray();
+                    if (nonReleaseNodes.Length > 0)
+                        cconfigurationNodes = nonReleaseNodes;
+                }
+
+                foreach (var cconfiguration in cconfigurationNodes)
+                {
+                    MultiConfigurationContext mctx = null;
+                    if (cconfigurationNodes.Length > 1)
+                    {
+                        if (cconfigurationNodes.Length != 2)
+                            throw new Exception("Unexpected configuration count for " + projectFile);
+
+                        string artifactName = cconfiguration.SelectSingleNode("storageModule[@moduleId='cdtBuildSystem']/configuration/@artifactName")?.Value;
+                        if (artifactName.EndsWith("_CM4"))
+                            mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "_M4", UserFriendlyNameSuffix = " (Cortex-M4 Core)" };
+                        else if (artifactName.EndsWith("_CM7"))
+                            mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "", UserFriendlyNameSuffix = " (Cortex-M7 Core)" };
+                        else
+                            throw new Exception("Don't know how to interpret the difference between multiple configurations for a project. Please review it manually.");
+                    }
+
+                    try
+                    {
+                        var sample = ParseSingleProject(cproject, project, cconfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir, Path.GetFileName(boardDir), mctx);
+                        sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs).ToArray();
+                        sample.VirtualPath = string.Join("\\", virtualPathComponents);
+                        sample.UserFriendlyName = virtualPathComponents.Last();
+                        sample.InternalUniqueID = string.Join("-", virtualPathComponents);
+
+                        result.Add(sample);
+                    }
+                    catch (Exception ex)
+                    {
+                        _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "General error while parsing a sample", ex.Message, false);
+                    }
                 }
             }
 
             return result;
         }
 
-        class ParseErrorCollection
-        {
-            List<string> _Errors = new List<string>();
 
-            public void AddError(string text)
-            {
-                _Errors.Add(text);
-                Console.WriteLine(text);
-            }
-        }
-
-        private static VendorSample ParseSingleProject(XmlDocument cproject, XmlDocument project, string sw4projectDir, string cprojectDir, string topLevelDir, string boardName, ParseErrorCollection errors)
+        private VendorSample ParseSingleProject(XmlDocument cproject, XmlDocument project,
+            XmlElement cconfiguration, string sw4projectDir, 
+            string cprojectDir, string topLevelDir, string boardName,
+            MultiConfigurationContext multiConfigurationContext)
         {
             VendorSample result = new VendorSample
             {
                 UserFriendlyName = (project.SelectSingleNode("projectDescription/name") as XmlElement)?.InnerText ?? throw new Exception("Failed to determine sample name")
             };
 
-            const string ToolchainConfigKey = "cproject/storageModule[@moduleId='org.eclipse.cdt.core.settings']/cconfiguration/storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
-            var toolchainConfigNode = cproject.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
+            const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
+            var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
 
             var gccNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.compiler')]") as XmlElement ?? throw new Exception("Missing gcc tool node");
             var linkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.linker')]") as XmlElement ?? throw new Exception("Missing linker tool node");
 
             result.IncludeDirectories = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.include.paths")
-                .Select(a => TranslatePath(cprojectDir, a, errors, PathTranslationFlags.AddExtraComponentToBaseDir))
+                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
                 .Where(d => d != null).ToArray();
 
             result.PreprocessorMacros = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.preprocessor.def.symbols")
@@ -100,7 +145,7 @@ namespace GeneratorSampleStm32.ProjectParsers
 
                 foreach (var libDir in libraryPaths)
                 {
-                    var fullPath = TranslatePath(cprojectDir, libDir, errors, PathTranslationFlags.AddExtraComponentToBaseDir);
+                    var fullPath = TranslatePath(cprojectDir, libDir, PathTranslationFlags.AddExtraComponentToBaseDir);
 
                     string candidate = Path.Combine(fullPath, $"{lib.Substring(1)}");
                     if (File.Exists(candidate))
@@ -119,21 +164,37 @@ namespace GeneratorSampleStm32.ProjectParsers
                 else
                     mcu = mcu.Remove(mcu.Length - 2, 2);
             }
+            else if (mcu.EndsWith("xP"))
+            {
+                mcu = mcu.Remove(mcu.Length - 3, 3);
+            }
+
+            if (multiConfigurationContext is MultiConfigurationContext.MultiCore mc)
+            {
+                mcu += mc.DeviceSuffix;
+                result.InternalUniqueID += mc.DeviceSuffix;
+                result.UserFriendlyName += mc.UserFriendlyNameSuffix;
+            }
+
+            if (!_SupportedMCUNames.Contains(mcu))
+            {
+                _Report.ReportMergeableError("Invalid MCU", mcu);
+            }
 
             result.DeviceID = mcu;
 
             var relLinkerScript = linkerNode.LookupOptionValue("fr.ac6.managedbuild.tool.gnu.cross.c.linker.script");
-            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, errors, PathTranslationFlags.AddExtraComponentToBaseDir);
+            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.AddExtraComponentToBaseDir);
 
             if (linkerScript != null)
                 result.LinkerScript = Path.GetFullPath(linkerScript);
 
-            result.SourceFiles = ParseSourceList(project, cprojectDir, errors).Concat(libs).ToArray();
+            result.SourceFiles = ParseSourceList(project, cprojectDir).Concat(libs).ToArray();
             result.Path = Path.GetDirectoryName(sw4projectDir);
             return result;
         }
 
-        static Regex rgParentSyntax = new Regex("PARENT-([0-9]+)-PROJECT_LOC(|..)/(.*)");
+        Regex rgParentSyntax = new Regex("PARENT-([0-9]+)-PROJECT_LOC(|..)/(.*)");
 
         [Flags]
         enum PathTranslationFlags
@@ -143,7 +204,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             ReturnEvenIfMissing = 2,
         }
 
-        static string TranslatePath(string baseDir, string path, ParseErrorCollection errors, PathTranslationFlags flags)
+        string TranslatePath(string baseDir, string path, PathTranslationFlags flags)
         {
             path = path.Trim('\"');
 
@@ -165,7 +226,7 @@ namespace GeneratorSampleStm32.ProjectParsers
 
             if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
             {
-                errors.AddError("Missing " + fullPath);
+                _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Missing file/directory", fullPath, false);
                 if ((flags & PathTranslationFlags.ReturnEvenIfMissing) == PathTranslationFlags.None)
                     return null;
             }
@@ -173,7 +234,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             return fullPath;
         }
 
-        private static List<string> ParseSourceList(XmlDocument project, string projectDir, ParseErrorCollection errors)
+        private List<string> ParseSourceList(XmlDocument project, string projectDir)
         {
             Regex rgStartup = new Regex("startup_stm.*\\.s");
             List<string> sources = new List<string>();
@@ -185,7 +246,7 @@ namespace GeneratorSampleStm32.ProjectParsers
 
                 int type = int.Parse(node.SelectSingleNode("type")?.InnerText ?? throw new Exception("Resource type unspecified"));
 
-                string fullPath = TranslatePath(projectDir, path, errors, PathTranslationFlags.None);
+                string fullPath = TranslatePath(projectDir, path, PathTranslationFlags.None);
                 if (fullPath == null)
                     continue;
 
@@ -196,6 +257,11 @@ namespace GeneratorSampleStm32.ProjectParsers
             }
 
             return sources;
+        }
+
+        public void Dispose()
+        {
+            _Report.Dispose();
         }
     }
 

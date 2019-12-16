@@ -31,7 +31,8 @@ namespace VendorSampleParserEngine
                 get => null;
                 set
                 {
-                    UniqueID = value[0].SelectSingleNode("SampleName").InnerText + "-" + value[0].SelectSingleNode("BoardNameOrDeviceID").InnerText;
+                    if (value != null)
+                        UniqueID = value[0].SelectSingleNode("SampleName").InnerText + "-" + value[0].SelectSingleNode("BoardNameOrDeviceID").InnerText;
                 }
             }
 
@@ -55,7 +56,7 @@ namespace VendorSampleParserEngine
         public string BSPID;
         public string BSPVersion;
 
-        public Record[]  Records
+        public Record[] Records
         {
             get => _RecordDictionary.Values.ToArray();
             set
