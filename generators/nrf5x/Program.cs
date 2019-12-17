@@ -48,7 +48,7 @@ namespace nrf5x
                 return base.OnFilePathTooLong(pathInsidePackage);
             }
 
-            public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
+            public override MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 //No additional memory information available for this MCU. Build a basic memory layout from known RAM/FLASH sizes.
                 MemoryLayout layout = new MemoryLayout { DeviceName = mcu.Name, Memories = new List<Memory>() };
@@ -70,7 +70,7 @@ namespace nrf5x
                     Size = (uint)mcu.RAMSize,
                 });
 
-                return layout;
+                return new MemoryLayoutAndSubstitutionRules(layout);
             }
 
 
@@ -140,7 +140,7 @@ namespace nrf5x
 
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
 
-            public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayout layout, string generalizedName)
+            public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayoutAndSubstitutionRules layout, string generalizedName)
             {
                 foreach (var sd in SoftDevices)
                 {
@@ -610,17 +610,9 @@ namespace nrf5x
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf5281.*", null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S113", "nrf528.*", null, bspBuilder.Directories.InputDir));
 
                 List<MCUBuilder> devices = new List<MCUBuilder>();
-#if NRF51_SUPPORT
-            if (!usingIoTSDK)
-                foreach (string part in new string[] { "nRF51822", "nRF51422" })
-                {
-                    devices.Add(new MCUBuilder { Name = part + "_XXAA", FlashSize = 256 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
-                    devices.Add(new MCUBuilder { Name = part + "_XXAB", FlashSize = 128 * 1024, RAMSize = 16 * 1024, Core = CortexCore.M0 });
-                    devices.Add(new MCUBuilder { Name = part + "_XXAC", FlashSize = 256 * 1024, RAMSize = 32 * 1024, Core = CortexCore.M0 });
-                }
-#endif
 
                 devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52.S" });
                 devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52840.S" });

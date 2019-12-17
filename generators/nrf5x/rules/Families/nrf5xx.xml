@@ -12,8 +12,8 @@
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.bspoptions.nrf5x.mcumacro$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
-			<string>NRF_DFU_SETTINGS_VERSION=1</string>
-			<string>$$com.sysprogs.bspoptions.nrf5x.apiversion$$</string>
+			<string>NRF_DFU_SETTINGS_VERSION=2</string>
+			<string>NRF_SD_BLE_API_VERSION=7</string>
 		</PreprocessorMacros>
 		<IncludeDirectories>
 			<string>.</string>
@@ -718,24 +718,6 @@
 				</Option>
 				<Option>
 					<Value>m33</Value>
-					<Regex>^nRF91.*</Regex>
-				</Option>
-			</Options>
-		</MCUClassifier>
-		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.nrf5x.apiversion</VariableName>
-			<Required>true</Required>
-			<Options>
-				<Option>
-					<Value>NRF_SD_BLE_API_VERSION=3</Value>
-					<Regex>^nRF51.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF_SD_BLE_API_VERSION=6</Value>
-					<Regex>^nRF52.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF_SD_BLE_API_VERSION=6</Value>
 					<Regex>^nRF91.*</Regex>
 				</Option>
 			</Options>
