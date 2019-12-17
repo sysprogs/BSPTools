@@ -21,7 +21,7 @@ namespace ESP8266DebugPackage
             return new GUI.ESPxxOpenOCDSettingsControl(method, host, this, _IsESP32);
         }
 
-        protected override abstract IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool);
+        protected override abstract IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool, string sharedSessionID);
 
         public override object TryConvertLegacyConfiguration(IBSPConfiguratorHost host, string methodDirectory, Dictionary<string, string> legacyConfiguration)
         {
@@ -117,7 +117,7 @@ namespace ESP8266DebugPackage
         }
 
 
-        protected override IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool)
+        protected override IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool, string sharedSessionID)
         {
             return new ESP32GDBStub(this, context, cmdLine, tool, (ESP32OpenOCDSettings)settings, gdbPort, telnetPort, temporaryScript);
         }
@@ -258,7 +258,7 @@ namespace ESP8266DebugPackage
         {
         }
 
-        protected override IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool)
+        protected override IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool, string sharedSessionID)
         {
             return new ESP8266GDBStub(this, context, cmdLine, tool, (ESP8266OpenOCDSettings)settings, gdbPort, telnetPort, temporaryScript);
         }
