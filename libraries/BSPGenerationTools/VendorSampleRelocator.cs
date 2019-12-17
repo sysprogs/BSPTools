@@ -221,7 +221,7 @@ namespace BSPGenerationTools
         protected virtual PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => null;
 
 
-        public virtual Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
+        public virtual Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter)
         {
             List<VendorSample> finalSamples = new List<VendorSample>();
 
@@ -236,8 +236,6 @@ namespace BSPGenerationTools
 
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
-
-            List<string> tooLongPaths = new List<string>();
 
             foreach (var s in sampleList)
             {
@@ -271,7 +269,7 @@ namespace BSPGenerationTools
 
                     int estimatedTargetPathLength = ReasonableVendorSampleDirPathLengthForUsers + dep.MappedFile.Length - SampleRootDirMarker.Length;
                     if (estimatedTargetPathLength > 254)
-                        tooLongPaths.Add(dep.MappedFile);
+                        reportWriter.ReportMergeableError("Path too long", dep.MappedFile);
                 }
 
                 s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
@@ -300,11 +298,6 @@ namespace BSPGenerationTools
                 }
 
                 finalSamples.Add(s);
-            }
-
-            if (tooLongPaths.Count > 0)
-            {
-                throw new Exception($"Found {tooLongPaths.Count} files with excessively long paths. Please update MapPath() in the BSP-specific path mapper to shorten the target paths.");
             }
 
             Console.WriteLine($"Copying {copiedFiles.Count} files...");

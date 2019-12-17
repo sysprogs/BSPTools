@@ -631,8 +631,11 @@ namespace VendorSampleParserEngine
             }
 
             //Insert the samples into the generated BSP
-            var relocator = CreateRelocator(sampleDir);
-            var copiedFiles = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory);
+            using (var reportWriter = new BSPReportWriter(CacheDirectory, "RelocationReport.txt"))
+            {
+                var relocator = CreateRelocator(sampleDir);
+                var copiedFiles = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory, reportWriter);
+            }
 
             var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
             bsp.VendorSampleDirectoryPath = VendorSampleDirectoryName;

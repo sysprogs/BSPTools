@@ -277,9 +277,9 @@ namespace GeneratorSampleStm32
                 };
             }
 
-            public override Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory)
+            public override Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter)
             {
-                var copiedFiles = base.InsertVendorSamplesIntoBSP(dir, sampleList, bspDirectory);
+                var copiedFiles = base.InsertVendorSamplesIntoBSP(dir, sampleList, bspDirectory, reportWriter);
 
                 Regex rgDebugger = new Regex("#define[ \t]+CFG_DEBUGGER_SUPPORTED[ \t]+(0)$");
 

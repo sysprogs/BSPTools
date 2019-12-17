@@ -20,7 +20,7 @@ namespace GeneratorSampleStm32.ProjectParsers
 
         public SW4STM32ProjectParser(string reportDir, MCU[] supportedMCUs)
         {
-            _Report = new BSPReportWriter(reportDir);
+            _Report = new BSPReportWriter(reportDir, "ParseReport.txt");
             _SupportedMCUs = supportedMCUs;
             foreach (var mcu in _SupportedMCUs)
                 _SupportedMCUNames.Add(mcu.ID);
@@ -28,11 +28,65 @@ namespace GeneratorSampleStm32.ProjectParsers
 
         abstract class MultiConfigurationContext
         {
+            public abstract string IDSuffix { get; }
+
             public class MultiCore : MultiConfigurationContext
             {
                 public string DeviceSuffix;
                 public string UserFriendlyNameSuffix;
+
+                public override string IDSuffix => DeviceSuffix;
             }
+        }
+
+        struct ConfigurationWithContext
+        {
+            public XmlElement CConfiguration;
+            public MultiConfigurationContext Context;
+        }
+
+        ConfigurationWithContext[] DetectConfigurationContexts(XmlDocument cproject, string projectFile)
+        {
+            var cconfigurationNodes = cproject.SelectNodes("cproject/storageModule[@moduleId='org.eclipse.cdt.core.settings']/cconfiguration").OfType<XmlElement>().ToArray();
+            if (cconfigurationNodes.Length == 0)
+                throw new Exception("No 'cconfiguration' nodes found");
+
+            if (cconfigurationNodes.Length > 1)
+            {
+                var nonReleaseNodes = cconfigurationNodes.Where(n => !n.GetAttribute("id").Contains(".release.")).ToArray();
+                if (nonReleaseNodes.Length > 0)
+                    cconfigurationNodes = nonReleaseNodes;
+            }
+
+            List<ConfigurationWithContext> result = new List<ConfigurationWithContext>();
+            foreach (var cconfiguration in cconfigurationNodes)
+            {
+                MultiConfigurationContext mctx = null;
+                if (cconfigurationNodes.Length > 1)
+                {
+                    if (cconfigurationNodes.Length != 2)
+                        throw new Exception("Unexpected configuration count for " + projectFile);
+
+                    string artifactName = cconfiguration.SelectSingleNode("storageModule[@moduleId='cdtBuildSystem']/configuration/@artifactName")?.Value;
+                    if (artifactName.EndsWith("_CM4"))
+                        mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "_M4", UserFriendlyNameSuffix = " (Cortex-M4 Core)" };
+                    else if (artifactName.EndsWith("_CM7"))
+                        mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "", UserFriendlyNameSuffix = " (Cortex-M7 Core)" };
+                    else
+                        throw new Exception("Don't know how to interpret the difference between multiple configurations for a project. Please review it manually.");
+
+                }
+
+                result.Add(new ConfigurationWithContext { CConfiguration = cconfiguration, Context = mctx });
+            }
+
+            if (result.Select(c => c.Context?.IDSuffix ?? "").Distinct().Count() != result.Count)
+            {
+                _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Found multiple configurations with the same ID", projectFile, false);
+                result = result.Take(1).ToList();
+            }
+
+            return result.ToArray();
         }
 
 
@@ -61,41 +115,17 @@ namespace GeneratorSampleStm32.ProjectParsers
                 XmlDocument project = new XmlDocument();
                 project.Load(Path.Combine(projectFileDir, ".project"));
 
-                var cconfigurationNodes = cproject.SelectNodes("cproject/storageModule[@moduleId='org.eclipse.cdt.core.settings']/cconfiguration").OfType<XmlElement>().ToArray();
-                if (cconfigurationNodes.Length == 0)
-                    throw new Exception("No 'cconfiguration' nodes found");
+                var configs = DetectConfigurationContexts(cproject, projectFile);
 
-                if (cconfigurationNodes.Length > 1)
+                foreach (var cfg in configs)
                 {
-                    var nonReleaseNodes = cconfigurationNodes.Where(n => !n.GetAttribute("id").Contains(".release.")).ToArray();
-                    if (nonReleaseNodes.Length > 0)
-                        cconfigurationNodes = nonReleaseNodes;
-                }
-
-                foreach (var cconfiguration in cconfigurationNodes)
-                {
-                    MultiConfigurationContext mctx = null;
-                    if (cconfigurationNodes.Length > 1)
-                    {
-                        if (cconfigurationNodes.Length != 2)
-                            throw new Exception("Unexpected configuration count for " + projectFile);
-
-                        string artifactName = cconfiguration.SelectSingleNode("storageModule[@moduleId='cdtBuildSystem']/configuration/@artifactName")?.Value;
-                        if (artifactName.EndsWith("_CM4"))
-                            mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "_M4", UserFriendlyNameSuffix = " (Cortex-M4 Core)" };
-                        else if (artifactName.EndsWith("_CM7"))
-                            mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "", UserFriendlyNameSuffix = " (Cortex-M7 Core)" };
-                        else
-                            throw new Exception("Don't know how to interpret the difference between multiple configurations for a project. Please review it manually.");
-                    }
-
                     try
                     {
-                        var sample = ParseSingleProject(cproject, project, cconfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir, Path.GetFileName(boardDir), mctx);
+                        var sample = ParseSingleProject(cproject, project, cfg.CConfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir, Path.GetFileName(boardDir), cfg.Context);
                         sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs).ToArray();
                         sample.VirtualPath = string.Join("\\", virtualPathComponents);
                         sample.UserFriendlyName = virtualPathComponents.Last();
-                        sample.InternalUniqueID = string.Join("-", virtualPathComponents);
+                        sample.InternalUniqueID = string.Join("-", virtualPathComponents) + cfg.Context?.IDSuffix;
 
                         result.Add(sample);
                     }
@@ -111,7 +141,7 @@ namespace GeneratorSampleStm32.ProjectParsers
 
 
         private VendorSample ParseSingleProject(XmlDocument cproject, XmlDocument project,
-            XmlElement cconfiguration, string sw4projectDir, 
+            XmlElement cconfiguration, string sw4projectDir,
             string cprojectDir, string topLevelDir, string boardName,
             MultiConfigurationContext multiConfigurationContext)
         {
