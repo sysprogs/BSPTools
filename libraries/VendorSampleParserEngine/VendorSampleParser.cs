@@ -16,7 +16,7 @@ namespace VendorSampleParserEngine
     public abstract class VendorSampleParser
     {
         public readonly string TestDirectory, ToolchainDirectory;
-        public readonly string CacheDirectory;
+        public readonly string CacheDirectory, RulesDirectory;
 
         public readonly string BSPDirectory;
 
@@ -42,11 +42,13 @@ namespace VendorSampleParserEngine
 
             BSPDirectory = Path.GetFullPath(Path.Combine(baseDirectory, testedBSPDirectory));
             CacheDirectory = Path.Combine(baseDirectory, "Cache");
+            RulesDirectory = Path.Combine(baseDirectory, "Rules");
             var reportDirectory = Path.Combine(baseDirectory, "Reports");
 
             if (!string.IsNullOrEmpty(subdir))
             {
                 CacheDirectory = Path.Combine(CacheDirectory, subdir);
+                RulesDirectory = Path.Combine(RulesDirectory, subdir);
                 reportDirectory = Path.Combine(reportDirectory, subdir);
             }
 
@@ -268,7 +270,10 @@ namespace VendorSampleParserEngine
             {
                 var samples = ParseVendorSamples(SDKdir, filter);
 
-                if (directoryMatches && mode == RunMode.Incremental)
+                HashSet<string> blacklist = ParseBlacklistFile();
+                samples.VendorSamples = samples.VendorSamples.Where(s => !blacklist.Contains(s.InternalUniqueID)).ToArray();
+
+                if (directoryMatches && (mode == RunMode.Incremental || mode == RunMode.SingleSample))
                 {
                     //We don't update the report yet, even if the samples were previously marked as 'parse failed'. 
                     //This status will get overridden once the samples are tested.
@@ -631,8 +636,11 @@ namespace VendorSampleParserEngine
             }
 
             //Insert the samples into the generated BSP
-            var relocator = CreateRelocator(sampleDir);
-            var copiedFiles = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory);
+            using (var reportWriter = new BSPReportWriter(CacheDirectory, "RelocationReport.txt"))
+            {
+                var relocator = CreateRelocator(sampleDir);
+                var copiedFiles = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory, reportWriter);
+            }
 
             var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
             bsp.VendorSampleDirectoryPath = VendorSampleDirectoryName;
@@ -693,6 +701,24 @@ namespace VendorSampleParserEngine
 
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
+        }
+
+        private HashSet<string> ParseBlacklistFile()
+        {
+            HashSet<string> result = new HashSet<string>();
+            var file = Path.Combine(RulesDirectory, "blacklist.txt");
+            if (File.Exists(file))
+            {
+                foreach(var rawLine in File.ReadAllLines(file))
+                {
+                    string line = rawLine.Trim();
+                    if (line.StartsWith("#") || line == "")
+                        continue;
+
+                    result.Add(line);
+                }
+            }
+            return result;
         }
     }
 }

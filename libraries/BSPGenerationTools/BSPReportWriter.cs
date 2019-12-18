@@ -9,14 +9,15 @@ namespace BSPGenerationTools
 {
     public class BSPReportWriter : IDisposable
     {
-        private readonly string _ReportDir;
+        private readonly string _ReportDir, _ReportFileName;
         private readonly bool _StopOnErrors;
 
         bool _Disposed = false;
 
-        public BSPReportWriter(string reportDir)
+        public BSPReportWriter(string reportDir, string reportFileName = "BSPReport.txt")
         {
             _ReportDir = reportDir;
+            _ReportFileName = reportFileName;
             Directory.CreateDirectory(reportDir);
 
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
@@ -86,7 +87,7 @@ namespace BSPGenerationTools
             int warnings = _MergeableMessages.Count(kv => kv.Key.Severity == MessageSeverity.Warning);
             int errors = _MergeableMessages.Count(kv => kv.Key.Severity == MessageSeverity.Error);
 
-            string reportFile = Path.Combine(_ReportDir, "BSPReport.txt");
+            string reportFile = Path.Combine(_ReportDir, _ReportFileName);
 
             using (var sw = new StreamWriter(reportFile))
             {

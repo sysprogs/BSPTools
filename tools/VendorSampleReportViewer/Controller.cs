@@ -42,7 +42,7 @@ namespace VendorSampleReportViewer
 
         public class SampleRow
         {
-            public SampleRow(VendorSampleID id, VendorSampleTestReport[] lastReports)
+            public SampleRow(string id, VendorSampleTestReport[] lastReports)
             {
                 Name = id.ToString();
                 Cells = lastReports.Select(r => new SampleCell(id, r.ProvideEntryForSample(id))).ToArray();
@@ -58,7 +58,7 @@ namespace VendorSampleReportViewer
 
             public class SampleCell
             {
-                public SampleCell(VendorSampleID id, VendorSampleTestReport.Record record)
+                public SampleCell(string id, VendorSampleTestReport.Record record)
                 {
                     SampleSubdir = id.ToString();
                     if (!record.BuildFailedExplicitly)
@@ -197,12 +197,12 @@ namespace VendorSampleReportViewer
             BSPID = lastReports.Last().BSPID;
             Summaries = lastReports.Select(r => new ReportSummary(r)).ToArray();
 
-            HashSet<VendorSampleID> allIDs = new HashSet<VendorSampleID>();
+            HashSet<string> allIDs = new HashSet<string>();
             HashSet<string> categoryIDs = new HashSet<string>();
             foreach (var rep in lastReports)
                 foreach (var rec in rep.Records)
                 {
-                    allIDs.Add(rec.ID);
+                    allIDs.Add(rec.UniqueID);
                     if (rec.KnownProblemID != null)
                         categoryIDs.Add(rec.KnownProblemID);
                 }

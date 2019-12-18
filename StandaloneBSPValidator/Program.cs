@@ -335,7 +335,6 @@ namespace StandaloneBSPValidator
             Directory.CreateDirectory(mcuDir);
 
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
-            configuredMCU.Configuration["com.sysprogs.toolchainoptions.arm.libnosys"] = "--specs=nosys.specs";
 
             if (configuredMCU.ExpandedMCU.FLASHSize == 0)
             {
@@ -674,6 +673,7 @@ namespace StandaloneBSPValidator
                 buildSucceeded = job.BuildFast(mcuDir, Environment.ProcessorCount);
             }
 
+
             bool success = false;
             string mapFile = Path.Combine(mcuDir, GeneratedProject.MapFileName);
             if (buildSucceeded && File.Exists(mapFile))
@@ -686,6 +686,7 @@ namespace StandaloneBSPValidator
                     using (var fs = File.Open(binFile, FileMode.Open))
                         if (fs.Length < 512)
                             success = false;
+
                 }
             }
 
@@ -700,6 +701,7 @@ namespace StandaloneBSPValidator
             {
                 vendorSample.AllDependencies = Directory.GetFiles(mcuDir, "*.d")
                     .SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":")))
+                    .Concat(prj.SourceFiles.SelectMany(sf => FindIncludedResources(vendorSample.Path, sf)))
                     .Distinct()
                     .ToArray();
             }
@@ -708,6 +710,43 @@ namespace StandaloneBSPValidator
                 Directory.Delete(mcuDir, true);
 
             return new TestResult(TestBuildResult.Succeeded, Path.Combine(mcuDir, "build.log"));
+        }
+
+        private static IEnumerable<string> FindIncludedResources(string baseDir, string sourceFile)
+        {
+            List<string> resources = new List<string>();
+
+            const string marker = "\".incbin \\\"";
+
+            foreach(var line in File.ReadLines(sourceFile))
+            {
+                int idx = line.IndexOf(marker);
+                if (idx != -1)
+                {
+                    idx += marker.Length;
+                    int end = line.IndexOf("\\\"", idx);
+                    if (end != -1)
+                    {
+                        //This discovers STM32 binary resources included as '.incbin \"<...>\"'.
+                        //The path to the resource is relative to the SW4STM32 project file, that is not directly stored in the VendorSample file.
+                        //Hence we use some basic trial-and-error to discover the correct path (assuming that the .cproject file was 0 to 5 levels inside the base dir).
+                        //Ideally, we need to store the .cproject file path somewhere in the vendor sample object in order to parse this deterministically.
+                        for (int i = 0; i < 5; i++)
+                        {
+                            string dummySubpath = string.Join("\\", Enumerable.Range(0, i).Select(x => "dummy"));
+
+                            string path = Path.Combine(Path.GetDirectoryName(sourceFile), dummySubpath, line.Substring(idx, end - idx));
+                            if (File.Exists(path))
+                            {
+                                resources.Add(Path.GetFullPath(path));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return resources;
         }
 
         private static void ApplyConfiguration(Dictionary<string, string> dict, PropertyDictionary2 values, PropertyDictionary2 values2 = null)
