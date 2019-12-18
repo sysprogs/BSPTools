@@ -301,12 +301,6 @@ namespace VendorSampleParserEngine
                         StoreError(_Report.ProvideEntryForSample(fs.UniqueID), fs.BuildLogFile, VendorSamplePass.InitialParse);
                 }
 
-                if (File.Exists(sampleListFile))
-                {
-                    //Make a temporary backup. Remove this when done changing logic.
-                    File.Move(sampleListFile, sampleListFile + "." + DateTime.Now.ToFileTimeUtc());
-                }
-
                 XmlTools.SaveObject(sampleDir, sampleListFile);
             }
             else if (sampleDir == null)

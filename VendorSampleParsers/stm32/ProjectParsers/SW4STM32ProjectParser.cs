@@ -123,7 +123,7 @@ namespace GeneratorSampleStm32.ProjectParsers
                     {
                         var sample = ParseSingleProject(cproject, project, cfg.CConfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir, Path.GetFileName(boardDir), cfg.Context);
                         sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs).ToArray();
-                        sample.VirtualPath = string.Join("\\", virtualPathComponents);
+                        sample.VirtualPath = string.Join("\\", virtualPathComponents.Take(virtualPathComponents.Length - 1));
                         sample.UserFriendlyName = virtualPathComponents.Last();
                         sample.InternalUniqueID = string.Join("-", virtualPathComponents) + cfg.Context?.IDSuffix;
 
@@ -171,7 +171,8 @@ namespace GeneratorSampleStm32.ProjectParsers
         {
             VendorSample result = new VendorSample
             {
-                UserFriendlyName = (project.SelectSingleNode("projectDescription/name") as XmlElement)?.InnerText ?? throw new Exception("Failed to determine sample name")
+                UserFriendlyName = (project.SelectSingleNode("projectDescription/name") as XmlElement)?.InnerText ?? throw new Exception("Failed to determine sample name"),
+                NoImplicitCopy = true,
             };
 
             const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
@@ -181,8 +182,6 @@ namespace GeneratorSampleStm32.ProjectParsers
             var gccNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.compiler')]") as XmlElement ?? throw new Exception("Missing gcc tool node");
             var linkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.linker')]") as XmlElement ?? throw new Exception("Missing linker tool node");
             var cppLinkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.cpp.linker')]") as XmlElement;
-
-            linkerNode = cppLinkerNode;
 
             result.IncludeDirectories = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.include.paths")
                 .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
@@ -196,7 +195,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             List<string> libs = new List<string>();
 
             string[] libraryPaths = linkerNode.LookupOptionValueAsList("gnu.c.link.option.paths", true);
-            foreach (var lib in linkerNode.LookupOptionValueAsList("gnu.cpp.link.option.libs", true))
+            foreach (var lib in linkerNode.LookupOptionValueAsList("gnu.c.link.option.libs", true))
             {
                 if (!lib.StartsWith(":"))
                     throw new Exception("Unexpected library file format: " + lib);
