@@ -463,6 +463,9 @@ namespace BSPGenerationTools
             List<string> projectFiles = new List<string>();
             CopyFamilyFiles(ref family.CompilationFlags, projectFiles);
 
+            if (Definition.AdditionalSourceFiles != null)
+                projectFiles.AddRange(Definition.AdditionalSourceFiles);
+
             family.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
             family.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
 

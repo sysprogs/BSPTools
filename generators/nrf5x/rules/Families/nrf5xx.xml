@@ -10,7 +10,7 @@
 	<CompilationFlags>
 		<COMMONFLAGS>-mabi=aapcs</COMMONFLAGS>
 		<PreprocessorMacros>
-			<string>$$com.sysprogs.bspoptions.nrf5x.mcumacro$$</string>
+			<string>$$com.sysprogs.bspoptions.nrf5x.mcu.macro$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
 			<string>NRF_DFU_SETTINGS_VERSION=2</string>
 			<string>NRF_SD_BLE_API_VERSION=7</string>
@@ -31,6 +31,10 @@
 		</AdditionalLibraryDirectories>
 		<CFLAGS>-std=c99 </CFLAGS>
 	</CompilationFlags>
+	<AdditionalSourceFiles>
+		<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/system_nrf$$com.sysprogs.bspoptions.nrf5x.mcu.basename$$.c</string>
+		<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/system_nrf$$com.sysprogs.bspoptions.nrf5x.mcu.basename$$.h</string>
+	</AdditionalSourceFiles>
 	<ConditionalFlags>
 		<ConditionalToolFlags>
 			<FlagCondition xsi:type="Not">
@@ -123,18 +127,9 @@
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\modules</SourceFolder>
 				<TargetFolder>modules</TargetFolder>
 				<FilesToCopy>nrfx\mdk\system_*</FilesToCopy>
-				<ProjectInclusionMask>nrfx\mdk\system_*.c;nrfx\mdk\system_*.h;*.s</ProjectInclusionMask>
-				<SimpleFileConditions>
-						<string>nrfx\\mdk\\system_nrf51.c: $$SYS:MCU_ID$$ =~ ^nRF518.*</string>
-						<string>nrfx\\mdk\\system_nrf52.c: $$SYS:MCU_ID$$ =~ ^nRF52832.*</string>
-						<string>nrfx\\mdk\\system_nrf52840.c: $$SYS:MCU_ID$$ =~ ^nRF52840.*</string>
-						<string>nrfx\\mdk\\system_nrf52810.c: $$SYS:MCU_ID$$ =~ ^nRF52810.*</string>
-						<string>nrfx\\mdk\\system_nrf52811.c: $$SYS:MCU_ID$$ =~ ^nRF52811.*</string>
-						<string>nrfx\\mdk\\system_nrf9160.c: $$SYS:MCU_ID$$ =~ ^nRF9160.*</string>
-
-				</SimpleFileConditions>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
 			</CopyJob>
-				<CopyJob>
+			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\toolchain</SourceFolder>
 				<TargetFolder>components\toolchain</TargetFolder>
 				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c</FilesToCopy>
@@ -723,36 +718,26 @@
 			</Options>
 		</MCUClassifier>
 		<MCUClassifier>
-			<VariableName>com.sysprogs.bspoptions.nrf5x.mcumacro</VariableName>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.mcu.macro</VariableName>
 			<Required>true</Required>
 			<Options>
 				<Option>
-					<Value>NRF51822</Value>
-					<Regex>^nRF51822.*</Regex>
+					<Regex>^nRF528(32|05|10|11|33|40)_XXAA.*</Regex>
+					<Value>NRF528{1}_XXAA</Value>
 				</Option>
+			</Options>
+		</MCUClassifier>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.mcu.basename</VariableName>
+			<Required>true</Required>
+			<Options>
 				<Option>
-					<Value>NRF52832_XXAA</Value>
 					<Regex>^nRF52832_XXAA.*</Regex>
+					<Value>52</Value>
 				</Option>
 				<Option>
-					<Value>NRF52832_XXAB</Value>
-					<Regex>^nRF52832_XXAB.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52840_XXAA</Value>
-					<Regex>^nRF52840.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52810_XXAA</Value>
-					<Regex>^nRF52810.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF52811_XXAA</Value>
-					<Regex>^nRF52811.*</Regex>
-				</Option>
-				<Option>
-					<Value>NRF9160_XXAA</Value>
-					<Regex>^nRF9160.*</Regex>
+					<Regex>^nRF528(05|10|11|33|40)_XXAA.*</Regex>
+					<Value>528{1}</Value>
 				</Option>
 			</Options>
 		</MCUClassifier>

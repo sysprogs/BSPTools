@@ -809,8 +809,16 @@ namespace BSPGenerationTools
                 name = name.Substring(0, name.Length - 3) + "xx";   //E.g. STM32MP151A_M4 => STM32MP151Axx
 
             foreach (var kv in _Cache)
-                if (kv.Key.IsMatch(name))
-                    return kv.Value;
+            {
+                var m = kv.Key.Match(name);
+                if (m.Success)
+                {
+                    if (kv.Value.Contains("{"))
+                        return string.Format(kv.Value, m.Groups.OfType<object>().ToArray());
+                    else
+                        return kv.Value;
+                }
+            }
 
             return null;
         }
@@ -892,5 +900,6 @@ namespace BSPGenerationTools
         public ConditionalToolFlags[] ConditionalFlags;
         public FrameworkTemplate[] AdditionalFrameworkTemplates;
         public CodeInsertionPoint[] InitializationCodeInsertionPoints;
+        public string[] AdditionalSourceFiles;
     }
 }

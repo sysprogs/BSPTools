@@ -600,6 +600,21 @@ namespace nrf5x
             }
         }
 
+        class NordicMCUBuilder : MCUBuilder
+        {
+            public readonly string DefaultSoftdevice;
+
+            public NordicMCUBuilder(string name, int flashKB, int ramKB, CortexCore core, string defaultSoftdevice, string defaultBoard)
+            {
+                Name = name;
+                FlashSize = flashKB * 1024;
+                RAMSize = ramKB * 1024;
+                Core = core;
+                DefaultSoftdevice = defaultSoftdevice;
+                StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf$$com.sysprogs.bspoptions.nrf5x.mcu.basename$$.S";
+            }
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 1)
@@ -612,12 +627,14 @@ namespace nrf5x
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf5281.*", null, bspBuilder.Directories.InputDir));
                 bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S113", "nrf528.*", null, bspBuilder.Directories.InputDir));
 
-                List<MCUBuilder> devices = new List<MCUBuilder>();
-
-                devices.Add(new MCUBuilder { Name = "nRF52832_XXAA", FlashSize = 512 * 1024, RAMSize = 64 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52.S" });
-                devices.Add(new MCUBuilder { Name = "nRF52840_XXAA", FlashSize = 1024 * 1024, RAMSize = 256 * 1024, Core = CortexCore.M4, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52840.S" });
-                devices.Add(new MCUBuilder { Name = "nRF52810_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52810.S" });
-                devices.Add(new MCUBuilder { Name = "nRF52811_XXAA", FlashSize = 192 * 1024, RAMSize = 24 * 1024, Core = CortexCore.M4_NOFPU, StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf52811.S" });
+                List<MCUBuilder> devices = new List<MCUBuilder>
+                {
+                    new NordicMCUBuilder("nRF52832_XXAA", 512,  64,  CortexCore.M4,       "S132", "PCA10040"),
+                    new NordicMCUBuilder("nRF52810_XXAA", 192,  24,  CortexCore.M4_NOFPU, "S112", "PCA10040"),
+                    new NordicMCUBuilder("nRF52811_XXAA", 192,  24,  CortexCore.M4_NOFPU, "S112", "PCA10056"),
+                    new NordicMCUBuilder("nRF52833_XXAA", 512,  128, CortexCore.M4,       "S140", "PCA10100"),
+                    new NordicMCUBuilder("nRF52840_XXAA", 1024, 256, CortexCore.M4,       "S140", "PCA10056"),
+                };
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
@@ -731,7 +748,6 @@ namespace nrf5x
                     familyDefinitions.Add(famObj);
                     fam.GenerateLinkerScripts(false);
 
-                    SysVarEntry suffixEntry = null;
 
                     foreach (var mcu in fam.MCUs)
                     {
@@ -743,32 +759,33 @@ namespace nrf5x
                             mcuDef.CompilationFlags.PreprocessorMacros = mcuDef.CompilationFlags.PreprocessorMacros.Concat(new[] { "NRF52" }).ToArray();
                         }
 
-                        var compatibleSoftdevs = new[]
-                            {
+                        var nosoftdev = new[]
+                        {
                             new PropertyEntry.Enumerated.Suggestion {InternalValue = "nosoftdev", UserFriendlyName = "None"}
-                        }
-                            .Concat(bspBuilder.SoftDevices.Where(sd => sd.IsCompatible(mcu.Name))
-                                .SelectMany(s => new[]
-                                {
+                        };
+
+                        var compatibleSoftdevs = bspBuilder.SoftDevices.Where(sd => sd.IsCompatible(mcu.Name)).SelectMany(
+                            s => new[]
+                            {
                                 new PropertyEntry.Enumerated.Suggestion {InternalValue = s.Name, UserFriendlyName = s.UserFriendlyName},
                                 new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name + "_reserve", UserFriendlyName = $"{s.UserFriendlyName} (programmed separately)"}
-                                 }))
-                            .ToArray();
+                            });
 
                         if (mcuDef.ConfigurableProperties == null)
                             mcuDef.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
+
                         mcuDef.ConfigurableProperties.PropertyGroups.Add(new PropertyGroup
                         {
                             Properties = new List<PropertyEntry>
-                        {
-                            new PropertyEntry.Enumerated
                             {
-                                UniqueID = NordicBSPBuilder.SoftdevicePropertyID,
-                                Name = "Softdevice",
-                                DefaultEntryIndex = 1,
-                                SuggestionList = compatibleSoftdevs,
+                                new PropertyEntry.Enumerated
+                                {
+                                    UniqueID = NordicBSPBuilder.SoftdevicePropertyID,
+                                    Name = "Softdevice",
+                                    DefaultEntryIndex = 1,
+                                    SuggestionList = nosoftdev.Concat(compatibleSoftdevs).ToArray(),
+                                }
                             }
-                        }
                         });
 
                         if (mcu.Name.StartsWith("nRF52") && !mcu.Name.StartsWith("nRF5281"))
@@ -789,9 +806,12 @@ namespace nrf5x
                         else
                             defaultConfig = "pca10040/s132";
 
-                        suffixEntry = new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = defaultConfig };
-                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, new SysVarEntry[] { suffixEntry,
-                    new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_blank", Value = "pca10040" } });
+                        var extraEntries = new[] {
+                            new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value = defaultConfig },
+                            new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_blank", Value = "pca10040" }
+                        };
+
+                        mcuDef.AdditionalSystemVars = LoadedBSP.Combine(mcuDef.AdditionalSystemVars, extraEntries);
 
                         mcuDefinitions.Add(mcuDef);
                     }
