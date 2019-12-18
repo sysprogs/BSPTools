@@ -1,0 +1,9 @@
+#These samples fail after conversion to the VisualGDB format due to inconsistencies between the MCU/family macros (e.g. -DSTM32L476ZG -DSTM32L486xx) that looks like a bug in the original projects.
+32L476GDISCOVERY-Demonstrations
+NUCLEO-G031K8-Examples-I2C-I2C_WakeUpFromStop
+STM32469I_EVAL-Examples-CRYP-CRYP_TDESModes
+STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes
+STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes_Suspension
+STM32L476G-EVAL-Examples-CRYP-CRYP_DMA
+STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Modes
+STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Suspension

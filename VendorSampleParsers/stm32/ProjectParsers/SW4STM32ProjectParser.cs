@@ -139,6 +139,30 @@ namespace GeneratorSampleStm32.ProjectParsers
             return result;
         }
 
+        struct SourceFilterEntry
+        {
+            public string[] Prefixes;
+
+            public bool IsValid => Prefixes != null && Prefixes.Length > 0;
+
+            public SourceFilterEntry(XmlElement e)
+            {
+                var excl = e.GetAttribute("excluding");
+                var flags = e.GetAttribute("flags");
+                if (!flags.Contains("VALUE_WORKSPACE_PATH") || e.GetAttribute("kind") != "sourcePath")
+                    throw new Exception("Don't know how to handle a source entry");
+
+                Prefixes = excl.Split('|').Where(p => p != "").ToArray();
+            }
+
+            public bool MatchesVirtualPath(string virtualPath)
+            {
+                foreach (var pfx in Prefixes)
+                    if (virtualPath.StartsWith(pfx))
+                        return true;
+                return false;
+            }
+        }
 
         private VendorSample ParseSingleProject(XmlDocument cproject, XmlDocument project,
             XmlElement cconfiguration, string sw4projectDir,
@@ -151,24 +175,28 @@ namespace GeneratorSampleStm32.ProjectParsers
             };
 
             const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
+            const string SourceEntriesKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/sourceEntries/entry";
             var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
 
             var gccNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.compiler')]") as XmlElement ?? throw new Exception("Missing gcc tool node");
             var linkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.linker')]") as XmlElement ?? throw new Exception("Missing linker tool node");
+            var cppLinkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.cpp.linker')]") as XmlElement;
+
+            linkerNode = cppLinkerNode;
 
             result.IncludeDirectories = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.include.paths")
                 .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
                 .Where(d => d != null).ToArray();
 
             result.PreprocessorMacros = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.preprocessor.def.symbols")
-                .Select(a => a).ToArray();
+                .Select(a => a.Trim()).Where(a => a != "").ToArray();
 
             result.BoardName = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.board");
             string mcu = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.mcu");
             List<string> libs = new List<string>();
 
             string[] libraryPaths = linkerNode.LookupOptionValueAsList("gnu.c.link.option.paths", true);
-            foreach (var lib in linkerNode.LookupOptionValueAsList("gnu.c.link.option.libs", true))
+            foreach (var lib in linkerNode.LookupOptionValueAsList("gnu.cpp.link.option.libs", true))
             {
                 if (!lib.StartsWith(":"))
                     throw new Exception("Unexpected library file format: " + lib);
@@ -213,13 +241,28 @@ namespace GeneratorSampleStm32.ProjectParsers
 
             result.DeviceID = mcu;
 
+            var sourceFilters = cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>().Select(e => new SourceFilterEntry(e)).Where(e => e.IsValid).ToArray();
+
             var relLinkerScript = linkerNode.LookupOptionValue("fr.ac6.managedbuild.tool.gnu.cross.c.linker.script");
             var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.AddExtraComponentToBaseDir);
+
+            string ldflags = linkerNode.LookupOptionValue("gnu.c.link.option.ldflags");
+
+            if (ldflags?.Contains("rdimon.specs") == true)
+            {
+                result.Configuration.MCUConfiguration = new PropertyDictionary2
+                {
+                    Entries = new PropertyDictionary2.KeyValue[]
+                    {
+                        new PropertyDictionary2.KeyValue{Key = "com.sysprogs.toolchainoptions.arm.libctype", Value = "--specs=rdimon.specs"}
+                    }
+                };
+            }
 
             if (linkerScript != null)
                 result.LinkerScript = Path.GetFullPath(linkerScript);
 
-            result.SourceFiles = ParseSourceList(project, cprojectDir).Concat(libs).ToArray();
+            result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters).Concat(libs).Distinct().ToArray();
             result.Path = Path.GetDirectoryName(sw4projectDir);
             return result;
         }
@@ -264,7 +307,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             return fullPath;
         }
 
-        private List<string> ParseSourceList(XmlDocument project, string projectDir)
+        private List<string> ParseSourceList(XmlDocument project, string projectDir, SourceFilterEntry[] sourceFilters)
         {
             Regex rgStartup = new Regex("startup_stm.*\\.s");
             List<string> sources = new List<string>();
@@ -283,10 +326,31 @@ namespace GeneratorSampleStm32.ProjectParsers
                 if (rgStartup.IsMatch(fullPath))
                     continue;   //Our BSP already provides a startup file
 
+                if (sourceFilters != null)
+                {
+                    if (ShouldSkipNode(node, sourceFilters))
+                        continue;
+                }
+
                 sources.Add(Path.GetFullPath(fullPath));
             }
 
             return sources;
+        }
+
+        private bool ShouldSkipNode(XmlElement node, SourceFilterEntry[] sourceFilters)
+        {
+            var virtualPath = node.SelectSingleNode("name")?.InnerText;
+            if (string.IsNullOrEmpty(virtualPath))
+                return false;
+
+            foreach (var sf in sourceFilters)
+            {
+                if (sf.MatchesVirtualPath(virtualPath))
+                    return true;
+            }
+
+            return false;
         }
 
         public void Dispose()
