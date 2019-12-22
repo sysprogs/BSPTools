@@ -52,7 +52,7 @@ namespace nrf5x
                     },
                     FilePath = "nRF5x/components/boards/" + file
                 });
-                lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = boardID });
+                lstProp.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = boardID });
             }
             //--ConfigurableProperties--
 
@@ -61,6 +61,7 @@ namespace nrf5x
                 UniqueID = "type",
                 Name = "Board Type",
                 DefaultEntryIndex = Enumerable.Range(0, lstProp.Count).First(i => lstProp[i].InternalValue == "PCA10040"),
+                DefaultEntryValue = "$$com.sysprogs.bspoptions.nrf5x.mcu.default_board$$",
                 SuggestionList = lstProp.ToArray()
             });
         }
@@ -204,7 +205,7 @@ namespace nrf5x
             }
 
             Regex rgExcludedSubdir = new Regex(@"-([^\\]+)\\\*$");
-            foreach(var cond in job.FilesToCopy.Split(';'))
+            foreach (var cond in job.FilesToCopy.Split(';'))
             {
                 var m = rgExcludedSubdir.Match(cond);
                 if (m.Success)

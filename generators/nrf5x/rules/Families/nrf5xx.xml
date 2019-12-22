@@ -12,6 +12,9 @@
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.bspoptions.nrf5x.mcu.macro$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
+			<string>$$com.sysprogs.bspoptions.nrf5x.pinreset$$</string>
+			<string>$$com.sysprogs.bspoptions.nrf5x.mcu.compat_macro_1$$</string>
+			<string>$$com.sysprogs.bspoptions.nrf5x.mcu.compat_macro_2$$</string>
 			<string>NRF_DFU_SETTINGS_VERSION=2</string>
 			<string>NRF_SD_BLE_API_VERSION=7</string>
 		</PreprocessorMacros>
@@ -29,7 +32,7 @@
 			<string>$$SYS:BSP_ROOT$$/nRF5x/SoftdeviceLibraries</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/LinkerScripts</string>
 		</AdditionalLibraryDirectories>
-		<CFLAGS>-std=c99 </CFLAGS>
+		<CFLAGS>-std=c99</CFLAGS>
 	</CompilationFlags>
 	<AdditionalSourceFiles>
 		<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/system_nrf$$com.sysprogs.bspoptions.nrf5x.mcu.basename$$.c</string>
@@ -81,9 +84,6 @@
 				<FilesToCopy>-*_iar.s;-*_keil.s;-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;-components\drivers_ext\*;-components\drivers_nrf\*;components\*;documentation\*;-*.emSession;-*_build*;examples\*;-external\*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>
-				<!--FilesToCopy>-*\ARM\*;-*\IAR\*;-*\arm4\*;-*\arm5_no_packs\*;components\*;documentation\*;examples\*;svd\*;-external\segger_rtt\*KEIL.*;-external\segger_rtt\*IAR.*;external\*</FilesToCopy>
-				<ProjectInclusionMask>external\fprintf\*;external\segger_rtt\*;-*</ProjectInclusionMask>
-				<AutoIncludeMask>external\*;-*</AutoIncludeMask-->
 				<Patches>
 					<Patch xsi:type="InsertLines">
 						<FilePath>examples/ble_peripheral/ble_app_uart/pca10040/s132/config/sdk_config.h</FilePath>
@@ -164,6 +164,22 @@
 							<Suggestion>
 								<UserFriendlyName>2 bytes (short)</UserFriendlyName>
 								<InternalValue>-fshort-wchar</InternalValue>
+							</Suggestion>
+						</SuggestionList>
+						<DefaultEntryIndex>0</DefaultEntryIndex>
+						<AllowFreeEntry>false</AllowFreeEntry>
+					</PropertyEntry>
+					<PropertyEntry xsi:type="Enumerated">
+						<Name>Reset pin function</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.pinreset</UniqueID>
+						<SuggestionList>
+							<Suggestion>
+								<UserFriendlyName>Reset</UserFriendlyName>
+								<InternalValue>CONFIG_GPIO_AS_PINRESET</InternalValue>
+							</Suggestion>
+							<Suggestion>
+								<UserFriendlyName>Regular GPIO</UserFriendlyName>
+								<InternalValue></InternalValue>
 							</Suggestion>
 						</SuggestionList>
 						<DefaultEntryIndex>0</DefaultEntryIndex>
@@ -403,9 +419,10 @@
 					<FilesToCopy>-*_keil*;-*_iar*;*</FilesToCopy>
 					<VendorSpecificAttributes>GenerateConditionsForSubdirs</VendorSpecificAttributes>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.|nRF5x Libraries</SmartPropertyGroup>
+					<AdvancedRenameRules>sha256\\sha256.c=>nrf_sha256.c</AdvancedRenameRules>
 					<SmartFileConditions>
 						<string>Scheduler[scheduler]|scheduler\\app_scheduler.c=>Normal[normal];scheduler\\app_scheduler_serconn.c=>Serialization Mode[serconn];=>None[none]</string>
-						<string>Timer[timer]|timer\\app_timer\..$=>Legacy[legacy];timer\\(app_timer2|drv_rtc)\..$=>+No RTOS[normal];timer\\app_timer_freertos\..=>FreeRTOS[freertos];timer\\app_timer_rtx\..=>RTX[rtx]</string>
+						<string>Timer[timer]|timer\\app_timer\..$=>Legacy[legacy];timer\\(app_timer2|drv_rtc)\..$=>+No RTOS[normal];timer\\app_timer_freertos\..=>FreeRTOS[freertos];timer\\app_timer_rtx\..=>RTX[rtx];=>None[none]</string>
 						<string>UART[uart]|=>None[];uart\\app_uart.c=>Without FIFO[app_uart];uart\\app_uart_fifo.c=>With FIFO[app_uart_fifo]</string>
 						<string>Redirect printf() output to UART[uart_retarget]|uart\\retarget.c</string>
 					</SmartFileConditions>
@@ -428,6 +445,18 @@
 						<string>.*[^freertos].*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
 					</SimpleFileConditions>
 				</CopyJob>
+				<!-- The fprintf library is physically located in the 'external' folder, however is required by the regular libraries, so we place it into the regular libraries framework. -->
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
+					<TargetFolder>external</TargetFolder>
+					<FilesToCopy>fprintf\*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask>*.h</AutoIncludeMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.|nRF5x Libraries</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>fprintf|fprintf\\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
 			</CopyJobs>
 		</Framework>
 		<Framework>
@@ -439,7 +468,7 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
 					<TargetFolder>external</TargetFolder>
-					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-*integration-test_*;-tile\tile_shim\*;-micro-ecc\*</FilesToCopy>
+					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-*integration_test_*;-tile\tile_shim\*;-micro-ecc\*;-infineon\*;-fprintf\*;*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.external.|nRF5x Libraries (3rd-party)</SmartPropertyGroup>
@@ -497,9 +526,8 @@
 
 			</CopyJobs>
 		</Framework>
-
 		<Framework>
-			<Name>NRF5x Embedded TLS</Name>
+			<Name>NRF5x TLS support (mbedtls)</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.mbedtls</ID>
 			<ProjectFolderName>MbedTLS</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
@@ -512,7 +540,6 @@
 					<AutoIncludeMask>-tests\*;*.h</AutoIncludeMask>
 					<PreprocessorMacros>MBEDTLS_CONFIG_FILE="nrf_tls_config.h";BLE_STACK_SUPPORT_REQD;ENABLE_DEBUG_LOG_SUPPORT;MBEDTLS_CTR_DRBG_C</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/mbedtls/include</AdditionalIncludeDirs>
-
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\nrf_tls</SourceFolder>
@@ -744,6 +771,52 @@
 				</Option>
 			</Options>
 		</MCUClassifier>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.mcu.compat_macro_1</VariableName>
+			<Required>true</Required>
+			<Options>
+				<Option>
+					<Regex>^nRF5281._XXAA.*</Regex>
+					<Value>NRFX_COREDEP_DELAY_US_LOOP_CYCLES=3</Value>
+				</Option>
+				<Option>
+					<Regex>.*</Regex>
+					<Value></Value>
+				</Option>
+			</Options>
+		</MCUClassifier>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.mcu.compat_macro_2</VariableName>
+			<Required>true</Required>
+			<Options>
+				<Option>
+					<Regex>^nRF528(32|10)_XXAA.*</Regex>
+					<Value>NRF52_PAN_74</Value>
+				</Option>
+				<Option>
+					<Regex>.*</Regex>
+					<Value></Value>
+				</Option>
+			</Options>
+		</MCUClassifier>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.mcu.default_board</VariableName>
+			<Required>true</Required>
+			<Options>
+				<Option>
+					<Regex>^nRF528(32|10)_XXAA.*</Regex>
+					<Value>PCA10040</Value>
+				</Option>
+				<Option>
+					<Regex>^nRF528(11|40)_XXAA.*</Regex>
+					<Value>PCA10056</Value>
+				</Option>
+				<Option>
+					<Regex>^nRF52833_XXAA.*</Regex>
+					<Value>PCA10100</Value>
+				</Option>
+			</Options>
+		</MCUClassifier>
 	</Subfamilies>
 	<SmartSamples>
 		<SmartSample>
@@ -788,6 +861,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMouse</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\BLEMouse</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -835,6 +909,7 @@
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRS</SourceFolder>
 			<DestinationFolder>samples\BLE_HRS</DestinationFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEWithCrypto.xml</CommonConfiguration>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
@@ -845,6 +920,7 @@
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLE_HRSClient</SourceFolder>
 			<DestinationFolder>samples\BLE_HRSClient</DestinationFolder>
 			<MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEWithCrypto.xml</CommonConfiguration>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_hrs_c/main.c</string>

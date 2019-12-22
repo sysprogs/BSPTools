@@ -84,26 +84,17 @@ namespace nrf5x
                 public string Description;
                 public uint FLASHSize;
                 public uint SRAMSize;
+                public bool HardwareFP;
                 public Regex DeviceRegex;
                 public string LdOriginalName;
 
                 public LDFileMemoryInfo LinkerScriptWithMaximumReservedRAM;
                 public string UserFriendlyName => string.IsNullOrEmpty(Description) ? Name : $"{Name} ({Description})";
 
-                public SoftDevice(string name, uint flash, uint sram, string deviceRegex, string desc, string pDirSdk)
+                public SoftDevice(string name, string deviceRegex, bool hardwareFP, string desc, string pDirSdk)
                 {
                     Name = name;
-                    FLASHSize = flash;
-                    SRAMSize = sram;
-                    DeviceRegex = new Regex(deviceRegex, RegexOptions.IgnoreCase);
-                    Description = desc;
-                    LdOriginalName = "";
-                    LinkerScriptWithMaximumReservedRAM = null;
-                }
-
-                public SoftDevice(string name, string deviceRegex, string desc, string pDirSdk)
-                {
-                    Name = name;
+                    HardwareFP = hardwareFP;
                     LinkerScriptWithMaximumReservedRAM = FindLdsFile(pDirSdk, Name);
                     LdOriginalName = LinkerScriptWithMaximumReservedRAM.FullPath;
                     FLASHSize = (uint)LinkerScriptWithMaximumReservedRAM.FLASH.Origin;
@@ -295,19 +286,10 @@ namespace nrf5x
                 {
                     string sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
                     string abi = "";
-                    if (sd.Name == "S132" || sd.Name == "S140")
-                    {
+                    if (sd.HardwareFP)
                         abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
-                    }
-                    if (sd.Name == "s1xx_iot")
-                    {
-                        sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name;
-                        abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
-                    }
-                    if (sd.Name == "S112")
-                    {
+                    else
                         abi = " \"-mfloat-abi=soft\"";
-                    }
 
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
                     var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName + abi, UseShellExecute = false };
@@ -536,10 +518,10 @@ namespace nrf5x
 
             using (var bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules", @"..\..\logs")))
             {
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf5281.*", null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S113", "nrf528.*", null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", true, null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", true, null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf5281.*", false, null, bspBuilder.Directories.InputDir));
+                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S113", "nrf528.*", true, null, bspBuilder.Directories.InputDir));
 
                 List<MCUBuilder> devices = new List<MCUBuilder>
                 {
