@@ -106,7 +106,6 @@
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.strerror</Key>
         <Value>yes</Value>
       </KeyValue>
-	  
 	   <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.bsp</Key>
         <Value>yes</Value>
@@ -227,6 +226,10 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.fds</Key>
+        <Value>yes</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.sortlist</Key>
         <Value>yes</Value>
       </KeyValue>
     </Entries>

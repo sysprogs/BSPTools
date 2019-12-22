@@ -254,6 +254,10 @@
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.uart</Key>
         <Value>app_uart</Value>
       </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.nrf5x.libraries.sortlist</Key>
+        <Value>yes</Value>
+      </KeyValue>
     </Entries>
   </DefaultConfiguration>
   <ConditionalErrors>

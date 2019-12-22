@@ -61,15 +61,14 @@
 			</Flags>
 		</ConditionalToolFlags>
 		<ConditionalToolFlags>
-			<FlagCondition xsi:type="Not">
-				<Argument xsi:type="Equals">
-					<Expression>$$com.sysprogs.bspoptions.nrf5x.libraries.timer$$</Expression>
-					<ExpectedValue>none</ExpectedValue>
-				</Argument>
+			<FlagCondition xsi:type="Equals">
+				<Expression>$$com.sysprogs.bspoptions.nrf5x.libraries.timer$$</Expression>
+				<ExpectedValue>normal</ExpectedValue>
 			</FlagCondition>
 			<Flags>
 				<PreprocessorMacros>
-					<string>SWI_DISABLE0</string>
+					<string>APP_TIMER_V2</string>
+					<string>APP_TIMER_V2_RTC1_ENABLED</string>
 				</PreprocessorMacros>
 			</Flags>
 		</ConditionalToolFlags>
@@ -253,7 +252,6 @@
 					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
-
 		</Framework>
 		<Framework>
 			<Name>Peripheral Drivers (Old)</Name>
@@ -271,20 +269,13 @@
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
 					<AutoIncludeMask>-nrf_soc_nosd\*;*.h</AutoIncludeMask>
-					<SimpleFileConditions>
-					</SimpleFileConditions>
+					<VendorSpecificAttributes>GenerateConditionsForSubdirs</VendorSpecificAttributes>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.drivers_nrf.|Peripheral Drivers</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>TWI Master[twi_master]|=>None[none];twi_master\\deprecated\\twi_hw_master.c=>Hardware[hw_master];twi_master\\deprecated\\twi_sw_master.c=>Software[sw_master]</string>
+					</SmartFileConditions>					
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Name>Peripheral Drivers</Name>
-						<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_nrf.</UniqueID>
-						<CollapsedByDefault>false</CollapsedByDefault>
-						<!-- Properties will be automatically generated based on the folder contents -->
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 		</Framework>
 		<Framework>
 			<Name>External Device Drivers</Name>
@@ -299,17 +290,10 @@
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
+					<VendorSpecificAttributes>GenerateConditionsForSubdirs</VendorSpecificAttributes>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.drivers_ext.|External Device Drivers</SmartPropertyGroup>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Name>External Device Drivers</Name>
-						<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_ext.</UniqueID>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 		</Framework>
 
 		<Framework>
@@ -373,7 +357,7 @@
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
 					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
-					<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
+					<!--   The conditions are generated programmatically, see Nrf5xRuleGenerator.GenerateBoardProperty() -->
 				</CopyJob>
 
 			</CopyJobs>
@@ -383,7 +367,7 @@
 						<Name>Evaluation Board</Name>
 						<UniqueID>com.sysprogs.bspoptions.nrf5x.board.</UniqueID>
 						<Properties>
-							<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
+							<!--   The conditions are generated programmatically, see Nrf5xRuleGenerator.GenerateBoardProperty() -->
 							<PropertyEntry xsi:type="Boolean">
 								<Name>Advanced mode</Name>
 								<UniqueID>bsp_mode</UniqueID>
@@ -413,7 +397,14 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\libraries</SourceFolder>
 					<TargetFolder>components\libraries</TargetFolder>
 					<FilesToCopy>-*_keil*;-*_iar*;*</FilesToCopy>
-					<!-- Conditions are programmatically generated -->
+					<VendorSpecificAttributes>GenerateConditionsForSubdirs</VendorSpecificAttributes>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.|nRF5x Libraries</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>Scheduler[scheduler]|scheduler\\app_scheduler.c=>Normal[normal];scheduler\\app_scheduler_serconn.c=>Serialization Mode[serconn];=>None[none]</string>
+						<string>Timer[timer]|timer\\app_timer\..$=>Legacy[legacy];timer\\(app_timer2|drv_rtc)\..$=>+No RTOS[normal];timer\\app_timer_freertos\..=>FreeRTOS[freertos];timer\\app_timer_rtx\..=>RTX[rtx]</string>
+						<string>UART[uart]|=>None[];uart\\app_uart.c=>Without FIFO[app_uart];uart\\app_uart_fifo.c=>With FIFO[app_uart_fifo]</string>
+						<string>Redirect printf() output to UART[uart_retarget]|uart\\retarget.c</string>
+					</SmartFileConditions>
 
 					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-bootloader_dfu\*init_template*;-timer\experimental\*;-*nrf_crypto_svc.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-ant_fs\*;-console\*;*.h</AutoIncludeMask>
@@ -424,7 +415,6 @@
 							<NewLine>//#include "uECC.h"</NewLine>
 						</Patch>
 					</Patches>
-					<PreprocessorMacros>NRF_LOG_BACKEND_SERIAL_USES_RTT=$$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$</PreprocessorMacros>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
@@ -446,46 +436,6 @@
 					</SimpleFileConditions>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Name>nRF5x Libraries</Name>
-						<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
-						<Properties>
-							<PropertyEntry xsi:type="Enumerated">
-								<Name>bootloader_dfu</Name>
-								<UniqueID>bootloader_dfu</UniqueID>
-								<SuggestionList>
-									<Suggestion>
-										<UserFriendlyName>None</UserFriendlyName>
-										<InternalValue>none</InternalValue>
-									</Suggestion>
-									<Suggestion>
-										<UserFriendlyName>Single-bank serial port</UserFriendlyName>
-										<InternalValue>single_serial</InternalValue>
-									</Suggestion>
-									<Suggestion>
-										<UserFriendlyName>Dual-bank serial port</UserFriendlyName>
-										<InternalValue>dual_serial</InternalValue>
-									</Suggestion>
-									<Suggestion>
-										<UserFriendlyName>Single-bank BLE</UserFriendlyName>
-										<InternalValue>single_ble</InternalValue>
-									</Suggestion>
-									<Suggestion>
-										<UserFriendlyName>Dual-bank BLE</UserFriendlyName>
-										<InternalValue>dual_ble</InternalValue>
-									</Suggestion>
-								</SuggestionList>
-								<DefaultEntryIndex>0</DefaultEntryIndex>
-								<AllowFreeEntry>false</AllowFreeEntry>
-							</PropertyEntry>
-							<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
-						</Properties>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 		</Framework>
 		<Framework>
 			<Name>Bluetooth LE - Common Files</Name>
@@ -726,7 +676,6 @@
 					</GuardedFiles>
 					<ProjectInclusionMask>-*.a;-mqtt\mqtt_transport_socket.c;-*.lib;*.c</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
-					<PreprocessorMacros>NRF_TLS_MAX_INSTANCE_COUNT=$$com.sysprogs.bspoptions.nrf5x.iot.tls_instance$$</PreprocessorMacros>
 					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>socket\api\socket_api.h</FilePath>
@@ -736,29 +685,13 @@
 							</InsertedLines>
 						</Patch>
 					</Patches>
+					<VendorSpecificAttributes>GenerateConditionsForSubdirs</VendorSpecificAttributes>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.iot.|Nordic IoT Components</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>Maximum TLS Instance Count[tls_instance]|NRF_TLS_MAX_INSTANCE_COUNT={0}|@2</string>
+					</SmartPreprocessorMacros>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Name>Nordic IoT Components</Name>
-						<UniqueID>com.sysprogs.bspoptions.nrf5x.iot.</UniqueID>
-						<Properties>
-							<PropertyEntry xsi:type="Integral">
-								<Name>tls_instance</Name>
-								<UniqueID>com.sysprogs.bspoptions.stackheap.tls_instance</UniqueID>
-								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-								<Description>TLS Instance Number </Description>
-								<DefaultValue>1</DefaultValue>
-								<MinValue>0</MinValue>
-								<MaxValue>10</MaxValue>
-								<Increment>1</Increment>
-							</PropertyEntry>
-						</Properties>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 		</Framework>
 	</AdditionalFrameworks>
 	<Subfamilies>

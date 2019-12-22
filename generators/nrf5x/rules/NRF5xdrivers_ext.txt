@@ -1,3 +1,0 @@
-// // -comments 
-//name options: name mode=value;name mode=value;...
-//[tab] namefile:==value

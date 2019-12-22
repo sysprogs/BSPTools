@@ -29,6 +29,7 @@ namespace nrf5x
                 : base(dirs)
             {
                 ShortName = "nRF5x";
+                OnValueForSmartBooleanProperties = "yes";   //Backward compatibility with v15 and older BSPs.
                 RuleGenerator = new Nrf5xRuleGenerator(this);
                 string extraSections = "|. = ALIGN(4);|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|. = ALIGN(4);|";
                 extraSections += "|. = ALIGN(4);|PROVIDE(__start_pwr_mgmt_data = .);|KEEP(*(.pwr_mgmt_data))|PROVIDE(__stop_pwr_mgmt_data = .);|. = ALIGN(4);|";
@@ -318,51 +319,6 @@ namespace nrf5x
                 }
             }
 
-            public void GenerateConditionsLibriries(Framework[] fr, string name_lib)//libraries
-            {
-                if (name_lib.StartsWith("experimental_"))
-                    name_lib = name_lib.Replace("experimental_", "");
-
-                var compositeProp = ReadCompositePropery($"NRF5x{ name_lib}.txt");
-
-                List<PropertyEntry.Boolean> lstProp = new List<PropertyEntry.Boolean>();
-
-                lstGenFramworks.Add($"com.sysprogs.arm.nordic.nrf5x.{name_lib}");
-                var propertysFr = fr.SingleOrDefault(f => f.ID.Equals($"com.sysprogs.arm.nordic.nrf5x.{name_lib}")).
-                                            ConfigurableProperties.PropertyGroups.
-                                                SingleOrDefault(pg => pg.UniqueID.Equals($"com.sysprogs.bspoptions.nrf5x.{name_lib}.")).Properties;
-
-                List<string> lstConditions = new List<string>();
-                var dirLib = $@"components\{name_lib}";
-                if (name_lib == "modules_nrfx")
-                    dirLib = @"modules\nrfx";
-                foreach (var fb in Directory.GetDirectories(Path.Combine(Directories.InputDir, $@"{dirLib}")))
-                {
-                    string namelibrary = fb.Remove(0, fb.LastIndexOf('\\') + 1);
-                    string Conditions = $@"{namelibrary}\\.*: $$com.sysprogs.bspoptions.nrf5x.{name_lib}.{namelibrary}$$ == yes";
-                    if (compositeProp.Where(n => n.Name == namelibrary).Count() > 0)
-                        continue;
-
-                    lstConditions.Add(Conditions);
-
-                    lstProp.Add(new PropertyEntry.Boolean()
-                    { Name = namelibrary, UniqueID = namelibrary, DefaultValue = false, ValueForTrue = "yes" });
-
-                }
-                //--ConfigurableProperties--
-
-                lstConditions.AddRange(ReadCompositeCondidtions($"NRF5x{ name_lib}.txt", name_lib));
-
-                fr.SingleOrDefault(f => f.ID.Equals($"com.sysprogs.arm.nordic.nrf5x.{name_lib}")).
-                    CopyJobs.SingleOrDefault(c => c.SourceFolder.Equals($@"$$BSPGEN:INPUT_DIR$$\{dirLib}")).
-                    SimpleFileConditions = lstConditions.ToArray();
-
-
-                propertysFr.AddRange(lstProp.ToArray());
-                propertysFr.AddRange(compositeProp.ToArray());
-
-            }
-
             List<PropertyEntry.Enumerated> ReadCompositePropery(string nameFile)
             {
                 List<PropertyEntry.Enumerated> lsPr = new List<PropertyEntry.Enumerated>();
@@ -630,11 +586,6 @@ namespace nrf5x
                     }
 
                     bspBuilder.RuleGenerator.GenerateRulesForFamily(fam.Definition);
-
-                    bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "libraries");
-                    bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "drivers_nrf");
-                    bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "drivers_ext");
-                    bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "iot");
 
                     // Starting from SDK 14.0 we use the original Nordic startup files & linker scripts as they contain various non-trivial logic
 #if GENERATE_STARTUP_FILES

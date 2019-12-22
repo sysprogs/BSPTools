@@ -67,7 +67,47 @@ namespace nrf5x
 
         public void GenerateRulesForFamily(FamilyDefinition family)
         {
+            foreach(var fw in family.AdditionalFrameworks)
+            {
+                foreach(var job in fw.CopyJobs)
+                {
+                    if (job.VendorSpecificAttributes?.StartsWith("GenerateConditionsForSubdirs") == true)
+                    {
+                        GenerateConditionsForSubdirs(family, fw, job);
+                    }
+                }
+            }
+
             GenerateBLEFrameworks(family);
+        }
+
+        private void GenerateConditionsForSubdirs(FamilyDefinition family, Framework fw, CopyJob job)
+        {
+            HashSet<string> explicitlyMentionedDirectories = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
+            foreach(var cond in job.SmartFileConditions ?? new string[0])
+            {
+                var def = SmartPropertyDefinition.Parse(cond, null);
+                foreach(var item in def.Items)
+                {
+                    int idx = item.Key.IndexOf('\\');
+                    if (idx != -1)
+                        explicitlyMentionedDirectories.Add(item.Key.Substring(0, idx));
+                }
+            }
+
+            List<string> generatedSmartFileConditions = new List<string>();
+
+            foreach (var dir in Directory.GetDirectories(Path.Combine(Directories.InputDir, _Builder.ExpandVariables(job.SourceFolder))))
+            {
+                string name = Path.GetFileName(dir);
+                if (explicitlyMentionedDirectories.Contains(name))
+                    continue;
+
+                generatedSmartFileConditions.Add($"-{name}|{name}\\\\.*");
+            }
+
+            job.SmartFileConditions = (job.SmartFileConditions ?? new string[0]).Concat(generatedSmartFileConditions).OrderBy(c => c.ToLower().TrimStart('-')).ToArray();
         }
 
         void GenerateBLEFrameworks(FamilyDefinition family)
