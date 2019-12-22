@@ -612,7 +612,7 @@ namespace nrf5x
 
                     fam.AttachPeripheralRegisters(aMcuDef1.Concat(aMcuDef2));
 
-                    var famObj = fam.GenerateFamilyObject(true);
+                    var famObj = fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All);
 
                     famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
                     famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
@@ -737,7 +737,7 @@ namespace nrf5x
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     PackageVersion = "16.0",
-                    FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
+                    FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
                     MinimumEngineVersion = "5.0",
                     ConditionalFlags = condFlags.ToArray(),
                     InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints,

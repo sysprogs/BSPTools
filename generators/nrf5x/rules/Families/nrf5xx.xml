@@ -8,7 +8,7 @@
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\modules\nrfx\mdk</PrimaryHeaderDir>
 	<Subfamilies></Subfamilies>
 	<CompilationFlags>
-		<COMMONFLAGS>-mabi=aapcs</COMMONFLAGS>
+		<COMMONFLAGS>-mabi=aapcs $$com.sysprogs.bspoptions.nrf5x.wchar$$</COMMONFLAGS>
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.bspoptions.nrf5x.mcu.macro$$</string>
 			<string>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</string>
@@ -153,12 +153,22 @@
 		<PropertyGroups>
 			<PropertyGroup>
 				<Properties>
-					<!--PropertyEntry xsi:type="Boolean">
-					<Name>Softdevice firmware is programmed separately</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.softdevice_suffix</UniqueID>
-					<DefaultValue>false</DefaultValue>
-					<ValueForTrue>_reserve</ValueForTrue>
-				</PropertyEntry-->
+					<PropertyEntry xsi:type="Enumerated">
+						<Name>Size of wchar_t</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.wchar</UniqueID>
+						<SuggestionList>
+							<Suggestion>
+								<UserFriendlyName>4 bytes (default)</UserFriendlyName>
+								<InternalValue></InternalValue>
+							</Suggestion>
+							<Suggestion>
+								<UserFriendlyName>2 bytes (short)</UserFriendlyName>
+								<InternalValue>-fshort-wchar</InternalValue>
+							</Suggestion>
+						</SuggestionList>
+						<DefaultEntryIndex>0</DefaultEntryIndex>
+						<AllowFreeEntry>false</AllowFreeEntry>
+					</PropertyEntry>
 				</Properties>
 				<CollapsedByDefault>false</CollapsedByDefault>
 			</PropertyGroup>
@@ -168,7 +178,6 @@
 		<Framework>
 			<Name>Legacy Peripheral Drivers</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.periph_legacy</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.periph_legacy</ClassID>
 			<ProjectFolderName>Legacy Peripheral Drivers</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<RequiredFrameworks>
@@ -256,7 +265,6 @@
 		<Framework>
 			<Name>Peripheral Drivers (Old)</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.drivers_nrf</ClassID>
 			<ProjectFolderName>Peripheral Drivers (Old)</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<RequiredFrameworks>
@@ -280,7 +288,6 @@
 		<Framework>
 			<Name>External Device Drivers</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.drivers_ext</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.drivers_ext</ClassID>
 			<ProjectFolderName>External Peripherals</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
@@ -299,7 +306,6 @@
 		<Framework>
 			<Name>NRF5x Common Utilities</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.util</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.util</ClassID>
 			<ProjectFolderName>Utils</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
@@ -321,7 +327,6 @@
 		<Framework>
 			<Name>Peer manager</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.peerm</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.peerm</ClassID>
 			<ProjectFolderName>Peer Manager</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
@@ -389,7 +394,6 @@
 		<Framework>
 			<Name>NRF5x Libraries</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.libraries</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.libraries</ClassID>
 			<ProjectFolderName>Libraries</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
@@ -405,7 +409,6 @@
 						<string>UART[uart]|=>None[];uart\\app_uart.c=>Without FIFO[app_uart];uart\\app_uart_fifo.c=>With FIFO[app_uart_fifo]</string>
 						<string>Redirect printf() output to UART[uart_retarget]|uart\\retarget.c</string>
 					</SmartFileConditions>
-
 					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-bootloader_dfu\*init_template*;-timer\experimental\*;-*nrf_crypto_svc.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-ant_fs\*;-console\*;*.h</AutoIncludeMask>
 					<Patches>
@@ -415,16 +418,6 @@
 							<NewLine>//#include "uECC.h"</NewLine>
 						</Patch>
 					</Patches>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
-					<TargetFolder>external</TargetFolder>
-					<FilesToCopy>-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*</FilesToCopy>
-					<ProjectInclusionMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_oberon\*.a;nrf_oberon\*.h;-nrf_cc310_bl\*keil*;-nrf_cc310_bl\*keil*;nrf_cc310_bl\*.a;nrf_cc310\*.a;-*</ProjectInclusionMask>
-					<AutoIncludeMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_cc310_bl\*;nrf_cc310\*;-*</AutoIncludeMask>
-					<SimpleFileConditions>
-						<string>segger_rtt\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$ == 1</string>
-					</SimpleFileConditions>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
@@ -438,9 +431,27 @@
 			</CopyJobs>
 		</Framework>
 		<Framework>
+			<Name>NRF5x Libraries (3rd-party)</Name>
+			<ID>com.sysprogs.arm.nordic.nrf5x.libraries.external</ID>
+			<ProjectFolderName>ExternalLibraries</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
+					<TargetFolder>external</TargetFolder>
+					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-*integration-test_*;-tile\tile_shim\*;-micro-ecc\*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
+					<AutoIncludeMask>*.h</AutoIncludeMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.external.|nRF5x Libraries (3rd-party)</SmartPropertyGroup>
+					<VendorSpecificAttributes>GenerateConditionsForSubdirs|GenerateConditionsForPrebuiltLibraries</VendorSpecificAttributes>
+					<SmartFileConditions>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
 			<Name>Bluetooth LE - Common Files</Name>
-			<ID>com.sysprogs.arm.nordic.nrf51.ble_common</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.ble_common</ClassID>
+			<ID>com.sysprogs.arm.nordic.nrf5x.ble_common</ID>
 			<ProjectFolderName>BLE Common</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
@@ -455,7 +466,6 @@
 		<Framework>
 			<Name>Peripheral Drivers</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</ClassID>
 			<ProjectFolderName>Peripheral Drivers</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
@@ -472,7 +482,6 @@
 		<Framework>
 			<Name>NRF5x LWIP</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.lwip</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.lwip</ClassID>
 			<ProjectFolderName>LwIP</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
@@ -492,7 +501,6 @@
 		<Framework>
 			<Name>NRF5x Embedded TLS</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.mbedtls</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.mbedtls</ClassID>
 			<ProjectFolderName>MbedTLS</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
@@ -654,7 +662,6 @@
 		<Framework>
 			<Name>Nordic IoT Components</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.iot</ID>
-			<ClassID>com.sysprogs.arm.nordic.nrf5x.iot</ClassID>
 			<ProjectFolderName>IoT</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
