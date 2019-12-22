@@ -23,10 +23,13 @@ namespace nrf5x
         {
             const uint FLASHBase = 0x00000000, SRAMBase = 0x20000000;
 
+            public readonly Nrf5xRuleGenerator RuleGenerator;
+
             public NordicBSPBuilder(BSPDirectories dirs)
                 : base(dirs)
             {
                 ShortName = "nRF5x";
+                RuleGenerator = new Nrf5xRuleGenerator(this);
                 string extraSections = "|. = ALIGN(4);|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|. = ALIGN(4);|";
                 extraSections += "|. = ALIGN(4);|PROVIDE(__start_pwr_mgmt_data = .);|KEEP(*(.pwr_mgmt_data))|PROVIDE(__stop_pwr_mgmt_data = .);|. = ALIGN(4);|";
 
@@ -313,51 +316,6 @@ namespace nrf5x
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
                         throw new Exception("Failed to convert a softdevice");
                 }
-            }
-
-            public void GenerateConditionsBoard(ref List<EmbeddedFramework> prFrBoard)
-            {
-                List<PropertyEntry.Enumerated.Suggestion> lstProp = new List<PropertyEntry.Enumerated.Suggestion>();
-                var propertyGroup = prFrBoard.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards")).
-                                            ConfigurableProperties.PropertyGroups.
-                                                SingleOrDefault(pg => pg.UniqueID.Equals("com.sysprogs.bspoptions.nrf5x.board."));
-
-                var rgBoardIfdef = new Regex("#(if|elif) defined\\(BOARD_([A-Z0-9a-z_]+)\\)");
-                var rgInclude = new Regex("#include \"([^\"]+)\"");
-
-                var lines = File.ReadAllLines(Path.Combine(Directories.OutputDir, @"nRF5x\components\boards\boards.h"));
-                lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = "", UserFriendlyName = "None" });
-
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    var m = rgBoardIfdef.Match(lines[i]);
-                    if (!m.Success)
-                        continue;
-
-                    string boardID = m.Groups[2].Value;
-                    string file = rgInclude.Match(lines[i + 1]).Groups[1].Value;
-
-                    MatchedFileConditions.Add(new FileCondition()
-                    {
-                        ConditionToInclude = new Condition.Equals()
-                        {
-                            Expression = "$$com.sysprogs.bspoptions.nrf5x.board.type$$",
-                            ExpectedValue = boardID,
-                            IgnoreCase = false
-                        },
-                        FilePath = "nRF5x/components/boards/" + file
-                    });
-                    lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = boardID });
-                }
-                //--ConfigurableProperties--
-
-                propertyGroup.Properties.Add(new PropertyEntry.Enumerated
-                {
-                    UniqueID = "type",
-                    Name = "Board Type",
-                    DefaultEntryIndex = Enumerable.Range(0, lstProp.Count).First(i => lstProp[i].InternalValue == "PCA10040"),
-                    SuggestionList = lstProp.ToArray()
-                });
             }
 
             public void GenerateConditionsLibriries(Framework[] fr, string name_lib)//libraries
@@ -662,7 +620,6 @@ namespace nrf5x
                 {
                     fam.GenerateLinkerScripts(false);
                     Console.WriteLine("Processing " + fam.Definition.Name + " family...");
-                    string famBase = fam.Definition.Name.Substring(0, 5).ToLower();
 
                     var rejectedMCUs = fam.RemoveUnsupportedMCUs();
                     if (rejectedMCUs.Length != 0)
@@ -672,45 +629,12 @@ namespace nrf5x
                             Console.WriteLine("\t{0}", mcu.Name);
                     }
 
+                    bspBuilder.RuleGenerator.GenerateRulesForFamily(fam.Definition);
+
                     bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "libraries");
                     bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "drivers_nrf");
                     bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "drivers_ext");
                     bspBuilder.GenerateConditionsLibriries(fam.Definition.AdditionalFrameworks, "iot");
-
-                    List<Framework> bleFrameworks = new List<Framework>();
-                    foreach (var line in File.ReadAllLines(bspBuilder.Directories.RulesDir + @"\BLEFrameworks.txt"))
-                    {
-                        int idx = line.IndexOf('|');
-                        string dir = line.Substring(0, idx);
-                        string desc = line.Substring(idx + 1);
-
-                        string id = Path.GetFileName(dir);
-                        if (!id.StartsWith("ble_"))
-                            id = "ble_" + id;
-
-                        if (dir.StartsWith("services\\", StringComparison.CurrentCultureIgnoreCase))
-                            id = "ble_svc_" + id.Substring(4);
-
-                        bleFrameworks.Add(new Framework
-                        {
-                            Name = string.Format("Bluetooth LE - {0} ({1})", desc, Path.GetFileName(dir)),
-                            ID = "com.sysprogs.arm.nordic." + famBase + "." + id,
-                            ClassID = "com.sysprogs.arm.nordic.nrfx." + id,
-                            ProjectFolderName = "BLE " + desc,
-                            DefaultEnabled = false,
-                            CopyJobs = new CopyJob[]
-                            {
-                            new CopyJob
-                            {
-                                SourceFolder = allFamilies[0].Definition.PrimaryHeaderDir + @"\..\..\..\components\ble\" + dir,
-                                TargetFolder = dir,
-                                FilesToCopy = "*.c;*.h",
-                            }
-                            }
-                        });
-                    }
-
-                    fam.Definition.AdditionalFrameworks = fam.Definition.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
 
                     // Starting from SDK 14.0 we use the original Nordic startup files & linker scripts as they contain various non-trivial logic
 #if GENERATE_STARTUP_FILES
@@ -821,6 +745,7 @@ namespace nrf5x
 
                     foreach (var fw in fam.GenerateFrameworkDefinitions())
                         frameworks.Add(fw);
+
                     string dirpca = "pca10040e/s112";
                     foreach (var sample in fam.CopySamples(null, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix", Value =dirpca },
                     new SysVarEntry { Key = "com.sysprogs.nordic.default_config_suffix_blank", Value = "pca10040" } }))
@@ -841,7 +766,7 @@ namespace nrf5x
                     });
 
                 bspBuilder.GenerateSoftdeviceLibraries();
-                bspBuilder.GenerateConditionsBoard(ref frameworks);
+                bspBuilder.RuleGenerator.GenerateBoardProperty(frameworks);
                 bspBuilder.GenFramworkSample(bspBuilder);
 
                 //  CheckEntriesSample(Path.Combine(bspBuilder.Directories.OutputDir, @"nRF5x\components\libraries"),
