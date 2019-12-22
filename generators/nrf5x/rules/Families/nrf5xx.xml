@@ -86,36 +86,36 @@
 				<ProjectInclusionMask>external\fprintf\*;external\segger_rtt\*;-*</ProjectInclusionMask>
 				<AutoIncludeMask>external\*;-*</AutoIncludeMask-->
 				<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>examples/ble_peripheral/ble_app_uart/pca10040/s132/config/sdk_config.h</FilePath>
-							<AfterLine>#define SDK_CONFIG_H</AfterLine>
-							<InsertedLines>
-								<string>#include "config.h"</string>
-							</InsertedLines>
-						</Patch>
-						<Patch xsi:type="InsertLines">
-							<FilePath>examples/ble_peripheral/ble_app_uart/pca10056/s140/config/sdk_config.h</FilePath>
-							<AfterLine>#define SDK_CONFIG_H</AfterLine>
-							<InsertedLines>
-								<string>#include "config.h"</string>
-							</InsertedLines>
-						</Patch>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
-							<OldLine>#define configTOTAL_HEAP_SIZE                                                     ( 4096 )</OldLine>
-							<NewLine>#define configTOTAL_HEAP_SIZE                                                     ( 16384 )</NewLine>
-						</Patch>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
-							<OldLine>#define configMINIMAL_STACK_SIZE                                                  ( 60 )</OldLine>
-							<NewLine>#define configMINIMAL_STACK_SIZE                                                  ( 512 )</NewLine>
-						</Patch>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
-							<OldLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 80 )</OldLine>
-							<NewLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 512 )</NewLine>
-						</Patch>
-					</Patches>
+					<Patch xsi:type="InsertLines">
+						<FilePath>examples/ble_peripheral/ble_app_uart/pca10040/s132/config/sdk_config.h</FilePath>
+						<AfterLine>#define SDK_CONFIG_H</AfterLine>
+						<InsertedLines>
+							<string>#include "config.h"</string>
+						</InsertedLines>
+					</Patch>
+					<Patch xsi:type="InsertLines">
+						<FilePath>examples/ble_peripheral/ble_app_uart/pca10056/s140/config/sdk_config.h</FilePath>
+						<AfterLine>#define SDK_CONFIG_H</AfterLine>
+						<InsertedLines>
+							<string>#include "config.h"</string>
+						</InsertedLines>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
+						<OldLine>#define configTOTAL_HEAP_SIZE                                                     ( 4096 )</OldLine>
+						<NewLine>#define configTOTAL_HEAP_SIZE                                                     ( 16384 )</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
+						<OldLine>#define configMINIMAL_STACK_SIZE                                                  ( 60 )</OldLine>
+						<NewLine>#define configMINIMAL_STACK_SIZE                                                  ( 512 )</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>examples/peripheral/blinky_freertos/config/FreeRTOSConfig.h</FilePath>
+						<OldLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 80 )</OldLine>
+						<NewLine>#define configTIMER_TASK_STACK_DEPTH                                              ( 512 )</NewLine>
+					</Patch>
+				</Patches>
 			</CopyJob>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:RULES_DIR$$\SoftdeviceLibraries</SourceFolder>
@@ -152,21 +152,21 @@
 	</CoreFramework>
 	<ConfigurableProperties>
 		<PropertyGroups>
-		  <PropertyGroup>
-			<Properties>
-				<!--PropertyEntry xsi:type="Boolean">
+			<PropertyGroup>
+				<Properties>
+					<!--PropertyEntry xsi:type="Boolean">
 					<Name>Softdevice firmware is programmed separately</Name>
 					<UniqueID>com.sysprogs.bspoptions.nrf5x.softdevice_suffix</UniqueID>
 					<DefaultValue>false</DefaultValue>
 					<ValueForTrue>_reserve</ValueForTrue>
 				</PropertyEntry-->
-			</Properties>
-			<CollapsedByDefault>false</CollapsedByDefault>
-		  </PropertyGroup>
+				</Properties>
+				<CollapsedByDefault>false</CollapsedByDefault>
+			</PropertyGroup>
 		</PropertyGroups>
 	</ConfigurableProperties>
 	<AdditionalFrameworks>
-	<Framework>
+		<Framework>
 			<Name>Legacy Peripheral Drivers</Name>
 			<ID>com.sysprogs.arm.nordic.nrf5x.periph_legacy</ID>
 			<ClassID>com.sysprogs.arm.nordic.nrf5x.periph_legacy</ClassID>
@@ -181,7 +181,8 @@
 					<TargetFolder>integration\nrfx</TargetFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 
-					<ProjectInclusionMask>-*nrf_drv_ppi.c;*</ProjectInclusionMask><!---*_config.h;-->
+					<ProjectInclusionMask>-*nrf_drv_ppi.c;*</ProjectInclusionMask>
+					<!---*_config.h;-->
 					<!--ProjectInclusionMask>-*nrf_drv_ppi.c;-*nrf_drv_rng.c;*</ProjectInclusionMask-->
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<SimpleFileConditions>
@@ -194,30 +195,62 @@
 					</SimpleFileConditions>
 				</CopyJob>
 			</CopyJobs>
-				<ConfigurableProperties>
+			<ConfigurableProperties>
 				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>Legacy Drivers</Name>
-					<Properties>
-						<PropertyEntry xsi:type="Enumerated">
-						  <Name>SPI Driver</Name>
-						  <UniqueID>com.sysprogs.bspoptions.nrf5x.spi_driver_legacy</UniqueID>
-						  <SuggestionList>
-							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue></InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Master</UserFriendlyName><InternalValue>master</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Master (5W)</UserFriendlyName><InternalValue>5W_master</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Slave</UserFriendlyName><InternalValue>slave</InternalValue></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>0</DefaultEntryIndex>
-						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>SWI driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.swi_driver_legacy</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Legacy TWI driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.twi_driver_legacy</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Legacy Clock driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.clock_driver_legacy</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Legacy UART driver</Name><UniqueID>com.sysprogs.bspoptions.nrf5x.uart_driver_legacy</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>yes</ValueForTrue></PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+					<PropertyGroup>
+						<Name>Legacy Drivers</Name>
+						<Properties>
+							<PropertyEntry xsi:type="Enumerated">
+								<Name>SPI Driver</Name>
+								<UniqueID>com.sysprogs.bspoptions.nrf5x.spi_driver_legacy</UniqueID>
+								<SuggestionList>
+									<Suggestion>
+										<UserFriendlyName>None</UserFriendlyName>
+										<InternalValue></InternalValue>
+									</Suggestion>
+									<Suggestion>
+										<UserFriendlyName>Master</UserFriendlyName>
+										<InternalValue>master</InternalValue>
+									</Suggestion>
+									<Suggestion>
+										<UserFriendlyName>Master (5W)</UserFriendlyName>
+										<InternalValue>5W_master</InternalValue>
+									</Suggestion>
+									<Suggestion>
+										<UserFriendlyName>Slave</UserFriendlyName>
+										<InternalValue>slave</InternalValue>
+									</Suggestion>
+								</SuggestionList>
+								<DefaultEntryIndex>0</DefaultEntryIndex>
+								<AllowFreeEntry>false</AllowFreeEntry>
+							</PropertyEntry>
+							<PropertyEntry xsi:type="Boolean">
+								<Name>SWI driver</Name>
+								<UniqueID>com.sysprogs.bspoptions.nrf5x.swi_driver_legacy</UniqueID>
+								<DefaultValue>false</DefaultValue>
+								<ValueForTrue>yes</ValueForTrue>
+							</PropertyEntry>
+							<PropertyEntry xsi:type="Boolean">
+								<Name>Legacy TWI driver</Name>
+								<UniqueID>com.sysprogs.bspoptions.nrf5x.twi_driver_legacy</UniqueID>
+								<DefaultValue>false</DefaultValue>
+								<ValueForTrue>yes</ValueForTrue>
+							</PropertyEntry>
+							<PropertyEntry xsi:type="Boolean">
+								<Name>Legacy Clock driver</Name>
+								<UniqueID>com.sysprogs.bspoptions.nrf5x.clock_driver_legacy</UniqueID>
+								<DefaultValue>false</DefaultValue>
+								<ValueForTrue>yes</ValueForTrue>
+							</PropertyEntry>
+							<PropertyEntry xsi:type="Boolean">
+								<Name>Legacy UART driver</Name>
+								<UniqueID>com.sysprogs.bspoptions.nrf5x.uart_driver_legacy</UniqueID>
+								<DefaultValue>false</DefaultValue>
+								<ValueForTrue>yes</ValueForTrue>
+							</PropertyEntry>
+						</Properties>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 
@@ -243,13 +276,13 @@
 				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
-			<PropertyGroups>
-				  <PropertyGroup>
-					<Name>Peripheral Drivers</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_nrf.</UniqueID>
-					<CollapsedByDefault>false</CollapsedByDefault>
-					<!-- Properties will be automatically generated based on the folder contents -->
-				  </PropertyGroup>
+				<PropertyGroups>
+					<PropertyGroup>
+						<Name>Peripheral Drivers</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_nrf.</UniqueID>
+						<CollapsedByDefault>false</CollapsedByDefault>
+						<!-- Properties will be automatically generated based on the folder contents -->
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 		</Framework>
@@ -266,15 +299,15 @@
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<ProjectInclusionMask>-*_config.h;*</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
-					</CopyJob>
+				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
-			<PropertyGroups>
-				  <PropertyGroup>
-					<Name>External Device Drivers</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_ext.</UniqueID>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+				<PropertyGroups>
+					<PropertyGroup>
+						<Name>External Device Drivers</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.drivers_ext.</UniqueID>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 		</Framework>
@@ -346,26 +379,26 @@
 			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>Evaluation Board</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.board.</UniqueID>
-					<Properties>
-						<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
-						<PropertyEntry xsi:type="Boolean">
-							<Name>Advanced mode</Name>
-						  <UniqueID>bsp_mode</UniqueID>
-							<DefaultValue>false</DefaultValue>
-							<ValueForFalse>BSP_SIMPLE</ValueForFalse>
-						</PropertyEntry>
-						<PropertyEntry xsi:type="Boolean">
-							<Name>Print diagnostics to UART</Name>
-						  <UniqueID>bsp_uart</UniqueID>
-							<DefaultValue>true</DefaultValue>
-							<ValueForTrue>BSP_UART_SUPPORT</ValueForTrue>
-						</PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+					<PropertyGroup>
+						<Name>Evaluation Board</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.board.</UniqueID>
+						<Properties>
+							<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
+							<PropertyEntry xsi:type="Boolean">
+								<Name>Advanced mode</Name>
+								<UniqueID>bsp_mode</UniqueID>
+								<DefaultValue>false</DefaultValue>
+								<ValueForFalse>BSP_SIMPLE</ValueForFalse>
+							</PropertyEntry>
+							<PropertyEntry xsi:type="Boolean">
+								<Name>Print diagnostics to UART</Name>
+								<UniqueID>bsp_uart</UniqueID>
+								<DefaultValue>true</DefaultValue>
+								<ValueForTrue>BSP_UART_SUPPORT</ValueForTrue>
+							</PropertyEntry>
+						</Properties>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 		</Framework>
@@ -394,48 +427,63 @@
 					<PreprocessorMacros>NRF_LOG_BACKEND_SERIAL_USES_RTT=$$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$</PreprocessorMacros>
 				</CopyJob>
 				<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
-				<TargetFolder>external</TargetFolder>
-				<FilesToCopy>-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*</FilesToCopy>
-				<ProjectInclusionMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_oberon\*.a;nrf_oberon\*.h;-nrf_cc310_bl\*keil*;-nrf_cc310_bl\*keil*;nrf_cc310_bl\*.a;nrf_cc310\*.a;-*</ProjectInclusionMask>
-				<AutoIncludeMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_cc310_bl\*;nrf_cc310\*;-*</AutoIncludeMask>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
+					<TargetFolder>external</TargetFolder>
+					<FilesToCopy>-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*</FilesToCopy>
+					<ProjectInclusionMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_oberon\*.a;nrf_oberon\*.h;-nrf_cc310_bl\*keil*;-nrf_cc310_bl\*keil*;nrf_cc310_bl\*.a;nrf_cc310\*.a;-*</ProjectInclusionMask>
+					<AutoIncludeMask>fprintf\*;segger_rtt\*;nrf_oberon\*.h;nrf_cc310_bl\*;nrf_cc310\*;-*</AutoIncludeMask>
 					<SimpleFileConditions>
 						<string>segger_rtt\\.*: $$com.sysprogs.bspoptions.nrf5x.libraries.segger_rtt$$ == 1</string>
 					</SimpleFileConditions>
-			</CopyJob>
+				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
 					<TargetFolder>components\softdevice\common</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<SimpleFileConditions>
-							<string>nrf_sdh_freertos.c: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
-							<string>.*[^freertos].*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
+						<string>nrf_sdh_freertos.c: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
+						<string>.*[^freertos].*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
 					</SimpleFileConditions>
 				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>nRF5x Libraries</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
-					<Properties>
-						<PropertyEntry xsi:type="Enumerated">
-						  <Name>bootloader_dfu</Name>
-						  <UniqueID>bootloader_dfu</UniqueID>
-						  <SuggestionList>
-							<Suggestion><UserFriendlyName>None</UserFriendlyName><InternalValue>none</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Single-bank serial port</UserFriendlyName><InternalValue>single_serial</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Dual-bank serial port</UserFriendlyName><InternalValue>dual_serial</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Single-bank BLE</UserFriendlyName><InternalValue>single_ble</InternalValue></Suggestion>
-							<Suggestion><UserFriendlyName>Dual-bank BLE</UserFriendlyName><InternalValue>dual_ble</InternalValue></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>0</DefaultEntryIndex>
-						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>
-						<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+					<PropertyGroup>
+						<Name>nRF5x Libraries</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.libraries.</UniqueID>
+						<Properties>
+							<PropertyEntry xsi:type="Enumerated">
+								<Name>bootloader_dfu</Name>
+								<UniqueID>bootloader_dfu</UniqueID>
+								<SuggestionList>
+									<Suggestion>
+										<UserFriendlyName>None</UserFriendlyName>
+										<InternalValue>none</InternalValue>
+									</Suggestion>
+									<Suggestion>
+										<UserFriendlyName>Single-bank serial port</UserFriendlyName>
+										<InternalValue>single_serial</InternalValue>
+									</Suggestion>
+									<Suggestion>
+										<UserFriendlyName>Dual-bank serial port</UserFriendlyName>
+										<InternalValue>dual_serial</InternalValue>
+									</Suggestion>
+									<Suggestion>
+										<UserFriendlyName>Single-bank BLE</UserFriendlyName>
+										<InternalValue>single_ble</InternalValue>
+									</Suggestion>
+									<Suggestion>
+										<UserFriendlyName>Dual-bank BLE</UserFriendlyName>
+										<InternalValue>dual_ble</InternalValue>
+									</Suggestion>
+								</SuggestionList>
+								<DefaultEntryIndex>0</DefaultEntryIndex>
+								<AllowFreeEntry>false</AllowFreeEntry>
+							</PropertyEntry>
+							<!--   The conditions are generated programmatically, see function GenerateConditionsBoard -->
+						</Properties>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 		</Framework>
@@ -465,9 +513,9 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\modules</SourceFolder>
 					<TargetFolder>modules</TargetFolder>
 					<FilesToCopy>-nrfx\mdk\system_*;-nrfx\mdk\ses*.s;nrfx\drivers\*.*;nrfx\hal\*.*;nrfx\soc\*;nrfx\mdk\*.c;nrfx\mdk\*.h;-nrfx\mdk\arm_*;-nrfx\mdk\iar_*;nrfx\mdk\*.s;-nrfx\templates\nRF52*.h;-nrfx\templates\nrfx_*.h;nrfx\nrfx.h</FilesToCopy>
-						<ProjectInclusionMask>-*gcc_startup*.s;*.s;*.c;*.h</ProjectInclusionMask>
-						<Patches>
-						</Patches>
+					<ProjectInclusionMask>-*gcc_startup*.s;*.s;*.c;*.h</ProjectInclusionMask>
+					<Patches>
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
@@ -521,20 +569,20 @@
 			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
-				 <PropertyGroup>
-					<Name>NRF5x Embedded TLS</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.mbedtls.</UniqueID>
-					<Properties>
-					<PropertyEntry xsi:type="Boolean">
-					<Name>tls interface</Name>
-					<UniqueID>tls_interface</UniqueID>
-					<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-					<DefaultValue>false</DefaultValue>
-					<ValueForTrue>yes</ValueForTrue>
-					</PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+					<PropertyGroup>
+						<Name>NRF5x Embedded TLS</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.mbedtls.</UniqueID>
+						<Properties>
+							<PropertyEntry xsi:type="Boolean">
+								<Name>tls interface</Name>
+								<UniqueID>tls_interface</UniqueID>
+								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+								<DefaultValue>false</DefaultValue>
+								<ValueForTrue>yes</ValueForTrue>
+							</PropertyEntry>
+						</Properties>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 
@@ -551,35 +599,35 @@
 					<PreprocessorMacros>__STACK_SIZE=$$com.sysprogs.bspoptions.stackheap.stacksize$$;__HEAP_SIZE=$$com.sysprogs.bspoptions.stackheap.heapsize$$</PreprocessorMacros>
 				</CopyJob>
 			</CopyJobs>
-			  <ConfigurableProperties>
+			<ConfigurableProperties>
 				<PropertyGroups>
-				  <PropertyGroup>
-					<Properties>
-					  <PropertyEntry xsi:type="Integral">
-						<Name>Fixed stack size</Name>
-						<UniqueID>com.sysprogs.bspoptions.stackheap.stacksize</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<Description>Specifies the amount of memory (in bytes) to reserve for the stack</Description>
-						<DefaultValue>8192</DefaultValue>
-						<MinValue>0</MinValue>
-						<MaxValue>16777216</MaxValue>
-						<Increment>1024</Increment>
-					  </PropertyEntry>
-					  <PropertyEntry xsi:type="Integral">
-						<Name>Fixed heap size</Name>
-						<UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
-						<DefaultValue>8192</DefaultValue>
-						<MinValue>0</MinValue>
-						<MaxValue>16777216</MaxValue>
-						<Increment>1024</Increment>
-					  </PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+					<PropertyGroup>
+						<Properties>
+							<PropertyEntry xsi:type="Integral">
+								<Name>Fixed stack size</Name>
+								<UniqueID>com.sysprogs.bspoptions.stackheap.stacksize</UniqueID>
+								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+								<Description>Specifies the amount of memory (in bytes) to reserve for the stack</Description>
+								<DefaultValue>8192</DefaultValue>
+								<MinValue>0</MinValue>
+								<MaxValue>16777216</MaxValue>
+								<Increment>1024</Increment>
+							</PropertyEntry>
+							<PropertyEntry xsi:type="Integral">
+								<Name>Fixed heap size</Name>
+								<UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
+								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+								<Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
+								<DefaultValue>8192</DefaultValue>
+								<MinValue>0</MinValue>
+								<MaxValue>16777216</MaxValue>
+								<Increment>1024</Increment>
+							</PropertyEntry>
+						</Properties>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
-			  </ConfigurableProperties>
+			</ConfigurableProperties>
 
 		</Framework>
 		<Framework>
@@ -605,30 +653,45 @@
 						<string>Source\\portable\\MemMang\\heap_4.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_4</string>
 						<string>Source\\portable\\MemMang\\heap_5.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_5</string>
 					</SimpleFileConditions>
-				<Patches>
-				</Patches>
+					<Patches>
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
-				  <PropertyGroup>
-					<Properties>
-						<PropertyEntry xsi:type="Enumerated">
-						  <Name>FreeRTOS Heap Implementation</Name>
-						  <UniqueID>com.sysprogs.bspoptions.stm32.freertos.heap</UniqueID>
-						  <SuggestionList>
-							<Suggestion><InternalValue>heap_1</InternalValue><UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName></Suggestion>
-							<Suggestion><InternalValue>heap_2</InternalValue><UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName></Suggestion>
-							<Suggestion><InternalValue>heap_3</InternalValue><UserFriendlyName>Heap3 - use newlib malloc()/free()</UserFriendlyName></Suggestion>
-							<Suggestion><InternalValue>heap_4</InternalValue><UserFriendlyName>Heap4 - contiguous heap area</UserFriendlyName></Suggestion>
-							<Suggestion><InternalValue>heap_5</InternalValue><UserFriendlyName>Heap5 - scattered heap area</UserFriendlyName></Suggestion>
-						  </SuggestionList>
-						  <DefaultEntryIndex>3</DefaultEntryIndex>
-						  <AllowFreeEntry>false</AllowFreeEntry>
-						</PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+					<PropertyGroup>
+						<Properties>
+							<PropertyEntry xsi:type="Enumerated">
+								<Name>FreeRTOS Heap Implementation</Name>
+								<UniqueID>com.sysprogs.bspoptions.stm32.freertos.heap</UniqueID>
+								<SuggestionList>
+									<Suggestion>
+										<InternalValue>heap_1</InternalValue>
+										<UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName>
+									</Suggestion>
+									<Suggestion>
+										<InternalValue>heap_2</InternalValue>
+										<UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName>
+									</Suggestion>
+									<Suggestion>
+										<InternalValue>heap_3</InternalValue>
+										<UserFriendlyName>Heap3 - use newlib malloc()/free()</UserFriendlyName>
+									</Suggestion>
+									<Suggestion>
+										<InternalValue>heap_4</InternalValue>
+										<UserFriendlyName>Heap4 - contiguous heap area</UserFriendlyName>
+									</Suggestion>
+									<Suggestion>
+										<InternalValue>heap_5</InternalValue>
+										<UserFriendlyName>Heap5 - scattered heap area</UserFriendlyName>
+									</Suggestion>
+								</SuggestionList>
+								<DefaultEntryIndex>3</DefaultEntryIndex>
+								<AllowFreeEntry>false</AllowFreeEntry>
+							</PropertyEntry>
+						</Properties>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 			<AdditionalSystemVars>
@@ -672,28 +735,28 @@
 								<string>typedef _ssize_t ssize_t;</string>
 							</InsertedLines>
 						</Patch>
-				</Patches>
+					</Patches>
 				</CopyJob>
 			</CopyJobs>
 			<ConfigurableProperties>
 				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>Nordic IoT Components</Name>
-					<UniqueID>com.sysprogs.bspoptions.nrf5x.iot.</UniqueID>
-					<Properties>
-					 <PropertyEntry xsi:type="Integral">
-						<Name>tls_instance</Name>
-						<UniqueID>com.sysprogs.bspoptions.stackheap.tls_instance</UniqueID>
-						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-						<Description>TLS Instance Number </Description>
-						<DefaultValue>1</DefaultValue>
-						<MinValue>0</MinValue>
-						<MaxValue>10</MaxValue>
-						<Increment>1</Increment>
-					  </PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
+					<PropertyGroup>
+						<Name>Nordic IoT Components</Name>
+						<UniqueID>com.sysprogs.bspoptions.nrf5x.iot.</UniqueID>
+						<Properties>
+							<PropertyEntry xsi:type="Integral">
+								<Name>tls_instance</Name>
+								<UniqueID>com.sysprogs.bspoptions.stackheap.tls_instance</UniqueID>
+								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+								<Description>TLS Instance Number </Description>
+								<DefaultValue>1</DefaultValue>
+								<MinValue>0</MinValue>
+								<MaxValue>10</MaxValue>
+								<Increment>1</Increment>
+							</PropertyEntry>
+						</Properties>
+						<CollapsedByDefault>false</CollapsedByDefault>
+					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
 		</Framework>
@@ -778,7 +841,7 @@
 			<DestinationFolder>samples\BLEAppTemplate</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_template/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_template/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/nrf_peripherals.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_template/main.c</string>
 			</AdditionalSources>
@@ -788,7 +851,7 @@
 			<DestinationFolder>samples\BLEMouse</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/nrf_peripherals.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hids_mouse/main.c</string>
 			</AdditionalSources>
@@ -811,7 +874,7 @@
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_beacon/main.c</string>
 			</AdditionalSources>
 		</SmartSample>
-			<SmartSample>
+		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEProximity</SourceFolder>
 			<DestinationFolder>samples\BLEProximity</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
@@ -863,9 +926,9 @@
 			<DestinationFolder>samples\IoT\Icmp</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/main.c</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/config/ipv6_medium_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/main.c</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/config/ipv6_medium_platform.h</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
@@ -873,9 +936,9 @@
 			<DestinationFolder>samples\IoT\mqtt\publisher</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/main.c</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/config/ipv6_medium_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/main.c</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/config/ipv6_medium_platform.h</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
@@ -883,9 +946,9 @@
 			<DestinationFolder>samples\IoT\mqtt\subscriber</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/main.c</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/config/ipv6_medium_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/main.c</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/config/ipv6_medium_platform.h</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
@@ -893,9 +956,9 @@
 			<DestinationFolder>samples\IoT\tcp\client</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/main.c</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/config/ipv6_medium_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/main.c</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/config/ipv6_medium_platform.h</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
@@ -903,9 +966,9 @@
 			<DestinationFolder>samples\IoT\tcp\server</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/main.c</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/config/ipv6_medium_platform.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/main.c</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/config/ipv6_medium_platform.h</string>
 			</AdditionalSources>
 		</SmartSample>
 	</SmartSamples>
