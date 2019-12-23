@@ -4,6 +4,7 @@
 	<RequiredFrameworks>
 		<string>com.sysprogs.arm.nordic.nrf5x.libraries.external</string>
 		<string>com.sysprogs.arm.nordic.nrf5x.mbedtls</string>
+		<string>com.sysprogs.arm.nordic.nrf5x.iot</string>
 	</RequiredFrameworks>
 	<DefaultConfiguration>
 		<Entries>

@@ -851,6 +851,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEAppTemplate</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\BLEAppTemplate</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -872,6 +873,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEKeyboard</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\BLEKeyboard</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -890,6 +892,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEProximity</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\BLEProximity</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -899,6 +902,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEUart</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\BLEUart</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -929,6 +933,7 @@
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\BLEMultilinkCentral</SourceFolder>
 			<DestinationFolder>samples\BLEMultilinkCentral</DestinationFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
@@ -939,6 +944,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\icmp</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\Icmp</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -949,6 +955,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\mqtt\lwip\publisher</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\mqtt\publisher</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -959,6 +966,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\mqtt\lwip\subscriber</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\mqtt\subscriber</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -969,6 +977,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\tcp\client</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\tcp\client</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -979,6 +988,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\tcp\server</SourceFolder>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\tcp\server</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>

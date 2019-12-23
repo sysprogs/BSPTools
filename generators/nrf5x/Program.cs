@@ -719,6 +719,7 @@ namespace nrf5x
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     PackageVersion = "16.0",
+                    FirstCompatibleVersion = "16.0",
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
                     MinimumEngineVersion = "5.0",
                     ConditionalFlags = condFlags.ToArray(),

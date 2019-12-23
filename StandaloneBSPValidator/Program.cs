@@ -212,11 +212,6 @@ namespace StandaloneBSPValidator
                     {
                         sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
 
-                        if (!task.AllInputs[0].Contains("/nrf_soc.c") && (task.Arguments.Contains(" -DS1")))//nordic
-                        {
-                            task.Arguments = task.Arguments.Replace("/nrf_soc_nosd ", " ");
-                        }
-
                         if (task.Arguments.Length > 7000)
                         {
                             string prefixArgs = "", extArgs = task.Arguments;
@@ -588,7 +583,7 @@ namespace StandaloneBSPValidator
                         PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sfE), ".o"),
                         AllInputs = new[] { sfE },
                         Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolchainSubtype.GCC, ToolFlags.FlagEscapingMode.ForMakefile)} -o $@".Replace('\\', '/').Replace("/\"", "\\\""),
+                        Arguments = $"-c -o $@ $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolchainSubtype.GCC, ToolFlags.FlagEscapingMode.ForMakefile)}".Replace('\\', '/').Replace("/\"", "\\\""),
                     });
                 }
             }

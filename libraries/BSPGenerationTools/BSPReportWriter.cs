@@ -64,6 +64,13 @@ namespace BSPGenerationTools
 
         public void ReportMergeableError(string message, string argument, bool oneLine = false) => ReportMergeableMessage(MessageSeverity.Error, message, argument, oneLine);
 
+        List<string> _RawErrors = new List<string>();
+
+        public void ReportRawError(string message)
+        {
+            _RawErrors.Add(message);
+        }
+
         public void ReportMergeableMessage(MessageSeverity severity, string message, string argument, bool oneLineFormat)
         {
             var key = new Key { Severity = severity, Text = message };
@@ -93,12 +100,14 @@ namespace BSPGenerationTools
             {
                 sw.WriteLine($"BSP generation completed with {warnings} warnings and {errors} errors");
 
-                if (errors > 0)
+                if (errors > 0 || _RawErrors.Count > 0)
                 {
                     sw.WriteLine("Errors:");
                     foreach (var kv in _MergeableMessages)
                         if (kv.Key.Severity == MessageSeverity.Error)
                             LogMessage(sw, kv.Value);
+                    foreach(var err in _RawErrors)
+                        sw.WriteLine(err);
                 }
 
                 sw.WriteLine("--------------------------------------");

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BSPGenerationTools
 {
-    class SmartPropertyDefinition
+    public class SmartPropertyDefinition
     {
         public readonly string Name, IDWithoutPrefix, IDWithPrefix;
         public readonly string[] ExtraArguments;
@@ -38,7 +38,7 @@ namespace BSPGenerationTools
             }
         }
 
-        public static SmartPropertyDefinition Parse(string definition, string groupID, int extraArgumentsAfterID = 0)
+        public static SmartPropertyDefinition Parse(string definition, string groupID, int extraArgumentsAfterID = 0, string onValueForBooleanProperties = "1")
         {
             int idx = -1, count = 0, prevIdx = 0;
             definition = definition.Trim();
@@ -90,7 +90,7 @@ namespace BSPGenerationTools
                 if (idx == -1)
                 {
                     regex = val;
-                    itemName = "1";
+                    itemName = onValueForBooleanProperties;
                 }
                 else
                 {
@@ -108,7 +108,7 @@ namespace BSPGenerationTools
     }
 }
 
-struct NameAndID
+public struct NameAndID
 {
     public string Name;
     public string ID;

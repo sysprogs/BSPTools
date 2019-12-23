@@ -233,22 +233,45 @@ namespace nrf5x
             List<Framework> bleFrameworks = new List<Framework>();
             string famBase = family.Name.Substring(0, 5).ToLower();
 
-            foreach (var line in File.ReadAllLines(Directories.RulesDir + @"\BLEFrameworks.txt"))
+            HashSet<string> discoveredSubdirs = new HashSet<string>();
+            string baseDir = Path.Combine(family.PrimaryHeaderDir, @"..\..\..\components\ble");
+            foreach (var subdir in Directory.GetDirectories(baseDir))
+                discoveredSubdirs.Add(Path.GetFileName(subdir));
+            foreach (var subdir in Directory.GetDirectories(Path.Combine(baseDir, "ble_services")))
+                discoveredSubdirs.Add(Path.Combine("ble_services", Path.GetFileName(subdir)));
+
+            foreach (var name in new[] { "ble_services", "common", "peer_manager", "nrf_ble_gatt" })
+                discoveredSubdirs.Remove(name);
+
+            foreach (var dir in discoveredSubdirs)
             {
-                int idx = line.IndexOf('|');
-                string dir = line.Substring(0, idx);
-                string desc = line.Substring(idx + 1);
+                string desc = FetchDescriptionFromDirectory(Path.Combine(baseDir, dir)) ?? throw new Exception("Failed to load description of " + dir);
+
+                if (desc.StartsWith("BLE"))
+                    desc = desc.Substring(3).Trim();
+
+                desc = "Bluetooth LE - " + desc;
 
                 string id = Path.GetFileName(dir);
-                if (!id.StartsWith("ble_"))
+
+                if (id.StartsWith("experimental_"))
+                    id = id.Substring(13);
+
+                if (!id.StartsWith("ble_") && !id.StartsWith("nrf_ble"))
                     id = "ble_" + id;
 
-                if (dir.StartsWith("services\\", StringComparison.CurrentCultureIgnoreCase))
-                    id = "ble_svc_" + id.Substring(4);
+                /*if (dir.StartsWith("ble_services\\", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    int idx = id.IndexOf("ble_");
+                    if (idx == -1)
+                        id = "ble_svc_" + id;
+                    else
+                        id = id.Insert(idx + 4, "svc_");
+                }*/
 
                 bleFrameworks.Add(new Framework
                 {
-                    Name = string.Format("Bluetooth LE - {0} ({1})", desc, Path.GetFileName(dir)),
+                    Name = string.Format("{0} ({1})", desc, Path.GetFileName(dir)),
                     ID = "com.sysprogs.arm.nordic." + famBase + "." + id,
                     ClassID = "com.sysprogs.arm.nordic.nrfx." + id,
                     ProjectFolderName = "BLE " + desc,
@@ -257,15 +280,47 @@ namespace nrf5x
                     {
                         new CopyJob
                         {
-                            SourceFolder = family.PrimaryHeaderDir + @"\..\..\..\components\ble\" + dir,
-                            TargetFolder = dir,
+                            SourceFolder = Path.Combine(baseDir, dir),
+                            TargetFolder = @"components\ble\" + dir,
                             FilesToCopy = "*.c;*.h",
                         }
                     }
                 });
             }
 
-            family.AdditionalFrameworks = family.AdditionalFrameworks.Concat(bleFrameworks).ToArray();
+            family.AdditionalFrameworks = family.AdditionalFrameworks.Concat(bleFrameworks).OrderBy(fw => fw.Name).ToArray();
+        }
+
+        private string FetchDescriptionFromDirectory(string dir)
+        {
+            Regex rgDesc = new Regex(" \\* @defgroup [^ ]+ (.*)$");
+
+            var headers = Directory.GetFiles(dir, "*.h", SearchOption.AllDirectories);
+            string hdr = headers[0];
+            if (headers.Length > 1)
+            {
+                string folderName = Path.GetFileName(dir);
+                if (folderName.StartsWith("experimental_"))
+                    folderName = folderName.Substring(13);
+
+                hdr = headers.FirstOrDefault(h => Path.GetFileNameWithoutExtension(h) == folderName);
+                if (hdr == null)
+                    hdr = headers.FirstOrDefault(h => Path.GetFileNameWithoutExtension(h) == "nrf_" + folderName);
+                if (hdr == null && folderName == "eddystone")
+                    hdr = headers.FirstOrDefault(h => Path.GetFileNameWithoutExtension(h) == "nrf_ble_es");
+
+                if (hdr == null)
+                    throw new Exception("Don't know how to read description for " + dir);
+            }
+
+            foreach (var line in File.ReadAllLines(hdr))
+            {
+                var m = rgDesc.Match(line);
+                if (m.Success)
+                    return m.Groups[1].Value;
+            }
+
+            return null;
         }
     }
 }

@@ -5,7 +5,11 @@
   <MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
   <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
   <RequiredFrameworks>
-	<string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_scan</string>
+	<string>com.sysprogs.arm.nordic.nrfx.nrf_ble_scan</string>
+	<string>com.sysprogs.arm.nordic.nrfx.ble_db_discovery</string>
+	<string>com.sysprogs.arm.nordic.nrfx.nrf_ble_gq</string>
+	<string>com.sysprogs.arm.nordic.nrfx.ble_hrs_c</string>
+    <string>com.sysprogs.arm.nordic.nrfx.ble_bas_c</string>
   </RequiredFrameworks>
   <ConditionalErrors>
     <ConditionalError>

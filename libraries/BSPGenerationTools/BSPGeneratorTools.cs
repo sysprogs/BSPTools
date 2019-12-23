@@ -178,11 +178,21 @@ namespace BSPGenerationTools
         public string ShortName;
         public readonly Dictionary<string, string> SystemVars = new Dictionary<string, string>();
 
-        public List<FileCondition> MatchedFileConditions = new List<FileCondition>();
+        public Dictionary<string, FileCondition> MatchedFileConditions = new Dictionary<string, FileCondition>();
+
         public Dictionary<string, string> RenamedFileTable = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        public string OnValueForSmartBooleanProperties = "1";   //Can be overridden to keep backward compatibility
         public readonly BSPDirectories Directories;
 
         public bool SkipHiddenFiles { get; protected set; }
+
+        public void  AddFileCondition(FileCondition cond)
+        {
+            if (MatchedFileConditions.TryGetValue(cond.FilePath, out var oldCond))
+                MatchedFileConditions[cond.FilePath] = new FileCondition { FilePath = cond.FilePath, ConditionToInclude = new Condition.And { Arguments = new[] { oldCond.ConditionToInclude, cond.ConditionToInclude } } };
+            else
+                MatchedFileConditions[cond.FilePath] = cond;
+        }
 
         public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = null, int linkerScriptLevel = 4)
         {
@@ -325,7 +335,13 @@ namespace BSPGenerationTools
         public void ExpandVariables(ref string value)
         {
             if (value != null && value.Contains("$$"))
-                value = BSPEngine.VariableHelper.ExpandVariables(value, SystemVars);
+                value = VariableHelper.ExpandVariables(value, SystemVars);
+        }
+
+        public string ExpandVariables(string value)
+        {
+            ExpandVariables(ref value);
+            return value;
         }
 
         internal void ExpandAdditionalVariables(ref string strSources, SysVarEntry[] AddVariables)
@@ -346,7 +362,6 @@ namespace BSPGenerationTools
             if (devicesWithZeroRAM > 0)
                 throw new Exception($"Found {devicesWithZeroRAM} devices with RAMSize = 0. Please fix the list.");
 
-            int totalErrors = 0;
             HashSet<string> reportedClassIDs = new HashSet<string>();
 
             foreach (var dev in bsp.SupportedMCUs)
@@ -369,12 +384,11 @@ namespace BSPGenerationTools
                 {
                     if (fw.Count() > 1 && !reportedClassIDs.Contains(fw.Key))
                     {
-                        totalErrors++;
-                        Console.WriteLine($"{fw.Key} ClassID corresponds to more then 1 framework on {dev.ID}:");
+                        Report.ReportRawError($"{fw.Key} ClassID corresponds to more then 1 framework on {dev.ID}:");
                         foreach (var fwObj in fw)
-                            Console.WriteLine($"    {fwObj.ID}");
-                        Console.WriteLine($"This will break referencing those frameworks via VisualGDB Project Properties. Specify MCUFilterRegex for those frameworks to ensure only 1 is compatible with each device.");
-                        Console.WriteLine();
+                            Report.ReportRawError($"    {fwObj.ID}");
+                        Report.ReportRawError($"This will break referencing those frameworks via VisualGDB Project Properties. Specify MCUFilterRegex for those frameworks to ensure only 1 is compatible with each device.");
+                        Report.ReportRawError("");
 
                         reportedClassIDs.Add(fw.Key);
                     }
@@ -387,14 +401,10 @@ namespace BSPGenerationTools
                 var id = fw.ClassID ?? fw.ID;
                 if (usedFoldersToCompatibleIDs.TryGetValue(fw.ProjectFolderName, out var tmp) && tmp != id)
                 {
-                    totalErrors++;
-                    Console.WriteLine($"'{fw.ProjectFolderName}' is used by both {id} and {tmp}. This will break builds in Visual Studio.");
+                    Report.ReportRawError($"'{fw.ProjectFolderName}' is used by both {id} and {tmp}. This will break builds in Visual Studio.");
                 }
                 usedFoldersToCompatibleIDs[fw.ProjectFolderName] = id;
             }
-
-            if (totalErrors > 0)
-                throw new Exception($"Found {totalErrors} validation errors. Please check the generator output.");
         }
 
         public void Dispose()
@@ -503,7 +513,7 @@ namespace BSPGenerationTools
 
                     foreach (var mcu in MCUs)
                         if (mcu.StartupFile != null)
-                            BSP.MatchedFileConditions.Add(new FileCondition { FilePath = mcu.StartupFile, ConditionToInclude = new Condition.Not { Argument = new Condition.Equals { Expression = $"$${IgnoreStartupFileProperty}$$", ExpectedValue = "1" } } });
+                            BSP.AddFileCondition(new FileCondition { FilePath = mcu.StartupFile, ConditionToInclude = new Condition.Not { Argument = new Condition.Equals { Expression = $"$${IgnoreStartupFileProperty}$$", ExpectedValue = "1" } } });
                 }
             }
 
@@ -832,8 +842,7 @@ namespace BSPGenerationTools
                     {
                         foreach (var src in sample.AdditionalBuildTimeSources)
                         {
-                            string source = src;
-                            BSP.ExpandVariables(ref source);
+                            string source = BSP.ExpandVariables(src);
                             string targetPath = Path.Combine(destFolder, Path.GetFileName(source));
                             try
                             {
@@ -868,6 +877,23 @@ namespace BSPGenerationTools
                     var sampleObj = sample.EmbeddedSample ?? XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(destFolder, "sample.xml"));
                     if (sampleObj.RequiredFrameworks == null && allFrameworks != null)
                         sampleObj.RequiredFrameworks = allFrameworks.Where(fw => fw.DefaultEnabled).Select(fw => fw.ClassID ?? fw.ID)?.ToArray();
+
+                    if (sample.CommonConfiguration != null)
+                    {
+                        Dictionary<string, string> config = new Dictionary<string, string>();
+                        HashSet<string> frameworks = new HashSet<string>();
+                        
+                        CommonSampleConfiguration.Read(BSP.ExpandVariables(sample.CommonConfiguration), config, frameworks);
+
+                        foreach (var fw in sampleObj.RequiredFrameworks ?? new string[0])
+                            frameworks.Add(fw);
+
+                        foreach (var kv in sampleObj.DefaultConfiguration?.Entries ?? new PropertyDictionary2.KeyValue[0])
+                            config[kv.Key] = kv.Value;
+
+                        sampleObj.DefaultConfiguration = new PropertyDictionary2(config);
+                        sampleObj.RequiredFrameworks = frameworks.ToArray();
+                    }
 
                     if (sample.AdditionalSources != null)
                     {

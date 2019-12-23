@@ -234,7 +234,7 @@ namespace BSPGenerationTools
 
         public string[] SimpleFileConditions;   //See <CONDITION SYNTAX> above
 
-        public string SmartPropertyGroup;   //Syntax: [Name]|[Prefix]
+        public string SmartPropertyGroup;   //Syntax: [Group ID]|[Name]
         public string[] SmartFileConditions; //Will be automatically translated to SimpleFileConditions & properties. Option name|list of (regex => option value). See CC3220 BSP for examples.
         public string[] SmartPreprocessorMacros;
 
@@ -242,10 +242,10 @@ namespace BSPGenerationTools
         public string[] GuardedFiles;
         public string SymlinkResolutionMask;
 
-        public string AdditionalProjectFiles;
-
-
         public Patch[] Patches;
+
+        public string AdditionalProjectFiles;
+        public string VendorSpecificAttributes;
 
         class ParsedCondition
         {
@@ -324,7 +324,7 @@ namespace BSPGenerationTools
             if (!string.IsNullOrEmpty(PreprocessorMacros))
             {
                 preprocessorMacros.AddRange(PreprocessorMacros.Split(';'));
-                foreach(var macro in preprocessorMacros)
+                foreach (var macro in preprocessorMacros)
                     reverseConditions?.AttachPreprocessorMacro(macro, null);
             }
 
@@ -336,7 +336,11 @@ namespace BSPGenerationTools
                 if (!string.IsNullOrEmpty(SmartPropertyGroup))
                 {
                     string[] elements = SmartPropertyGroup.Split('|');
-                    configurableProperties.PropertyGroups.Add(grp = new PropertyGroup { Name = elements[1], UniqueID = elements[0] });
+                    var id = elements[0];
+
+                    grp = configurableProperties.PropertyGroups.FirstOrDefault(g => g.UniqueID == id);
+                    if (grp == null)
+                        configurableProperties.PropertyGroups.Add(grp = new PropertyGroup { Name = elements[1], UniqueID = id });
                 }
                 else
                 {
@@ -347,7 +351,7 @@ namespace BSPGenerationTools
 
                 foreach (var str in SmartFileConditions ?? new string[0])
                 {
-                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID);
+                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID, 0, bsp.OnValueForSmartBooleanProperties);
 
                     if (def.Items.Length == 1)
                     {
@@ -398,7 +402,7 @@ namespace BSPGenerationTools
 
                 foreach (var str in SmartPreprocessorMacros ?? new string[0])
                 {
-                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID, 1);
+                    var def = SmartPropertyDefinition.Parse(str, grp.UniqueID, 1, bsp.OnValueForSmartBooleanProperties);
                     preprocessorMacros.Add(string.Format(def.ExtraArguments[0], "$$" + def.IDWithPrefix + "$$"));
 
                     if (def.Items.Length == 1)
@@ -587,7 +591,7 @@ namespace BSPGenerationTools
                     foreach (var cond in conditions)
                         if (cond.Regex.IsMatch(f))
                         {
-                            bsp.MatchedFileConditions.Add(new FileCondition { ConditionToInclude = cond.Condition, FilePath = encodedPath });
+                            bsp.AddFileCondition(new FileCondition { ConditionToInclude = cond.Condition, FilePath = encodedPath });
                             cond.UseCount++;
 
                             if (includedInProject)
@@ -662,7 +666,7 @@ namespace BSPGenerationTools
 
             if (AdditionalIncludeDirs != null)
             {
-                foreach(var dir in AdditionalIncludeDirs.Split(';'))
+                foreach (var dir in AdditionalIncludeDirs.Split(';'))
                 {
                     var mappedDir = MapIncludeDir(absTarget, subdir, dir);
                     reverseConditions?.AttachIncludeDir(mappedDir);
@@ -759,6 +763,30 @@ namespace BSPGenerationTools
         public string CopyFilters;
         public string[] AdditionalBuildTimeSources; //Sources that will be copied to the sample directory during BSP building as if they were present in the SourceFolder.
         public Patch[] Patches;
+
+        public string CommonConfiguration;
+    }
+
+    public class CommonSampleConfiguration
+    {
+        public string BasedOn;
+        public string[] RequiredFrameworks;
+        public PropertyDictionary2 DefaultConfiguration;
+
+        public static void Read(string file, Dictionary<string, string> config, HashSet<string> frameworks)
+        {
+            var cfg = XmlTools.LoadObject<CommonSampleConfiguration>(file);
+            if (cfg.BasedOn != null)
+                Read(Path.Combine(Path.GetDirectoryName(file), cfg.BasedOn), config, frameworks);
+
+            if (cfg.RequiredFrameworks != null)
+                foreach (var fw in cfg.RequiredFrameworks)
+                    frameworks.Add(fw);
+
+            if (cfg.DefaultConfiguration?.Entries != null)
+                foreach (var kv in cfg.DefaultConfiguration.Entries)
+                    config[kv.Key] = kv.Value;
+        }
     }
 
     /* Use MCU classifiers to define MCU-specific flags.
