@@ -569,30 +569,26 @@ namespace nrf5x
 
                     bspBuilder.RuleGenerator.GenerateRulesForFamily(fam.Definition);
 
-                    // Starting from SDK 14.0 we use the original Nordic startup files & linker scripts as they contain various non-trivial logic
-#if GENERATE_STARTUP_FILES
-                StartupFileGenerator.InterruptVectorTable[] aStartupVectors;
-                if (usingIoTSDK)
-                    aStartupVectors = new StartupFileGenerator.InterruptVectorTable[] {
-                                                    GenerateStartupFile(fam.Definition.StartupFileDir,"nRF52")
-                                                    };
-                else
-                    aStartupVectors = new StartupFileGenerator.InterruptVectorTable[] {
-                                                    GenerateStartupFile(fam.Definition.StartupFileDir,"nRF51"),
-                                                    GenerateStartupFile(fam.Definition.StartupFileDir,"nRF52")
-                                                    };
+                    List<MCUDefinitionWithPredicate> hardwareRegisterFiles = new List<MCUDefinitionWithPredicate>();
+                    foreach(var svd in Directory.GetFiles(fam.Definition.PrimaryHeaderDir, "*.svd"))
+                    {
+                        var name = Path.GetFileNameWithoutExtension(svd).ToUpper();
+                        if (name == "NRF52")
+                            name = "NRF52832";
 
-                fam.AttachStartupFiles(aStartupVectors);
-#endif
+                        if (!name.StartsWith("NRF52"))
+                            continue;
 
-                    //  SVD Files
-                    var aMcuDef1 = (new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nRF51.svd"), "nRF51") });
-                    aMcuDef1[0].MatchPredicate = m => m.Name.StartsWith("nRF51");
+                        var registers = SVDParser.ParseSVDFile(svd, name);
+                        hardwareRegisterFiles.Add(new MCUDefinitionWithPredicate
+                        {
+                            MCUName = name,
+                            RegisterSets = registers.RegisterSets,
+                            MatchPredicate = m => m.Name.StartsWith(registers.MCUName, StringComparison.InvariantCultureIgnoreCase)
+                        });
+                    }
 
-                    var aMcuDef2 = (new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, "nRF52.svd"), "nRF52") });
-                    aMcuDef2[0].MatchPredicate = m => m.Name.StartsWith("nRF52");
-
-                    fam.AttachPeripheralRegisters(aMcuDef1.Concat(aMcuDef2));
+                    fam.AttachPeripheralRegisters(hardwareRegisterFiles);
 
                     var famObj = fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All);
 

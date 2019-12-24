@@ -133,20 +133,6 @@
 				<TargetFolder>components\toolchain</TargetFolder>
 				<FilesToCopy>-ARM\*;-IAR\*;*.h;*.c</FilesToCopy>
 			</CopyJob>
-			<!--CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\device</SourceFolder>
-				<TargetFolder>components\device</TargetFolder>
-				<FilesToCopy>*.h;*.c</FilesToCopy>
-			</CopyJob-->
-			<!--CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
-				<TargetFolder>components\softdevice\common</TargetFolder>
-
-				<FilesToCopy>*.h;*.c</FilesToCopy>
-				<SimpleFileConditions>
-					<string>.*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
-				</SimpleFileConditions>
-			</CopyJob-->
 		</CopyJobs>
 	</CoreFramework>
 	<ConfigurableProperties>
@@ -209,74 +195,16 @@
 					<!---*_config.h;-->
 					<!--ProjectInclusionMask>-*nrf_drv_ppi.c;-*nrf_drv_rng.c;*</ProjectInclusionMask-->
 					<AutoIncludeMask>*.h</AutoIncludeMask>
-					<SimpleFileConditions>
-						<string>legacy\\nrf_drv_twi*: $$com.sysprogs.bspoptions.nrf5x.twi_driver_legacy$$ == yes</string>
-						<string>legacy\\nrf_drv_swi*: $$com.sysprogs.bspoptions.nrf5x.swi_driver_legacy$$ == yes</string>
-						<string>legacy\\nrf_drv_uart*: $$com.sysprogs.bspoptions.nrf5x.uart_driver_legacy$$ == yes</string>
-						<string>legacy\\nrf_drv_spis.c: $$com.sysprogs.bspoptions.nrf5x.spi_driver_legacy$$ == slave</string>
-						<string>legacy\\nrf_drv_spi.c: $$com.sysprogs.bspoptions.nrf5x.spi_driver_legacy$$ == 5W_master</string>
-						<string>legacy\\nrf_drv_clock*: $$com.sysprogs.bspoptions.nrf5x.clock_driver_legacy$$ == yes</string>
-					</SimpleFileConditions>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.legacy_drivers.|Legacy Drivers</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>SPI[spi]|=>None[none];legacy\\nrf_drv_spi.c=>Master[5W_master];legacy\\nrf_drv_spis.c=>Slave[slave]</string>
+						<string>-SWI[swi]|legacy\\nrf_drv_swi*</string>
+						<string>-TWI[twi]|legacy\\nrf_drv_twi*</string>
+						<string>-UART[uart]|legacy\\nrf_drv_uart*</string>
+						<string>-Clock[clock]|legacy\\nrf_drv_clock*</string>
+					</SmartFileConditions>					
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Name>Legacy Drivers</Name>
-						<Properties>
-							<PropertyEntry xsi:type="Enumerated">
-								<Name>SPI Driver</Name>
-								<UniqueID>com.sysprogs.bspoptions.nrf5x.spi_driver_legacy</UniqueID>
-								<SuggestionList>
-									<Suggestion>
-										<UserFriendlyName>None</UserFriendlyName>
-										<InternalValue></InternalValue>
-									</Suggestion>
-									<Suggestion>
-										<UserFriendlyName>Master</UserFriendlyName>
-										<InternalValue>master</InternalValue>
-									</Suggestion>
-									<Suggestion>
-										<UserFriendlyName>Master (5W)</UserFriendlyName>
-										<InternalValue>5W_master</InternalValue>
-									</Suggestion>
-									<Suggestion>
-										<UserFriendlyName>Slave</UserFriendlyName>
-										<InternalValue>slave</InternalValue>
-									</Suggestion>
-								</SuggestionList>
-								<DefaultEntryIndex>0</DefaultEntryIndex>
-								<AllowFreeEntry>false</AllowFreeEntry>
-							</PropertyEntry>
-							<PropertyEntry xsi:type="Boolean">
-								<Name>SWI driver</Name>
-								<UniqueID>com.sysprogs.bspoptions.nrf5x.swi_driver_legacy</UniqueID>
-								<DefaultValue>false</DefaultValue>
-								<ValueForTrue>yes</ValueForTrue>
-							</PropertyEntry>
-							<PropertyEntry xsi:type="Boolean">
-								<Name>Legacy TWI driver</Name>
-								<UniqueID>com.sysprogs.bspoptions.nrf5x.twi_driver_legacy</UniqueID>
-								<DefaultValue>false</DefaultValue>
-								<ValueForTrue>yes</ValueForTrue>
-							</PropertyEntry>
-							<PropertyEntry xsi:type="Boolean">
-								<Name>Legacy Clock driver</Name>
-								<UniqueID>com.sysprogs.bspoptions.nrf5x.clock_driver_legacy</UniqueID>
-								<DefaultValue>false</DefaultValue>
-								<ValueForTrue>yes</ValueForTrue>
-							</PropertyEntry>
-							<PropertyEntry xsi:type="Boolean">
-								<Name>Legacy UART driver</Name>
-								<UniqueID>com.sysprogs.bspoptions.nrf5x.uart_driver_legacy</UniqueID>
-								<DefaultValue>false</DefaultValue>
-								<ValueForTrue>yes</ValueForTrue>
-							</PropertyEntry>
-						</Properties>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 		</Framework>
 		<Framework>
 			<Name>Peripheral Drivers (Old)</Name>
@@ -468,7 +396,8 @@
 							<OldLine>    .read    = read,</OldLine>
 							<NewLine>    .read    = read_impl,</NewLine>
 						</Patch>
-					</Patches>				</CopyJob>
+					</Patches>
+				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
 					<TargetFolder>components\softdevice\common</TargetFolder>
@@ -580,30 +509,12 @@
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
-					<SimpleFileConditions>
-						<string>mbedtls\\tls_interface.c: $$com.sysprogs.bspoptions.nrf5x.mbedtls.tls_interface$$ == yes</string>
-					</SimpleFileConditions>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.mbedtls.|NRF5x Embedded TLS</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>-tls_interface|mbedtls\\tls_interface.c*</string>
+					</SmartFileConditions>					
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Name>NRF5x Embedded TLS</Name>
-						<UniqueID>com.sysprogs.bspoptions.nrf5x.mbedtls.</UniqueID>
-						<Properties>
-							<PropertyEntry xsi:type="Boolean">
-								<Name>tls interface</Name>
-								<UniqueID>tls_interface</UniqueID>
-								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-								<DefaultValue>false</DefaultValue>
-								<ValueForTrue>yes</ValueForTrue>
-							</PropertyEntry>
-						</Properties>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
-
 		</Framework>
 		<Framework>
 			<Name>Fixed Size Stack &amp; Heap</Name>
@@ -664,54 +575,20 @@
 					<AutoIncludeMask/>
 					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Portable/gcc/nrf52;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Portable/CMSIS/nrf52</AdditionalIncludeDirs>
-					<SimpleFileConditions>
-						<string>Source\\portable\\MemMang\\heap_1.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_1</string>
-						<string>Source\\portable\\MemMang\\heap_2.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_2</string>
-						<string>Source\\portable\\MemMang\\heap_3.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_3</string>
-						<string>Source\\portable\\MemMang\\heap_4.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_4</string>
-						<string>Source\\portable\\MemMang\\heap_5.c: $$com.sysprogs.bspoptions.stm32.freertos.heap$$ == heap_5</string>
-					</SimpleFileConditions>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.freertos.|FreeRTOS</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>Heap Implementation[heap]|
+Source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing[heap_1];
+Source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation[heap_2];
+Source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()[heap_3];
+Source\\portable\\MemMang\\heap_4.c=>+Heap4 - contiguous heap area[heap_4];
+Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
+						</string>
+					</SmartFileConditions>
 					<Patches>
 					</Patches>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Properties>
-							<PropertyEntry xsi:type="Enumerated">
-								<Name>FreeRTOS Heap Implementation</Name>
-								<UniqueID>com.sysprogs.bspoptions.stm32.freertos.heap</UniqueID>
-								<SuggestionList>
-									<Suggestion>
-										<InternalValue>heap_1</InternalValue>
-										<UserFriendlyName>Heap1 - no support for freeing</UserFriendlyName>
-									</Suggestion>
-									<Suggestion>
-										<InternalValue>heap_2</InternalValue>
-										<UserFriendlyName>Heap2 - no block consolidation</UserFriendlyName>
-									</Suggestion>
-									<Suggestion>
-										<InternalValue>heap_3</InternalValue>
-										<UserFriendlyName>Heap3 - use newlib malloc()/free()</UserFriendlyName>
-									</Suggestion>
-									<Suggestion>
-										<InternalValue>heap_4</InternalValue>
-										<UserFriendlyName>Heap4 - contiguous heap area</UserFriendlyName>
-									</Suggestion>
-									<Suggestion>
-										<InternalValue>heap_5</InternalValue>
-										<UserFriendlyName>Heap5 - scattered heap area</UserFriendlyName>
-									</Suggestion>
-								</SuggestionList>
-								<DefaultEntryIndex>3</DefaultEntryIndex>
-								<AllowFreeEntry>false</AllowFreeEntry>
-							</PropertyEntry>
-						</Properties>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 			<AdditionalSystemVars>
 				<SysVarEntry>
 					<Key>com.sysprogs.rtos_type</Key>
