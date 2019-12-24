@@ -5,6 +5,7 @@
 		<string>com.sysprogs.arm.nordic.nrf5x.libraries.external</string>
 		<string>com.sysprogs.arm.nordic.nrf5x.mbedtls</string>
 		<string>com.sysprogs.arm.nordic.nrf5x.iot</string>
+		<string>com.sysprogs.arm.nordic.nrfx.ble_ipsp</string>
 	</RequiredFrameworks>
 	<DefaultConfiguration>
 		<Entries>
@@ -14,6 +15,30 @@
 			</KeyValue>
 			<KeyValue>
 				<Key>com.sysprogs.bspoptions.nrf5x.libraries.external.nrf_cc310</Key>
+				<Value>yes</Value>
+			</KeyValue>
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.iot.ipv6_stack</Key>
+				<Value>yes</Value>
+			</KeyValue>
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.iot.medium</Key>
+				<Value>yes</Value>
+			</KeyValue>
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.iot.context_manager</Key>
+				<Value>yes</Value>
+			</KeyValue>
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.libraries.mem_manager</Key>
+				<Value>yes</Value>
+			</KeyValue>
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.iot.ble_6lowpan</Key>
+				<Value>yes</Value>
+			</KeyValue>
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.iot.iot_timer</Key>
 				<Value>yes</Value>
 			</KeyValue>
 		</Entries>

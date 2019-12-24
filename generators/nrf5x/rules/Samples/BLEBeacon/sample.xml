@@ -12,7 +12,6 @@
 		<string>com.sysprogs.arm.nordic.nrf5x.ble_common</string>
 		<string>com.sysprogs.arm.nordic.nrf5x.modules_nrfx</string>
 		<string>com.sysprogs.arm.nordic.nrf5x.ble_link_ctx_manager</string>
-		<string>com.sysprogs.arm.nordic.nrf5x.ble_nrf_ble_qwr</string>
 		<string>com.sysprogs.arm.nordic.nrf5x.periph_legacy</string>
 		<string>com.sysprogs.arm.nordic.nrfx.nrf_ble_gq</string>
 		<string>com.sysprogs.arm.nordic.nrfx.nrf_ble_qwr</string>

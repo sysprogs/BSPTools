@@ -405,6 +405,23 @@ namespace BSPGenerationTools
                 }
                 usedFoldersToCompatibleIDs[fw.ProjectFolderName] = id;
             }
+
+
+            var sourcesByName = bsp.MCUFamilies.SelectMany(f => f.AdditionalSourceFiles ?? new string[0])
+                .Concat(bsp.SupportedMCUs.SelectMany(m => m.AdditionalSourceFiles ?? new string[0]))
+                .Concat(bsp.Frameworks.SelectMany(fw => fw.AdditionalSourceFiles ?? new string[0]))
+                .Distinct()
+                .GroupBy(f => Path.GetFileName(f), StringComparer.InvariantCultureIgnoreCase);
+
+            foreach(var grp in sourcesByName)
+            {
+                if (grp.Count() > 1)
+                {
+                    Report.ReportRawError($"Found multiple files called '{grp.Key}':");
+                    foreach (var fn in grp)
+                        Report.ReportRawError("  " + fn);
+                }
+            }
         }
 
         public void Dispose()

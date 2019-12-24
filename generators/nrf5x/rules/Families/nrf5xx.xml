@@ -330,13 +330,6 @@
 					<TargetFolder>components\libraries</TargetFolder>
 					<FilesToCopy>util\*</FilesToCopy>
 					<ProjectInclusionMask>-util\app_error_weak_cmock*;-*_iar.*;-*_keil.*;*</ProjectInclusionMask>
-					<Patches>
-						<!--Patch xsi:type="ReplaceLine">
-							<FilePath>bootloader\nrf_bootloader_app_start_asm.c</FilePath>
-							<OldLine>void __attribute__ ((noinline)) nrf_bootloader_app_start_impl(uint32_t start_addr)</OldLine>
-							<NewLine>void __attribute__ ((noinline, optimize("-fomit-frame-pointer"))) nrf_bootloader_app_start_impl(uint32_t start_addr)</NewLine>
-						</Patch-->
-					</Patches>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
@@ -434,8 +427,48 @@
 							<OldLine>#include "uECC.h"</OldLine>
 							<NewLine>//#include "uECC.h"</NewLine>
 						</Patch>
-					</Patches>
-				</CopyJob>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_nvmc.c</FilePath>
+							<OldLine>static ret_code_t read(nrf_fstorage_t const * p_fs, uint32_t src, void * p_dest, uint32_t len)</OldLine>
+							<NewLine>static ret_code_t read_impl(nrf_fstorage_t const * p_fs, uint32_t src, void * p_dest, uint32_t len)</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_nvmc.c</FilePath>
+							<OldLine>static ret_code_t write(nrf_fstorage_t const * p_fs,</OldLine>
+							<NewLine>static ret_code_t write_impl(nrf_fstorage_t const * p_fs,</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_nvmc.c</FilePath>
+							<OldLine>    .write   = write,</OldLine>
+							<NewLine>    .write   = write_impl,</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_nvmc.c</FilePath>
+							<OldLine>    .read    = read,</OldLine>
+							<NewLine>    .read    = read_impl,</NewLine>
+						</Patch>
+						
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_sd.c</FilePath>
+							<OldLine>static ret_code_t read(nrf_fstorage_t const * p_fs, uint32_t src, void * p_dest, uint32_t len)</OldLine>
+							<NewLine>static ret_code_t read_impl(nrf_fstorage_t const * p_fs, uint32_t src, void * p_dest, uint32_t len)</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_sd.c</FilePath>
+							<OldLine>static ret_code_t write(nrf_fstorage_t const * p_fs,</OldLine>
+							<NewLine>static ret_code_t write_impl(nrf_fstorage_t const * p_fs,</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_sd.c</FilePath>
+							<OldLine>    .write   = write,</OldLine>
+							<NewLine>    .write   = write_impl,</NewLine>
+						</Patch>
+						<Patch xsi:type="ReplaceLine">
+							<FilePath>fstorage\nrf_fstorage_sd.c</FilePath>
+							<OldLine>    .read    = read,</OldLine>
+							<NewLine>    .read    = read_impl,</NewLine>
+						</Patch>
+					</Patches>				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
 					<TargetFolder>components\softdevice\common</TargetFolder>
@@ -518,12 +551,11 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\lwip</SourceFolder>
 					<TargetFolder>external\lwip</TargetFolder>
 					<FilesToCopy>-doc\*;*</FilesToCopy>
-
+					<AdvancedRenameRules>src\\core\\ipv4\\(dhcp|etharp).c=>{1}4.c</AdvancedRenameRules>
 					<ProjectInclusionMask>-src\api\*;-src\core\snmp\*;-test\*;-src\netif\ppp*;-src\apps\*;-src\core\mem.*;-src\include\lwip\apps\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask>-test\*;-src\include\lwip\apps\*;*.h</AutoIncludeMask>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/lwip/src/include</AdditionalIncludeDirs>
 				</CopyJob>
-
 			</CopyJobs>
 		</Framework>
 		<Framework>
@@ -536,7 +568,8 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\mbedtls</SourceFolder>
 					<TargetFolder>external\mbedtls</TargetFolder>
 					<FilesToCopy>-visualc\*;-yotta\*;-scripts\*;*</FilesToCopy>
-					<ProjectInclusionMask>-tests\*;-doxygen\*;-programs\*;*.c;*.h</ProjectInclusionMask>
+					<!-- Note that Nordic SDK provides its own replacements for some mbedtls files in mbedtls\replacements\asn1write.c -->
+					<ProjectInclusionMask>-tests\*;-doxygen\*;-programs\*;-library\asn1write.c;-library\ssl_srv.c;*.c;*.h</ProjectInclusionMask> 
 					<AutoIncludeMask>-tests\*;*.h</AutoIncludeMask>
 					<PreprocessorMacros>MBEDTLS_CONFIG_FILE="nrf_tls_config.h";BLE_STACK_SUPPORT_REQD;ENABLE_DEBUG_LOG_SUPPORT;MBEDTLS_CTR_DRBG_C</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/mbedtls/include</AdditionalIncludeDirs>
@@ -708,6 +741,7 @@
 						<string>ipv6_stack\\utils\\ipv6_utils.c=>IPV6_DEFAULT_HOP_LIMIT</string>
 						<string>ipv6_stack\\udp\\udp6.c=>UDP6_MAX_SOCKET_COUNT</string>
 					</GuardedFiles>
+					<AdvancedRenameRules>ipv6_stack\\icmp6\\icmp6.c=>nrf_icmp6.c</AdvancedRenameRules>
 					<ProjectInclusionMask>-*.a;-mqtt\mqtt_transport_socket.c;-*.lib;*.c</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<Patches>
@@ -955,7 +989,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\mqtt\lwip\publisher</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\mqtt\publisher</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -966,7 +1000,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\mqtt\lwip\subscriber</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\mqtt\subscriber</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -977,7 +1011,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\tcp\client</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\tcp\client</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>
@@ -988,7 +1022,7 @@
 		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\tcp\server</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEConfiguration.xml</CommonConfiguration>
+			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
 			<DestinationFolder>samples\IoT\tcp\server</DestinationFolder>
 			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
 			<AdditionalSources>

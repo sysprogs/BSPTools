@@ -699,7 +699,7 @@ namespace nrf5x
                     });
 
                 bspBuilder.GenerateSoftdeviceLibraries();
-                bspBuilder.RuleGenerator.GenerateBoardProperty(frameworks);
+                bspBuilder.RuleGenerator.PatchGeneratedFrameworks(frameworks, condFlags);
                 bspBuilder.GenFramworkSample(bspBuilder);
 
                 //  CheckEntriesSample(Path.Combine(bspBuilder.Directories.OutputDir, @"nRF5x\components\libraries"),

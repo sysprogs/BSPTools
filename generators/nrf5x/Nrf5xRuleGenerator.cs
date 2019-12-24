@@ -20,10 +20,74 @@ namespace nrf5x
             _Builder = nordicBSPBuilder;
         }
 
-        public void GenerateBoardProperty(List<EmbeddedFramework> prFrBoard)
+        public void PatchGeneratedFrameworks(List<EmbeddedFramework> frameworks, List<ConditionalToolFlags> condFlags)
+        {
+            GenerateBoardProperty(frameworks);
+            //ConvertFrameworkIncludesFromAutoConditionedSubfoldersToConditionalFlags(frameworks, condFlags);
+        }
+
+        void ConvertFrameworkIncludesFromAutoConditionedSubfoldersToConditionalFlags(List<EmbeddedFramework> frameworks, List<ConditionalToolFlags> condFlags)
+        { 
+            foreach (var fw in frameworks)
+            {
+                if (!_FrameworkConditions.TryGetValue(fw.ID, out var frameworkConditions))
+                    continue;
+
+                Dictionary<string, List<string>> conditionalIncludes = new Dictionary<string, List<string>>();
+                var includeDirs = fw.AdditionalIncludeDirs.ToList();
+
+                for (int i = 0; i < includeDirs.Count; i++)
+                {
+                    if (!includeDirs[i].StartsWith(frameworkConditions.TargetPath + "/"))
+                        continue;
+
+                    string firstComponent = includeDirs[i].Substring(frameworkConditions.TargetPath.Length).TrimStart('/');
+                    int idx = firstComponent.IndexOf('/');
+                    if (idx == -1)
+                        continue;
+
+                    firstComponent = firstComponent.Substring(0, idx);
+
+                    if (frameworkConditions.ConditionalSubdirectories.Contains(firstComponent))
+                    {
+                        if (!conditionalIncludes.TryGetValue(firstComponent, out var list))
+                            conditionalIncludes[firstComponent] = list = new List<string>();
+
+                        list.Add(includeDirs[i]);
+                        includeDirs.RemoveAt(i--);
+                    }
+                }
+
+                foreach (var kv in conditionalIncludes)
+                {
+                    string prefix = frameworkConditions.TargetPath + "/" + kv.Key;
+                    var fileCondition = _Builder.MatchedFileConditions.FirstOrDefault(kv2 => kv2.Key.StartsWith(prefix + "/")).Value;
+                    if (fileCondition == null)
+                        throw new Exception($"No file conditions start with '{prefix}'. Could not derive variable name for '{kv.Key}'.");
+
+                    condFlags.Add(new ConditionalToolFlags
+                    {
+                        FlagCondition = new Condition.And
+                        {
+                            Arguments = new Condition[] {
+                                new Condition.ReferencesFramework{FrameworkID = fw.ClassID ?? fw.ID},
+                                fileCondition.ConditionToInclude,
+                            }
+                        },
+                        Flags = new ToolFlags
+                        {
+                            IncludeDirectories = kv.Value.ToArray()
+                        }
+                    });
+                }
+            }
+
+        }
+
+        void GenerateBoardProperty(List<EmbeddedFramework> frameworks)
         {
             List<PropertyEntry.Enumerated.Suggestion> lstProp = new List<PropertyEntry.Enumerated.Suggestion>();
-            var propertyGroup = prFrBoard.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards")).
+            var propertyGroup = frameworks.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards")).
                                         ConfigurableProperties.PropertyGroups.
                                             SingleOrDefault(pg => pg.UniqueID.Equals("com.sysprogs.bspoptions.nrf5x.board."));
 
@@ -188,6 +252,14 @@ namespace nrf5x
             }
         }
 
+        class GeneratedFrameworkConditions
+        {
+            public string TargetPath;
+            public HashSet<string> ConditionalSubdirectories = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        Dictionary<string, GeneratedFrameworkConditions> _FrameworkConditions = new Dictionary<string, GeneratedFrameworkConditions>();
+
         private void GenerateConditionsForSubdirs(FamilyDefinition family, Framework fw, CopyJob job)
         {
             HashSet<string> explicitlyMentionedDirectories = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
@@ -223,6 +295,11 @@ namespace nrf5x
                     continue;
 
                 generatedSmartFileConditions.Add($"-{name}|{name}\\\\.*");
+
+                if (!_FrameworkConditions.TryGetValue(fw.ID, out var conditions))
+                    _FrameworkConditions[fw.ID] = conditions = new GeneratedFrameworkConditions { TargetPath = $"$$SYS:BSP_ROOT$$/{family.FamilySubdirectory}/{job.TargetFolder}" };
+
+                conditions.ConditionalSubdirectories.Add(name);
             }
 
             job.SmartFileConditions = (job.SmartFileConditions ?? new string[0]).Concat(generatedSmartFileConditions).OrderBy(c => c.ToLower().TrimStart('-')).ToArray();
@@ -250,6 +327,7 @@ namespace nrf5x
                 if (desc.StartsWith("BLE"))
                     desc = desc.Substring(3).Trim();
 
+                string virtualFolderName = "BLE " + desc;
                 desc = "Bluetooth LE - " + desc;
 
                 string id = Path.GetFileName(dir);
@@ -274,7 +352,7 @@ namespace nrf5x
                     Name = string.Format("{0} ({1})", desc, Path.GetFileName(dir)),
                     ID = "com.sysprogs.arm.nordic." + famBase + "." + id,
                     ClassID = "com.sysprogs.arm.nordic.nrfx." + id,
-                    ProjectFolderName = "BLE " + desc,
+                    ProjectFolderName = virtualFolderName,
                     DefaultEnabled = false,
                     CopyJobs = new CopyJob[]
                     {

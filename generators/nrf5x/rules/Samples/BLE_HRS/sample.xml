@@ -1,35 +1,33 @@
 <?xml version="1.0"?>
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Name>Bluetooth LE HRS Peripheral</Name>
-  <Description>This sample demonstrates the Bluetooth LE Heart Rate Service</Description>
-  <MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
-  <DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
-  <RequiredFrameworks>
-    <string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
-    <string>com.sysprogs.arm.nordic.nrfx.ble_dis</string>
-    <string>com.sysprogs.arm.nordic.nrfx.ble_hrs</string>
-  </RequiredFrameworks>
-  <!--AdditionalSourcesToCopy>
-    <AdditionalSourceFile>
-      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</SourcePath>
-      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
-    </AdditionalSourceFile>
-    <AdditionalSourceFile>
-      <SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_peripheral/ble_app_hrs/main.c</SourcePath>
-      <DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
-    </AdditionalSourceFile>
-  </AdditionalSourcesToCopy-->
-
-  <ConditionalErrors>
-    <ConditionalError>
-      <ErrorCondition xsi:type="Not">
-        <Argument xsi:type="MatchesRegex">
-          <Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
-          <Regex>S.*</Regex>
-          <IgnoreCase>false</IgnoreCase>
-        </Argument>
-      </ErrorCondition>
-      <ErrorText>Please select a BLE Peripheral-capable softdevice on the previous page.</ErrorText>
-    </ConditionalError>
-  </ConditionalErrors>
+	<Name>Bluetooth LE HRS Peripheral</Name>
+	<Description>This sample demonstrates the Bluetooth LE Heart Rate Service</Description>
+	<MCUFilterRegex>^nRF528(32|40).*$</MCUFilterRegex>
+	<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
+		<string>com.sysprogs.arm.nordic.nrfx.ble_dis</string>
+		<string>com.sysprogs.arm.nordic.nrfx.ble_hrs</string>
+		<string>com.sysprogs.arm.nordic.nrf5x.libraries.external</string>
+	</RequiredFrameworks>
+	<DefaultConfiguration>
+		<Entries>
+			<KeyValue>
+				<Key>com.sysprogs.bspoptions.nrf5x.libraries.external.nrf_oberon</Key>
+				<Value>yes</Value>
+			</KeyValue>
+		</Entries>
+	</DefaultConfiguration>
+	<ConditionalErrors>
+		<ConditionalError>
+			<ErrorCondition xsi:type="Not">
+				<Argument xsi:type="MatchesRegex">
+					<Expression>$$com.sysprogs.bspoptions.nrf5x.softdevice$$</Expression>
+					<Regex>S.*</Regex>
+					<IgnoreCase>false</IgnoreCase>
+				</Argument>
+			</ErrorCondition>
+			<ErrorText>Please select a BLE Peripheral-capable softdevice on the previous page.</ErrorText>
+		</ConditionalError>
+	</ConditionalErrors>
 </EmbeddedProjectSample>
