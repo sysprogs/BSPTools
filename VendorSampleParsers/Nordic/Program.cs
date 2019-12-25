@@ -141,9 +141,9 @@ namespace NordicVendorSampleParser
                 Console.WriteLine(strlog);
             }
 
-            VendorSample ParseNativeBuildLog(string namelog, string SDKdir)
+            VendorSample ParseNativeBuildLog(string namelog, string SDKdir, string sampleID)
             {
-                VendorSample vs = new VendorSample();
+                VendorSample vs = new VendorSample { InternalUniqueID = sampleID };
                 List<string> lstFileC = new List<string>();
                 List<string> lstFileInc = new List<string>();
                 List<string> splitArgs = new List<string>();
@@ -225,13 +225,13 @@ namespace NordicVendorSampleParser
                 ApplyKnownPatches(SDKdir);
                 string makeExecutable = ToolchainDirectory + "/bin/make";
 
-                string[] ExampleDirs = Directory.GetFiles(Path.Combine(SDKdir, "examples"), "Makefile", SearchOption.AllDirectories).ToArray();
+                string[] allMakefiles = Directory.GetFiles(Path.Combine(SDKdir, "examples"), "Makefile", SearchOption.AllDirectories).ToArray();
 
                 using (var sw = File.CreateText(Path.Combine(SDKdir, @"components\toolchain\gcc\Makefile.windows")))
                 {
                     sw.WriteLine($"GNU_INSTALL_ROOT := {ToolchainDirectory.Replace('\\', '/')}/bin/");
-                    sw.WriteLine($"GNU_VERSION := 7.2.0");
-                    sw.WriteLine($"GNU_PREFIX := arm-eabi");
+                    sw.WriteLine($"GNU_VERSION := 9.2.1");
+                    sw.WriteLine($"GNU_PREFIX := arm-none-eabi");
                 }
 
                 List<VendorSample> allSamples = new List<VendorSample>();
@@ -240,25 +240,24 @@ namespace NordicVendorSampleParser
                 List<UnparseableVendorSample> failedSamples = new List<UnparseableVendorSample>();
                 int samplesDone = 0, samplesWithoutBinaryFile = 0, samplesWithoutLogFile = 0;
  
-                foreach (var makefile in ExampleDirs)
+                foreach (var makefile in allMakefiles)
                 {
                     string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("armgcc\\Makefile", "");
                     if (makefile.Contains(@"\ant\"))
                     {
-                        LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (" Skipped"));
+                        LogLine($"{samplesDone}/{allMakefiles.Length}: {nameExampl.TrimEnd('\\')}: " + (" Skipped"));
                         continue;
                     }
 
                     var nameLog = Path.Combine(Path.GetDirectoryName(makefile), "log.txt");
                     Console.WriteLine($"Compiling {nameExampl} ...");
 
-                    var sampleID = new VendorSampleID
-                    {
-                        SampleName = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("PROJECT_NAME")).Split('=')[1].Trim(' ').ToUpper(),
-                        BoardNameOrDeviceID = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("TARGETS")).Split('=')[1].Trim(' ').ToUpper()
-                    };
+                    string sampleName = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("PROJECT_NAME")).Split('=')[1].Trim(' ').ToUpper();
+                    string boardNameOrDeviceID = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("TARGETS")).Split('=')[1].Trim(' ').ToUpper();
 
-                    if (!filter.ShouldParseSampleForSpecificDevice(sampleID))
+                    string sampleID = $"{sampleName}-{boardNameOrDeviceID}";
+
+                    if (!filter.ShouldParseAnySamplesInsideDirectory(Path.GetDirectoryName(makefile)))
                         continue;
 
                     var startInfo = new ProcessStartInfo
@@ -275,7 +274,7 @@ namespace NordicVendorSampleParser
                     if (Directory.Exists(buildDir) && Directory.GetFiles(buildDir, "*.bin", SearchOption.AllDirectories).Count() > 0)
                     {
                         Console.ForegroundColor = ConsoleColor.Blue;
-                        LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + ("Builded"));
+                        LogLine($"{samplesDone}/{allMakefiles.Length}: {nameExampl.TrimEnd('\\')}: " + ("Built"));
                         Console.ForegroundColor = ConsoleColor.Gray;
                     }
                     else
@@ -301,10 +300,10 @@ namespace NordicVendorSampleParser
                         Console.ForegroundColor = ConsoleColor.Green;
                         if (!buildSucceeded)
                         {
-                            failedSamples.Add(new UnparseableVendorSample { BuildLogFile = nameLog, ID = sampleID });
+                            failedSamples.Add(new UnparseableVendorSample { BuildLogFile = nameLog, UniqueID = sampleID });
                             Console.ForegroundColor = ConsoleColor.Red;
                         }
-                        LogLine($"{samplesDone}/{ExampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
+                        LogLine($"{samplesDone}/{allMakefiles.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
                         Console.ForegroundColor = ConsoleColor.Gray;
 
                         if (!buildSucceeded)
@@ -327,7 +326,7 @@ namespace NordicVendorSampleParser
                         continue;
                     }
 
-                    var vs = ParseNativeBuildLog(nameLog, SDKdir);
+                    var vs = ParseNativeBuildLog(nameLog, SDKdir, sampleID);
                     vs.Path = Path.GetDirectoryName(makefile);
                     while (Directory.GetFiles(vs.Path, "*.c").Length == 0)
                         vs.Path = Path.GetDirectoryName(vs.Path);
