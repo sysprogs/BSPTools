@@ -430,8 +430,8 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
 					<TargetFolder>external</TargetFolder>
-					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-*integration_test_*;-tile\tile_shim\*;-micro-ecc\*;-infineon\*;-fprintf\*;*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
+					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-tile\tile_shim\*;-micro-ecc\*;-fprintf\*;*</FilesToCopy>
+					<ProjectInclusionMask>-*integration_test_*;-infineon\*;*.c;*.h;*.a</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.external.|nRF5x Libraries (3rd-party)</SmartPropertyGroup>
 					<VendorSpecificAttributes>GenerateConditionsForSubdirs|GenerateConditionsForPrebuiltLibraries</VendorSpecificAttributes>
@@ -557,10 +557,8 @@
 					</PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>
-
 		</Framework>
 		<Framework>
-
 			<Name>FreeRTOS</Name>
 			<ID>com.sysprogs.arm.nordic.nrf51.freertos</ID>
 			<ProjectFolderName>FreeRTOS</ProjectFolderName>
@@ -569,7 +567,8 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\freertos</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\freertos</SourceFolder>	
+					<TargetFolder>external\freertos</TargetFolder>	
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;portable\GCC\nrf52\*;portable\CMSIS\nrf52\*;-Source\Portable\*;-Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>

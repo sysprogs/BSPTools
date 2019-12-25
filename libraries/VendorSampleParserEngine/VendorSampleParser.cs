@@ -179,9 +179,9 @@ namespace VendorSampleParserEngine
 
                 foreach (var rec in report.Records)
                 {
-                    if (rec.BuildFailedExplicitly)
+                    if (rec.BuildFailedExplicitly && sampleDirectories.TryGetValue(rec.UniqueID, out var dir))
                     {
-                        RememberSamplePath(sampleDirectories[rec.UniqueID].Replace('/', '\\').Split('\\'));
+                        RememberSamplePath(dir.Replace('/', '\\').Split('\\'));
                     }
                 }
             }

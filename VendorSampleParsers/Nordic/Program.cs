@@ -147,7 +147,7 @@ namespace NordicVendorSampleParser
                 List<string> lstFileC = new List<string>();
                 List<string> lstFileInc = new List<string>();
                 List<string> splitArgs = new List<string>();
-                List<string> lstDef = new List<string>();
+                List<string> preprocessorMacros = new List<string>();
                 string aCurDir = Path.GetDirectoryName(namelog);
                 foreach (var ln in File.ReadAllLines(namelog))
                 {
@@ -170,7 +170,7 @@ namespace NordicVendorSampleParser
 
                 // Processing arguments
                 lstFileInc.AddRange(splitArgs.Where(ar => ar.StartsWith("-I")).Select(a => a.Substring(2).Trim()));
-                lstDef.AddRange(splitArgs.Where(ar => ar.StartsWith("-D")).Select(a => a.Substring(2).Trim()));
+                preprocessorMacros.AddRange(splitArgs.Where(ar => ar.StartsWith("-D")).Select(a => a.Substring(2).Trim()));
 
                 lstFileC.AddRange(splitArgs.Where(ar => (ar.EndsWith(".c") || ar.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase)) && !ar.Contains(@"components/toolchain/") &&
                 !ar.Contains(@"gcc_startup")));
@@ -189,32 +189,43 @@ namespace NordicVendorSampleParser
 
                 var aProjectName = File.ReadAllLines(Path.Combine(aCurDir, "Makefile")).Single(ln => ln.StartsWith("PROJECT_NAME")).Split('=')[1].Trim(' ').ToUpper();
 
-                var fl = File.ReadAllText(Path.Combine(aCurDir, "Makefile"));
-                if (!fl.Contains("SOFTDEVICE_PRESENT"))
+                vs.DeviceID = File.ReadAllLines(Path.Combine(aCurDir, "Makefile")).Single(ln => ln.StartsWith("TARGETS")).Split('=')[1].Trim(' ').ToUpper();
+
+                var softdeviceProperty = BSP.BSP.SupportedMCUs.First(m => vs.DeviceID.StartsWith(m.ID, StringComparison.InvariantCultureIgnoreCase)).ConfigurableProperties.PropertyGroups.SelectMany(g => g.Properties).FirstOrDefault(p => p.UniqueID == "com.sysprogs.bspoptions.nrf5x.softdevice") as PropertyEntry.Enumerated;
+                if (softdeviceProperty == null)
+                    throw new Exception("Failed to locate softdevice for property" + vs.DeviceID);
+
+                string softdevice = softdeviceProperty.SuggestionList.FirstOrDefault(e => preprocessorMacros.Contains(e.InternalValue))?.InternalValue;
+                if (!preprocessorMacros.Contains("SOFTDEVICE_PRESENT"))
                 {
-                    vs.Configuration.MCUConfiguration = new PropertyDictionary2
-                    {
-                        Entries = new PropertyDictionary2.KeyValue[] {
-                                    new PropertyDictionary2.KeyValue {
-                                        Key = "com.sysprogs.bspoptions.nrf5x.softdevice", Value = "nosoftdev" }
-                                                                    }.ToArray()
-                    };
+                    //This is a special 'serialization mode' sample that defines -DSxxx, but not -DSOFTDEVICE_PRESENT, that is not supported by our BSP yet.
+                    softdevice = null;
                 }
-                else
+
+                vs.Configuration.MCUConfiguration = new PropertyDictionary2
+                {
+                    Entries = new PropertyDictionary2.KeyValue[]
+                    {
+                        new PropertyDictionary2.KeyValue {
+                            Key = "com.sysprogs.bspoptions.nrf5x.softdevice",
+                            Value = softdevice ?? "nosoftdev"
+                        }
+                    }.ToArray()
+                };
+
+                if (softdevice != null)
                 {
                     var n = lstFileC.FindIndex(fi => fi.Contains("/softdevice_handler.c"));
                     if (n >= 0)
                         lstFileC.RemoveAt(n);
-
                 }
 
                 if (Directory.GetFiles(aCurDir, "*.ld").Count() > 0)
                     vs.LinkerScript = Directory.GetFiles(aCurDir, "*.ld")[0];
 
                 vs.IncludeDirectories = lstFileInc.ToArray();
-                vs.PreprocessorMacros = lstDef.ToArray();
+                vs.PreprocessorMacros = preprocessorMacros.ToArray();
                 vs.SourceFiles = lstFileC.ToArray();
-                vs.DeviceID = File.ReadAllLines(Path.Combine(aCurDir, "Makefile")).Single(ln => ln.StartsWith("TARGETS")).Split('=')[1].Trim(' ').ToUpper();
                 vs.UserFriendlyName = aProjectName;
                 vs.NoImplicitCopy = true;
                 return vs;
@@ -239,7 +250,7 @@ namespace NordicVendorSampleParser
                 string outputDir = Path.Combine(TestDirectory, "_MakeBuildLogs");
                 List<UnparseableVendorSample> failedSamples = new List<UnparseableVendorSample>();
                 int samplesDone = 0, samplesWithoutBinaryFile = 0, samplesWithoutLogFile = 0;
- 
+
                 foreach (var makefile in allMakefiles)
                 {
                     string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("armgcc\\Makefile", "");
@@ -257,7 +268,11 @@ namespace NordicVendorSampleParser
 
                     string sampleID = $"{sampleName}-{boardNameOrDeviceID}";
 
-                    if (!filter.ShouldParseAnySamplesInsideDirectory(Path.GetDirectoryName(makefile)))
+                    string vendorSamplePath = Path.GetDirectoryName(makefile);
+                    while (Directory.GetFiles(vendorSamplePath, "*.c").Length == 0)
+                        vendorSamplePath = Path.GetDirectoryName(vendorSamplePath);
+
+                    if (!filter.ShouldParseAnySamplesInsideDirectory(vendorSamplePath))
                         continue;
 
                     var startInfo = new ProcessStartInfo
@@ -327,18 +342,20 @@ namespace NordicVendorSampleParser
                     }
 
                     var vs = ParseNativeBuildLog(nameLog, SDKdir, sampleID);
-                    vs.Path = Path.GetDirectoryName(makefile);
-                    while (Directory.GetFiles(vs.Path, "*.c").Length == 0)
-                        vs.Path = Path.GetDirectoryName(vs.Path);
+                    vs.Path = vendorSamplePath;
+
 
                     allSamples.Add(vs);
                 }
 
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                LogLine($"Total samples : {samplesDone}");
-                LogLine($"Samples without final binary file: {samplesWithoutBinaryFile}  Samples producing no log: {samplesWithoutLogFile}");
-                LogLine($"Failed samples : {failedSamples.Count}, {(failedSamples.Count / samplesDone) * 100} % from Total");
-                Console.ForegroundColor = ConsoleColor.Gray;
+                if (samplesDone > 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    LogLine($"Total samples : {samplesDone}");
+                    LogLine($"Samples without final binary file: {samplesWithoutBinaryFile}  Samples producing no log: {samplesWithoutLogFile}");
+                    LogLine($"Failed samples : {failedSamples.Count}, {(failedSamples.Count / samplesDone) * 100} % from Total");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                }
 
                 return new ParsedVendorSamples { VendorSamples = allSamples.ToArray(), FailedSamples = failedSamples.ToArray() };
             }

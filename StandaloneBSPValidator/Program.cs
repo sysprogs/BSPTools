@@ -627,6 +627,7 @@ namespace StandaloneBSPValidator
             });
 
             List<string> comments = new List<string>();
+            comments.Add("Original directory:" + vendorSample?.Path);
             comments.Add("Tool flags:");
             comments.Add("\tInclude directories:");
             foreach (var dir in flags.IncludeDirectories ?? new string[0])
