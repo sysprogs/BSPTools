@@ -87,8 +87,8 @@ namespace nrf5x
         void GenerateBoardProperty(List<EmbeddedFramework> frameworks)
         {
             List<PropertyEntry.Enumerated.Suggestion> lstProp = new List<PropertyEntry.Enumerated.Suggestion>();
-            var propertyGroup = frameworks.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards")).
-                                        ConfigurableProperties.PropertyGroups.
+            var framework = frameworks.SingleOrDefault(fr => fr.ID.Equals("com.sysprogs.arm.nordic.nrf5x.boards"));
+            var propertyGroup = framework.ConfigurableProperties.PropertyGroups.
                                             SingleOrDefault(pg => pg.UniqueID.Equals("com.sysprogs.bspoptions.nrf5x.board."));
 
             var rgBoardIfdef = new Regex("#(if|elif) defined\\(BOARD_([A-Z0-9a-z_]+)\\)");
@@ -96,6 +96,10 @@ namespace nrf5x
 
             var lines = File.ReadAllLines(Path.Combine(Directories.OutputDir, @"nRF5x\components\boards\boards.h"));
             lstProp.Add(new PropertyEntry.Enumerated.Suggestion() { InternalValue = "", UserFriendlyName = "None" });
+
+            var reverseConditions = _Builder.ReverseFileConditions?.GetHandleForFramework(framework);
+
+            const string BoardTypeParameter = "com.sysprogs.bspoptions.nrf5x.board.type";
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -110,13 +114,15 @@ namespace nrf5x
                 {
                     ConditionToInclude = new Condition.Equals()
                     {
-                        Expression = "$$com.sysprogs.bspoptions.nrf5x.board.type$$",
+                        Expression = $"$${BoardTypeParameter}$$",
                         ExpectedValue = boardID,
                         IgnoreCase = false
                     },
                     FilePath = "nRF5x/components/boards/" + file
                 });
                 lstProp.Add(new PropertyEntry.Enumerated.Suggestion { InternalValue = boardID });
+
+                reverseConditions?.AttachPreprocessorMacro("BOARD_" + boardID, reverseConditions?.CreateSimpleCondition(BoardTypeParameter, boardID));
             }
             //--ConfigurableProperties--
 
@@ -277,7 +283,7 @@ namespace nrf5x
             }
 
             Regex rgExcludedSubdir = new Regex(@"-([^\\]+)\\\*$");
-            foreach (var cond in job.FilesToCopy.Split(';'))
+            foreach (var cond in (job.FilesToCopy + ";" + job.ProjectInclusionMask).Split(';'))
             {
                 var m = rgExcludedSubdir.Match(cond);
                 if (m.Success)

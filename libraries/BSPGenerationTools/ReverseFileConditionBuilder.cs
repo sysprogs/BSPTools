@@ -116,6 +116,14 @@ namespace BSPGenerationTools
 
         Dictionary<string, Handle> _HandlesByFramework = new Dictionary<string, Handle>();
 
+        public Handle GetHandleForFramework(EmbeddedFramework fw)
+        {
+            var id = fw.ClassID ?? fw.ID;
+            if (!_HandlesByFramework.TryGetValue(id, out var handle))
+                _HandlesByFramework[id] = handle = new Handle(this, id);
+            return handle;
+        }
+
         public Handle GetHandleForFramework(Framework fw)
         {
             var id = fw.ClassID ?? fw.ID;

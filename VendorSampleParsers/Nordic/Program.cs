@@ -75,7 +75,8 @@ namespace NordicVendorSampleParser
 
         class NordicSampleRelocator : VendorSampleRelocator
         {
-            public NordicSampleRelocator()
+            public NordicSampleRelocator(ReverseConditionTable optionalConditionTableForFrameworkMapping)
+                : base(optionalConditionTableForFrameworkMapping)
             {
                 AutoDetectedFrameworks = new AutoDetectedFramework[0];
                 AutoPathMappings = new PathMapping[]
@@ -129,7 +130,20 @@ namespace NordicVendorSampleParser
 
             protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir)
             {
-                return new NordicSampleRelocator();
+                ReverseConditionTable table = null;
+
+                if (false)
+                {
+                    //As of SDK 16.0, most vendor samples include very specific subsets of various frameworks, so
+                    //converting them to properly reference embedded frameworks pulls in too many extra files.
+                    //Also the LwIP framework defines excessive amount of include directories, exceeding the 32KB
+                    //limit for .rsp files.
+                    var conditionTableFile = Path.Combine(BSPDirectory, ReverseFileConditionBuilder.ReverseConditionListFileName + ".gz");
+                    if (File.Exists(conditionTableFile))
+                        table = XmlTools.LoadObject<ReverseConditionTable>(conditionTableFile);
+                }
+
+                return new NordicSampleRelocator(table);
             }
 
             void LogLine(string strlog)

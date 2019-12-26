@@ -298,35 +298,15 @@
 					<TargetFolder>components\boards</TargetFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*bsp_btn_ant.c;*</ProjectInclusionMask>
-					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_mode$$;$$com.sysprogs.bspoptions.nrf5x.board.bsp_uart$$</PreprocessorMacros>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.board.|Evaluation Board</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>-Enable Simple BSP Mode[bsp_mode]|{0}|BSP_SIMPLE</string>
+						<string>Print diagnostics to UART[bsp_uart]|{0}|BSP_UART_SUPPORT</string>
+					</SmartPreprocessorMacros>
+					<PreprocessorMacros>BOARD_$$com.sysprogs.bspoptions.nrf5x.board.type$$</PreprocessorMacros>
 					<!--   The conditions are generated programmatically, see Nrf5xRuleGenerator.GenerateBoardProperty() -->
 				</CopyJob>
-
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Name>Evaluation Board</Name>
-						<UniqueID>com.sysprogs.bspoptions.nrf5x.board.</UniqueID>
-						<Properties>
-							<!--   The conditions are generated programmatically, see Nrf5xRuleGenerator.GenerateBoardProperty() -->
-							<PropertyEntry xsi:type="Boolean">
-								<Name>Advanced mode</Name>
-								<UniqueID>bsp_mode</UniqueID>
-								<DefaultValue>false</DefaultValue>
-								<ValueForFalse>BSP_SIMPLE</ValueForFalse>
-							</PropertyEntry>
-							<PropertyEntry xsi:type="Boolean">
-								<Name>Print diagnostics to UART</Name>
-								<UniqueID>bsp_uart</UniqueID>
-								<DefaultValue>true</DefaultValue>
-								<ValueForTrue>BSP_UART_SUPPORT</ValueForTrue>
-							</PropertyEntry>
-						</Properties>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 		</Framework>
 		<Framework>
 			<Name>NRF5x Libraries</Name>
@@ -402,9 +382,10 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\softdevice\common</SourceFolder>
 					<TargetFolder>components\softdevice\common</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
+					<Flags>SimpleFileConditionsAreSecondary</Flags>
 					<SimpleFileConditions>
-						<string>nrf_sdh_freertos.c: $$com.sysprogs.bspoptions.nrf5x.libraries.timer$$ == freertos</string>
-						<string>.*[^freertos].*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
+						<string>nrf_sdh_freertos\..: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev &amp;&amp; fw:com.sysprogs.arm.nordic.nrf51.freertos</string>
+						<string>nrf_sdh(?!_freertos).*: $$com.sysprogs.bspoptions.nrf5x.softdevice$$ != nosoftdev</string>
 					</SimpleFileConditions>
 				</CopyJob>
 				<!-- The fprintf library is physically located in the 'external' folder, however is required by the regular libraries, so we place it into the regular libraries framework. -->
@@ -432,7 +413,7 @@
 					<TargetFolder>external</TargetFolder>
 					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-tile\tile_shim\*;-micro-ecc\*;-fprintf\*;*</FilesToCopy>
 					<ProjectInclusionMask>-*integration_test_*;-infineon\*;*.c;*.h;*.a</ProjectInclusionMask>
-					<AutoIncludeMask>*.h</AutoIncludeMask>
+					<AutoIncludeMask>-infineon\*;*.h</AutoIncludeMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.external.|nRF5x Libraries (3rd-party)</SmartPropertyGroup>
 					<VendorSpecificAttributes>GenerateConditionsForSubdirs|GenerateConditionsForPrebuiltLibraries</VendorSpecificAttributes>
 					<SmartFileConditions>
@@ -500,8 +481,12 @@
 					<!-- Note that Nordic SDK provides its own replacements for some mbedtls files in mbedtls\replacements\asn1write.c -->
 					<ProjectInclusionMask>-tests\*;-doxygen\*;-programs\*;-library\asn1write.c;-library\ssl_srv.c;*.c;*.h</ProjectInclusionMask> 
 					<AutoIncludeMask>-tests\*;*.h</AutoIncludeMask>
-					<PreprocessorMacros>MBEDTLS_CONFIG_FILE="nrf_tls_config.h";BLE_STACK_SUPPORT_REQD;ENABLE_DEBUG_LOG_SUPPORT;MBEDTLS_CTR_DRBG_C</PreprocessorMacros>
+					<PreprocessorMacros>BLE_STACK_SUPPORT_REQD;ENABLE_DEBUG_LOG_SUPPORT;MBEDTLS_CTR_DRBG_C</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/mbedtls/include</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.mbedtls.|MbedTLS</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>MbedTLS Configuration File Name[config_file]|MBEDTLS_CONFIG_FILE={0}|@"nrf_tls_config.h"</string>
+					</SmartPreprocessorMacros>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external\nrf_tls</SourceFolder>

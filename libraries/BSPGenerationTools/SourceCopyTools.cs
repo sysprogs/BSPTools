@@ -246,6 +246,14 @@ namespace BSPGenerationTools
 
         public string AdditionalProjectFiles;
         public string VendorSpecificAttributes;
+        public CopyJobFlags Flags;
+
+        [Flags]
+        public enum CopyJobFlags
+        {
+            None = 0,
+            SimpleFileConditionsAreSecondary,
+        }
 
         class ParsedCondition
         {
@@ -318,7 +326,8 @@ namespace BSPGenerationTools
             if (SimpleFileConditions != null)
             {
                 allConditions.AddRange(SimpleFileConditions.Select(c => new ConditionRecord(c, null)));
-                reverseConditions?.FlagIncomplete(ReverseFileConditionWarning.HasRegularConditions);
+                if ((Flags & CopyJobFlags.SimpleFileConditionsAreSecondary) == CopyJobFlags.None)
+                    reverseConditions?.FlagIncomplete(ReverseFileConditionWarning.HasRegularConditions);
             }
 
             if (!string.IsNullOrEmpty(PreprocessorMacros))
@@ -584,7 +593,7 @@ namespace BSPGenerationTools
                 if (includedInProject)
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
 
-                bool foundCondition = false;
+                ParsedCondition foundCondition = null;
 
                 if (conditions != null)
                 {
@@ -597,13 +606,24 @@ namespace BSPGenerationTools
                             if (includedInProject)
                                 cond.ReverseConditionHandle?.AttachFile(encodedPath);
 
-                            foundCondition = true;
+                            foundCondition = cond;
                             break;
                         }
                 }
 
-                if (!foundCondition && includedInProject)
-                    reverseConditions?.AttachFile(encodedPath);
+                if (includedInProject)
+                {
+                    bool createReverseConditionForJustFrameworkReference = foundCondition == null;
+                    if (foundCondition != null && foundCondition.ReverseConditionHandle == null && ((Flags & CopyJobFlags.SimpleFileConditionsAreSecondary) != CopyJobFlags.None))
+                    {
+                        //This file is handled by a secondary condition (non-smart condition that depends on other variables).
+                        //Vendor samples referencing this file should just reference the framework and not set any configuration parameters.
+                        createReverseConditionForJustFrameworkReference = true;
+                    }
+
+                    if (createReverseConditionForJustFrameworkReference)
+                        reverseConditions?.AttachFile(encodedPath);
+                }
             }
 
             if (AdditionalProjectFiles != null)

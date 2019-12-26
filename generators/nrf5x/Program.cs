@@ -723,6 +723,7 @@ namespace nrf5x
                 };
 
                 bspBuilder.ValidateBSP(bsp);
+                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), true);
 
                 bspBuilder.Save(bsp, false, false);
             }
