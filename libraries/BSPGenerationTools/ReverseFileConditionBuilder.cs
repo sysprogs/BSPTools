@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using static BSPEngine.ConfigurationFixDatabase;
 
 namespace BSPGenerationTools
 {
@@ -40,7 +41,7 @@ namespace BSPGenerationTools
 
             public void AttachFile(string file) => _Handle.AttachFile(file, this);
 
-            public ReverseConditionTable.Condition ToConditionRecord() => new ReverseConditionTable.Condition { RequestedConfiguration = _RequiredConfiguration };
+            public ConfigurationFragment ToConditionRecord() => new ConfigurationFragment { RequestedConfiguration = _RequiredConfiguration };
         }
 
         public class Handle
@@ -52,7 +53,7 @@ namespace BSPGenerationTools
             internal Dictionary<string, ConditionHandle> ConditionsPerMacro = new Dictionary<string, ConditionHandle>();
             internal Dictionary<string, string> FreeformMacros = new Dictionary<string, string>();
             internal Dictionary<string, string> MinimalConfiguration = new Dictionary<string, string>();
-            internal List<string> IncludeDirs = new List<string>();
+            internal Dictionary<string, ConditionHandle> IncludeDirs = new Dictionary<string, ConditionHandle>();
 
             public Handle(ReverseFileConditionBuilder reverseFileConditionBuilder, string id)
             {
@@ -100,15 +101,14 @@ namespace BSPGenerationTools
 
             internal void AttachIncludeDir(string mappedDir)
             {
-                IncludeDirs.Add(mappedDir);
+                IncludeDirs[mappedDir] = null;
             }
 
-            internal ReverseConditionTable.Framework ToFrameworkDefinition()
+            internal FrameworkReference ToFrameworkDefinition()
             {
-                return new ReverseConditionTable.Framework
+                return new FrameworkReference
                 {
                     ID = FrameworkID,
-                    IncludeDirs = IncludeDirs.ToArray(),
                     MinimalConfiguration = MinimalConfiguration.Select(kv => new SysVarEntry { Key = kv.Key, Value = kv.Value }).ToArray()
                 };
             }
@@ -155,8 +155,9 @@ namespace BSPGenerationTools
             {
                 ConvertObjectConditions(allFrameworkHandles[i].ConditionsPerFile, result.ConditionTable, result.FileTable, conditionIndicies, i);
                 ConvertObjectConditions(allFrameworkHandles[i].ConditionsPerMacro, result.ConditionTable, result.MacroTable, conditionIndicies, i);
+                ConvertObjectConditions(allFrameworkHandles[i].IncludeDirs, result.ConditionTable, result.IncludeDirectoryTable, conditionIndicies, i);
 
-                foreach(var kv in allFrameworkHandles[i].FreeformMacros)
+                foreach (var kv in allFrameworkHandles[i].FreeformMacros)
                 {
                     result.FreeFormMacros.Add(new ReverseConditionTable.FreeFormMacroEntry
                     {
@@ -174,7 +175,7 @@ namespace BSPGenerationTools
             }
         }
 
-        private static void ConvertObjectConditions(Dictionary<string, ConditionHandle> conditionsToConvert, List<ReverseConditionTable.Condition> allConditions, List<ReverseConditionTable.ObjectEntry> result, Dictionary<ConditionHandle, int> conditionIndicies, int i)
+        private static void ConvertObjectConditions(Dictionary<string, ConditionHandle> conditionsToConvert, List<ConfigurationFragment> allConditions, List<ObjectEntry> result, Dictionary<ConditionHandle, int> conditionIndicies, int i)
         {
             foreach (var cond in conditionsToConvert)
             {
@@ -188,7 +189,7 @@ namespace BSPGenerationTools
                     }
                 }
 
-                result.Add(new ReverseConditionTable.ObjectEntry { ObjectName = cond.Key, ConditionIndex = index, FrameworkIndex = i });
+                result.Add(new ObjectEntry { ObjectName = cond.Key, OneBasedConfigurationFragmentIndex = index, OneBasedFrameworkIndex = i + 1 });
             }
         }
 
@@ -198,18 +199,6 @@ namespace BSPGenerationTools
 
     public class ReverseConditionTable
     {
-        public struct Condition
-        {
-            public SysVarEntry[] RequestedConfiguration;
-        }
-
-        public struct ObjectEntry
-        {
-            public string ObjectName;
-            public int ConditionIndex;
-            public int FrameworkIndex;
-        }
-
         public struct FreeFormMacroEntry
         {
             public string Regex;
@@ -217,18 +206,12 @@ namespace BSPGenerationTools
             public int FrameworkIndex;
         }
 
-        public class Framework
-        {
-            public string ID;
-            public SysVarEntry[] MinimalConfiguration;
-            public string[] IncludeDirs;
-        }
-
-        public List<Condition> ConditionTable = new List<Condition>();
+        public List<ConfigurationFragment> ConditionTable = new List<ConfigurationFragment>();
         public List<ObjectEntry> FileTable = new List<ObjectEntry>();
         public List<ObjectEntry> MacroTable = new List<ObjectEntry>();
+        public List<ObjectEntry> IncludeDirectoryTable = new List<ObjectEntry>();
         public List<FreeFormMacroEntry> FreeFormMacros = new List<FreeFormMacroEntry>();
-        public Framework[] Frameworks;
+        public FrameworkReference[] Frameworks;
         public PropertyDictionary2 RenamedFileTable;
     }
 

@@ -647,11 +647,19 @@ namespace VendorSampleParserEngine
             bsp.VendorSampleCatalogName = VendorSampleCatalogName;
             XmlTools.SaveObject(bsp, Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
 
+            var reverseConditionTableFile = Path.Combine(BSPDirectory, ReverseFileConditionBuilder.ReverseConditionListFileName + ".gz");
+            if (File.Exists(reverseConditionTableFile))
+            {
+                Console.WriteLine("Building configuration fix database...");
+                var fixBuilder = new ConfigurationFixDatabaseBuilder(BSPDirectory, XmlTools.LoadObject<ReverseConditionTable>(reverseConditionTableFile));
+                fixBuilder.BuildConfigurationFixDatabase();
+            }
+
             if (mode != RunMode.Incremental && mode != RunMode.SingleSample)
             {
                 Console.WriteLine("Creating new BSP archive...");
                 string statFile = Path.ChangeExtension(archiveName, ".xml");
-                TarPacker.PackDirectoryToTGZ(BSPDirectory, archiveFilePath, fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp" && Path.GetFileName(fn) != statFile);
+                TarPacker.PackDirectoryToTGZ(BSPDirectory, archiveFilePath, fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp" && Path.GetFileName(fn) != statFile && !fn.Contains(ReverseFileConditionBuilder.ReverseConditionListFileName));
             }
 
             var vendorSampleListInBSP = Path.Combine(BSPDirectory, VendorSampleDirectoryName, "VendorSamples.xml");

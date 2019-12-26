@@ -558,7 +558,7 @@
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;portable\GCC\nrf52\*;portable\CMSIS\nrf52\*;-Source\Portable\*;-Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Source/CMSIS_RTOS;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Portable/gcc/nrf52;$$SYS:BSP_ROOT$$/nRF5x/FreeRTOS/Portable/CMSIS/nrf52</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/nRF5x/external/freertos/Source/Include;$$SYS:BSP_ROOT$$/nRF5x/external/freertos/Portable/gcc/nrf52;$$SYS:BSP_ROOT$$/nRF5x/external/freertos/Portable/CMSIS/nrf52</AdditionalIncludeDirs>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.freertos.|FreeRTOS</SmartPropertyGroup>
 					<SmartFileConditions>
 						<string>Heap Implementation[heap]|

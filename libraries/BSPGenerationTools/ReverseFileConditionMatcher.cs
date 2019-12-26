@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using static BSPEngine.ConfigurationFixDatabase;
 
 namespace BSPGenerationTools
 {
@@ -11,7 +12,7 @@ namespace BSPGenerationTools
     {
         public class RequestedConfiguration
         {
-            public ReverseConditionTable.Framework Framework;
+            public FrameworkReference Framework;
             public SysVarEntry[] Configuration;
         }
 
@@ -19,10 +20,11 @@ namespace BSPGenerationTools
         {
             public Regex Regex;
             public string VariableName;
-            public ReverseConditionTable.Framework Framework;
+            public FrameworkReference Framework;
         }
 
         readonly Dictionary<string, RequestedConfiguration> _ConfigurationByFile;
+        readonly Dictionary<string, RequestedConfiguration> _ConfigurationByIncludeDir;
         readonly Dictionary<string, RequestedConfiguration> _ConfigurationByMacro;
 
         readonly List<FreeFormMacro> _FreeFormMacros = new List<FreeFormMacro>();
@@ -33,6 +35,7 @@ namespace BSPGenerationTools
 
             _ConfigurationByFile = TranslateObjectList(table, table.FileTable, fileDict);
             _ConfigurationByMacro = TranslateObjectList(table, table.MacroTable);
+            _ConfigurationByIncludeDir = TranslateObjectList(table, table.IncludeDirectoryTable);
 
             foreach (var macro in table.FreeFormMacros)
             {
@@ -45,14 +48,14 @@ namespace BSPGenerationTools
             }
         }
 
-        static Dictionary<string, RequestedConfiguration> TranslateObjectList(ReverseConditionTable table, IEnumerable<ReverseConditionTable.ObjectEntry> list, Dictionary<string, string> optionalDictionary = null)
+        static Dictionary<string, RequestedConfiguration> TranslateObjectList(ReverseConditionTable table, IEnumerable<ObjectEntry> list, Dictionary<string, string> optionalDictionary = null)
         {
             Dictionary<string, RequestedConfiguration> result = new Dictionary<string, RequestedConfiguration>();
             foreach (var entry in list)
             {
-                var cfg = new RequestedConfiguration { Framework = table.Frameworks[entry.FrameworkIndex] };
-                if (entry.ConditionIndex != 0)
-                    cfg.Configuration = table.ConditionTable[entry.ConditionIndex - 1].RequestedConfiguration;
+                var cfg = new RequestedConfiguration { Framework = table.Frameworks[entry.OneBasedFrameworkIndex - 1] };
+                if (entry.OneBasedConfigurationFragmentIndex != 0)
+                    cfg.Configuration = table.ConditionTable[entry.OneBasedConfigurationFragmentIndex - 1].RequestedConfiguration;
 
                 string key = entry.ObjectName;
                 if (optionalDictionary != null && optionalDictionary.TryGetValue(key, out var val))
@@ -89,13 +92,15 @@ namespace BSPGenerationTools
 
             MatchingFlags flags = MatchingFlags.None;
 
-            var frameworkObjects = new HashSet<ReverseConditionTable.Framework>();
+            var frameworkObjects = new HashSet<FrameworkReference>();
 
             LocateAndRemoveMatchingEntries(sourceList, _ConfigurationByFile, requestedConfiguration, frameworkObjects, ref flags);
             LocateAndRemoveMatchingEntries(macroList, _ConfigurationByMacro, requestedConfiguration, frameworkObjects, ref flags);
 
             LocateAndRemoveMatchingEntries(headerList, _ConfigurationByFile, requestedConfiguration, frameworkObjects, ref flags, ObjectMatchingMode.MatchIfConfigurationMatches);
             LocateAndRemoveMatchingEntries(dependencyList, _ConfigurationByFile, requestedConfiguration, frameworkObjects, ref flags, ObjectMatchingMode.MatchIfConfigurationMatches);
+
+            LocateAndRemoveMatchingEntries(includeList, _ConfigurationByIncludeDir, requestedConfiguration, frameworkObjects, ref flags, ObjectMatchingMode.MatchIfConfigurationMatches);
 
             for (int i = 0; i < macroList.Count; i++)
             {
@@ -153,7 +158,7 @@ namespace BSPGenerationTools
         static void LocateAndRemoveMatchingEntries(List<string> items,
             Dictionary<string, RequestedConfiguration> rules,
             Dictionary<string, string> requestedConfiguration,
-            HashSet<ReverseConditionTable.Framework> frameworks,
+            HashSet<FrameworkReference> frameworks,
             ref MatchingFlags flags,
             ObjectMatchingMode mode = ObjectMatchingMode.MatchAndUpdateConfiguration)
         {

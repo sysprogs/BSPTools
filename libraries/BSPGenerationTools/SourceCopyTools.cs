@@ -689,9 +689,13 @@ namespace BSPGenerationTools
                 foreach (var dir in AdditionalIncludeDirs.Split(';'))
                 {
                     var mappedDir = MapIncludeDir(absTarget, subdir, dir);
-                    reverseConditions?.AttachIncludeDir(mappedDir);
                     includeDirs.Add(mappedDir);
                 }
+            }
+
+            foreach (var dir in includeDirs)
+            {
+                reverseConditions?.AttachIncludeDir(dir);
             }
 
             return new ToolFlags
