@@ -11,12 +11,14 @@ namespace VendorSampleParserEngine
 {
     public class ConfigurationFixDatabaseBuilder
     {
-        string _BSPDirectory;
+        LoadedBSP _BSP;
+        private readonly string _TestDirectory;
         ReverseConditionTable _ReverseConditionTable;
 
-        public ConfigurationFixDatabaseBuilder(string bSPDirectory, ReverseConditionTable reverseConditionTable)
+        public ConfigurationFixDatabaseBuilder(LoadedBSP bsp, string testDirectory, ReverseConditionTable reverseConditionTable)
         {
-            _BSPDirectory = bSPDirectory;
+            _BSP = bsp;
+            _TestDirectory = testDirectory;
             _ReverseConditionTable = reverseConditionTable;
         }
 
@@ -42,12 +44,35 @@ namespace VendorSampleParserEngine
                 }
             }
 
-            XmlTools.SaveObject(result, Path.Combine(_BSPDirectory, ConfigurationFixDatabase.FileName));
+            BuildConfigurationFixSample();
+
+            XmlTools.SaveObject(result, Path.Combine(_BSP.Directory, ConfigurationFixDatabase.FileName));
+        }
+
+        private void BuildConfigurationFixSample()
+        {
+            if (_ReverseConditionTable.ConfigurationFixSample == null)
+                return;
+
+            var sampleDir = GetFullPath(_ReverseConditionTable.ConfigurationFixSample.SamplePath);
+
+            LoadedBSP.LoadedSample sampleObj = new LoadedBSP.LoadedSample
+            {
+                BSP = _BSP,
+                Directory = sampleDir,
+                Sample = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(sampleDir, "sample.xml"))
+            };
+
+            var mcu = _BSP.MCUs.First(m => m.ExpandedMCU.ID == _ReverseConditionTable.ConfigurationFixSample.MCUID);
+
+            var result = StandaloneBSPValidator.Program.TestSingleSample(sampleObj, mcu, _TestDirectory, new StandaloneBSPValidator.TestedSample { }, null, null);
+            if (result.Result != StandaloneBSPValidator.Program.TestBuildResult.Succeeded)
+                throw new Exception("Failed to build synthetic sample for determining symbol-to-config map");
         }
 
         private string GetFullPath(string value)
         {
-            return Path.GetFullPath(value.Replace("$$SYS:BSP_ROOT$$", _BSPDirectory));
+            return Path.GetFullPath(value.Replace("$$SYS:BSP_ROOT$$", _BSP.Directory));
         }
     }
 }

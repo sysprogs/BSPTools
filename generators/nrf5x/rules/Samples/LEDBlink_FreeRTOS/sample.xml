@@ -26,7 +26,7 @@
 	<DefaultConfiguration>
 		<Entries>
 			<KeyValue>
-				<Key>com.sysprogs.bspoptions.nrf5x.clock_driver_legacy</Key>
+				<Key>com.sysprogs.bspoptions.nrf5x.legacy_drivers.clock</Key>
 				<Value>yes</Value>
 			</KeyValue>
 			<KeyValue>

@@ -102,14 +102,13 @@
 				<Value>yes</Value>
 			</KeyValue>
 			<KeyValue>
-				<Key>com.sysprogs.bspoptions.nrf5x.uart_driver_legacy</Key>
+				<Key>com.sysprogs.bspoptions.nrf5x.legacy_drivers.uart</Key>
 				<Value>yes</Value>
 			</KeyValue>
 			<KeyValue>
 				<Key>com.sysprogs.bspoptions.nrf5x.libraries.atomic_fifo</Key>
 				<Value>yes</Value>
 			</KeyValue>
-
 			<KeyValue>
 				<Key>com.sysprogs.bspoptions.nrf5x.libraries.block_dev</Key>
 				<Value />

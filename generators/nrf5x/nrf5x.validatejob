@@ -6,13 +6,6 @@
 	<DeviceRegex>nRF52.*</DeviceRegex>
 	<Samples>
 		<TestedSample>
-			<DeviceRegex>^nRF528(32|40).*$</DeviceRegex>
-			<Name>ValidateGenerateFramwoks</Name>
-			<SkipIfNotFound>false</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-ValidateGenerateFramwoks</TestDirSuffix>
-		</TestedSample>	 
-		<TestedSample>
 			<Name>Bluetooth LE Mouse</Name>
 			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>

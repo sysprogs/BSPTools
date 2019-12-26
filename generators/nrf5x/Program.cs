@@ -654,7 +654,14 @@ namespace nrf5x
                 };
 
                 bspBuilder.ValidateBSP(bsp);
-                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), true);
+
+                var cfgFixSample = new ConfigurationFixSampleReference
+                {
+                    MCUID = "nRF52840_XXAA",
+                    SamplePath = "$$SYS:BSP_ROOT$$/samples/BLEMouse"
+                };
+
+                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), true, cfgFixSample);
 
                 bspBuilder.Save(bsp, false, false);
             }

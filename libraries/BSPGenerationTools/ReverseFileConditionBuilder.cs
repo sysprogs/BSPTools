@@ -132,7 +132,7 @@ namespace BSPGenerationTools
             return handle;
         }
 
-        public void SaveIfConsistent(string outputDir, PropertyDictionary2 renamedFileTable, bool throwIfInconsistent)
+        public void SaveIfConsistent(string outputDir, PropertyDictionary2 renamedFileTable, bool throwIfInconsistent, ConfigurationFixSampleReference cfgFixSample = null)
         {
             if (Warnings != ReverseFileConditionWarning.None)
             {
@@ -149,6 +149,7 @@ namespace BSPGenerationTools
             {
                 Frameworks = allFrameworkHandles.Select(h => h.ToFrameworkDefinition()).ToArray(),
                 RenamedFileTable = renamedFileTable,
+                ConfigurationFixSample = cfgFixSample,
             };
 
             for (int i = 0; i < allFrameworkHandles.Length; i++)
@@ -197,6 +198,12 @@ namespace BSPGenerationTools
 
     }
 
+    public class ConfigurationFixSampleReference
+    {
+        public string SamplePath;
+        public string MCUID;
+    }
+
     public class ReverseConditionTable
     {
         public struct FreeFormMacroEntry
@@ -213,6 +220,8 @@ namespace BSPGenerationTools
         public List<FreeFormMacroEntry> FreeFormMacros = new List<FreeFormMacroEntry>();
         public FrameworkReference[] Frameworks;
         public PropertyDictionary2 RenamedFileTable;
+
+        public ConfigurationFixSampleReference ConfigurationFixSample;
     }
 
     [Flags]

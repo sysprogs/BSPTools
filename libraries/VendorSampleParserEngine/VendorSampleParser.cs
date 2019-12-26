@@ -651,7 +651,8 @@ namespace VendorSampleParserEngine
             if (File.Exists(reverseConditionTableFile))
             {
                 Console.WriteLine("Building configuration fix database...");
-                var fixBuilder = new ConfigurationFixDatabaseBuilder(BSPDirectory, XmlTools.LoadObject<ReverseConditionTable>(reverseConditionTableFile));
+                var testDir = Path.Combine(TestDirectory, BSP.BSP.PackageID, "AutoFixTest");
+                var fixBuilder = new ConfigurationFixDatabaseBuilder(BSP, testDir, XmlTools.LoadObject<ReverseConditionTable>(reverseConditionTableFile));
                 fixBuilder.BuildConfigurationFixDatabase();
             }
 

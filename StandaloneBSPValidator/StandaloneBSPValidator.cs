@@ -463,12 +463,12 @@ namespace StandaloneBSPValidator
 
         public static TestResult TestSingleSample(LoadedBSP.LoadedSample sampleObj,
             LoadedBSP.LoadedMCU mcu,
-            string mcuDir,
+            string testDirectory,
             TestedSample sample, 
             DeviceParameterSet extraParameters,
             RegisterValidationParameters registerValidationParameters)
         { 
-            CreateEmptyDirectoryForTestingMCU(mcuDir);
+            CreateEmptyDirectoryForTestingMCU(testDirectory);
 
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
             if (configuredMCU.ExpandedMCU.FLASHSize == 0)
@@ -517,7 +517,7 @@ namespace StandaloneBSPValidator
             ApplyConfiguration(configuredSample.FrameworkParameters, extraParameters?.FrameworkConfiguration, sample.FrameworkConfiguration);
             ApplyConfiguration(configuredSample.Parameters, extraParameters?.SampleConfiguration, sample.SampleConfiguration);
 
-            var prj = new GeneratedProject(mcuDir, configuredMCU, frameworks) { DataSections = sample.DataSections };
+            var prj = new GeneratedProject(testDirectory, configuredMCU, frameworks) { DataSections = sample.DataSections };
             prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);
             Dictionary<string, bool> frameworkIDs = new Dictionary<string, bool>();
             if (frameworks != null)
@@ -545,8 +545,8 @@ namespace StandaloneBSPValidator
             foreach (var ext in sample.SourceFileExtensions.Split(';'))
                 sourceExtensions[ext] = true;
 
-            Console.Write("Building {0}...", Path.GetFileName(mcuDir));
-            return BuildAndRunValidationJob(mcu, mcuDir, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null);
+            Console.Write("Building {0}...", Path.GetFileName(testDirectory));
+            return BuildAndRunValidationJob(mcu, testDirectory, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null);
         }
 
         private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu,
