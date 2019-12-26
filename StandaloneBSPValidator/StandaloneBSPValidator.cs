@@ -404,7 +404,7 @@ namespace StandaloneBSPValidator
             sourceExtensions.Add("cpp", true);
             sourceExtensions.Add("s", true);
 
-            return BuildAndRunValidationJob(mcu, mcuDir, false, null, prj, flags, sourceExtensions, null, null, vs, validationFlags);
+            return BuildAndRunValidationJob(mcu, mcuDir, prj, flags, sourceExtensions, vs, null, validationFlags);
         }
 
         static void CreateEmptyDirectoryForTestingMCU(string mcuDir)
@@ -439,14 +439,8 @@ namespace StandaloneBSPValidator
             }
         }
 
-        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, LoadedRenamingRule[] renameRules, string[] nonValidateReg, string[] pUndefinedMacros)
+        private static TestResult TestMCU(LoadedBSP.LoadedMCU mcu, string mcuDir, TestedSample sample, DeviceParameterSet extraParameters, RegisterValidationParameters registerValidationParameters)
         {
-            var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
-            if (configuredMCU.ExpandedMCU.FLASHSize == 0)
-            {
-                configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
-            }
-
             var samples = mcu.BSP.GetSamplesForMCU(mcu.ExpandedMCU.ID, false);
             LoadedBSP.LoadedSample sampleObj;
             if (string.IsNullOrEmpty(sample.Name))
@@ -464,15 +458,25 @@ namespace StandaloneBSPValidator
                     throw new Exception("Cannot find sample: " + sample.Name);
             }
 
+            return TestSingleSample(sampleObj, mcu, mcuDir, sample, extraParameters, registerValidationParameters);
+        }
+
+        public static TestResult TestSingleSample(LoadedBSP.LoadedSample sampleObj,
+            LoadedBSP.LoadedMCU mcu,
+            string mcuDir,
+            TestedSample sample, 
+            DeviceParameterSet extraParameters,
+            RegisterValidationParameters registerValidationParameters)
+        { 
             CreateEmptyDirectoryForTestingMCU(mcuDir);
 
+            var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
+            if (configuredMCU.ExpandedMCU.FLASHSize == 0)
+            {
+                configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
+            }
+
             string[] frameworks = sampleObj.Sample.RequiredFrameworks ?? new string[0];
-
-
-            //frameworkCfg["com.sysprogs.bspoptions.stm32.freertos.heap"] = "heap_4";
-            //frameworkCfg["com.sysprogs.bspoptions.stm32.freertos.portcore"] = "CM0";
-            //frameworkCfg["com.sysprogs.bspoptions.stm32.usb.devclass"] = "CDC";
-            //frameworkCfg["com.sysprogs.bspoptions.stm32.usb.speed"] = "FS";
 
             var configuredSample = new ConfiguredSample
             {
@@ -486,12 +490,7 @@ namespace StandaloneBSPValidator
                 FrameworkParameters = new Dictionary<string, string>(),
             };
 
-
             ApplyConfiguration(configuredMCU.Configuration, extraParameters?.MCUConfiguration, sample.MCUConfiguration);
-
-            //configuredSample.Parameters["com.sysprogs.examples.ledblink.LEDPORT"] = "GPIOA";
-            //configuredSample.Parameters["com.sysprogs.examples.stm32.LEDPORT"] = "GPIOA";
-            //configuredSample.Parameters["com.sysprogs.examples.stm32.freertos.heap_size"] = "0";
 
             var bspDict = configuredMCU.BuildSystemDictionary(default(SystemDirectories));
             bspDict["PROJECTNAME"] = "test";
@@ -547,19 +546,16 @@ namespace StandaloneBSPValidator
                 sourceExtensions[ext] = true;
 
             Console.Write("Building {0}...", Path.GetFileName(mcuDir));
-            return BuildAndRunValidationJob(mcu, mcuDir, sample.ValidateRegisters, renameRules, prj, flags, sourceExtensions, nonValidateReg, pUndefinedMacros);
+            return BuildAndRunValidationJob(mcu, mcuDir, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null);
         }
 
         private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu,
             string mcuDir,
-            bool validateRegisters,
-            LoadedRenamingRule[] renameRules,
             GeneratedProject prj,
             ToolFlags flags,
             Dictionary<string, bool> sourceExtensions,
-            string[] nonValidateReg,
-            string[] UndefinedMacros,
             VendorSample vendorSample = null,
+            RegisterValidationParameters registerValidationParameters = null,
             BSPValidationFlags validationFlags = BSPValidationFlags.None)
         {
             BuildJob job = new BuildJob();
@@ -651,10 +647,10 @@ namespace StandaloneBSPValidator
 
             job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin", comments);
 
-            if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && validateRegisters)
+            if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && registerValidationParameters != null)
             {
                 string firstSrcFileInPrjDir = prj.SourceFiles.First(fn => Path.GetDirectoryName(fn) == mcuDir);
-                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), renameRules, nonValidateReg, UndefinedMacros);
+                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), registerValidationParameters);
             }
 
             bool buildSucceeded;
@@ -838,8 +834,12 @@ namespace StandaloneBSPValidator
                     MCUs = MCUs.Where(mcu => !rg.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
                 }
 
-                var loadedRules = job.RegisterRenamingRules?.Select(rule => new LoadedRenamingRule(rule))?.ToArray();
-                var noValidateReg = job.NonValidatedRegisters;
+                var registerValidationParameters = new RegisterValidationParameters
+                {
+                    RenameRules = job.RegisterRenamingRules?.Select(rule => new LoadedRenamingRule(rule))?.ToArray(),
+                    NonValidatedRegisters = job.NonValidatedRegisters,
+                    UndefinedMacros = job.UndefinedMacros
+                };
 
                 foreach (var sample in job.Samples)
                 {
@@ -856,14 +856,6 @@ namespace StandaloneBSPValidator
                     if (additionalMCUFilter != null)
                         effectiveMCUs = effectiveMCUs.Where(mcu => additionalMCUFilter.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
 
-                    if (sample.Name == "ValidateGenerateFramwoks")
-                    {
-                        var sampleFramwork = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(job.BSPPath, "FramworkSamples", "sample.xml"));
-                        LoadedBSP.LoadedSample sampleObj1 = new LoadedBSP.LoadedSample() { Sample = sampleFramwork };
-                        effectiveMCUs[0].BSP.Samples.Add(sampleObj1);
-                        effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 1].Directory = effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 2].Directory.Remove(effectiveMCUs[0].BSP.Samples[effectiveMCUs[0].BSP.Samples.Count - 2].Directory.LastIndexOf("samples")) + "FramworkSamples";
-                    }
-
                     foreach (var mcu in effectiveMCUs)
                     {
                         if (string.IsNullOrEmpty(mcu.ExpandedMCU.ID))
@@ -874,7 +866,7 @@ namespace StandaloneBSPValidator
                         string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
                         DateTime start = DateTime.Now;
 
-                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, loadedRules, noValidateReg, job.UndefinedMacros);
+                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, registerValidationParameters);
                         Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
                         if (result.Result == TestBuildResult.Failed)
                             failed++;
@@ -929,7 +921,15 @@ namespace StandaloneBSPValidator
                 }
             return false;
         }
-        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, LoadedRenamingRule[] renameRules, string[] pNonValidatedRegisters, string[] pUndefinedMacros)
+
+        public class RegisterValidationParameters
+        {
+            public LoadedRenamingRule[] RenameRules;
+            public string[] NonValidatedRegisters;
+            public string[] UndefinedMacros;
+        }
+
+        static void InsertRegisterValidationCode(string sourceFile, MCUDefinition mcuDefinition, RegisterValidationParameters parameters)
         {
             if (!File.Exists(sourceFile))
                 throw new Exception("File does not exist: " + sourceFile);
@@ -946,14 +946,14 @@ namespace StandaloneBSPValidator
                         foreach (var reg in regset.Registers)
                         {
                             string regName = reg.Name;
-                            if (IsNoValid(regset.UserFriendlyName, pNonValidatedRegisters))
+                            if (IsNoValid(regset.UserFriendlyName, parameters.NonValidatedRegisters))
                                 continue;
-                            if (IsNoValid(regName, pNonValidatedRegisters))
+                            if (IsNoValid(regName, parameters.NonValidatedRegisters))
                                 continue;
-                            if (IsNoValid(regName, pUndefinedMacros))
+                            if (IsNoValid(regName, parameters.UndefinedMacros))
                                 sw.WriteLine($"#undef {regName}");
-                            if (renameRules != null)
-                                foreach (var rule in renameRules)
+                            if (parameters.RenameRules != null)
+                                foreach (var rule in parameters.RenameRules)
                                 {
                                     if (rule.RegisterSetRegex?.IsMatch(regset.UserFriendlyName) != false)
                                     {

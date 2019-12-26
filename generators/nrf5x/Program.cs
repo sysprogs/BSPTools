@@ -301,74 +301,6 @@ namespace nrf5x
                 }
             }
 
-            List<PropertyEntry.Enumerated> ReadCompositePropery(string nameFile)
-            {
-                List<PropertyEntry.Enumerated> lsPr = new List<PropertyEntry.Enumerated>();
-                foreach (var ln in File.ReadAllLines(Path.Combine(Directories.RulesDir, nameFile)))
-                {
-                    if (ln.StartsWith("\t") || ln.StartsWith("//"))
-                        continue;
-                    Match m = Regex.Match(ln, "(.*):(.*)");
-                    if (!m.Success)
-                        continue;
-                    var name = m.Groups[1].Value;
-                    var prop = m.Groups[2].Value;
-
-                    List<PropertyEntry.Enumerated.Suggestion> lstSugg = new List<PropertyEntry.Enumerated.Suggestion>();
-                    foreach (var sg in prop.Trim(' ').Split(';'))
-                    {
-                        Match m1 = Regex.Match(sg, "(.*)=(.*)");
-                        lstSugg.Add(new PropertyEntry.Enumerated.Suggestion
-                        {
-                            UserFriendlyName = m1.Groups[1].Value,
-                            InternalValue = m1.Groups[2].Value
-                        });
-
-                    }
-                    lsPr.Add(new PropertyEntry.Enumerated { Name = name, UniqueID = name, SuggestionList = lstSugg.ToArray() });
-                }
-
-                return lsPr;
-            }
-
-            List<string> ReadCompositeCondidtions(string nameFile, string name_fr)
-            {
-                List<string> lsPrContin = new List<string>();
-                string nameLib = "";
-                foreach (var ln in File.ReadAllLines(Path.Combine(Directories.RulesDir, nameFile)))
-                {
-                    if (ln.StartsWith("//") || ln == "")
-                        continue;
-                    if (!ln.StartsWith("\t"))
-                    {
-                        nameLib = ln.Remove(ln.IndexOf(':'));
-                        continue;
-                    }
-
-                    lsPrContin.Add(ln.Trim('\t').Replace(":", $": $$com.sysprogs.bspoptions.nrf5x.{name_fr}.{nameLib}$$"));
-
-                }
-
-                return lsPrContin;
-            }
-
-            List<string> lstGenFramworks = new List<string>();
-            List<PropertyDictionary2.KeyValue> lstGenConditions = new List<PropertyDictionary2.KeyValue>();
-
-            public void GenFramworkSample(NordicBSPBuilder bspBuilder)
-            {
-                var fsample = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(bspBuilder.Directories.RulesDir, "FramworkSamples", "sample.xml"));
-
-                lstGenFramworks.AddRange(fsample.RequiredFrameworks);
-                fsample.RequiredFrameworks = lstGenFramworks.Distinct().ToArray();
-                lstGenConditions.AddRange(fsample.DefaultConfiguration.Entries);
-                fsample.DefaultConfiguration.Entries = lstGenConditions.ToArray();
-
-                Directory.CreateDirectory(Path.Combine(bspBuilder.Directories.OutputDir, "FramworkSamples"));
-                XmlTools.SaveObject(fsample, Path.Combine(bspBuilder.Directories.OutputDir, "FramworkSamples", "sample.xml"));
-                foreach (var fl in Directory.GetFiles(Path.Combine(bspBuilder.Directories.RulesDir, "FramworkSamples"), "*.c"))
-                    File.Copy(fl, Path.Combine(bspBuilder.Directories.OutputDir, "FramworkSamples", Path.GetFileName(fl)));
-            }
         }
 
         static StartupFileGenerator.InterruptVectorTable GenerateStartupFile(string pDir, string pFBase)
@@ -696,7 +628,6 @@ namespace nrf5x
 
                 bspBuilder.GenerateSoftdeviceLibraries();
                 bspBuilder.RuleGenerator.PatchGeneratedFrameworks(frameworks, condFlags);
-                bspBuilder.GenFramworkSample(bspBuilder);
 
                 //  CheckEntriesSample(Path.Combine(bspBuilder.Directories.OutputDir, @"nRF5x\components\libraries"),
                 //                     Path.Combine(bspBuilder.Directories.OutputDir, "Samples"));
