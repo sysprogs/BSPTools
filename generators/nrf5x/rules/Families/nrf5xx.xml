@@ -411,7 +411,7 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
 					<TargetFolder>external</TargetFolder>
-					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-tile\tile_shim\*;-micro-ecc\*;-fprintf\*;*</FilesToCopy>
+					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-tile\tile_shim\*;-micro-ecc\*;-fprintf\*;-fatfs\doc\*;*</FilesToCopy>
 					<ProjectInclusionMask>-*integration_test_*;-infineon\*;*.c;*.h;*.a</ProjectInclusionMask>
 					<AutoIncludeMask>-infineon\*;*.h</AutoIncludeMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.external.|nRF5x Libraries (3rd-party)</SmartPropertyGroup>
@@ -602,7 +602,7 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 						<string>ipv6_stack\\utils\\ipv6_utils.c=>IPV6_DEFAULT_HOP_LIMIT</string>
 						<string>ipv6_stack\\udp\\udp6.c=>UDP6_MAX_SOCKET_COUNT</string>
 					</GuardedFiles>
-					<AdvancedRenameRules>ipv6_stack\\icmp6\\icmp6.c=>nrf_icmp6.c</AdvancedRenameRules>
+					<AdvancedRenameRules>ipv6_stack\\icmp6\\icmp6.c=>nrf_icmp6.c;socket\\transport\\ipv6\\transport_handler.c=>transport_handler6.c</AdvancedRenameRules>
 					<ProjectInclusionMask>-*.a;-mqtt\mqtt_transport_socket.c;-*.lib;*.c</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>
 					<Patches>

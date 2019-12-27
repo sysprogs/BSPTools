@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BSPEngine;
 using BSPGenerationTools;
+using StandaloneBSPValidator;
 
 namespace VendorSampleParserEngine
 {
@@ -44,15 +47,75 @@ namespace VendorSampleParserEngine
                 }
             }
 
-            BuildConfigurationFixSample();
+            result.Symbols = ComputeSymbolToFileMap();
 
             XmlTools.SaveObject(result, Path.Combine(_BSP.Directory, ConfigurationFixDatabase.FileName));
         }
 
-        private void BuildConfigurationFixSample()
+        class ConstructedConfiguration
         {
+            HashSet<int> _Frameworks = new HashSet<int>();
+            Dictionary<string, string> _Config = new Dictionary<string, string>();
+            private readonly ReverseConditionTable _Table;
+
+            public ConstructedConfiguration(ReverseConditionTable table)
+            {
+                _Table = table;
+            }
+
+            public bool TryMerge(ConfigurationFixDatabase.ObjectEntry entry)
+            {
+                if (entry.OneBasedConfigurationFragmentIndex > 0)
+                {
+                    var fragment = _Table.ConditionTable[entry.OneBasedConfigurationFragmentIndex - 1];
+
+                    foreach (var kv in fragment.RequestedConfiguration)
+                    {
+                        if (_Config.TryGetValue(kv.Key, out var tmp) && tmp != kv.Value)
+                            return false;   //Incompatible configuration detected
+                    }
+
+                    foreach (var kv in fragment.RequestedConfiguration)
+                        _Config[kv.Key] = kv.Value;
+                }
+
+                if (entry.OneBasedFrameworkIndex > 0)
+                {
+                    _Frameworks.Add(entry.OneBasedFrameworkIndex);
+                }
+
+                return true;
+            }
+
+            public TestedSample ToSampleJobObject()
+            {
+                Dictionary<string, string> config = new Dictionary<string, string>(_Config);
+                List<string> frameworkIDs = new List<string>();
+
+                foreach (var idx in _Frameworks)
+                {
+                    var fw = _Table.Frameworks[idx - 1];
+                    frameworkIDs.Add(fw.ID);
+                    foreach (var kv in fw.MinimalConfiguration ?? new SysVarEntry[0])
+                    {
+                        if (!config.ContainsKey(kv.Key))
+                            config[kv.Key] = kv.Value;
+                    }
+                }
+
+                return new TestedSample
+                {
+                    FrameworkConfiguration = new PropertyDictionary2(config),
+                    AdditionalFrameworks = frameworkIDs.ToArray()
+                };
+            }
+        }
+
+        private List<ConfigurationFixDatabase.SecondaryObjectEntry> ComputeSymbolToFileMap()
+        {
+            List<ConfigurationFixDatabase.SecondaryObjectEntry> result = new List<ConfigurationFixDatabase.SecondaryObjectEntry>();
             if (_ReverseConditionTable.ConfigurationFixSample == null)
-                return;
+                return result;
 
             var sampleDir = GetFullPath(_ReverseConditionTable.ConfigurationFixSample.SamplePath);
 
@@ -64,10 +127,74 @@ namespace VendorSampleParserEngine
             };
 
             var mcu = _BSP.MCUs.First(m => m.ExpandedMCU.ID == _ReverseConditionTable.ConfigurationFixSample.MCUID);
+            List<int> queue = Enumerable.Range(0, _ReverseConditionTable.FileTable.Count).ToList();
 
-            var result = StandaloneBSPValidator.Program.TestSingleSample(sampleObj, mcu, _TestDirectory, new StandaloneBSPValidator.TestedSample { }, null, null);
-            if (result.Result != StandaloneBSPValidator.Program.TestBuildResult.Succeeded)
-                throw new Exception("Failed to build synthetic sample for determining symbol-to-config map");
+            while(queue.Count > 0)
+            {
+                List<int> rejects = new List<int>();
+                List<int> handledFiles = new List<int>();
+                ConstructedConfiguration cfg = new ConstructedConfiguration(_ReverseConditionTable);
+
+                foreach (var i in queue)
+                {
+                    var file = _ReverseConditionTable.FileTable[i];
+                    string ext = Path.GetExtension(file.ObjectName).ToLower();
+                    if (ext != ".c" && ext != ".cpp")
+                        continue;
+
+                    if (cfg.TryMerge(file))
+                        handledFiles.Add(i);
+                    else
+                        rejects.Add(i);
+                }
+
+                var buildResult = Program.TestSingleSample(sampleObj, mcu, _TestDirectory, cfg.ToSampleJobObject(), null, null, BSPValidationFlags.KeepDirectoryAfterSuccessfulTest | BSPValidationFlags.ContinuePastCompilationErrors);
+                BuildSymbolTableFromBuildResults(queue, result);
+
+                if (rejects.Count == queue.Count)
+                    break;
+
+                queue = rejects;
+            }
+
+            return result;
+        }
+
+        private void BuildSymbolTableFromBuildResults(IEnumerable<int> fileIndicies, List<ConfigurationFixDatabase.SecondaryObjectEntry> result)
+        {
+            Regex rgDefinedSymbol = new Regex("[0-9a-fA-F]+[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)$");
+
+            foreach(var i in fileIndicies)
+            {
+                var nameBase = Path.GetFileNameWithoutExtension(_ReverseConditionTable.FileTable[i].ObjectName);
+                if (!File.Exists(Path.Combine(_TestDirectory, nameBase + ".o")))
+                    continue;
+
+                var objdump = _BSP.Toolchain.MakeToolName("objdump", false);
+                var proc = new Process();
+                proc.StartInfo.FileName = "cmd.exe";
+                proc.StartInfo.Arguments = $"/c {objdump} -t {nameBase}.o > {nameBase}.lst";
+                proc.StartInfo.UseShellExecute = false;
+                proc.StartInfo.WorkingDirectory = _TestDirectory;
+                proc.Start();
+                proc.WaitForExit();
+                if (proc.ExitCode != 0)
+                    throw new Exception("Failed to obtain symbol list for " + nameBase);
+
+                foreach(var line in File.ReadAllLines(Path.Combine(_TestDirectory, nameBase + ".lst")))
+                {
+                    var m = rgDefinedSymbol.Match(line);
+                    if (m.Success)
+                    {
+                        var scope = m.Groups[1].Value;
+                        var name = m.Groups[5].Value;
+                        if (scope == "g")
+                        {
+                            result.Add(new ConfigurationFixDatabase.SecondaryObjectEntry { ObjectName = name, PrimaryObjectIndex = i });
+                        }
+                    }
+                }
+            }
         }
 
         private string GetFullPath(string value)

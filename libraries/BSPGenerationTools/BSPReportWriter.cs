@@ -124,7 +124,7 @@ namespace BSPGenerationTools
 
             }
 
-            if (errors > 0)
+            if (errors > 0 || _RawErrors.Count > 0)
                 throw new Exception($"BSP generation failed. Examine {reportFile} for details.");
 
             _Disposed = true;

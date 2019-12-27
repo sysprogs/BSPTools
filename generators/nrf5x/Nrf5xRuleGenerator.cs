@@ -366,7 +366,7 @@ namespace nrf5x
                         {
                             SourceFolder = Path.Combine(baseDir, dir),
                             TargetFolder = @"components\ble\" + dir,
-                            FilesToCopy = "*.c;*.h",
+                            FilesToCopy = "-*_nrf51.c;*.c;*.h",
                         }
                     }
                 });

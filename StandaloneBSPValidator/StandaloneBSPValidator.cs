@@ -195,7 +195,7 @@ namespace StandaloneBSPValidator
             public List<BuildTask> CompileTasks = new List<BuildTask>();
             public List<BuildTask> OtherTasks = new List<BuildTask>();
 
-            public void GenerateMakeFile(string filePath, string primaryTarget, IEnumerable<string> comments)
+            public void GenerateMakeFile(string filePath, string primaryTarget, IEnumerable<string> comments, bool continuePastCompilationErrors)
             {
                 using (var sw = new StreamWriter(filePath))
                 {
@@ -208,6 +208,9 @@ namespace StandaloneBSPValidator
 
                     sw.WriteLine($"all: {primaryTarget}");
                     sw.WriteLine();
+
+                    string modeFlag = continuePastCompilationErrors ? "-" : "";
+
                     foreach (var task in CompileTasks.Concat(OtherTasks))
                     {
                         sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
@@ -225,10 +228,10 @@ namespace StandaloneBSPValidator
 
                             string rspFile = Path.ChangeExtension(Path.GetFileName(task.PrimaryOutput), ".rsp");
                             File.WriteAllText(Path.Combine(Path.GetDirectoryName(filePath), rspFile), extArgs.Replace('\\', '/').Replace("/\"", "\\\""));
-                            sw.WriteLine($"\t{task.Executable} {prefixArgs} @{rspFile}");
+                            sw.WriteLine($"\t{modeFlag}{task.Executable} {prefixArgs} @{rspFile}");
                         }
                         else
-                            sw.WriteLine($"\t{task.Executable} {task.Arguments}");
+                            sw.WriteLine($"\t{modeFlag}{task.Executable} {task.Arguments}");
                         sw.WriteLine();
                     }
                 }
@@ -318,9 +321,9 @@ namespace StandaloneBSPValidator
         }
 
 
-        public static TestResult TestVendorSampleAndUpdateDependencies(LoadedBSP.LoadedMCU mcu, 
-            VendorSample vs, 
-            string mcuDir, 
+        public static TestResult TestVendorSampleAndUpdateDependencies(LoadedBSP.LoadedMCU mcu,
+            VendorSample vs,
+            string mcuDir,
             string sampleDirPath,
             bool codeRequiresDebugInfoFlag,
             BSPValidationFlags validationFlags)
@@ -464,10 +467,11 @@ namespace StandaloneBSPValidator
         public static TestResult TestSingleSample(LoadedBSP.LoadedSample sampleObj,
             LoadedBSP.LoadedMCU mcu,
             string testDirectory,
-            TestedSample sample, 
+            TestedSample sample,
             DeviceParameterSet extraParameters,
-            RegisterValidationParameters registerValidationParameters)
-        { 
+            RegisterValidationParameters registerValidationParameters,
+            BSPValidationFlags validationFlags = BSPValidationFlags.None)
+        {
             CreateEmptyDirectoryForTestingMCU(testDirectory);
 
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
@@ -475,8 +479,6 @@ namespace StandaloneBSPValidator
             {
                 configuredMCU.Configuration["com.sysprogs.bspoptions.primary_memory"] = "sram";
             }
-
-            string[] frameworks = sampleObj.Sample.RequiredFrameworks ?? new string[0];
 
             var configuredSample = new ConfiguredSample
             {
@@ -517,15 +519,14 @@ namespace StandaloneBSPValidator
             ApplyConfiguration(configuredSample.FrameworkParameters, extraParameters?.FrameworkConfiguration, sample.FrameworkConfiguration);
             ApplyConfiguration(configuredSample.Parameters, extraParameters?.SampleConfiguration, sample.SampleConfiguration);
 
-            var prj = new GeneratedProject(testDirectory, configuredMCU, frameworks) { DataSections = sample.DataSections };
-            prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);
             Dictionary<string, bool> frameworkIDs = new Dictionary<string, bool>();
-            if (frameworks != null)
-                foreach (var fw in frameworks)
-                    frameworkIDs[fw] = true;
-            if (sample.AdditionalFrameworks != null)
-                foreach (var fw in sample.AdditionalFrameworks)
-                    frameworkIDs[fw] = true;
+            foreach (var fw in sampleObj.Sample.RequiredFrameworks ?? new string[0])
+                frameworkIDs[fw] = true;
+            foreach (var fw in sample.AdditionalFrameworks ?? new string[0])
+                frameworkIDs[fw] = true;
+
+            var prj = new GeneratedProject(testDirectory, configuredMCU, frameworkIDs.Keys.ToArray()) { DataSections = sample.DataSections };
+            prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);
 
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
             var flags = prj.GetToolFlags(bspDict, configuredSample.FrameworkParameters, frameworkIDs);
@@ -546,7 +547,7 @@ namespace StandaloneBSPValidator
                 sourceExtensions[ext] = true;
 
             Console.Write("Building {0}...", Path.GetFileName(testDirectory));
-            return BuildAndRunValidationJob(mcu, testDirectory, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null);
+            return BuildAndRunValidationJob(mcu, testDirectory, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null, validationFlags);
         }
 
         private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu,
@@ -608,7 +609,7 @@ namespace StandaloneBSPValidator
             {
                 Executable = prefix + "g++",
                 Arguments = $"{flags.StartGroup} {flags.EffectiveLDFLAGS} $^ {flags.EndGroup} -o $@",
-                AllInputs = job.CompileTasks.Select(t=>t.PrimaryOutput)
+                AllInputs = job.CompileTasks.Select(t => t.PrimaryOutput)
                     .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)))
                     .ToArray(),
                 PrimaryOutput = "test.elf",
@@ -645,7 +646,10 @@ namespace StandaloneBSPValidator
             comments.Add("\tLDFLAGS:" + flags.LDFLAGS);
             comments.Add("\tCOMMONFLAGS:" + flags.COMMONFLAGS);
 
-            job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"), "test.bin", comments);
+            job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"),
+                "test.bin", 
+                comments, 
+                (validationFlags & BSPValidationFlags.ContinuePastCompilationErrors) != BSPValidationFlags.None);
 
             if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && registerValidationParameters != null)
             {
@@ -710,7 +714,7 @@ namespace StandaloneBSPValidator
 
             const string marker = "\".incbin \\\"";
 
-            foreach(var line in File.ReadLines(sourceFile))
+            foreach (var line in File.ReadLines(sourceFile))
             {
                 int idx = line.IndexOf(marker);
                 if (idx != -1)
@@ -1003,6 +1007,8 @@ namespace StandaloneBSPValidator
         //This can be enabled for Pass 1 tests (in-place build) only if the conflicts will get resolved by attaching embedded frameworks that have the files renamed (e.g. STM32MP1).
         //!!!DO NOT ENABLE THIS OPTION FOR PASS 2 TESTS!!! MSBuild and Make backends to not support colliding source file names, so projects containing them will not build.
         ResolveNameCollisions = 2,
+
+        ContinuePastCompilationErrors = 4,
     }
 
 }

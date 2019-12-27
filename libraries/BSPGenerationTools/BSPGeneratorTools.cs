@@ -407,10 +407,12 @@ namespace BSPGenerationTools
             }
 
 
-            var sourcesByName = bsp.MCUFamilies.SelectMany(f => f.AdditionalSourceFiles ?? new string[0])
+            var allSources = bsp.MCUFamilies.SelectMany(f => f.AdditionalSourceFiles ?? new string[0])
                 .Concat(bsp.SupportedMCUs.SelectMany(m => m.AdditionalSourceFiles ?? new string[0]))
                 .Concat(bsp.Frameworks.SelectMany(fw => fw.AdditionalSourceFiles ?? new string[0]))
-                .Distinct()
+                .Distinct();
+
+            var sourcesByName = allSources.Where(s => s.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase) || s.EndsWith(".cpp", StringComparison.InvariantCultureIgnoreCase))
                 .GroupBy(f => Path.GetFileName(f), StringComparer.InvariantCultureIgnoreCase);
 
             foreach(var grp in sourcesByName)
