@@ -23,6 +23,8 @@ namespace nrf5x
         public void PatchGeneratedFrameworks(List<EmbeddedFramework> frameworks, List<ConditionalToolFlags> condFlags)
         {
             GenerateBoardProperty(frameworks);
+
+            //As of SDK v16.0, this causes issues with libraries/cli, so we do not enable it for now.
             //ConvertFrameworkIncludesFromAutoConditionedSubfoldersToConditionalFlags(frameworks, condFlags);
         }
 
@@ -43,10 +45,8 @@ namespace nrf5x
 
                     string firstComponent = includeDirs[i].Substring(frameworkConditions.TargetPath.Length).TrimStart('/');
                     int idx = firstComponent.IndexOf('/');
-                    if (idx == -1)
-                        continue;
-
-                    firstComponent = firstComponent.Substring(0, idx);
+                    if (idx != -1)
+                        firstComponent = firstComponent.Substring(0, idx);
 
                     if (frameworkConditions.ConditionalSubdirectories.Contains(firstComponent))
                     {
@@ -58,6 +58,8 @@ namespace nrf5x
                     }
                 }
 
+                fw.AdditionalIncludeDirs = includeDirs.ToArray();
+
                 foreach (var kv in conditionalIncludes)
                 {
                     string prefix = frameworkConditions.TargetPath + "/" + kv.Key;
@@ -65,13 +67,22 @@ namespace nrf5x
                     if (fileCondition == null)
                         throw new Exception($"No file conditions start with '{prefix}'. Could not derive variable name for '{kv.Key}'.");
 
+                    Condition.Equals conditionToInclude = fileCondition.ConditionToInclude as Condition.Equals;
+                    if (conditionToInclude == null)
+                    {
+                        //This is a generated condition for a library file (.a).
+                        conditionToInclude = (fileCondition.ConditionToInclude as Condition.And)?.Arguments?.LastOrDefault() as Condition.Equals;
+                        if (conditionToInclude == null)
+                            throw new Exception("Failed to determine a condition to include " + prefix);
+                    }
+
                     condFlags.Add(new ConditionalToolFlags
                     {
                         FlagCondition = new Condition.And
                         {
                             Arguments = new Condition[] {
                                 new Condition.ReferencesFramework{FrameworkID = fw.ClassID ?? fw.ID},
-                                fileCondition.ConditionToInclude,
+                                conditionToInclude,
                             }
                         },
                         Flags = new ToolFlags
@@ -79,9 +90,15 @@ namespace nrf5x
                             IncludeDirectories = kv.Value.ToArray()
                         }
                     });
+
+                    var reverseConditions = _Builder.ReverseFileConditions?.GetHandleForFramework(fw);
+                    if (reverseConditions != null)
+                    {
+                        foreach (var dir in kv.Value)
+                            reverseConditions.AttachIncludeDirectoryCondition(dir, reverseConditions.CreateSimpleCondition(conditionToInclude.Expression.Trim('$'), conditionToInclude.ExpectedValue));
+                    }
                 }
             }
-
         }
 
         void GenerateBoardProperty(List<EmbeddedFramework> frameworks)
@@ -303,7 +320,7 @@ namespace nrf5x
                 generatedSmartFileConditions.Add($"-{name}|{name}\\\\.*");
 
                 if (!_FrameworkConditions.TryGetValue(fw.ID, out var conditions))
-                    _FrameworkConditions[fw.ID] = conditions = new GeneratedFrameworkConditions { TargetPath = $"$$SYS:BSP_ROOT$$/{family.FamilySubdirectory}/{job.TargetFolder}" };
+                    _FrameworkConditions[fw.ID] = conditions = new GeneratedFrameworkConditions { TargetPath = $"$$SYS:BSP_ROOT$$/{family.FamilySubdirectory}/{job.TargetFolder}".Replace('\\', '/') };
 
                 conditions.ConditionalSubdirectories.Add(name);
             }

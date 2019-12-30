@@ -94,6 +94,16 @@ namespace BSPGenerationTools
                 FreeformMacros[macroRegex] = macroName;
             }
 
+            public void AttachIncludeDirectoryCondition(string dir, ConditionHandle conditionHandle)
+            {
+                if (!IncludeDirs.TryGetValue(dir, out var value))
+                    throw new Exception("Unknown include dir: " + dir);
+                if (value != null)
+                    throw new Exception("Include dir already conditional: " + dir);
+
+                IncludeDirs[dir] = conditionHandle;
+            }
+
             public void AttachMinimalConfigurationValue(string key, string value)
             {
                 MinimalConfiguration[key] = value;
