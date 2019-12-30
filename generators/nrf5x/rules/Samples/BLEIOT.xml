@@ -18,10 +18,6 @@
 				<Value>yes</Value>
 			</KeyValue>
 			<KeyValue>
-				<Key>com.sysprogs.bspoptions.nrf5x.iot.ipv6_stack</Key>
-				<Value>yes</Value>
-			</KeyValue>
-			<KeyValue>
 				<Key>com.sysprogs.bspoptions.nrf5x.iot.medium</Key>
 				<Value>yes</Value>
 			</KeyValue>
