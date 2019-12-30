@@ -6,7 +6,6 @@
 	<FamilySubdirectory>nRF5x</FamilySubdirectory>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\components\toolchain\arm</StartupFileDir>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\modules\nrfx\mdk</PrimaryHeaderDir>
-	<Subfamilies></Subfamilies>
 	<CompilationFlags>
 		<COMMONFLAGS>-mabi=aapcs $$com.sysprogs.bspoptions.nrf5x.wchar$$</COMMONFLAGS>
 		<PreprocessorMacros>
@@ -579,6 +578,12 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 					<Value>com.sysprogs.freertos</Value>
 				</SysVarEntry>
 			</AdditionalSystemVars>
+			<ConfigFiles>
+				<ConfigFileDefinition>
+					<Path>$$BSPGEN:INPUT_DIR$$/external/freertos/config/FreeRTOSConfig.h</Path>
+					<ParserClass>BSPGenerationTools.ConfigFiles.FreeRTOSConfigParser</ParserClass>
+				</ConfigFileDefinition>
+			</ConfigFiles>
 		</Framework>
 		<Framework>
 			<Name>Nordic IoT Components</Name>
@@ -663,6 +668,16 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 				<Option>
 					<Regex>^nRF528(05|10|11|33|40)_XXAA.*</Regex>
 					<Value>528{1}</Value>
+				</Option>
+			</Options>
+		</MCUClassifier>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.bspoptions.nrf5x.mcu.number</VariableName>
+			<Required>true</Required>
+			<Options>
+				<Option>
+					<Regex>^nRF([0-9]+)_XXAA.*</Regex>
+					<Value>{1}</Value>
 				</Option>
 			</Options>
 		</MCUClassifier>
@@ -891,4 +906,11 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 			</AdditionalSources>
 		</SmartSample>
 	</SmartSamples>
+	<ConfigFiles>
+		<ConfigFileDefinition>
+			<Path>$$BSPGEN:INPUT_DIR$$/config/nrf$$com.sysprogs.bspoptions.nrf5x.mcu.number$$/config/sdk_config.h</Path>
+			<ParserClass>nrf5x.NRFConfigFileParser</ParserClass>
+			<SeparateConfigsForEachMCU>true</SeparateConfigsForEachMCU>
+		</ConfigFileDefinition>
+	</ConfigFiles>
 </FamilyDefinition>

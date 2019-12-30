@@ -151,6 +151,14 @@ namespace BSPGenerationTools
             else
                 bspBuilder.GetMemoryBases(out mcu.FLASHBase, out mcu.RAMBase);
 
+            if (fam.Definition.ConfigFiles != null)
+            {
+                mcu.ConfigurationFileTemplates = fam.Definition.ConfigFiles
+                    .Where(cf => cf.SeparateConfigsForEachMCU)
+                    .Select(cf => bspBuilder.ParseConfigurationFile(cf, mcu.AdditionalSystemVars))
+                    .ToArray();
+            }
+
             return mcu;
         }
     }
@@ -186,7 +194,7 @@ namespace BSPGenerationTools
 
         public bool SkipHiddenFiles { get; protected set; }
 
-        public void  AddFileCondition(FileCondition cond)
+        public void AddFileCondition(FileCondition cond)
         {
             if (MatchedFileConditions.TryGetValue(cond.FilePath, out var oldCond))
                 MatchedFileConditions[cond.FilePath] = new FileCondition { FilePath = cond.FilePath, ConditionToInclude = new Condition.And { Arguments = new[] { oldCond.ConditionToInclude, cond.ConditionToInclude } } };
@@ -415,7 +423,7 @@ namespace BSPGenerationTools
             var sourcesByName = allSources.Where(s => s.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase) || s.EndsWith(".cpp", StringComparison.InvariantCultureIgnoreCase))
                 .GroupBy(f => Path.GetFileName(f), StringComparer.InvariantCultureIgnoreCase);
 
-            foreach(var grp in sourcesByName)
+            foreach (var grp in sourcesByName)
             {
                 if (grp.Count() > 1)
                 {
@@ -429,6 +437,23 @@ namespace BSPGenerationTools
         public void Dispose()
         {
             Report.Dispose();
+        }
+
+        public ConfigurationFileTemplate ParseConfigurationFile(ConfigFileDefinition cf, SysVarEntry[] additionalSystemVars = null)
+        {
+            string sourceFile = ExpandVariables(cf.Path);
+            sourceFile = VariableHelper.ExpandVariables(sourceFile, additionalSystemVars?.ToDictionary(kv => kv.Key, kv => kv.Value));
+
+            var parserClass = new[] { Assembly.GetExecutingAssembly(), GetType().Assembly }.Select(a => a.GetType(cf.ParserClass, false)).FirstOrDefault(p => p != null);
+            var parser = parserClass?.GetConstructor(new Type[0])?.Invoke(new object[0]) as IConfigurationFileParser;
+
+            if (parser == null)
+                throw new Exception("Failed to instantiate " + cf.ParserClass);
+
+            if (!File.Exists(sourceFile))
+                throw new Exception("Missing " + sourceFile);
+
+            return parser.BuildConfigurationFileTemplate(sourceFile);
         }
     }
 
@@ -806,6 +831,9 @@ namespace BSPGenerationTools
                     fwDef.ConfigurableProperties = fw.ConfigurableProperties;
                     fwDef.AdditionalSystemVars = fw.AdditionalSystemVars;
 
+                    if (fw.ConfigFiles != null)
+                        fwDef.ConfigurationFileTemplates = fw.ConfigFiles.Select(cf => BSP.ParseConfigurationFile(cf)).ToArray();
+
                     yield return fwDef;
                 }
             }
@@ -901,7 +929,7 @@ namespace BSPGenerationTools
                     {
                         Dictionary<string, string> config = new Dictionary<string, string>();
                         HashSet<string> frameworks = new HashSet<string>();
-                        
+
                         CommonSampleConfiguration.Read(BSP.ExpandVariables(sample.CommonConfiguration), config, frameworks);
 
                         foreach (var fw in sampleObj.RequiredFrameworks ?? new string[0])

@@ -533,7 +533,6 @@ namespace nrf5x
                     familyDefinitions.Add(famObj);
                     fam.GenerateLinkerScripts(false);
 
-
                     foreach (var mcu in fam.MCUs)
                     {
                         var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters, false, MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);

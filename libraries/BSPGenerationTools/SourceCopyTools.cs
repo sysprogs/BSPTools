@@ -773,6 +773,8 @@ namespace BSPGenerationTools
         public string[] IncompatibleFrameworks; //Mutually exclusive frameworks (e.g. HAL is incompatible with StdPeriph)
         public ConfigurationFileTemplate[] ConfigurationFileTemplates;
         public string AdditionalForcedIncludes;
+
+        public ConfigFileDefinition[] ConfigFiles;
     }
 
     //Smart, i.e. configurable via wizard. We will eventually support 'dumb' samples just cloned from the BSP "as is".
@@ -933,6 +935,18 @@ namespace BSPGenerationTools
         }
     }
 
+    public interface IConfigurationFileParser
+    {
+        ConfigurationFileTemplate BuildConfigurationFileTemplate(string file);
+    }
+
+    public class ConfigFileDefinition
+    {
+        public string Path;
+        public string ParserClass;
+        public bool SeparateConfigsForEachMCU;
+    }
+
     public class FamilyDefinition
     {
         public string Name;
@@ -953,5 +967,7 @@ namespace BSPGenerationTools
         public FrameworkTemplate[] AdditionalFrameworkTemplates;
         public CodeInsertionPoint[] InitializationCodeInsertionPoints;
         public string[] AdditionalSourceFiles;
+
+        public ConfigFileDefinition[] ConfigFiles;
     }
 }
