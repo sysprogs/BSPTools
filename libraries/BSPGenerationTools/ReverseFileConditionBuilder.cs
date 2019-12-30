@@ -132,7 +132,7 @@ namespace BSPGenerationTools
             return handle;
         }
 
-        public void SaveIfConsistent(string outputDir, PropertyDictionary2 renamedFileTable, bool throwIfInconsistent, ConfigurationFixSampleReference cfgFixSample = null)
+        public void SaveIfConsistent(string outputDir, PropertyDictionary2 renamedFileTable, bool throwIfInconsistent, ConfigurationFixSampleReference[] cfgFixSamples = null)
         {
             if (Warnings != ReverseFileConditionWarning.None)
             {
@@ -149,7 +149,7 @@ namespace BSPGenerationTools
             {
                 Frameworks = allFrameworkHandles.Select(h => h.ToFrameworkDefinition()).ToArray(),
                 RenamedFileTable = renamedFileTable,
-                ConfigurationFixSample = cfgFixSample,
+                ConfigurationFixSamples = cfgFixSamples,
             };
 
             for (int i = 0; i < allFrameworkHandles.Length; i++)
@@ -221,7 +221,7 @@ namespace BSPGenerationTools
         public FrameworkReference[] Frameworks;
         public PropertyDictionary2 RenamedFileTable;
 
-        public ConfigurationFixSampleReference ConfigurationFixSample;
+        public ConfigurationFixSampleReference[] ConfigurationFixSamples;
     }
 
     [Flags]

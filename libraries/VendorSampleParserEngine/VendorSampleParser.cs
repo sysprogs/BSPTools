@@ -640,20 +640,20 @@ namespace VendorSampleParserEngine
             {
                 var relocator = CreateRelocator(sampleDir);
                 var copiedFiles = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory, reportWriter);
-            }
 
-            var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
-            bsp.VendorSampleDirectoryPath = VendorSampleDirectoryName;
-            bsp.VendorSampleCatalogName = VendorSampleCatalogName;
-            XmlTools.SaveObject(bsp, Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
+                var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
+                bsp.VendorSampleDirectoryPath = VendorSampleDirectoryName;
+                bsp.VendorSampleCatalogName = VendorSampleCatalogName;
+                XmlTools.SaveObject(bsp, Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
 
-            var reverseConditionTableFile = Path.Combine(BSPDirectory, ReverseFileConditionBuilder.ReverseConditionListFileName + ".gz");
-            if (File.Exists(reverseConditionTableFile))
-            {
-                Console.WriteLine("Building configuration fix database...");
-                var testDir = Path.Combine(TestDirectory, BSP.BSP.PackageID, "PassZ_AutoFixTest");
-                var fixBuilder = new ConfigurationFixDatabaseBuilder(BSP, testDir, XmlTools.LoadObject<ReverseConditionTable>(reverseConditionTableFile));
-                fixBuilder.BuildConfigurationFixDatabase();
+                var reverseConditionTableFile = Path.Combine(BSPDirectory, ReverseFileConditionBuilder.ReverseConditionListFileName + ".gz");
+                if (File.Exists(reverseConditionTableFile))
+                {
+                    Console.WriteLine("Building configuration fix database...");
+                    var testDir = Path.Combine(TestDirectory, BSP.BSP.PackageID, "PassZ_AutoFixTest");
+                    var fixBuilder = new ConfigurationFixDatabaseBuilder(BSP, testDir, XmlTools.LoadObject<ReverseConditionTable>(reverseConditionTableFile));
+                    fixBuilder.BuildConfigurationFixDatabase(reportWriter);
+                }
             }
 
             if (mode != RunMode.Incremental && mode != RunMode.SingleSample)

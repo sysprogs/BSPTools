@@ -546,7 +546,7 @@ namespace StandaloneBSPValidator
             foreach (var ext in sample.SourceFileExtensions.Split(';'))
                 sourceExtensions[ext] = true;
 
-            Console.Write("Building {0}...", Path.GetFileName(testDirectory));
+            Console.WriteLine("Building {0}...", Path.GetFileName(testDirectory));
             return BuildAndRunValidationJob(mcu, testDirectory, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null, validationFlags);
         }
 

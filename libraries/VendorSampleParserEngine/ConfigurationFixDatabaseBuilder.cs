@@ -25,13 +25,14 @@ namespace VendorSampleParserEngine
             _ReverseConditionTable = reverseConditionTable;
         }
 
-        public void BuildConfigurationFixDatabase()
+        public void BuildConfigurationFixDatabase(BSPReportWriter reportWriter)
         {
             ConfigurationFixDatabase result = new ConfigurationFixDatabase
             {
                 ConfigurationTable = _ReverseConditionTable.ConditionTable,
                 Frameworks = _ReverseConditionTable.Frameworks,
                 SourceFiles = _ReverseConditionTable.FileTable,
+                IncludeDirectories = _ReverseConditionTable.IncludeDirectoryTable,
             };
 
             for (int i = 0; i < _ReverseConditionTable.IncludeDirectoryTable.Count; i++)
@@ -47,7 +48,7 @@ namespace VendorSampleParserEngine
                 }
             }
 
-            result.Symbols = ComputeSymbolToFileMap();
+            result.Symbols = ComputeSymbolToFileMap(reportWriter);
 
             XmlTools.SaveObject(result, Path.Combine(_BSP.Directory, ConfigurationFixDatabase.FileName));
         }
@@ -111,56 +112,66 @@ namespace VendorSampleParserEngine
             }
         }
 
-        private List<ConfigurationFixDatabase.SecondaryObjectEntry> ComputeSymbolToFileMap()
+        private List<ConfigurationFixDatabase.SecondaryObjectEntry> ComputeSymbolToFileMap(BSPReportWriter reportWriter)
         {
-            List<ConfigurationFixDatabase.SecondaryObjectEntry> result = new List<ConfigurationFixDatabase.SecondaryObjectEntry>();
-            if (_ReverseConditionTable.ConfigurationFixSample == null)
-                return result;
+            var result = new HashSet<ConfigurationFixDatabase.SecondaryObjectEntry>();
+            if (_ReverseConditionTable.ConfigurationFixSamples == null)
+                return result.ToList();
 
-            var sampleDir = GetFullPath(_ReverseConditionTable.ConfigurationFixSample.SamplePath);
+            Dictionary<string, bool> fileBuildStatus = new Dictionary<string, bool>();
 
-            LoadedBSP.LoadedSample sampleObj = new LoadedBSP.LoadedSample
+            foreach (var sample in _ReverseConditionTable.ConfigurationFixSamples)
             {
-                BSP = _BSP,
-                Directory = sampleDir,
-                Sample = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(sampleDir, "sample.xml"))
-            };
+                var sampleDir = GetFullPath(sample.SamplePath);
 
-            var mcu = _BSP.MCUs.First(m => m.ExpandedMCU.ID == _ReverseConditionTable.ConfigurationFixSample.MCUID);
-            List<int> queue = Enumerable.Range(0, _ReverseConditionTable.FileTable.Count).ToList();
-
-            while(queue.Count > 0)
-            {
-                List<int> rejects = new List<int>();
-                List<int> handledFiles = new List<int>();
-                ConstructedConfiguration cfg = new ConstructedConfiguration(_ReverseConditionTable);
-
-                foreach (var i in queue)
+                LoadedBSP.LoadedSample sampleObj = new LoadedBSP.LoadedSample
                 {
-                    var file = _ReverseConditionTable.FileTable[i];
-                    string ext = Path.GetExtension(file.ObjectName).ToLower();
-                    if (ext != ".c" && ext != ".cpp")
-                        continue;
+                    BSP = _BSP,
+                    Directory = sampleDir,
+                    Sample = XmlTools.LoadObject<EmbeddedProjectSample>(Path.Combine(sampleDir, "sample.xml"))
+                };
 
-                    if (cfg.TryMerge(file))
-                        handledFiles.Add(i);
-                    else
-                        rejects.Add(i);
+                var mcu = _BSP.MCUs.First(m => m.ExpandedMCU.ID == sample.MCUID);
+                List<int> queue = Enumerable.Range(0, _ReverseConditionTable.FileTable.Count).ToList();
+
+                while (queue.Count > 0)
+                {
+                    Console.WriteLine($"Analyzing {sampleObj.Sample.Name} ({result.Count} symbols mapped, {queue.Count} files left)...");
+                    List<int> rejects = new List<int>();
+                    List<int> handledFiles = new List<int>();
+                    ConstructedConfiguration cfg = new ConstructedConfiguration(_ReverseConditionTable);
+
+                    foreach (var i in queue)
+                    {
+                        var file = _ReverseConditionTable.FileTable[i];
+                        string ext = Path.GetExtension(file.ObjectName).ToLower();
+                        if (ext != ".c" && ext != ".cpp")
+                            continue;
+
+                        if (cfg.TryMerge(file))
+                            handledFiles.Add(i);
+                        else
+                            rejects.Add(i);
+                    }
+
+                    var buildResult = Program.TestSingleSample(sampleObj, mcu, _TestDirectory, cfg.ToSampleJobObject(), null, null, BSPValidationFlags.KeepDirectoryAfterSuccessfulTest | BSPValidationFlags.ContinuePastCompilationErrors);
+                    BuildSymbolTableFromBuildResults(handledFiles, result, fileBuildStatus);
+
+                    if (rejects.Count == queue.Count)
+                        break;
+
+                    queue = rejects;
                 }
-
-                var buildResult = Program.TestSingleSample(sampleObj, mcu, _TestDirectory, cfg.ToSampleJobObject(), null, null, BSPValidationFlags.KeepDirectoryAfterSuccessfulTest | BSPValidationFlags.ContinuePastCompilationErrors);
-                BuildSymbolTableFromBuildResults(queue, result);
-
-                if (rejects.Count == queue.Count)
-                    break;
-
-                queue = rejects;
             }
 
-            return result;
+            foreach (var kv in fileBuildStatus)
+                if (!kv.Value)
+                    reportWriter.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Could not obtain symbol list provided by the following files", kv.Key, false);
+
+            return result.ToList();
         }
 
-        private void BuildSymbolTableFromBuildResults(IEnumerable<int> fileIndicies, List<ConfigurationFixDatabase.SecondaryObjectEntry> result)
+        private void BuildSymbolTableFromBuildResults(IEnumerable<int> fileIndicies, HashSet<ConfigurationFixDatabase.SecondaryObjectEntry> result, Dictionary<string, bool> fileBuildStatus)
         {
             Regex rgDefinedSymbol = new Regex("[0-9a-fA-F]+[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)$");
 
@@ -168,7 +179,13 @@ namespace VendorSampleParserEngine
             {
                 var nameBase = Path.GetFileNameWithoutExtension(_ReverseConditionTable.FileTable[i].ObjectName);
                 if (!File.Exists(Path.Combine(_TestDirectory, nameBase + ".o")))
+                {
+                    if (!fileBuildStatus.ContainsKey(_ReverseConditionTable.FileTable[i].ObjectName))
+                        fileBuildStatus[_ReverseConditionTable.FileTable[i].ObjectName] = false;
                     continue;
+                }
+
+                fileBuildStatus[_ReverseConditionTable.FileTable[i].ObjectName] = true;
 
                 var objdump = _BSP.Toolchain.MakeToolName("objdump", false);
                 var proc = new Process();

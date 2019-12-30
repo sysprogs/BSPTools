@@ -655,13 +655,18 @@ namespace nrf5x
 
                 bspBuilder.ValidateBSP(bsp);
 
-                var cfgFixSample = new ConfigurationFixSampleReference
-                {
-                    MCUID = "nRF52840_XXAA",
-                    SamplePath = "$$SYS:BSP_ROOT$$/samples/BLEMouse"
-                };
+                List<ConfigurationFixSampleReference> samplesForComputingSymbolLists = new List<ConfigurationFixSampleReference>();
 
-                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), true, cfgFixSample);
+                foreach (var sampleName in new[] { "BLEMouse", "IoT/Icmp", "BLEMultilinkCentral", "LEDBlink_FreeRTOS" })
+                {
+                    samplesForComputingSymbolLists.Add(new ConfigurationFixSampleReference
+                    {
+                        MCUID = "nRF52840_XXAA",
+                        SamplePath = "$$SYS:BSP_ROOT$$/samples/" + sampleName
+                    });
+                }
+
+                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), true, samplesForComputingSymbolLists.ToArray());
 
                 bspBuilder.Save(bsp, false, false);
             }

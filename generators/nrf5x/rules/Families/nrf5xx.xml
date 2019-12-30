@@ -411,7 +411,7 @@
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\external</SourceFolder>
 					<TargetFolder>external</TargetFolder>
-					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-tile\tile_shim\*;-micro-ecc\*;-fprintf\*;-fatfs\doc\*;*</FilesToCopy>
+					<FilesToCopy>-*.lib;-segger_rtt\*KEIL.*;-segger_rtt\*IAR.*;-lwip\*;-mbedtls\*;-freertos\*;-nrf_tls\*;-tile\tile_shim\*;-micro-ecc\*;-fprintf\*;-fatfs\doc\*;-cJSON\test.c;*</FilesToCopy>
 					<ProjectInclusionMask>-*integration_test_*;-infineon\*;*.c;*.h;*.a</ProjectInclusionMask>
 					<AutoIncludeMask>-infineon\*;*.h</AutoIncludeMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.libraries.external.|nRF5x Libraries (3rd-party)</SmartPropertyGroup>
@@ -833,8 +833,6 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/main.c</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/components/ble/ble_services/ble_lbs_c/ble_lbs_c.c</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/components/ble/ble_services/ble_lbs_c/ble_lbs_c.h</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>

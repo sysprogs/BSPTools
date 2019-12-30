@@ -8,6 +8,7 @@
 		<string>com.sysprogs.arm.nordic.nrfx.nrf_ble_scan</string>
 		<string>com.sysprogs.arm.nordic.nrfx.ble_db_discovery</string>
 		<string>com.sysprogs.arm.nordic.nrfx.nrf_ble_gq</string>
+		<string>com.sysprogs.arm.nordic.nrf5x.ble_lbs_c</string>
 	</RequiredFrameworks>
 	<AdditionalSourcesToCopy>
 		<AdditionalSourceFile>
@@ -16,14 +17,6 @@
 		</AdditionalSourceFile>
 		<AdditionalSourceFile>
 			<SourcePath>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/main.c</SourcePath>
-			<DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
-		</AdditionalSourceFile>
-		<AdditionalSourceFile>
-			<SourcePath>$$SYS:BSP_ROOT$$/nRF5x/components/ble/ble_services/ble_lbs_c/ble_lbs_c.c</SourcePath>
-			<DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
-		</AdditionalSourceFile>
-		<AdditionalSourceFile>
-			<SourcePath>$$SYS:BSP_ROOT$$/nRF5x/components/ble/ble_services/ble_lbs_c/ble_lbs_c.h</SourcePath>
 			<DoNotAddToSolutionExplorer>false</DoNotAddToSolutionExplorer>
 		</AdditionalSourceFile>
 	</AdditionalSourcesToCopy>
