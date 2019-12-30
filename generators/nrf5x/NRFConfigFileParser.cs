@@ -91,6 +91,7 @@ namespace nrf5x
                 },
                 TargetFileName = Path.GetFileName(file),
                 PropertyList = propertyList,
+                UserFriendlyName = "nRF5x SDK Configuration",
             };
         }
 

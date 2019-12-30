@@ -29,11 +29,10 @@ namespace BSPGenerationTools.ConfigFiles
                         group.Properties.Add(new PropertyEntry.Boolean { Name = name, UniqueID = name, ValueForTrue = "1", ValueForFalse = "0" });
                     else
                         group.Properties.Add(new PropertyEntry.String { Name = name, UniqueID = name });
+
+                    allProperties.Add(name);
                 }
             }
-
-            if (group != null && group.Properties.Count > 0)
-                propertyList.PropertyGroups.Add(group);
 
             return new ConfigurationFileTemplate
             {
@@ -42,7 +41,7 @@ namespace BSPGenerationTools.ConfigFiles
                     new ConfigurationFilePropertyClass
                     {
                         NormalRegex = new SerializableRegularExpression(rgParameter.ToString()),
-                        Template = "#define {0}{1}{2}",
+                        Template = "#define config{0}{1}{2}",
                         Properties = allProperties.ToArray(),
                         NameIndex = 1,
                         IndentIndex = 2,
@@ -51,6 +50,7 @@ namespace BSPGenerationTools.ConfigFiles
                 },
                 TargetFileName = Path.GetFileName(file),
                 PropertyList = propertyList,
+                UserFriendlyName = "FreeRTOS Configuration",
             };
         }
     }
