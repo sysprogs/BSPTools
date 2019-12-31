@@ -1,0 +1,369 @@
+Part Number;Description;Status;SubFamily;Frequency(MHz);FRAM(KB);Flash(KB);SRAM(B);GPIO;Cap touch I/O;Timers - 16-bit;Watchdog;Real-Time Clock;Brown Out Reset;SVS;USART;USCI_B (I2C & SPI);USCI_A (UART/LIN/IrDA/SPI);USI:(I2C/SPI);DMA;Multiplier;Comparators;Temp Sensor;ADC;ADC Channels;DAC;USB;LCD Segments;Approx. Price (US$);Pin/Package
+MSP430G2553;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;16;512;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;0.90 | 1ku;0DIESALE, 0WAFERSALE, 20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2533;MSP430G2x33, MSP430G2x03 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;16;512;24;Yes;2;Yes;;Yes;;;1;1;;;;;Yes;10-bit SAR;8;;;;0.90 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2513;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;16;512;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;;Slope;;;;;0.90 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2453;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;512;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;0.80 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2452;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;Yes;10-bit SAR;8;;;;0.70 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2433;MSP430G2x33, MSP430G2x03 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;512;24;Yes;2;Yes;;Yes;;;1;1;;;;;Yes;10-bit SAR;8;;;;0.75 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2432;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;256;16;Yes;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.70 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2413;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;512;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;;Slope;;;;;0.75 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2412;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;;10-bit SAR;8;;;;0.65 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2403;MSP430G2x33, MSP430G2x03 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;512;24;Yes;2;Yes;;Yes;;;1;1;;;;;;;;;;;0.75 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2402;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;8;256;16;Yes;1;Yes;;Yes;;;;;1;;;;;;;;;;0.65 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2353;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;0.70 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2352;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;Yes;10-bit SAR;8;;;;0.65 | 1ku;14TSSOP, 20PDIP, 20TSSOP, 16QFN
+MSP430G2333;MSP430G2x33, MSP430G2x03 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;24;Yes;2;Yes;;Yes;;;1;1;;;;;Yes;10-bit SAR;8;;;;0.65 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2332;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;16;Yes;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.60 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2313;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;;Slope;;;;;0.65 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2312;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;;;;;;;0.60 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2303;MSP430G2x33, MSP430G2x03 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;24;Yes;2;Yes;;Yes;;;1;1;;;;;;;;;;;0.65 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2302;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;4;256;16;Yes;1;Yes;;Yes;;;;;1;;;;;;;;;;0.55 | 1ku;16QFN, 20PDIP, 14TSSOP, 20TSSOP
+MSP430G2253;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;0.65 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2252;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;Yes;10-bit SAR;8;;;;0.60 | 1ku;14TSSOP, 20PDIP, 16QFN, 20TSSOP
+MSP430G2233;MSP430G2x33, MSP430G2x03 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;24;Yes;2;Yes;;Yes;;;1;1;;;;;Yes;10-bit SAR;8;;;;0.60 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2232;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;16;Yes;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.55 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2231;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;128;10;;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.55 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2230;MSP430G22x0 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;128;4;;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;4;;;;0.40 | 1ku;8SOIC
+MSP430G2221;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;128;10;;1;Yes;;Yes;;;;;1;;;;;;;;;;0.49 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2213;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;;Slope;;;;;0.60 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2212;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;;;;;;;0.55 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2211;MSP430G2x01, MSP430G2x11 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;128;10;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.49 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2210;MSP430G22x0 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;128;4;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.35 | 1ku;8SOIC
+MSP430G2203;MSP430G2x33, MSP430G2x03 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;24;Yes;2;Yes;;Yes;;;1;1;;;;;;;;;;;0.60 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2202;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;256;16;Yes;1;Yes;;Yes;;;;;1;;;;;;;;;;0.50 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2201;MSP430G2x01, MSP430G2x11 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;2;128;10;;1;Yes;;Yes;;;;;;;;;;;;;;;0.47 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2153;MSP430G2x53, MSP430G2x13 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;256;24;Yes;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;0.60 | 1ku;20PDIP, 20TSSOP, 28TSSOP, 32QFN
+MSP430G2152;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;Yes;10-bit SAR;8;;;;0.55 | 1ku;14TSSOP, 20PDIP, 16QFN, 20TSSOP
+MSP430G2132;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;256;16;Yes;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.55 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2131;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;128;10;;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.49 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2121;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;128;10;;1;Yes;;Yes;;;;;1;;;;;;;;;;0.46 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2112;MSP430G2x52, MSP430G2x12 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;256;16;Yes;1;Yes;;Yes;;;;;1;;;Yes;;;;;;;0.49 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2111;MSP430G2x01, MSP430G2x11 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;128;10;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.46 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2102;MSP430G2x32, MSP430G2x02 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;256;16;Yes;1;Yes;;Yes;;;;;1;;;;;;;;;;0.48 | 1ku;14TSSOP, 16QFN, 20PDIP, 20TSSOP
+MSP430G2101;MSP430G2x01, MSP430G2x11 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;1;128;10;;1;Yes;;Yes;;;;;;;;;;;;;;;0.44 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430G2001;MSP430G2x01, MSP430G2x11 Mixed Signal Microcontroller;ACTIVE;Value Line;16;;0,5;128;10;;1;Yes;;Yes;;;;;;;;;;;;;;;0.34 | 1ku;14PDIP, 14TSSOP, 16QFN
+CC430F6147;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;32;4096;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;8;;;96;3.20 | 1ku;64VQFN
+CC430F6145;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;16;2048;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;8;;;96;3.10 | 1ku;64VQFN
+CC430F6143;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;8;2048;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;8;;;96;3.00 | 1ku;64VQFN
+CC430F6137;16-Bit Ultra-Low-Power MCU, 32KB Flash, 4KB RAM, CC1101 Radio, AES-128, 12Bit ADC, USCI, LCD driver;ACTIVE;RF SoC Series;20;;32;4096;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;8;;;96;3.10 | 1ku;64VQFN
+CC430F6135;16-Bit Ultra-Low-Power MCU, 16KB Flash, 2KB RAM, CC1101 Radio, AES-128, 12Bit ADC, USCI, LCD driver;ACTIVE;RF SoC Series;20;;16;2048;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;8;;;96;3.00 | 1ku;64VQFN
+CC430F6127;16-Bit Ultra-Low-Power MCU, 32KB Flash, 4KB RAM, CC1101 Radio, AES-128, USCI, LCD Driver;ACTIVE;RF SoC Series;20;;32;4096;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;;;;96;3.00 | 1ku;64VQFN
+CC430F6126;16-Bit Ultra-Low-Power MCU, 32KB Flash, 2KB RAM, CC1101 Radio, AES-128, USCI, LCD Driver;ACTIVE;RF SoC Series;20;;32;2048;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;;;;96;2.90 | 1ku;64VQFN
+CC430F6125;16-Bit Ultra-Low-Power MCU, 16KB Flash, 2KB RAM, CC1101 Radio, AES-128, USCI, LCD Driver;ACTIVE;RF SoC Series;20;;16;2048;44;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;;;;96;2.80 | 1ku;64VQFN
+CC430F5147;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;32;4096;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;6;;;;2.80 | 1ku;48VQFN
+CC430F5145;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;16;2048;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;6;;;;2.70 | 1ku;48VQFN
+CC430F5143;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;8;2048;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;6;;;;2.60 | 1ku;48VQFN
+CC430F5137;16-Bit Ultra-Low-Power MCU, 32KB Flash, 4KB RAM, CC1101 Radio, AES-128, 12Bit ADC, USCI;ACTIVE;RF SoC Series;20;;32;4096;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;6;;;;2.70 | 1ku;48VQFN
+CC430F5135;16-Bit Ultra-Low-Power MCU, 16KB Flash, 2KB RAM, CC1101 Radio, AES-128, 12Bit ADC, USCI;ACTIVE;RF SoC Series;20;;16;2048;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;6;;;;2.60 | 1ku;48VQFN
+CC430F5133;16-Bit Ultra-Low-Power MCU, 8KB Flash, 2KB RAM, CC1101 Radio, AES-128, 12Bit ADC, USCI;ACTIVE;RF SoC Series;20;;8;2048;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;6;;;;2.50 | 1ku;48VQFN
+CC430F5125;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;16;2048;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;;;;;2.60 | 1ku;48VQFN
+CC430F5123;CC430F614x, CC430F514x, CC430F512x SoC With RF Core;ACTIVE;RF SoC Series;20;;8;2048;30;;2;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;Yes;;;;;2.50 | 1ku;48VQFN
+MSP430L092;MSP430L092 Mixed Signal Microcontroller;ACTIVE;Low Voltage Series;4;;;2048;11;;2;Yes;;Yes;Yes;;;;;;;Yes;Yes;8-bit SAR  ;4;;;;1.00 | 1ku;0DIESALE, 14TSSOP
+MSP430C092;MSP430L092 Mixed Signal Microcontroller;ACTIVE;Low Voltage Series;4;;;128;11;;2;Yes;;Yes;Yes;;;;;;;Yes;Yes;8-bit SAR ;4;;;;;
+MSP430C091;MSP430L092 Mixed Signal Microcontroller;ACTIVE;Low Voltage Series;4;;;128;11;;2;Yes;;Yes;Yes;;;;;;;Yes;Yes;8-bit SAR ;4;;;;;
+AFE4110;Mixed Signal Microcontroller, AFE4110;ACTIVE;Low Voltage Series;8;;;512;23;;2;Yes;;Yes;Yes;;;;;;;Yes;Yes;8-bit SAR;4;;;;0.80 | 1ku;0WAFERSALE
+MSP430BQ1010;MSP430BQ1010 - Pre-programmed, fixed-function device for wireless power control and communications;ACTIVE;Fixed Function;;;;;;;;;;;;;;;;;;;;;;;;;1.80 | 1ku;32WQFN
+MSP430FR5739;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;16;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;10-bit SAR;14;;;;2.45 | 1ku;38TSSOP, 40VQFN
+MSP430FR5738;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;16;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;10-bit SAR;10;;;;2.35 | 1ku;24VQFN, 28TSSOP
+MSP430FR5737;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;16;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;;;;;;2.30 | 1ku;38TSSOP, 40VQFN
+MSP430FR5736;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;8;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;;;2.20 | 1ku;24VQFN, 28TSSOP
+MSP430FR5735;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;8;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;10-bit SAR;14;;;;2.20 | 1ku;38TSSOP, 40VQFN
+MSP430FR5734;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;8;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;10-bit SAR;10;;;;2.10 | 1ku;24VQFN, 28TSSOP
+MSP430FR5733;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;8;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;;;;;;2.05 | 1ku;38TSSOP, 40VQFN
+MSP430FR5732;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;4;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;;;2.00 | 1ku;24VQFN, 28TSSOP
+MSP430FR5731;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;4;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;10-bit SAR;14;;;;1.95 | 1ku;38TSSOP, 40VQFN
+MSP430FR5730;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;24;4;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;10-bit SAR;10;;;;1.90 | 1ku;24VQFN, 28TSSOP
+MSP430FR5729;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;16;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;10-bit SAR;14;;;;2.15 | 1ku;38TSSOP, 40VQFN
+MSP430FR5728;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;16;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;10-bit SAR;10;;;;2.10 | 1ku;24VQFN, 28TSSOP
+MSP430FR5727;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;16;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;;;;;;2.20 | 1ku;38TSSOP, 40VQFN
+MSP430FR5726;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8  ;16;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;;;2.00 | 1ku;24VQFN, 28TSSOP
+MSP430FR5725;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;8;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;10-bit SAR;14;;;;2.05 | 1ku;38TSSOP, 40VQFN
+MSP430FR5724;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;8;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;10-bit SAR;10;;;;1.95 | 1ku;24VQFN, 28TSSOP
+MSP430FR5723;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;8;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;;;;;;1.90 | 1ku;38TSSOP, 40VQFN
+MSP430FR5722;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;8;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;;;1.85 | 1ku;24VQFN, 28TSSOP
+MSP430FR5721;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;4;;1024;33;;5;Yes;Yes;Yes;Yes;;1;2;;3;32x32;Yes;;10-bit SAR;14;;;;1.80 | 1ku;38TSSOP, 40VQFN
+MSP430FR5720;MSP430FR573x,MSP430FR572x Mixed Signal Microcontroller;ACTIVE;FRAM Series;8;4;;1024;17;;3;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;10-bit SAR;10;;;;1.75 | 1ku;24VQFN, 28TSSOP
+MSP430G2230-EP;Enhanced Product 16-bit Ultra-Low-Power Mixed Signal Microcontroller, 2kB Flash, 128B RAM;"HiRel
+PREVIEW";Extended Temp;16;;;128;4;;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;4;;;;0.52 | 1ku;8SOIC
+MSP430F2618-EP;Enhanced Product 16-Bit Ultra-Low-Power MCU, 92KB Flash, 8KB RAM, 12-Bit ADC, Dual DAC, 2 USCI;"HiRel
+ACTIVE";Extended Temp;16;;116;8192;48;;2;Yes;;Yes;Yes;;2;2;;3;16x16;Yes;Yes;12-bit SAR;8;1;;;26.00 | 100u;113BGA MICROSTAR JUNIOR
+MSP430F2618;16-Bit Ultra-Low-Power MCU, 116kB Flash, 8KB RAM, 12-Bit ADC, Dual DAC, 2 USCI, HW Mult, DMA;ACTIVE;Extended Temp;16;;116;8192;48;;2;Yes;;Yes;Yes;;2;2;;3;16x16;Yes;Yes;12-bit SAR;8;;;;6.35 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F249-EP;Enhanced Product 16-bit Ultra-Low-Power Microcontroller, 60KB Flash, 2KB RAM, 12-Bit ADC, 2 USCIs,;"HiRel
+ACTIVE";Extended Temp;16;;60;2048;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yesbit (3CCDR), 1 16-bit (7CCR), 1;12-bit SAR;8;;;;11.90 | 100u;64LQFP
+MSP430F2274-EP;16-bit Ultra-Low-Power Micro controller, 32kB Flash, 1K RAM;"HiRel
+ACTIVE";Extended Temp;16;;32;1024;32;;2;Yes;;Yes;;;1;1;1;;;;Yes;10-bit SAR;12;;;;6.75 | 1ku;38TSSOP, 40VQFN
+MSP430F2013-EP;Enhanced Product 16-bit Ultra-Low-Power Microcontroller, 2kB Flash, 128B RAM, 16-Bit Sigma-Delta A/D;"HiRel
+ACTIVE";Extended Temp;16;;2;128;10;;1;Yes;;Yes;Yes;;;;1;;;;Yes;16-bit Sigma Delta;4;;;;1.75 | 100u;16QFN
+MSP430G2111-Q1;MSP430G2x01-Q1, MSP430G2x11-Q1 Automotive Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp, Value Line;16;;1;128;10;;1;Yes;;Yes;;;;;1;;;Yes;;Slope;;;;;0.55 | 1ku;14TSSOP, 16QFN
+MSP430G2231-Q1;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp;16;;2;128;10;;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.65 | 1ku;14TSSOP, 16QFN
+MSP430G2221-Q1;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp;16;;2;128;10;;1;Yes;;Yes;;;;;1;;;;;;;;;;0.60 | 1ku;14TSSOP, 16QFN
+MSP430G2211-Q1;MSP430G2x01-Q1, MSP430G2x11-Q1 Automotive Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp;16;;2;128;10;;1;Yes;;Yes;;;;;1;;;Yes;;Slope;;;;;0.60 | 1ku;14TSSOP, 16QFN
+MSP430G2201-Q1;MSP430G2x01-Q1, MSP430G2x11-Q1 Automotive Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp;16;;2;128;10;;1;Yes;;Yes;;;;;1;;;;;;;;;;0.55 | 1ku;14TSSOP, 16QFN
+MSP430G2131-Q1;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp;16;;1;128;10;;1;Yes;;Yes;;;;;1;;;;Yes;10-bit SAR;8;;;;0.60 | 1ku;14TSSOP, 16QFN
+MSP430G2121-Q1;MSP430G2x21, MSP430G2x31 Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp;16;;1;128;10;;1;Yes;;Yes;;;;;1;;;;;;;;;;0.55 | 1ku;14TSSOP, 16QFN
+MSP430G2001-Q1;MSP430G2x01-Q1, MSP430G2x11-Q1 Automotive Mixed Signal Microcontroller;ACTIVE;Automotive, Extended Temp;16;;0,5;128;10;;1;Yes;;Yes;;;;;1;;;;;;;;;;0.41 | 1ku;14TSSOP, 16QFN
+MSP430F2272-Q1;Automotive Catalog 16-bit Ultra-Low-Power Microcontroller, 32kB Flash, 1K RAM;PREVIEW;Automotive, Extended Temp;16;;32;1024;32;;2;Yes;;Yes;;;1;1;;;;;Yes;10-bit SAR;12;;;;;38TSSOP, 40VQFN
+MSP430F2254-Q1;Automotive Catalog 16-bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM;PREVIEW;Automotive, Extended Temp;16;;16;512;32;;2;Yes;;Yes;;;1;1;1;;;;Yes;10-bit SAR;12;;;;;38TSSOP, 40VQFN
+MSP430F2252-Q1;Automotive Catalog 16-bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM;PREVIEW;Automotive, Extended Temp;16;;16;512;32;;2;Yes;;Yes;;;1;1;;;;;Yes;10-bit SAR;12;;;;;38TSSOP, 40VQFN
+MSP430F2234-Q1;Automotive Catalog 16-bit Ultra-Low-Power Microcontroller, 8kB Flash, 512B RAM;PREVIEW;Automotive, Extended Temp;16;;8;512;32;;2;Yes;;Yes;;;1;1;1;;;;Yes;10-bit SAR;12;;;;;38TSSOP, 40VQFN
+MSP430F2232-Q1;Automotive Catalog 16-bit Ultra-Low-Power Microcontroller, 8kB Flash, 512B RAM;PREVIEW;Automotive, Extended Temp;16;;8;512;32;;2;Yes;;Yes;;;1;1;;;;;Yes;10-bit SAR;12;;;;;40VQFN, 38TSSOP
+MSP430G2101-Q1;MSP430G2x01-Q1, MSP430G2x11-Q1 Automotive Mixed Signal Microcontroller;ACTIVE;Automotive;16;;1;128;10;;1;Yes;;Yes;;;;;1;;;;;;;;;;0.55 | 1ku;14TSSOP, 16QFN
+MSP430F2274-Q1;Automotive Catalog 16-bit Ultra-Low-Power Microcontroller, 32kB Flash, 1K RAM;PREVIEW;Automotive;16;;32;1024;32;;2;Yes;;Yes;;;1;1;1;;;;Yes;10-bit SAR;12;;;;;38TSSOP, 40VQFN
+MSP430F6736;MSP430F6736 Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;128;8192;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;3.25 | 1ku;0DIESALE, 0WAFERSALE, 100LQFP, 80LQFP
+MSP430F6735;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;128;4096;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;3.15 | 1ku;100LQFP, 80LQFP
+MSP430F6734;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;96;4096;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;3.00 | 1ku;100LQFP, 80LQFP
+MSP430F6733;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;64;4096;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.75 | 1ku;100LQFP, 80LQFP
+MSP430F6731;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;32;2048;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.55 | 1ku;100LQFP, 80LQFP
+MSP430F6730;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;16;1024;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.45 | 1ku;100LQFP, 80LQFP
+MSP430F6726;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;128;8192;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.70 | 1ku;100LQFP, 80LQFP
+MSP430F6725;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;128;4096;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.60 | 1ku;100LQFP, 80LQFP
+MSP430F6724;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;96;4096;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.45 | 1ku;100LQFP, 80LQFP
+MSP430F6723;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;64;4096;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.30 | 1ku;100LQFP, 80LQFP
+MSP430F6721;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;32;2048;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.10 | 1ku;100LQFP, 80LQFP
+MSP430F6720;MSP430F673x, MSP430F672x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;25;;16;1024;72;;4;Yes;Yes, with battery backup;Yes;;;1;3;;3;32x32;;Yes;10-bit SAR;8;;;320;2.00 | 1ku;100LQFP, 80LQFP
+MSP430F6638;MSP430F6638 Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;256;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;1;1;;5.45 | 1ku;0WAFERSALE, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6637;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;192;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;1;1;;5.15 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6636;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;128;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;1;1;;4.90 | 1ku;100BGA MICROSTAR JUNIOR, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6635;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;256;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;5.15 | 1ku;100BGA MICROSTAR JUNIOR, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6634;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;192;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;4.95 | 1ku;100BGA MICROSTAR JUNIOR, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6633;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;128;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;4.65 | 1ku;100BGA MICROSTAR JUNIOR, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6632;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;256;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;5.10 | 1ku;100BGA MICROSTAR JUNIOR, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6631;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;192;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;4.80 | 1ku;100BGA MICROSTAR JUNIOR, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6630;MSP430F663x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;128;16384;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;4.60 | 1ku;100BGA MICROSTAR JUNIOR, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6438;MSP430F643x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;256;18432;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;4.70 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6436;MSP430F643x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;128;18432;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;4.20 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6435;MSP430F643x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;256;18432;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;4.05 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F6433;MSP430F643x Mixed Signal Microcontroller;ACTIVE;6 Series with LCD;20;;128;10240;74;;4;Yes;Yes, with battery backup;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;3.65 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5638;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;256;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;Yes;12-bit SAR;16;1;1;;5.35 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5637;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;192;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;Yes;12-bit SAR;16;1;1;;5.10 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5636;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;128;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;Yes;12-bit SAR;16;1;1;;4.85 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5635;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;256;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;4.75 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5634;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;192;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;4.45 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5633;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;128;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;4.20 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5632;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;256;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;;;16;;1;;4.50 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5631;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;192;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;;;16;;1;;4.10 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5630;MSP430F563x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;128;16384;74;;4;Yes;Yes;Yes;Yes;;;;;3;32x32;Yes;;;16;;1;;3.65 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5529;16-Bit Ultra-Low-Power Microcontroller, 128KB Flash, 8KB RAM, USB, 12Bit ADC, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;128;8192;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;4.00 | 1ku;0DIESALE, 80LQFP
+MSP430F5528;16-Bit Ultra-Low-Power Microcontroller, 128KB Flash, 8KB RAM, USB, 12Bit ADC, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;128;8192;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;3.95 | 1ku;64DSBGA, 64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5527;16-Bit Ultra-Low-Power Microcontroller, 96KB Flash, 6KB RAM, USB, 12Bit ADC, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;96;6144;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;3.90 | 1ku;80LQFP
+MSP430F5526;16-Bit Ultra-Low-Power Microcontroller, 96KB Flash, 6KB RAM, USB, 12Bit ADC, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;96;6144;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;3.80 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5525;16-Bit Ultra-Low-Power Microcontroller, USB, 64KB Flash, 4KB RAM, 12Bit ADC, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;64;4096;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;3.70 | 1ku;80LQFP
+MSP430F5524;16-Bit Ultra-Low-Power Microcontroller, USB, 64KB Flash, 4KB RAM, 12Bit ADC, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;64;4096;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;3.55 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5522;MSP430F551x, MSP430F552x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;8192;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;3.40 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5521;MSP430F551x, MSP430F552x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;6144;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;1;;3.35 | 1ku;80LQFP
+MSP430F5519;MSP430F551x, MSP430F552x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;128;8192;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;3.90 | 1ku;80LQFP
+MSP430F5517;MSP430F551x, MSP430F552x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;96;6144;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;3.75 | 1ku;80LQFP
+MSP430F5515;16-Bit Ultra-Low-Power Microcontroller, USB, 64KB Flash, 4KB RAM, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;64;4096;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;3.35 | 1ku;80LQFP
+MSP430F5514;16-Bit Ultra-Low-Power Microcontroller, USB, 64KB Flash, 4KB RAM, 2 USCIs, 32Bit HW MPY;ACTIVE;5 Series;25;;64;4096;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;3.55 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5513;MSP430F551x, MSP430F552x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;4096;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;;;;;1;;3.25 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5510;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;4096;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;10-bit SAR;8;;1;;1.90 | 1ku;48LQFP, 64VQFN, 48VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5509;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;24;4096;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;10-bit SAR;8;;1;;1.85 | 1ku;48LQFP, 64VQFN, 48VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5508;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;16;4096;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;10-bit SAR;8;;1;;1.80 | 1ku;48LQFP, 48VQFN, 64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5507;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;4096;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;;Yes;10-bit SAR;8;;1;;1.90 | 1ku;48VQFN
+MSP430F5506;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;24;4096;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;;Yes;10-bit SAR;8;;1;;1.80 | 1ku;48VQFN
+MSP430F5505;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;16;4096;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;;Yes;10-bit SAR;8;;1;;1.75 | 1ku;48VQFN
+MSP430F5504;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;8;4096;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;;Yes;10-bit SAR;8;;1;;1.70 | 1ku;48LQFP, 48VQFN
+MSP430F5503;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;4096;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;1;;1.75 | 1ku;48VQFN
+MSP430F5502;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;24;4096;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;1;;1.65 | 1ku;48VQFN
+MSP430F5501;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;16;4096;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;1;;1.60 | 1ku;48VQFN
+MSP430F5500;Mixed Signal Microcontroller;ACTIVE;5 Series;25;;8;4096;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;;;;;1;;1.45 | 1ku;48VQFN
+MSP430F5438A;16-Bit Ultra-Low-Power Microcontroller, 256KB Flash, 16KB RAM, 12 Bit ADC, 4 USCIs, 32-bit HW Multi;ACTIVE;5 Series;25;;256;16384;87;;3;Yes;Yes;Yes;Yes;;4;4;;3;32x32;;Yes;12-bit SAR;16;;;;4.55 | 1ku;0DIESALE, 0WAFERSALE, 100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5437A;16-Bit Ultra-Low-Power Microcontroller, 256KB Flash, 16KB RAM, 12 Bit ADC, 2 USCIs, 32-bit HW Multi;ACTIVE;5 Series;25;;256;16384;67;;3;Yes;Yes;Yes;Yes;;2;2;;3;32x32;;Yes;12-bit SAR;16;;;;4.30 | 1ku;80LQFP
+MSP430F5436A;16-Bit Ultra-Low-Power Microcontroller, 192KB Flash, 16KB RAM, 12 Bit ADC, 4 USCIs, 32-bit HW Multi;ACTIVE;5 Series;25;;192;16384;87;;3;Yes;Yes;Yes;Yes;;4;4;;3;32x32;;Yes;12-bit SAR;16;;;;4.10 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5435A;16-Bit Ultra-Low-Power Microcontroller, 192KB Flash, 16KB RAM, 12 Bit ADC, 2 USCIs, 32-bit HW Multi;ACTIVE;5 Series;25;;192;16384;67;;3;Yes;Yes;Yes;Yes;;2;2;;3;32x32;;Yes;12-bit SAR;16;;;;3.80 | 1ku;80LQFP
+MSP430F5419A;16-Bit Ultra-Low-Power Microcontroller, 128KB Flash, 16KB RAM, 12 Bit ADC, 4 USCIs, 32-bit HW Multi;ACTIVE;5 Series;25;;128;16384;87;;3;Yes;Yes;Yes;Yes;;4;4;;3;32x32;;Yes;12-bit SAR;16;;;;2.50 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5418A;16-Bit Ultra-Low-Power Microcontroller, 128KB Flash, 16KB RAM, 12 Bit ADC, 2 USCIs, 32-bit HW Multi;ACTIVE;5 Series;25;;128;16384;67;;3;Yes;Yes;Yes;Yes;;2;2;;3;32x32;;Yes;12-bit SAR;16;;;;2.65 | 1ku;80LQFP
+MSP430F5342;MSP430F534x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;128;10240;31;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.60 | 1ku;48VQFN
+MSP430F5341;MSP430F534x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;96;8192;31;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.45 | 1ku;48VQFN
+MSP430F5340;MSP430F534x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;64;6144;31;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.15 | 1ku;48VQFN
+MSP430F5338;MSP430F533x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;256;18432;74;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;1;;;3.85 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5336;MSP430F533x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;128;18432;74;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;1;;;3.45 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5335;MSP430F533x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;256;18432;74;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;3.35 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5333;MSP430F533x Mixed Signal Microcontroller;ACTIVE;5 Series;20;;128;10240;74;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;3.00 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430F5329;MSP430F532x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;128;10240;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.60 | 1ku;80LQFP
+MSP430F5328;MSP430F532x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;128;10240;48;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.55 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5327;MSP430F532x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;96;8192;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.50 | 1ku;80LQFP
+MSP430F5326;MSP430F532x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;96;8192;48;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.45 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5325;MSP430F532x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;64;6144;63;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.20 | 1ku;80LQFP
+MSP430F5324;MSP430F532x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;64;6144;48;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;12-bit SAR;16;;;;2.10 | 1ku;64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5310;MSP430F530x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;6144;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;10-bit SAR;12;;;;1.85 | 1ku;48LQFP, 48VQFN, 64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5309;MSP430F530x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;24;6144;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;10-bit SAR;12;;;;1.75 | 1ku;48LQFP, 48VQFN, 64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5308;MSP430F530x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;16;6144;47;;4;Yes;Yes;Yes;Yes;;2;2;;3;32x32;Yes;Yes;10-bit SAR;12;;;;1.65 | 1ku;48LQFP, 48VQFN, 64VQFN, 80BGA MICROSTAR JUNIOR
+MSP430F5304;MSP430F530x Mixed Signal Microcontroller;ACTIVE;5 Series;25;;8;6144;31;;4;Yes;Yes;Yes;Yes;;1;1;;3;32x32;Yes;Yes;10-bit SAR;8;;;;1.55 | 1ku;48LQFP, 48VQFN
+MSP430F5172;MSP430F51x2 Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;2048;29;;2;Yes;;Yes;Yes;;1;1;;3;32x32;Yes;Yes;10-bit SAR;8;;;;1.70 | 1ku;38TSSOP, 40WQFN
+MSP430F5171;MSP430F51x2 Mixed Signal Microcontroller;ACTIVE;5 Series;25;;32;2048;29;;3;Yes;;Yes;Yes;;1;1;;3;32x32;Yes;;;;;;;1.60 | 1ku;38TSSOP, 40WQFN
+MSP430F5152;MSP430F51x2 Mixed Signal Microcontroller;ACTIVE;5 Series;25;;16;2048;29;;3;Yes;;Yes;Yes;;1;1;;3;32x32;Yes;Yes;10-bit SAR;8;;;;1.50 | 1ku;38TSSOP, 40WQFN
+MSP430F5151;MSP430F51x2 Mixed Signal Microcontroller;ACTIVE;5 Series;25;;16;2048;29;;3;Yes;;Yes;Yes;;1;1;;3;32x32;Yes;;;;;;;1.35 | 1ku;38TSSOP, 40WQFN
+MSP430F5132;MSP430F51x2 Mixed Signal Microcontroller;ACTIVE;5 Series;25;;8;1024;29;;3;Yes;;Yes;Yes;;1;1;;3;32x32;Yes;Yes;10-bit SAR;8;;;;1.25 | 1ku;38TSSOP, 40WQFN
+MSP430F5131;MSP430F51x2 Mixed Signal Microcontroller;ACTIVE;5 Series;25;;8;1024;29;;3;Yes;;;Yes;;1;1;;3;32x32;Yes;;;;;;;1.20 | 1ku;38TSSOP, 40WQFN
+MSP430BT5190;16-bit Microcontroller designed for use with CC2560 TI Bluetooth® Based Solutions;ACTIVE;5 Series;25;;256;16384;;;3;Yes;Yes;Yes;Yes;;4;4;;3;32x32;;Yes;12-bit SAR;16;;;;4.95 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430FW429;MSP430FW42x Mixed Signal Microcontroller;ACTIVE;4 Series with LCD;8;;60;2048;48;;2;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;3.55 | 1ku;0DIESALE, 64LQFP
+MSP430FW428;MSP430FW42x Mixed Signal Microcontroller;ACTIVE;4 Series with LCD;8;;48;2048;48;;2;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;3.30 | 1ku;64LQFP
+MSP430FW427;16-bit RISC Ultra-Low-Power Microcontroller for Electronic Flow Meters;ACTIVE;4 Series with LCD;8;;32;1024;48;;2;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;3.10 | 1ku;64LQFP
+MSP430FW425;16-bit RISC Ultra-Low-Power Microcontroller for Electronic Flow Meters;ACTIVE;4 Series with LCD;8;;16;512;48;;2;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;2.80 | 1ku;64LQFP
+MSP430FW423;16-bit RISC Ultra-Low-Power Microcontroller for Electronic Flow Meters;ACTIVE;4 Series with LCD;8;;8;256;48;;2;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;2.50 | 1ku;64LQFP
+MSP430FG479;16-Bit Ultra-Low-Power MCU, 60KB Flash, 2KB RAM, 16bit Sigma-Delta ADC, 12bit DAC, OpAmp, 128Seg LCD;ACTIVE;4 Series with LCD;8;;60;2048;48;;2;Yes;;Yes;Yes;;1;1;;;;Yes;Yes;16-bit Sigma Delta;;;;128;6.20 | 1ku;113BGA MICROSTAR JUNIOR, 80LQFP
+MSP430FG478;16-Bit Ultra-Low-Power MCU, 48KB Flash, 2KB RAM, 16bit Sigma-Delta ADC, 12bit DAC, OpAmp, 128Seg LCD;ACTIVE;4 Series with LCD;8;;48;2048;48;;2;Yes;;Yes;Yes;;1;1;;;;Yes;Yes;16-bit Sigma Delta;;;;128;5.55 | 1ku;113BGA MICROSTAR JUNIOR, 80LQFP
+MSP430FG477;16-Bit Ultra-Low-Power MCU, 32KB Flash, 2KB RAM, 16bit Sigma-Delta ADC, 12bit DAC, OpAmp, 128Seg LCD;ACTIVE;4 Series with LCD;8;;32;2048;48;;2;Yes;;Yes;Yes;;1;1;;;;Yes;Yes;16-bit Sigma Delta;;;;128;4.75 | 1ku;113BGA MICROSTAR JUNIOR, 80LQFP
+MSP430FG4619;16-Bit Ultra-Low-Power MCU, 120KB Flash, 4KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;120;4096;80;;1;Yes;Yes;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;2;;160;7.95 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430FG4618;16-Bit Ultra-Low-Power MCU, 116KB Flash, 8KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;116;8192;80;;1;Yes;Yes;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;2;;160;8.35 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430FG4617;16-Bit Ultra-Low-Power MCU, 92KB Flash, 8KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;8192;80;;1;Yes;Yes;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;2;;160;7.95 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430FG4616;16-Bit Ultra-Low-Power MCU, 92KB Flash, 4KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;4096;80;;1;Yes;Yes;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;2;;160;7.45 | 1ku;100LQFP, 113BGA MICROSTAR JUNIOR
+MSP430FG439;16-Bit Ultra-Low-Power MCU, 60KB Flash, 2KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 128 Seg LCD;ACTIVE;4 Series with LCD;8;;60;2048;48;;2;Yes;;Yes;Yes;1;;;;3;;Yes;Yes;12-bit SAR;;2;;128;5.25 | 1ku;80LQFP
+MSP430FG438;16-Bit Ultra-Low-Power MCU, 48KB Flash, 2KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 128 Seg LCD;ACTIVE;4 Series with LCD;8;;48;2048;48;;2;Yes;;Yes;Yes;1;;;;3;;Yes;Yes;12-bit SAR;;2;;128;4.50 | 1ku;80LQFP
+MSP430FG437;16-Bit Ultra-Low-Power MCU, 32KB Flash, 1KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 128 Seg LCD;ACTIVE;4 Series with LCD;8;;32;1024;48;;2;Yes;;Yes;Yes;1;;;;3;;Yes;Yes;12-bit SAR;;2;;128;3.85 | 1ku;80LQFP
+MSP430FG4270;16-Bit Ultra-Low-Power MCU, 32kB Flash, 256B RAM, 16-bit sigma Delta A/D, 12-bit D/A, 2 OPAMP, LCD D;ACTIVE;4 Series with LCD;8;;32;256;32;;;;;;;;;;;;;;Yes;16-bit Sigma Delta;;1;;56;4.00 | 1ku;48SSOP, 48VQFN
+MSP430FG4260;16-Bit Ultra-Low-Power MCU, 24kB Flash, 256B RAM, 16-bit Sigma-Delta A/D, 12-bit D/A, 2 OPAMP, LCD D;ACTIVE;4 Series with LCD;8;;24;256;32;;;;;;;;;;;;;;Yes;16-bit Sigma Delta;;1;;56;3.60 | 1ku;48SSOP, 48VQFN
+MSP430FG4250;16-Bit Ultra-Low-Power MCU, 16kB Flash, 256B RAM, 16-bit Sigma-Delta A/D, 12-bit D/A, 2 OPAMP, LCD D;ACTIVE;4 Series with LCD;8;;16;256;32;;;;;;;;;;;;;;Yes;16-bit Sigma Delta;;1;;56;3.30 | 1ku;48SSOP, 48VQFN
+MSP430FE427A;16-Bit Ultra-Low-Power Microcontroller for Energy Meters, 32KB Flash, 1024B RAM;ACTIVE;4 Series with LCD;8;;32;1024;14;;1;Yes;;Yes;Yes;1;;;;;16x16;;;16-bit Sigma Delta;;;;128;4.40 | 1ku;64LQFP
+MSP430FE4272;16-Bit Ultra-Low-Power Microcontroller for Energy Meters, 32KB Flash, 1024B RAM;ACTIVE;4 Series with LCD;8;;32;1024;14;;1;;;Yes;Yes;1;;;;;;;Yes;16-bit Sigma Delta;;;;128;2.45 | 1ku;64LQFP
+MSP430FE427;16-Bit Ultra-Low-Power Microcontroller for Energy Meters, 32KB Flash, 1024B RAM;ACTIVE;4 Series with LCD;8;;32;1024;14;;1;;;Yes;Yes;;;;;;;;;16-bit Sigma Delta;;;;128;5.45 | 1ku;64LQFP
+MSP430FE425A;16-bit Ultra-Low-Power Microcontroller for Energy Meters, 16KB Flash, 512B RAM;ACTIVE;4 Series with LCD;8;;16;512;14;;1;Yes;;Yes;Yes;1;;;;;16x16;;;16-bit Sigma Delta;;;;128;5.15 | 1ku;64LQFP
+MSP430FE4252;16-Bit Ultra-Low-Power Microcontroller for Energy Meters, 16KB Flash, 512B RAM;ACTIVE;4 Series with LCD;8;;16;512;14;;1;;;Yes;Yes;1;;;;;;;Yes;16-bit Sigma Delta;;;;128;2.35 | 1ku;64LQFP
+MSP430FE425;16-bit Ultra-Low-Power Microcontroller for Energy Meters, 16KB Flash, 512B RAM;ACTIVE;4 Series with LCD;8;;16;512;14;;1;;;Yes;Yes;;;;;;;;;16-bit Sigma Delta;;;;128;5.15 | 1ku;64LQFP
+MSP430FE4242;16-Bit Ultra-Low-Power Microcontroller for Energy Meters, 12KB Flash, 512B RAM;ACTIVE;4 Series with LCD;8;;12;512;14;;1;;;Yes;Yes;1;;;;;;;Yes;16-bit Sigma Delta;;;;128;2.25 | 1ku;64LQFP
+MSP430FE423A;16-bit Ultra-Low-Power Microcontroller for Energy Meters, 8KB Flash, 256B RAM;ACTIVE;4 Series with LCD;8;;8;256;14;;1;Yes;;Yes;Yes;1;;;;;16x16;;;16-bit Sigma Delta;;;;128;3.80 | 1ku;64LQFP
+MSP430FE4232;16-Bit Ultra-Low-Power Microcontroller for Energy Meters, 8KB Flash, 256B RAM;ACTIVE;4 Series with LCD;8;;8;256;14;;1;;;Yes;Yes;1;;;;;;;Yes;16-bit Sigma Delta;;;;128;2.15 | 1ku;64LQFP
+MSP430FE423;16-bit Ultra-Low-Power Microcontroller for Energy Meters, 8KB Flash, 256B RAM;ACTIVE;4 Series with LCD;8;;8;256;14;;1;;;Yes;Yes;;;;;;;;;16-bit Sigma Delta;;;;128;4.70 | 1ku;64LQFP
+MSP430F4794;16-Bit Ultra-Low-Power Microcontroller, 60KB Flash, 2KB RAM, 4 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;60;2560;72;;2;Yes;;Yes;Yes;;2;2;;;32x32;Yes;Yes;16-bit Sigma Delta;;;;160;4.30 | 1ku;100LQFP
+MSP430F4793;16-Bit Ultra-Low-Power Microcontroller, 60KB Flash, 2.5KB RAM, 3 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;60;2560;72;;2;Yes;;Yes;Yes;;2;2;;;32x32;Yes;Yes;16-bit Sigma Delta;;;;160;4.30 | 1ku;100LQFP
+MSP430F479;16-Bit Ultra-Low-Power MCU, 32KB Flash, 2KB RAM, 16bit Sigma-Delta ADC, 12bit DAC, 128Seg LCD;ACTIVE;4 Series with LCD;8;;60;2048;48;;2;Yes;Yes;Yes;Yes;;1;1;;;;Yes;Yes;16-bit Sigma Delta;;;;128;5.35 | 1ku;113BGA MICROSTAR JUNIOR, 80LQFP
+MSP430F4784;16-Bit Ultra-Low-Power Microcontroller, 48KB Flash, 2KB RAM, 4 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;48;2048;72;;2;Yes;;Yes;Yes;;2;2;;;32x32;Yes;Yes;16-bit Sigma Delta;;;;160;4.00 | 1ku;100LQFP
+MSP430F4783;16-Bit Ultra-Low-Power Microcontroller, 48KB Flash, 2KB RAM, 3 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;48;2048;72;;2;Yes;;Yes;Yes;;2;2;;;32x32;;Yes;16-bit Sigma Delta;;;;160;4.00 | 1ku;100LQFP
+MSP430F478;16-Bit Ultra-Low-Power MCU, 48KB Flash, 2KB RAM, 16bit Sigma-Delta A/D, 12bit D/A, 128Seg LCD;ACTIVE;4 Series with LCD;8;;48;2048;48;;2;Yes;Yes;Yes;Yes;;1;1;;;;Yes;Yes;16-bit Sigma Delta;;1;;128;5.00 | 1ku;113BGA MICROSTAR JUNIOR, 80LQFP
+MSP430F477;16-Bit Ultra-Low-Power MCU, 32KB Flash, 2KB RAM, 16bit Sigma-Delta A/D, 12bit D/A, 128Seg LCD;ACTIVE;4 Series with LCD;8;;32;2048;48;;;Yes;Yes;Yes;Yes;;1;1;;;;Yes;Yes;16-bit Sigma Delta;;1;;128;4.60 | 1ku;113BGA MICROSTAR JUNIOR, 80LQFP
+MSP430F47197;16-Bit Ultra-Low-Power Microcontroller, 120KB Flash, 4KB RAM, 7 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;120;4096;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;6.35 | 1ku;100LQFP
+MSP430F47196;16-Bit Ultra-Low-Power Microcontroller, 120KB Flash, 4KB RAM, 6 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;120;4096;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;7.70 | 1ku;100LQFP
+MSP430F47193;16-Bit Ultra-Low-Power Microcontroller, 120KB Flash, 4KB RAM, 3 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;120;4096;72;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.50 | 1ku;100LQFP
+MSP430F47187;16-Bit Ultra-Low-Power Microcontroller, 116KB Flash, 8KB RAM, 7 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;116;8192;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;6.10 | 1ku;100LQFP
+MSP430F47186;16-Bit Ultra-Low-Power Microcontroller, 116KB Flash, 8KB RAM, 6 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;116;8192;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;7.40 | 1ku;100LQFP
+MSP430F47183;16-Bit Ultra-Low-Power Microcontroller, 116KB Flash, 8KB RAM, 3 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;116;8192;72;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.30 | 1ku;100LQFP
+MSP430F47177;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 8KB RAM, 7 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;92;8192;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;4.85 | 1ku;100LQFP
+MSP430F47176;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 8KB RAM, 6 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;92;8192;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.90 | 1ku;100LQFP
+MSP430F47173;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 8KB RAM, 3 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;92;8192;72;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.10 | 1ku;100LQFP
+MSP430F47167;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 4KB RAM, 7 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;92;4096;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;4.75 | 1ku;100LQFP
+MSP430F47166;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 4KB RAM, 6 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;92;4096;68;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.70 | 1ku;100LQFP
+MSP430F47163;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 4KB RAM, 3 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;92;4096;72;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.00 | 1ku;100LQFP
+MSP430F47127;16-Bit Ultra-Low-Power Microcontroller, 56KB Flash, 4KB RAM, 7 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;56;4096;72;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.20 | 1ku;100LQFP
+MSP430F47126;16-Bit Ultra-Low-Power Microcontroller, 56KB Flash, 4KB RAM, 6 Sigma-Delta ADCs, LCD Driver;ACTIVE;4 Series with LCD;16;;56;4096;72;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;16-bit Sigma Delta;;;;160;5.10 | 1ku;100LQFP
+MSP430F46191;16-Bit Ultra-Low-Power MCU, 120KB Flash, 4KB RAM, Comparator, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;120;4096;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;;;;;160;5.80 | 1ku;100LQFP
+MSP430F4619;16-Bit Ultra-Low-Power MCU, 120KB Flash, 4KB RAM, 12-Bit ADC, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;120;4096;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;;;160;6.70 | 1ku;100LQFP
+MSP430F46181;16-Bit Ultra-Low-Power MCU, 116KB Flash, 8KB RAM, Comparator, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;116;8192;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;;;;;160;6.20 | 1ku;100LQFP
+MSP430F4618;16-Bit Ultra-Low-Power MCU, 116KB Flash, 8KB RAM, 12-Bit ADC, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;116;8192;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;;;160;7.10 | 1ku;100LQFP
+MSP430F46171;16-Bit Ultra-Low-Power MCU, 92KB Flash, 8KB RAM, Comparator, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;8192;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;;;;;160;5.80 | 1ku;100LQFP
+MSP430F4617;16-Bit Ultra-Low-Power MCU, 92KB Flash, 8KB RAM, 12-Bit ADC, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;8192;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;;;160;6.70 | 1ku;100LQFP
+MSP430F46161;16-Bit Ultra-Low-Power MCU, 92KB Flash, 4KB RAM, Comparator, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;4096;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;;;;;160;5.40 | 1ku;100LQFP
+MSP430F4616;16-Bit Ultra-Low-Power MCU, 92KB Flash, 4KB RAM, 12-Bit ADC, DMA, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;4096;80;;2;Yes;;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;;;160;6.30 | 1ku;100LQFP
+MSP430F4491;16-Bit Ultra-Low-Power MCU, 60kB Flash, 2048B RAM, Comparator, 2 USARTs, HW Multiplier, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;60;2048;48;;2;Yes;;Yes;Yes;2;;;;;16x16;Yes;Yes;;;;;160;4.40 | 1ku;100LQFP
+MSP430F449;16-Bit Ultra-Low-Power MCU, 60kB Flash, 2048B RAM, 12-Bit ADC, 2 USARTs HW Multiplier, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;60;2048;48;;;Yes;;Yes;Yes;2;;;;;16x16;Yes;Yes;12-bit SAR;;;;160;4.65 | 1ku;100LQFP
+MSP430F4481;16-Bit Ultra-Low-Power MCU, 48kB Flash, 2048B RAM, Comparator, 2 USARTs, HW Multiplier, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;48;2048;48;;2;Yes;;Yes;Yes;2;;;;;16x16;Yes;Yes;;;;;160;4.05 | 1ku;100LQFP
+MSP430F448;16-Bit Ultra-Low-Power MCU, 48kB Flash, 2048B RAM, 12-Bit ADC, 2 USARTs, HW Multiplier, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;48;2048;48;;;Yes;;Yes;Yes;2;;;;;16x16;Yes;Yes;12-bit SAR;;;;160;4.35 | 1ku;100LQFP
+MSP430F447;16-Bit Ultra-Low-Power MCU, 32kB Flash, 1024B RAM, 12-Bit ADC, 2 USARTs, HW Multiplier, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;32;1024;48;;;Yes;;Yes;Yes;2;;;;;16x16;Yes;Yes;12-bit SAR;;;;160;4.05 | 1ku;100LQFP
+MSP430F439;MSP430F43x Mixed Signal Microcontroller;ACTIVE;4 Series with LCD;8;;60;2048;48;;;;;;;1;;;;1;;;;12-bit SAR;;;;128;5.95 | 1ku;80LQFP
+MSP430F438;MSP430F43x Mixed Signal Microcontroller;ACTIVE;4 Series with LCD;8;;48;2048;48;;;;;;;1;;;;1;;;;12-bit SAR;;;;128;5.40 | 1ku;80LQFP
+MSP430F4371;16-Bit Ultra-Low-Power Microcontroller, 32kB Flash, 1024B RAM, USART, 160 Segment LCD;ACTIVE;4 Series with LCD;8;;32;1024;48;;2;Yes;;Yes;Yes;1;;;;;;Yes;;Slope;;;;128, 160;3.60 | 1ku;100LQFP, 80LQFP
+MSP430F437;16-Bit Ultra-Low-Power Microcontroller, 32kB Flash, 1024B RAM, 12-Bit ADC, USART, 160 Segment LCD;ACTIVE;4 Series with LCD;8;;32;1024;48;;2;Yes;;Yes;Yes;1;;;;;;Yes;;12-bit SAR;;;;128, 160;3.90 | 1ku;100LQFP, 80LQFP
+MSP430F4361;16-Bit Ultra-Low-Power Microcontroller, 24kB Flash, 1024B RAM, USART, 160 Segment LCD;ACTIVE;4 Series with LCD;8;;24;1024;48;;2;Yes;;Yes;Yes;1;;;;;;Yes;;Slope;;;;128, 160;3.50 | 1ku;100LQFP, 80LQFP
+MSP430F436;16-Bit Ultra-Low-Power Microcontroller, 24kB Flash, 1024B RAM, 12-Bit ADC, USART, 160 Segment LCD;ACTIVE;4 Series with LCD;8;;24;1024;48;;2;Yes;;Yes;Yes;1;;;;;;Yes;;12-bit SAR;;;;128, 160;3.70 | 1ku;100LQFP, 80LQFP
+MSP430F4351;16-Bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM, USART, 160 Segment LCD;ACTIVE;4 Series with LCD;8;;16;512;48;;2;Yes;;Yes;Yes;1;;;;;;Yes;;Slope;;;;128, 160;2.65 | 1ku;100LQFP, 80LQFP
+MSP430F435;16-Bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM, 12-Bit ADC, USART, 160 Segment LCD;ACTIVE;4 Series with LCD;8;;16;1024;48;;;Yes;;Yes;Yes;1;;;;;;Yes;;12-bit SAR;;;;128, 160;3.40 | 1ku;100LQFP, 80LQFP
+MSP430F427A;16-bit Ultra-Low-Power Microcontroller, 32KB Flash, 1KB RAM, Sigma-Delta ADC, 128 Seg LCD;ACTIVE;4 Series with LCD;8;;32;1024;14;;1;Yes;;Yes;Yes;;;;;;16x16;;Yes;16-bit Sigma Delta;;;;128;4.05 | 1ku;64LQFP
+MSP430F4270;16-Bit Ultra-Low-Power MCU, 32kB Flash, 256B RAM, 16-bit sigma Delta A/D, 12-bit D/A, LCD Driver;ACTIVE;4 Series with LCD;8;;32;256;32;;1;Yes;;Yes;;;;;;;;;Yes;16-bit Sigma Delta;;1;;56;3.65 | 1ku;48SSOP, 48VQFN
+MSP430F4260;16-Bit Ultra-Low-Power MCU, 24kB Flash, 256B RAM, 16-bit Sigma-Delta A/D, 12-bit D/A, LCD Driver;ACTIVE;4 Series with LCD;8;;24;256;32;;1;Yes;;Yes;;;;;;;;;Yes;16-bit Sigma Delta;;1;;56;3.40 | 1ku;48SSOP, 48VQFN
+MSP430F425A;16-bit Ultra-Low-Power Microcontroller, 16KB Flash, 512B RAM, Sigma-Delta ADC, 128 Seg LCD;ACTIVE;4 Series with LCD;8;;16;512;14;;1;Yes;;Yes;Yes;;;;;;16x16;;Yes;16-bit Sigma Delta;;;;128;3.10 | 1ku;64LQFP
+MSP430F4250;16-Bit Ultra-Low-Power MCU, 16kB Flash, 256B RAM, 16-bit Sigma-Delta A/D, 12-bit D/A, LCD Driver;ACTIVE;4 Series with LCD;8;;16;256;32;;1;Yes;;Yes;;;;;;;;;Yes;16-bit Sigma Delta;;1;;56;3.05 | 1ku;48SSOP, 48VQFN
+MSP430F423A;16-bit Ultra-Low-Power Microcontroller, 8KB Flash, 256B RAM, Sigma-Delta ADC, 128 Seg LCD;ACTIVE;4 Series with LCD;8;;8;256;14;;1;Yes;;Yes;Yes;;;;;;16x16;;Yes;16-bit Sigma Delta;;;;128;3.45 | 1ku;64LQFP
+MSP430F417;16-Bit Ultra-Low-Power Microcontroller, 32kB Flash, 1kB RAM, Comparator, 96 Segment LCD;ACTIVE;4 Series with LCD;8;;32;1024;48;;2;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;1.75 | 1ku;64LQFP, 64VQFN
+MSP430F4152;16-Bit Ultra-Low-Power MCU, 16KB Flash, 512B RAM, 10-bit ADC, USCI, Analog Comp, 56 I/Os, LCD Driver;ACTIVE;4 Series with LCD;8;;16;512;56;;2;Yes;;Yes;Yes;;1;1;;;;Yes;Yes;10-bit SAR;;;;144;1.70 | 1ku;48VQFN, 64LQFP
+MSP430F415;16-Bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM, Comparator, 96 Segment LCD;ACTIVE;4 Series with LCD;8;;16;512;48;;2;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;1.50 | 1ku;64LQFP, 64VQFN
+MSP430F4132;16-Bit Ultra-Low-Power MCU, 16KB Flash, 512B RAM, 10-bit ADC, USCI, Analog Comp, 56 I/Os, LCD Driver;ACTIVE;4 Series with LCD;8;;8;512;56;;2;Yes;;Yes;Yes;;1;1;;;;Yes;Yes;10-bit SAR;;;;144;1.50 | 1ku;48VQFN, 64LQFP
+MSP430F413;16-Bit Ultra-Low-Power Microcontroller, 8kB Flash, 256B RAM, Comparator, 96 segment LCD;ACTIVE;4 Series with LCD;8;;8;256;48;;1;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;1.35 | 1ku;64LQFP, 64VQFN
+MSP430F412;16-Bit Ultra-Low-Power Microcontroller, 4kB Flash, 256B RAM, Comparator, 96 segment LCD;ACTIVE;4 Series with LCD;8;;4;256;48;;1;Yes;;Yes;Yes;;;;;;;Yes;;Slope;;;;96;1.30 | 1ku;64LQFP, 64VQFN
+MSP430CG4619;16-Bit Ultra-Low-Power MCU, 120KB ROM, 4KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;120;4096;80;;;Yes;;Yes;Yes;1;1;1;;3;;Yes;Yes;12-bit SAR;;2;;160;;
+MSP430CG4618;16-Bit Ultra-Low-Power MCU, 116KB ROM, 8KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;116;8192;80;;;Yes;;Yes;Yes;1;1;1;;3;;Yes;Yes;12-bit SAR;;2;;160;;
+MSP430CG4617;16-Bit Ultra-Low-Power MCU, 92KB ROM, 8KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;8192;80;;;Yes;;Yes;Yes;1;1;1;;3;;Yes;Yes;12-bit SAR;;2;;160;;
+MSP430CG4616;16-Bit Ultra-Low-Power MCU, 92KB ROM, 4KB RAM, 12-Bit ADC, Dual DAC, DMA, 3 OPAMP, 160 Seg LCD;ACTIVE;4 Series with LCD;8;;92;4096;80;;1;Yes;Yes;Yes;Yes;1;1;1;;3;16x16;Yes;Yes;12-bit SAR;;2;;160;;
+MSP430C413;16-bit Ultra-Low-Power Microcontroller, 8kB ROM, 256B RAM, 96 segment LCD;ACTIVE;4 Series with LCD;8;;;;48;;;;;;;;;;;;;;;Slope;;;;96;;
+MSP430C412;16-bit Ultra-Low-Power Microcontroller, 4kB ROM, 256B RAM, 96 segment LCD;ACTIVE;4 Series with LCD;8;;;256;48;;;;;;;;;;;;;;;Slope;;;;96;;
+MSP430C336;16-Bit Ultra-Low-Power Microcontroller, 24kB ROM, 1KB RAM, USART, HW multiplier, 120 segment LCD;ACTIVE;3 Series;8;;;;40;;;;;;;;;;;;;;;Slope;;;;120;;
+MSP430C314;16-Bit Ultra-Low-Power Microcontroller, 12kB ROM, 512B RAM, 92 segment LCD;ACTIVE;3 Series;8;;;;14;;;;;;;;;;;;;;;Slope;;;;92;;
+MSP430F2619;16-Bit Ultra-Low-Power MCU, 92KB Flash, 4KB RAM, 12-Bit ADC, Dual DAC, 2 USCI, HW Mult, DMA;ACTIVE;2 Series, Extended Temp;16;;120;4096;48;;2;Yes;;Yes;Yes;;2;2;;3;16x16;Yes;Yes;12-bit SAR;8;;;;6.65 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F2617;16-Bit Ultra-Low-Power MCU, 92KB Flash, 8KB RAM, 12-Bit ADC, Dual DAC, 2 USCI, HW Mult, DMA;ACTIVE;2 Series, Extended Temp;16;;92;8192;48;;2;Yes;;Yes;Yes;;2;2;;3;16x16;Yes;Yes;12-bit SAR;8;;;;6.05 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F2616;16-Bit Ultra-Low-Power MCU, 92KB Flash, 4KB RAM, 12-Bit ADC, Dual DAC, 2 USCI, HW Mult, DMA;ACTIVE;2 Series, Extended Temp;16;;92;4096;48;;2;Yes;;Yes;Yes;;2;2;;3;16x16;Yes;Yes;12-bit SAR;8;;;;5.85 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F2491;16-bit Ultra-Low-Power Microcontroller, 60KB Flash, 2KB RAM, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;60;2048;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;Slope;;;;;3.80 | 1ku;64LQFP, 64VQFN
+MSP430F249;16-bit Ultra-Low-Power Microcontroller, 60KB Flash, 2KB RAM, 12-Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;60;2048;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;12-bit SAR;8;;;;3.70 | 1ku;64LQFP, 64VQFN
+MSP430F2481;16-bit Ultra-Low-Power Microcontroller, 48KB Flash, 4KB RAM, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;48;4096;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;Slope;;;;;3.00 | 1ku;64LQFP, 64VQFN
+MSP430F248;16-bit Ultra-Low-Power Microcontroller, 48KB Flash, 4KB RAM, 12-Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;48;4096;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;12-bit SAR;8;;;;3.40 | 1ku;64LQFP, 64VQFN
+MSP430F2471;16-bit Ultra-Low-Power Microcontroller, 32KB Flash, 4KB RAM, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;32;4096;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;Slope;;;;;3.15 | 1ku;64LQFP, 64VQFN
+MSP430F247;16-bit Ultra-Low-Power Microcontroller, 32KB Flash, 4KB RAM, 12-Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;32;4096;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;12-bit SAR;8;;;;2.75 | 1ku;64LQFP, 64VQFN
+MSP430F2419;16-Bit Ultra-Low-Power Microcontroller, 120KB Flash, 4KB RAM, 12 Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;120;4096;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;12-bit SAR;8;;;;5.30 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F2418;16-Bit Ultra-Low-Power Microcontroller, 116KB Flash, 8KB RAM, 12 Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;116;8192;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;12-bit SAR;8;;;;5.00 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F2417;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 8KB RAM, 12 Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;92;8192;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;12-bit SAR;8;;;;4.80 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F2416;16-Bit Ultra-Low-Power Microcontroller, 92KB Flash, 4KB RAM, 12 Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;92;4096;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;Yes;12-bit SAR;8;;;;4.70 | 1ku;113BGA MICROSTAR JUNIOR, 64LQFP, 80LQFP
+MSP430F2410;16-bit Ultra-Low-Power Microcontroller, 56KB Flash, 4KB RAM, 12-Bit ADC, 2 USCIs, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;56;4096;48;;2;Yes;;Yes;Yes;;2;2;;;16x16;Yes;;12-bit SAR;8;;;;4.60 | 1ku;64VQFN, 64LQFP
+MSP430F2370;16-bit Ultra-Low-Power Microcontroller, 32KB Flash, 2048B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;32;2048;32;;2;Yes;;Yes;;;1;1;;;16x16;Yes;;Slope;;;;;1.95 | 1ku;40VQFN, 49DSBGA
+MSP430F2350;16-bit Ultra-Low-Power Microcontroller, 16KB Flash, 2048B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;16;2048;32;;2;Yes;;Yes;;;1;1;;;16x16;Yes;;Slope;;;;;1.80 | 1ku;40VQFN, 49DSBGA
+MSP430F235;16-bit Ultra-Low-Power Microcontroller, 16KB Flash, 2KB RAM, 12-Bit ADC, USCI, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;16;2048;48;;2;Yes;;Yes;Yes;;1;1;;;16x16;Yes;Yes;12-bit SAR;8;;;;2.60 | 1ku;64LQFP, 64VQFN
+MSP430F2330;16-bit Ultra-Low-Power Microcontroller, 8KB Flash, 1024B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;8;1024;32;;2;Yes;;Yes;;;1;1;;;16x16;Yes;;Slope;;;;;1.60 | 1ku;40VQFN, 49DSBGA
+MSP430F233;16-bit Ultra-Low-Power Microcontroller, 8KB Flash, 1KB RAM, 12-Bit ADC, USCI, HW Multiplier;ACTIVE;2 Series, Extended Temp;16;;8;1024;48;;2;Yes;;Yes;Yes;;1;1;;;16x16;Yes;Yes;12-bit SAR;8;;;;2.15 | 1ku;64LQFP, 64VQFN
+MSP430F2274;16-bit Ultra-Low-Power Microcontroller, 32kB Flash, 1K RAM;ACTIVE;2 Series, Extended Temp;16;;32;1024;32;;2;Yes;;Yes;;;1;1;;;;;;10-bit SAR;12;;;;2.25 | 1ku;38TSSOP, 40VQFN, 49DSBGA
+MSP430F2272;16-bit Ultra-Low-Power Microcontroller, 32kB Flash, 1K RAM;ACTIVE;2 Series, Extended Temp;16;;32;1024;32;;2;Yes;;Yes;;;1;1;;;;;;10-bit SAR;12;;;;2.00 | 1ku;38TSSOP, 40VQFN, 49DSBGA
+MSP430F2254;16-bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM;ACTIVE;2 Series, Extended Temp;16;;16;512;32;;2;Yes;;Yes;;;1;1;;;;;;10-bit SAR;12;;;;2.15 | 1ku;38TSSOP, 40VQFN, 49DSBGA
+MSP430F2252;16-bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM;ACTIVE;2 Series, Extended Temp;16;;16;512;32;;2;Yes;;Yes;;;1;1;;;;;;10-bit SAR;12;;;;1.95 | 1ku;38TSSOP, 40VQFN, 49DSBGA
+MSP430F2234;16-bit Ultra-Low-Power Microcontroller, 8kB Flash, 512B RAM;ACTIVE;2 Series, Extended Temp;16;;8;512;32;;2;Yes;;Yes;;;1;1;;;;;;10-bit SAR;12;;;;1.85 | 1ku;38TSSOP, 40VQFN, 49DSBGA
+MSP430F2232;16-bit Ultra-Low-Power Microcontroller, 8kB Flash, 512B RAM;ACTIVE;2 Series, Extended Temp;16;;8;512;32;;2;Yes;;Yes;;;1;1;;;;;;10-bit SAR;12;;;;1.65 | 1ku;38TSSOP, 40VQFN, 49DSBGA
+MSP430F2132;16-bit Ultra-Low-Power Microcontroller, 8kB Flash, 512B RAM, 10 bit ADC, 1 USCI;ACTIVE;2 Series, Extended Temp;16;;8;512;24;;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;1.50 | 1ku;28TSSOP, 32QFN, 32WQFN
+MSP430F2131;16-Bit Ultra-Low-Power Microcontroller, 8kB Flash, 256B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;8;256;16;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;1.20 | 1ku;20SOIC, 20TSSOP, 24VQFN, 20TVSOP
+MSP430F2122;16-bit Ultra-Low-Power Microcontroller, 4kB Flash, 512B RAM, 10 bit ADC, 1 USCI;ACTIVE;2 Series, Extended Temp;16;;4;512;24;;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;1.40 | 1ku;28TSSOP, 32QFN, 32WQFN
+MSP430F2112;16-bit Ultra-Low-Power Microcontroller, 2kB Flash, 256B RAM, 10 bit ADC, 1 USCI;ACTIVE;2 Series, Extended Temp;16;;2;256;24;;2;Yes;;Yes;;;1;1;;;;Yes;Yes;10-bit SAR;8;;;;1.10 | 1ku;28TSSOP, 32QFN, 32WQFN
+MSP430F2111;16-bit Ultra-Low-Power Microcontroller, 2kB Flash, 128B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;2;128;16;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.70 | 1ku;20SOIC, 20TSSOP, 20TVSOP, 24VQFN
+MSP430F2101;16-bit Ultra-Low-Power Microcontroller, 1kB Flash, 128B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;1;128;16;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.60 | 1ku;20SOIC, 20TSSOP, 20TVSOP, 24VQFN
+MSP430F2013;16-bit Ultra-Low-Power Microcontroller, 2kB Flash, 128B RAM, 16-Bit Sigma-Delta A/D, USI for SPI/I2C;ACTIVE;2 Series, Extended Temp;16;;2;128;10;;1;Yes;;Yes;;;;;;;;;Yes;16-bit Sigma Delta;4;;;;1.10 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430F2012;16-bit Ultra-Low-Power Microcontroller, 2kB Flash, 128B RAM, 10-Bit SAR A/D, USI for SPI/I2C;ACTIVE;2 Series, Extended Temp;16;;2;128;10;;1;Yes;;Yes;;;;;;;;;Yes;10-bit SAR;8;;;;0.85 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430F2011;16-bit Ultra-Low-Power Microcontroller, 2kB Flash, 128B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;2;128;10;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.55 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430F2003;16-bit Ultra-Low-Power Microcontroller, 1kB Flash, 128B RAM, 16-Bit Sigma-Delta A/D, USI for SPI/I2C;ACTIVE;2 Series, Extended Temp;16;;1;128;10;;1;Yes;;Yes;;;;;;;;;Yes;16-bit Sigma Delta;4;;;;0.99 | 1ku;14TSSOP, 16QFN, 14PDIP
+MSP430F2002;16-bit Ultra-Low-Power Microcontroller, 1kB Flash, 128B RAM, 10-Bit SAR A/D, USI for SPI/I2C;ACTIVE;2 Series, Extended Temp;16;;1;128;10;;1;Yes;;Yes;;;;;;;;;Yes;10-bit SAR;8;;;;0.65 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430F2001;16-bit Ultra-Low-Power Microcontroller, 1kB Flash, 128B RAM, Comparator;ACTIVE;2 Series, Extended Temp;16;;1;128;10;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.45 | 1ku;14PDIP, 14TSSOP, 16QFN
+MSP430F2121;16-bit Ultra-Low-Power Microcontroller, 4kB Flash, 256B RAM, Comparator;ACTIVE;2 Series;16;;4;256;16;;1;Yes;;Yes;;;;;;;;Yes;;Slope;;;;;0.90 | 1ku;20SOIC, 20TSSOP, 20TVSOP, 24VQFN
+MSP430AFE253;16-bit Ultra-Low-Power Microcontroller, 16KB Flash, 512B RAM, 3x SD24;ACTIVE;2 Series;12;;16;512;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;3;;;;2.20 | 1ku;24TSSOP
+MSP430AFE252;16-bit Ultra-Low-Power Microcontroller, 16KB Flash, 512B RAM, 2x SD24;ACTIVE;2 Series;12;;16;512;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;2;;;;2.05 | 1ku;24TSSOP
+MSP430AFE251;16-bit Ultra-Low-Power Microcontroller, 16KB Flash, 512B RAM, 1x SD24;ACTIVE;2 Series;12;;16;512;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;1;;;;1.90 | 1ku;24TSSOP
+MSP430AFE233;16-bit Ultra-Low-Power Microcontroller, 8KB Flash, 512B RAM, 3x SD24;ACTIVE;2 Series;12;;8;512;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;3;;;;2.10 | 1ku;24TSSOP
+MSP430AFE232;16-bit Ultra-Low-Power Microcontroller, 8KB Flash, 512B RAM, 2x SD24;ACTIVE;2 Series;12;;8;512;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;2;;;;2.00 | 1ku;24TSSOP
+MSP430AFE231;16-bit Ultra-Low-Power Microcontroller, 8KB Flash, 512B RAM, 1x SD24;ACTIVE;2 Series;12;;8;512;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;1;;;;1.85 | 1ku;24TSSOP
+MSP430AFE223;16-bit Ultra-Low-Power Microcontroller, 4KB Flash, 256B RAM, 3x SD24;ACTIVE;2 Series;12;;4;256;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;3;;;;2.10 | 1ku;24TSSOP
+MSP430AFE222;16-bit Ultra-Low-Power Microcontroller, 4KB Flash, 256B RAM, 2x SD24;ACTIVE;2 Series;12;;4;256;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;2;;;;1.95 | 1ku;24TSSOP
+MSP430AFE221;16-bit Ultra-Low-Power Microcontroller, 4KB Flash, 256B RAM, 1x SD24;ACTIVE;2 Series;12;;4;256;11;;1;Yes;;Yes;Yes;1;;;;;16x16;;Yes;24-bit Sigma Delta;1;;;;1.80 | 1ku;24TSSOP
+MSP430F169;16-bit Ultra-Low-Power MCU, 60kB Flash, 2048B RAM, 12-Bit ADC, Dual DAC, 2 USART, I2C, HW Mult, DMA;ACTIVE;1 Series;8;;60;2048;48;;2;Yes;;Yes;Yes;2 with I, 2C;;;;3;16x16;Yes;Yes;12-bit SAR;8;1;;;7.35 | 1ku;64LQFP, 64VQFN
+MSP430F168;16-bit Ultra-Low-Power MCU, 48kB Flash, 2048B RAM, 12-Bit ADC, Dual DAC, 2 USART, I2C, HW Mult, DMA;ACTIVE;1 Series;8;;48;2048;48;;2;Yes;;Yes;Yes;2 with I, 2C;;;;3;16x16;Yes;Yes;12-bit SAR;8;1;;;6.85 | 1ku;64LQFP, 64VQFN
+MSP430F167;16-bit Ultra-Low-Power MCU, 32kB Flash, 1024B RAM, 12-Bit ADC, Dual DAC, 2 USART, I2C, HW Mult, DMA;ACTIVE;1 Series;8;;32;1024;48;;2;Yes;;Yes;Yes;2 with I, 2C;;;;3;16x16;Yes;Yes;12-bit SAR;8;1;;;6.20 | 1ku;64LQFP, 64VQFN
+MSP430F1612;16-bit Ultra-Low-Power MCU, 55kB Flash, 5120B RAM, 12-Bit ADC, Dual DAC, 2 USART, I2C, HW Mult, DMA;ACTIVE;1 Series;8;;55;5120;48;;2;Yes;;Yes;Yes;2 with I, 2C;;;;3;16x16;Yes;Yes;12-bit SAR;8;1;;;8.55 | 1ku;64LQFP, 64VQFN
+MSP430F1611;16-bit Ultra-Low-Power MCU, 48kB Flash, 10240B RAM, 12-Bit ADC, Dual DAC, 2 USART, I2C, HW Mult, DMA;ACTIVE;1 Series;8;;48;10240;48;;2;Yes;;Yes;Yes;2 with I, 2C;;;;3;16x16;Yes;Yes;12-bit SAR;8;1;;;8.25 | 1ku;64LQFP, 64VQFN
+MSP430F1610;16-bit Ultra-Low-Power MCU, 32kB Flash, 5124B RAM, 12-Bit ADC, Dual DAC, 2 USART, I2C, HW Mult, DMA;ACTIVE;1 Series;8;;32;5120;48;;2;Yes;;Yes;Yes;2 with I, 2C;;;;3;16x16;Yes;Yes;12-bit SAR;8;1;;;7.85 | 1ku;64LQFP, 64VQFN
+MSP430F157;16-bit Ultra-Low-Power MCU, 32kB Flash, 1024B RAM, 12-Bit ADC, Dual 12-Bit DAC, USART, I2C, DMA;ACTIVE;1 Series;8;;32;1024;48;;2;Yes;;Yes;Yes;1 with I, 2C;;;;;;Yes;Yes;12-bit SAR;8;1;;;5.35 | 1ku;64LQFP, 64VQFN
+MSP430F156;16-bit Ultra-Low-Power MCU, 24kB Flash, 1024B RAM, 12-Bit ADC, Dual 12-Bit DAC, USART, I2C, DMA;ACTIVE;1 Series;8;;24;1024;48;;2;Yes;;Yes;Yes;1 with I, 2C;;;;;;Yes;Yes;12-bit SAR;8;1;;;5.05 | 1ku;64LQFP, 64VQFN
+MSP430F155;16-bit Ultra-Low-Power MCU, 16kB Flash, 512B RAM, 12-Bit ADC, Dual 12-Bit DAC, USART, I2C, DMA;ACTIVE;1 Series;8;;16;512;48;;2;Yes;;Yes;Yes;1 with I, 2C;;;;;;Yes;Yes;12-bit SAR;8;1;;;4.85 | 1ku;64LQFP, 64VQFN
+MSP430F1491;16-Bit Ultra-Low-Power Microcontroller, 60 kB Flash, 2KB RAM, 2 USARTs, HW multiplier;ACTIVE;1 Series;8;;60;2048;48;;2;Yes;;;;2;;;;;16x16;Yes;;Slope;;;;;4.90 | 1ku;64LQFP, 64VQFN
+MSP430F149;16-Bit Ultra-Low-Power Microcontroller, 60 kB Flash, 2KB RAM, 12 bit ADC, 2 USARTs, HW multiplier;ACTIVE;1 Series;8;;60;2048;48;;2;Yes;;;;2;;;;;16x16;Yes;Yes;12-bit SAR;8;;;;4.20 | 1ku;64LQFP, 64TQFP, 64VQFN
+MSP430F1481;16-Bit Ultra-Low-Power Microcontroller, 48 kB Flash, 2KB RAM, 2 USARTs, HW multiplier;ACTIVE;1 Series;8;;48;2048;48;;2;Yes;;;;2;;;;;16x16;Yes;;Slope;;;;;4.60 | 1ku;64LQFP, 64VQFN
+MSP430F148;16-Bit Ultra-Low-Power Microcontroller, 48 kB Flash, 2KB RAM, 12 bit ADC, 2 USARTs, HW multiplier;ACTIVE;1 Series;8;;48;2048;48;;2;Yes;;;;2;;;;;16x16;Yes;Yes;12-bit SAR;8;;;;3.90 | 1ku;64LQFP, 64TQFP, 64VQFN
+MSP430F1471;16-Bit Ultra-Low-Power Microcontroller, 32 kB Flash, 1KB RAM, 2 USARTs, HW multiplier;ACTIVE;1 Series;8;;32;1024;48;;2;Yes;;;;2;;;;;16x16;Yes;;Slope;;;;;4.10 | 1ku;64LQFP, 64VQFN
+MSP430F147;16-Bit Ultra-Low-Power Microcontroller, 32 kB Flash, 1KB RAM, 12 bit ADC, 2 USARTs, HW multiplier;ACTIVE;1 Series;8;;32;1024;48;;2;Yes;;;;2;;;;;16x16;Yes;Yes;12-bit SAR;8;;;;3.60 | 1ku;64LQFP, 64TQFP, 64VQFN
+MSP430F135;16-Bit Ultra-Low-Power Microcontroller, 16kB Flash, 512B RAM, 12 bit ADC, USART;ACTIVE;1 Series;8;;16;512;48;;2;Yes;;;Yes;1;;;;;;Yes;Yes;12-bit SAR;8;;;;2.95 | 1ku;64LQFP, 64TQFP, 64VQFN
+MSP430F133;16-Bit Ultra-Low-Power Microcontroller, 8kB Flash, 256B RAM, 12 bit ADC, USART;ACTIVE;1 Series;8;;8;256;48;;2;Yes;;;Yes;1;;;;;;Yes;Yes;12-bit SAR;8;;;;2.65 | 1ku;64LQFP, 64TQFP, 64VQFN
+MSP430F1232;16-bit Ultra-Low-Power Microcontroller, 8kB Flash, 256B RAM, 10 bit ADC, 1 USART;ACTIVE;1 Series;8;;8;256;22;;1;Yes;;Yes;;1;;;;;;;Yes;10-bit SAR;8;;;;1.65 | 1ku;28SOIC, 28TSSOP, 32QFN
+MSP430F123;16-Bit Ultra-Low-Power Microcontroller, 8kB Flash, 256B RAM, USART, Comparator;ACTIVE;1 Series;8;;8;256;22;;1;Yes;;;;1;;;;;;Yes;;Slope;;;;;1.55 | 1ku;0DIESALE, 28SOIC, 28TSSOP, 32QFN
+MSP430F1222;16-bit Ultra-Low-Power Microcontroller, 4kB Flash, 256B RAM, 10 bit ADC, 1 USART;ACTIVE;1 Series;8;;4;256;22;;1;Yes;;Yes;;1;;;;;;;Yes;10-bit SAR;8;;;;1.55 | 1ku;28SOIC, 28TSSOP, 32QFN
+MSP430F122;16-Bit Ultra-Low-Power Microcontroller, 4kB Flash, 256B RAM, USART, Comparator;ACTIVE;1 Series;8;;4;256;22;;1;Yes;;;;1;;;;;;Yes;;Slope;;;;;1.50 | 1ku;28SOIC, 28TSSOP, 32QFN
+MSP430F1132;16-bit Ultra-Low-Power Microcontroller, 8kB Flash, 256B RAM, 10 bit ADC;ACTIVE;1 Series;8;;8;256;14;;1;Yes;;Yes;;;;;;;;;Yes;10-bit SAR;5;;;;1.60 | 1ku;20SOIC, 20TSSOP, 32QFN
+MSP430F1122;16-bit Ultra-Low-Power Microcontroller, 4kB Flash, 256B RAM, 10 bit ADC;ACTIVE;1 Series;8;;4;256;14;;1;Yes;;Yes;;;;;;;;;Yes;10-bit SAR;5;;;;1.50 | 1ku;20SOIC, 20TSSOP, 32QFN
+MSP430F1121A;16-bit Ultra-Low-Power Microcontroller, 4kB Flash, 256B RAM, Comparator;ACTIVE;1 Series;8;;4;256;14;;1;Yes;;;;;;;;;;Yes;;Slope;;;;;1.40 | 1ku;20SOIC, 20TSSOP, 20TVSOP, 24VQFN
+MSP430F112;16-Bit Ultra-Low-Power Microcontroller, 4kB Flash, 256B RAM;ACTIVE;1 Series;8;;4;128;14;;1;Yes;;;;;;;;;;;;;;;;;1.40 | 1ku;20SOIC, 20TSSOP
+MSP430F1111A;16-bit Ultra-Low-Power Microcontroller, 2kB Flash, 128B RAM, Comparator;ACTIVE;1 Series;8;;2;128;14;;1;Yes;;;;;;;;;;Yes;;Slope;;;;;1.10 | 1ku;20SOIC, 20TSSOP, 20TVSOP, 24VQFN
+MSP430F1101A;16-bit Ultra-Low-Power Microcontroller, 1kB Flash, 128B RAM, Comparator;ACTIVE;1 Series;8;;1;128;14;;1;Yes;;;;;;;;;;Yes;;Slope;;;;;0.95 | 1ku;20SOIC, 20TSSOP, 20TVSOP, 24VQFN
+MSP430F110;16-Bit Ultra-Low-Power Microcontroller, 1kB Flash, 128B RAM;ACTIVE;1 Series;8;;1;128;14;;1;Yes;;;;;;;;;;;;;;;;;1.05 | 1ku;20TSSOP
+MSP430C1351;16-Bit Ultra-Low-Power Microcontroller, 16kB ROM, 512B RAM, USART, Comparator;ACTIVE;1 Series;8;;;;48;;1;;;;;;;;;;;;;Slope;;;;;;
+MSP430C1331;16-Bit Ultra-Low-Power Microcontroller, 8kB ROM, 256B RAM, USART, Comparator;ACTIVE;1 Series;8;;;;48;;1;;;;;;;;;;;;;Slope;;;;;;
+MSP430C1121;16-Bit Ultra-Low-Power Microcontroller, 4kB ROM, 256B RAM, Comparator;ACTIVE;1 Series;8;;;;14;;1;;;;;;;;;;;;;Slope;;;;;;
+MSP430C1111;16-Bit Ultra-Low-Power Microcontroller, 2kB ROM, 128B RAM, Comparator;ACTIVE;1 Series;8;;;;14;;1;;;;;;;;;;;;;Slope;;;;;;
+MSP430C1101;16-Bit Ultra-Low-Power Microcontroller, 1kB of ROM, 128B RAM, Comparator;ACTIVE;1 Series;8;;;128;14;;1;Yes;Yes;;;1;;;;3;16x16;Yes;Yes;Slope;;;;;;
