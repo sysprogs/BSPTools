@@ -508,7 +508,7 @@ namespace stm32_bsp_generator
                 bsp.Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
                 bsp.TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
                 bsp.PackageVersion = bspBuilder.SDKList.BSPVersion;
-                bsp.FileConditions = bspBuilder.MatchedFileConditions.ToArray();
+                bsp.FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray();
                 bsp.InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints;
                 bsp.ConditionalFlags = allConditionalToolFlags.ToArray();
 
