@@ -105,5 +105,5 @@
     <EmbeddedResource Include="..\..\..\DebugPackages\RenesasDebugPackage\bin\$(Configuration)\RenesasDebugPackage.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\BSPEngine.targets" />
+  <Import Project="..\..\..\BSPEngine.targets" />
 </Project>

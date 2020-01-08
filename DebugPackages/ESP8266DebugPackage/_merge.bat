@@ -1,1 +1,1 @@
-ilmerge bin\Release\ESPxxDebugPackage.dll bin\Release\OpenOCDPackage2.dll /out:bin\ESPxxDebugPackage.dll /targetplatform:2.0
+..\..\ilmerge bin\Release\ESPxxDebugPackage.dll bin\Release\OpenOCDPackage2.dll /out:bin\ESPxxDebugPackage.dll /targetplatform:2.0
