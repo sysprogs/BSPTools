@@ -53,6 +53,15 @@ namespace stm32_bsp_generator
                     continue;
                 }
 
+                if (newReleases.Length > 1)
+                {
+                    var newReleasesByMajor = newReleases.GroupBy(r => r.Release.Value).ToArray();
+                    if (newReleasesByMajor.Length == 1)
+                    {
+                        newReleases = new[] { newReleasesByMajor[0].OrderByDescending(r => r.Patch.Value).First() };
+                    }
+                }
+
                 if (newReleases.Length == 1)
                 {
                     bestReleaseForEachFamily.Add(newReleases[0]);
