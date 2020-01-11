@@ -30,7 +30,14 @@
 					<ProjectInclusionMask>-Examples\*;-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32??????.h*;-*system_*.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;-NN\*;-Core_A\*;*.h</AutoIncludeMask>					
 				</CopyJob>
-			</CopyJobs>			
+			</CopyJobs>
+			<ConfigFiles>
+				<ConfigFileDefinition>
+					<Path>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver\Inc\$$STM32:FAMILY_L$$xx_hal_conf_template.h</Path>
+					<FinalName>$$STM32:FAMILY_L$$xx_hal_conf.h</FinalName>
+					<ParserClass>stm32_bsp_generator.STM32ConfigFileParser</ParserClass>
+				</ConfigFileDefinition>
+			</ConfigFiles>
 		</Framework>
 		<Framework>
 			<Name>$$STM32:FAMILY_EX$$ Low-level Driver Library</Name>

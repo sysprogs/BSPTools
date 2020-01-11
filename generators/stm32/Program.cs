@@ -334,6 +334,7 @@ namespace stm32_bsp_generator
             STM32MP1
         }
 
+        //Usage: stm32.exe /rules:{Classic|STM32WB|STM32MP1} [/fetch] [/noperiph]
         static void Main(string[] args)
         {
             var regKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPGenerators\STM32");
@@ -391,8 +392,9 @@ namespace stm32_bsp_generator
 
                         var dict = new Dictionary<string, string>
                         {
-                            { "STM32:FAMILY_EX" , fam.Name },
-                            { "STM32:FAMILY" , baseFamName },
+                            { "STM32:FAMILY_EX"  , fam.Name },
+                            { "STM32:FAMILY"     , baseFamName },
+                            { "STM32:FAMILY_L"   , baseFamName.ToLower() },
                             { "STM32:FAMILY_DIR" , baseDir },
                         };
 
@@ -410,6 +412,15 @@ namespace stm32_bsp_generator
                                 job.SourceFolder = VariableHelper.ExpandVariables(job.SourceFolder, dict);
                                 job.TargetFolder = VariableHelper.ExpandVariables(job.TargetFolder, dict);
                                 job.AdditionalIncludeDirs = VariableHelper.ExpandVariables(job.AdditionalIncludeDirs, dict);
+                            }
+
+                            if (fw.ConfigFiles != null)
+                            {
+                                foreach(var file in fw.ConfigFiles)
+                                {
+                                    file.Path = VariableHelper.ExpandVariables(file.Path, dict);
+                                    file.FinalName = VariableHelper.ExpandVariables(file.FinalName, dict);
+                                }
                             }
 
                             return fw;

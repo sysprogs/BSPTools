@@ -237,6 +237,10 @@ namespace stm32_bsp_generator
                     {
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000), MemoryLocationRule.ByName("RAM_D2"));
                     }
+                    else if (MCU.Name.StartsWith("STM32MP1"))
+                    {
+                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByName("RAM1"));
+                    }
                     else
                     {
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x20000000));

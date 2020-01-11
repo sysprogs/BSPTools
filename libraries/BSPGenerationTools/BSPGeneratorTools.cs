@@ -15,6 +15,7 @@ using System.Xml.Serialization;
 using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
+using System.Diagnostics;
 
 namespace BSPGenerationTools
 {
@@ -427,11 +428,34 @@ namespace BSPGenerationTools
             {
                 if (grp.Count() > 1)
                 {
-                    Report.ReportRawError($"Found multiple files called '{grp.Key}':");
-                    foreach (var fn in grp)
-                        Report.ReportRawError("  " + fn);
+                    if (!AreFilesMutuallyExclusive(bsp, grp.ToArray()))
+                    {
+                        Report.ReportRawError($"Found multiple files called '{grp.Key}':");
+                        foreach (var fn in grp)
+                            Report.ReportRawError("  " + fn);
+                    }
                 }
             }
+        }
+
+        private bool AreFilesMutuallyExclusive(BoardSupportPackage bsp, string[] files)
+        {
+            List<Condition> conditions = new List<Condition>();
+            foreach(var file in files)
+            {
+                var cond = bsp.FileConditions.FirstOrDefault(c => c.FilePath == file);
+                if (cond == null)
+                    return false;
+
+                conditions.Add(cond.ConditionToInclude);
+            }
+
+            var conditionsByEqualsExpression = conditions.GroupBy(c => (c as Condition.Equals)?.Expression).ToArray();
+            if (conditionsByEqualsExpression.Length == 1 && conditionsByEqualsExpression[0].Key != null)
+                return true;
+
+            Debugger.Break();   //Most likely, we are not accounting for some special case. Investigate it.
+            return false;
         }
 
         public void Dispose()
@@ -453,7 +477,12 @@ namespace BSPGenerationTools
             if (!File.Exists(sourceFile))
                 throw new Exception("Missing " + sourceFile);
 
-            return parser.BuildConfigurationFileTemplate(sourceFile);
+            var result =  parser.BuildConfigurationFileTemplate(sourceFile);
+
+            if (cf.FinalName != null && result.TargetFileName != null)
+                result.TargetFileName = cf.FinalName;
+
+            return result;
         }
     }
 

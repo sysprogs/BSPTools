@@ -945,6 +945,7 @@ namespace BSPGenerationTools
         public string Path;
         public string ParserClass;
         public bool SeparateConfigsForEachMCU;
+        public string FinalName;
     }
 
     public class FamilyDefinition
