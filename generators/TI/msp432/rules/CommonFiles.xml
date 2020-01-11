@@ -19,6 +19,20 @@
 				<TargetFolder>SDK\driverlib</TargetFolder>
 				<FilesToCopy>*.h;*.c</FilesToCopy>
 				<ProjectInclusionMask>*</ProjectInclusionMask>
+				<Patches>
+					<!-- Repeating the same patch twice fixes both occurrences of the problem -->
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>debug.h</FilePath>
+						<OldLine>#ifdef DEBUG</OldLine>
+						<NewLine>#ifdef DEBUG_BROKEN</NewLine>
+					</Patch>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>debug.h</FilePath>
+						<OldLine>#ifdef DEBUG</OldLine>
+						<NewLine>#ifdef DEBUG_BROKEN</NewLine>
+					</Patch>
+				</Patches>
+				
 			</CopyJob>
 		</CopyJobs>
 	</CoreFramework>

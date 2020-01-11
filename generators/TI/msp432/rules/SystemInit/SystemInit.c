@@ -3,10 +3,8 @@
 
 void SystemInit()
 {
-	HWREG32(SCS_BASE + OFS_SCB_CPACR) =
-            ((HWREG32(SCS_BASE + OFS_SCB_CPACR)
-                    & ~(SCB_CPACR_CP11_M | SCB_CPACR_CP10_M))
-                    | SCB_CPACR_CP11_M | SCB_CPACR_CP10_M);
+	SCB->CPACR |= ((3UL << 10 * 2) | /* Set CP10 Full Access */
+				   (3UL << 11 * 2)); /* Set CP11 Full Access */
 }
 
 #ifdef DEBUG

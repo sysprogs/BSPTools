@@ -23,7 +23,7 @@ namespace msp432_bsp_generator
 
         public static StartupFileGenerator.InterruptVectorTable Parse(string mcuFamilyName, string searchDir, string startupFileName)
         {
-            var startupFiles = new DirectoryInfo(searchDir).GetFiles("startup_" + mcuFamilyName + ".s", SearchOption.AllDirectories);
+            var startupFiles = new DirectoryInfo(searchDir).GetFiles("startup_*.s", SearchOption.AllDirectories);
             var allVectorTables = new List<StartupFileGenerator.InterruptVector[]>();
 
             foreach (var startupFile in startupFiles)
