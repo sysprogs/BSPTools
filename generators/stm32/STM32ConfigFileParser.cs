@@ -7,132 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static BSPGenerationTools.Parsing.RegularExpressionBuilder;
 
 namespace stm32_bsp_generator
 {
     class STM32ConfigFileParser : IConfigurationFileParser
     {
-        class DefineClass
-        {
-            public Regex Define;
-            public Regex CommentedDefine;
-            public List<string> FoundDefines = new List<string>();
-
-            public string Template, InverseTemplate;
-
-            public int MacroNameGroup = 1, ValueGroup = 3, CommentGroup = 4;
-
-            public DefineClass(RegexComponent[] components)
-            {
-                for (int i = 0; i < components.Length; i++)
-                    components[i].Index = i + 1;
-
-                Define = new Regex(string.Join("", components.Select(c => c.ToRegexPart())) + "$");
-                Template = string.Join("", components.Select(c => c.ToTemplatePart()));
-
-                MacroNameGroup = components.Single(c => c.Kind == RegexComponentKind.Name).Index;
-                ValueGroup = components.Single(c => c.Kind == RegexComponentKind.Value).Index;
-                CommentGroup = components.Single(c => c.Kind == RegexComponentKind.Comment).Index;
-            }
-
-            public DefineClass(string regex, string template, string inverseRegex = null, string inverseTemplate = null, bool hasPrePadding = false)
-            {
-                Define = new Regex(regex);
-                Template = template;
-                if (inverseRegex != null)
-                {
-                    CommentedDefine = new Regex(inverseRegex);
-                    InverseTemplate = inverseTemplate;
-                }
-
-                if (hasPrePadding)
-                {
-                    MacroNameGroup++;
-                    ValueGroup++;
-                }
-            }
-
-            public bool IsMatch(string line, out Match m, out bool isInverse)
-            {
-                m = Define.Match(line);
-                if (m.Success)
-                {
-                    isInverse = false;
-                    return true;
-                }
-
-                if (CommentedDefine != null)
-                {
-                    m = CommentedDefine.Match(line);
-                    if (m.Success)
-                    {
-                        isInverse = true;
-                        return true;
-                    }
-                }
-
-                isInverse = false;
-                return false;
-            }
-
-            public ConfigurationFilePropertyClass ToPropertyClass()
-            {
-                return new ConfigurationFilePropertyClass
-                {
-                    NormalRegex = new SerializableRegularExpression(Define.ToString()),
-                    UndefRegex = CommentedDefine == null ? null : new SerializableRegularExpression(CommentedDefine.ToString()),
-                    Template = Template,
-                    UndefTemplate = InverseTemplate,
-                    Properties = FoundDefines.ToArray(),
-                    NameIndex = MacroNameGroup,
-                    ValueIndex = ValueGroup,
-                };
-            }
-        }
-
-        enum RegexComponentKind
-        {
-            Padding,
-            Fixed,
-            Name,
-            Value,
-            Comment,
-        }
-
-        struct RegexComponent
-        {
-            public string Regex;
-            public string DefaultValue;
-            public RegexComponentKind Kind;
-
-            public int Index;
-
-            public string ToRegexPart() => "(" + Regex + ")";
-            public string ToTemplatePart()
-            {
-                switch (Kind)
-                {
-                    case RegexComponentKind.Padding:
-                    case RegexComponentKind.Comment:
-                        if (string.IsNullOrEmpty(DefaultValue))
-                            return "{g" + Index + "}";
-                        else
-                            return "{g" + Index + ":" + DefaultValue + "}";
-                    case RegexComponentKind.Fixed:
-                        return DefaultValue ?? Regex;
-                    case RegexComponentKind.Name:
-                        return "{name}";
-                    case RegexComponentKind.Value:
-                        return "{value}";
-                    default:
-                        throw new Exception("Unknown regex part");
-                }
-            }
-        }
-
-        static RegexComponent RC(string regex, string defaultValue, RegexComponentKind kind = RegexComponentKind.Padding) => new RegexComponent { Regex = regex, DefaultValue = defaultValue, Kind = kind };
-        static RegexComponent RC(string regex, RegexComponentKind kind = RegexComponentKind.Padding) => new RegexComponent { Regex = regex, Kind = kind };
-
         static DefineClass MakeRegularDefineClass()
         {
             //The STM32 configuration macros can have several forms, e.g.:
@@ -150,18 +30,18 @@ namespace stm32_bsp_generator
                  RC(" *", " "),                                             //Space between #define and macro
                  RC("[^ ]+", RegexComponentKind.Name),                      //Macro name
                  RC(" *"),                                                  //Space between name and value
-                 RC(@"\(?"),                                                //Possible start of type conversion
-                 RC(@"|\([a-zA-Z0-9_]+\)"),                                 //Possible type conversion
-                 RC("0x[0-9a-fA-F]+|[0-9]+", RegexComponentKind.Value),     //Value
-                 RC("U|u|"),                                                //Possible 'U' suffix
-                 RC(@"\)?"),                                                //Possible end of type conversion
-                 RC(@"| */\*!<.*\*/", RegexComponentKind.Comment),          //Possible comment
+                 RC(@"\(?"),                                                //Possible start of type conversion     (
+                 RC(@"|\([a-zA-Z0-9_]+\)"),                                 //Possible type conversion              (uint32_t)
+                 RC("0x[0-9a-fA-F]+|[0-9]+", RegexComponentKind.Value),     //Value                                 0x1234
+                 RC("U|u|"),                                                //Possible 'U' suffix                   U
+                 RC(@"\)?"),                                                //Possible end of type conversion       )
+                 RC(@"| */\*!<.*\*/", RegexComponentKind.Comment),          //Possible comment                      /*<! xxx */
             };
 
             return new DefineClass(components);
         }
 
-        public ConfigurationFileTemplate BuildConfigurationFileTemplate(string file)
+        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file)
         {
             Regex rgIfndef = new Regex("^#ifndef ([^ ]+)");
 
@@ -252,13 +132,15 @@ namespace stm32_bsp_generator
             }
 
 
-            return new ConfigurationFileTemplate
+            var template = new ConfigurationFileTemplate
             {
                 PropertyClasses = new[] { valuelessDefine, defineWithValue }.Select(d => d.ToPropertyClass()).ToArray(),
                 TargetFileName = Path.GetFileName(file),
                 PropertyList = propertyList,
                 UserFriendlyName = "STM32 HAL Configuration",
             };
+
+            return new ConfigurationFileTemplateEx(template);
         }
     }
 }

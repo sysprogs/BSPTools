@@ -12,7 +12,7 @@ namespace nrf5x
 {
     public class NRFConfigFileParser : IConfigurationFileParser
     {
-        public ConfigurationFileTemplate BuildConfigurationFileTemplate(string file)
+        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file)
         {
             Regex rgIfndef = new Regex("^#ifndef ([^ ]+)");
             Regex rgDefine = new Regex("^#define ([^ ]+)( )([^ ]+)$");
@@ -75,7 +75,7 @@ namespace nrf5x
             if (group != null && group.Properties.Count > 0)
                 propertyList.PropertyGroups.Add(group);
 
-            return new ConfigurationFileTemplate
+            return new ConfigurationFileTemplateEx(new ConfigurationFileTemplate
             {
                 PropertyClasses = new ConfigurationFilePropertyClass[]
                 {
@@ -92,7 +92,7 @@ namespace nrf5x
                 TargetFileName = Path.GetFileName(file),
                 PropertyList = propertyList,
                 UserFriendlyName = "nRF5x SDK Configuration",
-            };
+            });
         }
 
         Regex rgMacroDescription = new Regex("<(.)> ([^ ]+)[ ]*-(.*)");

@@ -56,9 +56,10 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
 			</CopyJobs>
 			<ConfigFiles>
 				<ConfigFileDefinition>
-					<Path>$$STM32:MP1_DIR$$/Middlewares/Third_Party/FreeRTOS/source/include/FreeRTOSConfig_template.h</Path>
+					<Path>$$STM32:MP1_DIR$$\Middlewares\Third_Party\FreeRTOS\source\include\FreeRTOSConfig_template.h</Path>
 					<FinalName>FreeRTOSConfig.h</FinalName>
 					<ParserClass>BSPGenerationTools.ConfigFiles.FreeRTOSConfigParser</ParserClass>
+					<TargetPathForInsertingIntoProject>$$SYS:BSP_ROOT$$/FreeRTOS/Source/include/FreeRTOSConfig_template.h</TargetPathForInsertingIntoProject>
 				</ConfigFileDefinition>
 			</ConfigFiles>
 			<AdditionalSystemVars>

@@ -46,6 +46,7 @@
     <Compile Include="Parsing\CppTokenizer.cs" />
     <Compile Include="Parsing\HeaderFileParser.cs" />
     <Compile Include="Parsing\ParseReportWriter.cs" />
+    <Compile Include="Parsing\RegularExpressionBuilder.cs" />
     <Compile Include="Parsing\SimpleTokenReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReverseFileConditionBuilder.cs" />

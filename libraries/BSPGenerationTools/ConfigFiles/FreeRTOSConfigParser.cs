@@ -5,53 +5,79 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using BSPEngine;
+using static BSPGenerationTools.Parsing.RegularExpressionBuilder;
 
 namespace BSPGenerationTools.ConfigFiles
 {
     class FreeRTOSConfigParser : IConfigurationFileParser
     {
-        public ConfigurationFileTemplate BuildConfigurationFileTemplate(string file)
+        static DefineClass MakeRegularDefineClass()
         {
-            Regex rgParameter = new Regex("#define config([^ ]+)([ \t]+)(\\( ?|)([a-zA-Z0-9_]+).*");
+            //Based on STM32 define class. See STM32ConfigFileParser.cs for explanation.
+            RegexComponent[] components = new[]
+            {
+                 RC(" *", ""),                                              //Initial padding
+                 RC("#define", RegexComponentKind.Fixed),                   //#define
+                 RC(" *", " "),                                             //Space between #define and macro
+                 RC("[^ ]+", RegexComponentKind.Name),                      //Macro name
+                 RC(" *"),                                                  //Space between name and value
+                 RC(@"\(?"),                                                //Possible start of type conversion     (
+                 RC(@"|\([a-zA-Z0-9_]+\)"),                                 //Possible type conversion              (uint32_t)
+                 RC(@"[( ]*"),                                              //Possible opening bracket around value (
+                 RC("[^()]+", RegexComponentKind.Value),                    //Value                                 0x1234 or 15 * 1024
+                 RC(@"[ )]*"),                                              //Possible closing bracket around value )
+                 RC("U|u|"),                                                //Possible 'U' suffix                   U
+                 RC(@"\)?"),                                                //Possible end of type conversion       )
+                 RC(@"| */\*.*\*/", RegexComponentKind.Comment),            //Possible comment                      /* xxx */
+            };
 
+            return new DefineClass(components);
+        }
+
+        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file)
+        {
             PropertyGroup group = new PropertyGroup { Name = "FreeRTOS" };
             PropertyList propertyList = new PropertyList { PropertyGroups = new List<PropertyGroup> { group } };
-            List<string> allProperties = new List<string>();
+
+            var defClass = MakeRegularDefineClass();
+            const string namePrefix = "config";
+            HashSet<string> processedNames = new HashSet<string>();
 
             foreach (var line in File.ReadAllLines(file))
             {
-                var m = rgParameter.Match(line);
-                if (m.Success)
+                if (defClass.IsMatch(line, out var m, out var unused) && m.Groups[defClass.MacroNameGroup].Value.StartsWith(namePrefix))
                 {
-                    string name = m.Groups[1].Value;
+                    string name = m.Groups[defClass.MacroNameGroup].Value;
+                    if (processedNames.Contains(name))
+                        continue;
 
-                    if (name.StartsWith("USE_"))
-                        group.Properties.Add(new PropertyEntry.Boolean { Name = name, UniqueID = name, ValueForTrue = "1", ValueForFalse = "0" });
+                    if (name == "ASSERT")
+                        continue;   //configASSERT is a function-like macro, not a regular constant-like definition.
+
+                    processedNames.Add(name);
+
+                    if (name.StartsWith("configUSE_"))
+                        group.Properties.Add(new PropertyEntry.Boolean { Name = name.Substring(namePrefix.Length), UniqueID = name, ValueForTrue = "1", ValueForFalse = "" });
                     else
-                        group.Properties.Add(new PropertyEntry.String { Name = name, UniqueID = name });
+                        group.Properties.Add(new PropertyEntry.String { Name = name.Substring(namePrefix.Length), UniqueID = name });
 
-                    allProperties.Add(name);
+                    defClass.FoundDefines.Add(name);
                 }
             }
 
-            return new ConfigurationFileTemplate
+            var template = new ConfigurationFileTemplate
             {
                 PropertyClasses = new ConfigurationFilePropertyClass[]
                 {
-                    new ConfigurationFilePropertyClass
-                    {
-                        NormalRegex = new SerializableRegularExpression(rgParameter.ToString()),
-                        Template = "#define config{0}{1}{2}",
-                        Properties = allProperties.ToArray(),
-                        NameIndex = 1,
-                        IndentIndex = 2,
-                        ValueIndex = 4,
-                    }
+                    defClass.ToPropertyClass()
                 },
+
                 TargetFileName = Path.GetFileName(file),
                 PropertyList = propertyList,
                 UserFriendlyName = "FreeRTOS Configuration",
             };
+
+            return new ConfigurationFileTemplateEx(template);
         }
     }
 }

@@ -935,9 +935,19 @@ namespace BSPGenerationTools
         }
     }
 
+    public class ConfigurationFileTemplateEx
+    {
+        public readonly ConfigurationFileTemplate Template;
+
+        public ConfigurationFileTemplateEx(ConfigurationFileTemplate template)
+        {
+            Template = template;
+        }
+    }
+
     public interface IConfigurationFileParser
     {
-        ConfigurationFileTemplate BuildConfigurationFileTemplate(string file);
+        ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file);
     }
 
     public class ConfigFileDefinition
@@ -946,6 +956,8 @@ namespace BSPGenerationTools
         public string ParserClass;
         public bool SeparateConfigsForEachMCU;
         public string FinalName;
+
+        public string TargetPathForInsertingIntoProject;
     }
 
     public class FamilyDefinition

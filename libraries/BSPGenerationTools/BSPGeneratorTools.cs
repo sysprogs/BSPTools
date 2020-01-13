@@ -477,12 +477,18 @@ namespace BSPGenerationTools
             if (!File.Exists(sourceFile))
                 throw new Exception("Missing " + sourceFile);
 
-            var result =  parser.BuildConfigurationFileTemplate(sourceFile);
+            var result = parser.BuildConfigurationFileTemplate(sourceFile);
+            var template = result.Template;
 
-            if (cf.FinalName != null && result.TargetFileName != null)
-                result.TargetFileName = cf.FinalName;
+            if (cf.FinalName != null && template.TargetFileName != null)
+                template.TargetFileName = cf.FinalName;
 
-            return result;
+            if (cf.TargetPathForInsertingIntoProject != null)
+            {
+                template.SourcePath = cf.TargetPathForInsertingIntoProject;
+            }
+
+            return template;
         }
     }
 
