@@ -18,15 +18,14 @@ namespace BSPGenerationTools.ConfigFiles
             {
                  RC(" *", ""),                                              //Initial padding
                  RC("#define", RegexComponentKind.Fixed),                   //#define
-                 RC(" *", " "),                                             //Space between #define and macro
+                 RC("[ \t]+", " "),                                         //Space between #define and macro
                  RC("[^ \t]+", RegexComponentKind.Name),                    //Macro name
-                 RC(" *"),                                                  //Space between name and value
+                 RC("[ \t]+", " "),                                         //Space between name and value
                  RC(@"\(?"),                                                //Possible start of type conversion     (
-                 RC(@"|\([a-zA-Z0-9_]+\)"),                                 //Possible type conversion              (uint32_t)
+                 RC(@" *\( *[a-zA-Z0-9_]+ *\) *|"),                         //Possible type conversion              (uint32_t)
                  RC(@"[( ]*"),                                              //Possible opening bracket around value (
-                 RC("[^()]+", RegexComponentKind.Value),                    //Value                                 0x1234 or 15 * 1024
+                 RC("[a-zA-Z0-9_]+|[a-zA-Z0-9_][^()]+[a-zA-Z0-9_]", RegexComponentKind.Value),                    //Value
                  RC(@"[ )]*"),                                              //Possible closing bracket around value )
-                 RC("U|u|"),                                                //Possible 'U' suffix                   U
                  RC(@"\)?"),                                                //Possible end of type conversion       )
                  RC(@"| */\*.*\*/", RegexComponentKind.Comment),            //Possible comment                      /* xxx */
             };

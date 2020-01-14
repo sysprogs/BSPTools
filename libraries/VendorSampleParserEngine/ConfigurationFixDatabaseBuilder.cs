@@ -42,6 +42,8 @@ namespace VendorSampleParserEngine
             for (int i = 0; i < _ReverseConditionTable.IncludeDirectoryTable.Count; i++)
             {
                 string physicalDir = GetFullPath(_ReverseConditionTable.IncludeDirectoryTable[i].ObjectName);
+                if (physicalDir.Contains("$$"))
+                    continue;
 
                 var headers = Directory.GetFiles(physicalDir, "*.h", SearchOption.AllDirectories);
                 foreach (var hdr in headers)
@@ -179,7 +181,7 @@ namespace VendorSampleParserEngine
         {
             Regex rgDefinedSymbol = new Regex("[0-9a-fA-F]+[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+)$");
 
-            foreach(var i in fileIndicies)
+            foreach (var i in fileIndicies)
             {
                 var nameBase = Path.GetFileNameWithoutExtension(_ReverseConditionTable.FileTable[i].ObjectName);
                 if (!File.Exists(Path.Combine(_TestDirectory, nameBase + ".o")))
@@ -202,7 +204,7 @@ namespace VendorSampleParserEngine
                 if (proc.ExitCode != 0)
                     throw new Exception("Failed to obtain symbol list for " + nameBase);
 
-                foreach(var line in File.ReadAllLines(Path.Combine(_TestDirectory, nameBase + ".lst")))
+                foreach (var line in File.ReadAllLines(Path.Combine(_TestDirectory, nameBase + ".lst")))
                 {
                     var m = rgDefinedSymbol.Match(line);
                     if (m.Success)

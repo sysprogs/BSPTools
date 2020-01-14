@@ -17,7 +17,8 @@
 	</Subfamilies>
 	<CompilationFlags>
 		<PreprocessorMacros>
-			<string>CORE_CM4</string>	
+			<string>CORE_CM4</string>
+			<string>INITIALIZE_SP_AT_RESET</string>
 		</PreprocessorMacros>
 		<IncludeDirectories>
 			<string>.</string>

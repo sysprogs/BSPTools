@@ -27,9 +27,9 @@ namespace stm32_bsp_generator
             {
                  RC(" *", ""),                                              //Initial padding
                  RC("#define", RegexComponentKind.Fixed),                   //#define
-                 RC(" *", " "),                                             //Space between #define and macro
+                 RC("[ \t]+", " "),                                         //Space between #define and macro
                  RC("[^ \t]+", RegexComponentKind.Name),                    //Macro name
-                 RC(" *"),                                                  //Space between name and value
+                 RC("[ \t]+", " "),                                         //Space between name and value
                  RC(@"\(?"),                                                //Possible start of type conversion     (
                  RC(@"|\([a-zA-Z0-9_]+\)"),                                 //Possible type conversion              (uint32_t)
                  RC("0x[0-9a-fA-F]+|[0-9]+", RegexComponentKind.Value),     //Value                                 0x1234

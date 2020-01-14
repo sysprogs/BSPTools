@@ -263,6 +263,24 @@ namespace GeneratorSampleStm32.ProjectParsers
 
             result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters).Concat(libs).Distinct().ToArray();
             result.Path = Path.GetDirectoryName(sw4projectDir);
+
+            string possibleRoot = sw4projectDir;
+            for(; ;)
+            {
+                string possibleIncDir = Path.Combine(possibleRoot, "Inc");
+                if (Directory.Exists(possibleIncDir))
+                {
+                    result.HeaderFiles = Directory.GetFiles(possibleIncDir, "*.h", SearchOption.AllDirectories);
+                    break;
+                }
+
+                var baseDir = Path.GetDirectoryName(possibleRoot);
+                if (baseDir == "" || baseDir == possibleRoot)
+                    break;
+
+                possibleRoot = baseDir;
+            }
+
             return result;
         }
 
