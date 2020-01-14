@@ -35,6 +35,10 @@ namespace VendorSampleParserEngine
                 IncludeDirectories = _ReverseConditionTable.IncludeDirectoryTable,
             };
 
+            var file = Path.Combine(_BSP.Directory, ConfigurationFixDatabase.FileName);
+            if (File.Exists(file))
+                result.ConfigurationFileEntries = XmlTools.LoadObject<ConfigurationFixDatabase>(file).ConfigurationFileEntries;
+
             for (int i = 0; i < _ReverseConditionTable.IncludeDirectoryTable.Count; i++)
             {
                 string physicalDir = GetFullPath(_ReverseConditionTable.IncludeDirectoryTable[i].ObjectName);
@@ -50,7 +54,7 @@ namespace VendorSampleParserEngine
 
             result.Symbols = ComputeSymbolToFileMap(reportWriter);
 
-            XmlTools.SaveObject(result, Path.Combine(_BSP.Directory, ConfigurationFixDatabase.FileName));
+            XmlTools.SaveObject(result, file);
         }
 
         class ConstructedConfiguration

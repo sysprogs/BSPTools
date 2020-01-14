@@ -911,6 +911,7 @@ namespace BSPGenerationTools
                     Expand(ref job.ProjectInclusionMask, n);
                     Expand(ref job.AdditionalIncludeDirs, n);
                 }
+
                 yield return deepCopy;
             }
         }
@@ -935,9 +936,22 @@ namespace BSPGenerationTools
         }
     }
 
+    //This structure defines a configuration file parameter that can conditionally enable various declarations (e.g. HAL_xxx_MODULE_ENABLED).
+    //The BSP generation logic can automatically determine the declarations enabled by it and insert hints for them into the BSP.
+    public struct TestableConfigurationFileParameter
+    {
+        public string Name;
+        public string DisabledValue, EnabledValue;
+
+        public override string ToString() => Name;
+    }
+
     public class ConfigurationFileTemplateEx
     {
-        public readonly ConfigurationFileTemplate Template;
+        public ConfigurationFileTemplate Template;
+
+        public TestableConfigurationFileParameter[] TestableParameters;
+        public string[] TestableHeaderFiles;
 
         public ConfigurationFileTemplateEx(ConfigurationFileTemplate template)
         {
@@ -947,7 +961,7 @@ namespace BSPGenerationTools
 
     public interface IConfigurationFileParser
     {
-        ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file);
+        ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file, ConfigFileDefinition cf);
     }
 
     public class ConfigFileDefinition
@@ -958,6 +972,9 @@ namespace BSPGenerationTools
         public string FinalName;
 
         public string TargetPathForInsertingIntoProject;
+        public string[] TestableHeaderFiles;
+
+        public ConfigFileDefinition ShallowClone() => (ConfigFileDefinition)MemberwiseClone();
     }
 
     public class FamilyDefinition

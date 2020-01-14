@@ -19,7 +19,7 @@ namespace BSPGenerationTools.ConfigFiles
                  RC(" *", ""),                                              //Initial padding
                  RC("#define", RegexComponentKind.Fixed),                   //#define
                  RC(" *", " "),                                             //Space between #define and macro
-                 RC("[^ ]+", RegexComponentKind.Name),                      //Macro name
+                 RC("[^ \t]+", RegexComponentKind.Name),                    //Macro name
                  RC(" *"),                                                  //Space between name and value
                  RC(@"\(?"),                                                //Possible start of type conversion     (
                  RC(@"|\([a-zA-Z0-9_]+\)"),                                 //Possible type conversion              (uint32_t)
@@ -34,7 +34,7 @@ namespace BSPGenerationTools.ConfigFiles
             return new DefineClass(components);
         }
 
-        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file)
+        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file, ConfigFileDefinition cf)
         {
             PropertyGroup group = new PropertyGroup { Name = "FreeRTOS" };
             PropertyList propertyList = new PropertyList { PropertyGroups = new List<PropertyGroup> { group } };

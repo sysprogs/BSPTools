@@ -244,14 +244,14 @@ namespace stm32_bsp_generator
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
                     MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
-                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn, 
+                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn,
                         tableStart: "g_pfnVectors:",
                         tableEnd: @"/\*{10,999}|^[^/\*]+\*/
                 $",
-                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ ]+)", 
-                        vectorLineB: null, 
+                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ ]+)",
+                        vectorLineB: null,
                         ignoredLine: @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*|// External Interrupts",
-                        macroDef: ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)", 
+                        macroDef: ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)",
                         nameGroup: 1,
                         commentGroup: 2)
                 };
@@ -334,7 +334,7 @@ namespace stm32_bsp_generator
             STM32MP1
         }
 
-        //Usage: stm32.exe /rules:{Classic|STM32WB|STM32MP1} [/fetch] [/noperiph]
+        //Usage: stm32.exe /rules:{Classic|STM32WB|STM32MP1} [/fetch] [/noperiph] [/nofixes]
         static void Main(string[] args)
         {
             var regKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPGenerators\STM32");
@@ -416,10 +416,12 @@ namespace stm32_bsp_generator
 
                             if (fw.ConfigFiles != null)
                             {
-                                foreach(var file in fw.ConfigFiles)
+                                foreach (var file in fw.ConfigFiles)
                                 {
                                     file.Path = VariableHelper.ExpandVariables(file.Path, dict);
                                     file.FinalName = VariableHelper.ExpandVariables(file.FinalName, dict);
+                                    file.TargetPathForInsertingIntoProject = VariableHelper.ExpandVariables(file.TargetPathForInsertingIntoProject, dict);
+                                    file.TestableHeaderFiles = file.TestableHeaderFiles?.Select(f => VariableHelper.ExpandVariables(f, dict))?.ToArray();
                                 }
                             }
 
@@ -472,6 +474,7 @@ namespace stm32_bsp_generator
                 List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
                 bool noPeripheralRegisters = args.Contains("/noperiph");
+                bool noAutoFixes = args.Contains("/notixes");
                 string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
 
                 var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
@@ -527,6 +530,9 @@ namespace stm32_bsp_generator
                 XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
 
                 bspBuilder.ValidateBSP(bsp);
+
+                if (!noAutoFixes)
+                    bspBuilder.ComputeAutofixHintsForConfigurationFiles(bsp);
 
                 bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), ruleset == STM32Ruleset.STM32WB);
 

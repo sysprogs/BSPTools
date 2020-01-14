@@ -33,13 +33,6 @@
 				<AutoIncludeMask/>
 			</CopyJob>
 		</CopyJobs>
-		<ConfigFiles>
-			<ConfigFileDefinition>
-				<Path>$$STM32:MP1_DIR$$/Drivers\STM32MP1xx_HAL_Driver\Inc\stm32mp1xx_hal_conf_template.h</Path>
-				<FinalName>stm32mp1xx_hal_conf.h</FinalName>
-				<ParserClass>stm32_bsp_generator.STM32ConfigFileParser</ParserClass>
-			</ConfigFileDefinition>
-		</ConfigFiles>
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<!-- As of v1.0, this framework would require 2 orthogonal sets of conditions (board type + subset of included features), that is not supported by VisualGDB.

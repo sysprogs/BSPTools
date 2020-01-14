@@ -16,6 +16,7 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
+using Microsoft.Win32;
 
 namespace BSPGenerationTools
 {
@@ -156,7 +157,7 @@ namespace BSPGenerationTools
             {
                 mcu.ConfigurationFileTemplates = fam.Definition.ConfigFiles
                     .Where(cf => cf.SeparateConfigsForEachMCU)
-                    .Select(cf => bspBuilder.ParseConfigurationFile(cf, mcu.AdditionalSystemVars))
+                    .Select(cf => bspBuilder.ParseConfigurationFile(cf, fam, null, mcu.AdditionalSystemVars))
                     .ToArray();
             }
 
@@ -441,7 +442,7 @@ namespace BSPGenerationTools
         private bool AreFilesMutuallyExclusive(BoardSupportPackage bsp, string[] files)
         {
             List<Condition> conditions = new List<Condition>();
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 var cond = bsp.FileConditions.FirstOrDefault(c => c.FilePath == file);
                 if (cond == null)
@@ -463,7 +464,23 @@ namespace BSPGenerationTools
             Report.Dispose();
         }
 
-        public ConfigurationFileTemplate ParseConfigurationFile(ConfigFileDefinition cf, SysVarEntry[] additionalSystemVars = null)
+        struct QueuedConfigurationFileTemplate
+        {
+            public ConfigurationFileTemplateEx Template;
+            public MCUFamilyBuilder Family;
+            public EmbeddedFramework OptionalFramework;
+
+            public QueuedConfigurationFileTemplate(ConfigurationFileTemplateEx result, MCUFamilyBuilder family, EmbeddedFramework optionalFramework)
+            {
+                Template = result;
+                Family = family;
+                OptionalFramework = optionalFramework;
+            }
+        }
+
+        List<QueuedConfigurationFileTemplate> _ProcessedConfigurationFileTemplates = new List<QueuedConfigurationFileTemplate>();
+
+        public ConfigurationFileTemplate ParseConfigurationFile(ConfigFileDefinition cf, MCUFamilyBuilder family, EmbeddedFramework optionalFramework, SysVarEntry[] additionalSystemVars = null)
         {
             string sourceFile = ExpandVariables(cf.Path);
             sourceFile = VariableHelper.ExpandVariables(sourceFile, additionalSystemVars?.ToDictionary(kv => kv.Key, kv => kv.Value));
@@ -477,7 +494,7 @@ namespace BSPGenerationTools
             if (!File.Exists(sourceFile))
                 throw new Exception("Missing " + sourceFile);
 
-            var result = parser.BuildConfigurationFileTemplate(sourceFile);
+            var result = parser.BuildConfigurationFileTemplate(sourceFile, cf);
             var template = result.Template;
 
             if (cf.FinalName != null && template.TargetFileName != null)
@@ -488,7 +505,111 @@ namespace BSPGenerationTools
                 template.SourcePath = cf.TargetPathForInsertingIntoProject;
             }
 
+            if (result.TestableHeaderFiles != null && result.TestableParameters != null)
+            {
+                result.Template = template;
+                _ProcessedConfigurationFileTemplates.Add(new QueuedConfigurationFileTemplate(result, family, optionalFramework));
+            }
             return template;
+        }
+
+
+
+        public void ComputeAutofixHintsForConfigurationFiles(BoardSupportPackage bsp)
+        {
+            var temporaryDir = Path.Combine(Path.GetTempPath(), "BSPAutofix");
+
+            var clangExe = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Sysprogs\BSPGenerators")?.GetValue("clang") as string;
+            if (clangExe == null || !File.Exists(clangExe))
+                return;
+
+            var compatFlags = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Sysprogs\BSPGenerators")?.GetValue("clang-compatflags") as string;
+
+            var bspRoot = Path.GetFullPath(Directories.OutputDir);
+
+            List<ConfigurationFixDatabase.ConfigurationFileEntry> autofixEntries = new List<ConfigurationFixDatabase.ConfigurationFileEntry>();
+
+            foreach (var cf in _ProcessedConfigurationFileTemplates)
+            {
+                var matchingFamily = bsp.MCUFamilies.First(f => f.ID == cf.Family.Definition.Name);
+                var firstMCU = bsp.SupportedMCUs.First(m => m.FamilyID == matchingFamily.ID);
+
+                if (Directory.Exists(temporaryDir))
+                    Directory.Delete(temporaryDir, true);
+                Thread.Sleep(500);
+                Directory.CreateDirectory(temporaryDir);
+
+                var templateFile = cf.Template.Template.SourcePath;
+                templateFile = cf.Family.BSP.ExpandVariables(templateFile);
+                var configFile = Path.Combine(temporaryDir, cf.Template.Template.TargetFileName);
+
+                File.Copy(templateFile.Replace("$$SYS:BSP_ROOT$$", bspRoot), configFile);
+
+                var finalFlags = firstMCU.CompilationFlags.Merge(matchingFamily.CompilationFlags);
+                if (cf.OptionalFramework != null)
+                {
+                    finalFlags.IncludeDirectories = finalFlags.IncludeDirectories.Concat(cf.OptionalFramework.AdditionalIncludeDirs ?? new string[0]).ToArray();
+                    finalFlags.PreprocessorMacros = finalFlags.PreprocessorMacros.Concat(cf.OptionalFramework.AdditionalPreprocessorMacros ?? new string[0]).ToArray();
+                }
+
+                string rspFile = Path.Combine(temporaryDir, "test.rsp");
+                var flagsAsArray = finalFlags.GetEffectiveCFLAGS(false).Split(' ');
+
+                var dict = new Dictionary<string, string>();
+                dict["SYS:BSP_ROOT"] = bspRoot;
+                foreach (var kv in firstMCU.AdditionalSystemVars ?? new SysVarEntry[0])
+                    dict[kv.Key] = kv.Value;
+
+                foreach (var kv in matchingFamily.ConfigurableProperties?.GetDefaultPropertyValues() ?? new Dictionary<string, string>())
+                    dict[kv.Key] = kv.Value;
+
+                foreach (var kv in firstMCU.ConfigurableProperties?.GetDefaultPropertyValues() ?? new Dictionary<string, string>())
+                    dict[kv.Key] = kv.Value;
+
+                foreach (var kv in cf.OptionalFramework?.ConfigurableProperties?.GetDefaultPropertyValues() ?? new Dictionary<string, string>())
+                    dict[kv.Key] = kv.Value;
+
+                string flagsAsString = string.Join(" ", flagsAsArray.Select(f => VariableHelper.ExpandVariables(f, dict).Replace('\\', '/')).Where(f => !f.StartsWith("-m")));
+
+                File.WriteAllText(rspFile, flagsAsString + " " + compatFlags);
+
+                string testFile = Path.Combine(temporaryDir, "test.c");
+                File.WriteAllLines(testFile, cf.Template.TestableHeaderFiles.Select(hf => $"#include <{hf}>"));
+
+                using (var analyzer = new ConfigFileAnalyzer(clangExe, temporaryDir, testFile, rspFile, configFile, cf.Template))
+                {
+                    var initialSymbols = analyzer.BuildGlobalSymbolList();
+
+                    foreach (var p in cf.Template.TestableParameters)
+                    {
+                        Console.Write($"Analyzing {p.Name}...");
+                        analyzer.SetParameterValue(p.Name, p.DisabledValue, true);
+                        var symbols = analyzer.BuildGlobalSymbolList();
+                        analyzer.SetParameterValue(p.Name, p.EnabledValue, false);
+
+                        var newSymbols = initialSymbols.Except(symbols).ToArray();
+
+                        Console.WriteLine($" => {newSymbols.Length} symbols");
+
+                        if (newSymbols.Length > 0)
+                        {
+                            autofixEntries.Add(new ConfigurationFixDatabase.ConfigurationFileEntry
+                            {
+                                File = cf.Template.Template.TargetFileName,
+                                Name = p.Name,
+                                Value = p.EnabledValue,
+                                ProvidedSymbols = newSymbols
+                            });
+                        }
+                    }
+
+                }
+            }
+
+            if (autofixEntries.Count > 0)
+            {
+                XmlTools.SaveObject(new ConfigurationFixDatabase { ConfigurationFileEntries = autofixEntries.ToArray() }, Path.Combine(bspRoot, ConfigurationFixDatabase.FileName));
+            }
         }
     }
 
@@ -867,7 +988,7 @@ namespace BSPGenerationTools
                     fwDef.AdditionalSystemVars = fw.AdditionalSystemVars;
 
                     if (fw.ConfigFiles != null)
-                        fwDef.ConfigurationFileTemplates = fw.ConfigFiles.Select(cf => BSP.ParseConfigurationFile(cf)).ToArray();
+                        fwDef.ConfigurationFileTemplates = fw.ConfigFiles.Select(cf => BSP.ParseConfigurationFile(cf, this, fwDef)).ToArray();
 
                     yield return fwDef;
                 }

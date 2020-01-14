@@ -28,7 +28,7 @@ namespace stm32_bsp_generator
                  RC(" *", ""),                                              //Initial padding
                  RC("#define", RegexComponentKind.Fixed),                   //#define
                  RC(" *", " "),                                             //Space between #define and macro
-                 RC("[^ ]+", RegexComponentKind.Name),                      //Macro name
+                 RC("[^ \t]+", RegexComponentKind.Name),                    //Macro name
                  RC(" *"),                                                  //Space between name and value
                  RC(@"\(?"),                                                //Possible start of type conversion     (
                  RC(@"|\([a-zA-Z0-9_]+\)"),                                 //Possible type conversion              (uint32_t)
@@ -41,7 +41,7 @@ namespace stm32_bsp_generator
             return new DefineClass(components);
         }
 
-        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file)
+        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file, ConfigFileDefinition cf)
         {
             Regex rgIfndef = new Regex("^#ifndef ([^ ]+)");
 
@@ -59,6 +59,7 @@ namespace stm32_bsp_generator
             PropertyList propertyList = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
             PropertyGroup group = null;
             string lastIfndef = null;
+            List<TestableConfigurationFileParameter> testableParameters = new List<TestableConfigurationFileParameter>();
 
             foreach (var line in File.ReadAllLines(file))
             {
@@ -102,6 +103,9 @@ namespace stm32_bsp_generator
                         }
 
                         prop = new PropertyEntry.Boolean { Name = userFriendlyName, ValueForTrue = "1", ValueForFalse = "", UniqueID = macro, DefaultValue = !isInverse };
+
+                        if (macro != "HAL_MODULE_ENABLED")
+                            testableParameters.Add(new TestableConfigurationFileParameter { Name = macro, DisabledValue = "", EnabledValue = "1" });
                     }
                     else if (defineWithValue.IsMatch(line, out m, out isInverse))
                     {
@@ -116,7 +120,9 @@ namespace stm32_bsp_generator
                         defineWithValue.FoundDefines.Add(macro);
 
                         if ((macro.StartsWith("USE_") || macro.EndsWith("_ENABLED")) && (value == "0" || value == "1" || value == "0x1"))
-                            prop = new PropertyEntry.Boolean { Name = text ?? macro, UniqueID = macro, ValueForTrue = "1", ValueForFalse = "", DefaultValue = value != "0" };
+                        {
+                            prop = new PropertyEntry.Boolean { Name = text ?? macro, UniqueID = macro, ValueForTrue = "1", ValueForFalse = "0", DefaultValue = value != "0" };
+                        }
                         else
                             prop = new PropertyEntry.Integral { Name = text ?? macro, UniqueID = macro, DefaultValue = int.Parse(value) };
                     }
@@ -140,7 +146,11 @@ namespace stm32_bsp_generator
                 UserFriendlyName = "STM32 HAL Configuration",
             };
 
-            return new ConfigurationFileTemplateEx(template);
+            return new ConfigurationFileTemplateEx(template)
+            {
+                TestableHeaderFiles = cf.TestableHeaderFiles,
+                TestableParameters = testableParameters.ToArray(),
+            };
         }
     }
 }

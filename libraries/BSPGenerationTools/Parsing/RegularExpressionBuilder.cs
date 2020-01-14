@@ -67,7 +67,7 @@ namespace BSPGenerationTools.Parsing
                 for (int i = 0; i < components.Length; i++)
                     components[i].Index = i + 1;
 
-                Define = new Regex(string.Join("", components.Select(c => c.ToRegexPart())) + "$");
+                Define = new Regex("^" + string.Join("", components.Select(c => c.ToRegexPart())) + "$");
                 Template = string.Join("", components.Select(c => c.ToTemplatePart()));
 
                 MacroNameGroup = components.Single(c => c.Kind == RegexComponentKind.Name).Index;
