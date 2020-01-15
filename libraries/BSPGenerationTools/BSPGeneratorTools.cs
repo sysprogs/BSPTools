@@ -418,13 +418,13 @@ namespace BSPGenerationTools
             }
 
 
-            var allSources = bsp.MCUFamilies.SelectMany(f => f.AdditionalSourceFiles ?? new string[0])
-                .Concat(bsp.SupportedMCUs.SelectMany(m => m.AdditionalSourceFiles ?? new string[0]))
-                .Concat(bsp.Frameworks.SelectMany(fw => fw.AdditionalSourceFiles ?? new string[0]))
+            var allSources = bsp.MCUFamilies.SelectMany(f => TranslateFileList(f.AdditionalSourceFiles, f.ID))
+                .Concat(bsp.SupportedMCUs.SelectMany(m => TranslateFileList(m.AdditionalSourceFiles, m.ID)))
+                .Concat(bsp.Frameworks.SelectMany(fw => TranslateFileList(fw.AdditionalSourceFiles, fw.MCUFilterRegex?.ToString())))
                 .Distinct();
 
-            var sourcesByName = allSources.Where(s => s.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase) || s.EndsWith(".cpp", StringComparison.InvariantCultureIgnoreCase))
-                .GroupBy(f => Path.GetFileName(f), StringComparer.InvariantCultureIgnoreCase);
+            var sourcesByName = allSources.Where(s => s.File.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase) || s.File.EndsWith(".cpp", StringComparison.InvariantCultureIgnoreCase))
+                .GroupBy(f => Path.GetFileName(f.File), StringComparer.InvariantCultureIgnoreCase);
 
             foreach (var grp in sourcesByName)
             {
@@ -440,24 +440,55 @@ namespace BSPGenerationTools
             }
         }
 
-        private bool AreFilesMutuallyExclusive(BoardSupportPackage bsp, string[] files)
+        private IEnumerable<FileWithContext> TranslateFileList(string[] files, string deviceSpecificCondition)
         {
-            List<Condition> conditions = new List<Condition>();
+            if (files == null)
+                return new FileWithContext[0];
+
+            return files.Select(f => new FileWithContext { File = f, DeviceSpecificCondition = deviceSpecificCondition });
+        }
+
+        struct FileWithContext
+        {
+            public string File;
+            public string DeviceSpecificCondition;
+
+            public override string ToString() => File;
+        }
+
+        public class PerDeviceFileList
+        {
+            public List<Condition> Conditions = new List<Condition>();
+        }
+
+
+        private bool AreFilesMutuallyExclusive(BoardSupportPackage bsp, FileWithContext[] files)
+        {
+            Dictionary<string, PerDeviceFileList> conditionsByDevice = new Dictionary<string, PerDeviceFileList>();
             foreach (var file in files)
             {
-                var cond = bsp.FileConditions.FirstOrDefault(c => c.FilePath == file);
-                if (cond == null)
-                    return false;
+                var cond = bsp.FileConditions.FirstOrDefault(c => c.FilePath == file.File);
 
-                conditions.Add(cond.ConditionToInclude);
+                if (!conditionsByDevice.TryGetValue(file.DeviceSpecificCondition ?? "", out var lst))
+                    conditionsByDevice[file.DeviceSpecificCondition ?? ""] = lst = new PerDeviceFileList();
+
+                lst.Conditions.Add(cond?.ConditionToInclude);
             }
 
-            var conditionsByEqualsExpression = conditions.GroupBy(c => (c as Condition.Equals)?.Expression).ToArray();
-            if (conditionsByEqualsExpression.Length == 1 && conditionsByEqualsExpression[0].Key != null)
-                return true;
+            foreach (var kv in conditionsByDevice)
+            {
+                if (kv.Value.Conditions.Count == 1 && !string.IsNullOrEmpty(kv.Key))
+                    continue;  //Only 1 file instance found for this device type.
 
-            Debugger.Break();   //Most likely, we are not accounting for some special case. Investigate it.
-            return false;
+                var conditionsByEqualsExpression = kv.Value.Conditions.GroupBy(c => (c as Condition.Equals)?.Expression).ToArray();
+                if (conditionsByEqualsExpression.Length == 1 && conditionsByEqualsExpression[0].Key != null)
+                    continue;  //All conditions refer to the same variable. They are likely mutually exclusive.
+
+                Debugger.Break();   //Most likely, we are not accounting for some special case. Investigate it.
+                return false;
+            }
+
+            return true;
         }
 
         public void Dispose()
@@ -734,48 +765,56 @@ namespace BSPGenerationTools
 
         internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core)
         {
-            string coreName = null;
+            string coreName = null, freertosPort = null;
             switch (core)
             {
                 case CortexCore.M0:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m0 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM0" };
+                    freertosPort = "ARM_CM0";
                     coreName = "M0";
                     break;
                 case CortexCore.M0Plus:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m0plus -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM0PLUS" };
+                    freertosPort = "ARM_CM0";
                     coreName = "M0";
                     break;
                 case CortexCore.M3:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m3 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
                     coreName = "M3";
+                    freertosPort = "ARM_CM3";
                     break;
                 case CortexCore.M33:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb";
-                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM33" };
                     coreName = "M33";
+                    freertosPort = "ARM_CM33_NTZ/non_secure";
                     break;
                 case CortexCore.M33_FPU:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16";
-                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM33" };
                     coreName = "M33";
+                    freertosPort = "ARM_CM33_NTZ/non_secure";
                     break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
+                    freertosPort = "ARM_CM4F";
                     coreName = "M4";
                     break;
                 case CortexCore.M4_NOFPU:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
                     coreName = "M4";
+                    freertosPort = "ARM_CM3";
                     break;
                 case CortexCore.M7:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb -mfpu=fpv4-sp-d16";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
                     coreName = "M7";
+                    freertosPort = "ARM_CM7/r0p1";
                     break;
                 case CortexCore.R5F:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mfpu=vfpv3-d16 -mthumb";
@@ -842,8 +881,15 @@ namespace BSPGenerationTools
                 }
             }
 
+            List<SysVarEntry> vars = new List<SysVarEntry>();
+
             if (coreName != null)
-                family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, new SysVarEntry[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName } });
+                vars.Add(new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName });
+            if (freertosPort != null)
+                vars.Add(new SysVarEntry { Key = "com.sysprogs.freertos.default_port", Value = freertosPort });
+
+            if (vars.Count > 0)
+                family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, vars.ToArray());
         }
 
         public static bool IsHeaderFile(string fn)

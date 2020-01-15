@@ -21,6 +21,7 @@
 					<!-- Note: stm32xxxx_ll_usb.c actually requires HAL headers -->
 					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
 					<ProjectInclusionMask>-*_template.?;*stm32??xx_ll_usb.?;-&gt;.*stm32[^\\]+_ll_[^\\]+$;*</ProjectInclusionMask>
+					<AdvancedRenameRules>legacy\\(stm32..xx_hal_can)\.c$=>{1}_legacy.c</AdvancedRenameRules>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>

@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,11 +23,36 @@ namespace stm32_bsp_generator
             if (daysOld > 14)
                 throw new Exception($"STM32CubeMX device list {daysOld:f0} days old. Please update STM32CubeMX.");
 
-            xml.Load(catalogFile);
+            WebClient wc0 = new WebClient();
+            wc0.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0";
+            wc0.Headers[HttpRequestHeader.Accept] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+            wc0.Headers[HttpRequestHeader.AcceptLanguage] = "en-US,en;q=0.5";
+
+            var onlineCatalog = wc0.DownloadData("https://www.st.com/resource/en/utility2/updaters.zip");
+            using (var archive = new ZipArchive(new MemoryStream(onlineCatalog)))
+            {
+                using (var stream = archive.GetEntry("STMupdaters.xml").Open())
+                {
+                    byte[] data = new byte[65536];
+                    MemoryStream ms = new MemoryStream();
+                    for (; ; )
+                    {
+                        int done = stream.Read(data, 0, data.Length);
+                        if (done == 0)
+                            break;
+                        ms.Write(data, 0, done);
+                    }
+
+                    string text = Encoding.UTF8.GetString(ms.ToArray());
+                    xml.LoadXml(text);
+                }
+            }
+
+            //xml.Load(catalogFile);
 
             var firmwaresNode = xml.DocumentElement.ChildNodes.OfType<XmlElement>().First(e => e.Name == "Firmwares");
             List<ReleaseDefinition> releases = new List<ReleaseDefinition>();
-            foreach(var firmwareNode in firmwaresNode.OfType<XmlElement>().Where(e => e.Name == "Firmware"))
+            foreach (var firmwareNode in firmwaresNode.OfType<XmlElement>().Where(e => e.Name == "Firmware"))
             {
                 var packDescriptionNodes = firmwareNode.ChildNodes.OfType<XmlElement>().Where(e => e.Name == "PackDescription").ToArray();
                 if (packDescriptionNodes.Length == 0)
@@ -53,24 +79,22 @@ namespace stm32_bsp_generator
                     continue;
                 }
 
-                if (newReleases.Length > 1)
+                if (newReleases.Length == 1)
+                    bestReleaseForEachFamily.Add(newReleases[0]);
+                else if (newReleases.Length > 1)
                 {
                     var newReleasesByMajor = newReleases.GroupBy(r => r.Release.Value).ToArray();
-                    if (newReleasesByMajor.Length == 1)
-                    {
-                        newReleases = new[] { newReleasesByMajor[0].OrderByDescending(r => r.Patch.Value).First() };
-                    }
-                }
 
-                if (newReleases.Length == 1)
-                {
-                    bestReleaseForEachFamily.Add(newReleases[0]);
-                    continue;
-                }
+                    var bestReleaseGroup = newReleasesByMajor.OrderByDescending(r => r.Key, new SimpleVersionComparer()).First();
+                    var bestRelease = bestReleaseGroup.OrderByDescending(r => r.Patch.Value).First();
 
-                throw new Exception($"Don't know how to pick the best release for {g.Key}. Investigate and add missing logic here.");
+                    bestReleaseForEachFamily.Add(bestRelease);
+                }
+                else
+                    throw new Exception($"Don't know how to pick the best release for {g.Key}. Investigate and add missing logic here.");
             }
-            
+
+            WebClient wc = new WebClient();
             var now = DateTime.Now;
 
             STM32SDKCollection expectedSDKs = new STM32SDKCollection
@@ -79,11 +103,10 @@ namespace stm32_bsp_generator
                 BSPVersion = $"{now.Year}.{now.Month:d2}",
             };
 
-            WebClient wc = new WebClient();
             const string MarkerFileName = "BSPGeneratorSDK.xml";
             int newSDKsFetched = 0;
 
-            foreach(var sdk in expectedSDKs.SDKs)
+            foreach (var sdk in expectedSDKs.SDKs)
             {
                 string targetDir = Path.Combine(sdkRoot, sdk.FolderName);
                 string markerFile = Path.Combine(targetDir, MarkerFileName);
@@ -117,7 +140,7 @@ namespace stm32_bsp_generator
             Console.WriteLine($"Unpacking {Path.GetFileName(URL)}...");
             using (var za = new ZipArchive(File.OpenRead(archive)))
             {
-                foreach(var e in za.Entries)
+                foreach (var e in za.Entries)
                 {
                     var targetPath = Path.Combine(targetDir, e.FullName);
                     if (e.FullName.EndsWith("/"))

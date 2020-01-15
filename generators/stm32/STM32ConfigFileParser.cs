@@ -2,6 +2,7 @@
 using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -123,8 +124,10 @@ namespace stm32_bsp_generator
                         {
                             prop = new PropertyEntry.Boolean { Name = text ?? macro, UniqueID = macro, ValueForTrue = "1", ValueForFalse = "0", DefaultValue = value != "0" };
                         }
+                        else if (int.TryParse(value, out var intValue) || (value.StartsWith("0x") && int.TryParse(value.Substring(2), NumberStyles.HexNumber, null, out intValue)))
+                            prop = new PropertyEntry.Integral { Name = text ?? macro, UniqueID = macro, DefaultValue = intValue };
                         else
-                            prop = new PropertyEntry.Integral { Name = text ?? macro, UniqueID = macro, DefaultValue = int.Parse(value) };
+                            prop = new PropertyEntry.String { Name = text ?? macro, UniqueID = macro, DefaultValue = value };
                     }
 
                     if (prop != null)

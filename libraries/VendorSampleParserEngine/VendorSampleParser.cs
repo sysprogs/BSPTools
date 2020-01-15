@@ -96,6 +96,7 @@ namespace VendorSampleParserEngine
         //If any of the source file paths in the vendor sample contains one of those strings, the sample will use the hardware FP mode.
         static string[] hwSubstrings = new[] {
                 @"\ARM_CM4F\port.c",
+                @"\ARM_CM33_NTZ\non_secure\port.c",
                 @"ARM_CM7\r0p1\port.c",
                 @"CM4_GCC.a",
                 @"CM4_GCC_wc32.a",

@@ -10,7 +10,7 @@
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
 			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32H742xx;STM32H745xx;STM32H747xx;STM32H755xx;STM32H757xx;STM32H743xx;STM32H753xx;STM32H750xx</AutoOptions>
+			<AutoOptions>STM32H743xx;STM32H753xx;STM32H750xx;STM32H742xx;STM32H745xx;STM32H755xx;STM32H747xx;STM32H757xx;STM32H7B0xx;STM32H7B0xxQ;STM32H7A3xx;STM32H7B3xx;STM32H7A3xxQ;STM32H7B3xxQ</AutoOptions>
 			<!--UnsupportedMCUs>STM32H7(22)|(78)|(23).*</UnsupportedMCUs-->
 			<UnsupportedMCUs></UnsupportedMCUs>
 			<Options/>
@@ -44,8 +44,8 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H743I_EVAL</SourceFolder>
-					<TargetFolder>BSP\STM32H743I_EVAL</TargetFolder>
+					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H743I-EVAL</SourceFolder>
+					<TargetFolder>BSP\STM32H743I-EVAL</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<SimpleFileConditions>
@@ -91,8 +91,8 @@
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H7xx_Nucleo_144</SourceFolder>
-					<TargetFolder>BSP\STM32H7xx_Nucleo_144</TargetFolder>
+					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H7xx_Nucleo</SourceFolder>
+					<TargetFolder>BSP\STM32H7xx_Nucleo</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				</CopyJob>

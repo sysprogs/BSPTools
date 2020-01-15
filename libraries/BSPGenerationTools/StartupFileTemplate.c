@@ -10,13 +10,24 @@ extern void *_estack;
 void Reset_Handler();
 void Default_Handler();
 
-#ifdef DEBUG_DEFAULT_INTERRUPT_HANDLERS
-void __attribute__ ((weak)) $$VECTOR$$() $@+7
+#ifndef DEBUG_DEFAULT_INTERRUPT_HANDLERS
+
+#ifdef DEBUG
+#define DEBUG_DEFAULT_INTERRUPT_HANDLERS 1
+#else
+#define DEBUG_DEFAULT_INTERRUPT_HANDLERS 0
+#endif
+
+#endif
+
+#if DEBUG_DEFAULT_INTERRUPT_HANDLERS
+void __attribute__ ((weak, naked)) $$VECTOR$$() $@+7
 {
 	//If you hit the breakpoint below, one of the interrupts was unhandled in your code. 
 	//Define the following function in your code to handle it:
 	//	extern "C" void $$VECTOR$$();
 	asm("bkpt 255");
+	asm("bx lr");
 }
 
 #else

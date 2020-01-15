@@ -2,7 +2,7 @@
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>LEDBlink (FreeRTOS)</Name>
 	<Description>A 2-threaded 'Blinking LED' example demonstrating the use of FreeRTOS.</Description>
-	<MCUFilterRegex>STM32[^W].*</MCUFilterRegex>
+	<MCUFilterRegex>STM32(?!W|L5).*</MCUFilterRegex>	 <!-- STM32L5 projects requires an STM32L5-specific FreeRTOSConfig.h that is available by cloning the STM32CubeMX samples -->
 	<ConfigurableProperties>
 	<PropertyGroups>
 	<PropertyGroup>

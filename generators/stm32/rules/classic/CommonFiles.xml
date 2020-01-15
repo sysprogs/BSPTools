@@ -38,7 +38,7 @@ Source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()[heap_3];
 Source\\portable\\MemMang\\heap_4.c=>+Heap4 - contiguous heap area[heap_4];
 Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 						</string>
-						<string>--default=$$com.sysprogs.freertos.default_core$$|CPU Core support[portcore]|
+						<string>--default=$$com.sysprogs.freertos.default_port$$|CPU Core support[portcore]|
 Source\\portable\\GCC\\ARM_CM0\\.*=>ARM Cortex M0[CM0];
 Source\\portable\\GCC\\ARM_CM23_NTZ\\non_secure\\.*=>ARM Cortex M23 (no TrustZone)[CM23_NTZ/non_secure];
 Source\\portable\\GCC\\ARM_CM23\\non_secure\\.*=>ARM Cortex M23 (TrustZone - non-secure partition)[CM23/non_secure]];
@@ -60,6 +60,14 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
+			<ConfigFiles>
+				<ConfigFileDefinition>
+					<Path>$$STM32:MP1_DIR$$\Middlewares\Third_Party\FreeRTOS\source\include\FreeRTOSConfig_template.h</Path>
+					<FinalName>FreeRTOSConfig.h</FinalName>
+					<ParserClass>BSPGenerationTools.ConfigFiles.FreeRTOSConfigParser</ParserClass>
+					<TargetPathForInsertingIntoProject>$$SYS:BSP_ROOT$$/FreeRTOS/Source/include/FreeRTOSConfig_template.h</TargetPathForInsertingIntoProject>
+				</ConfigFileDefinition>
+			</ConfigFiles>
 			<AdditionalSystemVars>
 				<SysVarEntry>
 					<Key>com.sysprogs.rtos_type</Key>
@@ -147,6 +155,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/PolarSSL/include;$$SYS:BSP_ROOT$$/PolarSSL/include/polarssl</AdditionalIncludeDirs>
 					<PreprocessorMacros></PreprocessorMacros>
+					<AdvancedRenameRules>library\\(arc4|des|md4|md5|sha1)\.c$=>PolarSSL_{1}.c</AdvancedRenameRules>
 					<SimpleFileConditions>
 					</SimpleFileConditions>
 						<Patches>
