@@ -757,6 +757,11 @@ namespace BSPGenerationTools
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
                     coreName = "M33";
                     break;
+                case CortexCore.M33_FPU:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
+                    coreName = "M33";
+                    break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
@@ -816,7 +821,7 @@ namespace BSPGenerationTools
 
             if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
             {
-                if (core == CortexCore.M4 || core == CortexCore.M7 || core == CortexCore.R5F)
+                if (core == CortexCore.M4 || core == CortexCore.M7 || core == CortexCore.R5F || core == CortexCore.M33_FPU)
                 {
                     if (family.ConfigurableProperties == null)
                         family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };

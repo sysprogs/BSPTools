@@ -345,6 +345,9 @@ namespace stm32_bsp_generator
                     string shortCore = cores[coreIndex].Substring(prefix.Length);
                     Core = ParseCore(shortCore);
 
+                    if (Name.StartsWith("STM32L5") && Core == CortexCore.M33)
+                        Core = CortexCore.M33_FPU;
+
                     if (cores.Length > 1)
                     {
                         CoreSuffix = shortCore.Replace('+', 'p');

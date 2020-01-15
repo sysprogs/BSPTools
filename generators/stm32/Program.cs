@@ -474,7 +474,7 @@ namespace stm32_bsp_generator
                 List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
                 bool noPeripheralRegisters = args.Contains("/noperiph");
-                bool noAutoFixes = args.Contains("/notixes");
+                bool noAutoFixes = args.Contains("/nofixes");
                 string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
 
                 var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));

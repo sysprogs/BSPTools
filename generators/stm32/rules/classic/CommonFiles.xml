@@ -40,7 +40,13 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 						</string>
 						<string>--default=$$com.sysprogs.freertos.default_core$$|CPU Core support[portcore]|
 Source\\portable\\GCC\\ARM_CM0\\.*=>ARM Cortex M0[CM0];
+Source\\portable\\GCC\\ARM_CM23_NTZ\\non_secure\\.*=>ARM Cortex M23 (no TrustZone)[CM23_NTZ/non_secure];
+Source\\portable\\GCC\\ARM_CM23\\non_secure\\.*=>ARM Cortex M23 (TrustZone - non-secure partition)[CM23/non_secure]];
+Source\\portable\\GCC\\ARM_CM23\\secure\\.*=>ARM Cortex M23 (TrustZone - secure partition)[CM23/secure];
 Source\\portable\\GCC\\ARM_CM3\\.*=>+ARM Cortex M3 or M4 with Software FP[CM3];
+Source\\portable\\GCC\\ARM_CM33_NTZ\\non_secure\\.*=>ARM Cortex M33 (no TrustZone)[CM33_NTZ/non_secure];
+Source\\portable\\GCC\\ARM_CM33\\non_secure\\.*=>ARM Cortex M33 (TrustZone - non-secure partition)[CM33/non_secure]];
+Source\\portable\\GCC\\ARM_CM33\\secure\\.*=>ARM Cortex M33 (TrustZone - secure partitione)[CM33/secure];
 Source\\portable\\GCC\\ARM_CM3_MPU\\.*=>ARM Cortex M3 with MPU[CM3_MPU];
 Source\\portable\\GCC\\ARM_CM4_MPU\\.*=>ARM Cortex M4 with MPU[CM4_MPU];
 Source\\portable\\GCC\\ARM_CM4F\\.*=>ARM Cortex M4 with Hardware FP[CM4F];
