@@ -469,19 +469,28 @@ namespace GeneratorSampleStm32
 
                             if (samplesForThisBoard == 0)
                             {
-                                foreach (var dir in Directory.GetDirectories(boardDir, "SW4STM32", SearchOption.AllDirectories))
+                                for (int pass = 0; pass < 2; pass++)
                                 {
-                                    if (!filter.ShouldParseAnySamplesInsideDirectory(Path.GetDirectoryName(dir)))
-                                        continue;   //We are only reparsing a subset of samples
+                                    foreach (var dir in Directory.GetDirectories(boardDir, (pass == 0) ? "SW4STM32" : "STM32CubeIDE", SearchOption.AllDirectories))
+                                    {
+                                        if (!filter.ShouldParseAnySamplesInsideDirectory(Path.GetDirectoryName(dir)))
+                                            continue;   //We are only reparsing a subset of samples
 
-                                    var aSamples = parser.ParseProjectFolder(dir, topLevelDir, boardDir, addInc);
+                                        SW4STM32ProjectParser.ProjectSubtype subtype;
+                                        if (pass == 0)
+                                            subtype = SW4STM32ProjectParser.ProjectSubtype.SW4STM32;
+                                        else
+                                            subtype = SW4STM32ProjectParser.ProjectSubtype.STM32CubeIDE;
 
-                                    foreach (var sample in aSamples)
-                                        filter?.OnSampleParsed(sample);
+                                        var aSamples = parser.ParseProjectFolder(dir, topLevelDir, boardDir, addInc, subtype);
 
-                                    sampleCount += aSamples.Count;
-                                    samplesForThisBoard += aSamples.Count;
-                                    allSamples.AddRange(aSamples);
+                                        foreach (var sample in aSamples)
+                                            filter?.OnSampleParsed(sample);
+
+                                        sampleCount += aSamples.Count;
+                                        samplesForThisBoard += aSamples.Count;
+                                        allSamples.AddRange(aSamples);
+                                    }
                                 }
                             }
 

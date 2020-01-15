@@ -89,8 +89,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             return result.ToArray();
         }
 
-
-        public List<VendorSample> ParseProjectFolder(string projectDir, string topLevelDir, string boardDir, List<string> extraIncludeDirs)
+        public List<VendorSample> ParseProjectFolder(string projectDir, string topLevelDir, string boardDir, List<string> extraIncludeDirs, ProjectSubtype subtype)
         {
             List<VendorSample> result = new List<VendorSample>();
 
@@ -107,13 +106,21 @@ namespace GeneratorSampleStm32.ProjectParsers
                 else
                     virtualPath = projectDir.Substring(topLevelDir.Length);
 
-                var virtualPathComponents = virtualPath.Trim('\\').Split('\\').Except(new[] { "SW4STM32", "Projects" }, StringComparer.InvariantCultureIgnoreCase).ToArray();
+                var virtualPathComponents = virtualPath.Trim('\\').Split('\\').Except(new[] { "SW4STM32", "Projects", "STM32CubeIDE" }, StringComparer.InvariantCultureIgnoreCase).ToArray();
 
                 XmlDocument cproject = new XmlDocument();
                 cproject.Load(projectFile);
 
                 XmlDocument project = new XmlDocument();
-                project.Load(Path.Combine(projectFileDir, ".project"));
+                try
+                {
+                    project.Load(Path.Combine(projectFileDir, ".project"));
+                }
+                catch
+                {
+                    _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Failed to load project file", projectFileDir, false);
+                    continue;
+                }
 
                 var configs = DetectConfigurationContexts(cproject, projectFile);
 
@@ -121,7 +128,8 @@ namespace GeneratorSampleStm32.ProjectParsers
                 {
                     try
                     {
-                        var sample = ParseSingleProject(cproject, project, cfg.CConfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir, Path.GetFileName(boardDir), cfg.Context);
+                        var sample = ParseSingleProject(cproject, project, cfg.CConfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir,
+                            Path.GetFileName(boardDir), cfg.Context, subtype);
                         sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs).ToArray();
                         sample.VirtualPath = string.Join("\\", virtualPathComponents.Take(virtualPathComponents.Length - 1));
                         sample.UserFriendlyName = virtualPathComponents.Last();
@@ -164,20 +172,30 @@ namespace GeneratorSampleStm32.ProjectParsers
             }
         }
 
-        private VendorSample ParseSingleProject(XmlDocument cproject, XmlDocument project,
-            XmlElement cconfiguration, string sw4projectDir,
-            string cprojectDir, string topLevelDir, string boardName,
-            MultiConfigurationContext multiConfigurationContext)
+        public enum ProjectSubtype
         {
-            VendorSample result = new VendorSample
-            {
-                UserFriendlyName = (project.SelectSingleNode("projectDescription/name") as XmlElement)?.InnerText ?? throw new Exception("Failed to determine sample name"),
-                NoImplicitCopy = true,
-            };
+            SW4STM32,
+            STM32CubeIDE,
+        }
 
+        struct CommonConfigurationOptions
+        {
+            public string[] IncludeDirectories;
+            public string[] PreprocessorMacros;
+            public string BoardName;
+            public string MCU;
+            public List<string> SourceFiles;
+            public string LinkerScript;
+            public List<string> Libraries;
+            public string LDFLAGS;
+        }
+
+        CommonConfigurationOptions ExtractSW4STM32Options(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
+        {
             const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
             const string SourceEntriesKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/sourceEntries/entry";
             var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
+            CommonConfigurationOptions result = new CommonConfigurationOptions();
 
             var gccNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.compiler')]") as XmlElement ?? throw new Exception("Missing gcc tool node");
             var linkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.linker')]") as XmlElement ?? throw new Exception("Missing linker tool node");
@@ -191,7 +209,7 @@ namespace GeneratorSampleStm32.ProjectParsers
                 .Select(a => a.Trim()).Where(a => a != "").ToArray();
 
             result.BoardName = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.board");
-            string mcu = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.mcu");
+            result.MCU = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.mcu");
             List<string> libs = new List<string>();
 
             string[] libraryPaths = linkerNode.LookupOptionValueAsList("gnu.c.link.option.paths", true);
@@ -214,6 +232,79 @@ namespace GeneratorSampleStm32.ProjectParsers
 
             }
 
+            var sourceFilters = cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>().Select(e => new SourceFilterEntry(e)).Where(e => e.IsValid).ToArray();
+            var relLinkerScript = linkerNode.LookupOptionValue("fr.ac6.managedbuild.tool.gnu.cross.c.linker.script");
+            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.AddExtraComponentToBaseDir);
+
+            if (linkerScript != null)
+                result.LinkerScript = Path.GetFullPath(linkerScript);
+
+            result.LDFLAGS = linkerNode.LookupOptionValue("gnu.c.link.option.ldflags");
+            result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters);
+            result.Libraries = libs;
+
+            return result;
+        }
+
+        CommonConfigurationOptions ExtractSTM32CubeIDEOptions(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
+        {
+            const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
+            const string SourceEntriesKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/sourceEntries/entry";
+            var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
+            CommonConfigurationOptions result = new CommonConfigurationOptions();
+
+            var gccNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler']") as XmlElement ?? throw new Exception("Missing gcc tool node");
+            var linkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker']") as XmlElement ?? throw new Exception("Missing linker tool node");
+            var cppLinkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker']") as XmlElement;
+
+            result.IncludeDirectories = gccNode.LookupOptionValueAsList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths")
+                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
+                .Where(d => d != null).ToArray();
+
+            result.PreprocessorMacros = gccNode.LookupOptionValueAsList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols")
+                .Select(a => a.Trim()).Where(a => a != "" && a != "DEBUG" && a != "RELEASE").ToArray();
+
+            result.MCU = toolchainConfigNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu");
+            result.BoardName = toolchainConfigNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board");
+
+            var relLinkerScript = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.script");
+            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.None);
+
+            if (linkerScript != null)
+                result.LinkerScript = Path.GetFullPath(linkerScript);
+
+            result.LDFLAGS = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.otherflags", true);
+
+            result.Libraries = new List<string>();
+            var sourceFilters = cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>().Select(e => new SourceFilterEntry(e)).Where(e => e.IsValid).ToArray();
+
+            result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters)
+                .Where(f => !f.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
+
+            return result;
+        }
+
+        private VendorSample ParseSingleProject(XmlDocument cproject, XmlDocument project,
+            XmlElement cconfiguration, string sw4projectDir,
+            string cprojectDir, string topLevelDir, string boardName,
+            MultiConfigurationContext multiConfigurationContext,
+            ProjectSubtype subtype)
+        {
+            VendorSample result = new VendorSample
+            {
+                UserFriendlyName = (project.SelectSingleNode("projectDescription/name") as XmlElement)?.InnerText ?? throw new Exception("Failed to determine sample name"),
+                NoImplicitCopy = true,
+            };
+
+
+            CommonConfigurationOptions opts;
+            if (subtype == ProjectSubtype.SW4STM32)
+                opts = ExtractSW4STM32Options(cproject, project, cconfiguration, cprojectDir);
+            else
+                opts = ExtractSTM32CubeIDEOptions(cproject, project, cconfiguration, cprojectDir);
+
+            var mcu = opts.MCU;
+            
             if (mcu.EndsWith("x"))
             {
                 if (mcu.StartsWith("STM32MP1"))
@@ -221,7 +312,7 @@ namespace GeneratorSampleStm32.ProjectParsers
                 else
                     mcu = mcu.Remove(mcu.Length - 2, 2);
             }
-            else if (mcu.EndsWith("xP"))
+            else if (mcu.EndsWith("xP") || mcu.EndsWith("xQ"))
             {
                 mcu = mcu.Remove(mcu.Length - 3, 3);
             }
@@ -239,15 +330,13 @@ namespace GeneratorSampleStm32.ProjectParsers
             }
 
             result.DeviceID = mcu;
+            result.SourceFiles = opts.SourceFiles.Concat(opts.Libraries).Distinct().ToArray();
+            result.IncludeDirectories = opts.IncludeDirectories;
+            result.PreprocessorMacros = opts.PreprocessorMacros;
+            result.BoardName = opts.BoardName;
+            result.LinkerScript = opts.LinkerScript;
 
-            var sourceFilters = cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>().Select(e => new SourceFilterEntry(e)).Where(e => e.IsValid).ToArray();
-
-            var relLinkerScript = linkerNode.LookupOptionValue("fr.ac6.managedbuild.tool.gnu.cross.c.linker.script");
-            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.AddExtraComponentToBaseDir);
-
-            string ldflags = linkerNode.LookupOptionValue("gnu.c.link.option.ldflags");
-
-            if (ldflags?.Contains("rdimon.specs") == true)
+            if (opts.LDFLAGS?.Contains("rdimon.specs") == true)
             {
                 result.Configuration.MCUConfiguration = new PropertyDictionary2
                 {
@@ -258,10 +347,6 @@ namespace GeneratorSampleStm32.ProjectParsers
                 };
             }
 
-            if (linkerScript != null)
-                result.LinkerScript = Path.GetFullPath(linkerScript);
-
-            result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters).Concat(libs).Distinct().ToArray();
             result.Path = Path.GetDirectoryName(sw4projectDir);
 
             string possibleRoot = sw4projectDir;
@@ -284,7 +369,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             return result;
         }
 
-        Regex rgParentSyntax = new Regex("PARENT-([0-9]+)-PROJECT_LOC(|..)/(.*)");
+        Regex rgParentSyntax = new Regex("(\\$%7B|)PARENT-([0-9]+)-PROJECT_LOC(|..|%7D)/(.*)");
 
         [Flags]
         enum PathTranslationFlags
@@ -298,11 +383,15 @@ namespace GeneratorSampleStm32.ProjectParsers
         {
             path = path.Trim('\"');
 
+            string workspacePrefix = "${workspace_loc:/${ProjName}/";
+            if (path.StartsWith(workspacePrefix))
+                path = path.Substring(workspacePrefix.Length).TrimEnd('}');
+
             var m = rgParentSyntax.Match(path);
             if (m.Success)
             {
                 //e.g. PARENT-1-PROJECT_LOC/startup_stm32mp15xx.s => ../startup_stm32mp15xx.s
-                path = string.Join("/", Enumerable.Range(0, int.Parse(m.Groups[1].Value)).Select(i => "..")) + "/" + m.Groups[3].Value.TrimStart('/');
+                path = string.Join("/", Enumerable.Range(0, int.Parse(m.Groups[2].Value)).Select(i => "..")) + "/" + m.Groups[4].Value.TrimStart('/');
             }
 
             string fullPath;
@@ -378,9 +467,12 @@ namespace GeneratorSampleStm32.ProjectParsers
 
     static class Extensions
     {
-        public static string LookupOptionValue(this XmlNode element, string optionName)
+        public static string LookupOptionValue(this XmlNode element, string optionName, bool optional = false)
         {
-            return (element.SelectSingleNode($"option[starts-with(@id, '{optionName}')]/@value") as XmlAttribute ?? throw new Exception("Missing " + optionName)).Value;
+            var attr = element.SelectSingleNode($"option[starts-with(@id, '{optionName}')]/@value") as XmlAttribute;
+            if (!optional && attr == null)
+                throw new Exception("Missing " + optionName);
+            return attr?.Value;
         }
 
         public static string[] LookupOptionValueAsList(this XmlNode element, string optionName, bool isOptional = false)

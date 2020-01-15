@@ -729,19 +729,6 @@ namespace stm32_bsp_generator
             return flags;
         }
 
-        static string FamilyFromMCU(string mcuName)
-        {
-            if (mcuName.StartsWith("STM32F3"))
-            {
-                if (mcuName[7] == '0' || mcuName[7] == '1')
-                    return "STM32F30xxx";
-                else if (mcuName[7] == '7' || mcuName[7] == '8')
-                    return "STM32F37xxx";
-                throw new Exception("Cannot detect family for " + mcuName);
-            }
-            return mcuName.Substring(0, 7) + "xxxx";
-        }
-
         const uint FLASHBase = 0x08000000, SRAMBase = 0x20000000;
 
         static void CopyDirectoryRecursive(string sourceDirectory, string destinationDirectory)

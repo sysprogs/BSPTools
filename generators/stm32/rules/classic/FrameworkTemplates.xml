@@ -34,7 +34,7 @@
 			<ConfigFiles>
 				<ConfigFileDefinition>
 					<Path>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver\Inc\$$STM32:FAMILY_L$$xx_hal_conf_template.h</Path>
-					<TargetPathForInsertingIntoProject>$$SYS:BSP_ROOT$$/STM32MP1xxxx/$$STM32:FAMILY$$xx_HAL_Driver/Inc/$$STM32:FAMILY_L$$xx_hal_conf_template.h</TargetPathForInsertingIntoProject>
+					<TargetPathForInsertingIntoProject>$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/$$STM32:FAMILY$$xx_HAL_Driver/Inc/$$STM32:FAMILY_L$$xx_hal_conf_template.h</TargetPathForInsertingIntoProject>
 					<FinalName>$$STM32:FAMILY_L$$xx_hal_conf.h</FinalName>
 					<ParserClass>stm32_bsp_generator.STM32ConfigFileParser</ParserClass>
 					<TestableHeaderFiles>

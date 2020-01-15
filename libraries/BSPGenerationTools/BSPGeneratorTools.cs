@@ -542,6 +542,7 @@ namespace BSPGenerationTools
                 var templateFile = cf.Template.Template.SourcePath;
                 templateFile = cf.Family.BSP.ExpandVariables(templateFile);
                 var configFile = Path.Combine(temporaryDir, cf.Template.Template.TargetFileName);
+                Console.WriteLine($"Analyzing {cf.Template.Template.TargetFileName}...");
 
                 File.Copy(templateFile.Replace("$$SYS:BSP_ROOT$$", bspRoot), configFile);
 
@@ -582,7 +583,7 @@ namespace BSPGenerationTools
 
                     foreach (var p in cf.Template.TestableParameters)
                     {
-                        Console.Write($"Analyzing {p.Name}...");
+                        Console.Write($"  {p.Name}...");
                         analyzer.SetParameterValue(p.Name, p.DisabledValue, true);
                         var symbols = analyzer.BuildGlobalSymbolList();
                         analyzer.SetParameterValue(p.Name, p.EnabledValue, false);
