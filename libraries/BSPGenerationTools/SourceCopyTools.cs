@@ -404,7 +404,8 @@ namespace BSPGenerationTools
                             Name = def.Name,
                             UniqueID = def.IDWithoutPrefix,
                             SuggestionList = suggestions.ToArray(),
-                            DefaultEntryIndex = def.DefaultItemIndex
+                            DefaultEntryIndex = def.DefaultItemIndex,
+                            DefaultEntryValue = def.DefaultValue,
                         });
                     }
                 }
@@ -466,7 +467,8 @@ namespace BSPGenerationTools
                             Name = def.Name,
                             UniqueID = def.IDWithoutPrefix,
                             SuggestionList = suggestions.ToArray(),
-                            DefaultEntryIndex = def.DefaultItemIndex
+                            DefaultEntryIndex = def.DefaultItemIndex,
+                            DefaultEntryValue = def.DefaultValue,
                         });
                     }
                 }

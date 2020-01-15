@@ -8,15 +8,17 @@ namespace BSPGenerationTools
     public class SmartPropertyDefinition
     {
         public readonly string Name, IDWithoutPrefix, IDWithPrefix;
+        public readonly string DefaultValue;
         public readonly string[] ExtraArguments;
 
         public readonly bool? IsDefaultOn;
         public readonly Item[] Items;
         public readonly int DefaultItemIndex;
 
-        protected SmartPropertyDefinition(string name, string idWithoutPrefix, string idWithPrefix, string[] extraArguments, bool? isDefaultOn, IEnumerable<Item> items, int defaultIndex)
+        protected SmartPropertyDefinition(string name, string idWithoutPrefix, string idWithPrefix, string[] extraArguments, bool? isDefaultOn, IEnumerable<Item> items, int defaultIndex, string defaultValue)
         {
             Name = name;
+            DefaultValue = defaultValue;
             IDWithoutPrefix = idWithoutPrefix;
             IDWithPrefix = idWithPrefix;
             ExtraArguments = extraArguments;
@@ -45,6 +47,15 @@ namespace BSPGenerationTools
 
             List<string> allArgs = new List<string>();
 
+            const string defaultMarker = "--default=";
+            string defaultValue = null;
+            if (definition.StartsWith(defaultMarker))
+            {
+                int idx0 = definition.IndexOf('|');
+                defaultValue = definition.Substring(defaultMarker.Length, idx0 - defaultMarker.Length);
+                definition = definition.Substring(idx0 + 1).Trim();
+            }
+
             for (; count < (extraArgumentsAfterID + 1); count++, prevIdx = idx)
             {
                 idx = definition.IndexOf('|', prevIdx);
@@ -57,7 +68,6 @@ namespace BSPGenerationTools
 
             if (allArgs.Count < (extraArgumentsAfterID + 1) || idx == -1)
                 throw new Exception("Insufficient initial arguments in smart property definition");
-
 
             bool? defaultOn = null;
             if (allArgs[0].StartsWith("-"))
@@ -103,7 +113,7 @@ namespace BSPGenerationTools
                 items.Add(new Item(regex, new NameAndID(itemName.TrimStart('+'))));
             }
 
-            return new SmartPropertyDefinition(name.Name, idWithoutPrefix, idWithPrefix, allArgs.Skip(1).ToArray(), defaultOn, items, defaultIndex);
+            return new SmartPropertyDefinition(name.Name, idWithoutPrefix, idWithPrefix, allArgs.Skip(1).ToArray(), defaultOn, items, defaultIndex, defaultValue);
         }
     }
 }

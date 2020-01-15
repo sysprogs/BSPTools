@@ -27,6 +27,7 @@ namespace BSPGenerationTools
         M0Plus,
         M3,
         M33,
+        M33_FPU,
         M4,
         M4_NOFPU,
         M7,
