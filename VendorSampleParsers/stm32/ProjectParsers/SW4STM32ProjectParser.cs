@@ -122,7 +122,18 @@ namespace GeneratorSampleStm32.ProjectParsers
                     continue;
                 }
 
-                var configs = DetectConfigurationContexts(cproject, projectFile);
+                ConfigurationWithContext[] configs;
+
+                try
+                {
+                    configs = DetectConfigurationContexts(cproject, projectFile);
+                }
+                catch
+                {
+                    _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Failed to compute configuration contexts", projectFileDir, false);
+                    continue;
+                }
+
 
                 foreach (var cfg in configs)
                 {
