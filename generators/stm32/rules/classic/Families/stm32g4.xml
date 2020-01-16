@@ -6,15 +6,6 @@
 	<PrimaryHeaderDir>$$STM32:G4_DIR$$\Drivers\CMSIS\Device\ST\STM32G4xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:G4_DIR$$\Drivers\CMSIS\Device\ST\STM32G4xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>	
-		<MCUClassifier>
-			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
-			<Required>true</Required>
-			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32G431xx;STM32G441xx;STM32G471xx;STM32G473xx;STM32G483xx;STM32G474xx;STM32G484xx;STM32GBK1CB</AutoOptions> 
-			<UnsupportedMCUs></UnsupportedMCUs>
-			<Options>
-			</Options>
-		</MCUClassifier>
 	</Subfamilies>
 	<CompilationFlags>
 	<PreprocessorMacros>

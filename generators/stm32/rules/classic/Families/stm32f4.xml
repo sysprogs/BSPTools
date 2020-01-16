@@ -7,64 +7,6 @@
 	<StartupFileDir>$$STM32:F4_DIR$$\Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
-			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
-			<Required>true</Required>
-			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32F405xx;STM32F415xx;STM32F407xx;STM32F417xx;STM32F427xx;STM32F437xx;STM32F429xx;STM32F439xx;STM32F446xx;STM32F469xx;STM32F479xx;STM32F412Rx;STM32F412Vx;STM32F412Rx;STM32F412Zx;STM32F423xx</AutoOptions>
-			<Options>
-			<Option>
-					<Value>STM32F423xx</Value>
-					<Regex>STM32F423..</Regex>
-			</Option>
-
-			<Option>
-					<Value>STM32F412Cx</Value>
-					<Regex>STM32F412C.</Regex>
-			</Option>
-			<Option>
-					<Value>STM32F413xx</Value>
-					<Regex>STM32F413..</Regex>
-			</Option>
-			<Option>
-					<Value>STM32F412Rx</Value>
-					<Regex>STM32F412R.</Regex>
-			</Option>
-						<Option>
-					<Value>STM32F412Vx</Value>
-					<Regex>STM32F412V.</Regex>
-			</Option>
-						<Option>
-					<Value>STM32F412Zx</Value>
-					<Regex>STM32F412Z.</Regex>
-			</Option>
-
-				<Option>
-					<Value>STM32F410Cx</Value>
-					<Regex>STM32F410C8|STM32F410CB</Regex>
-				</Option>
-			<Option>
-					<Value>STM32F410Tx</Value>
-					<Regex>STM32F410T8|STM32F410TB</Regex>
-				</Option>
-			<Option>
-					<Value>STM32F410Rx</Value>
-					<Regex>STM32F410R8|STM32F410RB</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F401xC</Value>
-					<Regex>STM32F401.B|STM32F401.C</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F401xE</Value>
-					<Regex>STM32F401.D|STM32F401.E</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F411xE</Value>
-					<Regex>STM32F411..</Regex>
-				</Option>
-			</Options>
-		</MCUClassifier>
-		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.legacy_device_family</VariableName>
 			<Required>true</Required>
 			<UnsupportedMCUs>STM32F479.*</UnsupportedMCUs>

@@ -6,13 +6,6 @@
 	<PrimaryHeaderDir>$$STM32:L5_DIR$$\Drivers\CMSIS\Device\ST\STM32L5xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:L5_DIR$$\Drivers\CMSIS\Device\ST\STM32L5xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
-		<MCUClassifier>
-			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
-			<Required>true</Required>
-			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32L552xx;STM32L562xx</AutoOptions>
-			<Options/>
-		</MCUClassifier>
 	</Subfamilies>
 	<CompilationFlags>
 	<PreprocessorMacros>

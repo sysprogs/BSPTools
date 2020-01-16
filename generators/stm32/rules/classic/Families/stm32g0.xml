@@ -6,40 +6,6 @@
 	<PrimaryHeaderDir>$$STM32:G0_DIR$$\Drivers\CMSIS\Device\ST\STM32G0xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:G0_DIR$$\Drivers\CMSIS\Device\ST\STM32G0xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>	
-		<MCUClassifier>
-			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
-			<Required>true</Required>
-			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32G030xx;STM32G031xx;STM32G041xx;STM32G070xx;STM32G071xx;STM32G081xx</AutoOptions> 
-			<UnsupportedMCUs></UnsupportedMCUs>
-			<Options>
-				<Option>
-					<Value>STM32G030xx</Value>
-					<Regex>STM32F030.*</Regex>
-				</Option>
-				<Option>
-					<Value>STM32G031xx</Value>
-					<Regex>STM32F031.*</Regex>
-				</Option>
-				<Option>
-					<Value>STM32G040xx</Value>
-					<Regex>STM32F041.*</Regex>
-				</Option>
-								
-				<Option>
-					<Value>STM32G070xx</Value>
-					<Regex>STM32F070.*</Regex>
-				</Option>
-				<Option>
-					<Value>STM32G071xx</Value>
-					<Regex>STM32F071.*</Regex>
-				</Option>
-				<Option>
-					<Value>STM32G081xx</Value>
-					<Regex>STM32F081.*</Regex>
-				</Option>
-			</Options>
-		</MCUClassifier>
 		<!--MCUClassifier>
 			<VariableName>com.sysprogs.stm32.legacy_device_family</VariableName>
 			<Required>true</Required>

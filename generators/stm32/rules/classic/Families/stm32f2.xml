@@ -6,14 +6,6 @@
 	<PrimaryHeaderDir>$$STM32:F2_DIR$$\Drivers\CMSIS\Device\ST\STM32F2xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:F2_DIR$$\Drivers\CMSIS\Device\ST\STM32F2xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
-		<MCUClassifier>
-			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
-			<Required>true</Required>
-			<IsPrimary>true</IsPrimary>
-			<UnsupportedMCUs></UnsupportedMCUs>
-			<AutoOptions>STM32F205xx;STM32F215xx;STM32F207xx;STM32F217xx</AutoOptions>
-			<Options/>
-		</MCUClassifier>
 	</Subfamilies>
 	<CompilationFlags>
 	<PreprocessorMacros>

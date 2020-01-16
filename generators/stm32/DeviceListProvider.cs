@@ -175,7 +175,7 @@ namespace stm32_bsp_generator
                 }
             }
 
-            internal RawMemory[] LookupMemories(string RPN, string RefName, string explicitCore, out string[] linkerScripts)
+            internal RawMemory[] LookupMemories(string RPN, string RefName, string explicitCore, out string[] linkerScripts, out string define)
             {
                 XmlElement node;
                 if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
@@ -192,6 +192,7 @@ namespace stm32_bsp_generator
                     memories = node.SelectNodes($"memories/C{explicitCore}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
                 }
 
+                define = node.SelectSingleNode("define")?.InnerText ?? node.ParentNode.SelectSingleNode("define")?.InnerText ?? throw new Exception("Unknown preprocessor macro for " + RPN);
                 return memories;
             }
         }
@@ -200,7 +201,7 @@ namespace stm32_bsp_generator
         {
             public class STM32MCUBuilder : MCUBuilder
             {
-                private readonly ParsedMCU MCU;
+                public readonly ParsedMCU MCU;
                 public string[] PredefinedLinkerScripts => MCU.LinkerScripts;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
 
@@ -251,7 +252,7 @@ namespace stm32_bsp_generator
                         //STM32H7 system file expects the ISR to be located at address 0x24000000  (D1_AXISRAM_BASE) and not at 0x20000000.
                         var mainMemoryForRAMMode = layout.TryLocateMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x24000000), MemoryLocationRule.ByName("RAM_D2")) ?? throw new Exception("Failed to locate main memory for RAM mode");
 
-                        memorySubstitutionRulesForRAMMode = new Dictionary<string, string> { 
+                        memorySubstitutionRulesForRAMMode = new Dictionary<string, string> {
                             { FLASHMemoryName, mainMemoryForRAMMode.Name } ,
                             { ram.Name, mainMemoryForRAMMode.Name } ,
                         };
@@ -280,6 +281,7 @@ namespace stm32_bsp_generator
                     }
 
                     mcu.MemoryMap = layout.Layout.ToMemoryMap();
+                    mcu.AdditionalSystemVars = LoadedBSP.Combine(new[] { new SysVarEntry { Key = "com.sysprogs.stm32.hal_device_family", Value = MCU.Define } }, mcu.AdditionalSystemVars);
 
                     return mcu;
                 }
@@ -301,6 +303,8 @@ namespace stm32_bsp_generator
 
                 public readonly int[] RAMs;
                 public readonly int FLASH;
+
+                public readonly string Define;
 
                 static XmlElement LoadMCUDefinition(string familyDir, string name)
                 {
@@ -362,7 +366,7 @@ namespace stm32_bsp_generator
                     else
                         CoreSuffix = null;
 
-                    Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts);
+                    Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts, out Define);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
@@ -391,7 +395,7 @@ namespace stm32_bsp_generator
                     };
                 }
 
-                public ConfigSnapshot Config => new ConfigSnapshot { FLASH = FLASH, RAMs = string.Join("|", Memories.Select(r => $"{r.Name}={r.Size}").ToArray()) };
+                public ConfigSnapshot Config => new ConfigSnapshot { FLASH = FLASH, RAMs = string.Join("|", Memories.Select(r => $"{r.Name}={r.Size}").ToArray()), Define = Define };
             }
 
             //MCUs with the same value of ConfigSnapshot can use the same linker script, MCU definition, etc
@@ -399,6 +403,7 @@ namespace stm32_bsp_generator
             {
                 public int FLASH;
                 public string RAMs; //Using this instead of int[] saves us the pain of redefining GetHashCode()/Equals() used by GroupBy().
+                public string Define;
             }
 
             public List<MCUBuilder> LoadDeviceList(Program.STM32BSPBuilder bspBuilder)
@@ -426,6 +431,7 @@ namespace stm32_bsp_generator
                     //As of November 2017, some MCUs in sharing the same RPN (namely STM32F103RC) have different FLASH/RAM sizes.
                     //We need to detect this and create multiple MCU entries for them, e.g. STM32F103RCTx and STM32F103RCYx
                     var mcusByConfig = grp.GroupBy(m => m.Config).ToArray();
+
                     if (mcusByConfig.Length == 1)
                     {
                         result.Add(mcusByConfig.First().First().ToMCUBuilder(db));

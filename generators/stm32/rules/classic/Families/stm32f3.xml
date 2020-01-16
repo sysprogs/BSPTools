@@ -7,51 +7,6 @@
 	<StartupFileDir>$$STM32:F3_DIR$$\Drivers\CMSIS\Device\ST\STM32F3xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
 		<MCUClassifier>
-			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
-			<Required>true</Required>
-			<IsPrimary>true</IsPrimary>
-			<UnsupportedMCUs></UnsupportedMCUs>
-			<AutoOptions>STM32F318xx;STM32F328xx;STM32F358xx;STM32F378xx;STM32F398xx</AutoOptions>
-			<Options>
-				<Option>
-					<Value>STM32F301x8</Value>
-					<Regex>STM32F301.(6|8)</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F302x8</Value>
-					<Regex>STM32F302.(6|8)</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F302xC</Value>
-					<Regex>STM32F302.(B|C)</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F302xE</Value>
-					<Regex>STM32F302.(D|E)</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F303x8</Value>
-					<Regex>STM32F303.(6|8)</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F303xC</Value>
-					<Regex>STM32F303.(B|C)</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F303xE</Value>
-					<Regex>STM32F303.(D|E)</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F334x8</Value>
-					<Regex>STM32F334..</Regex>
-				</Option>
-				<Option>
-					<Value>STM32F373xC</Value>
-					<Regex>STM32F373..</Regex>
-				</Option>
-			</Options>
-		</MCUClassifier>
-		<MCUClassifier>
 			<VariableName>com.sysprogs.stm32.legacy_device_family</VariableName>
 			<Required>true</Required>
 			<Options>

@@ -228,10 +228,13 @@ namespace stm32_bsp_generator
             }
         }
 
+        static string GetSubfamilyDefine(MCUBuilder builder)
+        {
+            return (builder as DeviceListProviders.CubeProvider.STM32MCUBuilder)?.MCU.Define ?? throw new Exception("Unknown primary macro for " + builder.Name);
+        }
+
         static IEnumerable<StartupFileGenerator.InterruptVectorTable> ParseStartupFiles(string dir, MCUFamilyBuilder fam)
         {
-            var mainClassifier = fam.Definition.Subfamilies.First(f => f.IsPrimary);
-
             var allFiles = Directory.GetFiles(dir);
 
             foreach (var fn in allFiles)
@@ -243,7 +246,7 @@ namespace stm32_bsp_generator
                 yield return new StartupFileGenerator.InterruptVectorTable
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
-                    MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamily) == 0,
+                    MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(m), subfamily) == 0,
                     Vectors = StartupFileGenerator.ParseInterruptVectors(fn,
                         tableStart: "g_pfnVectors:",
                         tableEnd: @"/\*{10,999}|^[^/\*]+\*/
@@ -260,7 +263,6 @@ namespace stm32_bsp_generator
 
         private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice, ParseReportWriter writer)
         {
-            var mainClassifier = fam.Definition.Subfamilies.First(f => f.IsPrimary);
             List<MCUDefinitionWithPredicate> result = new List<MCUDefinitionWithPredicate>();
             Console.Write("Parsing {0} registers using the new parsing logic...", fam.Definition.Name);
             foreach (var fn in Directory.GetFiles(dir, "*.h"))
@@ -285,7 +287,7 @@ namespace stm32_bsp_generator
                 {
                     MCUName = subfamily,
                     RegisterSets = PeripheralRegisterGenerator2.GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, fam.MCUs[0].Core, writer),
-                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(mainClassifier.TryMatchMCUName(m.Name), subfamilyForMatching) == 0,
+                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(m), subfamilyForMatching) == 0,
                 };
 
                 result.Add(r);

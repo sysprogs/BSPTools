@@ -6,15 +6,6 @@
 	<PrimaryHeaderDir>$$STM32:H7_DIR$$\Drivers\CMSIS\Device\ST\STM32H7xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:H7_DIR$$\Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\gcc</StartupFileDir>
 	<Subfamilies>
-		<MCUClassifier>
-			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
-			<Required>true</Required>
-			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32H742xx;STM32H745xx;STM32H747xx;STM32H755xx;STM32H757xx;STM32H743xx;STM32H753xx;STM32H750xx</AutoOptions>
-			<!--UnsupportedMCUs>STM32H7(22)|(78)|(23).*</UnsupportedMCUs-->
-			<UnsupportedMCUs></UnsupportedMCUs>
-			<Options/>
-		</MCUClassifier>
 	</Subfamilies>
 	<CompilationFlags>
 	<PreprocessorMacros>	
