@@ -315,7 +315,7 @@ namespace GeneratorSampleStm32.ProjectParsers
                 opts = ExtractSTM32CubeIDEOptions(cproject, project, cconfiguration, cprojectDir);
 
             var mcu = opts.MCU;
-            
+
             if (mcu.EndsWith("x"))
             {
                 if (mcu.StartsWith("STM32MP1"))
@@ -323,7 +323,12 @@ namespace GeneratorSampleStm32.ProjectParsers
                 else
                     mcu = mcu.Remove(mcu.Length - 2, 2);
             }
-            else if (mcu.EndsWith("xP") || mcu.EndsWith("xQ"))
+            else if (mcu.EndsWith("xP"))
+            {
+                mcu = mcu.Remove(mcu.Length - 3, 3);
+            }
+
+            if (!_SupportedMCUNames.Contains(mcu) && mcu.EndsWith("xQ"))
             {
                 mcu = mcu.Remove(mcu.Length - 3, 3);
             }
@@ -361,7 +366,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             result.Path = Path.GetDirectoryName(sw4projectDir);
 
             string possibleRoot = sw4projectDir;
-            for(; ;)
+            for (; ; )
             {
                 string possibleIncDir = Path.Combine(possibleRoot, "Inc");
                 if (Directory.Exists(possibleIncDir))
