@@ -499,7 +499,7 @@ namespace GeneratorSampleStm32
                         Console.WriteLine($"Found {sampleCount} samples for {sdk.Family}.");
                     }
 
-                    return new ParsedVendorSamples { VendorSamples = allSamples.ToArray() };
+                    return new ParsedVendorSamples { VendorSamples = allSamples.ToArray(), FailedSamples = parser.FailedSamples.ToArray() };
                 }
             }
         }

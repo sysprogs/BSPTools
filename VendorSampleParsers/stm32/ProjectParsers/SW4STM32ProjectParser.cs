@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+using VendorSampleParserEngine;
 
 namespace GeneratorSampleStm32.ProjectParsers
 {
@@ -116,8 +117,9 @@ namespace GeneratorSampleStm32.ProjectParsers
                 {
                     project.Load(Path.Combine(projectFileDir, ".project"));
                 }
-                catch
+                catch(Exception ex)
                 {
+                    FailedSamples.Add(new VendorSampleParser.UnparseableVendorSample { UniqueID = string.Join("-", virtualPathComponents), ErrorDetails = ex.ToString() });
                     _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Failed to load project file", projectFileDir, false);
                     continue;
                 }
@@ -128,8 +130,9 @@ namespace GeneratorSampleStm32.ProjectParsers
                 {
                     configs = DetectConfigurationContexts(cproject, projectFile);
                 }
-                catch
+                catch(Exception ex)
                 {
+                    FailedSamples.Add(new VendorSampleParser.UnparseableVendorSample { UniqueID = string.Join("-", virtualPathComponents), ErrorDetails = ex.ToString() });
                     _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Failed to compute configuration contexts", projectFileDir, false);
                     continue;
                 }
@@ -137,19 +140,25 @@ namespace GeneratorSampleStm32.ProjectParsers
 
                 foreach (var cfg in configs)
                 {
+                    string sampleID = null;
+
                     try
                     {
+                        sampleID = string.Join("-", virtualPathComponents) + cfg.Context?.IDSuffix;
+
                         var sample = ParseSingleProject(cproject, project, cfg.CConfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir,
                             Path.GetFileName(boardDir), cfg.Context, subtype);
                         sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs).ToArray();
                         sample.VirtualPath = string.Join("\\", virtualPathComponents.Take(virtualPathComponents.Length - 1));
                         sample.UserFriendlyName = virtualPathComponents.Last();
-                        sample.InternalUniqueID = string.Join("-", virtualPathComponents) + cfg.Context?.IDSuffix;
+                        sample.InternalUniqueID = sampleID;
 
                         result.Add(sample);
                     }
                     catch (Exception ex)
                     {
+                        if (sampleID != null)
+                            FailedSamples.Add(new VendorSampleParser.UnparseableVendorSample { UniqueID = sampleID, ErrorDetails = ex.ToString() });
                         _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "General error while parsing a sample", ex.Message, false);
                     }
                 }
@@ -219,7 +228,7 @@ namespace GeneratorSampleStm32.ProjectParsers
             result.PreprocessorMacros = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.preprocessor.def.symbols")
                 .Select(a => a.Trim()).Where(a => a != "").ToArray();
 
-            result.BoardName = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.board");
+            result.BoardName = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.board", true);
             result.MCU = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.mcu");
             List<string> libs = new List<string>();
 
@@ -365,27 +374,46 @@ namespace GeneratorSampleStm32.ProjectParsers
 
             result.Path = Path.GetDirectoryName(sw4projectDir);
 
+            HashSet<string> possibleIncludeDirs = new HashSet<string>();
+            foreach (var src in result.SourceFiles)
+            {
+                int idx = src.IndexOf(@"\Src\", StringComparison.InvariantCultureIgnoreCase);
+                if (idx == -1)
+                    continue;
+                string possibleInc = src.Substring(0, idx) + @"\Inc";
+                possibleIncludeDirs.Add(possibleInc);
+            }
+
             string possibleRoot = sw4projectDir;
             for (; ; )
             {
                 string possibleIncDir = Path.Combine(possibleRoot, "Inc");
                 if (Directory.Exists(possibleIncDir))
                 {
-                    result.HeaderFiles = Directory.GetFiles(possibleIncDir, "*.h", SearchOption.AllDirectories);
+                    possibleIncludeDirs.Add(possibleIncDir);
                     break;
                 }
 
                 var baseDir = Path.GetDirectoryName(possibleRoot);
-                if (baseDir == "" || baseDir == possibleRoot)
+                if (string.IsNullOrEmpty(baseDir) || baseDir == possibleRoot)
                     break;
 
                 possibleRoot = baseDir;
             }
 
+            List<string> headers = new List<string>();
+            foreach (var possibleIncDir in possibleIncludeDirs)
+            {
+                if (Directory.Exists(possibleIncDir))
+                    headers.AddRange(Directory.GetFiles(possibleIncDir, "*.h", SearchOption.AllDirectories));
+            }
+
+            result.HeaderFiles = headers.ToArray();
             return result;
         }
 
         Regex rgParentSyntax = new Regex("(\\$%7B|)PARENT-([0-9]+)-PROJECT_LOC(|..|%7D)/(.*)");
+        public List<VendorSampleParser.UnparseableVendorSample> FailedSamples = new List<VendorSampleParser.UnparseableVendorSample>();
 
         [Flags]
         enum PathTranslationFlags
