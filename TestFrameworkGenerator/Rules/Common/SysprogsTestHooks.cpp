@@ -209,6 +209,7 @@ void __attribute__((noinline)) SysprogsTestHook_TestStarting(void *pTest)
 {
 	static bool s_ReferenceAddressReported = false;
     TestOutputSynchronizer sync;
+#ifndef __ICCARM__
 	if (!s_ReferenceAddressReported)
 	{
 		s_ReferenceAddressReported = true;
@@ -216,6 +217,7 @@ void __attribute__((noinline)) SysprogsTestHook_TestStarting(void *pTest)
 		unsigned char hdr2[] = { 1 + sizeof(pMain), strpReferenceAddressReport };
 		WriteTestOutput(&hdr2, sizeof(hdr2), &pMain, sizeof(pMain));
 	}
+#endif
     unsigned char hdr[] = { 1 + sizeof(pTest), strpTestStartingByID };
     WriteTestOutput(&hdr, sizeof(hdr), &pTest, sizeof(pTest));
 }

@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.tinyembtest</ID>
 	<Name>TinyEmbeddedTest</Name>
-	<Version>1.3</Version>
+	<Version>1.4</Version>
 	<MinimumEngineVersion>5.5.2</MinimumEngineVersion>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">

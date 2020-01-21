@@ -1,8 +1,11 @@
-#include <alloca.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include "TinyEmbeddedTest.h"
 #include "SysprogsTestHooks.h"
+
+#ifndef __ICCARM__
+#include <alloca.h>
+#endif
 
 #ifndef TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE
 #define TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE 0
@@ -22,8 +25,12 @@ void RunAllTests()
     for (TestGroup *pGroup = TestGroup::s_pFirstTestGroup; pGroup; pGroup = pGroup->m_pNextGroup)
         for (TestInstance *pTest = pGroup->m_pFirstTest; pTest; pTest = pTest->m_pNextTestInGroup)
             testCount++;
-    
-    TestInstance **pAllInstances = (TestInstance **)alloca(testCount * sizeof(TestInstance *));
+
+#ifdef __ICCARM__
+	TestInstance **pAllInstances = (TestInstance **)malloc(testCount * sizeof(TestInstance *));	//WARNING: this will cause a one-time memory leak
+#else
+	TestInstance **pAllInstances = (TestInstance **)alloca(testCount * sizeof(TestInstance *));
+#endif
     int index = 0;
     
     for (TestGroup *pGroup = TestGroup::s_pFirstTestGroup; pGroup; pGroup = pGroup->m_pNextGroup)
@@ -86,11 +93,21 @@ void ReportTestFailure(const char *pFormat, ...)
     va_list ap;
     va_start(ap, pFormat);
     int requiredLength = vsnprintf(0, 0, pFormat, ap);
+	
+#ifdef __ICCARM__
+	char *pBuffer = (char *)malloc(requiredLength + 1);
+#else
     char *pBuffer = (char *)alloca(requiredLength + 1);
+#endif
+	
     vsnprintf(pBuffer, requiredLength + 1, pFormat, ap);
     SysprogsTestHook_TestFailed(0, pBuffer, 0);
     va_end(ap);
-	
+
+#ifdef __ICCARM__
+	free(pBuffer);
+#endif
+
 #if TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 1
 	longjmp(s_TinyEmbeddedTestJumpBuffer, 1);
 #elif TINY_EMBEDDED_TEST_CONTEXT_RESTORE_MODE == 2
