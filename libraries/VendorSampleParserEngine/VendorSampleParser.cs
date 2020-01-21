@@ -75,6 +75,7 @@ namespace VendorSampleParserEngine
         {
             public string BuildLogFile;
             public string UniqueID;
+            public string ErrorDetails;
         }
 
         public struct ParsedVendorSamples
@@ -253,6 +254,8 @@ namespace VendorSampleParserEngine
             if (directoryMatches && mode == RunMode.Release)
             {
                 Console.WriteLine($"Loaded {sampleDir.Samples.Length} samples from cache");
+                HashSet<string> blacklist = ParseBlacklistFile();
+                sampleDir.Samples = sampleDir.Samples.Where(s => !blacklist.Contains(s.InternalUniqueID)).ToArray();
                 return sampleDir;
             }
 

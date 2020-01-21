@@ -26,8 +26,8 @@ void __attribute__ ((weak, naked)) $$VECTOR$$() $@+7
 	//If you hit the breakpoint below, one of the interrupts was unhandled in your code. 
 	//Define the following function in your code to handle it:
 	//	extern "C" void $$VECTOR$$();
-	asm("bkpt 255");
-	asm("bx lr");
+	__asm("bkpt 255");
+	__asm("bx lr");
 }
 
 #else
@@ -54,7 +54,7 @@ void __attribute__((naked, noreturn)) Reset_Handler()
 	//Normally the CPU should will setup the based on the value from the first entry in the vector table.
 	//If you encounter problems with accessing stack variables during initialization, ensure the line below is enabled.
 	#if defined(sram_layout) || defined(INITIALIZE_SP_AT_RESET)
-	asm ("ldr sp, =_estack");
+	__asm ("ldr sp, =_estack");
 	#endif
 
 	void **pSource, **pDest;
