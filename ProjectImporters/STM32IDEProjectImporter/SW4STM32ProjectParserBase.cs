@@ -80,11 +80,18 @@ namespace STM32IDEProjectImporter
         protected virtual void ValidateFinalMCUName(string mcu) { }
         protected virtual void OnFileNotFound(string fullPath) { }
 
-        public List<VendorSample> ParseProjectFolder(string projectDir, string topLevelDir, string boardDir, List<string> extraIncludeDirs, ProjectSubtype subtype)
+        public List<VendorSample> ParseProjectFolder(string optionalProjectRootForLocatingHeaders, 
+            string topLevelDir,
+            string boardName,
+            List<string> extraIncludeDirs,
+            ProjectSubtype subtype)
         {
             List<VendorSample> result = new List<VendorSample>();
 
-            string[] cprojectFiles = Directory.GetFiles(projectDir, ".cproject", SearchOption.AllDirectories);
+            if (topLevelDir == null)
+                topLevelDir = Path.GetDirectoryName(optionalProjectRootForLocatingHeaders);
+
+            string[] cprojectFiles = Directory.GetFiles(optionalProjectRootForLocatingHeaders, ".cproject", SearchOption.AllDirectories);
 
             foreach (var projectFile in cprojectFiles)
             {
@@ -95,61 +102,71 @@ namespace STM32IDEProjectImporter
                 if (cprojectFiles.Length > 1)
                     virtualPath = projectFileDir.Substring(topLevelDir.Length); //This sample has multiple project files (e.g. <...>\SW4STM32\Board1, <...>\SW4STM32\Board2).
                 else
-                    virtualPath = projectDir.Substring(topLevelDir.Length);
+                    virtualPath = optionalProjectRootForLocatingHeaders.Substring(topLevelDir.Length);
 
                 var virtualPathComponents = virtualPath.Trim('\\').Split('\\').Except(new[] { "SW4STM32", "Projects", "STM32CubeIDE" }, StringComparer.InvariantCultureIgnoreCase).ToArray();
 
-                XmlDocument cproject = new XmlDocument();
-                cproject.Load(projectFile);
-
-                XmlDocument project = new XmlDocument();
-                try
-                {
-                    project.Load(Path.Combine(projectFileDir, ".project"));
-                }
-                catch (Exception ex)
-                {
-                    OnParseFailed(ex, string.Join("-", virtualPathComponents), projectFileDir, "Failed to load project file");
-                    continue;
-                }
-
-                ConfigurationWithContext[] configs;
-
-                try
-                {
-                    configs = DetectConfigurationContexts(cproject, projectFile);
-                }
-                catch (Exception ex)
-                {
-                    OnParseFailed(ex, string.Join("-", virtualPathComponents), projectFileDir, "Failed to compute configuration contexts");
-                    continue;
-                }
-
-                foreach (var cfg in configs)
-                {
-                    string sampleID = null;
-
-                    try
-                    {
-                        sampleID = string.Join("-", virtualPathComponents) + cfg.Context?.IDSuffix;
-
-                        var sample = ParseSingleProject(cproject, project, cfg.CConfiguration, projectDir, Path.GetDirectoryName(cprojectFiles[0]), topLevelDir,
-                            Path.GetFileName(boardDir), cfg.Context, subtype);
-                        sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs).ToArray();
-                        sample.VirtualPath = string.Join("\\", virtualPathComponents.Take(virtualPathComponents.Length - 1).ToArray());
-                        sample.UserFriendlyName = virtualPathComponents.Last();
-                        sample.InternalUniqueID = sampleID;
-
-                        result.Add(sample);
-                    }
-                    catch (Exception ex)
-                    {
-                        OnParseFailed(ex, sampleID, projectFileDir, "General error while parsing a sample");
-                    }
-                }
+                ParseSingleProject(optionalProjectRootForLocatingHeaders, projectFile, virtualPathComponents, boardName, extraIncludeDirs, subtype, result);
             }
 
             return result;
+        }
+
+        public void ParseSingleProject(string optionalProjectRootForLocatingHeaders, string projectFile, string[] virtualPathComponents, string boardName, List<string> extraIncludeDirs, ProjectSubtype subtype, List<VendorSample> result)
+        {
+            var projectFileDir = Path.GetDirectoryName(projectFile);
+
+            if (virtualPathComponents == null)
+                virtualPathComponents = new[] { "virtual", "sample", "path" };
+
+            XmlDocument cproject = new XmlDocument();
+            cproject.Load(projectFile);
+
+            XmlDocument project = new XmlDocument();
+            try
+            {
+                project.Load(Path.Combine(projectFileDir, ".project"));
+            }
+            catch (Exception ex)
+            {
+                OnParseFailed(ex, string.Join("-", virtualPathComponents), projectFileDir, "Failed to load project file");
+                return;
+            }
+
+            ConfigurationWithContext[] configs;
+
+            try
+            {
+                configs = DetectConfigurationContexts(cproject, projectFile);
+            }
+            catch (Exception ex)
+            {
+                OnParseFailed(ex, string.Join("-", virtualPathComponents), projectFileDir, "Failed to compute configuration contexts");
+                return;
+            }
+
+            foreach (var cfg in configs)
+            {
+                string sampleID = null;
+
+                try
+                {
+                    sampleID = string.Join("-", virtualPathComponents) + cfg.Context?.IDSuffix;
+
+                    var sample = ParseSingleConfiguration(cproject, project, cfg.CConfiguration, optionalProjectRootForLocatingHeaders, Path.GetDirectoryName(projectFile),
+                        boardName, cfg.Context, subtype);
+                    sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs ?? new List<string>()).ToArray();
+                    sample.VirtualPath = string.Join("\\", virtualPathComponents.Take(virtualPathComponents.Length - 1).ToArray());
+                    sample.UserFriendlyName = virtualPathComponents.Last();
+                    sample.InternalUniqueID = sampleID;
+
+                    result.Add(sample);
+                }
+                catch (Exception ex)
+                {
+                    OnParseFailed(ex, sampleID, projectFileDir, "General error while parsing a sample");
+                }
+            }
         }
 
         struct SourceFilterEntry
@@ -179,6 +196,7 @@ namespace STM32IDEProjectImporter
 
         public enum ProjectSubtype
         {
+            Auto,
             SW4STM32,
             STM32CubeIDE,
         }
@@ -195,10 +213,11 @@ namespace STM32IDEProjectImporter
             public string LDFLAGS;
         }
 
+        const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
+        const string SourceEntriesKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/sourceEntries/entry";
+
         CommonConfigurationOptions ExtractSW4STM32Options(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
         {
-            const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
-            const string SourceEntriesKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/sourceEntries/entry";
             var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
             CommonConfigurationOptions result = new CommonConfigurationOptions();
 
@@ -253,8 +272,6 @@ namespace STM32IDEProjectImporter
 
         CommonConfigurationOptions ExtractSTM32CubeIDEOptions(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
         {
-            const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
-            const string SourceEntriesKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/sourceEntries/entry";
             var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
             CommonConfigurationOptions result = new CommonConfigurationOptions();
 
@@ -289,9 +306,12 @@ namespace STM32IDEProjectImporter
             return result;
         }
 
-        private VendorSample ParseSingleProject(XmlDocument cproject, XmlDocument project,
-            XmlElement cconfiguration, string sw4projectDir,
-            string cprojectDir, string topLevelDir, string boardName,
+        private VendorSample ParseSingleConfiguration(XmlDocument cproject,
+            XmlDocument project,
+            XmlElement cconfiguration, 
+            string optionalProjectRootForLocatingHeaders,
+            string cprojectFileDir,
+            string boardName,
             MultiConfigurationContext multiConfigurationContext,
             ProjectSubtype subtype)
         {
@@ -301,12 +321,25 @@ namespace STM32IDEProjectImporter
                 NoImplicitCopy = true,
             };
 
+            if (optionalProjectRootForLocatingHeaders == null)
+                optionalProjectRootForLocatingHeaders = cprojectFileDir;
 
             CommonConfigurationOptions opts;
+            if (subtype == ProjectSubtype.Auto)
+            {
+                var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
+                if (toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.compiler')]") != null)
+                    subtype = ProjectSubtype.SW4STM32;
+                else if (toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler']") != null)
+                    subtype = ProjectSubtype.STM32CubeIDE;
+                else
+                    throw new Exception("Failed to detect the project type");
+            }
+
             if (subtype == ProjectSubtype.SW4STM32)
-                opts = ExtractSW4STM32Options(cproject, project, cconfiguration, cprojectDir);
+                opts = ExtractSW4STM32Options(cproject, project, cconfiguration, cprojectFileDir);
             else
-                opts = ExtractSTM32CubeIDEOptions(cproject, project, cconfiguration, cprojectDir);
+                opts = ExtractSTM32CubeIDEOptions(cproject, project, cconfiguration, cprojectFileDir);
 
             var mcu = opts.MCU;
 
@@ -337,7 +370,7 @@ namespace STM32IDEProjectImporter
             result.SourceFiles = opts.SourceFiles.Concat(opts.Libraries).Distinct().ToArray();
             result.IncludeDirectories = opts.IncludeDirectories;
             result.PreprocessorMacros = opts.PreprocessorMacros;
-            result.BoardName = opts.BoardName;
+            result.BoardName = boardName ?? opts.BoardName;
             result.LinkerScript = opts.LinkerScript;
 
             if (opts.LDFLAGS?.Contains("rdimon.specs") == true)
@@ -351,7 +384,7 @@ namespace STM32IDEProjectImporter
                 };
             }
 
-            result.Path = Path.GetDirectoryName(sw4projectDir);
+            result.Path = Path.GetDirectoryName(optionalProjectRootForLocatingHeaders);
 
             HashSet<string> possibleIncludeDirs = new HashSet<string>();
             foreach (var src in result.SourceFiles)
@@ -363,7 +396,7 @@ namespace STM32IDEProjectImporter
                 possibleIncludeDirs.Add(possibleInc);
             }
 
-            string possibleRoot = sw4projectDir;
+            string possibleRoot = optionalProjectRootForLocatingHeaders;
             for (; ; )
             {
                 string possibleIncDir = Path.Combine(possibleRoot, "Inc");

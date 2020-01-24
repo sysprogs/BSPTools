@@ -482,7 +482,7 @@ namespace GeneratorSampleStm32
                                         else
                                             subtype = SW4STM32ProjectParser.ProjectSubtype.STM32CubeIDE;
 
-                                        var aSamples = parser.ParseProjectFolder(dir, topLevelDir, boardDir, addInc, subtype);
+                                        var aSamples = parser.ParseProjectFolder(dir, topLevelDir, boardName, addInc, subtype);
 
                                         foreach (var sample in aSamples)
                                             filter?.OnSampleParsed(sample);
