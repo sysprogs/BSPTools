@@ -79,8 +79,9 @@ namespace STM32IDEProjectImporter
         protected virtual void AdjustMCUName(ref string mcu) { }
         protected virtual void ValidateFinalMCUName(string mcu) { }
         protected virtual void OnFileNotFound(string fullPath) { }
+        protected virtual void OnVendorSampleParsed(VendorSample sample, CommonConfigurationOptions options) { }
 
-        public List<VendorSample> ParseProjectFolder(string optionalProjectRootForLocatingHeaders, 
+        public List<VendorSample> ParseProjectFolder(string optionalProjectRootForLocatingHeaders,
             string topLevelDir,
             string boardName,
             List<string> extraIncludeDirs,
@@ -201,13 +202,13 @@ namespace STM32IDEProjectImporter
             STM32CubeIDE,
         }
 
-        struct CommonConfigurationOptions
+        public struct CommonConfigurationOptions
         {
             public string[] IncludeDirectories;
             public string[] PreprocessorMacros;
             public string BoardName;
             public string MCU;
-            public List<string> SourceFiles;
+            public List<ParsedSourceFile> SourceFiles;
             public string LinkerScript;
             public List<string> Libraries;
             public string LDFLAGS;
@@ -301,14 +302,14 @@ namespace STM32IDEProjectImporter
             var sourceFilters = cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>().Select(e => new SourceFilterEntry(e)).Where(e => e.IsValid).ToArray();
 
             result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters)
-                .Where(f => !f.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
+                .Where(f => !f.FullPath.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
 
             return result;
         }
 
         private VendorSample ParseSingleConfiguration(XmlDocument cproject,
             XmlDocument project,
-            XmlElement cconfiguration, 
+            XmlElement cconfiguration,
             string optionalProjectRootForLocatingHeaders,
             string cprojectFileDir,
             string boardName,
@@ -367,11 +368,12 @@ namespace STM32IDEProjectImporter
             ValidateFinalMCUName(mcu);
 
             result.DeviceID = mcu;
-            result.SourceFiles = opts.SourceFiles.Concat(opts.Libraries).Distinct().ToArray();
+            result.SourceFiles = opts.SourceFiles.Select(f => f.FullPath).Concat(opts.Libraries).Distinct().ToArray();
             result.IncludeDirectories = opts.IncludeDirectories;
             result.PreprocessorMacros = opts.PreprocessorMacros;
             result.BoardName = boardName ?? opts.BoardName;
             result.LinkerScript = opts.LinkerScript;
+            OnVendorSampleParsed(result, opts);
 
             if (opts.LDFLAGS?.Contains("rdimon.specs") == true)
             {
@@ -468,10 +470,18 @@ namespace STM32IDEProjectImporter
             return fullPath;
         }
 
-        private List<string> ParseSourceList(XmlDocument project, string projectDir, SourceFilterEntry[] sourceFilters)
+        public struct ParsedSourceFile
+        {
+            public string FullPath;
+            public string VirtualPath;
+
+            public override string ToString() => FullPath;
+        }
+
+        private List<ParsedSourceFile> ParseSourceList(XmlDocument project, string projectDir, SourceFilterEntry[] sourceFilters)
         {
             Regex rgStartup = new Regex("startup_stm.*\\.s");
-            List<string> sources = new List<string>();
+            List<ParsedSourceFile> sources = new List<ParsedSourceFile>();
             foreach (var node in project.SelectNodes("projectDescription/linkedResources/link").OfType<XmlElement>())
             {
                 string path = node.SelectSingleNode("locationURI")?.InnerText ?? node.SelectSingleNode("location")?.InnerText ?? throw new Exception("Resource name unspecified");
@@ -493,7 +503,9 @@ namespace STM32IDEProjectImporter
                         continue;
                 }
 
-                sources.Add(Path.GetFullPath(fullPath));
+                string virtualPath = node.SelectSingleNode("name")?.InnerText ?? Path.GetFileName(fullPath);
+
+                sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = virtualPath });
             }
 
             return sources;
