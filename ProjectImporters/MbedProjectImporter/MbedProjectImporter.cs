@@ -23,6 +23,10 @@ namespace MbedProjectImporter
 
         public string HelpURL => null;
 
+        public object SettingsControl => null;
+
+        public object Settings { get; set; }
+
         public ImportedExternalProject ImportProject(ProjectImportParameters parameters, IProjectImportService service)
         {
             Regex rgLine = new Regex("(PROJECT|OBJECTS|INCLUDE_PATHS|LIBRARY_PATHS|LIBRARIES|LINKER_SCRIPT|C_FLAGS|CXX_FLAGS|ASM_FLAGS|LD_FLAGS|LD_SYS_LIBS|CC)[ \t]*(:=|\\+=|=|\\?=|=)[ \t]*(.*)$");
