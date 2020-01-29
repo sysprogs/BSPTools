@@ -110,7 +110,7 @@ namespace ESP8266DebugPackage
                 {
                     var hdr = ReadStruct<Elf32_Ehdr>(0);
                     if (hdr.Signature[0] != 0x7F || hdr.Signature[1] != 'E' || hdr.Signature[2] != 'L' || hdr.Signature[3] != 'F')
-                        throw new Exception("Invalid ELF file");
+                        throw new Exception($"Invalid ELF file ({_PathHint}): mismatching signature");
                     _CachedHeader = hdr;
                 }
                 return _CachedHeader;
@@ -127,13 +127,13 @@ namespace ESP8266DebugPackage
                 {
                     var hdr = ELFHeader;
                     if (hdr.e_shoff + hdr.e_shentsize * hdr.e_shnum > _File.Length)
-                        throw new Exception("Invalid ELF file");
+                        throw new Exception($"Invalid ELF file ({_PathHint}): inconsistent string table");
                     if (hdr.e_shstrndx >= hdr.e_shnum)
-                        throw new Exception("Invalid ELF file");
+                        throw new Exception($"Invalid ELF file ({_PathHint}): string table too long");
 
                     var hdrStrings = ReadStruct<Elf32_Shdr>((int)(hdr.e_shoff + hdr.e_shstrndx * hdr.e_shentsize));
                     if (hdrStrings.sh_type != (short)SectionType.SHT_STRTAB)
-                        throw new Exception("Invalid ELF file: wrong string table section type");
+                        throw new Exception($"Invalid ELF file ({_PathHint}): unexpected string table section type");
 
                     _CachedStringTable = LoadSection(hdrStrings);
                 }
@@ -141,8 +141,11 @@ namespace ESP8266DebugPackage
             }
         }
 
+        readonly string _PathHint;
+
         public ELFFile(string fileName)
         {
+            _PathHint = fileName;
             _File = new BufferedStream(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), 1024 * 1024);
         }
 
