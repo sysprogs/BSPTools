@@ -400,7 +400,7 @@ namespace SLab_bsp_generator
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
-                    PackageVersion = "5.8.3"
+                    PackageVersion = "5.9.1"
                 };
 
                 Console.WriteLine("Saving BSP...");
