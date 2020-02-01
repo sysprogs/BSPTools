@@ -44,7 +44,7 @@ namespace SLab_bsp_generator
                 ramBase = SRAMBase;
             }
 
-            public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
+            public override MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 //No additional memory information available for this MCU. Build a basic memory layout from known RAM/FLASH sizes.
                 MemoryLayout layout = new MemoryLayout();
@@ -83,7 +83,7 @@ namespace SLab_bsp_generator
                     Size = (uint)mcu.RAMSize
                 });
 
-                return layout;
+                return new MemoryLayoutAndSubstitutionRules(layout);
             }
         }
 
@@ -275,135 +275,137 @@ namespace SLab_bsp_generator
             if (args.Length < 1)
                 throw new Exception("Usage: EFM32.exe <SLab SW package directory>");
 
-            var bspBuilder = new SLabBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-
-            List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
-            var ignoredFamilyNames = File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, "rulesfamaly.txt"));
-
-            string DirDevices = Path.Combine(bspBuilder.Directories.InputDir, @"platform\Device\SiliconLabs");
-            string[] allFamilySubdirectories = Directory.GetDirectories(DirDevices);
-            Console.WriteLine("Enumerating devices...");
-            foreach (var dir in allFamilySubdirectories)
+            using (var bspBuilder = new SLabBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules", @"..\..\logs")))
             {
-                string familyName = Path.GetFileNameWithoutExtension(dir);
 
-                if (ignoredFamilyNames.FirstOrDefault(n => dir.Contains(n)) != null)
-                    continue;
+                List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+                var ignoredFamilyNames = File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, "rulesfamaly.txt"));
 
-                var devices = GetMCUsForFamily(dir);
-                Console.WriteLine($"    {familyName}: {devices.Count} devices");
-                ValidateMCUNames(devices);
-
-                if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
-                    throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
-
-                if (devices.Count == 0)
-                    throw new Exception("No devices for " + familyName);
-
-                string StartupFile = Directory.GetFiles(Path.Combine(DirDevices, familyName, @"Source\GCC"), "startup_*.c")[0].Replace(bspBuilder.Directories.InputDir, @"$$BSPGEN:INPUT_DIR$$");
-
-                var copyJob = new CopyJob()
+                string DirDevices = Path.Combine(bspBuilder.Directories.InputDir, @"platform\Device\SiliconLabs");
+                string[] allFamilySubdirectories = Directory.GetDirectories(DirDevices);
+                Console.WriteLine("Enumerating devices...");
+                foreach (var dir in allFamilySubdirectories)
                 {
-                    FilesToCopy = "-*startup_*;*.h;*.c",
-                    TargetFolder = "Devices",
-                    ProjectInclusionMask = "*.c",
-                    AutoIncludeMask = "*.h",
-                    SourceFolder = DirDevices + "\\" + familyName
-                };
+                    string familyName = Path.GetFileNameWithoutExtension(dir);
 
-                var fam = new MCUFamilyBuilder(bspBuilder, new FamilyDefinition()
-                {
-                    Name = familyName,
-                    FamilySubdirectory = familyName,
-                    PrimaryHeaderDir = "$$BSPGEN:INPUT_DIR$$",
-                    StartupFileDir = StartupFile,
-                    CoreFramework = new Framework() { CopyJobs = new[] { copyJob } },
-                    Subfamilies = new MCUClassifier[] { }.ToArray()
-                });
+                    if (ignoredFamilyNames.FirstOrDefault(n => dir.Contains(n)) != null)
+                        continue;
 
-                fam.MCUs.AddRange(devices);
-                allFamilies.Add(fam);
-            }
+                    var devices = GetMCUsForFamily(dir);
+                    Console.WriteLine($"    {familyName}: {devices.Count} devices");
+                    ValidateMCUNames(devices);
 
-            List<MCUFamily> familyDefinitions = new List<MCUFamily>();
-            List<MCU> mcuDefinitions = new List<MCU>();
-            List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
+                    if (devices.Where(d => d.RAMSize == 0 || d.FlashSize == 0).Count() > 0)
+                        throw new Exception($"Some devices are RAM Size ({devices.Where(d => d.RAMSize == 0).Count()})  = 0 or FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
 
-            bool noPeripheralRegisters = args.Contains("/noperiph");
-            List<KeyValuePair<string, string>> macroToHeaderMap = new List<KeyValuePair<string, string>>();
+                    if (devices.Count == 0)
+                        throw new Exception("No devices for " + familyName);
 
-            var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
+                    string StartupFile = Directory.GetFiles(Path.Combine(DirDevices, familyName, @"Source\GCC"), "startup_*.c")[0].Replace(bspBuilder.Directories.InputDir, @"$$BSPGEN:INPUT_DIR$$");
 
-            foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
-                frameworks.Add(fw);
+                    var copyJob = new CopyJob()
+                    {
+                        FilesToCopy = "-*startup_*;*.h;*.c",
+                        TargetFolder = "Devices",
+                        ProjectInclusionMask = "*.c",
+                        AutoIncludeMask = "*.h",
+                        SourceFolder = DirDevices + "\\" + familyName
+                    };
 
-            var flags = new ToolFlags();
-            List<string> projectFiles = new List<string>();
-            commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
+                    var fam = new MCUFamilyBuilder(bspBuilder, new FamilyDefinition()
+                    {
+                        Name = familyName,
+                        FamilySubdirectory = familyName,
+                        PrimaryHeaderDir = "$$BSPGEN:INPUT_DIR$$",
+                        StartupFileDir = StartupFile,
+                        CoreFramework = new Framework() { CopyJobs = new[] { copyJob } },
+                        Subfamilies = new MCUClassifier[] { }.ToArray()
+                    });
 
-            foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample);
-
-            Console.WriteLine("Processing families...");
-
-            int cnt = 0;
-
-            foreach (var fam in allFamilies)
-            {
-                Console.WriteLine($"    {fam.Definition.Name} ({++cnt}/{allFamilies.Count})...");
-                var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
-                if (rejectedMCUs.Length != 0)
-                {
-                    Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
-                    foreach (var mcu in rejectedMCUs)
-                        Console.WriteLine("\t{0}", mcu.Name);
+                    fam.MCUs.AddRange(devices);
+                    allFamilies.Add(fam);
                 }
 
+                List<MCUFamily> familyDefinitions = new List<MCUFamily>();
+                List<MCU> mcuDefinitions = new List<MCU>();
+                List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+                List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
-                fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
+                bool noPeripheralRegisters = args.Contains("/noperiph");
+                List<KeyValuePair<string, string>> macroToHeaderMap = new List<KeyValuePair<string, string>>();
 
-                var famObj = fam.GenerateFamilyObject(true);
+                var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
 
-                famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
-                famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
-
-                famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, commonPseudofamily.Definition.AdditionalSystemVars);
-                famObj.CompilationFlags = famObj.CompilationFlags.Merge(flags);
-                famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
-
-                familyDefinitions.Add(famObj);
-                fam.GenerateLinkerScripts(false);
-                if (!noPeripheralRegisters)
-                    fam.AttachPeripheralRegisters(ParsePeripheralRegisters(bspBuilder.Directories.OutputDir + "\\" + fam.Definition.FamilySubdirectory + "\\Devices", fam));
-
-                foreach (var mcu in fam.MCUs)
-                    mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters));
-
-                foreach (var fw in fam.GenerateFrameworkDefinitions())
+                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
 
-                foreach (var sample in fam.CopySamples())
+                var flags = new ToolFlags();
+                List<string> projectFiles = new List<string>();
+                commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
+
+                foreach (var sample in commonPseudofamily.CopySamples())
                     exampleDirs.Add(sample);
+
+                Console.WriteLine("Processing families...");
+
+                int cnt = 0;
+
+                foreach (var fam in allFamilies)
+                {
+                    Console.WriteLine($"    {fam.Definition.Name} ({++cnt}/{allFamilies.Count})...");
+                    var rejectedMCUs = fam.RemoveUnsupportedMCUs();
+                    if (rejectedMCUs.Length != 0)
+                    {
+                        Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
+                        foreach (var mcu in rejectedMCUs)
+                            Console.WriteLine("\t{0}", mcu.Name);
+                    }
+
+
+                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
+
+                    var famObj = fam.GenerateFamilyObject(true, true);
+
+                    famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
+                    famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
+
+                    famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, commonPseudofamily.Definition.AdditionalSystemVars);
+                    famObj.CompilationFlags = famObj.CompilationFlags.Merge(flags);
+                    famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
+
+                    familyDefinitions.Add(famObj);
+                    fam.GenerateLinkerScripts(false);
+                    if (!noPeripheralRegisters)
+                        fam.AttachPeripheralRegisters(ParsePeripheralRegisters(bspBuilder.Directories.OutputDir + "\\" + fam.Definition.FamilySubdirectory + "\\Devices", fam));
+
+                    foreach (var mcu in fam.MCUs)
+                        mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters));
+
+                    foreach (var fw in fam.GenerateFrameworkDefinitions())
+                        frameworks.Add(fw);
+
+                    foreach (var sample in fam.CopySamples())
+                        exampleDirs.Add(sample);
+                }
+
+                BoardSupportPackage bsp = new BoardSupportPackage
+                {
+                    PackageID = "com.sysprogs.arm.silabs.efm32",
+                    PackageDescription = "Silabs EFM32 Devices",
+                    GNUTargetID = "arm-eabi",
+                    GeneratedMakFileName = "efm32.mak",
+                    MCUFamilies = familyDefinitions.ToArray(),
+                    SupportedMCUs = mcuDefinitions.ToArray(),
+                    Frameworks = frameworks.ToArray(),
+                    Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
+                    PackageVersion = "5.8.3"
+                };
+
+                Console.WriteLine("Saving BSP...");
+                bspBuilder.Save(bsp, true);
             }
-
-            BoardSupportPackage bsp = new BoardSupportPackage
-            {
-                PackageID = "com.sysprogs.arm.silabs.efm32",
-                PackageDescription = "Silabs EFM32 Devices",
-                GNUTargetID = "arm-eabi",
-                GeneratedMakFileName = "efm32.mak",
-                MCUFamilies = familyDefinitions.ToArray(),
-                SupportedMCUs = mcuDefinitions.ToArray(),
-                Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "5.8.3"
-            };
-
-            Console.WriteLine("Saving BSP...");
-            bspBuilder.Save(bsp, true);
         }
     }
 }

@@ -683,7 +683,7 @@ namespace BSPGenerationTools
 
         const string IgnoreStartupFileProperty = "com.sysprogs.mcuoptions.ignore_startup_file";
 
-        public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables) => GenerateFamilyObject(defineConfigurationVariables ? CoreSpecificFlags.All : CoreSpecificFlags.None);
+        public MCUFamily GenerateFamilyObject(bool defineConfigurationVariables, bool allowExcludingStartupFiles = false) => GenerateFamilyObject(defineConfigurationVariables ? CoreSpecificFlags.All : CoreSpecificFlags.None, allowExcludingStartupFiles);
 
         public virtual MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate, bool allowExcludingStartupFiles = false)
         {
