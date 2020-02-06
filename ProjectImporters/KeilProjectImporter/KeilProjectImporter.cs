@@ -128,6 +128,21 @@ namespace KeilProjectImporter
                     .Where(p => p != null));
             }
 
+            optionsNode = target.SelectSingleNode("TargetOption/TargetArmAds/LDads");
+            string linkerScript = null;
+            if (optionsNode != null)
+            {
+                string scatterFile = optionsNode.SelectSingleNode("ScatterFile")?.InnerText;
+                if (!string.IsNullOrEmpty(scatterFile) && _Settings.UseKeilToolchain)
+                    linkerScript = TryAdjustPath(baseDir, scatterFile.Trim(), service);
+            }
+
+            ToolchainSubtype[] subtypes;
+            if (_Settings.UseKeilToolchain)
+                subtypes = new ToolchainSubtype[] { ToolchainSubtype.ARMCC, ToolchainSubtype.ARMClang };
+            else
+                subtypes = new ToolchainSubtype[] { ToolchainSubtype.GCC };
+
             return new ImportedExternalProject
             {
                 DeviceNameMask = new Regex(deviceName.Replace("x", ".*") + ".*"),
@@ -143,10 +158,13 @@ namespace KeilProjectImporter
                         Settings = new ImportedExternalProject.InvariantProjectBuildSettings
                         {
                             IncludeDirectories = includeDirs.ToArray(),
-                            PreprocessorMacros = macros.ToArray()
+                            PreprocessorMacros = macros.ToArray(),
+                            LinkerScript = linkerScript,
                         }
                     }
-                }
+                },
+
+                SupportedToolchainSubtypes = subtypes,
             };
         }
     }
