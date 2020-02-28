@@ -243,6 +243,10 @@ namespace stm32_bsp_generator
                 if (!subfamily.StartsWith("startup_"))
                     continue;
                 subfamily = subfamily.Substring(8);
+
+                if (subfamily.EndsWith("_cm4"))
+                    subfamily = subfamily.Substring(0, subfamily.Length - 4);
+
                 yield return new StartupFileGenerator.InterruptVectorTable
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
