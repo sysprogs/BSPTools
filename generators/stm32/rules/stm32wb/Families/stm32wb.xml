@@ -43,7 +43,7 @@
 					<SmartFileConditions>
 						<!-- '-' in front of the name means 'disabled by default' -->
 						<string>-Blood Pressure Service[bls]|.*\\bls\.(h|c)</string>
-						<string>-BlueVoice Opus Service[bvopus_service_stm]|.*\\(bvopus_service_stm|opus_interface_stm)\.(h|c)</string>
+						<string>-BlueVoice Opus Service (ST)[bvopus_service_stm]|.*\\(bvopus_service_stm|opus_interface_stm)\.(h|c)</string>
 						<string>-Cable Replacement Service (ST)[crs_st]|.*\\crs_stm\.(h|c)</string>
 						<string>-Device Information Service[dis]|.*\\dis\.(h|c)</string>
 						<string>-End Device Service (ST)[eds_st]|.*\\eds_stm\.(h|c)</string>
@@ -53,7 +53,7 @@
 						<string>-Immediate Alert Service[ias]|.*\\ias\.(h|c)</string>
 						<string>-Link Loss Service[lls]|.*\\lls\.(h|c)</string>
 						<string>-Mesh[mesh]|.*\\mesh\.(h|c)</string>
-						<string>-MOTENV Service[motenv_stm]|.*\\motenv_stm\.(h|c)</string>
+						<string>-MOTENV Service (ST)[motenv_stm]|.*\\motenv_stm\.(h|c)</string>
 						<string>-OTA Service (ST)[otas_st]|.*\\otas_stm\.(h|c)</string>
 						<string>-Peer-to-Peer Service (ST)[p2p_st]|.*\\p2p_stm\.(h|c)</string>
 						<string>-TX Power Service[tps]|.*\\tps\.(h|c)</string>
@@ -104,8 +104,10 @@
 						<string>-OpenThread Support[openthread]|tl\\tl_thread_hci\.(c|h)</string>
 						<string>SHCI command support[shci]|shci\\.*</string>
 						<string>LHCI command support[lhci]|lhci\\.*</string>
-						<string>SHCI_TL command support[shci_tl]|tl\\shci_tl.*</string>
-						<string>HCI_TL command support[hci_tl]|tl\\hci_tl.*</string>
+						<string>SHCI_TL interface[shci_tl_if]|tl\\shci_tl_if.*</string>
+						<string>-SHCI_TL command support[shci_tl]|tl\\shci_tl\..*</string>
+						<string>HCI_TL interface[hci_tl_if]|tl\\hci_tl_if.*</string>
+						<string>-HCI_TL command support[hci_tl]|tl\\hci_tl\..*</string>
 						<string>-ZigBee support[tl_zigbee]|tl\\tl_zigbee_hci.*</string>
 					</SmartFileConditions>
 				</CopyJob>
