@@ -109,7 +109,7 @@ namespace BSPGenerationTools
                 MCUFamilyBuilder.AddCoreSpecificFlags(flagsToAdd, mcu, Core);
 
             List<SysVarEntry> sysVars = new List<SysVarEntry>();
-            foreach (var classifier in fam.Definition.Subfamilies)
+            foreach (var classifier in fam.Definition.Subfamilies ?? new MCUClassifier[0])
             {
                 string category = classifier.TryMatchMCUName(Name);
                 if (category == null)
@@ -1286,7 +1286,7 @@ namespace BSPGenerationTools
         public MCUBuilder[] RemoveUnsupportedMCUs()
         {
             List<MCUBuilder> removedMCUs = new List<MCUBuilder>();
-            foreach (var classifier in Definition.Subfamilies)
+            foreach (var classifier in Definition.Subfamilies ?? new MCUClassifier[0])
             {
                 if (!classifier.Required)
                     continue;
