@@ -176,7 +176,7 @@ namespace IARProjectFileImporter
                 string icfFile = ExpandRelativePath(prjNode.SelectSingleNode("settings/data/option[name=\"IlinkIcfFile\"]/state")?.InnerText);
                 string overrideIcfFile = prjNode.SelectSingleNode("settings/data/option[name=\"IlinkIcfOverride\"]/state")?.InnerText;
 
-                configuration.IsStaticLibrary = prjNode.SelectSingleNode("settings/data/option[name=\"GOutputBinary\"]/state")?.InnerText == "0";
+                configuration.IsStaticLibrary = prjNode.SelectSingleNode("settings/data/option[name=\"GOutputBinary\"]/state")?.InnerText == "1";
                 
                 string thisDeviceName = prjNode.SelectSingleNode("(settings/data/option[name=\"OGChipSelectEditMenu\"]|settings/data/option[name=\"OGChipSelectMenu\"])/state")?.InnerText?.Split(' ', '\t')[0] ?? "";
                 if (!string.IsNullOrEmpty(thisDeviceName))
