@@ -158,7 +158,14 @@ namespace IARProjectFileImporter
         public ImportedExternalProject ParseEWPFile(string pFileEwp, IProjectImportService service)
         {
             ProjectDirectory = Path.GetDirectoryName(pFileEwp);
-            ImportedExternalProject result = new ImportedExternalProject();
+
+            ToolchainSubtype[] subtypes;
+            if (_Settings.UseIARToolchain)
+                subtypes = new ToolchainSubtype[] { ToolchainSubtype.IAR };
+            else
+                subtypes = new ToolchainSubtype[] { ToolchainSubtype.GCC };
+
+            ImportedExternalProject result = new ImportedExternalProject { SupportedToolchainSubtypes = subtypes };
             XmlDocument doc = new XmlDocument();
             doc.Load(pFileEwp);
             string deviceName = "";
@@ -184,6 +191,11 @@ namespace IARProjectFileImporter
 
                 if (_Settings.UseIARToolchain && overrideIcfFile == "1" && !string.IsNullOrEmpty(icfFile))
                     configuration.Settings.LinkerScript = icfFile.Replace("$TOOLKIT_DIR$", "$(ToolchainDir)/" + toolchain);
+            }
+
+            if (doc.SelectSingleNode("/project/configuration/toolchain/name")?.InnerText == "ARM")
+            {
+                result.GNUTargetID = _Settings.UseIARToolchain ? "arm-none-eabi" : "arm-eabi";
             }
 
             if (allConfigurations.Count == 0)
