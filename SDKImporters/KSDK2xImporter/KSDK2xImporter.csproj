@@ -11,6 +11,7 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>8.0</LangVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -43,6 +44,10 @@
   <ItemGroup>
     <Compile Include="CoreFlagHelper.cs" />
     <Compile Include="..\..\libraries\BSPGenerationTools\SVDParser.cs" />
+    <Compile Include="HelperTypes\ExtraHelpers.cs" />
+    <Compile Include="HelperTypes\ParsedComponent.cs" />
+    <Compile Include="HelperTypes\ParsedDevice.cs" />
+    <Compile Include="HelperTypes\ParsedSourceList.cs" />
     <Compile Include="KSDKManifestParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

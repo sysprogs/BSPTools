@@ -15,8 +15,30 @@ namespace KSDK2xImporter
 {
     class Program
     {
-        class ConsoleWarningSink : IWarningSink
+        class ConsoleWarningSink : IWarningSink, ISDKImportHost
         {
+            public IWarningSink WarningSink => this;
+
+            public bool AskWarn(string text)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void DeleteDirectoryRecursively(string directory)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void ExtractZIPFile(string zipFile, string targetDirectory)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetDefaultDirectoryForImportedSDKs(string target)
+            {
+                throw new NotImplementedException();
+            }
+
             public void LogWarning(string warning)
             {
                 Console.WriteLine("Warning: " + warning);
@@ -32,29 +54,10 @@ namespace KSDK2xImporter
                 Environment.ExitCode = 1;
                 return;
             }
-            if (args[0] == "all")
-            { //Parsing several sdks
-                foreach (var dir in Directory.GetDirectories(args[1]))
-                {
-                    if (Directory.GetFiles(dir, "*manifest*.xml").Count() == 0)
-                        continue;
-                    Console.WriteLine("Parser " + dir);
-                    var bsp1 = KSDKManifestParser.ParseKSDKManifest(dir, new ConsoleWarningSink());
-                    bsp1.Save(dir);
-                }
-                return;
-            }
 
             string sdkDir = args[0];
-            string tempDir = args.Skip(1).FirstOrDefault();
-            var bsp = KSDKManifestParser.ParseKSDKManifest(args[0], new ConsoleWarningSink());
-            bsp.Save(args[0]);
-
-            var bspDir = sdkDir;
-            // Finally verify that everything builds
-            /*VendorSampleDirectory expandedSamples = XmlTools.LoadObject<VendorSampleDirectory>(Path.Combine(bspDir, "VendorSamples.xml"));
-            expandedSamples.Path = Path.GetFullPath(Path.Combine(bspDir, "VendorSamples"));
-            StandaloneBSPValidator.Program.TestVendorSamples( expandedSamples, bspDir, tempDir, 0.1);*/
+            var parser = new KSDKManifestParser();
+            parser.GenerateBSPForSDK(new ImportedSDKLocation { Directory = sdkDir }, new ConsoleWarningSink());
         }
     }
 }
