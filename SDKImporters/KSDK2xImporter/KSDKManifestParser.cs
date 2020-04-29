@@ -55,6 +55,8 @@ namespace KSDK2xImporter
             public readonly string Type;
             public CopiedFile CopiedFiles;
 
+            public readonly string Condition;
+
             public ParsedSource(XmlElement e, ParsedDevice dev)
             {
                 _Element = e;
@@ -62,6 +64,7 @@ namespace KSDK2xImporter
                 _Path = ExpandVariables(e.GetAttribute("path") ?? "");
 
                 Exclude = (e.GetAttribute("exclude") ?? "false") == "true";
+                Condition = e.GetAttribute("condition") ?? "";
                 Type = e.GetAttribute("type") ?? "";
                 var comp = e.GetAttribute("compiler") ?? "";
                 if (comp.Contains("compiler") && !comp.Contains("gcc"))
@@ -260,6 +263,7 @@ namespace KSDK2xImporter
             var dictCopiedFile = new ListDictionary<string, CopiedFile>();
             var dictAddIncludeDir = new ListDictionary<string, string>();
 
+            HashSet<string> usedProjectFolderNames = new HashSet<string>();
 
             foreach (XmlElement devNode in doc.SelectNodes("//devices/device"))
             {
@@ -289,8 +293,8 @@ namespace KSDK2xImporter
 
                 foreach (var componentNode in doc.SelectNodes($"//components/component").OfType<XmlElement>())
                 {
-                    string id = componentNode.GetAttribute("id");
-                    if (id?.Contains(".freertos.") == true)
+                    string id = componentNode.GetAttribute("id") ?? "";
+                    if (id.Contains(".freertos.") || id.Contains(".amazon_freertos-kernel."))
                     {
                         if (componentNode.SelectNodes("source/files[@mask='FreeRTOS.h']").Count > 0)
                         {
@@ -401,7 +405,8 @@ namespace KSDK2xImporter
                             if (file.BSPPath.EndsWith("ucosiii.c") && !componentName.Contains("ucosiii"))
                                 continue;
 
-                            if (file.BSPPath.Contains("freertos"))
+                            if (file.BSPPath.Contains("freertos") || src.Condition.Contains("freertos"))
+                            {
                                 allConditions.Add(new FileCondition
                                 {
                                     FilePath = file.BSPPath,
@@ -410,6 +415,21 @@ namespace KSDK2xImporter
                                         FrameworkID = fwPrefix + freeRTOSComponentID
                                     }
                                 });
+                            }
+                            else if (src.Condition.Contains(".baremetal."))
+                            {
+                                allConditions.Add(new FileCondition
+                                {
+                                    FilePath = file.BSPPath,
+                                    ConditionToInclude = new Condition.Not
+                                    {
+                                        Argument = new Condition.ReferencesFramework
+                                        {
+                                            FrameworkID = fwPrefix + freeRTOSComponentID
+                                        }
+                                    }
+                                });
+                            }
 
                             if (src.TargetPath != "")
                             {
@@ -443,7 +463,7 @@ namespace KSDK2xImporter
                         ID = $"{IDFr}",
                         MCUFilterRegex = FilterRegex,
                         UserFriendlyName = $"{componentName} ({componentType})",
-                        ProjectFolderName = componentName,
+                        ProjectFolderName = $"{componentName}-{componentType}",
                         AdditionalSourceFiles = sourceFiles.Distinct().ToArray(),
                         AdditionalHeaderFiles = headerFiles.Distinct().ToArray(),
                         RequiredFrameworks = dependencyList,
@@ -452,7 +472,23 @@ namespace KSDK2xImporter
                         AdditionalPreprocessorMacros = componentNode.SelectNodes("defines/define").OfType<XmlElement>().Select(el => new ParsedDefine(el).Definition).ToArray(),
                     };
 
-                    if (componentName == "freertos" && componentType == "OS")
+                    if (usedProjectFolderNames.Contains(fw.ProjectFolderName))
+                    {
+                        for (int i = 2; i < 10000; i++)
+                        {
+                            if (!usedProjectFolderNames.Contains(fw.ProjectFolderName + i))
+                            {
+                                fw.ProjectFolderName += i;
+                                break;
+                            }
+                        }
+
+                    }
+                    usedProjectFolderNames.Add(fw.ProjectFolderName);
+
+                    if (componentName.IndexOf("freertos", StringComparison.InvariantCultureIgnoreCase) != -1 &&
+                        sourceFiles.FirstOrDefault(s => Path.GetFileName(s).ToLower() == "tasks.c") != null &&
+                        componentType == "OS")
                     {
                         fw.AdditionalPreprocessorMacros = LoadedBSP.Combine(fw.AdditionalPreprocessorMacros, "USE_RTOS=1;USE_FREERTOS".Split(';'));
                         fw.ConfigurableProperties = new PropertyList
@@ -544,7 +580,7 @@ namespace KSDK2xImporter
                     mcus.Add(new MCU
                     {
                         ID = pkgName,
-                        UserFriendlyName = $"{pkgName} (KSDK 2.x)",
+                        UserFriendlyName = $"{pkgName} (MCUxpresso)",
                         FamilyID = mcuFamily.ID,
                         FLASHSize = FLASHSize,
                         RAMSize = RAMSize,
@@ -637,7 +673,6 @@ namespace KSDK2xImporter
                         Key = "com.sysprogs.bspoptions.arm.floatmode",
                         Value = "-mfloat-abi=" + typFpu
                     });
-
 
                     VendorSample sample = new VendorSample
                     {

@@ -14,6 +14,7 @@ namespace KSDK2xImporter
             M0,
             M0Plus,
             M3,
+            M33,
             M4,
             M7,
         }
@@ -39,6 +40,11 @@ namespace KSDK2xImporter
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m3 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
                     coreName = "M3";
+                    break;
+                case CortexCore.M33:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM33" };
+                    coreName = "M33";
                     break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb";
@@ -109,6 +115,9 @@ namespace KSDK2xImporter
                     break;
                 case "cm3":
                     AddCoreSpecificFlags(defineConfigurationVariables, family, CortexCore.M3);
+                    break;
+                case "cm33":
+                    AddCoreSpecificFlags(defineConfigurationVariables, family, CortexCore.M33);
                     break;
                 case "cm4":
                     AddCoreSpecificFlags(defineConfigurationVariables, family, CortexCore.M4);
