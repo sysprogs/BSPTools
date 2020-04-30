@@ -32,13 +32,13 @@ namespace KSDK2xImporter
                 _Sink = sink;
             }
 
-            List<SpecializedDevice> _SpecializedDevice;
+            List<SpecializedDevice> _SpecializedDevices;
             ParsedDefine[] _GlobalDefines;
             ParsedComponent[] _Components;
 
             void LoadDevicesAndFamilies()   //Sets _ConstructedDevices and _AllFamilies
             {
-                _SpecializedDevice = new List<SpecializedDevice>();
+                _SpecializedDevices = new List<SpecializedDevice>();
 
                 foreach (XmlElement devNode in _Manifest.DocumentElement.SelectNodes("devices/device"))
                 {
@@ -50,13 +50,13 @@ namespace KSDK2xImporter
                     }
 
                     foreach(var core in dev.Cores)
-                        _SpecializedDevice.Add(new SpecializedDevice(dev, core));
+                        _SpecializedDevices.Add(new SpecializedDevice(dev, core));
                 }
             }
 
             void AttachSVDFilesAndLinkerScriptsToDevices()
             {
-                foreach(var sd in _SpecializedDevice)
+                foreach(var sd in _SpecializedDevices)
                 {
                     if (_Components.FirstOrDefault(c => c.Type == ComponentType.SVDFile && c.Filter.MatchesDevice(sd)) is ParsedComponent svdComponent)
                     {
@@ -91,6 +91,66 @@ namespace KSDK2xImporter
                 }
             }
 
+            class PerFileContext
+            {
+                public HashSet<SpecializedDevice> ReferencingDevices = new HashSet<SpecializedDevice>();
+                public readonly FileReference File;
+
+                public PerFileContext(FileReference file)
+                {
+                    File = file;
+                }
+            }
+
+            EmbeddedFramework[] TranslateComponentsToFrameworks(Dictionary<string, FileCondition> fileConditions)
+            {
+                List<EmbeddedFramework> result = new List<EmbeddedFramework>();
+                HashSet<string> usedProjectFolderNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
+                foreach(var component in _Components)
+                {
+                    if (!component.IsSourceComponent || component.SkipUnconditionally)
+                        continue;
+
+                    Dictionary<string, PerFileContext> fileContexts = new Dictionary<string, PerFileContext>();
+                    foreach (var dev in _SpecializedDevices)
+                        foreach (var file in component.LocateAllFiles(dev, _Directory))
+                        {
+                            if (!fileContexts.TryGetValue(file.RelativePath, out var ctx))
+                                fileContexts[file.RelativePath] = ctx = new PerFileContext(file);
+
+                            ctx.ReferencingDevices.Add(dev);
+                        }
+
+                    bool foundDeviceDependentFiles = fileContexts.Values.FirstOrDefault(c => c.ReferencingDevices.Count != _SpecializedDevices.Count) != null;
+
+                    string projectFolderName = component.Name;
+                    if (usedProjectFolderNames.Contains(projectFolderName))
+                    { 
+                        for (int i = 0; i < 10000; i++)
+                            if (!usedProjectFolderNames.Contains(projectFolderName + i))
+                            {
+                                projectFolderName += i;
+                                break;
+                            }
+                    }
+
+                    usedProjectFolderNames.Add(projectFolderName);
+
+                    string frameworkID = FrameworkIDPrefix + component.ID;
+
+                    if (!foundDeviceDependentFiles)
+                    {
+                        var fw = component.BuildFramework();
+                    }
+                    else
+                    {
+                    }
+                }
+
+                return result.ToArray();
+            }
+
             public ParsedSDK ParseKSDKManifest()
             {
                 LoadDevicesAndFamilies();
@@ -102,6 +162,9 @@ namespace KSDK2xImporter
                     .ToArray();
 
                 AttachSVDFilesAndLinkerScriptsToDevices();
+                Dictionary<string, FileCondition> fileConditions = new Dictionary<string, FileCondition>();
+
+                var frameworks = TranslateComponentsToFrameworks(fileConditions);
 
 #if !DEBUG
                 if (families.Count == 0)
@@ -266,7 +329,7 @@ namespace KSDK2xImporter
                 if (version == "")
                     version = "unknown";
 
-                var allFamilies = _SpecializedDevice.Select(d => d.BuildMCUFamily()).ToArray();
+                var allFamilies = _SpecializedDevices.Select(d => d.BuildMCUFamily()).ToArray();
 
                 return new ParsedSDK
                 {
@@ -276,10 +339,10 @@ namespace KSDK2xImporter
                         PackageDescription = "Imported MCUXpresso SDK for " + allFamilies[0].ID,
                         PackageVersion = version,
                         GNUTargetID = "arm-eabi",
-                        //Frameworks = allFrameworks.Where(f => f.OriginalType != "project_template").Select(f => f.Framework).ToArray(),
+                        Frameworks = frameworks,
                         MCUFamilies = allFamilies.ToArray(),
-                        SupportedMCUs = _SpecializedDevice.SelectMany(d => d.Complete(_GlobalDefines)).ToArray(),
-                        //FileConditions = allConditions.ToArray(),
+                        SupportedMCUs = _SpecializedDevices.SelectMany(d => d.Complete(_GlobalDefines)).ToArray(),
+                        FileConditions = fileConditions.Values.ToArray(),
                         VendorSampleCatalogName = "MCUXpresso Samples",
                         BSPImporterID = ID,
                     },

@@ -25,6 +25,7 @@ namespace KSDK2xImporter.HelperTypes
         public readonly string ID, Name, OriginalType;
         public readonly string[] Dependencies;
 
+        public bool IsSourceComponent => Type == ComponentType.CMSIS_SDK || Type == ComponentType.Other;
         public bool SkipUnconditionally => Type == ComponentType.Skipped || Filter.SkipUnconditionally;
 
         public override string ToString() => $"{Name} ({OriginalType})";
