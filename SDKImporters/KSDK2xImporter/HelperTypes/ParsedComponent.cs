@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace KSDK2xImporter.HelperTypes
 {
     enum ComponentType
     {
+        Skipped,
         LinkerScript,
         SVDFile,
         CMSIS_SDK,
@@ -15,33 +17,53 @@ namespace KSDK2xImporter.HelperTypes
 
     class ParsedComponent
     {
-        public ComponentType Type;
+        public readonly ComponentType Type;
+        public readonly ParsedFilter Filter;
 
-        //public EmbeddedFramework Framework;
-        public string OriginalName;
-        public string OriginalType;
+        public readonly ParsedSourceList[] SourceLists;
 
-        public override string ToString()
+        public readonly string ID, Name, OriginalType;
+        public readonly string[] Dependencies;
+
+        public bool SkipUnconditionally => Type == ComponentType.Skipped || Filter.SkipUnconditionally;
+
+        public override string ToString() => $"{Name} ({OriginalType})";
+
+        ComponentType TranslateComponentType(string type) => type switch
         {
-            return base.ToString();
-            //return Framework?.UserFriendlyName;
+            "documentation" => ComponentType.Skipped,
+            "SCR" => ComponentType.Skipped,
+            "EULA" => ComponentType.Skipped,
+            "project_template" => ComponentType.Skipped,
+            "debugger" => ComponentType.SVDFile,
+            "linker" => ComponentType.LinkerScript,
+            "CMSIS" => ComponentType.CMSIS_SDK,
+            _ => ComponentType.Other,
+        };
+
+        public IEnumerable<FileReference> LocateAllFiles(SpecializedDevice device, string rootDir)
+        {
+            return SourceLists.Where(sl => sl.Filter.MatchesDevice(device)).SelectMany(s => s.LocateAllFiles(device, rootDir));
         }
 
-#if !DEBUG
-        public EmbeddedProjectSample ToProjectSample(IEnumerable<string> extraReferences)
+        public ParsedComponent(XmlElement componentNode)
         {
-            return new EmbeddedProjectSample
-            {
-                AdditionalSourcesToCopy = Framework.AdditionalSourceFiles
-                    .Select(f => new AdditionalSourceFile { SourcePath = f, TargetFileName = Path.GetFileName(f) })
-                    .Concat(new[] { new AdditionalSourceFile { SourcePath = "$$SYS:BSP_ROOT$$/" + ParsedSDK.MainFileName, TargetFileName = ParsedSDK.MainFileName } })
-                    .ToArray(),
-                AdditionalIncludeDirectories = Framework.AdditionalIncludeDirs,
-                PreprocessorMacros = Framework.AdditionalPreprocessorMacros,
-                RequiredFrameworks = LoadedBSP.Combine(Framework.RequiredFrameworks, extraReferences?.ToArray()),
-                Name = "Empty project for " + OriginalName,
-            };
+            ID = componentNode.GetAttribute("id");
+            Name = componentNode.GetAttribute("name");
+            OriginalType = componentNode.GetAttribute("type");
+            Type = TranslateComponentType(OriginalType);
+
+            Filter = new ParsedFilter(componentNode);
+
+            SourceLists = componentNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSourceList(e)).ToArray();
+
+            var dependencies = componentNode.GetAttribute("dependencies");
+            if (dependencies != "")
+                Dependencies = dependencies.Split(' ');
+            else
+                Dependencies = componentNode.SelectNodes("dependencies/all/component_dependency/@value").OfType<XmlAttribute>().Select(a => a.Value).ToArray();
+
+
         }
-#endif
     }
 }

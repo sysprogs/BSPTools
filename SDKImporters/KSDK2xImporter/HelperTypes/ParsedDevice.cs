@@ -90,41 +90,27 @@ namespace KSDK2xImporter.HelperTypes
             else
                 return "";
         }
-
-        public MCUFamily BuildMCUFamily(Core core)
-        {
-            var mcuFamily = new MCUFamily
-            {
-                ID = FullName + MakeCoreSuffix(core),
-                UserFriendlyName = DeviceName + MakeCoreSuffix(core)
-            };
-
-            CoreFlagHelper.AddCoreSpecificFlags(CoreFlagHelper.CoreSpecificFlags.FPU, mcuFamily, core.Type);
-            return mcuFamily;
-        }
     }
 
 
-    class ConstructedBSPDevice
+    //Refers to a specific core of a specific device. Corresponds to 1 MCUFamily and multiple MCUs (one per package)
+    class SpecializedDevice 
     {
         public readonly ParsedDevice Device;
         public readonly ParsedDevice.Core Core;
-        public readonly string Package;
-        public readonly string FamilyID;
 
-        public string ConvertedSVDFile;
+        public FileReference ConvertedSVDFile;
+        public FileReference[] DiscoveredLinkerScripts;
 
-        public ConstructedBSPDevice(ParsedDevice device, ParsedDevice.Core core, string package, string familyID)
+        public SpecializedDevice(ParsedDevice device, ParsedDevice.Core core)
         {
             Device = device;
             Core = core;
-            Package = package;
-            FamilyID = familyID;
         }
 
-        public override string ToString() => Package;
+        public override string ToString() => $"{Device} ({Core})";
 
-        public string ExpandVariables(string str)
+        public string ExpandVariables(string str, string packageName = null)
         {
             if (str == null || !str.Contains("$"))
                 return str;
@@ -134,27 +120,70 @@ namespace KSDK2xImporter.HelperTypes
             str = str.Replace("$|compiler|", "GCC");
             str = str.Replace("$|core|", Core.Type);
             str = str.Replace("$|core_name|", Core.Name);
-            str = str.Replace("$|package|", Package);
+
+            if (packageName != null)
+                str = str.Replace("$|package|", packageName);
             return str;
         }
 
-        public MCU Complete(ParsedDefine[] globalDefines)
-        {
-            return new MCU
-            {
-                ID = Package,
-                UserFriendlyName = $"{Package} (MCUxpresso)",
-                FamilyID = FamilyID,
-                FLASHSize = Device.FLASHSize,
-                RAMSize = Device.RAMSize,
-                MemoryMap = new AdvancedMemoryMap { Memories = Device.Memories },
-                CompilationFlags = new ToolFlags
-                {
-                    PreprocessorMacros = globalDefines.Select(d => ExpandVariables(d.Definition)).Where(d => !d.Contains("$")).ToArray()
-                },
+        public string FamilyID => Device.FullName + Device.MakeCoreSuffix(Core);
 
-                MCUDefinitionFile = ConvertedSVDFile
+        public MCUFamily BuildMCUFamily()
+        {
+            var mcuFamily = new MCUFamily
+            {
+                ID = FamilyID,
+                UserFriendlyName = Device.FullName + Device.MakeCoreSuffix(Core),
+                CompilationFlags = new ToolFlags()
             };
+
+            CoreFlagHelper.AddCoreSpecificFlags(CoreFlagHelper.CoreSpecificFlags.FPU, mcuFamily, Core.Type);
+
+            if (DiscoveredLinkerScripts != null)
+            {
+                if (DiscoveredLinkerScripts.Length == 1)
+                    mcuFamily.CompilationFlags.LinkerScript = DiscoveredLinkerScripts[0].GetBSPPath();
+                else
+                {
+                    const string optionID = "com.sysprogs.imported.ksdk2x.linker_script";
+                    mcuFamily.CompilationFlags.LinkerScript = $"$$SYS:BSP_ROOT$$/$${optionID}$$";
+                    if ((mcuFamily.ConfigurableProperties?.PropertyGroups?.Count ?? 0) == 0)
+                        mcuFamily.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+
+                    mcuFamily.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated
+                    {
+                        UniqueID = optionID,
+                        Name = "Linker script",
+                        AllowFreeEntry = false,
+                        SuggestionList = DiscoveredLinkerScripts.Select(p => new PropertyEntry.Enumerated.Suggestion { InternalValue = p.RelativePath, UserFriendlyName = Path.GetFileName(p.RelativePath) }).ToArray()
+                    });
+
+                }
+            }
+
+            return mcuFamily;
+        }
+
+        public IEnumerable<MCU> Complete(ParsedDefine[] globalDefines)
+        {
+            foreach (var pkg in Device.PackageNames)
+            {
+                yield return new MCU
+                {
+                    ID = pkg,
+                    UserFriendlyName = $"{pkg} (MCUxpresso)",
+                    FamilyID = FamilyID,
+                    FLASHSize = Device.FLASHSize,
+                    RAMSize = Device.RAMSize,
+                    MemoryMap = new AdvancedMemoryMap { Memories = Device.Memories },
+                    CompilationFlags = new ToolFlags
+                    {
+                        PreprocessorMacros = globalDefines.Select(d => ExpandVariables(d.Definition)).Where(d => !d.Contains("$")).ToArray()
+                    },
+
+                    MCUDefinitionFile = ConvertedSVDFile.GetBSPPath(),
+                };
+            }
         }
     }
 }

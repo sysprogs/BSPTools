@@ -4,6 +4,7 @@ using KSDK2xImporter.HelperTypes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -31,221 +32,15 @@ namespace KSDK2xImporter
                 _Sink = sink;
             }
 
-#if !DEBUG
-            List<ParsedComponent> LoadComponents()
-            {
-                List<ParsedComponent> result = new List<ParsedComponent>();
-
-                //Map each component to an instance of EmbeddedFramework
-                foreach (var componentNode in _Manifest.SelectNodes($"//components/component").OfType<XmlElement>())
-                {
-                    string componentName = componentNode.GetAttribute("name");
-                    string componentType = componentNode.GetAttribute("type");
-
-                    var filter = new ParsedFilter(componentNode);
-                    if (filter.SkipUnconditionally)
-                        continue;
-
-                    ComponentType type;
-
-                    switch (componentType)
-                    {
-                        case "documentation":
-                        case "SCR":
-                        case "EULA":
-                        case "project_template":
-                            continue;
-                        case "debugger":
-                            type = ComponentType.SVDFile;
-                            break;
-                        case "linker":
-                            type = ComponentType.LinkerScript;
-                            break;
-                        case "CMSIS":
-                            type = ComponentType.CMSIS_SDK;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    List<string> headerFiles = new List<string>();
-                    List<string> includeDirectories = new List<string>();
-                    List<string> sourceFiles = new List<string>();
-                    List<string> libFiles = new List<string>();
-
-                    foreach (ParsedSourceList src in componentNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSourceList(e)))
-                    {
-                        if (src.Filter.SkipUnconditionally)
-                            continue;
-
-                        if (src.Type == "c_include")
-                            includeDirectories.Add(src.BSPPath);
-
-                        foreach (var file in src.AllFiles)
-                        {
-                            if (file.BSPPath.EndsWith("ucosii.c") && !componentName.Contains("ucosii"))
-                                continue;
-                            if (file.BSPPath.EndsWith("ucosiii.c") && !componentName.Contains("ucosiii"))
-                                continue;
-
-                            if (file.BSPPath.Contains("freertos") || src.Condition.Contains("freertos"))
-                            {
-                                allConditions.Add(new FileCondition
-                                {
-                                    FilePath = file.BSPPath,
-                                    ConditionToInclude = new Condition.ReferencesFramework
-                                    {
-                                        FrameworkID = fwPrefix + freeRTOSComponentID
-                                    }
-                                });
-                            }
-                            else if (src.Condition.Contains(".baremetal."))
-                            {
-                                allConditions.Add(new FileCondition
-                                {
-                                    FilePath = file.BSPPath,
-                                    ConditionToInclude = new Condition.Not
-                                    {
-                                        Argument = new Condition.ReferencesFramework
-                                        {
-                                            FrameworkID = fwPrefix + freeRTOSComponentID
-                                        }
-                                    }
-                                });
-                            }
-
-                            if (src.TargetPath != "")
-                            {
-                                dictCopiedFile.Add(IDFr, new CopiedFile { SourcePath = file.BSPPath, TargetPath = src.TargetPath + "/" + Path.GetFileName(file.BSPPath) });
-                                foreach (XmlElement patch in componentNode.SelectNodes("include_paths/include_path"))
-                                    dictAddIncludeDir.Add(IDFr, patch.GetAttribute("path"));
-                            }
-
-                            if (src.Type == "lib")
-                                libFiles.Add(file.BSPPath);
-                            else if (src.Type == "src" || src.Type == "asm_include")
-                                sourceFiles.Add(file.BSPPath);
-                            else if (src.Type == "c_include")
-                                headerFiles.Add(file.BSPPath);
-                        }
-                    }
-
-                    foreach (XmlElement patch in componentNode.SelectNodes("include_paths/include_path"))
-                        includeDirectories.Add(patch.GetAttribute("path"));
-
-                    string[] dependencyList = componentNode.Attributes?.GetNamedItem("dependency")?.Value?.Split(' ')
-                        ?.Select(id => fwPrefix + id)
-                        ?.ToArray() ?? new string[0];
-
-                    var FilterRegex = device.Length > 5 ? $"^{device.Substring(0, 5)}.*" : $"^{device}.*"; //MK02F MK22F
-                    if (device.Length == 0)
-                        FilterRegex = "";
-
-                    EmbeddedFramework fw = new EmbeddedFramework
-                    {
-                        ID = $"{IDFr}",
-                        MCUFilterRegex = FilterRegex,
-                        UserFriendlyName = $"{componentName} ({componentType})",
-                        ProjectFolderName = $"{componentName}-{componentType}",
-                        AdditionalSourceFiles = sourceFiles.Distinct().ToArray(),
-                        AdditionalHeaderFiles = headerFiles.Distinct().ToArray(),
-                        RequiredFrameworks = dependencyList,
-                        AdditionalIncludeDirs = includeDirectories.Distinct().ToArray(),
-                        AdditionalLibraries = libFiles.ToArray(),
-                        AdditionalPreprocessorMacros = componentNode.SelectNodes("defines/define").OfType<XmlElement>().Select(el => new ParsedDefine(el).Definition).ToArray(),
-                    };
-
-                    if (usedProjectFolderNames.Contains(fw.ProjectFolderName))
-                    {
-                        for (int i = 2; i < 10000; i++)
-                        {
-                            if (!usedProjectFolderNames.Contains(fw.ProjectFolderName + i))
-                            {
-                                fw.ProjectFolderName += i;
-                                break;
-                            }
-                        }
-
-                    }
-                    usedProjectFolderNames.Add(fw.ProjectFolderName);
-
-                    if (componentName.IndexOf("freertos", StringComparison.InvariantCultureIgnoreCase) != -1 &&
-                        sourceFiles.FirstOrDefault(s => Path.GetFileName(s).ToLower() == "tasks.c") != null &&
-                        componentType == "OS")
-                    {
-                        fw.AdditionalPreprocessorMacros = LoadedBSP.Combine(fw.AdditionalPreprocessorMacros, "USE_RTOS=1;USE_FREERTOS".Split(';'));
-                        fw.ConfigurableProperties = new PropertyList
-                        {
-                            PropertyGroups = new List<PropertyGroup>()
-                            {
-                                new PropertyGroup
-                                {
-                                    Properties = new List<PropertyEntry>()
-                                    {
-                                        new PropertyEntry.Enumerated
-                                        {
-                                            Name = "FreeRTOS Heap Implementation",
-                                            UniqueID = "com.sysprogs.bspoptions.stm32.freertos.heap",
-                                            DefaultEntryIndex = 3,
-                                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
-                                            {
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "heap_1", UserFriendlyName = "Heap1 - no support for freeing"},
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "heap_2", UserFriendlyName = "Heap2 - no block consolidation"},
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "heap_3", UserFriendlyName = "Heap3 - use newlib malloc()/free()"},
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "heap_4", UserFriendlyName = "Heap4 - contiguous heap area"},
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "heap_5", UserFriendlyName = "Heap5 - scattered heap area"},
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        };
-
-                        foreach (var fn in fw.AdditionalSourceFiles)
-                        {
-                            string name = Path.GetFileName(fn);
-                            if (name.StartsWith("heap_"))
-                            {
-                                allConditions.Add(new FileCondition { FilePath = fn, ConditionToInclude = new Condition.Equals { Expression = "$$com.sysprogs.bspoptions.stm32.freertos.heap$$", ExpectedValue = Path.GetFileNameWithoutExtension(fn) } });
-                            }
-                        }
-                    }
-
-                    if (frameworkDict.ContainsKey(fw.ID))
-                    {
-                        _Sink.LogWarning("Duplicate framework for " + fw.ID);
-                        continue;
-                    }
-
-                    frameworkDict[fw.ID] = fw;
-
-                    if (string.IsNullOrEmpty(fw.ID))
-                    {
-                        _Sink.LogWarning($"Found a framework with empty ID. Skipping...");
-                        continue;
-                    }
-
-                    if (string.IsNullOrEmpty(fw.UserFriendlyName))
-                        fw.UserFriendlyName = fw.ID;
-
-                    allFrameworks.Add(new ParsedComponent { Framework = fw, OriginalType = componentType, OriginalName = componentName });
-                }
-
-
-                return result;
-            }
-#endif
-
-            List<ConstructedBSPDevice> _ConstructedDevices;
-            List<MCUFamily> _AllFamilies;
+            List<SpecializedDevice> _SpecializedDevice;
             ParsedDefine[] _GlobalDefines;
+            ParsedComponent[] _Components;
 
             void LoadDevicesAndFamilies()   //Sets _ConstructedDevices and _AllFamilies
             {
-                _ConstructedDevices = new List<ConstructedBSPDevice>();
-                _AllFamilies = new List<MCUFamily>();
+                _SpecializedDevice = new List<SpecializedDevice>();
 
-                foreach (XmlElement devNode in _Manifest.SelectNodes("//devices/device"))
+                foreach (XmlElement devNode in _Manifest.DocumentElement.SelectNodes("devices/device"))
                 {
                     var dev = new ParsedDevice(devNode);
                     if (string.IsNullOrEmpty(dev.DeviceName) || string.IsNullOrEmpty(dev.FullName) || dev.PackageNames.Length == 0 || dev.Cores.Length == 0)
@@ -254,25 +49,59 @@ namespace KSDK2xImporter
                         continue;
                     }
 
-                    foreach (var core in dev.Cores)
-                    {
-                        var family = dev.BuildMCUFamily(core);
-
-                        _AllFamilies.Add(family);
-                        foreach (var package in dev.PackageNames)
-                            _ConstructedDevices.Add(new ConstructedBSPDevice(dev, core, package, family.ID));
-                    }
+                    foreach(var core in dev.Cores)
+                        _SpecializedDevice.Add(new SpecializedDevice(dev, core));
                 }
             }
 
-            void LoadGlobalDefines() => _GlobalDefines = _Manifest.SelectNodes("defines/define").OfType<XmlElement>().Select(e => new ParsedDefine(e)).ToArray();
+            void AttachSVDFilesAndLinkerScriptsToDevices()
+            {
+                foreach(var sd in _SpecializedDevice)
+                {
+                    if (_Components.FirstOrDefault(c => c.Type == ComponentType.SVDFile && c.Filter.MatchesDevice(sd)) is ParsedComponent svdComponent)
+                    {
+                        var svdFiles = svdComponent.LocateAllFiles(sd, _Directory).ToArray();
+                        Debug.Assert(svdFiles.Length <= 1); //If we get multiple matching SVD files, we might have skipped some conditions.
+
+                        if (svdFiles.Length > 0)
+                        {
+                            try
+                            {
+                                var fullPath = svdFiles[0].GetLocalPath(_Directory);
+
+                                var mcuDef = SVDParser.ParseSVDFile(fullPath, sd.Device.DeviceName);
+                                var convertedFile = new FileReference(Path.ChangeExtension(svdFiles[0].RelativePath, ".vgdbdevice"), svdFiles[0].Type);
+
+                                XmlSerializer ser = new XmlSerializer(typeof(MCUDefinition));
+                                using (var fs = File.Create(Path.ChangeExtension(convertedFile.GetLocalPath(_Directory), ".vgdbdevice.gz")))
+                                using (var gs = new GZipStream(fs, CompressionMode.Compress, true))
+                                    ser.Serialize(gs, new MCUDefinition(mcuDef));
+
+                                sd.ConvertedSVDFile = convertedFile;
+                            }
+                            catch (Exception ex)
+                            {
+                                _Sink.LogWarning($"Failed to process {svdFiles[0]}: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    sd.DiscoveredLinkerScripts = _Components.Where(c => c.Type == ComponentType.LinkerScript && c.Filter.MatchesDevice(sd))
+                        .SelectMany(c => c.LocateAllFiles(sd, _Directory)).ToArray();
+                }
+            }
 
             public ParsedSDK ParseKSDKManifest()
             {
                 LoadDevicesAndFamilies();
-                LoadGlobalDefines();
 
-                //TODO: Attach SVD files and linker scripts
+                _GlobalDefines = _Manifest.DocumentElement.SelectNodes("defines/define").OfType<XmlElement>().Select(e => new ParsedDefine(e)).ToArray();
+                _Components = _Manifest.DocumentElement.SelectNodes($"components/component").OfType<XmlElement>()
+                    .Select(n => new ParsedComponent(n))
+                    .Where(c => !c.SkipUnconditionally)
+                    .ToArray();
+
+                AttachSVDFilesAndLinkerScriptsToDevices();
 
 #if !DEBUG
                 if (families.Count == 0)
@@ -280,7 +109,7 @@ namespace KSDK2xImporter
 
                 List<VendorSample> samples = new List<VendorSample>();
 
-                foreach (XmlElement boardNode in _Manifest.SelectNodes("//boards/board"))
+                foreach (XmlElement boardNode in _Manifest.DocumentElement.SelectNodes("boards/board"))
                 {
                     string boardName = boardNode.GetAttribute("name");
                     string deviceID = boardNode.GetAttribute("package");
@@ -433,20 +262,25 @@ namespace KSDK2xImporter
                 }
 #endif
 
+                var version = _Manifest.DocumentElement.GetAttribute("version");
+                if (version == "")
+                    version = "unknown";
+
+                var allFamilies = _SpecializedDevice.Select(d => d.BuildMCUFamily()).ToArray();
+
                 return new ParsedSDK
                 {
                     BSP = new BoardSupportPackage
                     {
-                        PackageID = "com.sysprogs.imported.ksdk2x." + _AllFamilies[0].ID,
-                        PackageDescription = "Imported MCUXpresso SDK for " + _AllFamilies[0].ID,
-                        PackageVersion = _Manifest.SelectSingleNode("//ksdk/@version")?.Value ?? "unknown",
+                        PackageID = "com.sysprogs.imported.ksdk2x." + allFamilies[0].ID,
+                        PackageDescription = "Imported MCUXpresso SDK for " + allFamilies[0].ID,
+                        PackageVersion = version,
                         GNUTargetID = "arm-eabi",
                         //Frameworks = allFrameworks.Where(f => f.OriginalType != "project_template").Select(f => f.Framework).ToArray(),
-                        MCUFamilies = _AllFamilies.ToArray(),
-                        SupportedMCUs = _ConstructedDevices.Select(d => d.Complete(_GlobalDefines)).ToArray(),
+                        MCUFamilies = allFamilies.ToArray(),
+                        SupportedMCUs = _SpecializedDevice.SelectMany(d => d.Complete(_GlobalDefines)).ToArray(),
                         //FileConditions = allConditions.ToArray(),
                         VendorSampleCatalogName = "MCUXpresso Samples",
-                        //EmbeddedSamples = allFrameworks.Where(f => f.OriginalType == "project_template").Select(f => f.ToProjectSample(alwaysIncludedFrameworks)).ToArray(),
                         BSPImporterID = ID,
                     },
 

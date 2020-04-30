@@ -72,7 +72,7 @@ namespace KSDK2xImporter.HelperTypes
 
     struct ParsedFilter
     {
-        public string[] Devices, Cores;
+        public string[] Devices, Cores; //Null if not used
         public bool SkipUnconditionally;
 
         public bool AppliesToAllCores => Cores == null;
@@ -85,7 +85,7 @@ namespace KSDK2xImporter.HelperTypes
 
         public ParsedFilter(XmlElement el)
         {
-            Devices = el.GetAttribute("devices").Split(' ');
+            Devices = el.GetAttribute("devices").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             if (Devices.Length == 0)
             {
                 string singleDev = el.GetAttribute("device");
@@ -95,7 +95,7 @@ namespace KSDK2xImporter.HelperTypes
                     Devices = null;
             }
 
-            Cores = el.GetAttribute("device_cores").Split(' ');
+            Cores = el.GetAttribute("device_cores").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (Cores.Length == 0)
                 Cores = null;
@@ -107,6 +107,25 @@ namespace KSDK2xImporter.HelperTypes
             string compiler = el.GetAttribute("compiler");
             if (compiler != "" && !compiler.Contains("gcc"))
                 SkipUnconditionally = true;
+        }
+
+        public bool MatchesDevice(SpecializedDevice device)
+        {
+            if (SkipUnconditionally)
+                return false;
+
+            if (Devices != null)
+            {
+                if (!Devices.Contains(device.Device.ID))
+                    return false;
+            }
+            if (Cores != null)
+            {
+                if (!Cores.Contains(device.Core.ID))
+                    return false;
+            }
+
+            return true;
         }
     }
 

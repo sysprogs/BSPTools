@@ -13,11 +13,42 @@ using System.Xml.Serialization;
 
 namespace KSDK2xImporter.HelperTypes
 {
+    public enum SourceType
+    {
+        Unknown,
+        Header,
+        Source,
+        Library
+    }
+
+    public struct FileReference
+    {
+        public readonly string RelativePath;
+        public readonly SourceType Type;
+
+        public FileReference(string relativePath, SourceType type)
+        {
+            RelativePath = relativePath;
+            Type = type;
+        }
+
+        public string GetLocalPath(string baseDirectory) => Path.Combine(baseDirectory, RelativePath);
+
+        public string GetBSPPath()
+        {
+            if (RelativePath == null)
+                return null;
+            return "$$SYS:BSP_ROOT$$/" + RelativePath.Replace('\\', '/');
+        }
+
+        public override string ToString() => RelativePath;
+    }
+
     class ParsedSourceList
     {
         //WARNING: all paths and masks can include variables, such as $|core|
-        public readonly string Path, TargetPath;
-        public readonly string Type;
+        public readonly string SourcePath, TargetPath;
+        public readonly SourceType Type;
 
         public readonly string ExtraCondition;
         public readonly ParsedFilter Filter;
@@ -26,78 +57,67 @@ namespace KSDK2xImporter.HelperTypes
 
         public ParsedSourceList(XmlElement e)
         {
-            Path = e.GetAttribute("path");
+            SourcePath = e.GetAttribute("path");
             TargetPath = e.GetAttribute("target_path");
             ExtraCondition = e.GetAttribute("condition");
             Filter = new ParsedFilter(e);
 
             Masks = e.SelectNodes("files/@mask").OfType<XmlAttribute>().Select(a => a.Value).Where(s => !string.IsNullOrEmpty(s)).ToArray();
-        }
 
-        public struct FileReference
-        {
-            public string RelativePath;
-
-            //public string BSPPath => "$$SYS:BSP_ROOT$$/" + RelativePath.Replace('\\', '/');
-        }
-
-        public IEnumerable<FileReference> LocateAllFiles(ConstructedBSPDevice device, string rootDir)
-        {
-            throw new NotImplementedException();
-        }
-
-#if !DEBUG
-        public IEnumerable<FileReference> AllFiles
-        {
-            get
+            Type = e.GetAttribute("type") switch
             {
-                bool Exc = false;
-                var toolchain = _Element.GetAttribute("toolchain") ?? "";
-                if (toolchain != "" && !toolchain.Contains("armgcc"))
-                    Exc = true;
+                "c_include" => SourceType.Header,
+                "src" => SourceType.Source,
+                "asm_include" => SourceType.Source,
+                "lib" => SourceType.Library,
+                _ => SourceType.Unknown,
+            };
+        }
 
-                foreach (XmlAttribute maskAttr in _Element.SelectNodes("files/@mask"))
+
+        public IEnumerable<FileReference> LocateAllFiles(SpecializedDevice device, string rootDir)
+        {
+            var expandedPath = device.ExpandVariables(SourcePath).Replace('\\', '/');
+
+            foreach (var mask in Masks)
+            {
+                var expandedMask = device.ExpandVariables(mask);
+                if (mask.Contains("|") || expandedPath.Contains("|"))
+                    continue;
+
+                string[] foundFileNames;
+
+                try
                 {
-                    if (Exc)
-                        continue;
-                    string mask = maskAttr.Value;
-                    string[] items;
-                    mask = ExpandVariables(mask);
-                    if (mask.Contains("|") || _Path.Contains("|"))
-                        continue;
+                    if (mask.Contains("*"))
+                        foundFileNames = Directory.GetFiles(Path.Combine(rootDir, expandedPath), mask).Select(f => Path.GetFileName(f)).ToArray();
+                    else
+                        foundFileNames = new string[] { mask };
+                }
+                catch
+                {
+                    foundFileNames = new string[0];
+                }
 
+                foreach (var fn in foundFileNames)
+                {
+                    string fullPath;
                     try
                     {
-                        if (mask.Contains("*"))
-                            items = Directory.GetFiles(Path.Combine(_Device.SDKDirectory, _Path), mask).Select(f => Path.GetFileName(f)).ToArray();
-                        else
-                            items = new string[] { mask };
+                        fullPath = Path.Combine(rootDir, expandedPath + "/" + fn);
+                        if (!File.Exists(fullPath))
+                            continue;
                     }
                     catch
                     {
-                        items = new string[0];
+                        continue;
                     }
 
-                    foreach (var item in items)
-                    {
-                        string fullPath;
-                        try
-                        {
-                            fullPath = Path.Combine(_Device.SDKDirectory, _Path + "/" + item);
-                            if (!File.Exists(fullPath))
-                                continue;
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-
-                        yield return new FileReference { RelativePath = _Path + "/" + item, FullPath = fullPath };
-                    }
+                    yield return new FileReference($"{expandedPath}/{fn}", Type);
                 }
             }
         }
-#endif
+
 
         //public string BSPPath => "$$SYS:BSP_ROOT$$/" + _Path.Replace('\\', '/');
     }
