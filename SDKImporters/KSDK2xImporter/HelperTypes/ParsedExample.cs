@@ -11,7 +11,7 @@ namespace KSDK2xImporter.HelperTypes
     class ParsedExample
     {
         public readonly string[] Dependencies;
-        public readonly string ID, Description;
+        public readonly string ID, Description, RelativePath;
         public readonly string[] Defines;
 
         public override string ToString() => ID;
@@ -28,6 +28,7 @@ namespace KSDK2xImporter.HelperTypes
         {
             ID = exampleNode.GetAttribute("id");
             Description = exampleNode.GetAttribute("brief");
+            RelativePath = exampleNode.GetAttribute("path");
 
             var externalNode = exampleNode.SelectSingleNode("external/files");
             if (externalNode != null)
@@ -85,6 +86,7 @@ namespace KSDK2xImporter.HelperTypes
             {
                 DeviceID = device.MakeMCUID(package),
                 UserFriendlyName = ID,
+                InternalUniqueID = ID,
                 Description = Description,
                 BoardName = boardName,
                 Configuration = new VendorSampleConfiguration
@@ -127,6 +129,8 @@ namespace KSDK2xImporter.HelperTypes
                 }
             }
 
+            sample.CLanguageStandard = MapLanguageStandard(LanguageStandard);
+
             if (matchingPathComponents != null)
                 sample.Path = string.Join("/", matchingPathComponents);
 
@@ -136,6 +140,13 @@ namespace KSDK2xImporter.HelperTypes
 
             return sample;
         }
+
+        static string MapLanguageStandard(string languageStandard) => languageStandard switch
+        {
+            "com.crt.advproject.misc.dialect.gnu99" => "gnu99",
+            "com.crt.advproject.misc.dialect.c99" => "c99",
+            _ => null
+        };
 
         private void UpdateMatchingPathComponents(string bspPath, ref string[] matchingComponents)
         {

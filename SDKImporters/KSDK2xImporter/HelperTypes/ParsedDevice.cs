@@ -113,6 +113,8 @@ namespace KSDK2xImporter.HelperTypes
 
         public readonly string CoreSuffix;
 
+        public string FlagsDerivedFromSamples;
+
         public SpecializedDevice(ParsedDevice device, ParsedDevice.Core core)
         {
             Device = device;
@@ -167,7 +169,16 @@ namespace KSDK2xImporter.HelperTypes
                 CompilationFlags = new ToolFlags()
             };
 
-            CoreFlagHelper.AddCoreSpecificFlags(CoreFlagHelper.CoreSpecificFlags.FPU | CoreFlagHelper.CoreSpecificFlags.DefaultHardFloat, mcuFamily, Core.Type);
+            if (FlagsDerivedFromSamples?.Contains("-mcpu") == true)
+            {
+                mcuFamily.CompilationFlags.COMMONFLAGS = FlagsDerivedFromSamples;
+                if (FlagsDerivedFromSamples.Contains("-mfpu"))
+                    CoreFlagHelper.AddFPModeProperty(CoreFlagHelper.CoreSpecificFlags.DefaultHardFloat, mcuFamily);
+            }
+            else
+            {
+                CoreFlagHelper.AddCoreSpecificFlags(CoreFlagHelper.CoreSpecificFlags.FPU | CoreFlagHelper.CoreSpecificFlags.DefaultHardFloat, mcuFamily, Core.Type);
+            }
 
             if (DiscoveredLinkerScripts != null)
             {
@@ -209,7 +220,7 @@ namespace KSDK2xImporter.HelperTypes
                     FamilyID = FamilyID,
                     FLASHSize = Device.FLASHSize,
                     RAMSize = Device.RAMSize,
-                    MemoryMap = new AdvancedMemoryMap { Memories = Device.Memories },
+                    MemoryMap = (Device.Memories.Length == 0) ? null : new AdvancedMemoryMap { Memories = Device.Memories },
                     CompilationFlags = new ToolFlags
                     {
                         PreprocessorMacros = globalDefines.Select(d => ExpandVariables(d.Definition, pkg)).Where(d => !d.Contains("$")).ToArray()

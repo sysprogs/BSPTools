@@ -10,6 +10,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -230,9 +231,9 @@ namespace KSDK2xImporter
                     throw new Exception("The selected KSDK contains no families");
 
                 Dictionary<string, Dictionary<string, SpecializedDevice>> specializedDevicesByPackage = new Dictionary<string, Dictionary<string, SpecializedDevice>>();
-                foreach(var dev in _SpecializedDevices)
+                foreach (var dev in _SpecializedDevices)
                 {
-                    foreach(var pkg in dev.Device.PackageNames)
+                    foreach (var pkg in dev.Device.PackageNames)
                     {
                         if (!specializedDevicesByPackage.TryGetValue(pkg, out var l2))
                             specializedDevicesByPackage[pkg] = l2 = new Dictionary<string, SpecializedDevice>();
@@ -268,6 +269,9 @@ namespace KSDK2xImporter
                                 continue;
                             }
 
+                            if (device.FlagsDerivedFromSamples == null && !string.IsNullOrEmpty(example.RelativePath))
+                                device.FlagsDerivedFromSamples = CollectCommonFlagsFromSample(example);
+
                             samples.Add(example.BuildVendorSample(_Directory, boardName, device, package, _AllComponentIDs, _ImplicitlyIncludedFrameworks));
                         }
                         catch (Exception ex)
@@ -278,6 +282,44 @@ namespace KSDK2xImporter
                 }
 
                 return samples;
+            }
+
+            Regex rgCPUOrFPU = new Regex("(-mcpu|-mfpu)=([0-9a-zA-Z-_]+)");
+
+            private string CollectCommonFlagsFromSample(ParsedExample example)
+            {
+                try
+                {
+                    Dictionary<string, string> flags = new Dictionary<string, string>();
+                    string dir = Path.Combine(_Directory, example.RelativePath);
+                    var cmakeLists = Path.Combine(dir, "armgcc\\CMakeLists.txt");
+                    HashSet<string> moreFlags = new HashSet<string>();
+                    if (File.Exists(cmakeLists))
+                    {
+                        foreach(var line in File.ReadAllLines(cmakeLists))
+                        {
+                            var match = rgCPUOrFPU.Match(line);
+                            if (match.Success)
+                            {
+                                if (!flags.TryGetValue(match.Groups[1].Value, out var oldValue) || oldValue == match.Groups[2].Value)
+                                    flags[match.Groups[1].Value] = match.Groups[2].Value;
+                                else
+                                    flags[match.Groups[1].Value] = null;
+                            }
+                            if (line.Contains("-mthumb"))
+                                moreFlags.Add("-mthumb");
+                        }
+                    }
+
+                    return string.Join(" ", flags.Where(kv => kv.Value != null).Select(kv => $"{kv.Key}={kv.Value}").Concat(moreFlags).ToArray());
+                }
+                catch (Exception ex)
+                {
+                    _Sink.LogWarning(ex.Message);
+                }
+
+                return "";
+
             }
         }
 

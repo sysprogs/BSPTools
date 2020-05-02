@@ -34,6 +34,8 @@ namespace KSDK2xImporter
 
         internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core)
         {
+            //WARNING: If the proper
+
             string coreName = null, freertosPort = null;
             switch (core)
             {
@@ -97,23 +99,7 @@ namespace KSDK2xImporter
             {
                 if (core == CortexCore.M4 || core == CortexCore.M7 || core == CortexCore.R5F || core == CortexCore.M33_FPU)
                 {
-                    if (family.ConfigurableProperties == null)
-                        family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
-                    family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
-                        new PropertyEntry.Enumerated
-                        {
-                            Name = "Floating point support",
-                            UniqueID = "com.sysprogs.bspoptions.arm.floatmode",
-                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
-                                        {
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=soft", UserFriendlyName = "Software"},
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=hard", UserFriendlyName = "Hardware"},
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Unspecified"},
-                                        },
-                            DefaultEntryIndex = ((flagsToDefine & CoreSpecificFlags.DefaultHardFloat) == CoreSpecificFlags.DefaultHardFloat) ? 1 : 0,
-                        });
-
-                    family.CompilationFlags.COMMONFLAGS += " $$com.sysprogs.bspoptions.arm.floatmode$$";
+                    AddFPModeProperty(flagsToDefine, family);
                 }
             }
 
@@ -126,6 +112,27 @@ namespace KSDK2xImporter
 
             if (vars.Count > 0)
                 family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, vars.ToArray());
+        }
+
+        public static void AddFPModeProperty(CoreSpecificFlags flagsToDefine, MCUFamily family)
+        {
+            if (family.ConfigurableProperties == null)
+                family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+            family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
+                new PropertyEntry.Enumerated
+                {
+                    Name = "Floating point support",
+                    UniqueID = "com.sysprogs.bspoptions.arm.floatmode",
+                    SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
+                                {
+                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=soft", UserFriendlyName = "Software"},
+                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=hard", UserFriendlyName = "Hardware"},
+                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Unspecified"},
+                                },
+                    DefaultEntryIndex = ((flagsToDefine & CoreSpecificFlags.DefaultHardFloat) == CoreSpecificFlags.DefaultHardFloat) ? 1 : 0,
+                });
+
+            family.CompilationFlags.COMMONFLAGS += " $$com.sysprogs.bspoptions.arm.floatmode$$";
         }
 
         public static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, string core)
