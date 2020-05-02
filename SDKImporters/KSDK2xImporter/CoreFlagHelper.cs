@@ -29,6 +29,7 @@ namespace KSDK2xImporter
         {
             None = 0,
             FPU = 0x01,
+            DefaultHardFloat = 0x02,
         }
 
         internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core)
@@ -108,7 +109,8 @@ namespace KSDK2xImporter
                                                 new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=soft", UserFriendlyName = "Software"},
                                                 new PropertyEntry.Enumerated.Suggestion{InternalValue = "-mfloat-abi=hard", UserFriendlyName = "Hardware"},
                                                 new PropertyEntry.Enumerated.Suggestion{InternalValue = "", UserFriendlyName = "Unspecified"},
-                                        }
+                                        },
+                            DefaultEntryIndex = ((flagsToDefine & CoreSpecificFlags.DefaultHardFloat) == CoreSpecificFlags.DefaultHardFloat) ? 1 : 0,
                         });
 
                     family.CompilationFlags.COMMONFLAGS += " $$com.sysprogs.bspoptions.arm.floatmode$$";

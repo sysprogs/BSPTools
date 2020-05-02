@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -83,10 +84,18 @@ namespace KSDK2xImporter.HelperTypes
 
         public override string ToString() => DeviceName;
 
+        static Regex rgCore = new Regex("_core([0-9]+)_");
+
         public string MakeCoreSuffix(Core core)
         {
             if (Cores.Length > 1)
-                return "_" + core.Name.ToUpper();
+            {
+                var m = rgCore.Match(core.ID);
+                if (m.Success)
+                    return "_" + core.ID.Substring(0, m.Groups[1].Index + m.Groups[1].Length).ToUpper();
+                else
+                    return "_" + core.ID.ToUpper();
+            }
             else
                 return "";
         }
@@ -94,7 +103,7 @@ namespace KSDK2xImporter.HelperTypes
 
 
     //Refers to a specific core of a specific device. Corresponds to 1 MCUFamily and multiple MCUs (one per package)
-    class SpecializedDevice 
+    class SpecializedDevice
     {
         public readonly ParsedDevice Device;
         public readonly ParsedDevice.Core Core;
@@ -102,28 +111,49 @@ namespace KSDK2xImporter.HelperTypes
         public FileReference ConvertedSVDFile;
         public FileReference[] DiscoveredLinkerScripts;
 
+        public readonly string CoreSuffix;
+
         public SpecializedDevice(ParsedDevice device, ParsedDevice.Core core)
         {
             Device = device;
             Core = core;
+            CoreSuffix = device.MakeCoreSuffix(core);
         }
 
         public override string ToString() => $"{Device} ({Core})";
+
+        static string ExpandCommonVariables(string str)
+        {
+            if (str == null || !str.Contains("$"))
+                return str;
+
+            str = str.Replace("$|compiler|", "GCC");
+            return str;
+        }
 
         public string ExpandVariables(string str, string packageName = null)
         {
             if (str == null || !str.Contains("$"))
                 return str;
 
+            str = ExpandCommonVariables(str);
+
             str = str.Replace("$|device_full_name|", Device.FullName);
             str = str.Replace("$|device|", Device.DeviceName);
-            str = str.Replace("$|compiler|", "GCC");
             str = str.Replace("$|core|", Core.Type);
             str = str.Replace("$|core_name|", Core.Name);
 
             if (packageName != null)
                 str = str.Replace("$|package|", packageName);
             return str;
+        }
+
+        public static string ExpandVariables(string str, SpecializedDevice optionalDevice, string packageName = null)
+        {
+            if (optionalDevice == null)
+                return ExpandCommonVariables(str);
+            else
+                return optionalDevice.ExpandVariables(str, packageName);
         }
 
         public string FamilyID => Device.FullName + Device.MakeCoreSuffix(Core);
@@ -137,7 +167,7 @@ namespace KSDK2xImporter.HelperTypes
                 CompilationFlags = new ToolFlags()
             };
 
-            CoreFlagHelper.AddCoreSpecificFlags(CoreFlagHelper.CoreSpecificFlags.FPU, mcuFamily, Core.Type);
+            CoreFlagHelper.AddCoreSpecificFlags(CoreFlagHelper.CoreSpecificFlags.FPU | CoreFlagHelper.CoreSpecificFlags.DefaultHardFloat, mcuFamily, Core.Type);
 
             if (DiscoveredLinkerScripts != null)
             {
@@ -164,24 +194,28 @@ namespace KSDK2xImporter.HelperTypes
             return mcuFamily;
         }
 
+        public string MakeMCUID(string packageName) => packageName + CoreSuffix;
+
+        public string[] FinalMCUIDs => Device.PackageNames.Select(MakeMCUID).ToArray();
+
         public IEnumerable<MCU> Complete(ParsedDefine[] globalDefines)
         {
             foreach (var pkg in Device.PackageNames)
             {
                 yield return new MCU
                 {
-                    ID = pkg,
-                    UserFriendlyName = $"{pkg} (MCUxpresso)",
+                    ID = MakeMCUID(pkg),
+                    UserFriendlyName = $"{pkg} {CoreSuffix} (MCUxpresso)",
                     FamilyID = FamilyID,
                     FLASHSize = Device.FLASHSize,
                     RAMSize = Device.RAMSize,
                     MemoryMap = new AdvancedMemoryMap { Memories = Device.Memories },
                     CompilationFlags = new ToolFlags
                     {
-                        PreprocessorMacros = globalDefines.Select(d => ExpandVariables(d.Definition)).Where(d => !d.Contains("$")).ToArray()
+                        PreprocessorMacros = globalDefines.Select(d => ExpandVariables(d.Definition, pkg)).Where(d => !d.Contains("$")).ToArray()
                     },
 
-                    MCUDefinitionFile = ConvertedSVDFile.GetBSPPath(),
+                    MCUDefinitionFile = ConvertedSVDFile.RelativePath?.Replace('\\', '/')
                 };
             }
         }

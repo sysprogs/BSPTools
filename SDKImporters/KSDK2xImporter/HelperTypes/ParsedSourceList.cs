@@ -18,7 +18,8 @@ namespace KSDK2xImporter.HelperTypes
         Unknown,
         Header,
         Source,
-        Library
+        Library,
+        LinkerScript,
     }
 
     public struct FileReference
@@ -42,6 +43,17 @@ namespace KSDK2xImporter.HelperTypes
         }
 
         public override string ToString() => RelativePath;
+
+        public void UpdateIncludeDirectoryList(HashSet<string> includeDirectories)
+        {
+            if (Type == SourceType.Header)
+            {
+                var bspPath = GetBSPPath();
+                int idx = bspPath.LastIndexOf('/');
+                if (idx != -1)
+                    includeDirectories.Add(bspPath.Substring(0, idx));
+            }
+        }
     }
 
     class ParsedSourceList
@@ -70,6 +82,7 @@ namespace KSDK2xImporter.HelperTypes
                 "src" => SourceType.Source,
                 "asm_include" => SourceType.Source,
                 "lib" => SourceType.Library,
+                "linker" => SourceType.LinkerScript,
                 _ => SourceType.Unknown,
             };
         }
@@ -77,11 +90,11 @@ namespace KSDK2xImporter.HelperTypes
 
         public IEnumerable<FileReference> LocateAllFiles(SpecializedDevice device, string rootDir)
         {
-            var expandedPath = device.ExpandVariables(SourcePath).Replace('\\', '/');
+            var expandedPath = SpecializedDevice.ExpandVariables(SourcePath, device).Replace('\\', '/');
 
             foreach (var mask in Masks)
             {
-                var expandedMask = device.ExpandVariables(mask);
+                var expandedMask = SpecializedDevice.ExpandVariables(mask, device);
                 if (mask.Contains("|") || expandedPath.Contains("|"))
                     continue;
 

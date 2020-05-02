@@ -107,6 +107,10 @@ namespace KSDK2xImporter.HelperTypes
             string compiler = el.GetAttribute("compiler");
             if (compiler != "" && !compiler.Contains("gcc"))
                 SkipUnconditionally = true;
+
+            string exclude = el.GetAttribute("exclude");
+            if (exclude.ToLower() == "true")
+                SkipUnconditionally = true;
         }
 
         public bool MatchesDevice(SpecializedDevice device)
@@ -114,11 +118,15 @@ namespace KSDK2xImporter.HelperTypes
             if (SkipUnconditionally)
                 return false;
 
+            if (device == null)
+                return true;
+
             if (Devices != null)
             {
                 if (!Devices.Contains(device.Device.ID))
                     return false;
             }
+
             if (Cores != null)
             {
                 if (!Cores.Contains(device.Core.ID))
