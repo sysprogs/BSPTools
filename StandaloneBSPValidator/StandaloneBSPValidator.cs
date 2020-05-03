@@ -907,17 +907,21 @@ namespace StandaloneBSPValidator
             return LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(bspDir))), toolchain);
         }
 
+        public static void RunJob(string jobFile, string outputDir)
+        {
+            var job = XmlTools.LoadObject<TestJob>(jobFile);
+            job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(jobFile));
+            var bsp = LoadBSP(job.ToolchainPath, job.BSPPath);
+
+            TestBSP(job, bsp, outputDir);
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
                 throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
 
-            var job = XmlTools.LoadObject<TestJob>(args[0]);
-            job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(args[0]));
-            var bsp = LoadBSP(job.ToolchainPath, job.BSPPath);
-
-            TestBSP(job, bsp, args[1]);
-            return;
+            RunJob(args[0], args[1]);
         }
 
         static bool IsNoValid(string pNameFrend, string[] NonValid)

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>Access Point</Name>
+  <Description>A very basic Wi-Fi Access Point example.</Description>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <BinaryFiles />
+   <RequiredFrameworks>
+	<string>com.sysprogs.rs14100.cmsis_driver</string>
+	<string>com.sysprogs.rs14100.driver</string>
+	<string>com.sysprogs.rs14100.rom_driver</string>
+	<string>com.sysprogs.rs14100.systemlevel</string>
+	<string>com.sysprogs.rs14100.wireless.base</string>
+	<string>com.sysprogs.rs14100.wireless.drivers</string>
+	<string>com.sysprogs.rs14100.wireless.network</string>
+  </RequiredFrameworks> 
+  <CLanguageStandard>gnu11</CLanguageStandard>
+  <DefaultConfiguration>
+    <Entries>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.rs14100.wireless.rom</Key>
+        <Value>ROM_WIRELESS</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.rs14100.wireless.wlan</Key>
+        <Value>RSI_WLAN_ENABLE</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.rs14100.wireless.hal</Key>
+        <Value>RSI_SAMPLE_HAL</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.rs14100.wireless.debug_uart</Key>
+        <Value>DEBUG_UART</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.rs14100.wireless.m4</Key>
+        <Value>RSI_M4_INTERFACE</Value>
+      </KeyValue>
+	</Entries>
+  </DefaultConfiguration>
+</EmbeddedProjectSample>

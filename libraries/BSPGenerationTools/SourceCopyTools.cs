@@ -247,6 +247,7 @@ namespace BSPGenerationTools
         public string AdditionalProjectFiles;
         public string VendorSpecificAttributes;
         public CopyJobFlags Flags;
+        public string SmartConditionsPromotedToPreprocessorMacros;
 
         [Flags]
         public enum CopyJobFlags
@@ -339,6 +340,8 @@ namespace BSPGenerationTools
 
             if (SmartFileConditions != null || SmartPreprocessorMacros != null)
             {
+                var preproRegex = string.IsNullOrEmpty(SmartConditionsPromotedToPreprocessorMacros) ? null : new Regex(SmartConditionsPromotedToPreprocessorMacros);
+
                 PropertyGroup grp;
                 if (configurableProperties == null)
                     configurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
@@ -407,6 +410,23 @@ namespace BSPGenerationTools
                             DefaultEntryIndex = def.DefaultItemIndex,
                             DefaultEntryValue = def.DefaultValue,
                         });
+                    }
+
+
+                    if (preproRegex?.IsMatch(def.IDWithoutPrefix) == true)
+                    {
+                        preprocessorMacros.Add("$$" + def.IDWithPrefix + "$$");
+
+                        if (def.Items.Length > 1)
+                        {
+
+                        }
+                        else
+                        {
+                            var value = def.Items[0].Value.ID;
+                            reverseConditions?.AttachPreprocessorMacro(value, reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, value));
+                            reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, "");
+                        }
                     }
                 }
 
@@ -495,6 +515,15 @@ namespace BSPGenerationTools
 
             if (TargetFolder == null)
                 TargetFolder = Path.GetFileName(expandedSourceFolder);
+
+            if (TargetFolder == "$$BSPGEN:RELPATH$$")
+            {
+                string prefix = "$$BSPGEN:INPUT_DIR$$\\";
+                if (!SourceFolder.StartsWith(prefix))
+                    throw new Exception("$$BSPGEN:RELPATH$$ can only be used together with " + prefix);
+                TargetFolder = SourceFolder.Substring(prefix.Length);
+            }
+
             TargetFolder = TargetFolder.Replace('\\', '/');
             if (subdir == null)
                 subdir = "";
@@ -894,9 +923,12 @@ namespace BSPGenerationTools
             MemoryStream ms = new MemoryStream();
             ser.Serialize(ms, Template);
 
+            if (Separator == "\\n")
+                Separator = "\n";
+
             foreach (var item in Range.Split(Separator[0]))
             {
-                var n = item.Trim('\r');
+                var n = item.Trim(' ', '\r', '\n', '\t');
                 if (n == "")
                     continue;
 

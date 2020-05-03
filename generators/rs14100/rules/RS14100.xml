@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>RS14100</Name>
+	<DeviceRegex>.*</DeviceRegex>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\common\chip\inc</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\Examples\Reference_Projects\Wireless_Projects\WiSeStudio\WiSeStudio_startup\startup_RS1xxxx.c</StartupFileDir>
+	<Subfamilies></Subfamilies>
+	<CompilationFlags>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
+		<PreprocessorMacros>
+			<string>REV_1P2_CHIP</string>
+		</PreprocessorMacros>
+		<LDFLAGS>-nostartfiles</LDFLAGS>
+	</CompilationFlags>
+	
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\common</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*iPMU_prog*;*.c;*.h</ProjectInclusionMask>
+			</CopyJob>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\Examples\Reference_Projects\Peripheral_Projects\WiSeStudio\WiSeStudio_startup</SourceFolder>
+				<TargetFolder>DeviceDefinition</TargetFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+			</CopyJob>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\Examples\Reference_Projects\Wireless_Projects\WiSeStudio\wlan\access_point\ldscripts</SourceFolder>
+				<TargetFolder>DeviceDefinition</TargetFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+			</CopyJob>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\Examples</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+			</CopyJob>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\Wireless_Library</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<Patches>
+					<Patch xsi:type="InsertLines">
+						<FilePath>include\rsi_os.h</FilePath>
+						<AfterLine>#define  RSI_OS_H</AfterLine>
+						<InsertedLines>
+							<string>#include "rsi_error.h"</string>
+						</InsertedLines>
+					</Patch>
+				</Patches>
+			</CopyJob>	
+		</CopyJobs>
+	</CoreFramework>
+	
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>CMSIS Drivers</Name>
+			<ID>com.sysprogs.rs14100.cmsis_driver</ID>
+			<ProjectFolderName>CMSIS Driver</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Peripheral_Library\cmsis_driver</SourceFolder>
+					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<SmartFileConditions>
+						<string>-CAN[can]|CAN\..*</string>
+						<string>-EMAC[emac]|EMAC\..*</string>
+						<string>-GSPI[gspi]|GSPI\..*</string>
+						<string>-I2C[i2c]|I2C\..*</string>
+						<string>-MCI[mci]|MCI\..*</string>
+						<string>-PHY_LAN8742A[phy_lan8742A]|PHY_LAN8742A\..*</string>
+						<string>-SAI[sai]|SAI\..*</string>
+						<string>-SPI[spi]|SPI\..*</string>
+						<string>-UDMA[udma]|UDMA\..*</string>
+						<string>USART[usart]|USART\..*</string>
+						<string>-USB[usb]|USB\..*</string>
+						<string>-USBD[usbd]|USBD\..*</string> <!-- As of v1.1.3, the file uses Keil-specific alignment attributes and doesn't work with GCC -->
+					</SmartFileConditions>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>SD Card Support</Name>
+			<ID>com.sysprogs.rs14100.middleware.sdmem</ID>
+			<ProjectFolderName>SD Card</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Peripheral_Library\middleware</SourceFolder>
+					<ProjectInclusionMask>-*\ccs\*;-*\iar\;*.c;*.h</ProjectInclusionMask>
+					<FilesToCopy>-sdmem\example\*;sdmem\*</FilesToCopy>
+					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
+				</CopyJob>	
+			</CopyJobs>		
+		</Framework>
+		<Framework>
+			<Name>Wireless Interface Support</Name>
+			<ID>com.sysprogs.rs14100.wireless.base</ID>
+			<ProjectFolderName>Bluetooth</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Wireless_Library</SourceFolder>
+					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
+					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.rs14100.wireless.|Wireless Interfaces</SmartPropertyGroup>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>common\*;include\*;crypto\*;hal_WiSeMcu\*;puf\*;wlan\*;rom\*</FilesToCopy>
+					<SmartConditionsPromotedToPreprocessorMacros>.*</SmartConditionsPromotedToPreprocessorMacros>
+					<SmartFileConditions>
+						<string>Cryptographic API[crypto]|crypto\\.*=>RSI_CRYPTO_ENABLE</string>
+						<string>HAL[hal]|hal_WiSeMcu\\.*=>RSI_SAMPLE_HAL</string>
+						<string>PUF API[puf]|puf\\.*=>RSI_PUF_ENABLE</string>
+						<string>Wireless ROM API[rom]|rom\\.*=>ROM_WIRELESS</string>
+						<string>WLAN API[wlan]|wlan\\.*=>RSI_WLAN_ENABLE</string>
+					</SmartFileConditions>
+					<SmartPreprocessorMacros>
+						<string>Enable Debug UART Interface[debug_uart]|{0}|DEBUG_UART</string>
+						<string>Enable The M4 Interface[m4]|{0}|RSI_M4_INTERFACE</string>
+					</SmartPreprocessorMacros>
+				</CopyJob>	
+			</CopyJobs>		
+		</Framework>
+		<Framework>
+			<Name>Network Protocol Support</Name>
+			<ID>com.sysprogs.rs14100.wireless.network</ID>
+			<ProjectFolderName>Network Protocols</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.rs14100.wireless.base</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Wireless_Library</SourceFolder>
+					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
+					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.rs14100.wireless.driver.|Wireless Drivers</SmartPropertyGroup>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>nwk\*</FilesToCopy>
+					<SmartFileConditions>
+						<string>Socket API[socket]|socket\\.*</string>
+						<string>-AWS SDK[aws_sdk]|applications\\aws_sdk\\.*</string>
+						<string>HTTP Server[http_server]|applications\\http_server\\.*</string>
+						<string>MDNSD[mdnsd]|applications\\(mdnsd_records\\.*|rsi_mdnsd\.*)</string>
+						<string>MQTT Client[mqtt_client]|applications\\(mqtt_client\\.*|rsi_mqtt_client\..*)</string>
+						<string>DHCP User[dhcp_user]|applications\\rsi_dhcp_user_.*</string>
+						<string>DNS[dns]|applications\\rsi_dns\..*</string>
+						<string>HTTP Client[http_client]|applications\\rsi_http_client\..*</string>
+						<string>Multicast Support[multicast]|applications\\rsi_multicast\..*</string>
+						<string>OTA Firmware Upgrade Support[ota_fw_up]|applications\\rsi_ota_fw_up\..*</string>
+						<string>POP3 Client[pop3_client]|applications\\rsi_pop3_client\..*</string>
+						<string>Raw Data[raw_data]|applications\\rsi_raw_data\..*</string>
+						<string>SMTP Client[smtp_client]|applications\\rsi_smtp_client\..*</string>
+						<string>SNTP Client[sntp_client]|applications\\rsi_sntp_client\..*</string>
+						<string>Web Socket[web_socket]|applications\\rsi_web_socket\..*</string>
+					</SmartFileConditions>
+				</CopyJob>	
+			</CopyJobs>		
+		</Framework>
+		<Framework>
+			<Name>Wireless Drivers</Name>
+			<ID>com.sysprogs.rs14100.wireless.drivers</ID>
+			<ProjectFolderName>Wireless Drivers</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Wireless_Library</SourceFolder>
+					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask> <!-- clock_update.c is #include-d from rsi_pll.c -->
+					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.rs14100.wireless.driver.|Wireless Drivers</SmartPropertyGroup>
+					<AlreadyCopied>true</AlreadyCopied>
+					<FilesToCopy>driver\*</FilesToCopy>
+					<SmartFileConditions>
+						<string>SDIO[sdio]|intf\\sdio\\.*</string>
+						<string>SPI[spi]|intf\\spi\\.*</string>
+						<string>UART[uart]|intf\\uart\\.*</string>
+					</SmartFileConditions>
+				</CopyJob>	
+			</CopyJobs>		
+		</Framework>
+		<Framework>
+			<Name>Bluetooth Support</Name>
+			<ID>com.sysprogs.rs14100.wireless.bluetooth</ID>
+			<RequiredFrameworks>
+				<string>com.sysprogs.rs14100.wireless.base</string>
+			</RequiredFrameworks>
+			<ProjectFolderName>Bluetooth</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Wireless_Library\bt_ble</SourceFolder>
+					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
+					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.rs14100.bluetooth.|Bluetooth</SmartPropertyGroup>
+					<FilesToCopy>*</FilesToCopy>
+					<AlreadyCopied>true</AlreadyCopied>
+					<SmartConditionsPromotedToPreprocessorMacros>.*</SmartConditionsPromotedToPreprocessorMacros>
+					<SmartFileConditions>
+						<string>Bluetooth LE Support[ble]|rsi_ble_.*=>RSI_BLE_ENABLE</string>
+						<string>Classic Bluetooth Support[bt]|rsi_bt_.*=>RSI_BT_ENABLE</string>
+					</SmartFileConditions>
+				</CopyJob>	
+			</CopyJobs>		
+		</Framework>
+	</AdditionalFrameworks>
+	
+	<AdditionalFrameworkTemplates>
+		<FrameworkTemplate>
+			<Range>
+				driver:Peripheral Drivers
+				rom_driver:ROM Drivers
+				systemlevel:System-Level APIs
+			</Range>
+			<ArgumentSeparator>:</ArgumentSeparator>
+			<Separator>\n</Separator>
+			<Template>
+				<Name>$$BSPGEN:FRAMEWORKARG1$$</Name>
+				<ID>com.sysprogs.rs14100.$$BSPGEN:FRAMEWORK$$</ID>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORKARG1$$</ProjectFolderName>
+				<DefaultEnabled>true</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$BSPGEN:INPUT_DIR$$\Peripheral_Library\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<TargetFolder>Peripheral_Library\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<FilesToCopy>*</FilesToCopy>
+						<ProjectInclusionMask>-*clock_update.c;*.c;*.h;*.a</ProjectInclusionMask> <!-- clock_update.c is #include-d from rsi_pll.c -->
+					</CopyJob>			
+				</CopyJobs>
+			</Template>				
+		</FrameworkTemplate>
+	</AdditionalFrameworkTemplates>
+	
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\access_point</SourceFolder>
+			<DestinationFolder>Examples\converted\access_point</DestinationFolder>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/Examples/Wireless_Examples/wlan/access_point/rsi_ap_start.c</string>
+				<string>$$SYS:BSP_ROOT$$/Examples/Wireless_Examples/wlan/access_point/rsi_wlan_config.h</string>
+			</AdditionalSources>
+		</SmartSample>		
+	</SmartSamples>
+	
+</FamilyDefinition>

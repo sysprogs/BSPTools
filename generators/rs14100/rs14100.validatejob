@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainPath>[SysGCC-arm-eabi-9.2.1]</ToolchainPath>
+	<BSPPath>$$JOBDIR$$\Output</BSPPath>
+	<DeviceRegex>.*</DeviceRegex>
+	<Samples>
+		<TestedSample>
+			<Name>Access Point</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+		</TestedSample>
+	</Samples>
+</TestJob>

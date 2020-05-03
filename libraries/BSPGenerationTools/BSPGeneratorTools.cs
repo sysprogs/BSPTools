@@ -177,6 +177,8 @@ namespace BSPGenerationTools
             RulesDir = rulesDir;
             LogDir = logDir;
         }
+
+        public static BSPDirectories MakeDefault(string[] args) => new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules", @"..\..\logs");
     }
 
     public abstract class BSPBuilder : IDisposable
