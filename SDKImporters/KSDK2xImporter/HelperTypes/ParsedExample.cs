@@ -12,7 +12,7 @@ namespace KSDK2xImporter.HelperTypes
     {
         public readonly string[] Dependencies;
         public readonly string ID, Description, RelativePath;
-        public readonly string[] Defines;
+        public readonly string[] Defines, AdvancedLinkerOptions;
 
         public override string ToString() => ID;
 
@@ -37,6 +37,8 @@ namespace KSDK2xImporter.HelperTypes
                 var mask = (externalNode as XmlElement)?.GetAttribute("mask");
                 if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(mask))
                 {
+                    if(string.IsNullOrEmpty(RelativePath))
+                        RelativePath = path;
                     var sampleFiles = Directory.GetFiles(Path.Combine(baseDirectory, path), mask);
                     var fn = sampleFiles?.FirstOrDefault();
                     if (fn != null)
@@ -53,6 +55,9 @@ namespace KSDK2xImporter.HelperTypes
             Dependencies = exampleNode.GetAttribute("dependency").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             Defines = exampleNode.SelectNodes("toolchainSettings/toolchainSetting/option[@id='gnu.c.compiler.option.preprocessor.def.symbols']/value").OfType<XmlElement>().
                         Select(node => node.InnerText.Replace("'\"", "'<").Replace("\"'", ">'")).ToArray();
+
+            AdvancedLinkerOptions = exampleNode.SelectNodes("toolchainSettings/toolchainSetting/option[@id='gnu.c.link.option.other']/value").OfType<XmlElement>().
+                        Select(node => node.InnerText).ToArray();
 
             ExplicitFPUSetting = exampleNode.SelectSingleNode("toolchainSettings/toolchainSetting/option[@id='com.crt.advproject.gcc.fpu']")?.InnerText;
             LanguageStandard = exampleNode.SelectSingleNode("toolchainSettings/toolchainSetting/option[@id='com.crt.advproject.c.misc.dialect']")?.InnerText;
@@ -82,10 +87,23 @@ namespace KSDK2xImporter.HelperTypes
                 properties["com.sysprogs.bspoptions.arm.floatmode"] = ExplicitFPUSetting.Contains("hard") ? "-mfloat-abi=hard" : "-mfloat-abi=soft";
             }
 
+            string sampleName = ID;
+            if (!string.IsNullOrEmpty(RelativePath))
+            {
+                string[] relativePathComponents = RelativePath.Split('/');
+                if (relativePathComponents.Length > 3 && relativePathComponents[0] == "boards")
+                {
+                    string expectedPrefix = relativePathComponents[1] + "_" + relativePathComponents[2] + "_";
+                    if (sampleName.StartsWith(expectedPrefix))
+                        sampleName = sampleName.Substring(expectedPrefix.Length);
+                }
+            }
+
+
             VendorSample sample = new VendorSample
             {
                 DeviceID = device.MakeMCUID(package),
-                UserFriendlyName = ID,
+                UserFriendlyName = sampleName,
                 InternalUniqueID = ID,
                 Description = Description,
                 BoardName = boardName,
@@ -94,7 +112,9 @@ namespace KSDK2xImporter.HelperTypes
                     Frameworks = Dependencies.Where(d => allComponentIDs.Contains(d)).Select(d => ParsedComponent.FrameworkIDPrefix + d).Concat(implicitFrameworks).Distinct().ToArray(),
                     MCUConfiguration = new PropertyDictionary2(properties)
                 },
+
                 VirtualPath = Category,
+                PreprocessorMacros = Defines,
 
                 NoImplicitCopy = true
             };
@@ -130,6 +150,9 @@ namespace KSDK2xImporter.HelperTypes
             }
 
             sample.CLanguageStandard = MapLanguageStandard(LanguageStandard);
+            sample.LDFLAGS = string.Join(" ", AdvancedLinkerOptions.Where(f => f.StartsWith("--defsym")).Select(f => "-Wl," + f).ToArray());
+            if (sample.LDFLAGS == "")
+                sample.LDFLAGS = null;
 
             if (matchingPathComponents != null)
                 sample.Path = string.Join("/", matchingPathComponents);

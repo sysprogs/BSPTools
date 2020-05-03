@@ -894,6 +894,19 @@ namespace StandaloneBSPValidator
             return stats;
         }
 
+        public static LoadedBSP LoadBSP(string toolchainID, string bspDir)
+        {
+            if (toolchainID.StartsWith("["))
+            {
+                toolchainID = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(toolchainID.Trim('[', ']'));
+                if (toolchainID == null)
+                    throw new Exception("Cannot locate toolchain path from registry");
+            }
+
+            var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(toolchainID)));
+            return LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(bspDir))), toolchain);
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -901,15 +914,7 @@ namespace StandaloneBSPValidator
 
             var job = XmlTools.LoadObject<TestJob>(args[0]);
             job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(args[0]));
-            if (job.ToolchainPath.StartsWith("["))
-            {
-                job.ToolchainPath = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(job.ToolchainPath.Trim('[', ']'));
-                if (job.ToolchainPath == null)
-                    throw new Exception("Cannot locate toolchain path from registry");
-            }
-
-            var toolchain = LoadedToolchain.Load(new ToolchainSource.Other(Environment.ExpandEnvironmentVariables(job.ToolchainPath)));
-            var bsp = LoadedBSP.Load(new BSPEngine.BSPSummary(Path.GetFullPath(Environment.ExpandEnvironmentVariables(job.BSPPath))), toolchain);
+            var bsp = LoadBSP(job.ToolchainPath, job.BSPPath);
 
             TestBSP(job, bsp, args[1]);
             return;

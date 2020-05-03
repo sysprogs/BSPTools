@@ -57,8 +57,8 @@ namespace BSPGenerationTools
                     {
                         if (subreg.SizeInBits > 8)
                         {
-                            if (subreg.Name != "CNT")
-                                Console.WriteLine(string.Format("Warning: suspiciously large register with known values: {0} ({1} bits)", subreg.Name, subreg.SizeInBits));
+                            /*if (subreg.Name != "CNT")
+                                Console.WriteLine(string.Format("Warning: suspiciously large register with known values: {0} ({1} bits)", subreg.Name, subreg.SizeInBits));*/
                         }
                         else
                         {

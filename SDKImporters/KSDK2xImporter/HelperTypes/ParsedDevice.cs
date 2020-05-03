@@ -216,7 +216,7 @@ namespace KSDK2xImporter.HelperTypes
                 yield return new MCU
                 {
                     ID = MakeMCUID(pkg),
-                    UserFriendlyName = $"{pkg} {CoreSuffix} (MCUxpresso)",
+                    UserFriendlyName = $"{pkg} {CoreSuffix}".Trim(),
                     FamilyID = FamilyID,
                     FLASHSize = Device.FLASHSize,
                     RAMSize = Device.RAMSize,

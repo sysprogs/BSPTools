@@ -116,10 +116,12 @@ namespace KSDK2xImporter.HelperTypes
                     {
                         if (allComponentIDs.Contains(src.ExtraCondition))
                         {
-                            if (fileConditions.ContainsKey(bspPath))
+                            string frameworkID = FrameworkIDPrefix + src.ExtraCondition;
+
+                            if (fileConditions.TryGetValue(bspPath, out var oldCondition) && (oldCondition.ConditionToInclude as Condition.ReferencesFramework)?.FrameworkID != frameworkID)
                                 sink.LogWarning("Duplicate conditions for " + bspPath);
 
-                            fileConditions[bspPath] = new FileCondition { FilePath = bspPath, ConditionToInclude = new Condition.ReferencesFramework { FrameworkID = FrameworkIDPrefix + src.ExtraCondition } };
+                            fileConditions[bspPath] = new FileCondition { FilePath = bspPath, ConditionToInclude = new Condition.ReferencesFramework { FrameworkID = frameworkID } };
                         }
                         else
                         {
@@ -135,7 +137,7 @@ namespace KSDK2xImporter.HelperTypes
                 MCUFilterRegex = mcuRegex,
                 UserFriendlyName = $"{LongName} ({OriginalType})",
                 ProjectFolderName = projectFolderName,
-                RequiredFrameworks = Dependencies.Where(d=>allComponentIDs.Contains(d)).Select(d => FrameworkIDPrefix + d).ToArray(),
+                RequiredFrameworks = Dependencies.Where(d => allComponentIDs.Contains(d)).Select(d => FrameworkIDPrefix + d).ToArray(),
                 AdditionalSourceFiles = sourceFiles.ToArray(),
                 AdditionalHeaderFiles = headerFiles.ToArray(),
                 AdditionalIncludeDirs = includeDirectories.ToArray(),

@@ -284,7 +284,7 @@ namespace KSDK2xImporter
                 return samples;
             }
 
-            Regex rgCPUOrFPU = new Regex("(-mcpu|-mfpu)=([0-9a-zA-Z-_]+)");
+            Regex rgCPUOrFPU = new Regex("(-mcpu|-mfpu)=([0-9a-zA-Z-_+]+)");    //'+' is needed for -mcpu=cortex-m33+nodsp
 
             private string CollectCommonFlagsFromSample(ParsedExample example)
             {
@@ -337,9 +337,8 @@ namespace KSDK2xImporter
             var bsp = new ParserImpl(location.Directory, doc, host.WarningSink).ParseKSDKManifest();
             bsp.Save(location.Directory);
 
-            return new ImportedExternalSDK { BSPID = bsp.BSP.PackageID };
+            return new ImportedExternalSDK { BSPID = bsp.BSP.PackageID, Directory = location.Directory };
         }
-
 
 
         public const string ID = "com.sysprogs.sdkimporters.nxp.ksdk";
@@ -349,17 +348,6 @@ namespace KSDK2xImporter
         public string CommandName => "Import an MCUXpresso SDK";
         public string Target => "arm-eabi";
         public string OpenFileFilter => "MCUXpresso SDK Manifest Files|*manifest*.xml";
-
-        static int CountMatches(string[] left, string[] right)
-        {
-            int limit = Math.Min(left.Length, right.Length);
-            for (int i = 0; i < limit; i++)
-            {
-                if (left[i] != right[i])
-                    return i;
-            }
-            return limit;
-        }
 
         public bool IsCompatibleWithToolchain(LoadedToolchain toolchain)
         {
