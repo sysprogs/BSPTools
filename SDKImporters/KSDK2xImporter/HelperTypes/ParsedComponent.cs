@@ -61,7 +61,10 @@ namespace KSDK2xImporter.HelperTypes
             OriginalType = componentNode.GetAttribute("type");
             Type = TranslateComponentType(OriginalType);
 
-            LongName = componentNode.GetAttribute("brief");
+            LongName = componentNode.GetAttribute("full_name");
+            if (string.IsNullOrEmpty(LongName))
+                componentNode.GetAttribute("brief");
+
             if (string.IsNullOrEmpty(LongName))
                 LongName = Name;
 
