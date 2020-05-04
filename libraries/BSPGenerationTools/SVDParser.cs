@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2015 Sysprogs OU. All Rights Reserved.
+﻿/* Copyright (c) 2015-2020 Sysprogs OU. All Rights Reserved.
    This software is licensed under the Sysprogs BSP Generator License.
    https://github.com/sysprogs/BSPTools/blob/master/LICENSE
 */
@@ -15,13 +15,16 @@ namespace BSPGenerationTools
 {
     public class SVDParser
     {
+        static Regex rgBitRange = new Regex(@"\[([0-9]+):([0-9]+)\]");
+        static Regex rgSingleBit = new Regex(@"\[?([0-9]+)\]?");
+
         static void ProcessRegister(XmlElement reg, List<HardwareRegister> registers, string prefix, uint baseAddr, uint? defaultRegisterSize)
         {
             string regName = reg.SelectSingleNode("name").InnerText;
             string access = reg.SelectSingleNode("access")?.InnerText;
             uint addrOff = ParseScaledNonNegativeInteger(reg.SelectSingleNode("addressOffset").InnerText);
             var regSizeProp = reg.SelectSingleNode("size");
-            uint regSize = regSizeProp != null ? ParseScaledNonNegativeInteger(regSizeProp.InnerText) : defaultRegisterSize ?? 0;
+            uint regSize = regSizeProp != null ? ParseScaledNonNegativeInteger(regSizeProp.InnerText) : (defaultRegisterSize ?? 32);
 
             int count = 1, step = 0;
             string dim = reg.SelectSingleNode("dim")?.InnerText;
@@ -29,7 +32,7 @@ namespace BSPGenerationTools
             {
                 count = (int)ParseScaledNonNegativeInteger(dim);
                 step = (int)ParseScaledNonNegativeInteger(reg.SelectSingleNode("dimIncrement").InnerText);
-                if (defaultRegisterSize != null && step * 8 != defaultRegisterSize)
+                if (step * 8 != (int)regSize)
                     throw new Exception("Mismatching array step for " + regName);
             }
 
@@ -43,23 +46,53 @@ namespace BSPGenerationTools
                         Name = fld.SelectSingleNode("name").InnerText
                     };
 
-                    var lsbProp = fld.SelectSingleNode("lsb");
-                    subreg.FirstBit = lsbProp != null ? (int)ParseScaledNonNegativeInteger(lsbProp.InnerText) :
-                        (int)ParseScaledNonNegativeInteger(fld.SelectSingleNode("bitOffset").InnerText);
+                    var bitRange = fld.SelectSingleNode("bitRange")?.InnerText;
+                    Match m;
+                    if (bitRange != null)
+                    {
+                        int bit1, bit2;
+                        
+                        if ((m = rgBitRange.Match(bitRange)).Success)
+                        {
+                            bit1 = int.Parse(m.Groups[1].Value);
+                            bit2 = int.Parse(m.Groups[2].Value);
+                        }
+                        else if ((m = rgSingleBit.Match(bitRange)).Success)
+                            bit1 = bit2 = int.Parse(m.Groups[1].Value);
+                        else
+                            continue;
 
-                    subreg.SizeInBits = lsbProp != null ?
-                        (int)ParseScaledNonNegativeInteger(fld.SelectSingleNode("msb").InnerText) - subreg.FirstBit + 1 :
-                        (int)ParseScaledNonNegativeInteger(fld.SelectSingleNode("bitWidth").InnerText);
+                        int lsb = Math.Min(bit1, bit2);
+                        int msb = Math.Max(bit1, bit2);
+
+                        subreg.FirstBit = lsb;
+                        subreg.SizeInBits = msb - lsb + 1;
+                    }
+                    else
+                    {
+                        var lsb = fld.SelectSingleNode("lsb")?.InnerText ?? fld.SelectSingleNode("bitOffset")?.InnerText;
+                        var msb = fld.SelectSingleNode("msb")?.InnerText;
+                        var bitWidth = fld.SelectSingleNode("bitWidth")?.InnerText;
+
+                        if (lsb == null)
+                            continue;
+                        subreg.FirstBit = (int)ParseScaledNonNegativeInteger(lsb);
+
+                        if (msb != null)
+                            subreg.SizeInBits = (int)ParseScaledNonNegativeInteger(msb) - subreg.FirstBit + 1;
+                        else if (bitWidth != null)
+                            subreg.SizeInBits = (int)ParseScaledNonNegativeInteger(bitWidth);
+                        else
+                            continue;
+                    }
+
                     XmlElement vals = (XmlElement)fld.SelectSingleNode("enumeratedValues");
                     var numOfAddedKnownValues = 0;
                     Regex rgTrivialKnownValue = new Regex("^value[0-9]+$");
                     if (vals != null && subreg.SizeInBits > 1 && subreg.SizeInBits != 32)
                     {
                         if (subreg.SizeInBits > 8)
-                        {
-                            /*if (subreg.Name != "CNT")
-                                Console.WriteLine(string.Format("Warning: suspiciously large register with known values: {0} ({1} bits)", subreg.Name, subreg.SizeInBits));*/
-                        }
+                            Console.WriteLine(string.Format("Warning: suspiciously large register with known values: {0} ({1} bits)", subreg.Name, subreg.SizeInBits));
                         else
                         {
                             KnownSubRegisterValue[] values = new KnownSubRegisterValue[1 << subreg.SizeInBits];
@@ -130,9 +163,7 @@ namespace BSPGenerationTools
                 uint? defaultRegisterSize = null;
                 var defaultRegisterSizeProp = periph.SelectSingleNode("size");
                 if (defaultRegisterSizeProp != null)
-                {
                     defaultRegisterSize = ParseScaledNonNegativeInteger(defaultRegisterSizeProp.InnerText);
-                }
 
                 periphNodes[name] = periph;
                 List<HardwareRegister> registers = new List<HardwareRegister>();
@@ -160,12 +191,12 @@ namespace BSPGenerationTools
             return new MCUDefinitionWithPredicate { MCUName = deviceName, RegisterSets = sets.ToArray() };
         }
 
-        public static HardwareRegisterSet ParseSVDFileToHardSet(string file,string pDesPerpherals)
+        public static HardwareRegisterSet ParseSVDFileToHardSet(string file, string pDesPerpherals)
         {
             var doc = new XmlDocument();
             doc.Load(file);
 
-       //     List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
+            //     List<HardwareRegisterSet> sets = new List<HardwareRegisterSet>();
             Dictionary<string, XmlElement> periphNodes = new Dictionary<string, XmlElement>();
 
             foreach (XmlElement periph in doc.DocumentElement.SelectNodes("peripherals/peripheral"))
@@ -240,12 +271,13 @@ namespace BSPGenerationTools
 
         private static readonly char[] DoNotCareBitsChars = new[] { 'x', 'X' };
 
-        private static bool DoNotCareBits(string text) {
+        private static bool DoNotCareBits(string text)
+        {
             return text.StartsWith("#") && text.IndexOfAny(DoNotCareBitsChars) > 0;
         }
 
-        private static uint ParseScaledNonNegativeInteger(string text) {
-
+        private static uint ParseScaledNonNegativeInteger(string text)
+        {
             ulong scale = ComputeScale(text);
             if (scale > 1)
             {
@@ -257,7 +289,8 @@ namespace BSPGenerationTools
             {
                 radix = 16;
                 text = text.Substring(2);
-            } else if (text.StartsWith("#"))
+            }
+            else if (text.StartsWith("#"))
             {
                 radix = 2;
                 text = text.Substring(1);
@@ -275,7 +308,8 @@ namespace BSPGenerationTools
             return checked((uint)(Convert.ToUInt64(text, radix) * scale));
         }
 
-        private static ulong ComputeScale(string text) {
+        private static ulong ComputeScale(string text)
+        {
 
             ulong scale = 1;
             var lastChar = text.Substring(text.Length - 1);
@@ -285,13 +319,16 @@ namespace BSPGenerationTools
                 if (lastChar == "k")
                 {
                     scale = 1024;
-                } else if (lastChar == "m")
+                }
+                else if (lastChar == "m")
                 {
                     scale = 1024 * 1024;
-                } else if (lastChar == "g")
+                }
+                else if (lastChar == "g")
                 {
                     scale = 1024 * 1024 * 1024;
-                } else if (lastChar == "t")
+                }
+                else if (lastChar == "t")
                 {
                     scale = 1024UL * 1024 * 1024 * 1024;
                 }

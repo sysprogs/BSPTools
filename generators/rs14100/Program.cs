@@ -1,5 +1,6 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
+using BSPGenerationTools.Parsing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,15 +59,14 @@ namespace rs14100
         {
             if (args.Length < 1)
                 throw new Exception("Usage: rs14100.exe <rs14100 SW package directory>");
-            string DirSDK = args[0];
             using (var bspBuilder = new RS14100BSPBuilder(BSPDirectories.MakeDefault(args)))
             {
                 bool noPeripheralRegisters = args.Contains("/noperiph");
                 bool noPack = args.Contains("/nopack");
 
                 MCUFamilyBuilder famBuilder = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(Path.Combine(bspBuilder.Directories.RulesDir, "rs14100.xml")));
-
-                string deviceDefinitionFile = @"DeviceDefinitions/RS14100.xml";
+                var definition = SVDParser.ParseSVDFile(Path.Combine(bspBuilder.Directories.InputDir, "RS1xxxx.svd"), "RS14100");
+                definition.MatchPredicate = m => true;
 
                 foreach (var name in new[] { "RS14100" })
                 {
@@ -76,12 +76,12 @@ namespace rs14100
                         FlashSize = 0x000EE000,
                         RAMSize = 0x00030000,
                         Name = name,
-                        //MCUDefinitionFile = deviceDefinitionFile,
                         LinkerScriptPath = $"$$SYS:BSP_ROOT$$/DeviceDefinition/arm-gcc-link.ld",
                         StartupFile = "$$SYS:BSP_ROOT$$/DeviceDefinition/startup_RS1xxxx.c"
                     });
                 }
 
+                famBuilder.AttachPeripheralRegisters(new[] { definition }, "DeviceDefinition");
 
                 List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
                 List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
