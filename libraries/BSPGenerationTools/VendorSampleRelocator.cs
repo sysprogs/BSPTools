@@ -162,7 +162,7 @@ namespace BSPGenerationTools
         {
             List<AutoDetectedFramework> matchedFrameworks = new List<AutoDetectedFramework>();
 
-            foreach (var fw in AutoDetectedFrameworks)
+            foreach (var fw in AutoDetectedFrameworks ?? new AutoDetectedFramework[0])
             {
                 if (sources?.FirstOrDefault(s => fw.FileRegex.IsMatch(s) && !fw.DisableTriggerRegex.IsMatch(s)) != null)
                 {
@@ -175,7 +175,7 @@ namespace BSPGenerationTools
                 }
             }
 
-            foreach (var map in AutoPathMappings)
+            foreach (var map in AutoPathMappings ?? new PathMapping[0])
             {
                 map.MapArray(ref sources);
                 map.MapArray(ref headers);

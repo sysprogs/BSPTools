@@ -1,0 +1,3 @@
+BSP generation completed with 0 warnings and 0 errors
+--------------------------------------
+--------------------------------------
