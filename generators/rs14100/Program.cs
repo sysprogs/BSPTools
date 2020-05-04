@@ -107,7 +107,7 @@ namespace rs14100
 
                 BoardSupportPackage bsp = new BoardSupportPackage
                 {
-                    PackageID = "com.sysprogs.arm.ti.rs14100",
+                    PackageID = "com.sysprogs.arm.rs14100",
                     PackageDescription = "Redpine RS14100 Devices",
                     GNUTargetID = "arm-eabi",
                     GeneratedMakFileName = "rs14100.mak",
@@ -120,9 +120,10 @@ namespace rs14100
                     PackageVersion = "1.1.3"
                 };
 
+                bspBuilder.ValidateBSP(bsp);
                 bspBuilder.Save(bsp, !noPack, false);
 
-                StandaloneBSPValidator.Program.RunJob( "..\\..\\rs14100.validatejob", "f:\\bsptest");
+                //StandaloneBSPValidator.Program.RunJob( "..\\..\\rs14100.validatejob", "f:\\bsptest");
             }
         }
     }

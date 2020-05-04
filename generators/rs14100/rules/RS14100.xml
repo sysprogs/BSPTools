@@ -64,7 +64,7 @@
 		<Framework>
 			<Name>CMSIS Drivers</Name>
 			<ID>com.sysprogs.rs14100.cmsis_driver</ID>
-			<ProjectFolderName>CMSIS Driver</ProjectFolderName>
+			<ProjectFolderName>CMSIS Drivers</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
@@ -72,6 +72,7 @@
 					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.rs14100.drivers.cmsis.|CMSIS Drivers</SmartPropertyGroup>
 					<SmartFileConditions>
 						<string>-CAN[can]|CAN\..*</string>
 						<string>-EMAC[emac]|EMAC\..*</string>
@@ -84,7 +85,7 @@
 						<string>-UDMA[udma]|UDMA\..*</string>
 						<string>USART[usart]|USART\..*</string>
 						<string>-USB[usb]|USB\..*</string>
-						<string>-USBD[usbd]|USBD\..*</string> <!-- As of v1.1.3, the file uses Keil-specific alignment attributes and doesn't work with GCC -->
+						<string>-USB Device[usbd]|USBD\..*</string> <!-- As of v1.1.3, the file uses Keil-specific alignment attributes and doesn't work with GCC -->
 					</SmartFileConditions>
 				</CopyJob>			
 			</CopyJobs>
@@ -110,7 +111,7 @@
 		<Framework>
 			<Name>Wireless Interface Support</Name>
 			<ID>com.sysprogs.rs14100.wireless.base</ID>
-			<ProjectFolderName>Bluetooth</ProjectFolderName>
+			<ProjectFolderName>Wireless Interfaces</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<RequiredFrameworks>
 			</RequiredFrameworks>
@@ -121,7 +122,7 @@
 					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.rs14100.wireless.|Wireless Interfaces</SmartPropertyGroup>
 					<AlreadyCopied>true</AlreadyCopied>
-					<FilesToCopy>common\*;include\*;crypto\*;hal_WiSeMcu\*;puf\*;wlan\*;rom\*</FilesToCopy>
+					<FilesToCopy>common\*;include\*;crypto\*;hal_WiSeMcu\*;puf\*;wlan\*;rom\*;os\free_rtos\rsi_os_wrapper.c</FilesToCopy>
 					<SmartConditionsPromotedToPreprocessorMacros>.*</SmartConditionsPromotedToPreprocessorMacros>
 					<SmartFileConditions>
 						<string>Cryptographic API[crypto]|crypto\\.*=>RSI_CRYPTO_ENABLE</string>
@@ -134,6 +135,13 @@
 						<string>Enable Debug UART Interface[debug_uart]|{0}|DEBUG_UART</string>
 						<string>Enable The M4 Interface[m4]|{0}|RSI_M4_INTERFACE</string>
 					</SmartPreprocessorMacros>
+					<Patches>
+						<!--<Patch xsi:type="ReplaceLine">
+							<FilePath>hal_WiSeMcu\src\rsi_hal_mcu_timer.c</FilePath>
+							<OldLine>void SysTick_Handler(void)</OldLine>
+							<NewLine>void __attribute__((weak)) SysTick_Handler(void)</NewLine>
+						</Patch>-->
+					</Patches>
 				</CopyJob>	
 			</CopyJobs>		
 		</Framework>
@@ -226,6 +234,29 @@
 				</CopyJob>	
 			</CopyJobs>		
 		</Framework>
+		<Framework> <!-- FreeRTOS -->
+			<Name>FreeRTOS</Name>
+			<ID>com.sysprogs.arm.rs14100.freertos</ID>
+			<ProjectFolderName>FreeRTOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Freertos</SourceFolder>
+					<ProjectInclusionMask>-common\*;Source\portable\GCC\ARM_CM4F\*;Source\portable\MemMang\*;-Source\portable\*;*.c;*.h</ProjectInclusionMask>
+					<FilesToCopy>-*FreeRTOSConfig.h*;*</FilesToCopy>
+					<TargetFolder>$$BSPGEN:RELPATH$$</TargetFolder>
+					<PreprocessorMacros>USE_FREERTOS;RSI_WITH_OS</PreprocessorMacros>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.rs14100.freertos.|FreeRTOS</SmartPropertyGroup>
+					<AutoIncludeMask>-*</AutoIncludeMask>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/Freertos/common;$$SYS:BSP_ROOT$$/Freertos/Source/include;$$SYS:BSP_ROOT$$/Freertos/Source/portable/GCC/ARM_CM4F</AdditionalIncludeDirs>
+					<SmartFileConditions>
+						<string>FreeRTOS Heap Implementation|source\\portable\\MemMang\\heap_4.c=>Heap4 - contiguous heap area;source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing;source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation;source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>		
 	</AdditionalFrameworks>
 	
 	<AdditionalFrameworkTemplates>
