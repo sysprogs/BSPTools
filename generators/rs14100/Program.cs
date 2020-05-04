@@ -41,20 +41,6 @@ namespace rs14100
             }
         }
 
-        private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir)
-        {
-            List<MCUDefinitionWithPredicate> RegistersPeriphs = new List<MCUDefinitionWithPredicate>();
-            MCUDefinitionWithPredicate mcu_def = new MCUDefinitionWithPredicate
-            {
-                MCUName = "RS14100",
-                //RegisterSets = PeripheralRegisterGenerator.GeneratePeripheralRegisters(dir),
-                MatchPredicate = null
-            };
-
-            RegistersPeriphs.Add(mcu_def);
-            return RegistersPeriphs;
-        }
-
         static void Main(string[] args)
         {
             if (args.Length < 1)
@@ -65,8 +51,6 @@ namespace rs14100
                 bool noPack = args.Contains("/nopack");
 
                 MCUFamilyBuilder famBuilder = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(Path.Combine(bspBuilder.Directories.RulesDir, "rs14100.xml")));
-                var definition = SVDParser.ParseSVDFile(Path.Combine(bspBuilder.Directories.InputDir, "RS1xxxx.svd"), "RS14100");
-                definition.MatchPredicate = m => true;
 
                 foreach (var name in new[] { "RS14100" })
                 {
@@ -81,7 +65,6 @@ namespace rs14100
                     });
                 }
 
-                famBuilder.AttachPeripheralRegisters(new[] { definition }, "DeviceDefinition");
 
                 List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
                 List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
@@ -90,7 +73,12 @@ namespace rs14100
                 List<string> projectFiles = new List<string>();
 
                 if (!noPeripheralRegisters)
-                    famBuilder.AttachPeripheralRegisters(ParsePeripheralRegisters(famBuilder.Definition.PrimaryHeaderDir));
+                {
+                    var definition = SVDParser.ParseSVDFile(Path.Combine(bspBuilder.Directories.InputDir, "RS1xxxx.svd"), "RS14100");
+                    definition.MatchPredicate = m => true;
+
+                    famBuilder.AttachPeripheralRegisters(new[] { definition }, "DeviceDefinition");
+                }
 
                 foreach (var fw in famBuilder.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
