@@ -1,0 +1,130 @@
+﻿<UserControl x:Class="RedLinkDebugPackage.GUI.RedLinkSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RedLinkDebugPackage.GUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:MaxWidthConverter x:Key="MaxWidthConverter"/>
+        <Thickness x:Key="BasicMargin">5 2</Thickness>
+
+        <Border Style="{DynamicResource VsBrandedUIBorderStyle}" x:Key="deviceScriptSelectionControl" Loaded="HackPopupDataContext">
+            <StackPanel DataContext="{Binding Path=DataContext.Device}">
+                <Button Style="{DynamicResource HyperlinkButton}" Click="Import_Click" HorizontalAlignment="Left" Margin="0 0 5 5" Grid.Column="1">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="16" Height="16" Source="icons/open16.png"/>
+                        <TextBlock Text="Import devices from an MCUXpresso workspace..." VerticalAlignment="Center" Margin="3 0 0 0"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+    </UserControl.Resources>
+    <Grid DataContext="{Binding Path=Controller, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:RedLinkSettingsControl}}}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="MCUXpresso IDE Directory:" VerticalAlignment="Center"/>
+        <Grid Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding MCUXpressoDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <Button Grid.Column="1" Click="Browse_Click" VerticalAlignment="Center">
+                <Image Width="16" Height="16" Source="Icons\open16.png"/>
+            </Button>
+        </Grid>
+
+        <Label Content="Debug interface:" VerticalAlignment="Center" Grid.Row="1"/>
+        <Label Content="Target device:" VerticalAlignment="Center" Grid.Row="2"/>
+        <UserControl Grid.Row="2" Grid.Column="1" Margin="{StaticResource BasicMargin}" >
+            <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding Device}"
+                      x:Name="DeviceComboBox">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Image Width="16" Height="16" Margin="0 0 5 0">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Icon}" Value="Normal">
+                                                <Setter Property="Source" Value="Icons\chip16.png"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Icon}" Value="Auto">
+                                                <Setter Property="Source" Value="Icons\chipcheck16.png"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Icon}" Value="Missing">
+                                                <Setter Property="Source" Value="Icons\redwarn16.png"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <TextBlock Text="{Binding}" Grid.Column="1"/>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </UserControl>
+
+        <Label Content="Debugged core:" VerticalAlignment="Center" Grid.Row="3"/>
+        <ComboBox Grid.Row="3" Grid.Column="1" Margin="{StaticResource BasicMargin}" ItemsSource="{Binding Cores}" SelectedItem="{Binding Core}"/>
+
+
+        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="19" Header="Advanced settings" IsExpanded="False">
+            <Grid MinHeight="80" Margin="20 0 5 5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition MinHeight="80"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Command line:" Margin="2" Grid.Row="2"/>
+                <TextBox Margin="2" Text="{Binding CommandLine, UpdateSourceTrigger=LostFocus}" Grid.Column="0" Grid.Row="3" 
+                         AcceptsReturn="False" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" 
+                         MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:RedLinkSettingsControl}}, Converter={StaticResource MaxWidthConverter}}"/>
+
+                <TextBlock Text="Startup GDB commands:" Margin="2" Grid.Column="1" Grid.Row="2"/>
+                <TextBox Margin="2" Grid.Column="1" Text="{Binding StartupCommands, UpdateSourceTrigger=LostFocus}" Grid.Row="3" AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"/>
+
+            </Grid>
+        </Expander>
+
+    </Grid>
+</UserControl>

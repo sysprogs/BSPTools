@@ -21,6 +21,7 @@ namespace KSDK2xImporter.HelperTypes
         public readonly string ID;
         public readonly string[] PackageNames;
         public readonly string FullName;
+        public readonly string VendorID;
 
         public struct Core
         {
@@ -42,6 +43,7 @@ namespace KSDK2xImporter.HelperTypes
         public readonly Core[] Cores;
         public readonly int FLASHSize, RAMSize;
         public readonly MCUMemory[] Memories;
+        public readonly string[] RedLinkServerOptions;
 
         public ParsedDevice(XmlElement devNode)
         {
@@ -65,6 +67,14 @@ namespace KSDK2xImporter.HelperTypes
             RAMSize *= 1024;
 
             Memories = devNode.SelectNodes("memory/memoryBlock").OfType<XmlElement>().Select(ParseMemoryBlock).Where(b => b != null).ToArray();
+
+            RedLinkServerOptions = devNode.SelectNodes("debug_configurations/debug_configuration/params/params[@name='misc.options']/@value")
+                .OfType<XmlAttribute>()
+                .Select(a => a.Value)
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToArray();
+
+            VendorID = (devNode.SelectSingleNode("metadataSet/metadata[@key='vendor']/@value") as XmlAttribute)?.Value ?? "NXP";
         }
 
         static MCUMemory ParseMemoryBlock(XmlElement el)
@@ -179,6 +189,23 @@ namespace KSDK2xImporter.HelperTypes
             {
                 CoreFlagHelper.AddCoreSpecificFlags(CoreFlagHelper.CoreSpecificFlags.FPU | CoreFlagHelper.CoreSpecificFlags.DefaultHardFloat, mcuFamily, Core.Type);
             }
+
+            int coreIndex = 0;
+            for (int i = 0; i < Device.Cores.Length; i++)
+                if (Device.Cores[i].ID == Core.ID)
+                {
+                    coreIndex = i;
+                    break;
+                }
+
+            mcuFamily.AdditionalSystemVars = new[]
+            {
+                new SysVarEntry{Key = "REDLINK:VENDOR_ID",  Value = Device.VendorID},
+                new SysVarEntry{Key = "REDLINK:DEVICE_ID",  Value = Device.ID},
+                new SysVarEntry{Key = "REDLINK:DEBUG_OPTIONS",  Value = Device.RedLinkServerOptions?.FirstOrDefault() ?? ""},
+                new SysVarEntry{Key = "REDLINK:CORE_INDEX", Value = coreIndex.ToString()},
+                new SysVarEntry{Key = "REDLINK:CORE_COUNT", Value = Device.Cores.Length.ToString()},
+            };
 
             if (DiscoveredLinkerScripts != null)
             {
