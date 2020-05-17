@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace RedLinkDebugPackage.GUI
 {
@@ -26,6 +28,7 @@ namespace RedLinkDebugPackage.GUI
     public partial class RedLinkSettingsControl : UserControl
     {
         public ControllerImpl Controller { get; }
+        DispatcherTimer _ServerCheckTimer;
 
         internal RedLinkSettingsControl(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host, RedLinkDebugController debugController)
         {
@@ -35,6 +38,11 @@ namespace RedLinkDebugPackage.GUI
             InitializeComponent();
 
             host.MakeSearchableComboBox(DeviceComboBox, (i, f) => Controller.FilterItem(i, f), Resources["deviceScriptSelectionControl"]);
+
+            _ServerCheckTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.Normal, (s, e) => Controller.UpdateServerStatus(), Dispatcher) { IsEnabled = false };
+            Loaded += (s, e) => _ServerCheckTimer.IsEnabled = true;
+            Unloaded += (s, e) => _ServerCheckTimer.IsEnabled = false;
+            IsVisibleChanged += (s, e) => _ServerCheckTimer.IsEnabled = IsVisible;
         }
 
         public class ControllerImpl : ICustomDebugMethodConfigurator, INotifyPropertyChanged
@@ -52,8 +60,13 @@ namespace RedLinkDebugPackage.GUI
                 TypeProvider = debugController;
 
                 Control = control;
-            }
 
+                ResetMode = new DerivedSetting(this, "--reset=", RedLinkServerCommandLine.SettingMode.Prefix, "SYSRESETREQ/system", "VECTRESET/core", "Software/soft"); ; ;
+                Interface = new DerivedSetting(this, "--wire", RedLinkServerCommandLine.SettingMode.Separated, "SWD/swd", "JTAG/jtag");
+                Core = new DerivedSetting(this, RedLinkServerCommandLine.CoreIndex, RedLinkServerCommandLine.SettingMode.Prefix) { LoadChoices = GetAvailableCores };
+
+                SetConfiguration(null, default);
+            }
 
             public object Control { get; }
 
@@ -64,6 +77,7 @@ namespace RedLinkDebugPackage.GUI
                     var result = (_Settings ?? new RedLinkDebugSettings()).ShallowClone();
                     result.CommandLineArguments = CommandLine;
                     result.StartupCommands = StartupCommands?.Split('\n')?.Select(c => c.Trim())?.ToArray();
+                    result.AlwaysUseProbeSerialNumber = AlwaysPassSerialNumber;
                     return result;
                 }
             }
@@ -85,6 +99,7 @@ namespace RedLinkDebugPackage.GUI
 
                 CommandLine = settings.CommandLineArguments;
                 ProgramMode = settings.ProgramMode;
+                AlwaysPassSerialNumber = settings.AlwaysUseProbeSerialNumber;
                 StartupCommands = string.Join("\r\n", settings.StartupCommands ?? new string[0]);
                 _Settings = settings;
             }
@@ -102,7 +117,11 @@ namespace RedLinkDebugPackage.GUI
             void OnPropertyChanged(string name)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-                SettingsChanged?.Invoke(this, EventArgs.Empty);
+
+                if (name != nameof(ServerIsRunning))
+                {
+                    SettingsChanged?.Invoke(this, EventArgs.Empty);
+                }
             }
 
             public bool FilterItem(object item, string filter)
@@ -146,30 +165,30 @@ namespace RedLinkDebugPackage.GUI
                     Device = selectedDevice;
 
                     //Update cores
-                    int maxCoreCount = 8;
-                    List<LabelAndValue> coreChoices = new List<LabelAndValue>();
 
-                    if (int.TryParse(_Host.MCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(v => v.Key == "REDLINK:CORE_INDEX")?.Value, out var mcuCore))
-                        coreChoices.Add(new LabelAndValue($"#{mcuCore} (auto)", RedLinkServerCommandLine.DefaultCore));
-
-                    for (int i = 0; i < maxCoreCount; i++)
-                        coreChoices.Add(new LabelAndValue($"#{i}", $"{i}"));
-
-                    var cmdlineCoreText = cmdLine.Core;
-                    var selectedCore = coreChoices.FirstOrDefault(c => c.Value == cmdlineCoreText);
-                    if (selectedCore == null && !string.IsNullOrEmpty(cmdlineCoreText))
-                    {
-                        selectedCore = new LabelAndValue(cmdlineCoreText, cmdlineCoreText);
-                        coreChoices.Add(selectedCore);
-                    }
-
-                    Cores = coreChoices.ToArray();
-                    Core = selectedCore;
+                    ResetMode.Load(cmdLine);
+                    Interface.Load(cmdLine);
+                    Core.Load(cmdLine);
                 }
                 finally
                 {
                     _UpdateInProgress--;
                 }
+            }
+
+            private List<LabelAndValue> GetAvailableCores()
+            {
+                int maxCoreCount;
+                List<LabelAndValue> coreChoices = new List<LabelAndValue>();
+                if (!int.TryParse(_Host.MCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(v => v.Key == "REDLINK:CORE_COUNT")?.Value, out maxCoreCount))
+                    maxCoreCount = 8;
+
+                if (int.TryParse(_Host.MCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(v => v.Key == "REDLINK:CORE_INDEX")?.Value, out var mcuCore))
+                    coreChoices.Add(new LabelAndValue($"#{mcuCore} (auto)", RedLinkServerCommandLine.DefaultCore));
+
+                for (int i = 0; i < maxCoreCount; i++)
+                    coreChoices.Add(new LabelAndValue($"#{i}", $"{i}"));
+                return coreChoices;
             }
 
             void UpdateCommandLine(Action<RedLinkServerCommandLine> updateAction)
@@ -188,6 +207,80 @@ namespace RedLinkDebugPackage.GUI
                 {
                     _UpdateInProgress--;
                 }
+            }
+
+            public class DerivedSetting : INotifyPropertyChanged
+            {
+                string[] _Defaults;
+                private readonly ControllerImpl _Controller;
+                readonly string _Key;
+                private readonly RedLinkServerCommandLine.SettingMode _Mode;
+
+                public Func<List<LabelAndValue>> LoadChoices;
+
+                internal DerivedSetting(ControllerImpl controller, string key, RedLinkServerCommandLine.SettingMode mode, params string[] choices)
+                {
+                    _Key = key;
+                    _Mode = mode;
+                    _Defaults = choices;
+                    _Controller = controller;
+                }
+
+                void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+                static LabelAndValue MakeChoice(string str)
+                {
+                    int idx = str.IndexOf('/');
+                    if (idx == -1)
+                        return new LabelAndValue(str, str);
+                    else
+                        return new LabelAndValue(str.Substring(0, idx), str.Substring(idx + 1));
+                }
+
+                internal void Load(RedLinkServerCommandLine cmdLine)
+                {
+                    List<LabelAndValue> choices = LoadChoices?.Invoke() ?? _Defaults.Select(MakeChoice).ToList();
+
+                    var currentValue = cmdLine.GetOptionValue(_Mode, _Key);
+                    LabelAndValue selection = null;
+                    if (currentValue != null)
+                    {
+                        selection = choices.FirstOrDefault(c => c.Value == currentValue);
+                        if (selection == null)
+                        {
+                            selection = new LabelAndValue(currentValue == "" ? "Unspecified" : currentValue, currentValue);
+                            choices.Add(selection);
+                        }
+                    }
+
+                    Values = choices.ToArray();
+                    Value = selection;
+                }
+
+                LabelAndValue[] _Values;
+                public LabelAndValue[] Values
+                {
+                    get => _Values;
+                    set
+                    {
+                        _Values = value;
+                        OnPropertyChanged(nameof(Values));
+                    }
+                }
+
+                LabelAndValue _Value;
+                public LabelAndValue Value
+                {
+                    get => _Value;
+                    set
+                    {
+                        _Value = value;
+                        OnPropertyChanged(nameof(Value));
+                        _Controller.UpdateCommandLine(c => c.SetOptionValue(_Mode, _Key, value?.Value));
+                    }
+                }
+
+                public event PropertyChangedEventHandler PropertyChanged;
             }
 
             #region Model
@@ -262,27 +355,31 @@ namespace RedLinkDebugPackage.GUI
                 }
             }
 
+            public DerivedSetting Interface { get; }
+            public DerivedSetting ResetMode { get; }
+            public DerivedSetting Core { get; }
 
-            LabelAndValue[] _Cores;
-            public LabelAndValue[] Cores
+            bool _AlwaysPassSerialNumber;
+            public bool AlwaysPassSerialNumber
             {
-                get => _Cores;
+                get => _AlwaysPassSerialNumber;
                 set
                 {
-                    _Cores = value;
-                    OnPropertyChanged(nameof(Cores));
+                    _AlwaysPassSerialNumber = value;
+                    OnPropertyChanged(nameof(AlwaysPassSerialNumber));
                 }
             }
 
-            LabelAndValue _Core;
-            public LabelAndValue Core
+            bool _ServerIsRunning;
+            public bool ServerIsRunning
             {
-                get => _Core;
+                get => _ServerIsRunning;
                 set
                 {
-                    _Core = value;
-                    OnPropertyChanged(nameof(Core));
-                    UpdateCommandLine(c => c.Core = value?.Value ?? RedLinkServerCommandLine.DefaultCore);
+                    if (value == _ServerIsRunning)
+                        return;
+                    _ServerIsRunning = value;
+                    OnPropertyChanged(nameof(ServerIsRunning));
                 }
             }
 
@@ -361,6 +458,40 @@ namespace RedLinkDebugPackage.GUI
                     _Host.GUIService.Report(ex.Message, System.Windows.Forms.MessageBoxIcon.Error);
                 }
             }
+
+            internal void UpdateServerStatus()
+            {
+                try
+                {
+                    ServerIsRunning = (Process.GetProcessesByName("redlinkserv")?.Length ?? 0) > 0;
+                }
+                catch { }
+            }
+
+            internal void ControlServer(bool start)
+            {
+                try
+                {
+                    if (start)
+                    {
+                        var proc = new Process();
+                        proc.StartInfo.FileName = System.IO.Path.Combine(MCUXpressoDirectory, @"binaries\redlinkserv.exe");
+                        proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        proc.Start();
+                    }
+                    else
+                    {
+                        foreach(var proc in Process.GetProcessesByName("redlinkserv"))
+                        {
+                            proc.Kill();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _Host.GUIService.Report(ex.Message, System.Windows.Forms.MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void Browse_Click(object sender, RoutedEventArgs e)
@@ -378,6 +509,22 @@ namespace RedLinkDebugPackage.GUI
         private void Import_Click(object sender, RoutedEventArgs e)
         {
             Controller.ImportDeviceDefinitions();
+        }
+
+        private void Start_Click(object sender, RoutedEventArgs e)
+        {
+            Controller.ControlServer(true);
+        }
+
+        private void Restart_Click(object sender, RoutedEventArgs e)
+        {
+            Controller.ControlServer(false);
+            Controller.ControlServer(true);
+        }
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            Controller.ControlServer(false);
         }
     }
 

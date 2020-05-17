@@ -10,16 +10,20 @@
         <local:MaxWidthConverter x:Key="MaxWidthConverter"/>
         <Thickness x:Key="BasicMargin">5 2</Thickness>
 
-        <Border Style="{DynamicResource VsBrandedUIBorderStyle}" x:Key="deviceScriptSelectionControl" Loaded="HackPopupDataContext">
-            <StackPanel DataContext="{Binding Path=DataContext.Device}">
+        <Border Style="{DynamicResource VsBrandedUIBorderStyle}" x:Key="deviceScriptSelectionControl" Loaded="HackPopupDataContext" Margin="0 5 0 0">
+            <StackPanel DataContext="{Binding Path=DataContext.Device}" Margin="5 4">
                 <Button Style="{DynamicResource HyperlinkButton}" Click="Import_Click" HorizontalAlignment="Left" Margin="0 0 5 5" Grid.Column="1">
                     <StackPanel Orientation="Horizontal">
                         <Image Width="16" Height="16" Source="icons/open16.png"/>
-                        <TextBlock Text="Import devices from an MCUXpresso workspace..." VerticalAlignment="Center" Margin="3 0 0 0"/>
+                        <TextBlock Text="Import debug configuration definitions from an MCUXpresso workspace..." VerticalAlignment="Center" Margin="3 0 0 0"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
         </Border>
+
+        <ItemsPanelTemplate x:Key="HorizontalItemsPanel">
+            <StackPanel Orientation="Horizontal"/>
+        </ItemsPanelTemplate>
 
     </UserControl.Resources>
     <Grid DataContext="{Binding Path=Controller, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:RedLinkSettingsControl}}}">
@@ -28,6 +32,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -62,9 +67,93 @@
             </Button>
         </Grid>
 
-        <Label Content="Debug interface:" VerticalAlignment="Center" Grid.Row="1"/>
-        <Label Content="Target device:" VerticalAlignment="Center" Grid.Row="2"/>
-        <UserControl Grid.Row="2" Grid.Column="1" Margin="{StaticResource BasicMargin}" >
+        <Label Content="RedLink Server state:" VerticalAlignment="Center" Grid.Row="1"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+            <Image Width="16" Height="16" Margin="5 0 0 0">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ServerIsRunning}" Value="true">
+                                <Setter Property="Source" Value="Icons\greenbulb16.png"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ServerIsRunning}" Value="false">
+                                <Setter Property="Source" Value="Icons\whitebulb.png"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
+            <TextBlock VerticalAlignment="Center" Margin="5 0 15 0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ServerIsRunning}" Value="true">
+                                <Setter Property="Text" Value="running"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ServerIsRunning}" Value="false">
+                                <Setter Property="Text" Value="stopped"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <UserControl>
+                <UserControl.Style>
+                    <Style TargetType="UserControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ServerIsRunning}" Value="true">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </UserControl.Style>
+                <Button Style="{DynamicResource HyperlinkButton}" HorizontalAlignment="Left" Click="Start_Click" Margin="5 0">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="16" Height="16" Source="Icons\PlayHS.png"/>
+                        <TextBlock Text="Start"/>
+                    </StackPanel>
+                </Button>
+            </UserControl>
+            <UserControl>
+                <UserControl.Style>
+                    <Style TargetType="UserControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ServerIsRunning}" Value="false">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </UserControl.Style>
+                <Button Style="{DynamicResource HyperlinkButton}" HorizontalAlignment="Left" Click="Stop_Click" Margin="5 0">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="16" Height="16" Source="Icons\StopHS.png"/>
+                        <TextBlock Text="Stop"/>
+                    </StackPanel>
+                </Button>
+            </UserControl>
+            <UserControl>
+                <UserControl.Style>
+                    <Style TargetType="UserControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ServerIsRunning}" Value="false">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </UserControl.Style>
+                <Button Style="{DynamicResource HyperlinkButton}" HorizontalAlignment="Left" Click="Restart_Click" Margin="5 0">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="16" Height="16" Source="Icons\reload.png"/>
+                        <TextBlock Text="Restart"/>
+                    </StackPanel>
+                </Button>
+            </UserControl>
+        </StackPanel>
+
+        <!-- <Label Content="Debug interface:" VerticalAlignment="Center" Grid.Row="1"/> -->
+        <Label Content="Target device:" VerticalAlignment="Center" Grid.Row="3"/>
+        <UserControl Grid.Row="3" Grid.Column="1" Margin="{StaticResource BasicMargin}" >
             <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding Device}"
                       x:Name="DeviceComboBox">
                 <ComboBox.ItemTemplate>
@@ -98,17 +187,28 @@
             </ComboBox>
         </UserControl>
 
-        <Label Content="Debugged core:" VerticalAlignment="Center" Grid.Row="3"/>
-        <ComboBox Grid.Row="3" Grid.Column="1" Margin="{StaticResource BasicMargin}" ItemsSource="{Binding Cores}" SelectedItem="{Binding Core}"/>
+        <Label Content="Debugged core:" VerticalAlignment="Center" Grid.Row="4"/>
+        <ComboBox Grid.Row="4" Grid.Column="1" Margin="{StaticResource BasicMargin}" ItemsSource="{Binding Path=Core.Values}" SelectedItem="{Binding Path=Core.Value}"/>
+
+        <Label Content="Debug interface:" VerticalAlignment="Center" Grid.Row="5"/>
+        <ListBox Grid.Row="5" Grid.Column="1" Margin="{StaticResource BasicMargin}" ItemsSource="{Binding Path=Interface.Values}" SelectedItem="{Binding Path=Interface.Value}"
+                 ItemsPanel="{StaticResource HorizontalItemsPanel}"/>
+
+        <Label Content="Reset mode:" VerticalAlignment="Center" Grid.Row="6"/>
+        <ListBox Grid.Row="6" Grid.Column="1" Margin="{StaticResource BasicMargin}" ItemsSource="{Binding Path=ResetMode.Values}" SelectedItem="{Binding Path=ResetMode.Value}"
+                 ItemsPanel="{StaticResource HorizontalItemsPanel}"/>
+
+        <CheckBox Grid.Row="7" Grid.Column="1" Content="Always pass the debug probe serial number to RedLink tools" Margin="5"
+                  IsChecked="{Binding AlwaysPassSerialNumber}"/>
 
 
-        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="19" Header="Advanced settings" IsExpanded="False">
-            <Grid MinHeight="80" Margin="20 0 5 5">
+        <Expander Grid.ColumnSpan="2" MinHeight="64" Grid.Row="20" Header="Advanced settings" IsExpanded="False">
+            <Grid MinHeight="120" Margin="20 0 5 5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition MinHeight="80"/>
+                    <RowDefinition MinHeight="120"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

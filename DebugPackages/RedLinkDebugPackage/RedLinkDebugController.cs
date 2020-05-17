@@ -21,6 +21,7 @@ namespace RedLinkDebugPackage
         }
 
         public const string DeviceDirectoryVariableReference = "$$REDLINK:DEVICE_DIRECTORY$$";
+        public const string FLASHDriverDirectoryVariableReference = "$$REDLINK:FLASH_DRIVER_DIRECTORY$$";
 
         public IGDBStubInstance StartGDBStub(IDebugStartService startService, DebugStartContext context)
         {
@@ -69,6 +70,35 @@ namespace RedLinkDebugPackage
                 cmdLineText = cmdLineText.Replace(DeviceDirectoryVariableReference, TranslatePath(dev.DefinitionDirectory));
             }
 
+            if (cmdLineText.Contains(FLASHDriverDirectoryVariableReference))
+            {
+                var pluginDir = Path.Combine(ideRoot, "plugins");
+                if (Directory.Exists(pluginDir))
+                {
+                    var toolsPlugin = Directory.GetDirectories(pluginDir, "com.nxp.mcuxpresso.tools.bin.win32*").FirstOrDefault();
+                    if (toolsPlugin != null)
+                        cmdLineText = cmdLineText.Replace(FLASHDriverDirectoryVariableReference, TranslatePath(Path.Combine(toolsPlugin, @"binaries\Flash")));
+                }
+            }
+
+            string explicitSerialNumber = null;
+
+            if (context.ResolvedDevices?.BestMatch.Device.SerialNumber != null)
+            {
+                if ((context.ResolvedDevices.AllCompatibleDevices?.Length ?? 0) > 1 || settings.AlwaysUseProbeSerialNumber)
+                {
+                    explicitSerialNumber = context.ResolvedDevices.BestMatch.Device.SerialNumber;
+                    cmdLineText += " --probeserial " + explicitSerialNumber;
+                }
+            }
+
+            int coreIndex = 0;
+            if (cmdLine.Core is string core)
+            {
+                core = startService.ExpandProjectVariables(core, true, false);
+                int.TryParse(core, out coreIndex);
+            }
+
             var tool = startService.LaunchCommandLineTool(new CommandLineToolLaunchInfo
             {
                 Command = gdbServer,
@@ -76,7 +106,7 @@ namespace RedLinkDebugPackage
                 WorkingDirectory = Path.GetDirectoryName(gdbServer)
             });
 
-            return new RedLinkGDBStub(context, settings, cmdLine, gdbPort, tool, programNow);
+            return new RedLinkGDBStub(context, settings, cmdLine, gdbPort, tool, programNow, explicitSerialNumber, coreIndex);
         }
 
         public static string TranslatePath(string path)

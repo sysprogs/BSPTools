@@ -26,7 +26,7 @@ namespace RedLinkDebugPackage
             return null;
         }
 
-        public void SetSeparatedValue(string key, string value)
+        public string SetSeparatedValue(string key, string value)
         {
             for (int i = 0; i < _SplitCommandLine.Count - 1; i++)
                 if (_SplitCommandLine[i] == key)
@@ -35,7 +35,7 @@ namespace RedLinkDebugPackage
                         _SplitCommandLine.RemoveRange(i, 2);
                     else
                         _SplitCommandLine[i + 1] = value;
-                    return;
+                    return value;
                 }
 
             if (value != null)
@@ -43,6 +43,8 @@ namespace RedLinkDebugPackage
                 _SplitCommandLine.Insert(0, key);
                 _SplitCommandLine.Insert(1, value);
             }
+
+            return value;
         }
 
         public string CommandLine
@@ -56,7 +58,7 @@ namespace RedLinkDebugPackage
             return _SplitCommandLine.FirstOrDefault(s => s.StartsWith(prefix))?.Substring(prefix.Length);
         }
 
-        public void SetPrefixedValue(string prefix, string value)
+        public string SetPrefixedValue(string prefix, string value)
         {
             for (int i = 0; i < _SplitCommandLine.Count; i++)
             {
@@ -66,12 +68,13 @@ namespace RedLinkDebugPackage
                         _SplitCommandLine.RemoveAt(i);
                     else
                         _SplitCommandLine[i] = prefix + value;
-                    return;
+                    return value;
                 }
             }
 
             if (value != null)
                 _SplitCommandLine.Add(prefix + value);
+            return value;
         }
 
         public string Device
@@ -88,8 +91,30 @@ namespace RedLinkDebugPackage
 
         public string Core
         {
-            get => TryGetPrefixedValue("-CoreIndex=");
-            set => SetPrefixedValue("-CoreIndex=", value);
+            get => TryGetPrefixedValue(CoreIndex);
+            set => SetPrefixedValue(CoreIndex, value);
         }
+
+        public const string CoreIndex = "-CoreIndex=";
+
+        public enum SettingMode
+        {
+            Prefix,
+            Separated,
+        }
+
+        public string GetOptionValue(SettingMode mode, string key) => mode switch
+        {
+            SettingMode.Prefix => TryGetPrefixedValue(key),
+            SettingMode.Separated => GetSeparatedValue(key),
+            _ => throw new ArgumentException("Invalid mode")
+        };
+
+        public string SetOptionValue(SettingMode mode, string key, string value) => mode switch
+        {
+            SettingMode.Prefix => SetPrefixedValue(key, value),
+            SettingMode.Separated => SetSeparatedValue(key, value),
+            _ => throw new ArgumentException("Invalid mode")
+        };
     }
 }
