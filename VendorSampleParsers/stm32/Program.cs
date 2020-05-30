@@ -393,6 +393,13 @@ namespace GeneratorSampleStm32
             {
                 base.AdjustVendorSampleProperties(vs);
                 vs.SourceFiles = vs.SourceFiles.Where(s => !IsNonGCCFile(vs, s)).ToArray();
+
+                if (vs.SourceFiles.FirstOrDefault(f => f.Contains("libBle_Mesh_CM4_GCC")) != null)
+                {
+                    var dict = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
+                    dict["com.sysprogs.bspoptions.arm.floatmode"] = "-mfloat-abi=soft";
+                    vs.Configuration.MCUConfiguration = new PropertyDictionary2(dict);
+                }
             }
 
             const bool UseLegacySampleParser = false;

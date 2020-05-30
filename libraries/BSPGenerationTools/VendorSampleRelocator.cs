@@ -245,6 +245,7 @@ namespace BSPGenerationTools
                 var deps = s.AllDependencies
                             .Concat(new[] { s.LinkerScript })
                             .Concat(s.SourceFiles)
+                            .Concat(s.HeaderFiles ?? new string[0])
                             .Distinct()
                             .Select(d => new ParsedDependency { OriginalFile = d, MappedFile = mapper.MapPath(d) })
                             .Where(d => d.MappedFile != null)
