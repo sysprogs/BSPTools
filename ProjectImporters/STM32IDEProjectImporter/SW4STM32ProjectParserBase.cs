@@ -195,6 +195,22 @@ namespace STM32IDEProjectImporter
             }
         }
 
+        class SourceEntry
+        {
+            public string Name;
+
+            public string RelativePath;
+
+            public bool IsValid => !string.IsNullOrEmpty(Name);
+            public SourceEntry(XmlElement e)
+            {
+                Name = e.GetAttribute("name");
+                var flags = e.GetAttribute("flags");
+                if (!flags.Contains("VALUE_WORKSPACE_PATH") || e.GetAttribute("kind") != "sourcePath")
+                    throw new Exception("Don't know how to handle a source entry");
+            }
+        }
+
         public enum ProjectSubtype
         {
             Auto,
@@ -299,11 +315,64 @@ namespace STM32IDEProjectImporter
             result.LDFLAGS = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.otherflags", true);
 
             result.Libraries = new List<string>();
-            var sourceFilters = cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>().Select(e => new SourceFilterEntry(e)).Where(e => e.IsValid).ToArray();
 
-            result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters)
+            List<SourceFilterEntry> sourceFilters = new List<SourceFilterEntry>();
+            Dictionary<string, SourceEntry> sourceReferences = new Dictionary<string, SourceEntry>();
+            foreach (var node in cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>())
+            {
+                if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
+                {
+                    var entry = new SourceFilterEntry(node);
+                    if (entry.IsValid)
+                        sourceFilters.Add(entry);
+                }
+                else if (!string.IsNullOrEmpty(node.GetAttribute("name")))
+                {
+                    var entry = new SourceEntry(node);
+                    if (entry.IsValid)
+                        sourceReferences[entry.Name] = entry;
+                }
+            }
+
+            var sources = ParseSourceList(project, cprojectDir, sourceFilters.ToArray(), sourceReferences)
                 .Where(f => !f.FullPath.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
 
+            result.SourceFiles = ExpandSourcePaths(sources);
+
+            return result;
+        }
+
+        private List<ParsedSourceFile> ExpandSourcePaths(List<ParsedSourceFile> sources)
+        {
+            List<ParsedSourceFile> result = new List<ParsedSourceFile>();
+            foreach(var src in sources)
+            {
+                try
+                {
+                    if (File.Exists(src.FullPath))
+                        result.Add(src);
+                    else if (Directory.Exists(src.FullPath))
+                    {
+                        var fullPath = Path.GetFullPath(src.FullPath);
+                        foreach(var file in Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories))
+                        {
+                            var ext = Path.GetExtension(file).ToLower();
+                            if (ext == ".c" || ext == ".cpp" || ext == ".cc" || ext == ".s")
+                            {
+                                string relPath = file.Substring(fullPath.Length).TrimStart('\\');
+                                result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath.Replace('\\', '/') });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Nothing exists at this path
+                    }
+                }
+                catch
+                {
+                }
+            }
             return result;
         }
 
@@ -478,7 +547,7 @@ namespace STM32IDEProjectImporter
             public override string ToString() => FullPath;
         }
 
-        private List<ParsedSourceFile> ParseSourceList(XmlDocument project, string projectDir, SourceFilterEntry[] sourceFilters)
+        private List<ParsedSourceFile> ParseSourceList(XmlDocument project, string projectDir, SourceFilterEntry[] sourceFilters, Dictionary<string, SourceEntry> sourceReferences = null)
         {
             Regex rgStartup = new Regex("startup_stm.*\\.s");
             List<ParsedSourceFile> sources = new List<ParsedSourceFile>();
@@ -503,9 +572,25 @@ namespace STM32IDEProjectImporter
                         continue;
                 }
 
-                string virtualPath = node.SelectSingleNode("name")?.InnerText ?? Path.GetFileName(fullPath);
+                var name = node.SelectSingleNode("name")?.InnerText;
+                if (name != null && sourceReferences != null && sourceReferences.TryGetValue(name, out var sr))
+                    sr.RelativePath = path;
 
+                string virtualPath = name ?? Path.GetFileName(fullPath);
                 sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = virtualPath });
+            }
+
+            foreach (var sr in sourceReferences.Values)
+            {
+                if (sr.RelativePath == null)
+                {
+                    //There was no entry in linkedResources corresponding to this source specifier
+                    string fullPath = TranslatePath(projectDir, sr.Name, PathTranslationFlags.None);
+                    if (fullPath == null)
+                        continue;
+
+                    sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name });
+                }
             }
 
             return sources;
