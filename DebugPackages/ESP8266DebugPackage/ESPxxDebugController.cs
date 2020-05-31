@@ -28,7 +28,7 @@ namespace ESP8266DebugPackage
             ESPxxOpenOCDSettingsEditor editor = new ESPxxOpenOCDSettingsEditor(host, methodDirectory, null, default(KnownInterfaceInstance), _IsESP32);
             string value;
             if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.openocd.iface_script", out value))
-                editor.ReplaceScript(true, value);
+                editor.ReplaceScript(OpenOCDCommandLine.ScriptType.Interface, value);
             else
                 return null;    //Not an OpenOCD configuration
 
