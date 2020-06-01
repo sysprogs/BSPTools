@@ -194,8 +194,9 @@
             <TextBlock Text="Issue an explicit reset command via command line"/>
         </CheckBox>-->
 
-        <TextBlock Text="Reset mode" Grid.Row="6"/>
-        <ListBox Grid.Row="6" Grid.Column="1" SelectedItem="{Binding Settings.ResetMode}" Margin="{StaticResource TableElementMargin}">
+        <TextBlock Text="Reset mode" Grid.Row="6" Visibility="{Binding ResetModeVisibility}"/>
+        <ListBox Grid.Row="6" Grid.Column="1" SelectedItem="{Binding Settings.ResetMode}" Margin="{StaticResource TableElementMargin}"
+                 Visibility="{Binding ResetModeVisibility}">
             <ListBox.ItemsSource>
                 <coll:ArrayList>
                     <pkg:RISCVResetMode>nSRST</pkg:RISCVResetMode>
@@ -215,14 +216,13 @@
                                         <Setter Property="Text" Value="Manually (reset button)"/>
                                     </DataTrigger>
                                 </Style.Triggers>
-                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:RISCVOpenOCDSettingsControl}}"/>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Grid Grid.Row="7" Grid.Column="1">
+        <Grid Grid.Row="7" Grid.Column="1" Visibility="{Binding ResetModeVisibility}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -256,7 +256,36 @@
                                         <Setter Property="Text" Value="If rebuilt since last load"/>
                                     </DataTrigger>
                                 </Style.Triggers>
-                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:RISCVOpenOCDSettingsControl}}"/>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+    
+        <TextBlock Text="Program FLASH using:" Grid.Row="9" Visibility="{Binding ExternalFLASHModeVisibility}"/>
+        <ListBox Grid.Row="9" Grid.Column="1" SelectedItem="{Binding ProgramUsingExternalTool}" 
+                 Margin="{StaticResource TableElementMargin}" Visibility="{Binding ExternalFLASHModeVisibility}">
+            <ListBox.ItemsSource>
+                <coll:ArrayList>
+                    <sys:Boolean>false</sys:Boolean>
+                    <sys:Boolean>true</sys:Boolean>
+                </coll:ArrayList>
+            </ListBox.ItemsSource>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="true">
+                                        <Setter Property="Text" Value="{Binding Path=DataContext.ExternallyProgrammableProjectDebugContext.ExternalProgrammingOptionName, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:RISCVOpenOCDSettingsControl}}}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="false">
+                                        <Setter Property="Text" Value="OpenOCD (via JTAG)"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>

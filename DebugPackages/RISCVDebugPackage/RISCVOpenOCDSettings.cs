@@ -29,7 +29,10 @@ namespace RISCVDebugPackage
         {
         }
 
-        public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Collapsed;
+        public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Visible;
+        public System.Windows.Visibility ResetModeVisibility => System.Windows.Visibility.Collapsed;
+
+        protected override string AdapterSpeedCommand => "adapter_khz";
 
         protected override void InsertResetAndHaltCommands(int idxLoad, QuickSetupDatabase.ProgrammingInterface iface, QuickSetupDatabase.TargetDeviceFamily device)
         {
