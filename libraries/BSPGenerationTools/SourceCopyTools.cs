@@ -548,7 +548,7 @@ namespace BSPGenerationTools
                 .Where(f => !bsp.SkipHiddenFiles || (File.GetAttributes(f) & FileAttributes.Hidden) != FileAttributes.Hidden)
                 .Select(f => f.Substring(expandedSourceFolder.Length + 1))
                 .Where(f => copyMasks.IsMatch(f))
-                .ToArray();
+                .ToArray(); 
 
             foreach (var dir in filesToCopy.Select(f => Path.Combine(absTarget, Path.GetDirectoryName(f))).Distinct())
                 Directory.CreateDirectory(dir);

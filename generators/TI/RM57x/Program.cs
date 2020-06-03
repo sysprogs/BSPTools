@@ -37,7 +37,7 @@ namespace RM57x
                 return true;
             }
 
-            public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
+            public override MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 throw new NotSupportedException("RM57x BSP should reuse existing linker scripts instead of generating new ones");
             }
@@ -62,74 +62,76 @@ namespace RM57x
             if (args.Length < 1)
                 throw new Exception("Usage: rm57x.exe <RM57x generated HAL directory>");
             string DirSDK = args[0];
-            var bspBuilder = new RM57xBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-
-            bool noPeripheralRegisters = args.Contains("/noperiph");
-            bool noPack = args.Contains("/nopack");
-
-            MCUFamilyBuilder famBuilder = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(Path.Combine(bspBuilder.Directories.RulesDir, "families\\rm57x.xml")));
-
-            //string deviceDefinitionFile = @"DeviceDefinitions/CC_3220.xml";
-
-            foreach (var name in new[] { "RM57L843ZWT" })
+            using (var bspBuilder = new RM57xBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules", @"..\..\log")))
             {
-                famBuilder.MCUs.Add(new MCUBuilder
+
+                bool noPeripheralRegisters = args.Contains("/noperiph");
+                bool noPack = args.Contains("/nopack");
+
+                MCUFamilyBuilder famBuilder = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(Path.Combine(bspBuilder.Directories.RulesDir, "families\\rm57x.xml")));
+
+                //string deviceDefinitionFile = @"DeviceDefinitions/CC_3220.xml";
+
+                foreach (var name in new[] { "RM57L843ZWT" })
                 {
-                    Core = CortexCore.R5F,
-                    FlashSize = 4096 * 1024,
-                    RAMSize = 512 * 1024,
-                    Name = name,
-                    //MCUDefinitionFile = deviceDefinitionFile,
-                    StartupFile = null
-                });
+                    famBuilder.MCUs.Add(new MCUBuilder
+                    {
+                        Core = CortexCore.R5F,
+                        FlashSize = 4096 * 1024,
+                        RAMSize = 512 * 1024,
+                        Name = name,
+                        //MCUDefinitionFile = deviceDefinitionFile,
+                        StartupFile = null
+                    });
+                }
+
+
+                List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+                List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
+
+                MCUFamilyBuilder commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
+
+                var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
+                List<string> projectFiles = new List<string>();
+                commonPseudofamily.CopyFamilyFiles(ref famObj.CompilationFlags, projectFiles);
+
+                famObj.AdditionalSourceFiles = famObj.AdditionalSourceFiles.Concat(projectFiles).ToArray();
+
+                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
+                    frameworks.Add(fw);
+
+                foreach (var sample in commonPseudofamily.CopySamples())
+                    exampleDirs.Add(sample);
+
+                if (!noPeripheralRegisters)
+                    famBuilder.AttachPeripheralRegisters(ParsePeripheralRegisters(famBuilder.Definition.PrimaryHeaderDir));
+
+                List<MCU> mcuDefinitions = new List<MCU>();
+                foreach (var mcuDef in famBuilder.MCUs)
+                {
+                    var mcu = mcuDef.GenerateDefinition(famBuilder, bspBuilder, !noPeripheralRegisters, true);
+                    mcuDefinitions.Add(mcu);
+                }
+
+                BoardSupportPackage bsp = new BoardSupportPackage
+                {
+                    PackageID = "com.sysprogs.arm.ti.rm57x",
+                    PackageDescription = "TI RM57Lx Devices",
+                    GNUTargetID = "arm-eabi",
+                    GeneratedMakFileName = "rm57x.mak",
+                    MCUFamilies = new[] { famObj },
+                    SupportedMCUs = mcuDefinitions.ToArray(),
+                    Frameworks = frameworks.ToArray(),
+                    Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
+                    ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
+                    PackageVersion = "1.0"
+                };
+                bspBuilder.Save(bsp, !noPack);
+
+                //StandaloneBSPValidator.Program.Main(new[] { "..\\..\\cc3220.validatejob", "f:\\bsptest" });
             }
-
-
-            List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
-
-            MCUFamilyBuilder commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
-
-            var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
-            List<string> projectFiles = new List<string>();
-            commonPseudofamily.CopyFamilyFiles(ref famObj.CompilationFlags, projectFiles);
-
-            famObj.AdditionalSourceFiles = famObj.AdditionalSourceFiles.Concat(projectFiles).ToArray();
-
-            foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
-                frameworks.Add(fw);
-
-            foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample);
-
-            if (!noPeripheralRegisters)
-                famBuilder.AttachPeripheralRegisters(ParsePeripheralRegisters(famBuilder.Definition.PrimaryHeaderDir));
-
-            List<MCU> mcuDefinitions = new List<MCU>();
-            foreach (var mcuDef in famBuilder.MCUs)
-            {
-                var mcu = mcuDef.GenerateDefinition(famBuilder, bspBuilder, !noPeripheralRegisters, true);
-                mcuDefinitions.Add(mcu);
-            }
-
-            BoardSupportPackage bsp = new BoardSupportPackage
-            {
-                PackageID = "com.sysprogs.arm.ti.rm57x",
-                PackageDescription = "TI RM57Lx Devices",
-                GNUTargetID = "arm-eabi",
-                GeneratedMakFileName = "rm57x.mak",
-                MCUFamilies = new[] { famObj },
-                SupportedMCUs = mcuDefinitions.ToArray(),
-                Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
-                PackageVersion = "1.0"
-            };
-            bspBuilder.Save(bsp, !noPack);
-
-            //StandaloneBSPValidator.Program.Main(new[] { "..\\..\\cc3220.validatejob", "f:\\bsptest" });
         }
     }
 }
