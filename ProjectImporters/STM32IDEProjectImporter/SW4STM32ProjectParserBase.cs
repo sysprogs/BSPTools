@@ -345,7 +345,7 @@ namespace STM32IDEProjectImporter
         private List<ParsedSourceFile> ExpandSourcePaths(List<ParsedSourceFile> sources)
         {
             List<ParsedSourceFile> result = new List<ParsedSourceFile>();
-            foreach(var src in sources)
+            foreach (var src in sources)
             {
                 try
                 {
@@ -354,7 +354,7 @@ namespace STM32IDEProjectImporter
                     else if (Directory.Exists(src.FullPath))
                     {
                         var fullPath = Path.GetFullPath(src.FullPath);
-                        foreach(var file in Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories))
+                        foreach (var file in Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories))
                         {
                             var ext = Path.GetExtension(file).ToLower();
                             if (ext == ".c" || ext == ".cpp" || ext == ".cc" || ext == ".s")
@@ -444,14 +444,27 @@ namespace STM32IDEProjectImporter
             result.LinkerScript = opts.LinkerScript;
             OnVendorSampleParsed(result, opts);
 
+            List<PropertyDictionary2.KeyValue> mcuConfig = new List<PropertyDictionary2.KeyValue>();
+
             if (opts.LDFLAGS?.Contains("rdimon.specs") == true)
+            {
+                mcuConfig.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.toolchainoptions.arm.libctype", Value = "--specs=rdimon.specs" });
+            }
+
+            try
+            {
+                if (result.SourceFiles.Select(f => Path.GetFileName(f)).FirstOrDefault(f => f.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase) && f.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase)) != null)
+                {
+                    mcuConfig.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.mcuoptions.ignore_startup_file", Value = "1" });
+                }
+            }
+            catch { }
+
+            if (mcuConfig.Count > 0)
             {
                 result.Configuration.MCUConfiguration = new PropertyDictionary2
                 {
-                    Entries = new PropertyDictionary2.KeyValue[]
-                    {
-                        new PropertyDictionary2.KeyValue{Key = "com.sysprogs.toolchainoptions.arm.libctype", Value = "--specs=rdimon.specs"}
-                    }
+                    Entries = mcuConfig.ToArray()
                 };
             }
 
@@ -510,8 +523,28 @@ namespace STM32IDEProjectImporter
             path = path.Trim('\"');
 
             string workspacePrefix = "${workspace_loc:/${ProjName}/";
+            string workspacePrefix2 = "${workspace_loc:/";
             if (path.StartsWith(workspacePrefix))
                 path = path.Substring(workspacePrefix.Length).TrimEnd('}');
+            else if (path.StartsWith(workspacePrefix2))
+            {
+                string pathInsideWorkspace = path.Substring(workspacePrefix2.Length).Replace("${ProjName}", Path.GetFileName(baseDir)).TrimEnd('}');
+                try
+                {
+                    string testedDir = baseDir;
+                    for (; ;)
+                    {
+                        if (File.Exists(Path.Combine(testedDir, pathInsideWorkspace)))
+                            return Path.GetFullPath(Path.Combine(testedDir, pathInsideWorkspace));
+                        var parentDir = Path.GetDirectoryName(testedDir);
+                        if (parentDir == null || parentDir.Length < 2 || parentDir == testedDir)
+                            break;
+
+                        testedDir = parentDir;
+                    }
+                }
+                catch { }
+            }
 
             var m = rgParentSyntax.Match(path);
             if (m.Success)
