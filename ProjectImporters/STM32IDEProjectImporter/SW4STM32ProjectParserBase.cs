@@ -613,16 +613,19 @@ namespace STM32IDEProjectImporter
                 sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = virtualPath });
             }
 
-            foreach (var sr in sourceReferences.Values)
+            if (sourceReferences != null)
             {
-                if (sr.RelativePath == null)
+                foreach (var sr in sourceReferences.Values)
                 {
-                    //There was no entry in linkedResources corresponding to this source specifier
-                    string fullPath = TranslatePath(projectDir, sr.Name, PathTranslationFlags.None);
-                    if (fullPath == null)
-                        continue;
+                    if (sr.RelativePath == null)
+                    {
+                        //There was no entry in linkedResources corresponding to this source specifier
+                        string fullPath = TranslatePath(projectDir, sr.Name, PathTranslationFlags.None);
+                        if (fullPath == null)
+                            continue;
 
-                    sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name });
+                        sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name });
+                    }
                 }
             }
 
