@@ -1018,7 +1018,10 @@ namespace BSPGenerationTools
         public string FamilySubdirectory;
         public string PrimaryHeaderDir;
         public string StartupFileDir;
+        
         public bool HasMixedCores; //Different devices within the family can have different cores (e.g. Cortex-M0 vs Cortex-M4)
+        public bool HasMixedFPUs;
+
         public Framework CoreFramework;
 
         public Framework[] AdditionalFrameworks;

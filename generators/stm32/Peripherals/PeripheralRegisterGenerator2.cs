@@ -215,7 +215,7 @@ namespace stm32_bsp_generator
                     var type = field.Type
                                 .Where(t => t.Type == CppTokenizer.TokenType.Identifier)
                                 .Select(t => t.Value)
-                                .Where(t => t != "__IO" && t != "__I" && t != "__O" && t != "const")
+                                .Where(t => t != "__IO" && t != "__I" && t != "__IM" && t != "__O" && t != "const")
                                 .ToArray();
 
                     bool isReadOnly = field.Type.Count(t => t.Value == "__I" || t.Value == "const") > 0;
@@ -238,6 +238,9 @@ namespace stm32_bsp_generator
                         case "int8_t":
                         case "uint8_t":
                             size = 1;
+                            break;
+                        case "RSSLIB_S_CloseExitHDP_TypeDef":   //Actually a function pointer
+                            size = 4;
                             break;
                         default:
                             for (int i = 0; i < field.ArraySize; i++)

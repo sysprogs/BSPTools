@@ -19,6 +19,7 @@
 		<CopyJobs>
 		</CopyJobs>
 	</CoreFramework>
+	<HasMixedFPUs>true</HasMixedFPUs>
 	<AdditionalFrameworks>
 		<Framework>
 			<Name>STM32F746G-Discovery drivers</Name>

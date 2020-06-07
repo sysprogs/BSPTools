@@ -155,6 +155,7 @@ namespace stm32_bsp_generator
                         switch (Name)
                         {
                             case "FLASH":
+                            case "FLASH1":
                             case "FLASH2":
                                 type = MemoryType.FLASH;
                                 break;
@@ -175,13 +176,14 @@ namespace stm32_bsp_generator
                 }
             }
 
-            internal RawMemory[] LookupMemories(string RPN, string RefName, string explicitCore, out string[] linkerScripts, out string define)
+            internal RawMemory[] LookupMemories(string RPN, string RefName, string explicitCore, out string[] linkerScripts, out string define, out string fpu)
             {
                 XmlElement node;
                 if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
                     throw new Exception("Could not find memory layout for " + RefName);
 
                 linkerScripts = node.SelectNodes("SW4STM32/linkers/linker").OfType<XmlElement>().Select(n => n.InnerText).ToArray();
+                fpu = ((XmlElement)node.ParentNode).GetAttribute("fpu");
 
                 var memories = node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
                 if (memories.Length == 0)
@@ -230,6 +232,7 @@ namespace stm32_bsp_generator
                     var layout = new MemoryLayout { DeviceName = Name, Memories = Memories.Select(m => m.ToMemoryDefinition()).ToList() };
 
                     const string FLASHMemoryName = "FLASH";
+                    const string FLASHMemoryName2 = "FLASH1";
 
                     Memory ram;
                     Dictionary<string, string> memorySubstitutionRulesForRAMMode = null;
@@ -254,6 +257,7 @@ namespace stm32_bsp_generator
 
                         memorySubstitutionRulesForRAMMode = new Dictionary<string, string> {
                             { FLASHMemoryName, mainMemoryForRAMMode.Name } ,
+                            { FLASHMemoryName2, mainMemoryForRAMMode.Name } ,
                             { ram.Name, mainMemoryForRAMMode.Name } ,
                         };
                     }
@@ -261,7 +265,7 @@ namespace stm32_bsp_generator
                     if (ram == null)
                         report.ReportMergeableError("Could not locate primary RAM for the MCU(s)", MCU.Name, true);
 
-                    if (layout.TryLocateAndMarkPrimaryMemory(MemoryType.FLASH, MemoryLocationRule.ByName(FLASHMemoryName)) == null)
+                    if (layout.TryLocateAndMarkPrimaryMemory(MemoryType.FLASH, MemoryLocationRule.ByName(FLASHMemoryName, FLASHMemoryName2)) == null)
                         throw new Exception("No FLASH found");
 
                     return new MemoryLayoutAndSubstitutionRules(layout, memorySubstitutionRulesForRAMMode);
@@ -296,6 +300,7 @@ namespace stm32_bsp_generator
                 public readonly string[] LinkerScripts;
 
                 public readonly CortexCore Core;
+                public readonly FPUType FPU;
                 public readonly string CoreSuffix;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
 
@@ -349,9 +354,6 @@ namespace stm32_bsp_generator
                     string shortCore = cores[coreIndex].Substring(prefix.Length);
                     Core = ParseCore(shortCore);
 
-                    if (Name.StartsWith("STM32L5") && Core == CortexCore.M33)
-                        Core = CortexCore.M33_FPU;
-
                     if (cores.Length > 1)
                     {
                         CoreSuffix = shortCore.Replace('+', 'p');
@@ -366,7 +368,8 @@ namespace stm32_bsp_generator
                     else
                         CoreSuffix = null;
 
-                    Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts, out Define);
+                    Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts, out Define, out string fpu);
+                    FPU = ParseFPU(fpu);
 
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
@@ -377,6 +380,21 @@ namespace stm32_bsp_generator
                     if (flash.Length != 1)
                         throw new Exception("Multiple or missing FLASH definitions of " + Name);
                     FLASH = flash[0];
+                }
+
+                static FPUType ParseFPU(string fpuString)
+                {
+                    switch (fpuString)
+                    {
+                        case "SP":
+                            return FPUType.SP;
+                        case "DP":
+                            return FPUType.DP;
+                        case "none":
+                            return FPUType.None;
+                        default:
+                            throw new Exception("Unknown FPU type: " + fpuString);
+                    }
                 }
 
                 public override string ToString()
@@ -391,7 +409,8 @@ namespace stm32_bsp_generator
                         Name = useSpecializedName ? RefName : RPN,
                         FlashSize = FLASH * 1024,
                         RAMSize = 0,    //This will be adjusted later in our override of GenerateDefinition()
-                        Core = Core
+                        Core = Core,
+                        FPU = FPU,
                     };
                 }
 

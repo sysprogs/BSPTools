@@ -27,12 +27,17 @@ namespace BSPGenerationTools
         M0Plus,
         M3,
         M33,
-        M33_FPU,
         M4,
-        M4_NOFPU,
         M7,
         A7,
-        R5F,
+        R5,
+    }
+
+    public enum FPUType
+    {
+        None,
+        SP,
+        DP
     }
 
     public class BSPSummary
@@ -60,6 +65,7 @@ namespace BSPGenerationTools
         public int FlashSize;
         public int RAMSize;
         public CortexCore Core;
+        public FPUType FPU;
 
         public string LinkerScriptPath;
         public string StartupFile;
@@ -106,7 +112,9 @@ namespace BSPGenerationTools
             };
 
             if (fam.Definition.HasMixedCores)
-                MCUFamilyBuilder.AddCoreSpecificFlags(flagsToAdd, mcu, Core);
+                MCUFamilyBuilder.AddCoreSpecificFlags(flagsToAdd, mcu, Core, FPU);
+            else if (fam.Definition.HasMixedFPUs)
+                MCUFamilyBuilder.AddFPUTypeFlag(mcu, Core, FPU);
 
             List<SysVarEntry> sysVars = new List<SysVarEntry>();
             foreach (var classifier in fam.Definition.Subfamilies ?? new MCUClassifier[0])
@@ -697,12 +705,17 @@ namespace BSPGenerationTools
                     throw new Exception("No MCUs found for " + Definition.Name);
 
                 var core = MCUs[0].Core;
+                var fpu = MCUs[0].FPU;
 
                 foreach (var mcu in MCUs)
+                {
                     if (mcu.Core != core)
                         throw new Exception("Different MCUs within " + Definition.Name + " have different core types");
+                    if (!Definition.HasMixedFPUs && mcu.FPU != fpu)
+                        throw new Exception("Different MCUs within " + Definition.Name + " have different FPUs");
+                }
 
-                AddCoreSpecificFlags(flagsToGenerate, family, core);
+                AddCoreSpecificFlags(flagsToGenerate, family, core, Definition.HasMixedFPUs ? default(FPUType?) : fpu);
             }
 
             family.CompilationFlags = family.CompilationFlags.Merge(Definition.CompilationFlags);
@@ -770,7 +783,48 @@ namespace BSPGenerationTools
             All = FPU | PrimaryMemory
         }
 
-        internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core)
+        internal static void AddFPUTypeFlag(MCUFamily mcuObj, CortexCore core, FPUType fpu)
+        {
+            int fpVersion;
+
+            switch(core)
+            {
+                case CortexCore.R5:
+                    fpVersion = 3;
+                    break;
+                case CortexCore.M7:
+                case CortexCore.M33:
+                    fpVersion = 5;
+                    break;
+                default:
+                    fpVersion = 4;
+                    break;
+            }
+
+            string flag;
+            switch(fpu)
+            {
+                case FPUType.None:
+                    return;
+                case FPUType.SP:
+                    flag = $"-mfpu=fpv{fpVersion}-sp-d16";
+                    break;
+                case FPUType.DP:
+                    flag = $"-mfpu=fpv{fpVersion}-d16";
+                    break;
+                default:
+                    throw new Exception("Invalid FPU type: " + fpu);
+            }
+
+            if (mcuObj.CompilationFlags == null)
+                mcuObj.CompilationFlags = new ToolFlags();
+            if (string.IsNullOrEmpty(mcuObj.CompilationFlags.COMMONFLAGS))
+                mcuObj.CompilationFlags.COMMONFLAGS = flag;
+            else
+                mcuObj.CompilationFlags.COMMONFLAGS += " " + flag;
+        }
+
+        internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core, FPUType? fpuType)
         {
             string coreName = null, freertosPort = null;
             switch (core)
@@ -799,32 +853,23 @@ namespace BSPGenerationTools
                     coreName = "M33";
                     freertosPort = "ARM_CM33_NTZ/non_secure";
                     break;
-                case CortexCore.M33_FPU:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16";
-                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM33" };
-                    coreName = "M33";
-                    freertosPort = "ARM_CM33_NTZ/non_secure";
-                    break;
                 case CortexCore.M4:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16";
-                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
-                    freertosPort = "ARM_CM4F";
-                    coreName = "M4";
-                    break;
-                case CortexCore.M4_NOFPU:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
+                    if (fpuType == FPUType.None)
+                        freertosPort = "ARM_CM3";
+                    else
+                        freertosPort = "ARM_CM4F";
                     coreName = "M4";
-                    freertosPort = "ARM_CM3";
                     break;
                 case CortexCore.M7:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb -mfpu=fpv4-sp-d16";
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
                     coreName = "M7";
                     freertosPort = "ARM_CM7/r0p1";
                     break;
-                case CortexCore.R5F:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mfpu=vfpv3-d16 -mthumb";
+                case CortexCore.R5:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CR5" };
                     break;
                 case CortexCore.A7:
@@ -833,6 +878,8 @@ namespace BSPGenerationTools
                     throw new Exception("Unsupported core type");
             }
 
+            if (fpuType.HasValue)
+                AddFPUTypeFlag(family, core, fpuType.Value);
 
             if ((flagsToDefine & CoreSpecificFlags.PrimaryMemory) == CoreSpecificFlags.PrimaryMemory)
             {
@@ -867,7 +914,7 @@ namespace BSPGenerationTools
 
             if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
             {
-                if (core == CortexCore.M4 || core == CortexCore.M7 || core == CortexCore.R5F || core == CortexCore.M33_FPU)
+                if (fpuType != FPUType.None)
                 {
                     if (family.ConfigurableProperties == null)
                         family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
@@ -1455,7 +1502,7 @@ namespace BSPGenerationTools
                 Name = arg.Name,
             };
 
-            if (arg.Name == "FLASH")
+            if (arg.Name == "FLASH" || arg.Name == "FLASH1")
                 mem.Flags |= MCUMemoryFlags.IsDefaultFLASH;
 
             return mem;
