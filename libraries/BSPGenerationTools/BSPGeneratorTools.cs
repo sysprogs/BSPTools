@@ -785,35 +785,27 @@ namespace BSPGenerationTools
 
         internal static void AddFPUTypeFlag(MCUFamily mcuObj, CortexCore core, FPUType fpu)
         {
-            int fpVersion;
+            if (fpu == FPUType.None)
+                return;
 
-            switch(core)
+            string sp = (fpu == FPUType.SP) ? "-sp" : "";
+            string flag;
+
+            switch (core)
             {
                 case CortexCore.R5:
-                    fpVersion = 3;
+                    flag = $"-mfpu=vfpv3{sp}-d16";
                     break;
                 case CortexCore.M7:
                 case CortexCore.M33:
-                    fpVersion = 5;
+                    flag = $"-mfpu=fpv5{sp}-d16";
                     break;
                 default:
-                    fpVersion = 4;
-                    break;
-            }
+                    if (fpu != FPUType.SP)
+                        throw new Exception("Unsupported configuration. Recheck the original flags.");
 
-            string flag;
-            switch(fpu)
-            {
-                case FPUType.None:
-                    return;
-                case FPUType.SP:
-                    flag = $"-mfpu=fpv{fpVersion}-sp-d16";
+                    flag = $"-mfpu=fpv4{sp}-d16";
                     break;
-                case FPUType.DP:
-                    flag = $"-mfpu=fpv{fpVersion}-d16";
-                    break;
-                default:
-                    throw new Exception("Invalid FPU type: " + fpu);
             }
 
             if (mcuObj.CompilationFlags == null)

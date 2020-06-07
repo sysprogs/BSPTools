@@ -371,6 +371,9 @@ namespace stm32_bsp_generator
                     Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts, out Define, out string fpu);
                     FPU = ParseFPU(fpu);
 
+                    if (cores.Length > 1 && coreIndex > 0 && Core == CortexCore.M4)
+                        FPU = FPUType.SP;
+
                     //RAMs = mcuDef.SelectNodes("mcu:Ram", nsmgr2).OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     RAMs = n.SelectNodes("Ram").OfType<XmlElement>().Select(n2 => int.Parse(n2.InnerText)).ToArray();
                     if (RAMs.Length < 1)
