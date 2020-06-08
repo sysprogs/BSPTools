@@ -58,7 +58,6 @@ namespace BSPGenerationTools
         public string FileName;
     }
 
-
     public class MCUBuilder
     {
         public string Name;
@@ -452,6 +451,10 @@ namespace BSPGenerationTools
             }
         }
 
+        public virtual void PatchSmartFileConditions(ref string[] smartFileConditions, string expandedSourceFolder, string subdir, CopyJob copyJob)
+        {
+        }
+
         private IEnumerable<FileWithContext> TranslateFileList(string[] files, string deviceSpecificCondition)
         {
             if (files == null)
@@ -689,6 +692,7 @@ namespace BSPGenerationTools
         public List<MCUBuilder> MCUs = new List<MCUBuilder>();
 
         public const string PrimaryMemoryOptionName = "com.sysprogs.bspoptions.primary_memory";
+        public const string SecureModeOptionName = "com.sysprogs.bspoptions.cmse";
         public readonly FamilyDefinition Definition;
 
         const string IgnoreStartupFileProperty = "com.sysprogs.mcuoptions.ignore_startup_file";
@@ -780,7 +784,8 @@ namespace BSPGenerationTools
             None = 0,
             FPU = 0x01,
             PrimaryMemory = 0x02,
-            All = FPU | PrimaryMemory
+            SecureMode = 0x04,
+            All = FPU | PrimaryMemory | SecureMode,
         }
 
         internal static void AddFPUTypeFlag(MCUFamily mcuObj, CortexCore core, FPUType fpu)
@@ -879,29 +884,33 @@ namespace BSPGenerationTools
                     family.AdditionalSystemVars = new SysVarEntry[] { new SysVarEntry { Key = PrimaryMemoryOptionName, Value = "flash" } };
                 else
                 {
-                    family.ConfigurableProperties = new PropertyList
+                    var prop = new PropertyEntry.Enumerated
                     {
-                        PropertyGroups = new List<PropertyGroup>
-                            {
-                                new PropertyGroup
-                                {
-                                    Properties = new List<PropertyEntry>
-                                    {
-                                        new PropertyEntry.Enumerated
-                                        {
-                                            Name = "Execute from",
-                                            UniqueID = PrimaryMemoryOptionName,
-                                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
-                                            {
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "flash", UserFriendlyName = "FLASH"},
-                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "sram", UserFriendlyName = "SRAM"},
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                        Name = "Execute from",
+                        UniqueID = PrimaryMemoryOptionName,
+                        SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
+                        {
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "flash", UserFriendlyName = "FLASH"},
+                            new PropertyEntry.Enumerated.Suggestion{InternalValue = "sram", UserFriendlyName = "SRAM"},
+                        }
                     };
+
+                    ProvideDefaultPropertyGroup(family).Properties.Add(prop);
                 }
+            }
+
+            if (core == CortexCore.M33 && (flagsToDefine & CoreSpecificFlags.SecureMode) == CoreSpecificFlags.SecureMode)
+            {
+                family.CompilationFlags.COMMONFLAGS += $" $${SecureModeOptionName}$$";
+
+                var prop = new PropertyEntry.Boolean
+                {
+                    Name = "Enable Armv8‑M Security Extensions",
+                    UniqueID = SecureModeOptionName,
+                    ValueForTrue = "-mcmse",
+                };
+
+                ProvideDefaultPropertyGroup(family).Properties.Add(prop);
             }
 
             if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
@@ -937,6 +946,19 @@ namespace BSPGenerationTools
 
             if (vars.Count > 0)
                 family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, vars.ToArray());
+        }
+
+        static PropertyGroup ProvideDefaultPropertyGroup(MCUFamily family)
+        {
+            if (family.ConfigurableProperties == null)
+                family.ConfigurableProperties = new PropertyList();
+            if (family.ConfigurableProperties.PropertyGroups == null)
+                family.ConfigurableProperties.PropertyGroups = new List<PropertyGroup>();
+
+            var group = family.ConfigurableProperties.PropertyGroups.FirstOrDefault(g => string.IsNullOrEmpty(g.UniqueID));
+            if (group == null)
+                family.ConfigurableProperties.PropertyGroups.Add(group = new PropertyGroup());
+            return group;
         }
 
         public static bool IsHeaderFile(string fn)

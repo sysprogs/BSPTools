@@ -338,6 +338,9 @@ namespace BSPGenerationTools
                     reverseConditions?.AttachPreprocessorMacro(macro, null);
             }
 
+            string expandedSourceFolder = SourceFolder;
+            bsp.ExpandVariables(ref expandedSourceFolder);
+
             if (SmartFileConditions != null || SmartPreprocessorMacros != null)
             {
                 var preproRegex = string.IsNullOrEmpty(SmartConditionsPromotedToPreprocessorMacros) ? null : new Regex(SmartConditionsPromotedToPreprocessorMacros);
@@ -361,7 +364,10 @@ namespace BSPGenerationTools
                         configurableProperties.PropertyGroups.Insert(0, grp = new PropertyGroup { });
                 }
 
-                foreach (var str in SmartFileConditions ?? new string[0])
+                var smartFileConditions = SmartFileConditions ?? new string[0];
+                bsp.PatchSmartFileConditions(ref smartFileConditions, expandedSourceFolder, subdir, this);
+
+                foreach (var str in smartFileConditions)
                 {
                     var def = SmartPropertyDefinition.Parse(str, grp.UniqueID, 0, bsp.OnValueForSmartBooleanProperties);
 
@@ -509,9 +515,6 @@ namespace BSPGenerationTools
                     conditions.Add(new ParsedCondition { Regex = rgFile, Condition = parsedCond, ReverseConditionHandle = cond.Handle });
                 }
             }
-
-            string expandedSourceFolder = SourceFolder;
-            bsp.ExpandVariables(ref expandedSourceFolder);
 
             if (TargetFolder == null)
                 TargetFolder = Path.GetFileName(expandedSourceFolder);

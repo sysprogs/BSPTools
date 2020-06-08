@@ -35,59 +35,35 @@ namespace stm32_bsp_generator
                 return macro.Replace('-', '_');
             }
 
-            public MemoryLayout GetLayoutFromICF(string pFileNameICF, string pNameDev)
+
+            //Different STM32 device subfamilies support different subsets of USB device classes, so we have to dynamically remove the unsupported ones.
+            public override void PatchSmartFileConditions(ref string[] smartFileConditions, string expandedSourceFolder, string subdir, CopyJob copyJob)
             {
-                MemoryLayout layout = new MemoryLayout { DeviceName = pNameDev, Memories = new List<Memory>() };
-                int StartFlash = NO_DATA;
-                int SizeFlash = NO_DATA;
-                /*int StartRAM = NO_DATA;
-                int SizeRAM = NO_DATA;
-                int StartCCM = NO_DATA;
-                int SizeCCM = NO_DATA;
-                */
-                foreach (var ln in File.ReadAllLines(pFileNameICF))
+                if (copyJob.SourceFolder.EndsWith("STM32_USB_Device_Library"))
                 {
-                    var m = Regex.Match(ln, @"define symbol __ICFEDIT_region_([\w\d]+)_start__[ ]*=[ ]*([x0-9A-Faf]+)[ ]*;");
-                    if (m.Success)
+                    for (int i = 0; i < smartFileConditions.Length; i++)
                     {
-                        StartFlash = (int)ParseHex(m.Groups[2].Value);
-                        continue;
-                    }
-                    m = Regex.Match(ln, @"define symbol __ICFEDIT_region_([\w\d]+)_end__[ ]*=[ ]*([x0-9A-Faf]+)[ ]*;");
-                    if (m.Success)
-                    {
-                        SizeFlash = (int)ParseHex(m.Groups[2].Value);
-                        MemoryType aTypeData = MemoryType.RAM;
-                        string aNameData = m.Groups[1].Value;
-                        if (m.Groups[1].Value.Contains("ROM"))
-                            aTypeData = MemoryType.FLASH;
-
-                        if (m.Groups[1].Value == "ROM")
-                            aNameData = "FLASH";
-                        else if (m.Groups[1].Value == "RAM")
-                            aNameData = "SRAM";
-
-                        if (StartFlash != NO_DATA && SizeFlash != NO_DATA)
+                        var condList = smartFileConditions[i].Split('\n').Select(s => s.Trim()).ToList();
+                        for (int j = 0; j < condList.Count; j++)
                         {
-                            SizeFlash -= StartFlash;
-                            if ((SizeFlash % 1024) != 0) SizeFlash += 1;
-                            layout.Memories.Add(new Memory
-                            {
-                                Name = aNameData,
-                                Access = MemoryAccess.Undefined,// Readable | MemoryAccess.Writable | MemoryAccess.Executable
-                                Type = aTypeData,
-                                Start = (uint)StartFlash,
-                                Size = (uint)SizeFlash
-                            });
+                            int idx = condList[j].IndexOf("=>");
+                            if (idx < 0)
+                                continue;
+                            string mask = condList[j].Substring(0, idx);
+                            idx = mask.LastIndexOf('\\');
+                            if (idx == -1)
+                                continue;
+                            string condSubdir = mask.Substring(0, idx);
+                            if (!condSubdir.StartsWith("Class\\", StringComparison.InvariantCultureIgnoreCase))
+                                continue;
+
+                            if (!Directory.Exists(Path.Combine(expandedSourceFolder, condSubdir)))
+                                condList.RemoveAt(j--);
                         }
-                        else
-                            throw new Exception("Error ld size flash");
-                        StartFlash = NO_DATA;
-                        continue;
+
+                        smartFileConditions[i] = string.Join("\r\n", condList);
                     }
                 }
-
-                return layout;
             }
 
             public STM32BSPBuilder(BSPDirectories dirs, string cubeDir)

@@ -85,13 +85,12 @@ static void MainThread(void const * argument)
 	while (!*((volatile u32_t *)&gnetif.ip_addr.addr))
 		asm("nop");
 	
-	dhcp_stop(&gnetif);
-	printf("Got IP address: %d.%d.%d.%d\n",
-		(unsigned)gnetif.ip_addr.addr & 0xFF,
-		((unsigned)gnetif.ip_addr.addr >> 8) & 0xFF,
-		((unsigned)gnetif.ip_addr.addr >> 16) & 0xFF,
-		((unsigned)gnetif.ip_addr.addr >> 24) & 0xFF);
-  
+    printf("Got IP address: %d.%d.%d.%d\n",
+        ip4_addr1_16_val(gnetif.ip_addr),
+        ip4_addr2_16_val(gnetif.ip_addr),
+        ip4_addr3_16_val(gnetif.ip_addr),
+        ip4_addr4_16_val(gnetif.ip_addr));
+		
 	pListeningConnection = netconn_new(NETCONN_TCP);
 	if (!pListeningConnection)
 		asm("bkpt 255");

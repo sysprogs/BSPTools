@@ -102,6 +102,29 @@ namespace stm32_bsp_generator
                 var parser = new HeaderFileParser(peripheralHeaderFile, handle);
                 var parsedFile = parser.ParseHeaderFile();
 
+                if (core == CortexCore.M4 && parsedFile.PreprocessorMacros.TryGetValue("HSEM_COMMON", out var hsem))
+                {
+                    /*
+                       This is the only relevant use of #ifdef in the STM32 headers:
+                       
+                        #if defined(CORE_CM4)
+                        #define HSEM_COMMON         ((HSEM_Common_TypeDef *) (HSEM_BASE + 0x110UL))
+                        #else
+                        #define HSEM_COMMON         ((HSEM_Common_TypeDef *) (HSEM_BASE + 0x100UL))
+                        #endif
+
+                       Currently, instead of fully parsing it, we just patch it manually for the M4 core.
+                    */
+
+                    for (int i = 0; i < hsem.Value.Length; i++)
+                    {
+                        if (hsem.Value[i].Value == "0x100UL")
+                        {
+                            hsem.Value[i].Value = "0x110UL";
+                        }
+                    }
+                }
+
                 var peripherals = LocateStructsReferencedInBaseExpressions(parsedFile);
                 var subregisterParser = new PeripheralSubregisterParser(handle);
 

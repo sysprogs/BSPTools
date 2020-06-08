@@ -896,6 +896,9 @@ namespace StandaloneBSPValidator
 
         public static LoadedBSP LoadBSP(string toolchainID, string bspDir)
         {
+            if (string.IsNullOrEmpty(toolchainID))
+                toolchainID = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\BSPTools\VendorSampleParsers\ToolchainDirectories").GetValue("arm-eabi");
+
             if (toolchainID.StartsWith("["))
             {
                 toolchainID = (string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue(toolchainID.Trim('[', ']'));

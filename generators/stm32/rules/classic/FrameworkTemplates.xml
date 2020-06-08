@@ -108,7 +108,10 @@
 					<SmartFileConditions>
 						<string>USB Device Class[devclass]|
 Class\\AUDIO\\.*=>Audio Device[AUDIO];
+Class\\BillBoard\\.*=>Billboard Device[BillBoard];
 Class\\CDC\\.*=>+Communications Device (CDC)[CDC];
+Class\\CDC_ECM\\.*=>Ethernet Control Model (ECM)[CDC_ECM];
+Class\\CDC_RNDIS\\.*=>Remote NDIS (RNDIS)[CDC_RNDIS];
 Class\\CustomHID\\.*=>Custom Human Interface Device (CustomHID)[CustomHID];
 Class\\DFU\\.*=>Device Firmware Update (DFU)[DFU];
 Class\\HID\\.*=>Human Interface Device (HID)[HID];
