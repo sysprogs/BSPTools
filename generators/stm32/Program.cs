@@ -244,6 +244,10 @@ namespace stm32_bsp_generator
         private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice, ParseReportWriter writer)
         {
             List<MCUDefinitionWithPredicate> result = new List<MCUDefinitionWithPredicate>();
+            string subfamilySuffix = "";
+            if (fam.Definition.Name.EndsWith("_M4"))
+                subfamilySuffix += "_m4";
+
             Console.Write("Parsing {0} registers using the new parsing logic...", fam.Definition.Name);
             foreach (var fn in Directory.GetFiles(dir, "*.h"))
             {
@@ -265,7 +269,7 @@ namespace stm32_bsp_generator
 
                 var r = new MCUDefinitionWithPredicate
                 {
-                    MCUName = subfamily,
+                    MCUName = subfamily + subfamilySuffix,
                     RegisterSets = PeripheralRegisterGenerator2.GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, fam.MCUs[0].Core, writer),
                     MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(m), subfamilyForMatching) == 0,
                 };
