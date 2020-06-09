@@ -121,11 +121,11 @@ namespace STM32IDEProjectImporter
                 virtualPathComponents = new[] { "virtual", "sample", "path" };
 
             XmlDocument cproject = new XmlDocument();
-            cproject.Load(projectFile);
-
             XmlDocument project = new XmlDocument();
+
             try
             {
+                cproject.Load(projectFile);
                 project.Load(Path.Combine(projectFileDir, ".project"));
             }
             catch (Exception ex)
