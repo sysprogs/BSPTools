@@ -195,9 +195,10 @@ namespace STM32IDEProjectImporter
             }
         }
 
-        class SourceEntry
+        public class SourceEntry
         {
             public string Name;
+            public string Excluding;
 
             public string RelativePath;
 
@@ -205,6 +206,7 @@ namespace STM32IDEProjectImporter
             public SourceEntry(XmlElement e)
             {
                 Name = e.GetAttribute("name");
+                Excluding = e.GetAttribute("excluding");
                 var flags = e.GetAttribute("flags");
                 if (!flags.Contains("VALUE_WORKSPACE_PATH") || e.GetAttribute("kind") != "sourcePath")
                     throw new Exception("Don't know how to handle a source entry");
@@ -320,17 +322,17 @@ namespace STM32IDEProjectImporter
             Dictionary<string, SourceEntry> sourceReferences = new Dictionary<string, SourceEntry>();
             foreach (var node in cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>())
             {
-                if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
-                {
-                    var entry = new SourceFilterEntry(node);
-                    if (entry.IsValid)
-                        sourceFilters.Add(entry);
-                }
-                else if (!string.IsNullOrEmpty(node.GetAttribute("name")))
+                if (!string.IsNullOrEmpty(node.GetAttribute("name")))
                 {
                     var entry = new SourceEntry(node);
                     if (entry.IsValid)
                         sourceReferences[entry.Name] = entry;
+                }
+                else if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
+                {
+                    var entry = new SourceFilterEntry(node);
+                    if (entry.IsValid)
+                        sourceFilters.Add(entry);
                 }
             }
 
@@ -354,12 +356,20 @@ namespace STM32IDEProjectImporter
                     else if (Directory.Exists(src.FullPath))
                     {
                         var fullPath = Path.GetFullPath(src.FullPath);
+                        HashSet<string> excludedFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+                        if (src.AssociatedSourceEntry?.Excluding is string s && !string.IsNullOrEmpty(s))
+                            foreach (var f in s.Split(';'))
+                                excludedFiles.Add(f.Replace('\\', '/'));
+
                         foreach (var file in Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories))
                         {
                             var ext = Path.GetExtension(file).ToLower();
                             if (ext == ".c" || ext == ".cpp" || ext == ".cc" || ext == ".s")
                             {
                                 string relPath = file.Substring(fullPath.Length).TrimStart('\\');
+                                if (excludedFiles.Contains(relPath.Replace('\\', '/')))
+                                    continue;
+                                
                                 result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath.Replace('\\', '/') });
                             }
                         }
@@ -577,6 +587,8 @@ namespace STM32IDEProjectImporter
             public string FullPath;
             public string VirtualPath;
 
+            public SourceEntry AssociatedSourceEntry;
+
             public override string ToString() => FullPath;
         }
 
@@ -624,7 +636,7 @@ namespace STM32IDEProjectImporter
                         if (fullPath == null)
                             continue;
 
-                        sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name });
+                        sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name, AssociatedSourceEntry = sr });
                     }
                 }
             }
