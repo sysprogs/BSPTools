@@ -144,8 +144,8 @@ namespace RedLinkDebugPackage.GUI
                     //Update devices
                     var devices = _Database.AllDevices.Select(d => new KnownDeviceEntry(d)).ToList();
 
-                    string mcuVendor = _Host.MCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(v => v.Key == "REDLINK:VENDOR_ID")?.Value;
-                    string mcuDev = _Host.MCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(v => v.Key == "REDLINK:DEVICE_ID")?.Value;
+                    string mcuVendor = _Host.MCU.ExpandedMCU.AdditionalSystemVars?.FirstOrDefault(v => v.Key == "REDLINK:VENDOR_ID")?.Value;
+                    string mcuDev = _Host.MCU.ExpandedMCU.AdditionalSystemVars?.FirstOrDefault(v => v.Key == "REDLINK:DEVICE_ID")?.Value;
 
                     var resolvedDevice = devices.FirstOrDefault(d => d.Device.MatchesDefinition(mcuVendor, mcuDev))?.Device;
 
@@ -180,10 +180,10 @@ namespace RedLinkDebugPackage.GUI
             {
                 int maxCoreCount;
                 List<LabelAndValue> coreChoices = new List<LabelAndValue>();
-                if (!int.TryParse(_Host.MCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(v => v.Key == "REDLINK:CORE_COUNT")?.Value, out maxCoreCount))
+                if (!int.TryParse(_Host.MCU.ExpandedMCU.AdditionalSystemVars?.FirstOrDefault(v => v.Key == "REDLINK:CORE_COUNT")?.Value, out maxCoreCount))
                     maxCoreCount = 8;
 
-                if (int.TryParse(_Host.MCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(v => v.Key == "REDLINK:CORE_INDEX")?.Value, out var mcuCore))
+                if (int.TryParse(_Host.MCU.ExpandedMCU.AdditionalSystemVars?.FirstOrDefault(v => v.Key == "REDLINK:CORE_INDEX")?.Value, out var mcuCore))
                     coreChoices.Add(new LabelAndValue($"#{mcuCore} (auto)", RedLinkServerCommandLine.DefaultCore));
 
                 for (int i = 0; i < maxCoreCount; i++)
