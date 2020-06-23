@@ -198,7 +198,7 @@ namespace RISCVDebugPackage
                     session.RunGDBCommand("-target-select remote :$$SYS:GDB_PORT$$");
 
                     var expr = session.EvaluateExpression("(void *)$pc == _start");
-                    if (expr.TrimStart('0', 'x') != "1")
+                    if (expr?.TrimStart('0', 'x') != "1")
                     {
                         session.SendInformationalOutput("Warning: unexpected value of $pc after a reset");
                         session.RunGDBCommand("set $pc = _start");

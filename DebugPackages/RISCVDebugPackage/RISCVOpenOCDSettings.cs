@@ -24,13 +24,17 @@ namespace RISCVDebugPackage
     {
         public new RISCVOpenOCDSettings Settings => (RISCVOpenOCDSettings)base.Settings;
 
-        public RISCVOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, RISCVOpenOCDSettings settings, KnownInterfaceInstance context)
-            : base(host, baseDir, settings ?? new RISCVOpenOCDSettings(), context, settings == null)
+        public RISCVOpenOCDSettingsEditor(IBSPConfiguratorHost host, LoadedBSP.LoadedDebugMethod method, RISCVOpenOCDSettings settings, KnownInterfaceInstance context)
+            : base(host, method.Directory, settings ?? new RISCVOpenOCDSettings(), context, settings == null)
         {
+            if (method.Method.ID == "com.sysprogs.riscv.openocd-kendryte")
+            {
+                ResetModeVisibility = System.Windows.Visibility.Collapsed;
+            }
         }
 
         public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Visible;
-        public System.Windows.Visibility ResetModeVisibility => System.Windows.Visibility.Collapsed;
+        public System.Windows.Visibility ResetModeVisibility { get; } = System.Windows.Visibility.Visible;
 
         protected override string AdapterSpeedCommand => "adapter_khz";
 

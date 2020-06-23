@@ -76,7 +76,7 @@ namespace RISCVDebugPackage.GUI
         public void SetConfiguration(object configuration, KnownInterfaceInstance context)
         {
             var settings = configuration as RISCVOpenOCDSettings;
-            _Editor = new RISCVOpenOCDSettingsEditor(_Host, _Method.Directory, settings, context);
+            _Editor = new RISCVOpenOCDSettingsEditor(_Host, _Method, settings, context);
 
             _Editor.PropertyChanged += (s, e) => SettingsChanged?.Invoke(this, EventArgs.Empty);
             DataContext = _Editor;
