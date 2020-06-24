@@ -216,6 +216,7 @@ namespace SLab_bsp_generator
             if (mcu.Core == CortexCore.Invalid || mcu.FlashSize == 0 || mcu.RAMSize == 0)
                 throw new Exception($"mcu '{mcu.Name}' have not size of memory , file {fileinc}");
 
+            mcu.FPU = BSPGeneratorTools.GetDefaultFPU(mcu.Core);
 
             return mcu;
         }
@@ -400,7 +401,7 @@ namespace SLab_bsp_generator
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
-                    PackageVersion = "5.9.1"
+                    PackageVersion = "5.9.6"
                 };
 
                 Console.WriteLine("Saving BSP...");
