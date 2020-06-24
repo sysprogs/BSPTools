@@ -25,24 +25,22 @@ namespace RISCVDebugPackage
         public new RISCVOpenOCDSettings Settings => (RISCVOpenOCDSettings)base.Settings;
 
         public RISCVOpenOCDSettingsEditor(IBSPConfiguratorHost host, LoadedBSP.LoadedDebugMethod method, RISCVOpenOCDSettings settings, KnownInterfaceInstance context)
-            : base(host, method.Directory, settings ?? new RISCVOpenOCDSettings(), context, settings == null)
+            : base(host, method.Directory, settings, context, settings == null)
         {
-            if (method.Method.ID == "com.sysprogs.riscv.openocd-kendryte")
-            {
-                ResetModeVisibility = System.Windows.Visibility.Collapsed;
-            }
         }
 
+        protected override OpenOCDSettings CreateDefaultSettings() => new RISCVOpenOCDSettings();
+
         public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Visible;
-        public System.Windows.Visibility ResetModeVisibility { get; } = System.Windows.Visibility.Visible;
+        public System.Windows.Visibility ResetModeVisibility { get; } = System.Windows.Visibility.Collapsed;
 
         protected override string AdapterSpeedCommand => "adapter_khz";
 
         protected override void InsertResetAndHaltCommands(int idxLoad, QuickSetupDatabase.ProgrammingInterface iface, QuickSetupDatabase.TargetDeviceFamily device)
         {
             const string unprotectCommand = "mon flash protect 0 64 last off";
-            const string resetHalt = "mon reset halt";
-            const string restartAtEntry = "mon reset halt"; // set $pc = _start";
+            const string resetHalt = "mon reset init";
+            //const string restartAtEntry = "mon reset halt"; // set $pc = _start";
             int idx;
 
             idx = Settings.StartupCommands.IndexOf(unprotectCommand);
@@ -53,9 +51,9 @@ namespace RISCVDebugPackage
             if (idx == -1)
                 Settings.StartupCommands.Insert(idxLoad, resetHalt);
 
-            idx = Settings.StartupCommands.IndexOf(restartAtEntry, idxLoad + 1);
+            /*idx = Settings.StartupCommands.IndexOf(restartAtEntry, idxLoad + 1);
             if (idx == -1)
-                Settings.StartupCommands.Add(restartAtEntry);
+                Settings.StartupCommands.Add(restartAtEntry);*/
         }
 
         public static bool IsE300CPU(LoadedBSP.ConfiguredMCU mcu)
