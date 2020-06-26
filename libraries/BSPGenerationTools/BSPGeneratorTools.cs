@@ -1503,6 +1503,17 @@ namespace BSPGenerationTools
             updatedFamily.AdditionalHeaderFiles = LoadedBSP.Combine(familyToCopy.AdditionalHeaderFiles, updatedFamily.AdditionalHeaderFiles);
             updatedFamily.AdditionalMakefileLines = LoadedBSP.Combine(familyToCopy.AdditionalMakefileLines, updatedFamily.AdditionalMakefileLines);
         }
+
+        public static FPUType GetDefaultFPU(CortexCore core)
+        {
+            switch(core)
+            {
+                case CortexCore.M4:
+                    return FPUType.SP;
+                default:
+                    return FPUType.None;
+            }
+        }
     }
 
     public static class Extensions
