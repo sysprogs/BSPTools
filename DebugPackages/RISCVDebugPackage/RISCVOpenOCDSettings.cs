@@ -19,7 +19,7 @@ namespace RISCVDebugPackage
         Manual,
         nSRST,
     }
-
+    
     public class RISCVOpenOCDSettingsEditor : OpenOCDSettingsEditor
     {
         public new RISCVOpenOCDSettings Settings => (RISCVOpenOCDSettings)base.Settings;
