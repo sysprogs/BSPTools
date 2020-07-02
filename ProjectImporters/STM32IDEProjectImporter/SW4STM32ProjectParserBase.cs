@@ -544,16 +544,20 @@ namespace STM32IDEProjectImporter
                     string testedDir = baseDir;
                     for (; ;)
                     {
-                        if (File.Exists(Path.Combine(testedDir, pathInsideWorkspace)))
+                        var candidate = Path.Combine(testedDir, pathInsideWorkspace);
+                        if (File.Exists(candidate) || Directory.Exists(candidate))
                             return Path.GetFullPath(Path.Combine(testedDir, pathInsideWorkspace));
                         var parentDir = Path.GetDirectoryName(testedDir);
                         if (parentDir == null || parentDir.Length < 2 || parentDir == testedDir)
-                            break;
+                            return pathInsideWorkspace; //This is a fallback option that likely won't work, but it's better than throwing an exception
 
                         testedDir = parentDir;
                     }
                 }
-                catch { }
+                catch
+                {
+                    return pathInsideWorkspace;
+                }
             }
 
             var m = rgParentSyntax.Match(path);
