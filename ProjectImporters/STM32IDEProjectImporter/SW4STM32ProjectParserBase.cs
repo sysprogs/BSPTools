@@ -358,7 +358,7 @@ namespace STM32IDEProjectImporter
                         var fullPath = Path.GetFullPath(src.FullPath);
                         HashSet<string> excludedFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
                         if (src.AssociatedSourceEntry?.Excluding is string s && !string.IsNullOrEmpty(s))
-                            foreach (var f in s.Split(';'))
+                            foreach (var f in s.Split('|'))
                                 excludedFiles.Add(f.Replace('\\', '/'));
 
                         foreach (var file in Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories))
@@ -366,11 +366,24 @@ namespace STM32IDEProjectImporter
                             var ext = Path.GetExtension(file).ToLower();
                             if (ext == ".c" || ext == ".cpp" || ext == ".cc" || ext == ".s")
                             {
-                                string relPath = file.Substring(fullPath.Length).TrimStart('\\');
-                                if (excludedFiles.Contains(relPath.Replace('\\', '/')))
+                                string relPath = file.Substring(fullPath.Length).TrimStart('\\').Replace('\\', '/');
+                                if (excludedFiles.Contains(relPath))
+                                    continue;
+
+                                bool excludedByPrefix = false;
+                                foreach(var excl in excludedFiles)
+                                {
+                                    if (relPath.StartsWith(excl + "/", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        excludedByPrefix = true;
+                                        break;
+                                    }
+                                }
+
+                                if (excludedByPrefix)
                                     continue;
                                 
-                                result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath.Replace('\\', '/') });
+                                result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath });
                             }
                         }
                     }
