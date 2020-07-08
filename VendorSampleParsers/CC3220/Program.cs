@@ -87,9 +87,7 @@ namespace CC3220VendorSampleParser
             protected override string BuildVirtualSamplePath(string originalPath)
             {
                 string[] components = originalPath.Split('/');
-                int trimAtEnd = 0;
-                if (components.Last() == "freertos")
-                    trimAtEnd++;
+                int trimAtEnd = 1;
 
                 components = components.Skip(4).Take(components.Length - 4 - trimAtEnd).ToArray();
 
@@ -456,6 +454,8 @@ namespace CC3220VendorSampleParser
                     var vs = ParseMakFile(makefile, relativePath, SDKdir);
                     vs.Path = Path.GetDirectoryName(makefile);
                     while (Directory.GetFiles(vs.Path, "*.c").Length == 0)
+                        vs.Path = Path.GetDirectoryName(vs.Path);
+                    while (Path.GetFileName(vs.Path) == "gcc" || Path.GetFileName(vs.Path) == "freertos")
                         vs.Path = Path.GetDirectoryName(vs.Path);
 
                     vs.InternalUniqueID = id;
