@@ -21,7 +21,7 @@
 				ti\utils\json\source\utils.c=>json_utils.c;
 				ti\display\display.c=>ti_display.c
 				</RenameRules>
-				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart|watchdog)\.c$=>drv_{1}.c</AdvancedRenameRules>
+				<AdvancedRenameRules>ti\\drivers\\(adc|button|camera|i2c|i2s|spi|timer|uart|watchdog)\.c$=>drv_{1}.c</AdvancedRenameRules>
 			</CopyJob>				
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples</SourceFolder>
@@ -314,23 +314,28 @@
 						<OldLine>typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</OldLine>
 						<NewLine>//typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</NewLine>
 					</Patch>
-					<Patch xsi:type="ReplaceLine">
-						<FilePath>freertos\pthread.c</FilePath>
-						<OldLine>    status = xTaskCreate((TaskFunction_t)_pthread_runStub, NULL /* name */,</OldLine>
-						<NewLine>    status = xTaskCreate((TaskFunction_t)_pthread_runStub, "pthread" /* name */,</NewLine>
-					</Patch>
 				</Patches> 
 			</CopyJob>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\FreeRTOSv10.1.1\FreeRTOS</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\FreeRTOSv10.2.1_191129\FreeRTOS</SourceFolder>
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<FilesToCopy>source\portable\MemMang\*;source\portable\GCC\ARM_CM3\*;source\portable\GCC\ARM_CM4F\*;-source\portable\*;source\*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
-				<TargetFolder>FreeRTOSv10.1.1\FreeRTOS</TargetFolder>
+				<TargetFolder>FreeRTOSv10.2.1_191129\FreeRTOS</TargetFolder>
 				<AdditionalIncludeDirs>source\include;source\portable\GCC\ARM_CM3</AdditionalIncludeDirs>
+				<SmartPropertyGroup>com.sysprogs.bspoptions.cc3220.freertos.|FreeRTOS</SmartPropertyGroup>
 				<SmartFileConditions>
-					<string>FreeRTOS Heap Implementation|source\\portable\\MemMang\\heap_4.c=>Heap4 - contiguous heap area;source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing;source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation;source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free();source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area</string>
-					<string>FreeRTOS Port|source\\portable\\GCC\\ARM_CM3=>Software FP;source\\portable\\GCC\\ARM_CM4F=>Hardware FP</string>
+					<string>Heap Implementation[heap]|
+Source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing[heap_1];
+Source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation[heap_2];
+Source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()[heap_3];
+Source\\portable\\MemMang\\heap_4.c=>+Heap4 - contiguous heap area[heap_4];
+Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
+					</string>
+					<string>--default=$$com.sysprogs.freertos.default_port$$|CPU Core support[portcore]|
+Source\\portable\\GCC\\ARM_CM3\\.*=>ARM Cortex M3 or M4 with Software FP[CM3];
+Source\\portable\\GCC\\ARM_CM4F\\.*=>+ARM Cortex M4 with Hardware FP[CM4F];
+					</string>
 				</SmartFileConditions>
 			</CopyJob>	
 			<!-- <CopyJob>
@@ -410,11 +415,10 @@ net_utils:Network Utilities:source\ti\net\utils:
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\pwmled</SourceFolder>
 			<DestinationFolder>Samples\pwmled</DestinationFolder>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/Board.h</string>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/CC3220SF_LAUNCHXL.c</string>
-				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/CC3220SF_LAUNCHXL.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/main_nortos.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/pwmled2.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/gcc/ti_drivers_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/nortos/CC3220SF_LAUNCHXL/drivers/pwmled2/gcc/ti_drivers_config.h</string>
 			</AdditionalSources>
 		</SmartSample>		
 		<SmartSample>
@@ -422,7 +426,6 @@ net_utils:Network Utilities:source\ti\net\utils:
 			<DestinationFolder>Samples\network_terminal_sf</DestinationFolder>
 			<MCUFilterRegex>CC3220SF$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/CC3220SF_LAUNCHXL.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/cmd_parser.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/netapp_cmd.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/network_terminal.c</string>
@@ -432,8 +435,6 @@ net_utils:Network Utilities:source\ti\net\utils:
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/transceiver_cmd.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/uart_term.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/wlan_cmd.c</string>
-				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/Board.h</string>
-				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/CC3220SF_LAUNCHXL.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/cmd_parser.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/netapp_cmd.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/network_terminal.h</string>
@@ -444,6 +445,10 @@ net_utils:Network Utilities:source\ti\net\utils:
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/uart_term.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/wlan_cmd.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/freertos/main_freertos.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_net_wifi_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_net_config.c</string>
 			</AdditionalSources>
 		</SmartSample>
 		<SmartSample>
@@ -451,7 +456,6 @@ net_utils:Network Utilities:source\ti\net\utils:
 			<DestinationFolder>Samples\network_terminal_s</DestinationFolder>
 			<MCUFilterRegex>CC3220S$</MCUFilterRegex>
 			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/CC3220S_LAUNCHXL.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/cmd_parser.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/netapp_cmd.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/network_terminal.c</string>
@@ -461,8 +465,6 @@ net_utils:Network Utilities:source\ti\net\utils:
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/transceiver_cmd.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/uart_term.c</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/wlan_cmd.c</string>
-				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/Board.h</string>
-				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/CC3220S_LAUNCHXL.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/cmd_parser.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/netapp_cmd.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/network_terminal.h</string>
@@ -473,8 +475,71 @@ net_utils:Network Utilities:source\ti\net\utils:
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/uart_term.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/wlan_cmd.h</string>
 				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/freertos/main_freertos.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_net_wifi_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3220S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_net_config.c</string>
 			</AdditionalSources>
 		</SmartSample>		
-	
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\network_terminal</SourceFolder>
+			<DestinationFolder>Samples\network_terminal_3235sf</DestinationFolder>
+			<MCUFilterRegex>CC3235SF$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/cmd_parser.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/netapp_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/network_terminal.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/radio_tool.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/socket_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/str.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/transceiver_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/uart_term.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/wlan_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/cmd_parser.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/netapp_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/network_terminal.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/radio_tool.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/socket_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/str.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/transceiver_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/uart_term.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/wlan_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/freertos/main_freertos.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_net_wifi_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235SF_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_net_config.c</string>
+			</AdditionalSources>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\network_terminal</SourceFolder>
+			<DestinationFolder>Samples\network_terminal_3235s</DestinationFolder>
+			<MCUFilterRegex>CC3235S$</MCUFilterRegex>
+			<AdditionalSources>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/cmd_parser.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/netapp_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/network_terminal.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/radio_tool.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/socket_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/str.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/transceiver_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/uart_term.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/wlan_cmd.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/cmd_parser.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/netapp_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/network_terminal.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/radio_tool.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/socket_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/str.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/transceiver_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/uart_term.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/wlan_cmd.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/freertos/main_freertos.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_config.h</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_drivers_net_wifi_config.c</string>
+				<string>$$SYS:BSP_ROOT$$/examples/rtos/CC3235S_LAUNCHXL/demos/network_terminal/freertos/gcc/ti_net_config.c</string>
+			</AdditionalSources>
+		</SmartSample>			
 	</SmartSamples>
 </FamilyDefinition>

@@ -38,7 +38,7 @@ namespace CC3200_bsp_generator
                 return true;
             }
 
-            public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
+            public override MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 throw new NotSupportedException("CC3220 BSP should reuse existing linker scripts instead of generating new ones");
             }
@@ -63,75 +63,77 @@ namespace CC3200_bsp_generator
             if (args.Length < 1)
                 throw new Exception("Usage: cc3220.exe <cc3220 SW package directory>");
             string DirSDK = args[0];
-            var bspBuilder = new CC3220BSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-
-            bool noPeripheralRegisters = args.Contains("/noperiph");
-            bool noPack = args.Contains("/nopack");
-
-            MCUFamilyBuilder famBuilder = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(Path.Combine(bspBuilder.Directories.RulesDir, "families\\cc3220.xml")));
-
-            string deviceDefinitionFile = @"DeviceDefinitions/CC_3220.xml";
-
-            foreach(var name in new[] { "CC3220SF", "CC3220S" })
+            using (var bspBuilder = new CC3220BSPBuilder(BSPDirectories.MakeDefault(args)))
             {
-                famBuilder.MCUs.Add(new MCUBuilder
+                bool noPeripheralRegisters = args.Contains("/noperiph");
+                bool noPack = args.Contains("/nopack");
+
+                MCUFamilyBuilder famBuilder = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(Path.Combine(bspBuilder.Directories.RulesDir, "families\\cc3220.xml")));
+
+                string deviceDefinitionFile = @"DeviceDefinitions/CC_3220.xml";
+
+                foreach (var name in new[] { "CC3220SF", "CC3220S", "CC3235SF", "CC3235S" })
                 {
-                    Core = CortexCore.M4,
-                    FlashSize = name.EndsWith("SF") ? 1024 * 1024 : 0,
-                    RAMSize = 256 * 1024,
-                    Name = name,
-                    MCUDefinitionFile = deviceDefinitionFile,
-                    //LinkerScriptPath = $"$$SYS:BSP_ROOT$$/source/ti/boards/{name}_LAUNCHXL/{name}_LAUNCHXL_$$com.sysprogs.cc3220.rtos$$.lds",
-                    StartupFile = null
-                });
+                    famBuilder.MCUs.Add(new MCUBuilder
+                    {
+                        Core = CortexCore.M4,
+                        FPU = FPUType.SP,
+                        FlashSize = name.EndsWith("SF") ? 1024 * 1024 : 0,
+                        RAMSize = 256 * 1024,
+                        Name = name,
+                        MCUDefinitionFile = deviceDefinitionFile,
+                        //LinkerScriptPath = $"$$SYS:BSP_ROOT$$/source/ti/boards/{name}_LAUNCHXL/{name}_LAUNCHXL_$$com.sysprogs.cc3220.rtos$$.lds",
+                        StartupFile = null
+                    });
+                }
+
+
+                List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+                List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
+
+                MCUFamilyBuilder commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
+
+                var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
+                List<string> projectFiles = new List<string>();
+                commonPseudofamily.CopyFamilyFiles(ref famObj.CompilationFlags, projectFiles);
+
+                famObj.AdditionalSourceFiles = famObj.AdditionalSourceFiles.Concat(projectFiles).ToArray();
+
+                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
+                    frameworks.Add(fw);
+
+                foreach (var sample in commonPseudofamily.CopySamples())
+                    exampleDirs.Add(sample);
+
+                if (!noPeripheralRegisters)
+                    famBuilder.AttachPeripheralRegisters(ParsePeripheralRegisters(famBuilder.Definition.PrimaryHeaderDir));
+
+                List<MCU> mcuDefinitions = new List<MCU>();
+                foreach (var mcuDef in famBuilder.MCUs)
+                {
+                    var mcu = mcuDef.GenerateDefinition(famBuilder, bspBuilder, !noPeripheralRegisters, true);
+                    mcuDefinitions.Add(mcu);
+                }
+
+                BoardSupportPackage bsp = new BoardSupportPackage
+                {
+                    PackageID = "com.sysprogs.arm.ti.cc3220",
+                    PackageDescription = "TI CC3220 Devices",
+                    GNUTargetID = "arm-eabi",
+                    GeneratedMakFileName = "cc3220.mak",
+                    MCUFamilies = new[] { famObj },
+                    SupportedMCUs = mcuDefinitions.ToArray(),
+                    Frameworks = frameworks.ToArray(),
+                    Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
+                    ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
+                    PackageVersion = "4.20.00"
+                };
+                bspBuilder.Save(bsp, !noPack);
+
+                //StandaloneBSPValidator.Program.Main(new[] { "..\\..\\cc3220.validatejob", "f:\\bsptest" });
             }
-
-
-            List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
-
-            MCUFamilyBuilder commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
-
-            var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
-            List<string> projectFiles = new List<string>();
-            commonPseudofamily.CopyFamilyFiles(ref famObj.CompilationFlags, projectFiles);
-
-            famObj.AdditionalSourceFiles = famObj.AdditionalSourceFiles.Concat(projectFiles).ToArray();
-
-            foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
-                frameworks.Add(fw);
-
-            foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample);
-
-            if (!noPeripheralRegisters)
-                famBuilder.AttachPeripheralRegisters(ParsePeripheralRegisters(famBuilder.Definition.PrimaryHeaderDir));
-
-            List<MCU> mcuDefinitions = new List<MCU>();
-            foreach (var mcuDef in famBuilder.MCUs)
-            {
-                var mcu = mcuDef.GenerateDefinition(famBuilder, bspBuilder, !noPeripheralRegisters, true);
-                mcuDefinitions.Add(mcu);
-            }
-
-            BoardSupportPackage bsp = new BoardSupportPackage
-            {
-                PackageID = "com.sysprogs.arm.ti.cc3220",
-                PackageDescription = "TI CC3220 Devices",
-                GNUTargetID = "arm-eabi",
-                GeneratedMakFileName = "cc3220.mak",
-                MCUFamilies = new[] { famObj },
-                SupportedMCUs = mcuDefinitions.ToArray(),
-                Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
-                PackageVersion = "2.30.00"
-            };
-            bspBuilder.Save(bsp, !noPack);
-
-            //StandaloneBSPValidator.Program.Main(new[] { "..\\..\\cc3220.validatejob", "f:\\bsptest" });
         }
     }
 }

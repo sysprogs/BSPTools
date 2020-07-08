@@ -1130,10 +1130,17 @@ namespace BSPGenerationTools
             public string SubstitutePath;   //Must work for ALL samples
         }
 
+        int _SuppressMissingSampleErrorsUntilEndOfDebugSession;
+
         protected virtual void OnMissingSampleFile(MissingSampleFileArgs args)
         {
-            //DO NOT REPLACE THIS WITH A WARNING! If needed, override this method in specific generators.
-            throw new Exception($"Missing sample file: {args.ExpandedPath}. Please setup fallback lookup rules.");
+            if (_SuppressMissingSampleErrorsUntilEndOfDebugSession == 0)
+            {
+                //DO NOT REPLACE THIS WITH A WARNING! If needed, override this method in specific generators.
+                throw new Exception($"Missing sample file: {args.ExpandedPath}. Please setup fallback lookup rules.");
+            }
+            else
+                Console.WriteLine($"Missing sample file: {args.ExpandedPath}. Please setup fallback lookup rules.");
         }
 
         public IEnumerable<CopiedSample> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null, IEnumerable<SysVarEntry> extraVariablesToValidateSamples = null)

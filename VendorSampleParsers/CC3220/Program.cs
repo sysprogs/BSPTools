@@ -109,6 +109,11 @@ namespace CC3220VendorSampleParser
                 XDCTOOLSCORE = _SettingsKey.GetValue("XDCToolsDirectory") as string ?? throw new Exception("Please specify the XDCTools directory via registry");
             }
 
+            protected override string FilterSDKDir(string dir)
+            {
+                return dir + ".vendorsamples";
+            }
+
             protected override void AdjustVendorSampleProperties(VendorSample vs)
             {
                 base.AdjustVendorSampleProperties(vs);
@@ -283,7 +288,7 @@ namespace CC3220VendorSampleParser
 
                 var filestr = File.ReadAllLines(impfile);
 
-                FREERTOS_INSTALL_DIR = Path.Combine(SDKdir, "FreeRTOSv10.1.1");
+                FREERTOS_INSTALL_DIR = Path.Combine(SDKdir, "FreeRTOSv10.2.1_191129");
 
                 for (int c = 0; c < filestr.Count(); c++)
                 {
@@ -347,14 +352,14 @@ namespace CC3220VendorSampleParser
                                                                     && !File.ReadAllText(s).Contains("$(NODE_JS)")
                                                                     )).ToArray();
 
-                GCC_ARMCOMPILER = ((string)Registry.CurrentUser.OpenSubKey(@"Software\Sysprogs\GNUToolchains").GetValue("SysGCC-arm-eabi-7.2.0")).Replace("\\arm-eabi", "");
+                GCC_ARMCOMPILER = ToolchainDirectory;
                 if (GCC_ARMCOMPILER == null)
                     throw new Exception("Cannot locate toolchain path from registry");
 
-                BuildFreeRtosKernel(Path.Combine(SDKdir, @"kernel\freertos\builds\CC3220S_LAUNCHXL\release\gcc"));
-                BuildFreeRtosKernel(Path.Combine(SDKdir, @"kernel\freertos\builds\CC3220SF_LAUNCHXL\release\gcc"));
-
                 UpdateImportMakefile(SDKdir);
+
+                foreach(var dir in Directory.GetDirectories(Path.Combine(SDKdir, @"kernel\freertos\builds")))
+                    BuildFreeRtosKernel(Path.Combine(dir, @"release\gcc"));
 
                 List<VendorSample> allSamples = new List<VendorSample>();
 
@@ -368,25 +373,18 @@ namespace CC3220VendorSampleParser
                     if (!makefile.Contains("gcc"))
                         continue;
 
+                    var sampleDir = Path.GetDirectoryName(makefile);
                     string nameExampl = makefile.Substring(makefile.IndexOf("examples") + 9).Replace("gcc\\Makefile", "");
 
-                    var nameLog = Path.Combine(Path.GetDirectoryName(makefile), "log.txt");
+                    var nameLog = Path.Combine(sampleDir, "log.txt");
+                    var markerFile = Path.Combine(sampleDir, "done.txt");
 
                     Console.WriteLine($"Compiling {nameExampl} ...");
 
-                    string namefl = "noname";
-                    if (File.ReadAllLines(makefile).Where(ln => ln.StartsWith("NAME")).Count() == 0)
-                        Console.WriteLine("NO NAME IN " + makefile);
-                    else
-                        namefl = File.ReadAllLines(makefile).Single(ln => ln.StartsWith("NAME")).Split('=')[1].Trim(' ').ToUpper();
+                    var dir = Path.GetDirectoryName(sampleDir);
+                    var id = dir.Substring(baseExampleDir.Length + 1).Replace('\\', '-');
 
-
-                    var sampleID = new VendorSampleID
-                    {
-                        SampleName = namefl
-                    };
-
-                    if (!filter.ShouldParseSampleForSpecificDevice(sampleID))
+                    if (!filter.ShouldParseAnySamplesInsideDirectory(sampleDir))
                         continue;
 
                     var startInfo = new ProcessStartInfo
@@ -394,31 +392,44 @@ namespace CC3220VendorSampleParser
                         FileName = "cmd.exe",
                         Arguments = $"/c {makeExecutable} clean",
                         UseShellExecute = false,
-                        WorkingDirectory = Path.GetDirectoryName(makefile)
+                        WorkingDirectory = sampleDir
                     };
 
-                    var cleanAction = Process.Start(startInfo);
-                    cleanAction.WaitForExit();
-                    if (cleanAction.ExitCode != 0)
-                        throw new Exception("Failed to clean" + makefile);
+                    bool buildSucceeded;
 
-                    startInfo.Arguments = $"/c {makeExecutable} -j{Environment.ProcessorCount} VERBOSE=1 > log.txt 2>&1";
+                    if (!File.Exists(markerFile))
+                    {
+                        var cleanAction = Process.Start(startInfo);
+                        cleanAction.WaitForExit();
+                        if (cleanAction.ExitCode != 0)
+                            throw new Exception("Failed to clean" + makefile);
 
-                    var compiler = Process.Start(startInfo);
+                        startInfo.Arguments = $"/c {makeExecutable} -j{Environment.ProcessorCount} VERBOSE=1 > log.txt 2>&1";
+
+                        var compiler = Process.Start(startInfo);
+
+                        compiler.WaitForExit();
+
+                        buildSucceeded = compiler.ExitCode == 0;
+                    }
+                    else
+                        buildSucceeded = true;
+
                     samplesDone++;
 
-                    compiler.WaitForExit();
-
-                    bool buildSucceeded = compiler.ExitCode == 0;
+                    CopyDriverFiles(SDKdir, sampleDir);
 
                     Console.ForegroundColor = ConsoleColor.Green;
 
-                    if (Directory.GetFiles(Path.GetDirectoryName(makefile), "*.out").Count() == 0)
+                    if (Directory.GetFiles(sampleDir, "*.out").Count() == 0)
                         buildSucceeded = false;
+
+                    if (buildSucceeded)
+                        File.WriteAllText(markerFile, "build succeeded");
 
                     if (!buildSucceeded)
                     {
-                        failedSamples.Add(new UnparseableVendorSample { BuildLogFile = nameLog, ID = sampleID });
+                        failedSamples.Add(new UnparseableVendorSample { BuildLogFile = nameLog, UniqueID = id });
                         Console.ForegroundColor = ConsoleColor.Red;
                     }
                     LogLine($"{samplesDone}/{exampleDirs.Length}: {nameExampl.TrimEnd('\\')}: " + (buildSucceeded ? "Succeeded" : "Failed "));
@@ -438,6 +449,8 @@ namespace CC3220VendorSampleParser
                     while (Directory.GetFiles(vs.Path, "*.c").Length == 0)
                         vs.Path = Path.GetDirectoryName(vs.Path);
 
+                    vs.InternalUniqueID = id;
+
                     allSamples.Add(vs);
                     //Clear
                     //                File.Delete(Path.Combine(compiler.StartInfo.WorkingDirectory, "log.txt"));
@@ -451,6 +464,21 @@ namespace CC3220VendorSampleParser
 
                 _FrameworkLocator.ThrowIfUnresolvedLibrariesFound();
                 return new ParsedVendorSamples { VendorSamples = allSamples.ToArray(), FailedSamples = failedSamples.ToArray() };
+            }
+
+            //This copes the files generated by TI SysConfig (but not other large binary files) back into the original SDK
+            private void CopyDriverFiles(string SDKDir, string sampleDir)
+            {
+                var originalSDKDir = Path.ChangeExtension(SDKDir, "").TrimEnd('.');
+                foreach(var fn in Directory.GetFiles(sampleDir))
+                {
+                    var ext = Path.GetExtension(fn).ToLower();
+                    if (ext == ".c" || ext == ".h")
+                    {
+                        var pathInsideSDKDir = fn.Substring(SDKDir.Length + 1);
+                        File.Copy(fn, Path.Combine(originalSDKDir, pathInsideSDKDir), true);
+                    }
+                }
             }
         }
 
