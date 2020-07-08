@@ -178,6 +178,8 @@ namespace CC3220VendorSampleParser
                 string aCurDir = Path.GetDirectoryName(nameFile);
                 Boolean flFlags = false;
 
+                lstFileInc.Add(aCurDir);
+
                 foreach (var ln in File.ReadAllLines(nameFile))
                 {
                     if (ln.StartsWith("CFLAGS =") || ln.StartsWith("CPPFLAGS ="))
@@ -209,8 +211,15 @@ namespace CC3220VendorSampleParser
 
                     if (ln.Contains(".obj:"))
                     {
-                        string file = ln.Remove(0, ln.IndexOf(":") + 1).Split('$')[0].Trim(' ');
-                        lstFileC.Add(Path.Combine(GetUpDir(file, aCurDir), file.Replace("../", "")));
+                        string files = ln.Remove(0, ln.IndexOf(":") + 1).Split('$')[0].Trim(' ');
+                        foreach(var file in files.Split(' '))
+                        {
+                            var fullPath = Path.GetFullPath(Path.Combine(aCurDir, file));
+
+                            if (!File.Exists(fullPath))
+                                throw new Exception("Missing " + fullPath);
+                            lstFileC.Add(fullPath);
+                        }
                     }
 
                     if (ln.Contains("\"-L"))
@@ -230,9 +239,9 @@ namespace CC3220VendorSampleParser
                 if (lstFileInc.Where(f => f.Contains("$")).Count() > 0)
                     throw new Exception("Path contains macros " + string.Join(", ", lstFileInc.Where(f => f.Contains("$"))));
 
-                vs.IncludeDirectories = lstFileInc.ToArray();
+                vs.IncludeDirectories = lstFileInc.Distinct().ToArray();
                 vs.PreprocessorMacros = lstDef.ToArray();
-                vs.SourceFiles = lstFileC.ToArray();
+                vs.SourceFiles = lstFileC.Distinct().ToArray();
                 vs.Configuration = new VendorSampleConfiguration
                 {
                     Frameworks = referencedFrameworks.Where(f => f != null).ToArray(),
@@ -240,8 +249,8 @@ namespace CC3220VendorSampleParser
 
                 if (vs.Configuration.Frameworks.Contains("com.sysprogs.arm.ti.cc3220.freertos"))
                 {
-                    AddConfigurationEntries(ref vs.Configuration.Configuration, "com.sysprogs.bspoptions.FreeRTOS_Heap_Implementation=Heap4 - contiguous heap area", "com.sysprogs.bspoptions.FreeRTOS_Port=Software FP");
-                    AddConfigurationEntries(ref vs.Configuration.MCUConfiguration, "com.sysprogs.bspoptions.arm.floatmode=-mfloat-abi=soft");
+                    AddConfigurationEntries(ref vs.Configuration.Configuration, "com.sysprogs.bspoptions.cc3220.freertos.heap=heap_4", "com.sysprogs.bspoptions.cc3220.freertos.portcore=CM4F");
+                    AddConfigurationEntries(ref vs.Configuration.MCUConfiguration, "com.sysprogs.bspoptions.arm.floatmode=-mfloat-abi=hard");
                 }
 
                 if (vs.Configuration.Frameworks.Contains("com.sysprogs.arm.ti.cc3220.mqtt"))

@@ -13,6 +13,8 @@
 			<string>DeviceFamily_CC3220</string>
 			<string>gcc</string>
 		</PreprocessorMacros>
+		<CFLAGS>-std=c99</CFLAGS>
+		<CXXFLAGS>-std=c++11</CXXFLAGS>
 		<LDFLAGS>-nostartfiles -eresetISR</LDFLAGS>
 	</CompilationFlags>
 </FamilyDefinition>

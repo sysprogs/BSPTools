@@ -21,7 +21,7 @@
 				ti\utils\json\source\utils.c=>json_utils.c;
 				ti\display\display.c=>ti_display.c
 				</RenameRules>
-				<AdvancedRenameRules>ti\\drivers\\(adc|button|camera|i2c|i2s|spi|timer|uart|watchdog)\.c$=>drv_{1}.c</AdvancedRenameRules>
+				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart|watchdog)\.c$=>drv_{1}.c;ti\\drivers\\apps\\(Button)\.c=>drv_{1}.c</AdvancedRenameRules>
 			</CopyJob>				
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\examples</SourceFolder>
@@ -104,6 +104,13 @@
 				<AutoIncludeMask>-*</AutoIncludeMask>	
 				<TargetFolder>source\ti\drivers</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
+				<Patches>
+					<Patch xsi:type="ReplaceLine">
+						<FilePath>net\wifi\porting\cc_pal.h</FilePath>
+						<OldLine>#elif defined (__clang__)</OldLine>
+						<NewLine>#elif defined (__clang__) &amp;&amp; !defined(__SYSPROGS_CODESENSE__)</NewLine>
+					</Patch>
+				</Patches>
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
@@ -156,6 +163,7 @@
 				<ProjectInclusionMask>sl*.c;sl*.h;bsd\*.c;bsd\*.h</ProjectInclusionMask>
 				<FilesToCopy>*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
+				<AdditionalIncludeDirs>bsd</AdditionalIncludeDirs>
 				<TargetFolder>source\ti\net</TargetFolder>
 			</CopyJob>	
 			</CopyJobs>
