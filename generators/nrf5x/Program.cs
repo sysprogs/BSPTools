@@ -193,9 +193,20 @@ namespace nrf5x
                     "PROVIDE(_etext = __etext);"
                 };
 
+
+                string suffix;
+                if (pass == LinkerScriptGenerationPass.Nosoftdev)
+                    suffix = "nosoftdev";
+                else if (pass == LinkerScriptGenerationPass.Reserve)
+                    suffix = $"{sd.Name.ToLower()}_reserve";
+                else
+                    suffix = sd.Name.ToLower();
+
                 int idx = generalizedName.IndexOf('_');
                 if (!sd.LinkerScriptWithMaximumReservedRAM.TryGetValue(generalizedName.Substring(0, idx), out var mems))
                 {
+                    File.WriteAllText(Path.Combine(ldsDirectory, $"{generalizedName}_{suffix}.lds"), $"/* The Nordic SDK did not include a linker script for this device/softdevice combination.\r\nIf you would like to use it nonetheless, consider porting another linker script based on the device/softdevice specifications. */\r\nINPUT(UNSUPPORTED_DEVICE_SOFTDEVICE_COMBINATION)\r\n");
+
                     _MissingSoftdeviceScripts.Add(new MissingSoftdeviceScriptInfo { MCU = generalizedName, Softdevice = sd.Name });
                     return;
                 }
@@ -267,14 +278,6 @@ namespace nrf5x
                 }
 
                 lines.AddRange(providedSymbols);
-
-                string suffix;
-                if (pass == LinkerScriptGenerationPass.Nosoftdev)
-                    suffix = "nosoftdev";
-                else if (pass == LinkerScriptGenerationPass.Reserve)
-                    suffix = $"{sd.Name.ToLower()}_reserve";
-                else
-                    suffix = sd.Name.ToLower();
 
                 File.WriteAllLines(Path.Combine(ldsDirectory, $"{generalizedName}_{suffix}.lds"), lines);
             }
