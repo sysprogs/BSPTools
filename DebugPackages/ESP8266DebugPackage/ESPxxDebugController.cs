@@ -23,9 +23,11 @@ namespace ESP8266DebugPackage
 
         protected override abstract IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool, string sharedSessionID);
 
+        public override string AdapterSpeedCommand => "adapter_khz";
+
         public override object TryConvertLegacyConfiguration(IBSPConfiguratorHost host, string methodDirectory, Dictionary<string, string> legacyConfiguration)
         {
-            ESPxxOpenOCDSettingsEditor editor = new ESPxxOpenOCDSettingsEditor(host, methodDirectory, null, default(KnownInterfaceInstance), _IsESP32);
+            ESPxxOpenOCDSettingsEditor editor = new ESPxxOpenOCDSettingsEditor(host, methodDirectory, null, default(KnownInterfaceInstance), _IsESP32, this);
             string value;
             if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.openocd.iface_script", out value))
                 editor.ReplaceScript(OpenOCDCommandLine.ScriptType.Interface, value);

@@ -24,8 +24,8 @@ namespace RISCVDebugPackage
     {
         public new RISCVOpenOCDSettings Settings => (RISCVOpenOCDSettings)base.Settings;
 
-        public RISCVOpenOCDSettingsEditor(IBSPConfiguratorHost host, LoadedBSP.LoadedDebugMethod method, RISCVOpenOCDSettings settings, KnownInterfaceInstance context)
-            : base(host, method.Directory, settings, context, settings == null)
+        public RISCVOpenOCDSettingsEditor(IBSPConfiguratorHost host, LoadedBSP.LoadedDebugMethod method, RISCVOpenOCDSettings settings, RISCVOpenOCDDebugController controller, KnownInterfaceInstance context)
+            : base(host, method.Directory, settings, context, controller, settings == null)
         {
         }
 
@@ -33,8 +33,6 @@ namespace RISCVDebugPackage
 
         public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Visible;
         public System.Windows.Visibility ResetModeVisibility { get; } = System.Windows.Visibility.Collapsed;
-
-        protected override string AdapterSpeedCommand => "adapter_khz";
 
         protected override void InsertResetAndHaltCommands(int idxLoad, QuickSetupDatabase.ProgrammingInterface iface, QuickSetupDatabase.TargetDeviceFamily device)
         {

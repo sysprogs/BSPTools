@@ -9,13 +9,15 @@ using System.Threading;
 
 namespace RISCVDebugPackage
 {
-    public class RISCVOpenOCDDebugController : IDebugMethodController, ICustomSettingsTypeProvider
+    public class RISCVOpenOCDDebugController : IDebugMethodController, ICustomSettingsTypeProvider, IOpenOCDDebugController
     {
         public virtual Type[] SettingsObjectTypes => new[] { typeof(RISCVOpenOCDSettings) };
 
         public virtual ICustomSettingsTypeProvider TypeProvider => this;
 
         public virtual bool SupportsConnectionTesting => true;
+
+        public string AdapterSpeedCommand => "adapter_khz";
 
         public virtual ICustomDebugMethodConfigurator CreateConfigurator(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host)
         {
