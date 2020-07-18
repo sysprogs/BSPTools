@@ -228,8 +228,10 @@ namespace nrf5x
 
                 if (pass == LinkerScriptGenerationPass.Nosoftdev)
                 {
-                    var indFl = lines.FindOrThrow(s => s.Contains("FLASH"));
-                    lines[indFl] = $"  FLASH (RX) :  ORIGIN = 0x{FLASHBase:x}, LENGTH = 0x{mems.FLASH.Origin + mems.FLASH.Length:x}";
+                    idx = lines.FindOrThrow(s => s.Contains("FLASH"));
+                    lines[idx] = $"  FLASH (RX) :  ORIGIN = 0x{FLASHBase:x}, LENGTH = 0x{mems.FLASH.Origin + mems.FLASH.Length - FLASHBase:x}";
+                    idx = lines.FindOrThrow(s => s.Contains("RAM ("));
+                    lines[idx] = $"  RAM (RWX) :  ORIGIN = 0x{SRAMBase:x}, LENGTH = 0x{mems.RAM.Origin + mems.RAM.Length - SRAMBase:x}";
                 }
                 else
                 {
@@ -372,9 +374,6 @@ namespace nrf5x
             public readonly string TargetDevice;
 
             bool _HasBLEObservers, _HasPowerMgt;
-
-            public uint FLASHSize => (uint)(FLASH.Origin - FLASHBase);
-            public uint RAMSize => (uint)(RAM.Origin - SRAMBase);
 
             public bool HasAllNecessarySymbols => _HasBLEObservers;// && _HasPowerMgt;
 
