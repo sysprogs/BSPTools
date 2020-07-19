@@ -1387,8 +1387,9 @@ namespace BSPGenerationTools
 
     public static class BSPGeneratorTools
     {
-        public static CortexCore ParseCoreName(string core)
+        public static CortexCore ParseCoreName(string core, out FPUType fpu)
         {
+            fpu = FPUType.None;
             switch (core.Replace(" ", ""))
             {
                 case "ARMCortex-M0":
@@ -1400,6 +1401,7 @@ namespace BSPGenerationTools
                 case "ARMCortex-M4":
                     return CortexCore.M4;
                 case "ARMCortex-M7":
+                    fpu = FPUType.SP;
                     return CortexCore.M7;
                 case "Cortex-M0":
                     return CortexCore.M0;
@@ -1412,12 +1414,16 @@ namespace BSPGenerationTools
                 case "Cortex-M4":
                     return CortexCore.M4;
                 case "Cortex-M4F": //FPU
+                    fpu = FPUType.SP;
                     return CortexCore.M4;
                 case "Cortex-M4F;M0"://MultiCore
+                    fpu = FPUType.SP;
                     return CortexCore.M4;
                 case "Cortex-M4F; Cortex-M0+"://MultiCore
+                    fpu = FPUType.SP;
                     return CortexCore.M4;
                 case "Cortex-M7":
+                    fpu = FPUType.SP;
                     return CortexCore.M7;
                 default:
                     return CortexCore.Invalid;
@@ -1454,7 +1460,7 @@ namespace BSPGenerationTools
                 };
 
                 if (coreColumn != null)
-                    mcu.Core = ParseCoreName(items[headers[coreColumn]]);
+                    mcu.Core = ParseCoreName(items[headers[coreColumn]], out mcu.FPU);
 
                 if (sizesAreInKilobytes)
                 {
