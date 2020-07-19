@@ -1401,7 +1401,7 @@ namespace BSPGenerationTools
                 case "ARMCortex-M4":
                     return CortexCore.M4;
                 case "ARMCortex-M7":
-                    fpu = FPUType.SP;
+                    fpu = FPUType.DP;
                     return CortexCore.M7;
                 case "Cortex-M0":
                     return CortexCore.M0;
@@ -1423,7 +1423,7 @@ namespace BSPGenerationTools
                     fpu = FPUType.SP;
                     return CortexCore.M4;
                 case "Cortex-M7":
-                    fpu = FPUType.SP;
+                    fpu = FPUType.DP;
                     return CortexCore.M7;
                 default:
                     return CortexCore.Invalid;

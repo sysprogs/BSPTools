@@ -210,30 +210,7 @@ namespace InfineonXMC_bsp_generator
             };
 
         }
-        //===========================================================
-        //  Correct name Mcu for Segger
-        static void UpdateNameMcuToSeggerFormat(ref List<MCU> pMcuList)
-        {
-            List<MCUBuilder> aoUpdateListNCU = new List<MCUBuilder>();
-            Regex aReg = new Regex(@"^(XMC[\d]+)[_]?([\w]?)([\d]+)[x]?([\w]+)");
-            foreach (var mcu in pMcuList)
-            {
-                var m = aReg.Match(mcu.ID);
-                if (!m.Success)
-                    throw new Exception("Error: Failed to update name of Mcu");
-                mcu.ID = $"{m.Groups[1].Value}-{m.Groups[4].Value}";
-            }
-            // Remove dublicate
-            for (int i = 0; i < pMcuList.Count - 1; i++)
-            {
-                for (var c = i + 1; c < pMcuList.Count; c++)
-                    if (pMcuList[i].ID == pMcuList[c].ID)
-                    {
-                        pMcuList.RemoveAt(c);
-                        c--;
-                    }
-            }
-        }
+
         //===========================================================
         // Correct name Mcu for macros
         static List<MCUBuilder> UpdateListMCU(List<MCUBuilder> pMcuList)
@@ -246,6 +223,8 @@ namespace InfineonXMC_bsp_generator
                 if (!m.Success)
                     throw new Exception("Error: Failed to update name of Mcu");
                 mcu.Name = $"{m.Groups[1].Value}_{m.Groups[2].Value}{m.Groups[3].Value}x{m.Groups[5].Value}";
+                if (mcu.Core == CortexCore.M4)
+                    mcu.FPU = FPUType.SP;
                 if (aoUpdateListNCU.IndexOf(mcu) < 0)
                     aoUpdateListNCU.Add(mcu);
             }
@@ -321,8 +300,6 @@ namespace InfineonXMC_bsp_generator
                         exampleDirs.Add(sample.RelativePath);
                 }
 
-                UpdateNameMcuToSeggerFormat(ref mcuDefinitions);
-
                 BoardSupportPackage bsp = new BoardSupportPackage
                 {
                     PackageID = "com.sysprogs.arm.infineon.xmc",
@@ -334,7 +311,7 @@ namespace InfineonXMC_bsp_generator
                     Frameworks = frameworks.ToArray(),
                     Examples = exampleDirs.ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
-                    PackageVersion = "2.1.24"
+                    PackageVersion = "2.1.24R2"
                 };
 
                 bspBuilder.Save(bsp, true);
