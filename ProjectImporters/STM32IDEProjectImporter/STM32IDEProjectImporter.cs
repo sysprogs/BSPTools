@@ -97,6 +97,7 @@ namespace STM32IDEProjectImporter
                         {
                             IncludeDirectories = sample.IncludeDirectories,
                             PreprocessorMacros = sample.PreprocessorMacros,
+                            LinkerScript = sample.LinkerScript,
                         }
                     }
                 }
