@@ -121,7 +121,12 @@ namespace ESP8266DebugPackage
             _ESPIDFMode = host.MCU.Configuration.ContainsKey("com.sysprogs.esp32.idf.sdkconfig");
 
             if (Device.SelectedItem.Script == null)
-                Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
+            {
+                if (Device.Items.Count > 0)
+                    ResetToDefaultDevice();
+                else
+                    Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
+            }
 
             if (settings == null)
             {

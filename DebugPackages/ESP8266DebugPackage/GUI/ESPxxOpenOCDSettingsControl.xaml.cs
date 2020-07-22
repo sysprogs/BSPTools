@@ -41,6 +41,7 @@ namespace ESP8266DebugPackage.GUI
             InitializeComponent();
 
             host.MakeSearchableComboBox(InterfaceComboBox, (i, f) => _Editor?.FilterItem(i, f) ?? false, Resources["interfaceScriptSelectionControl"]);
+            host.MakeSearchableComboBox(DeviceComboBox, (i, f) => _Editor?.FilterItem(i, f) ?? false, Resources["deviceScriptSelectionControl"]);
         }
 
 
@@ -121,6 +122,12 @@ namespace ESP8266DebugPackage.GUI
         private void ESP32Diag_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://visualgdb.com/tutorials/esp32/flashdiag");
+        }
+
+        private void ResetToDefaultDevice(object sender, RoutedEventArgs e)
+        {
+            _Editor.ResetToDefaultDevice();
+            DeviceComboBox.IsDropDownOpen = false;
         }
     }
 
