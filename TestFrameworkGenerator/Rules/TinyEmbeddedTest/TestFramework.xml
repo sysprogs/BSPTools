@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.tinyembtest</ID>
 	<Name>TinyEmbeddedTest</Name>
-	<Version>1.4</Version>
+	<Version>1.5</Version>
 	<MinimumEngineVersion>5.5.2</MinimumEngineVersion>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
@@ -47,6 +47,11 @@
 			<ExpectedSymbolType>1</ExpectedSymbolType>
 		  </TestDiscoverer>
 		</TestDiscoverers>
+		<AttributeDiscoverers>
+			<TestAttributeDiscoverer xsi:type="SymbolBasedAttributeDiscoverer">
+				<AttributeDeclarationSymbol>TestInstance_([^:]+)::attachAttributes\(TestAttributeCollection*&lt;([^&gt;]+)&gt;.*</AttributeDeclarationSymbol>
+			</TestAttributeDiscoverer>
+		</AttributeDiscoverers>
 		<TestHooks>
 		  <TestHook xsi:type="TestsCompletedHook">
 			<Expression>SysprogsTestHook_TestsCompleted</Expression>

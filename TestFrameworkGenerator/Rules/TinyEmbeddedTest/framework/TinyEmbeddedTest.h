@@ -57,11 +57,31 @@ template <typename _TestGroup> static inline TestGroup *GetTestGroup()
 
 #define TEST_GROUP(groupName) struct TestGroup_ ## groupName; \
     struct TestGroup_ ## groupName : public TestGroup
-    
+
+template <class Attr1 = void, class Attr2 = void, class Attr3 = void, class Attr4 = void, class Attr5 = void, class Attr6 = void, class Attr7 = void, class Attr8 = void>
+class TestAttributeCollection
+{
+};
+
 #define TEST(groupName, testName) class TestInstance_ ## groupName ## _ ## testName : public TestInstance \
 { \
 public: \
     void run(); \
+}; \
+TestInstance_ ## groupName ## _ ## testName testInstance_ ## groupName ## _ ## testName; \
+void __attribute__((constructor)) RegisterTest_ ## groupName ## _ ## testName () \
+{ \
+    GetTestGroup<TestGroup_ ## groupName>()->RegisterTest(&testInstance_ ## groupName ## _ ## testName); \
+} \
+void TestInstance_ ## groupName ## _ ## testName::run()
+        
+//The attachAttributes() method is intentionally blank and is only used during ELF symbol enumeration
+#define TEST_WITH_ATTRIBUTES(groupName, testName, ...) class TestInstance_ ## groupName ## _ ## testName : public TestInstance \
+{ \
+public: \
+	void __attribute__ ((noinline)) attachAttributes(TestAttributeCollection<__VA_ARGS__> * = nullptr) {} \
+    void run(); \
+	TestInstance_ ## groupName ## _ ## testName () { attachAttributes(); } \
 }; \
 TestInstance_ ## groupName ## _ ## testName testInstance_ ## groupName ## _ ## testName; \
 void __attribute__((constructor)) RegisterTest_ ## groupName ## _ ## testName () \

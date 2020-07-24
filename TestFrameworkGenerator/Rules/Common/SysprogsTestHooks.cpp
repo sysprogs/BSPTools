@@ -201,7 +201,7 @@ extern "C" int __attribute__((weak)) main()
 {
     return 0;
 }
-#else
+#elif !defined (__ICCARM__)
 extern "C" int main();
 #endif
 
