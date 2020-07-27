@@ -18,7 +18,7 @@ namespace BSPGenerationTools
 
             bool insideMemoryBlock = false;
 
-            Regex rgMemory = new Regex("([a-zA-Z0-9]+)[ \t]+\\([^()]+\\)[ \t:]+ORIGIN[ \t]*=[ \t]*0x([0-9A-Fa-f]+),[ \t]*LENGTH[ \t]*=[ \t]*0x([0-9A-Fa-f]+)");
+            Regex rgMemory = new Regex("([a-zA-Z0-9_]+)[ \t]+\\([^()]+\\)[ \t:]+ORIGIN[ \t]*=[ \t]*0x([0-9A-Fa-f]+),[ \t]*LENGTH[ \t]*=[ \t]*0x([0-9A-Fa-f]+)");
             List<MCUMemory> memories = new List<MCUMemory>();
 
             foreach (var line in File.ReadAllLines(linkerScript))
