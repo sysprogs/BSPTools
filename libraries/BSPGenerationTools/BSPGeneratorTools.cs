@@ -30,6 +30,7 @@ namespace BSPGenerationTools
         M4,
         M7,
         A7,
+        R4,
         R5,
     }
 
@@ -798,6 +799,7 @@ namespace BSPGenerationTools
 
             switch (core)
             {
+                case CortexCore.R4:
                 case CortexCore.R5:
                     flag = $"-mfpu=vfpv3{sp}-d16";
                     break;
@@ -864,6 +866,10 @@ namespace BSPGenerationTools
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
                     coreName = "M7";
                     freertosPort = "ARM_CM7/r0p1";
+                    break;
+                case CortexCore.R4:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r4 -mthumb";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CR4" };
                     break;
                 case CortexCore.R5:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mthumb";
