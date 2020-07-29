@@ -6,9 +6,5 @@
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\NonRTOS\source</StartupFileDir>
 	<Subfamilies></Subfamilies>
 	<CompilationFlags>
-		<IncludeDirectories>
-		</IncludeDirectories>
-		<PreprocessorMacros>
-		</PreprocessorMacros>
 	</CompilationFlags>
 </FamilyDefinition>

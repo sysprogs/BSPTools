@@ -39,7 +39,7 @@
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\NonRTOS</SourceFolder>
-					<ProjectInclusionMask>-*\HL_sys_main.c;*.c;*.h;*.s</ProjectInclusionMask>
+					<ProjectInclusionMask>-*\HL_sys_main.c;-*\sys_main.c;*.c;*.h;*.s</ProjectInclusionMask>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
 				</CopyJob>	
@@ -78,6 +78,56 @@
 			   <RequiredFrameworks>
 				<string>com.sysprogs.arm.ti.rm57x.nonrtos</string>
 			  </RequiredFrameworks> 
+			  <ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+					  <PropertyEntry xsi:type="Enumerated">
+						<Name>LED Port Group</Name>
+						<UniqueID>com.sysprogs.examples.halcogen.LEDPORT</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the port group where the LED is connected</Description>
+						<SuggestionList>
+						  <Suggestion>
+							<InternalValue>PORTA</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTB</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTC</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTD</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTE</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTF</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTG</InternalValue>
+						  </Suggestion>
+						</SuggestionList>
+						<DefaultEntryIndex>1</DefaultEntryIndex>
+						<AllowFreeEntry>false</AllowFreeEntry>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Integral">
+						<Name>LED1 Port Number</Name>
+						<UniqueID>com.sysprogs.examples.halcogen.LEDBIT</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the port number of the LED1 port</Description>
+						<DefaultValue>6</DefaultValue>
+						<MinValue>0</MinValue>
+						<MaxValue>31</MaxValue>
+						<Increment>1</Increment>
+					  </PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			  </ConfigurableProperties>
 			</EmbeddedSample>
 		</SmartSample>	
 		<SmartSample>
@@ -90,6 +140,56 @@
 			   <RequiredFrameworks>
 				<string>com.sysprogs.arm.ti.rm57x.freertos</string>
 			  </RequiredFrameworks> 
+			  <ConfigurableProperties>
+				<PropertyGroups>
+				  <PropertyGroup>
+					<Properties>
+					  <PropertyEntry xsi:type="Enumerated">
+						<Name>LED Port Group</Name>
+						<UniqueID>com.sysprogs.examples.halcogen.LEDPORT</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the port group where the LED is connected</Description>
+						<SuggestionList>
+						  <Suggestion>
+							<InternalValue>PORTA</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTB</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTC</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTD</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTE</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTF</InternalValue>
+						  </Suggestion>
+						  <Suggestion>
+							<InternalValue>PORTG</InternalValue>
+						  </Suggestion>
+						</SuggestionList>
+						<DefaultEntryIndex>1</DefaultEntryIndex>
+						<AllowFreeEntry>false</AllowFreeEntry>
+					  </PropertyEntry>
+					  <PropertyEntry xsi:type="Integral">
+						<Name>LED1 Port Number</Name>
+						<UniqueID>com.sysprogs.examples.halcogen.LEDBIT</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the port number of the LED1 port</Description>
+						<DefaultValue>6</DefaultValue>
+						<MinValue>0</MinValue>
+						<MaxValue>31</MaxValue>
+						<Increment>1</Increment>
+					  </PropertyEntry>
+					</Properties>
+					<CollapsedByDefault>false</CollapsedByDefault>
+				  </PropertyGroup>
+				</PropertyGroups>
+			  </ConfigurableProperties>			  
 			</EmbeddedSample>
 		</SmartSample>	
 	</SmartSamples>

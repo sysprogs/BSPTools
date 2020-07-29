@@ -76,6 +76,7 @@ namespace RM57x
 
                 CortexCore core;
                 bool isBigEndian = false;
+                bool isThumb = true;
 
                 switch (deviceID)
                 {
@@ -85,6 +86,7 @@ namespace RM57x
                     case "TMS570LS1224PGE":
                         core = CortexCore.R4;
                         isBigEndian = true;
+                        isThumb = false;
                         break;
                     default:
                         throw new Exception($"Unknown ARM Cortex core for {deviceID}. Please update the logic above.");
@@ -100,7 +102,7 @@ namespace RM57x
                 famBuilder.Definition.Name = familyID;
 
                 if (isBigEndian)
-                    famBuilder.Definition.CompilationFlags.COMMONFLAGS += " -mbig-endian";
+                    famBuilder.Definition.CompilationFlags.COMMONFLAGS += " -mbig-endian -mbe32";
 
                 //string deviceDefinitionFile = @"DeviceDefinitions/CC_3220.xml";
 
@@ -137,13 +139,20 @@ namespace RM57x
                 if (!noPeripheralRegisters)
                     famBuilder.AttachPeripheralRegisters(ParsePeripheralRegisters(famBuilder.Definition.PrimaryHeaderDir, deviceID));
 
+                if (!isThumb)
+                    famObj.CompilationFlags.COMMONFLAGS = famObj.CompilationFlags.COMMONFLAGS.Replace("-mthumb", "-marm");
+
                 List<MCU> mcuDefinitions = new List<MCU>();
                 foreach (var mcuDef in famBuilder.MCUs)
                 {
                     var mcu = mcuDef.GenerateDefinition(famBuilder, bspBuilder, !noPeripheralRegisters, true);
+
                     mcu.AdditionalSystemVars = (mcu.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[]
                     {
-                        new SysVarEntry{ Key = "com.sysprogs.linker_script", Value = linkerScriptPath.Substring(nonRTOSDir.Length + 1).Replace('\\', '/')}
+                        new SysVarEntry{ Key = "com.sysprogs.linker_script", Value = linkerScriptPath.Substring(nonRTOSDir.Length + 1).Replace('\\', '/')},
+                        CreateHeaderFileVariable(nonRTOSDir, "common.h"),
+                        CreateHeaderFileVariable(nonRTOSDir, "gio.h"),
+                        CreateHeaderFileVariable(nonRTOSDir, "het.h"),
                     }).ToArray();
 
                     mcuDefinitions.Add(mcu);
@@ -172,13 +181,24 @@ namespace RM57x
             }
         }
 
+        static SysVarEntry CreateHeaderFileVariable(string baseDir, string fileName)
+        {
+            var matchedFile = Directory.GetFiles(baseDir, "*.h", SearchOption.AllDirectories).Where(f =>
+            {
+                var nameOnly = Path.GetFileName(f);
+                return StringComparer.InvariantCultureIgnoreCase.Compare(nameOnly, fileName) == 0 || nameOnly.EndsWith("_" + fileName, StringComparison.InvariantCultureIgnoreCase);
+            }).OrderBy(f => f.Length).First();
+
+            return new SysVarEntry { Key = "com.sysprogs.halcogen." + fileName, Value = Path.GetFileName(matchedFile) };
+        }
+
         private static void ApplyKnownPatches(string dir)
         {
             foreach (var file in Directory.GetFiles(dir, "HL_sys_startup.c", SearchOption.AllDirectories))
             {
                 var lines = File.ReadAllLines(file).ToList();
                 int idx = -1;
-                for (int i = 0; i< lines.Count; i++)
+                for (int i = 0; i < lines.Count; i++)
                     if (lines[i].Contains("esmGroup3Notification(esmREG,esmREG->SR1[2]);"))
                     {
                         idx = i;
