@@ -130,6 +130,13 @@ namespace RM57x
 
                 famObj.AdditionalSourceFiles = famObj.AdditionalSourceFiles.Concat(projectFiles).ToArray();
 
+                if (!Directory.Exists(Path.Combine(bspBuilder.Directories.InputDir, "FreeRTOS")))
+                {
+                    Console.WriteLine("Missing FreeRTOS directory. Skipping FreeRTOS framework and project sample...");
+                    commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Where(f => !f.ID.Contains("freertos")).ToArray();
+                    commonPseudofamily.Definition.SmartSamples = commonPseudofamily.Definition.SmartSamples.Where(f => f.EmbeddedSample.Name.IndexOf("freertos", StringComparison.InvariantCultureIgnoreCase) == -1).ToArray();
+                }
+
                 foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
 
