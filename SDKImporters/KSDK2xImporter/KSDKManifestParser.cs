@@ -197,7 +197,10 @@ namespace KSDK2xImporter
                 var vendorSamples = TranslateSampleProjects();
 
                 var version = _Manifest.DocumentElement.GetAttribute("version");
-                if (version == "")
+                if (string.IsNullOrEmpty(version))
+                    version = _Manifest.DocumentElement.SelectSingleNode("ksdk/@version")?.InnerText;
+
+                if (string.IsNullOrEmpty(version))
                     version = "unknown";
 
                 var allFamilies = _SpecializedDevices.Select(d => d.BuildMCUFamily()).ToArray();
@@ -296,7 +299,7 @@ namespace KSDK2xImporter
                     HashSet<string> moreFlags = new HashSet<string>();
                     if (File.Exists(cmakeLists))
                     {
-                        foreach(var line in File.ReadAllLines(cmakeLists))
+                        foreach (var line in File.ReadAllLines(cmakeLists))
                         {
                             var match = rgCPUOrFPU.Match(line);
                             if (match.Success)
