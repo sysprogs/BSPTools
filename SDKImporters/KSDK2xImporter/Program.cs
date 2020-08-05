@@ -43,6 +43,8 @@ namespace KSDK2xImporter
             {
                 Console.WriteLine("Warning: " + warning);
             }
+
+            public MCUDefinition TryParseSVDFile(string fullPath, string deviceName) => null;
         }
 
 
