@@ -1,8 +1,8 @@
 #include "SysprogsTestHooks.h"
-#include <FastSemihosting.h>
 #include <string.h>
 
 #ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
+#include <FastSemihosting.h>
 
 #include <SysprogsProfilerInterface.h>
 
