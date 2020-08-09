@@ -132,6 +132,7 @@
     <AdditionalHeaderFiles />
     <AdditionalIncludeDirs />
     <AdditionalPreprocessorMacros>
+		<string>SIMULATION</string>
     </AdditionalPreprocessorMacros>
 		<TestSelection xsi:type="ArgumentBasedTestSelection">
 			  <GlobalArgumentTemplate>/runtests $(PerTestArguments)</GlobalArgumentTemplate>
