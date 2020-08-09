@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.tinyembtest</ID>
 	<Name>TinyEmbeddedTest</Name>
-	<Version>1.5</Version>
+	<Version>2.0</Version>
 	<MinimumEngineVersion>5.5.2</MinimumEngineVersion>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
@@ -28,8 +28,6 @@
 			<string>    RunAllTests();</string>
 			<string>}</string>
 		</InitializationLines>
-	</Embedded>
-	<Common>
 		<TestDiscoverers>
 		  <TestDiscoverer xsi:type="SymbolBasedScopeDiscoverer">
 			<TargetDemangledNames>true</TargetDemangledNames>
@@ -51,7 +49,9 @@
 			<TestAttributeDiscoverer xsi:type="SymbolBasedAttributeDiscoverer">
 				<AttributeDeclarationSymbol>TestInstance_([^:]+)::attachAttributes\(TestAttributeCollection*&lt;([^&gt;]+)&gt;.*</AttributeDeclarationSymbol>
 			</TestAttributeDiscoverer>
-		</AttributeDiscoverers>
+		</AttributeDiscoverers>		
+	</Embedded>
+	<Common>
 		<TestHooks>
 		  <TestHook xsi:type="TestsCompletedHook">
 			<Expression>SysprogsTestHook_TestsCompleted</Expression>
@@ -127,4 +127,33 @@
 			</TestFrameworkSample>
 		</Samples>
 	</Common>
+  <Windows>
+    <AdditionalSourceFiles />
+    <AdditionalHeaderFiles />
+    <AdditionalIncludeDirs />
+    <AdditionalPreprocessorMacros>
+    </AdditionalPreprocessorMacros>
+		<TestSelection xsi:type="ArgumentBasedTestSelection">
+			  <GlobalArgumentTemplate>/runtests $(PerTestArguments)</GlobalArgumentTemplate>
+			  <TestIDRegex>(.*)</TestIDRegex>
+			  <PerTestArgumentTemplate>$(1)</PerTestArgumentTemplate>
+		</TestSelection>
+		<AdvancedTestDiscoverers>
+		  <TestDiscoverer xsi:type="OutputBasedTestDiscoverer">
+			<CommandLineArguments>/listtests</CommandLineArguments>
+			<TargetDemangledNames>true</TargetDemangledNames>
+			<TestRegex>group *= *'([^']*)', *test *= *'([^']*)', *file *= *'([^']*)', *line *= *'([^']*)', *address *= *'([^']*)', *attributes *= *'([^']*)'</TestRegex>
+			<UniqueNameFormat>{1}.{2}</UniqueNameFormat>
+			<StructuredInternalNameFormat>{1}.{2}</StructuredInternalNameFormat>
+			<UserFriendlyNameFormat>{1}::{2}</UserFriendlyNameFormat>
+			<SecondaryIDFormat>{1}::{2}</SecondaryIDFormat>
+			<ShortUserFriendlyNameFormat>{2}</ShortUserFriendlyNameFormat>
+			<AttributeListGroup>6</AttributeListGroup>
+		  </TestDiscoverer>
+		</AdvancedTestDiscoverers>	
+		<TestReportChannel xsi:type="PipeBasedTestChannelWithEnv">
+		  <EnvironmentVariableName>SYSPROGS_TEST_REPORTING_PIPE</EnvironmentVariableName>
+		  <PipeTimestampVariableName>g_SysprogsTestReportTimestamp</PipeTimestampVariableName>
+		</TestReportChannel>
+  </Windows>	
 </TestFrameworkDefinition>

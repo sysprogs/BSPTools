@@ -37,6 +37,7 @@ extern "C"
     void __attribute__((noinline)) SysprogsTestHook_SelectTests(int testCount, void **pTests);
     void __attribute__((noinline)) SysprogsTestHook_TestStarting(void *pTest);
     void __attribute__((noinline)) SysprogsTestHook_TestStartingEx(const char *pFullyQualifiedName);
+    void __attribute__((noinline)) SysprogsTestHook_TestStartingEx2(const char *pGroupName, const char *pTestName);
     void __attribute__((noinline)) SysprogsTestHook_TestEnded();
 	void __attribute__((noinline)) SysprogsTestHook_OutputMessage(TestMessageSeverity severity, const char *pMessage);
 	void __attribute__((noinline)) SysprogsTestHook_OutputMessageEx(TestMessageSeverity severity, const char *pMessage, int size);

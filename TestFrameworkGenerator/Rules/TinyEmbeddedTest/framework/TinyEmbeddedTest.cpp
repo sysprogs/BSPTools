@@ -3,7 +3,7 @@
 #include "TinyEmbeddedTest.h"
 #include "SysprogsTestHooks.h"
 
-#ifndef __ICCARM__
+#if !defined(__ICCARM__) && !defined(SIMULATION)
 #include <alloca.h>
 #endif
 
@@ -37,11 +37,15 @@ void RunAllTests()
         for (TestInstance *pTest = pGroup->m_pFirstTest; pTest; pTest = pTest->m_pNextTestInGroup)
             pAllInstances[index++] = pTest;
     
+#ifdef SIMULATION
+	TinyEmbeddedTest::InitializeSimulation(testCount, pAllInstances);
+#endif
+	
     SysprogsTestHook_SelectTests(testCount, (void **)pAllInstances);
     
     TestGroup *pGroup = 0;
-    
-    for (index = testCount - 1; index >= 0; index--)
+
+	for (index = testCount - 1; index >= 0; index--)
     {
         TestInstance *pInstance = pAllInstances[index];
         if (!pInstance)
@@ -55,7 +59,11 @@ void RunAllTests()
                 pGroup->setup();
         }
         
+#ifdef STORE_TEST_NAMES
+		SysprogsTestHook_TestStartingEx2(pInstance->m_pGroup->GetName(), pInstance->GetName());
+#else
 	    SysprogsTestHook_TestStarting(pInstance);
+#endif
 	    
 	    pGroup->TestSetup(pInstance);
 	    
