@@ -14,6 +14,10 @@ class MemoryLeakTestScope
 
 	static size_t GetNumberOfAllocatedBytes()
 	{
+#if defined (SIMULATION) && defined(_WIN32)
+		extern size_t GetNumberOfWin32AllocatedBytes();
+		return GetNumberOfWin32AllocatedBytes();
+#else
 		struct mallinfo info;
 #ifdef __ICCARM__
 		info = __iar_dlmallinfo();
@@ -21,6 +25,7 @@ class MemoryLeakTestScope
 		info = mallinfo();
 #endif
 		return info.uordblks;
+#endif
 	}
 
   public:

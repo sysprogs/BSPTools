@@ -2,10 +2,11 @@
 
 #ifdef SIMULATION
 
-#include <windows.h>
-#include <stdio.h>
+#include <crtdbg.h>
 #include <set>
+#include <stdio.h>
 #include <string>
+#include <windows.h>
 
 namespace TinyEmbeddedTest
 {
@@ -36,7 +37,7 @@ namespace TinyEmbeddedTest
 
 					if (pTag && tagLength)
 						fwrite(pTag, tagLength, 1, stdout);
-					
+
 					printf("'\n");
 				}
 			}
@@ -89,6 +90,27 @@ namespace TinyEmbeddedTest
 		LPSTR pCommandLine = GetCommandLine();
 		return strstr(pCommandLine, "/listtests") || strstr(pCommandLine, "/runtests");
 	}
+} // namespace TinyEmbeddedTest
+
+size_t GetNumberOfWin32AllocatedBytes()
+{
+	_HEAPINFO info = {
+		0,
+	};
+
+	size_t allocated = 0;
+
+	for (;;)
+	{
+		int ret = _heapwalk(&info);
+		if (ret == _HEAPEND || !info._pentry)
+			break;
+
+		if (info._useflag == _USEDENTRY)
+			allocated += info._size;
+	}
+
+	return allocated;
 }
 
 #endif
