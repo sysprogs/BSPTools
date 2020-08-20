@@ -205,6 +205,8 @@ namespace nrf5x
                 int idx = generalizedName.IndexOf('_');
                 if (!sd.LinkerScriptWithMaximumReservedRAM.TryGetValue(generalizedName.Substring(0, idx), out var mems))
                 {
+                    if (pass == LinkerScriptGenerationPass.Nosoftdev)
+                        return;
                     File.WriteAllText(Path.Combine(ldsDirectory, $"{generalizedName}_{suffix}.lds"), $"/* The Nordic SDK did not include a linker script for this device/softdevice combination.\r\nIf you would like to use it nonetheless, consider porting another linker script based on the device/softdevice specifications. */\r\nINPUT(UNSUPPORTED_DEVICE_SOFTDEVICE_COMBINATION)\r\n");
 
                     _MissingSoftdeviceScripts.Add(new MissingSoftdeviceScriptInfo { MCU = generalizedName, Softdevice = sd.Name });
