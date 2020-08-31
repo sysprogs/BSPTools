@@ -25,16 +25,16 @@
 				</Patch>	
 				<Patch xsi:type="InsertLines">
 					<FilePath>src\gtest.cc</FilePath>
-					<AfterLine>  impl-&gt;set_current_test_info(NULL);</AfterLine>
+					<AfterLine>  impl-&gt;set_current_test_info(nullptr);</AfterLine>
 					<InsertedLines>
 						<string>  SysprogsTestHook_TestEnded();</string>
 					</InsertedLines>
 				</Patch>	
 				<Patch xsi:type="InsertLines">
 					<FilePath>src\gtest.cc</FilePath>
-					<AfterLine>  if (result_type != TestPartResult::kSuccess) {</AfterLine>
+					<AfterLine>      result_type != TestPartResult::kSkip) {</AfterLine>
 					<InsertedLines>
-						<string>      SysprogsTestHook_TestFailed(NULL, message.c_str(), NULL);</string>
+						<string>      SysprogsTestHook_TestFailed(nullptr, message.c_str(), nullptr);</string>
 					</InsertedLines>
 				</Patch>	
 				<Patch xsi:type="InsertLines">
@@ -53,8 +53,8 @@
 				</Patch>	
 				<Patch xsi:type="ReplaceLine">
 					<FilePath>src\gtest.cc</FilePath>
-					<OldLine>      test_case->set_should_run(test_case->should_run() || is_selected);</OldLine>
-					<NewLine>      test_case->set_should_run(test_case->should_run() || is_selected);
+					<OldLine>      test_suite->set_should_run(test_suite->should_run() || is_selected);</OldLine>
+					<NewLine>      test_suite->set_should_run(test_suite->should_run() || is_selected);
       if (test_info-&gt;should_run_)
         testInfos.push_back(test_info);
     }
@@ -74,11 +74,11 @@
 				</Patch>	
 				<Patch xsi:type="ReplaceLine">
 					<FilePath>src\gtest.cc</FilePath>
-					<OldLine>  gettimeofday(&amp;now, NULL);</OldLine>
+					<OldLine>  gettimeofday(&amp;now, nullptr);</OldLine>
 					<NewLine>#ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
   return 0;
 #else
-  gettimeofday(&amp;now, NULL);
+  gettimeofday(&amp;now, nullptr);
 #endif
 </NewLine>
 				</Patch>	

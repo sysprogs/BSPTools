@@ -1,10 +1,11 @@
 #include "SysprogsTestHooks.h"
-#ifndef SIMULATION
-#include <FastSemihosting.h>
-#endif
 #include <string.h>
 
 #ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
+
+#ifndef SIMULATION
+#include <FastSemihosting.h>
+#endif
 
 #include <SysprogsProfilerInterface.h>
 
@@ -81,6 +82,10 @@ static int WaitForConnectionOnLocalSocket(const char* name)
 
     return clientSock;
 }
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
 
 class TestOutputPipe
