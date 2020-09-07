@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace STM32CubeMXImporter
 {
-    public class STM32CubeMXProjectImporter : IExternalProjectImporter
+    public class STM32CubeMXProjectImporter : IReconfigurableProjectImporter
     {
         public string Name => "STM32CubeMX";
 
@@ -39,14 +39,14 @@ namespace STM32CubeMXImporter
 
         static void FixInvalidPathsRecursively(ImportedExternalProject.VirtualDirectory dir, string baseDir, ref Dictionary<string, string> allFilesUnderProjectDir)
         {
-            foreach(var file in dir.Files)
+            foreach (var file in dir.Files)
             {
                 if (!File.Exists(file.FullPath))
                 {
                     if (allFilesUnderProjectDir == null)
                     {
                         allFilesUnderProjectDir = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-                        foreach(var fn in Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories))
+                        foreach (var fn in Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories))
                         {
                             var key = Path.GetFileName(fn);
                             if (allFilesUnderProjectDir.ContainsKey(key))
@@ -68,7 +68,7 @@ namespace STM32CubeMXImporter
 
         //STM32CubeMX v5.3.0 does not reference some of the FreeRTOS-specific files and references an incorrect system file.
         //The method below detects and fixes this condition.
-        static void ApplyFreeRTOSFixes(ImportedExternalProject.ConstructedVirtualDirectory dir, ref string[] includeDirs, ref PropertyDictionary2 mcuConfiguration)
+        static void ApplyFreeRTOSFixes(ImportedExternalProject.ConstructedVirtualDirectory dir, HashSet<string> includeDirs, ref PropertyDictionary2 mcuConfiguration)
         {
             List<FlatFileReference> allFiles = new List<FlatFileReference>();
             FillFlatFileCollectionRecursively(dir, allFiles);
@@ -81,10 +81,10 @@ namespace STM32CubeMXImporter
             var queueCFile = queueFiles.First();
             string baseDir = Path.GetFullPath(Path.GetDirectoryName(queueCFile.File.FullPath));
 
-            string portFile = FindAndAddFileIfMissing(fileListsByName, "port.c", Path.Combine(baseDir, "portable"), queueCFile.Directory, ref includeDirs);
-            FindAndAddFileIfMissing(fileListsByName, "cmsis_os.c", baseDir, queueCFile.Directory, ref includeDirs);
+            string portFile = FindAndAddFileIfMissing(fileListsByName, "port.c", Path.Combine(baseDir, "portable"), queueCFile.Directory, includeDirs);
+            FindAndAddFileIfMissing(fileListsByName, "cmsis_os.c", baseDir, queueCFile.Directory, includeDirs);
 
-            foreach(var file in fileListsByName.SelectMany(g=>g.Value))
+            foreach (var file in fileListsByName.SelectMany(g => g.Value))
             {
                 if (Path.GetFileName(file.File.FullPath).StartsWith("system_stm32", StringComparison.InvariantCultureIgnoreCase) && !File.Exists(file.File.FullPath))
                 {
@@ -124,7 +124,7 @@ namespace STM32CubeMXImporter
             }
         }
 
-        private static string FindAndAddFileIfMissing(Dictionary<string, IGrouping<string, FlatFileReference>> fileListsByName, string fileName, string baseDir, ImportedExternalProject.ConstructedVirtualDirectory directoryToAddFile, ref string[] includeDirs)
+        private static string FindAndAddFileIfMissing(Dictionary<string, IGrouping<string, FlatFileReference>> fileListsByName, string fileName, string baseDir, ImportedExternalProject.ConstructedVirtualDirectory directoryToAddFile, HashSet<string> includeDirs)
         {
             if (fileListsByName.TryGetValue(fileName, out var group))
                 return group.FirstOrDefault().File?.FullPath;
@@ -136,23 +136,43 @@ namespace STM32CubeMXImporter
             if (foundFile != null)
             {
                 directoryToAddFile.AddFile(foundFile, false);
-                includeDirs = includeDirs.Concat(new[] { Path.GetDirectoryName(foundFile) }).ToArray();
+                includeDirs.Add(Path.GetDirectoryName(foundFile));
             }
 
             return foundFile;
         }
 
-        public ImportedExternalProject ImportProject(ProjectImportParameters parameters, IProjectImportService service)
+        struct ParsedCubeProject
+        {
+            public ImportedExternalProject.ConstructedVirtualDirectory RootDirectory;
+            public string DeviceName, InternalDeviceName;
+            public HashSet<string> IncludeDirectories;
+            public HashSet<string> PreprocessorMacros;
+            public PropertyDictionary2 MCUConfiguration;
+            public string CFLAGS, LinkerScript;
+
+            public HashSet<string> AllFiles;
+        }
+
+        ParsedCubeProject ParseProjectFile(string projectFile, bool importingReconfigurableProject)
         {
             XmlDocument xml = new XmlDocument();
-            xml.Load(parameters.ProjectFile);
+            xml.Load(projectFile);
 
-            string deviceName = (xml.SelectSingleNode("package/generators/generator/select/@Dname") as XmlAttribute)?.Value;
-            if (deviceName == null)
-                throw new Exception("Failed to extract the device name from " + deviceName);
+            ParsedCubeProject result = new ParsedCubeProject
+            {
+                RootDirectory = new ImportedExternalProject.ConstructedVirtualDirectory()
+            };
+
+            result.DeviceName = result.InternalDeviceName = (xml.SelectSingleNode("package/generators/generator/select/@Dname") as XmlAttribute)?.Value;
+            if (result.DeviceName == null)
+                throw new Exception("Failed to extract the device name from " + projectFile);
+
+            result.DeviceName = result.DeviceName.TrimEnd('x');
+            result.DeviceName = result.DeviceName.Substring(0, result.DeviceName.Length - 1);
 
             HashSet<string> allHeaderDirs = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            string baseDir = Path.GetDirectoryName(parameters.ProjectFile);
+            string baseDir = Path.GetDirectoryName(projectFile);
             ImportedExternalProject.ConstructedVirtualDirectory rootDir = new ImportedExternalProject.ConstructedVirtualDirectory();
 
             foreach (var file in xml.SelectNodes("package/generators/generator/project_files/file").OfType<XmlElement>())
@@ -163,7 +183,7 @@ namespace STM32CubeMXImporter
                 if (category == "header")
                     allHeaderDirs.Add(Path.GetDirectoryName(name));
 
-                rootDir.AddFile(Path.Combine(baseDir, name), category == "header");
+                result.RootDirectory.AddFile(Path.Combine(baseDir, name), category == "header");
             }
 
             bool hasFreeRTOS = false;
@@ -204,7 +224,7 @@ namespace STM32CubeMXImporter
                         dir = relativePath.Substring(0, idx);
                     }
 
-                    if (category == "sourceAsm" && name.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase))
+                    if (category == "sourceAsm" && name.StartsWith("startup_", StringComparison.InvariantCultureIgnoreCase) && !importingReconfigurableProject)
                         continue;   //VisualGDB provides its own startup files for STM32 devices that are compatible with STM32CubeMX-generated files
 
                     if (category == "header" && dir != "")
@@ -221,41 +241,182 @@ namespace STM32CubeMXImporter
                         {
                             foreach (var fn in Directory.GetFiles(physicalDir, name))
                             {
-                                rootDir.ProvideSudirectory(path).AddFile(fn, category == "header");
+                                result.RootDirectory.ProvideSudirectory(path).AddFile(fn, category == "header");
                             }
                         }
                     }
                     else
-                        rootDir.ProvideSudirectory(path).AddFile(Path.Combine(baseDir, relativePath), category == "header");
+                        result.RootDirectory.ProvideSudirectory(path).AddFile(Path.Combine(baseDir, relativePath), category == "header");
                 }
             }
 
-            List<string> macros = new List<string> { "$$com.sysprogs.bspoptions.primary_memory$$_layout", "$$com.sysprogs.stm32.hal_device_family$$" };
-            string[] includeDirs = allHeaderDirs.Select(d => Path.Combine(baseDir, d)).ToArray();
+            if (importingReconfigurableProject)
+                result.PreprocessorMacros = new HashSet<string>();
+            else
+                result.PreprocessorMacros = new HashSet<string> { "$$com.sysprogs.bspoptions.primary_memory$$_layout", "$$com.sysprogs.stm32.hal_device_family$$" };
 
-            PropertyDictionary2 mcuConfiguration = null;
+            result.IncludeDirectories = new HashSet<string>();
+
+            foreach (var dir in allHeaderDirs)
+                result.IncludeDirectories.Add(Path.GetFullPath(Path.Combine(baseDir, dir)));
 
             if (hasFreeRTOS)
             {
-                macros.Add("USE_FREERTOS");
-                ApplyFreeRTOSFixes(rootDir, ref includeDirs, ref mcuConfiguration);
+                result.PreprocessorMacros.Add("USE_FREERTOS");
+                ApplyFreeRTOSFixes(result.RootDirectory, result.IncludeDirectories, ref result.MCUConfiguration);
             }
 
             Dictionary<string, string> temporaryExistingFileCollection = null;
-            FixInvalidPathsRecursively(rootDir, baseDir, ref temporaryExistingFileCollection);
+            FixInvalidPathsRecursively(result.RootDirectory, baseDir, ref temporaryExistingFileCollection);
 
-            deviceName = deviceName.TrimEnd('x');
-            deviceName = deviceName.Substring(0, deviceName.Length - 1);
+            result.AllFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            foreach (var f in result.RootDirectory.AllFilesRecursively)
+                result.AllFiles.Add(Path.GetFullPath(f.FullPath));
+
+            if (importingReconfigurableProject)
+            {
+                string makefile = Path.Combine(Path.GetDirectoryName(projectFile), "Makefile");
+                if (File.Exists(makefile))
+                {
+                    AdjustImportedProjectFromMakefile(ref result, makefile);
+                }
+            }
+
+            return result;
+        }
+
+        bool ExpandValues(ref string[] inputs, Dictionary<string, string[]> dict)
+        {
+            List<string> result = new List<string>();
+            int expanded = 0;
+            foreach (var t in inputs)
+            {
+                if (t.StartsWith("$(") && t.EndsWith(")"))
+                {
+                    expanded++;
+                    if (dict.TryGetValue(t.Substring(2, t.Length - 3), out var foundValues))
+                        result.AddRange(foundValues);
+                }
+                else
+                    result.Add(t);
+            }
+            inputs = result.ToArray();
+            return expanded > 0;
+        }
+
+        void AdjustImportedProjectFromMakefile(ref ParsedCubeProject parsedProject, string makefile)
+        {
+            var baseDir = Path.GetDirectoryName(makefile);
+
+            Dictionary<string, string[]> listsByKey = ExtractListsFromSTM32CubeMXMakefile(makefile);
+
+            if (listsByKey.TryGetValue("C_DEFS", out var values))
+            {
+                foreach (var v in values)
+                    if (v.StartsWith("-D"))
+                        parsedProject.PreprocessorMacros.Add(v.Substring(2));
+            }
+
+            if (listsByKey.TryGetValue("C_INCLUDES", out values))
+            {
+                foreach (var v in values)
+                    if (v.StartsWith("-I"))
+                        parsedProject.IncludeDirectories.Add(Path.GetFullPath(Path.Combine(baseDir, v.Substring(2))));
+            }
+
+            if (listsByKey.TryGetValue("LDSCRIPT", out values) && values.Length == 1)
+            {
+                parsedProject.LinkerScript = Path.GetFullPath(Path.Combine(baseDir, values[0]));
+            }
+
+            if (listsByKey.TryGetValue("MCU", out values))
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    if (!ExpandValues(ref values, listsByKey))
+                        break;
+                }
+
+                parsedProject.CFLAGS = string.Join(" ", values);
+            }
+
+            if (listsByKey.TryGetValue("C_SOURCES", out values))
+            {
+                //GPDSC files generated by STM32CubeMX are often inaccurate and buggy, so we take the data from the Makefile instead
+                parsedProject.AllFiles.RemoveWhere(f => f.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase));
+
+                foreach(var src in values)
+                    parsedProject.AllFiles.Add(Path.GetFullPath(Path.Combine(baseDir, src)));
+            }
+
+            if (listsByKey.TryGetValue("ASM_SOURCES", out values))
+            {
+                parsedProject.AllFiles.RemoveWhere(f => f.EndsWith(".s", StringComparison.InvariantCultureIgnoreCase));
+
+                foreach(var src in values)
+                    parsedProject.AllFiles.Add(Path.GetFullPath(Path.Combine(baseDir, src)));
+            }
+        }
+
+        private static Dictionary<string, string[]> ExtractListsFromSTM32CubeMXMakefile(string makefile)
+        {
+            Dictionary<string, string[]> listsByKey = new Dictionary<string, string[]>();
+            Regex rgDefinition = new Regex(@"^([A-Za-z0-9_-]+) *= *(.*)$");
+            List<string> builtList = null;
+            string listKey = null;
+            foreach (var line in File.ReadAllLines(makefile))
+            {
+                var trimmedLine = line.Trim();
+                if (builtList != null)
+                {
+                    var token = trimmedLine.Trim('\\', ' ', '\t', '\r');
+                    if (token != "")
+                        builtList.Add(token);
+
+                    if (!trimmedLine.EndsWith("\\"))
+                    {
+                        listsByKey[listKey] = builtList.ToArray();
+                        builtList = null;
+                    }
+                }
+                else
+                {
+                    var m = rgDefinition.Match(line);
+                    if (m.Success)
+                    {
+                        listKey = m.Groups[1].Value;
+                        builtList = new List<string>();
+
+                        var value = m.Groups[2].Value;
+                        var token = value.Trim('\\', ' ', '\t', '\r');
+                        if (token != "")
+                            builtList.AddRange(token.Split(' '));
+
+                        if (!value.EndsWith("\\"))
+                        {
+                            listsByKey[listKey] = builtList.ToArray();
+                            builtList = null;
+                        }
+                    }
+                }
+            }
+
+            return listsByKey;
+        }
+
+        public ImportedExternalProject ImportProject(ProjectImportParameters parameters, IProjectImportService service)
+        {
+            var parsedProject = ParseProjectFile(parameters.ProjectFile, false);
 
             return new ImportedExternalProject
             {
-                DeviceNameMask = new Regex(deviceName.Replace("x", ".*") + ".*"),
+                DeviceNameMask = new Regex(parsedProject.DeviceName.Replace("x", ".*") + ".*"),
                 OriginalProjectFile = parameters.ProjectFile,
-                RootDirectory = rootDir,
+                RootDirectory = parsedProject.RootDirectory,
                 GNUTargetID = "arm-eabi",
                 ReferencedFrameworks = new string[0],   //Unless this is explicitly specified, VisualGDB will try to reference the default frameworks (STM32 HAL) that will conflict with the STM32CubeMX-generated files.
 
-                MCUConfiguration = mcuConfiguration,
+                MCUConfiguration = parsedProject.MCUConfiguration,
 
                 Configurations = new[]
                 {
@@ -263,11 +424,49 @@ namespace STM32CubeMXImporter
                     {
                         Settings = new ImportedExternalProject.InvariantProjectBuildSettings
                         {
-                            IncludeDirectories = includeDirs,
-                            PreprocessorMacros = macros.ToArray()
+                            IncludeDirectories = parsedProject.IncludeDirectories.ToArray(),
+                            PreprocessorMacros = parsedProject.PreprocessorMacros.ToArray()
                         }
                     }
                 }
+            };
+        }
+
+        static string MakeBSPPath(string path, string baseDir)
+        {
+            path = Path.GetFullPath(path);
+
+            if (path.StartsWith(baseDir, StringComparison.InvariantCultureIgnoreCase))
+                return "$$SYS:BSP_ROOT$$" + path.Substring(baseDir.Length).Replace('\\', '/');
+            else
+                return path.Replace('\\', '/');
+        }
+
+        public MCUDefinitionFromProject GenerateMCUDefinitionFromProject(ReconfigurableProjectImportParameters parameters, IProjectImportService service)
+        {
+            var gpdscFile = Path.ChangeExtension(parameters.ProjectFile, ".gpdsc");
+
+            var parsedProject = ParseProjectFile(gpdscFile, true);
+            string baseDir = Path.GetFullPath(Path.GetDirectoryName(parameters.ProjectFile));
+
+            var mcu = new MCU
+            {
+                ID = parsedProject.DeviceName,
+                AdditionalSourceFiles = parsedProject.AllFiles.Where(f => f.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f, baseDir)).ToArray(),
+                AdditionalHeaderFiles = parsedProject.AllFiles.Where(f => !f.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f, baseDir)).ToArray(),
+                CompilationFlags = new ToolFlags
+                {
+                    IncludeDirectories = parsedProject.IncludeDirectories.Select(d => MakeBSPPath(d, baseDir)).ToArray(),
+                    PreprocessorMacros = parsedProject.PreprocessorMacros.ToArray(),
+                    COMMONFLAGS = parsedProject.CFLAGS,
+                    LinkerScript = MakeBSPPath(parsedProject.LinkerScript, baseDir),
+                }
+            };
+
+            return new MCUDefinitionFromProject
+            {
+                MCU = mcu,
+                VirtualFolderStructure = parsedProject.RootDirectory,
             };
         }
     }
