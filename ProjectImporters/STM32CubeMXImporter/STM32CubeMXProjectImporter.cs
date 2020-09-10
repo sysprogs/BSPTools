@@ -70,7 +70,7 @@ namespace STM32CubeMXImporter
                 var dir = nonWow64HLKMKey.OpenSubKey(@"SOFTWARE\JavaSoft\JDK\" + version)?.GetValue("JavaHome") as string;
                 if (dir != null)
                 {
-                    var java = Path.Combine(dir, "java.exe");
+                    var java = Path.Combine(dir, "bin\\java.exe");
                     if (File.Exists(java))
                         return java;
                 }
