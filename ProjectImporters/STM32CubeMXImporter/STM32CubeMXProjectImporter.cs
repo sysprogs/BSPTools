@@ -556,6 +556,19 @@ namespace STM32CubeMXImporter
                     args = $"\"{context.ProjectFile}\" -s \"{temporaryScriptFile}\"";
                     text = "Regenerating project...";
                     break;
+                case ProjectReconfigurationReason.CreateNewProject:
+                    temporaryScriptFile = service.GetTemporaryFileName();
+                    File.WriteAllLines(temporaryScriptFile, new[]
+                    {
+                        $"load {context.DeviceID}",
+                        "project name " + Path.GetFileNameWithoutExtension(context.ProjectFile),
+                        $"project path \"{Path.GetDirectoryName(context.ProjectFile)}\"",
+                        "project toolchain \"Other Toolchains (GPDSC)\"",
+                    });
+
+                    args = $" -s \"{temporaryScriptFile}\"";
+                    text = "Waiting for STM32CubeMX...";
+                    break;
                 case ProjectReconfigurationReason.EditConfigurationInteractively:
                     args = $"\"{context.ProjectFile}\"";
                     break;
@@ -579,6 +592,48 @@ namespace STM32CubeMXImporter
                 result.Finalizer = () => File.Delete(temporaryScriptFile);
 
             return result;
+        }
+
+        public MCU[] LoadMCUList(IProjectImportService service, Dictionary<string, string> toolLocations)
+        {
+            var stm32cubeMXExe = toolLocations[_STM32CubeMX.ID];
+            var xmlFile = Path.Combine(Path.GetDirectoryName(stm32cubeMXExe), @"db\mcu\families.xml");
+            List<MCU> result = new List<MCU>();
+
+            var xml = new XmlDocument();
+            xml.Load(xmlFile);
+            foreach(var family in xml.DocumentElement.SelectNodes("Family").OfType<XmlElement>())
+            {
+                var familyName = family.GetAttribute("Name");
+                foreach(var subfamily in family.SelectNodes("SubFamily").OfType<XmlElement>())
+                {
+                    var subfamilyName = subfamily.GetAttribute("Name");
+                    foreach(var mcu in subfamily.SelectNodes("Mcu").OfType<XmlElement>())
+                    {
+                        var mcuName = mcu.GetAttribute("Name");
+                        var refName = mcu.GetAttribute("RefName");
+                        if (!string.IsNullOrEmpty(mcuName) && !string.IsNullOrEmpty(refName))
+                        {
+                            var mcuObject = new MCU
+                            {
+                                ID = refName,
+                                //UserFriendlyName = mcuName,
+                            };
+
+                            int.TryParse(mcu.SelectSingleNode("Flash")?.InnerText, out mcuObject.FLASHSize);
+                            int.TryParse(mcu.SelectSingleNode("Ram")?.InnerText, out mcuObject.RAMSize);
+
+                            mcuObject.FLASHSize *= 1024;
+                            mcuObject.RAMSize *= 1024;
+                            mcuObject.HierarchicalPath = $"{familyName}\\{subfamilyName}";
+
+                            result.Add(mcuObject);
+                        }
+                    }
+                }
+            }
+
+            return result.ToArray();
         }
     }
 }
