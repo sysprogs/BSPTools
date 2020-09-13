@@ -309,7 +309,7 @@ int __attribute__((noinline)) IsRunningUnitTests()
 	return s_IsRunningUnitTests;
 }
 
-#elif defined (SIMULATION)
+#elif defined (SIMULATION) && defined(TINY_EMBEDDED_TEST)
 
 namespace TinyEmbeddedTest
 {

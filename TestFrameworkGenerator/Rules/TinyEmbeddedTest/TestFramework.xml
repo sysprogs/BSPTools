@@ -52,6 +52,9 @@
 		</AttributeDiscoverers>		
 	</Embedded>
 	<Common>
+		<AdditionalPreprocessorMacros>
+			<string>TINY_EMBEDDED_TEST</string>
+		</AdditionalPreprocessorMacros>
 		<TestHooks>
 		  <TestHook xsi:type="TestsCompletedHook">
 			<Expression>SysprogsTestHook_TestsCompleted</Expression>

@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.googletest</ID>
 	<Name>GoogleTest</Name>
-	<Version>20200830-1.10.0</Version>
+	<Version>20200912-1.10.0</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -66,6 +66,44 @@
 			<string>return RUN_ALL_TESTS();</string>
 		</InitializationLines>		
 	</Linux>
+  <Windows>
+    <AdditionalSourceFiles />
+    <AdditionalHeaderFiles />
+    <AdditionalPreprocessorMacros />
+    <AdditionalLibraries>
+      <string>pthread</string>
+    </AdditionalLibraries>
+    <InitializationLines>
+      <string>testing::InitGoogleTest(&amp;argc, argv);</string>
+      <string>return RUN_ALL_TESTS();</string>
+    </InitializationLines>
+    <AdvancedTestDiscoverers>
+      <TestDiscoverer xsi:type="OutputBasedTestDiscoverer">
+        <TargetDemangledNames>true</TargetDemangledNames>
+        <CommandLineArguments>--gtest_list_tests</CommandLineArguments>
+        <TestGroupRegex>^(|[^/]+/)([^ \t/]+)\.$</TestGroupRegex>
+        <TestRegex>^[ \t]+([^ \t/]+)(|/[^ \t/]+)($| )</TestRegex>
+        <UniqueNameFormat>{1}{2}_{4}{5}</UniqueNameFormat>
+        <SecondaryIDFormat>{1}{2}::{4}{5}</SecondaryIDFormat>
+        <StructuredInternalNameFormat>{1}{2}.{4}{5}</StructuredInternalNameFormat>
+        <UserFriendlyNameFormat>{1}{2}::{4}{5}</UserFriendlyNameFormat>
+        <ShortUserFriendlyNameFormat>{4}{5}</ShortUserFriendlyNameFormat>
+        <LocationSymbolFormat>{2}_{4}_Test::TestBody()</LocationSymbolFormat>
+        <AttributeListGroup>0</AttributeListGroup>
+      </TestDiscoverer>
+    </AdvancedTestDiscoverers>
+    <TestSelection xsi:type="ArgumentBasedTestSelection">
+      <GlobalArgumentTemplate>--gtest_filter=$(PerTestArguments)</GlobalArgumentTemplate>
+      <PerTestArgumentTemplate>$(1).$(2)</PerTestArgumentTemplate>
+      <PerTestArgumentSeparator>:</PerTestArgumentSeparator>
+      <TestIDRegex>(.*)::(.*)</TestIDRegex>
+      <IDType>SecondaryID</IDType>
+    </TestSelection>
+    <TestReportChannel xsi:type="PipeBasedTestChannelWithEnv">
+      <PipeTimestampVariableName>g_SysprogsTestReportTimestamp</PipeTimestampVariableName>
+      <EnvironmentVariableName>SYSPROGS_TEST_REPORTING_PIPE</EnvironmentVariableName>
+    </TestReportChannel>
+  </Windows>	
 	<Common>
     <TestDiscoverers>
 	  <TestDiscoverer xsi:type="SymbolBasedScopedTestDiscoverer">
