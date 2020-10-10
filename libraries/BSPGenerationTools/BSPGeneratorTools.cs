@@ -1482,7 +1482,7 @@ namespace BSPGenerationTools
             return rawmcu_list;
         }
 
-        public static List<MCUBuilder> AssignMCUsToFamilies(List<MCUBuilder> devices, List<MCUFamilyBuilder> allFamilies)
+        public static List<MCUBuilder> AssignMCUsToFamilies(IEnumerable<MCUBuilder> devices, List<MCUFamilyBuilder> allFamilies)
         {
             List<MCUBuilder> orphanedDevices = new List<MCUBuilder>();
             var families = (from f in allFamilies select new KeyValuePair<Regex, MCUFamilyBuilder>(new Regex(f.Definition.DeviceRegex), f)).ToArray();
