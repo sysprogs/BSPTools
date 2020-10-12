@@ -201,7 +201,7 @@ namespace nrf5x
 
             var conditions = new[]
             {
-                new PrebuiltLibraryCondition("hard-float", "com.sysprogs.bspoptions.arm.floatmode", "-mfloat-abi=hard", "soft-float"),
+                new PrebuiltLibraryCondition("hard-float", "com.sysprogs.bspoptions.arm.floatmode.short", "hard", "soft-float"),
                 new PrebuiltLibraryCondition("no-interrupts", "com.sysprogs.bspoptions.nrf5x.interrupts", "no"),
                 new PrebuiltLibraryCondition("short-wchar", "com.sysprogs.bspoptions.nrf5x.wchar", "-fshort-wchar"),
             };

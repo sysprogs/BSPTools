@@ -28,7 +28,7 @@
 			<string>$$SYS:BSP_ROOT$$/nRF5x/external/nrf_oberon</string>
 		</IncludeDirectories>
 		<AdditionalLibraryDirectories>
-			<string>$$SYS:BSP_ROOT$$/nRF5x/SoftdeviceLibraries</string>
+			<string>$$SYS:BSP_ROOT$$/nRF5x/SoftdeviceLibraries/$$com.sysprogs.bspoptions.arm.floatmode.short$$</string>
 			<string>$$SYS:BSP_ROOT$$/nRF5x/LinkerScripts</string>
 		</AdditionalLibraryDirectories>
 		<CFLAGS>-std=c99</CFLAGS>
@@ -585,48 +585,6 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 				</ConfigFileDefinition>
 			</ConfigFiles>
 		</Framework>
-		<Framework>
-			<Name>Nordic IoT Components</Name>
-			<ID>com.sysprogs.arm.nordic.nrf5x.iot</ID>
-			<ProjectFolderName>IoT</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\components\iot</SourceFolder>
-					<TargetFolder>components\iot</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
-					<GuardedFiles>
-						<string>ipv6_stack\\dns6\\dns6.c=>DNS6_MAX_PENDING_QUERIES</string>
-						<string>ipv6_stack\\sntp_client\\sntp_client.c=>SNTP_RETRANSMISSION_INTERVAL</string>
-						<string>ipv6_stack\\tftp\\iot_tftp.c=>TFTP_MAX_RETRANSMISSION_COUNT</string>
-						<string>ipv6_stack\\tftp\\iot_tftp.c=>TFTP_MAX_INSTANCES</string>
-						<string>context_manager\\iot_context_manager.c=>IOT_CONTEXT_MANAGER_MAX_CONTEXTS</string>
-						<string>ipv6_stack\\icmp6\\icmp6.c=>IPV6_DEFAULT_HOP_LIMIT</string>
-						<string>ipv6_stack\\ipv6\\ipv6.c=>IPV6_MAX_ADDRESS_PER_INTERFACE</string>
-						<string>ipv6_stack\\pbuffer\\iot_pbuffer.c=>IOT_PBUFFER_MAX_COUNT</string>
-						<string>ipv6_stack\\utils\\ipv6_utils.c=>IPV6_DEFAULT_HOP_LIMIT</string>
-						<string>ipv6_stack\\udp\\udp6.c=>UDP6_MAX_SOCKET_COUNT</string>
-					</GuardedFiles>
-					<AdvancedRenameRules>ipv6_stack\\icmp6\\icmp6.c=>nrf_icmp6.c;socket\\transport\\ipv6\\transport_handler.c=>transport_handler6.c</AdvancedRenameRules>
-					<ProjectInclusionMask>-*.a;-mqtt\mqtt_transport_socket.c;-*.lib;*.c</ProjectInclusionMask>
-					<AutoIncludeMask>*.h</AutoIncludeMask>
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>socket\api\socket_api.h</FilePath>
-							<AfterLine>#endif</AfterLine>
-							<InsertedLines>
-								<string>typedef _ssize_t ssize_t;</string>
-							</InsertedLines>
-						</Patch>
-					</Patches>
-					<VendorSpecificAttributes>GenerateConditionsForSubdirs</VendorSpecificAttributes>
-					<SmartPropertyGroup>com.sysprogs.bspoptions.nrf5x.iot.|Nordic IoT Components</SmartPropertyGroup>
-					<SmartPreprocessorMacros>
-						<string>Maximum TLS Instance Count[tls_instance]|NRF_TLS_MAX_INSTANCE_COUNT={0}|@2</string>
-					</SmartPreprocessorMacros>
-				</CopyJob>
-			</CopyJobs>
-		</Framework>
 	</AdditionalFrameworks>
 	<Subfamilies>
 		<MCUClassifier>
@@ -652,7 +610,7 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 			<Required>true</Required>
 			<Options>
 				<Option>
-					<Regex>^nRF528(32|05|10|11|33|40)_XXAA.*</Regex>
+					<Regex>^nRF528(32|05|10|11|20|33|40)_XXA[AB].*</Regex>
 					<Value>NRF528{1}_XXAA</Value>
 				</Option>
 			</Options>
@@ -662,11 +620,11 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 			<Required>true</Required>
 			<Options>
 				<Option>
-					<Regex>^nRF52832_XXAA.*</Regex>
+					<Regex>^nRF52832_XXA[AB].*</Regex>
 					<Value>52</Value>
 				</Option>
 				<Option>
-					<Regex>^nRF528(05|10|11|33|40)_XXAA.*</Regex>
+					<Regex>^nRF528(05|10|11|20|33|40)_XXAA.*</Regex>
 					<Value>528{1}</Value>
 				</Option>
 			</Options>
@@ -676,7 +634,7 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 			<Required>true</Required>
 			<Options>
 				<Option>
-					<Regex>^nRF([0-9]+)_XXAA.*</Regex>
+					<Regex>^nRF([0-9]+)_XXA[AB].*</Regex>
 					<Value>{1}</Value>
 				</Option>
 			</Options>
@@ -714,7 +672,7 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 			<Required>true</Required>
 			<Options>
 				<Option>
-					<Regex>^nRF528(32|10)_XXAA.*</Regex>
+					<Regex>^nRF528(05|32|10)_XXA(A|B).*</Regex>
 					<Value>PCA10040</Value>
 				</Option>
 				<Option>
@@ -722,7 +680,7 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 					<Value>PCA10056</Value>
 				</Option>
 				<Option>
-					<Regex>^nRF52833_XXAA.*</Regex>
+					<Regex>^nRF528(20|33)_XXAA.*</Regex>
 					<Value>PCA10100</Value>
 				</Option>
 			</Options>
@@ -848,61 +806,6 @@ Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
 			<AdditionalSources>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
 				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/ble_central/ble_app_multilink_central/main.c</string>
-			</AdditionalSources>
-		</SmartSample>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\icmp</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
-			<DestinationFolder>samples\IoT\Icmp</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/main.c</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/icmp/config/ipv6_medium_platform.h</string>
-			</AdditionalSources>
-		</SmartSample>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\mqtt\lwip\publisher</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
-			<DestinationFolder>samples\IoT\mqtt\publisher</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/main.c</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/publisher/config/ipv6_medium_platform.h</string>
-			</AdditionalSources>
-		</SmartSample>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\mqtt\lwip\subscriber</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
-			<DestinationFolder>samples\IoT\mqtt\subscriber</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/main.c</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/mqtt/lwip/subscriber/config/ipv6_medium_platform.h</string>
-			</AdditionalSources>
-		</SmartSample>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\tcp\client</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
-			<DestinationFolder>samples\IoT\tcp\client</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/main.c</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/client/config/ipv6_medium_platform.h</string>
-			</AdditionalSources>
-		</SmartSample>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\IoT\tcp\server</SourceFolder>
-			<CommonConfiguration>$$BSPGEN:RULES_DIR$$\samples\BLEIOT.xml</CommonConfiguration>
-			<DestinationFolder>samples\IoT\tcp\server</DestinationFolder>
-			<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/main.c</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/$$com.sysprogs.nordic.default_config_suffix$$/config/sdk_config.h</string>
-				<string>$$SYS:BSP_ROOT$$/nRF5x/examples/iot/tcp/server/config/ipv6_medium_platform.h</string>
 			</AdditionalSources>
 		</SmartSample>
 	</SmartSamples>

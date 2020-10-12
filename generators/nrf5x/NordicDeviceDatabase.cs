@@ -1,6 +1,7 @@
 ﻿using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -65,6 +66,7 @@ namespace nrf5x
                 DeviceNumber = int.Parse(m.Groups[1].Value),
                 FLASH = info.FLASH,
                 RAM = info.RAM,
+                MemoryLines = info.MemoryLines.ToArray(),
                 ID = Path.GetFileNameWithoutExtension(linkerScript),
                 HasFPU = hasFpu,
                 SVDFileName = svdFileName,
@@ -79,7 +81,7 @@ namespace nrf5x
 
             Devices = deviceSummaries.Select(s => new NordicMCUBuilder(s)).ToArray();
 
-            var deviceByNumber = Devices.Where(d=>d.Name.EndsWith("xxaa", StringComparison.InvariantCultureIgnoreCase)).ToDictionary(d => d.Summary.DeviceNumber);
+            var deviceByNumber = Devices.Where(d => d.Name.EndsWith("xxaa", StringComparison.InvariantCultureIgnoreCase)).ToDictionary(d => d.Summary.DeviceNumber);
 
             //Softdevice are manually compiled from Nordic website/documentation
             Softdevices = File.ReadAllLines(Path.Combine(rulesDir, "softdevices.txt"))
@@ -104,7 +106,7 @@ namespace nrf5x
                 HashSet<ulong> reservedRAMVariants = new HashSet<ulong>();
                 HashSet<ulong> reservedFLASHVariants = new HashSet<ulong>();
 
-                foreach(var lds in allLinkerScripts)
+                foreach (var lds in allLinkerScripts)
                 {
                     if (StringComparer.InvariantCultureIgnoreCase.Compare(lds.Softdevice, sd.Name) != 0)
                         continue;
@@ -123,6 +125,12 @@ namespace nrf5x
 
                     reservedFLASHVariants.Add(memInfo.FLASH.Origin - dev.Summary.FLASH.Origin);
                     reservedRAMVariants.Add(memInfo.RAM.Origin - dev.Summary.RAM.Origin);
+
+                    if (memInfo.HasHardFloat.HasValue)
+                    {
+                        if (memInfo.HasHardFloat.Value != dev.Summary.HasFPU)
+                            throw new Exception("Unexpected FPU setting for " + lds.FullPath);
+                    }
                 }
 
                 sd.ReservedFLASH = reservedFLASHVariants.Cast<ulong?>().SingleOrDefault() ?? throw new Exception("Inconsistent FLASH offsets found for " + sd.Name);
@@ -196,6 +204,30 @@ namespace nrf5x
         }
     }
 
+    public struct ParsedMemoryLine
+    {
+        public string Line;
+        public Match Match;
+
+        public string Name => Match.Groups[1].Value;
+        public ulong Origin => ulong.Parse(Match.Groups[2].Value, NumberStyles.HexNumber);
+        public ulong Size => ulong.Parse(Match.Groups[3].Value, NumberStyles.HexNumber);
+
+        static void ReplaceGroupContents(ref string line, Group g, string value) => line = line.Substring(0, g.Index) + value + line.Substring(g.Index + g.Length);
+
+        public string Reformat(string name, ulong newOrigin, ulong newSize)
+        {
+            var result = Line;
+            ReplaceGroupContents(ref result, Match.Groups[3], $"{newSize:x8}");
+            ReplaceGroupContents(ref result, Match.Groups[2], $"{newOrigin:x8}");
+            if (name != null)
+                ReplaceGroupContents(ref result, Match.Groups[1], name);
+            return result;
+        }
+
+        public override string ToString() => Line;
+    }
+
     public struct DeviceSummary
     {
         public string ID;
@@ -203,6 +235,7 @@ namespace nrf5x
         public SingleMemoryInfo FLASH, RAM;
         public bool HasFPU;
         public string SVDFileName;
+        public ParsedMemoryLine[] MemoryLines;
 
         public override string ToString() => ID;
     }
@@ -248,8 +281,6 @@ namespace nrf5x
 
         public ulong ReservedRAM, ReservedFLASH;
 
-        public bool HardwareFP => MCUs.Count(m => m.FPU == FPUType.None) == 0;
-
         public override string ToString() => $"{Name} ({MCUs?.Length} devices)";
 
         internal static SoftdeviceDefinition Parse(string line, Dictionary<int, NordicMCUBuilder> deviceByNumber)
@@ -283,9 +314,13 @@ namespace nrf5x
 
         public override string ToString() => FullPath;
 
+        public List<ParsedMemoryLine> MemoryLines = new List<ParsedMemoryLine>();
+        public readonly bool? HasHardFloat;
         public LDFileMemoryInfo(string fn)
         {
             FullPath = fn;
+            bool isInsideMemoryList = false;
+
             foreach (var line in File.ReadAllLines(fn))
             {
                 if (line.Contains("__stop_sdh_ble_observers"))
@@ -293,13 +328,20 @@ namespace nrf5x
                 if (line.Contains("__start_pwr_mgmt_data"))
                     _HasPowerMgt = true;
 
-                var m = Regex.Match(line, $"^[ \t]*(FLASH|RAM).*ORIGIN[ =]+0x([a-fA-F0-9]+).*LENGTH[ =]+0x([a-fA-F0-9]+)");
-                if (m.Success)
+                if (line.Trim() == "MEMORY")
+                    isInsideMemoryList = true;
+                else if (line.Trim() == "}")
+                    isInsideMemoryList = false;
+                else if (isInsideMemoryList && line.Trim() != "{")
                 {
+                    var m = Regex.Match(line, $"^[ \t]*([^ \t]+).*ORIGIN[ =]+0x([a-fA-F0-9]+).*LENGTH[ =]+0x([a-fA-F0-9]+)");
+                    if (!m.Success)
+                        throw new Exception("Unrecognized memory line: " + line);
+
                     var info = new SingleMemoryInfo
                     {
-                        Origin = ulong.Parse(m.Groups[2].Value, System.Globalization.NumberStyles.HexNumber),
-                        Length = ulong.Parse(m.Groups[3].Value, System.Globalization.NumberStyles.HexNumber)
+                        Origin = ulong.Parse(m.Groups[2].Value, NumberStyles.HexNumber),
+                        Length = ulong.Parse(m.Groups[3].Value, NumberStyles.HexNumber)
                     };
 
                     switch (m.Groups[1].Value)
@@ -310,9 +352,9 @@ namespace nrf5x
                         case "RAM":
                             RAM = info;
                             break;
-                        default:
-                            throw new Exception("Unexpected memory: " + m.Groups[1].Value);
                     }
+
+                    MemoryLines.Add(new ParsedMemoryLine { Line = line, Match = m });
                 }
             }
 
@@ -326,6 +368,8 @@ namespace nrf5x
             Regex rgSingleTarget = new Regex("^(nrf[0-9]+)_[a-z0-9_]+$");
             if (File.Exists(makefile))
             {
+                HasHardFloat = false;
+
                 foreach (var line in File.ReadAllLines(makefile))
                 {
                     var m = rgTargets.Match(line);
@@ -338,6 +382,9 @@ namespace nrf5x
 
                         TargetDevice = m.Groups[1].Value;
                     }
+
+                    if (line.Contains("-mfloat-abi=hard"))
+                        HasHardFloat = true;
                 }
 
                 if (TargetDevice == null)

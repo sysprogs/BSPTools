@@ -58,7 +58,7 @@ namespace nrf5x
                     Access = MemoryAccess.Undefined,
                     Type = MemoryType.FLASH,
                     Start = FLASHBase,
-                    Size = (uint)mcu.FlashSize,
+                    Size = (uint)mcu.FlashSize * 1024,
                 });
 
                 layout.Memories.Add(new Memory
@@ -67,7 +67,7 @@ namespace nrf5x
                     Access = MemoryAccess.Undefined,
                     Type = MemoryType.RAM,
                     Start = SRAMBase,
-                    Size = (uint)mcu.RAMSize,
+                    Size = (uint)mcu.RAMSize * 1024,
                 });
 
                 return new MemoryLayoutAndSubstitutionRules(layout);
@@ -89,47 +89,24 @@ namespace nrf5x
                     }
                     else
                     {
+                        NordicLinkerScriptGenerator.BuildLinkerScriptBasedOnOriginalNordicScripts(ldsDirectory, generalizedName,  nrfMCU, sd);
                     }
                 }
                 mcu.LinkerScriptPath = $"$$SYS:BSP_ROOT$$/{familyFilePrefix}LinkerScripts/{generalizedName}_$${SoftdevicePropertyID}$$.lds";
-            }
-
-
-
-
-            private static void InsertPowerMgmtData(List<string> lines)
-            {
-                int idx = lines.IndexOf("  .log_const_data :");
-                if (idx == -1)
-                    throw new Exception("Could not find the beginning of section .text");
-
-                lines.InsertRange(idx, new string[]
-                {
-                    "   .pwr_mgmt_data :",
-                    "  {",
-                    "    PROVIDE(__start_pwr_mgmt_data = .);",
-                    "    KEEP(*(SORT(.pwr_mgmt_data*)))",
-                    "    PROVIDE(__stop_pwr_mgmt_data = .);",
-                    "  } > FLASH"
-                });
             }
 
             internal void GenerateSoftdeviceLibraries(IEnumerable<SoftdeviceDefinition> softdevices)
             {
                 foreach (var sd in softdevices)
                 {
-                    string sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
-                    string abi = "";
-                    if (sd.HardwareFP)
-                        abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
-                    else
-                        abi = " \"-mfloat-abi=soft\"";
+                    string sdDir = $@"{BSPRoot}\nRF5x\components\softdevice\{sd.Name}   \hex";
 
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
-                    var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName + abi, UseShellExecute = false };
+                    var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName, UseShellExecute = false };
                     info.EnvironmentVariables["PATH"] += @";e:\sysgcc\arm-eabi\bin";
                     Process.Start(info).WaitForExit();
-                    string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
+
+                    string softdevLib = $@"{BSPRoot}\nRF5x\SoftdeviceLibraries\hard\{sd.Name}_softdevice.o";
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
                         throw new Exception("Failed to convert a softdevice");
                 }
@@ -289,7 +266,8 @@ namespace nrf5x
 
                     foreach (var mcu in fam.MCUs.Cast<NordicMCUBuilder>())
                     {
-                        var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters, false, MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
+                        var corFlags = MCUFamilyBuilder.CoreSpecificFlags.All | MCUFamilyBuilder.CoreSpecificFlags.ConciseFPUMacro & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory;
+                        var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters, false, corFlags);
 
                         if (mcu.Name.StartsWith("nRF52832"))
                         {
@@ -305,8 +283,8 @@ namespace nrf5x
                         var compatibleSoftdevs = mcu.Softdevices.SelectMany(
                             s => new[]
                             {
-                                new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name.ToLower(), UserFriendlyName = s.Name},
-                                new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name.ToLower() + "_reserve", UserFriendlyName = $"{s.Name} (programmed separately)"}
+                                new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name.ToUpper(), UserFriendlyName = s.Name.ToUpper()},
+                                new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name.ToUpper() + "_reserve", UserFriendlyName = $"{s.Name.ToUpper()} (programmed separately)"}
                             });
 
                         if (mcuDef.ConfigurableProperties == null)
@@ -328,7 +306,7 @@ namespace nrf5x
 
                         if (mcu.Summary.HasFPU)
                         {
-                            var prop = mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode") as PropertyEntry.Enumerated;
+                            var prop = mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode.short") as PropertyEntry.Enumerated;
                             var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
                             prop.DefaultEntryIndex = idx;
                             prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
@@ -398,8 +376,8 @@ namespace nrf5x
                     Frameworks = frameworks.ToArray(),
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    PackageVersion = "16.0",
-                    FirstCompatibleVersion = "16.0",
+                    PackageVersion = "17.0",
+                    FirstCompatibleVersion = "17.0",
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
                     MinimumEngineVersion = "5.0",
                     ConditionalFlags = condFlags.ToArray(),

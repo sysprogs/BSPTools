@@ -786,6 +786,7 @@ namespace BSPGenerationTools
             FPU = 0x01,
             PrimaryMemory = 0x02,
             SecureMode = 0x04,
+            ConciseFPUMacro = 0x08,
             All = FPU | PrimaryMemory | SecureMode,
         }
 
@@ -919,12 +920,29 @@ namespace BSPGenerationTools
                 ProvideDefaultPropertyGroup(family).Properties.Add(prop);
             }
 
-            if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
+            if (fpuType != FPUType.None)
             {
-                if (fpuType != FPUType.None)
+                if ((flagsToDefine & CoreSpecificFlags.ConciseFPUMacro) == CoreSpecificFlags.ConciseFPUMacro)
                 {
-                    if (family.ConfigurableProperties == null)
-                        family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+                    family.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+                    family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
+                        new PropertyEntry.Enumerated
+                        {
+                            Name = "Floating point support",
+                            UniqueID = "com.sysprogs.bspoptions.arm.floatmode.short",
+                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
+                                        {
+                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "soft", UserFriendlyName = "Software"},
+                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "hard", UserFriendlyName = "Hardware"},
+                                        },
+                            DefaultEntryIndex = 1,
+                        });
+
+                    family.CompilationFlags.COMMONFLAGS += " -mfloat-abi=$$com.sysprogs.bspoptions.arm.floatmode.short$$";
+                }
+                else if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
+                {
+                    family.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
                     family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
                         new PropertyEntry.Enumerated
                         {
@@ -1525,7 +1543,7 @@ namespace BSPGenerationTools
 
         public static FPUType GetDefaultFPU(CortexCore core)
         {
-            switch(core)
+            switch (core)
             {
                 case CortexCore.M4:
                     return FPUType.SP;
