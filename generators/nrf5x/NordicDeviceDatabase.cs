@@ -35,6 +35,13 @@ namespace nrf5x
             if (!m.Success)
                 return default;
 
+            var configDir = Path.Combine(Path.GetDirectoryName(linkerScript), @$"..\..\..\config\nrf{m.Groups[1].Value}");
+            if (!Directory.Exists(configDir))
+            {
+                //On SDK 17.0 this filters out the unsupported nRF52805 device
+                return default;
+            }
+
             var info = new LDFileMemoryInfo(linkerScript);
             if (info.FLASH.Length == 0 || info.RAM.Length == 0)
                 throw new Exception("Invalid FLASH/RAM size in " + linkerScript);
@@ -81,12 +88,12 @@ namespace nrf5x
 
             Devices = deviceSummaries.Select(s => new NordicMCUBuilder(s)).ToArray();
 
-            var deviceByNumber = Devices.Where(d => d.Name.EndsWith("xxaa", StringComparison.InvariantCultureIgnoreCase)).ToDictionary(d => d.Summary.DeviceNumber);
+            var devicesByNumber = Devices.GroupBy(d => d.Summary.DeviceNumber).ToDictionary(g => g.Key, g => g.ToArray());
 
             //Softdevice are manually compiled from Nordic website/documentation
             Softdevices = File.ReadAllLines(Path.Combine(rulesDir, "softdevices.txt"))
                 .Where(l => !l.Trim().StartsWith("#"))
-                .Select(l => SoftdeviceDefinition.Parse(l, deviceByNumber))
+                .Select(l => SoftdeviceDefinition.Parse(l, devicesByNumber))
                 .ToArray();
 
             //Scan all linker scripts from example projects. Try to cover as many device/softdevice combinations as possible.
@@ -112,7 +119,7 @@ namespace nrf5x
                         continue;
 
                     var memInfo = new LDFileMemoryInfo(lds.FullPath);
-                    var dev = deviceByNumber[lds.DeviceNumber];
+                    var dev = devicesByNumber[lds.DeviceNumber].First();
 
                     if (memInfo.RAM.End != dev.Summary.RAM.End)
                         throw new Exception("Inconsistent end of RAM for " + lds.FullPath);
@@ -283,7 +290,7 @@ namespace nrf5x
 
         public override string ToString() => $"{Name} ({MCUs?.Length} devices)";
 
-        internal static SoftdeviceDefinition Parse(string line, Dictionary<int, NordicMCUBuilder> deviceByNumber)
+        internal static SoftdeviceDefinition Parse(string line, Dictionary<int, NordicMCUBuilder[]> deviceByNumber)
         {
             int idx = line.IndexOf(":");
             if (idx == -1)
@@ -295,7 +302,7 @@ namespace nrf5x
                 MCUs = line.Substring(idx + 1).Trim().Split(',')
                 .Select(l => l.Trim())
                 .Select(l => l.StartsWith("nRF", StringComparison.InvariantCultureIgnoreCase) ? l.Substring(3) : l)
-                .Select(l => deviceByNumber[int.Parse(l)])
+                .SelectMany(l => deviceByNumber[int.Parse(l)])
                 .ToArray()
             };
 

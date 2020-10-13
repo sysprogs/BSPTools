@@ -16,6 +16,8 @@
 			<string>$$com.sysprogs.bspoptions.nrf5x.mcu.compat_macro_2$$</string>
 			<string>NRF_DFU_SETTINGS_VERSION=2</string>
 			<string>NRF_SD_BLE_API_VERSION=7</string>
+			<string>__STACK_SIZE=$$com.sysprogs.bspoptions.stackheap.stacksize$$</string>
+			<string>__HEAP_SIZE=$$com.sysprogs.bspoptions.stackheap.heapsize$$</string>
 		</PreprocessorMacros>
 		<IncludeDirectories>
 			<string>.</string>
@@ -169,6 +171,33 @@
 						</SuggestionList>
 						<DefaultEntryIndex>0</DefaultEntryIndex>
 						<AllowFreeEntry>false</AllowFreeEntry>
+					</PropertyEntry>
+				</Properties>
+				<CollapsedByDefault>false</CollapsedByDefault>
+			</PropertyGroup>
+			<PropertyGroup>
+				<Name>Fixed-size Stack &amp; Heap</Name>
+				<UniqueID>com.sysprogs.bspoptions.stackheap.</UniqueID>
+				<Properties>
+					<PropertyEntry xsi:type="Integral">
+						<Name>Memory Reserved for Stack</Name>
+						<UniqueID>stacksize</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the amount of memory (in bytes) to reserve for the stack</Description>
+						<DefaultValue>1024</DefaultValue>
+						<MinValue>0</MinValue>
+						<MaxValue>16777216</MaxValue>
+						<Increment>1024</Increment>
+					</PropertyEntry>
+					<PropertyEntry xsi:type="Integral">
+						<Name>Memory Reserved for Heap</Name>
+						<UniqueID>heapsize</UniqueID>
+						<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+						<Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
+						<DefaultValue>1024</DefaultValue>
+						<MinValue>0</MinValue>
+						<MaxValue>16777216</MaxValue>
+						<Increment>1024</Increment>
 					</PropertyEntry>
 				</Properties>
 				<CollapsedByDefault>false</CollapsedByDefault>
@@ -499,48 +528,6 @@
 					</SmartFileConditions>					
 				</CopyJob>
 			</CopyJobs>
-		</Framework>
-		<Framework>
-			<Name>Fixed Size Stack &amp; Heap</Name>
-			<ID>com.sysprogs.arm.nordic.nrf5x.stack_heap</ID>
-			<ProjectFolderName>Stack/Heap</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$</SourceFolder>
-					<FilesToCopy>-*</FilesToCopy>
-					<PreprocessorMacros>__STACK_SIZE=$$com.sysprogs.bspoptions.stackheap.stacksize$$;__HEAP_SIZE=$$com.sysprogs.bspoptions.stackheap.heapsize$$</PreprocessorMacros>
-				</CopyJob>
-			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-					<PropertyGroup>
-						<Properties>
-							<PropertyEntry xsi:type="Integral">
-								<Name>Fixed stack size</Name>
-								<UniqueID>com.sysprogs.bspoptions.stackheap.stacksize</UniqueID>
-								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-								<Description>Specifies the amount of memory (in bytes) to reserve for the stack</Description>
-								<DefaultValue>8192</DefaultValue>
-								<MinValue>0</MinValue>
-								<MaxValue>16777216</MaxValue>
-								<Increment>1024</Increment>
-							</PropertyEntry>
-							<PropertyEntry xsi:type="Integral">
-								<Name>Fixed heap size</Name>
-								<UniqueID>com.sysprogs.bspoptions.stackheap.heapsize</UniqueID>
-								<OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
-								<Description>Specifies the amount of memory (in bytes) to use for dynamically allocated data</Description>
-								<DefaultValue>8192</DefaultValue>
-								<MinValue>0</MinValue>
-								<MaxValue>16777216</MaxValue>
-								<Increment>1024</Increment>
-							</PropertyEntry>
-						</Properties>
-						<CollapsedByDefault>false</CollapsedByDefault>
-					</PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>
 		</Framework>
 		<Framework>
 			<Name>FreeRTOS</Name>

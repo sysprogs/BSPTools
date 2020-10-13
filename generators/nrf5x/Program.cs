@@ -114,45 +114,6 @@ namespace nrf5x
 
         }
 
-        static StartupFileGenerator.InterruptVectorTable GenerateStartupFile(string pDir, string pFBase)
-        {
-            var vectorTable = new StartupFileGenerator.InterruptVectorTable
-            {
-                FileName = "startup_" + pFBase + "x.c",
-                Vectors = StartupFileGenerator.ParseInterruptVectors(Path.Combine(pDir, "arm_startup_" + pFBase + ".s"),
-                    "^__Vectors",
-                    @"__Vectors_End",
-                    @"^[ \t]+DCD[ \t]+([^ \t]+)[ \t]+; *([^ \t].*)$",
-                    @"^[ \t]+DCD[ \t]+([^ \t]+)$",
-                    @"^[ \t]+;.*",
-                    null,
-                    1,
-                    2),
-            };
-
-            if (pFBase.ToLower() == "nrf51")
-            {
-                vectorTable.AdditionalResetHandlerLines = new string[]
-                {
-                        "asm volatile(\".equ NRF_POWER_RAMON_ADDRESS,0x40000524\");",
-                        "asm volatile(\".equ NRF_POWER_RAMON_RAMxON_ONMODE_Msk,3\");",
-                        "asm volatile(\"LDR     R0, =NRF_POWER_RAMON_ADDRESS\");",
-                        "asm volatile(\"LDR     R2, [R0]\");",
-                        "asm volatile(\"MOVS    R1, #NRF_POWER_RAMON_RAMxON_ONMODE_Msk\");",
-                        "asm volatile(\"ORR     R2, R2, R1\");",
-                        "asm volatile(\"STR     R2, [R0]\");",
-                };
-            }
-
-            vectorTable.Vectors = new StartupFileGenerator.InterruptVector[] { new StartupFileGenerator.InterruptVector { Name = "_estack" } }.Concat(vectorTable.Vectors).ToArray();
-
-            vectorTable.MatchPredicate = m => m.Name.StartsWith(pFBase);
-            return vectorTable;
-        }
-
-
-
-
         class NordicFamilyBuilder : MCUFamilyBuilder
         {
             public NordicFamilyBuilder(BSPBuilder bspBuilder, FamilyDefinition definition)
@@ -280,6 +241,9 @@ namespace nrf5x
                             new PropertyEntry.Enumerated.Suggestion {InternalValue = "nosoftdev", UserFriendlyName = "None"}
                         };
 
+                        if (mcu.Softdevices.Count < 1)
+                            throw new Exception("No softdevices found for " + mcu.Name);
+
                         var compatibleSoftdevs = mcu.Softdevices.SelectMany(
                             s => new[]
                             {
@@ -311,11 +275,16 @@ namespace nrf5x
                             prop.DefaultEntryIndex = idx;
                             prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
                         }
+                        else
+                        {
+                            //This is needed to locate the SoftFP version of the softdevice object file
+                            mcuDef.AdditionalSystemVars = (mcuDef.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.floatmode.short", Value = "soft" } }).ToArray();
+                        }
 
                         string defaultConfig;
                         if (mcu.Name.StartsWith("nRF52840"))
                             defaultConfig = "pca10056/s140";
-                        else if (mcu.Name.StartsWith("nRF52810"))
+                        else if (mcu.Name.StartsWith("nRF52810") || mcu.Name.StartsWith("nRF52820"))
                             defaultConfig = "pca10040e/s112";
                         else if (mcu.Name.StartsWith("nRF52811"))
                             defaultConfig = "pca10056e/s112";

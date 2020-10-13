@@ -2,7 +2,7 @@
 <EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>Bluetooth LE Proximity Tag</Name>
 	<Description>This sample demonstrates a Bluetooth LE Proximity Tag used with the Nordic nRF Toolbox App.</Description>
-	<MCUFilterRegex>^nRF5.*$</MCUFilterRegex>
+	<MCUFilterRegex>^nRF5(?!2820).*$</MCUFilterRegex>
 	<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
 	<RequiredFrameworks>
 		<string>com.sysprogs.arm.nordic.nrfx.ble_bas</string>
