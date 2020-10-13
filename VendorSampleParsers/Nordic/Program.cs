@@ -215,16 +215,41 @@ namespace NordicVendorSampleParser
                     //This is a special 'serialization mode' sample that defines -DSxxx, but not -DSOFTDEVICE_PRESENT, that is not supported by our BSP yet.
                     softdevice = null;
                 }
+                else if (softdevice == null)
+                    throw new Exception("Could not find a matching softdevice for " + sampleID);
+
+                List<PropertyDictionary2.KeyValue> entries = new List<PropertyDictionary2.KeyValue>
+                {
+                    new PropertyDictionary2.KeyValue
+                    {
+                        Key = "com.sysprogs.bspoptions.nrf5x.softdevice",
+                        Value = softdevice ?? "nosoftdev"
+                    }
+                };
+
+                for (int i = 0; i < preprocessorMacros.Count; i++)
+                {
+                    int idx = preprocessorMacros[i].IndexOf("=");
+                    if (idx == -1)
+                        continue;
+
+                    string name = preprocessorMacros[i].Substring(0, idx);
+                    if (name == "__HEAP_SIZE")
+                    {
+                        entries.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.bspoptions.stackheap.heapsize", Value = preprocessorMacros[i].Substring(idx + 1) });
+                        preprocessorMacros.RemoveAt(i--);
+                    }
+                    else if (name == "__STACK_SIZE")
+                    {
+                        entries.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.bspoptions.stackheap.stacksize", Value = preprocessorMacros[i].Substring(idx + 1) });
+                        preprocessorMacros.RemoveAt(i--);
+                    }
+                }
+
 
                 vs.Configuration.MCUConfiguration = new PropertyDictionary2
                 {
-                    Entries = new PropertyDictionary2.KeyValue[]
-                    {
-                        new PropertyDictionary2.KeyValue {
-                            Key = "com.sysprogs.bspoptions.nrf5x.softdevice",
-                            Value = softdevice ?? "nosoftdev"
-                        }
-                    }.ToArray()
+                    Entries = entries.ToArray()
                 };
 
                 if (softdevice != null)
@@ -242,6 +267,7 @@ namespace NordicVendorSampleParser
                 vs.SourceFiles = lstFileC.ToArray();
                 vs.UserFriendlyName = aProjectName;
                 vs.NoImplicitCopy = true;
+
                 return vs;
             }
 

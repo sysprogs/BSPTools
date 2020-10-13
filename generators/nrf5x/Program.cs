@@ -357,7 +357,7 @@ namespace nrf5x
 
                 List<ConfigurationFixSampleReference> samplesForComputingSymbolLists = new List<ConfigurationFixSampleReference>();
 
-                foreach (var sampleName in new[] { "BLEMouse", "IoT/Icmp", "BLEMultilinkCentral", "LEDBlink_FreeRTOS" })
+                foreach (var sampleName in new[] { "BLEMouse", "BLEMultilinkCentral", "LEDBlink_FreeRTOS" })
                 {
                     samplesForComputingSymbolLists.Add(new ConfigurationFixSampleReference
                     {
