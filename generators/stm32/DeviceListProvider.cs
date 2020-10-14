@@ -394,6 +394,7 @@ namespace stm32_bsp_generator
                         case "DP":
                             return FPUType.DP;
                         case "none":
+                        case "None":
                             return FPUType.None;
                         default:
                             throw new Exception("Unknown FPU type: " + fpuString);

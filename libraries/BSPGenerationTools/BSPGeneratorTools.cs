@@ -905,7 +905,7 @@ namespace BSPGenerationTools
 
                 var prop = new PropertyEntry.Boolean
                 {
-                    Name = "Enable Armv8‑M Security Extensions",
+                    Name = "Enable Armv8-M Security Extensions",
                     UniqueID = SecureModeOptionName,
                     ValueForTrue = "-mcmse",
                 };
