@@ -30,6 +30,7 @@ namespace BSPGenerationTools
         M4,
         M7,
         A7,
+        R4,
         R5,
     }
 
@@ -785,6 +786,7 @@ namespace BSPGenerationTools
             FPU = 0x01,
             PrimaryMemory = 0x02,
             SecureMode = 0x04,
+            ConciseFPUMacro = 0x08,
             All = FPU | PrimaryMemory | SecureMode,
         }
 
@@ -798,6 +800,7 @@ namespace BSPGenerationTools
 
             switch (core)
             {
+                case CortexCore.R4:
                 case CortexCore.R5:
                     flag = $"-mfpu=vfpv3{sp}-d16";
                     break;
@@ -865,6 +868,10 @@ namespace BSPGenerationTools
                     coreName = "M7";
                     freertosPort = "ARM_CM7/r0p1";
                     break;
+                case CortexCore.R4:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r4 -mthumb";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CR4" };
+                    break;
                 case CortexCore.R5:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r5 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CR5" };
@@ -913,12 +920,29 @@ namespace BSPGenerationTools
                 ProvideDefaultPropertyGroup(family).Properties.Add(prop);
             }
 
-            if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
+            if (fpuType != FPUType.None)
             {
-                if (fpuType != FPUType.None)
+                if ((flagsToDefine & CoreSpecificFlags.ConciseFPUMacro) == CoreSpecificFlags.ConciseFPUMacro)
                 {
-                    if (family.ConfigurableProperties == null)
-                        family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+                    family.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+                    family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
+                        new PropertyEntry.Enumerated
+                        {
+                            Name = "Floating point support",
+                            UniqueID = "com.sysprogs.bspoptions.arm.floatmode.short",
+                            SuggestionList = new PropertyEntry.Enumerated.Suggestion[]
+                                        {
+                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "soft", UserFriendlyName = "Software"},
+                                                new PropertyEntry.Enumerated.Suggestion{InternalValue = "hard", UserFriendlyName = "Hardware"},
+                                        },
+                            DefaultEntryIndex = 1,
+                        });
+
+                    family.CompilationFlags.COMMONFLAGS += " -mfloat-abi=$$com.sysprogs.bspoptions.arm.floatmode.short$$";
+                }
+                else if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
+                {
+                    family.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
                     family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
                         new PropertyEntry.Enumerated
                         {
@@ -1130,10 +1154,17 @@ namespace BSPGenerationTools
             public string SubstitutePath;   //Must work for ALL samples
         }
 
+        int _SuppressMissingSampleErrorsUntilEndOfDebugSession;
+
         protected virtual void OnMissingSampleFile(MissingSampleFileArgs args)
         {
-            //DO NOT REPLACE THIS WITH A WARNING! If needed, override this method in specific generators.
-            throw new Exception($"Missing sample file: {args.ExpandedPath}. Please setup fallback lookup rules.");
+            if (_SuppressMissingSampleErrorsUntilEndOfDebugSession == 0)
+            {
+                //DO NOT REPLACE THIS WITH A WARNING! If needed, override this method in specific generators.
+                throw new Exception($"Missing sample file: {args.ExpandedPath}. Please setup fallback lookup rules.");
+            }
+            else
+                Console.WriteLine($"Missing sample file: {args.ExpandedPath}. Please setup fallback lookup rules.");
         }
 
         public IEnumerable<CopiedSample> CopySamples(IEnumerable<EmbeddedFramework> allFrameworks = null, IEnumerable<SysVarEntry> extraVariablesToValidateSamples = null)
@@ -1380,8 +1411,9 @@ namespace BSPGenerationTools
 
     public static class BSPGeneratorTools
     {
-        public static CortexCore ParseCoreName(string core)
+        public static CortexCore ParseCoreName(string core, out FPUType fpu)
         {
+            fpu = FPUType.None;
             switch (core.Replace(" ", ""))
             {
                 case "ARMCortex-M0":
@@ -1393,6 +1425,7 @@ namespace BSPGenerationTools
                 case "ARMCortex-M4":
                     return CortexCore.M4;
                 case "ARMCortex-M7":
+                    fpu = FPUType.DP;
                     return CortexCore.M7;
                 case "Cortex-M0":
                     return CortexCore.M0;
@@ -1405,12 +1438,16 @@ namespace BSPGenerationTools
                 case "Cortex-M4":
                     return CortexCore.M4;
                 case "Cortex-M4F": //FPU
+                    fpu = FPUType.SP;
                     return CortexCore.M4;
                 case "Cortex-M4F;M0"://MultiCore
+                    fpu = FPUType.SP;
                     return CortexCore.M4;
                 case "Cortex-M4F; Cortex-M0+"://MultiCore
+                    fpu = FPUType.SP;
                     return CortexCore.M4;
                 case "Cortex-M7":
+                    fpu = FPUType.DP;
                     return CortexCore.M7;
                 default:
                     return CortexCore.Invalid;
@@ -1447,7 +1484,7 @@ namespace BSPGenerationTools
                 };
 
                 if (coreColumn != null)
-                    mcu.Core = ParseCoreName(items[headers[coreColumn]]);
+                    mcu.Core = ParseCoreName(items[headers[coreColumn]], out mcu.FPU);
 
                 if (sizesAreInKilobytes)
                 {
@@ -1463,7 +1500,7 @@ namespace BSPGenerationTools
             return rawmcu_list;
         }
 
-        public static List<MCUBuilder> AssignMCUsToFamilies(List<MCUBuilder> devices, List<MCUFamilyBuilder> allFamilies)
+        public static List<MCUBuilder> AssignMCUsToFamilies(IEnumerable<MCUBuilder> devices, List<MCUFamilyBuilder> allFamilies)
         {
             List<MCUBuilder> orphanedDevices = new List<MCUBuilder>();
             var families = (from f in allFamilies select new KeyValuePair<Regex, MCUFamilyBuilder>(new Regex(f.Definition.DeviceRegex), f)).ToArray();
@@ -1502,6 +1539,17 @@ namespace BSPGenerationTools
             updatedFamily.AdditionalSourceFiles = LoadedBSP.Combine(familyToCopy.AdditionalSourceFiles, updatedFamily.AdditionalSourceFiles);
             updatedFamily.AdditionalHeaderFiles = LoadedBSP.Combine(familyToCopy.AdditionalHeaderFiles, updatedFamily.AdditionalHeaderFiles);
             updatedFamily.AdditionalMakefileLines = LoadedBSP.Combine(familyToCopy.AdditionalMakefileLines, updatedFamily.AdditionalMakefileLines);
+        }
+
+        public static FPUType GetDefaultFPU(CortexCore core)
+        {
+            switch (core)
+            {
+                case CortexCore.M4:
+                    return FPUType.SP;
+                default:
+                    return FPUType.None;
+            }
         }
     }
 

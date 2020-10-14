@@ -688,33 +688,6 @@ namespace stm32_bsp_generator
             return int.Parse(str);
         }
 
-        static ToolFlags MakeToolFlagsForCortex(string cortex)
-        {
-            ToolFlags flags = new ToolFlags();
-
-            string cortexFlags = null;
-            switch (cortex)
-            {
-                case "ARM Cortex-M0":
-                    cortexFlags = "-mcpu=cortex-m0 -mthumb";
-                    break;
-                case "ARM Cortex-M0+":
-                    cortexFlags = "-mcpu=cortex-m0plus -mthumb";
-                    break;
-                case "ARM Cortex-M3":
-                    cortexFlags = "-mcpu=cortex-m3 -mthumb";
-                    break;
-                case "ARM Cortex-M4":
-                    cortexFlags = "-mcpu=cortex-m4 -mthumb";
-                    break;
-                default:
-                    throw new Exception("Unknown MCU: " + cortex);
-            }
-            flags.CFLAGS = flags.CXXFLAGS = flags.ASFLAGS = flags.LDFLAGS = cortexFlags;
-
-            return flags;
-        }
-
         const uint FLASHBase = 0x08000000, SRAMBase = 0x20000000;
 
         static void CopyDirectoryRecursive(string sourceDirectory, string destinationDirectory)

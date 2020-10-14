@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <ToolchainPath>[SysGCC-arm-eabi-9.2.1]</ToolchainPath>
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
-	<DeviceRegex>nRF52.*</DeviceRegex>
+	<DeviceRegex>nRF52.*_XXAA</DeviceRegex>
 	<Samples>
 	<TestedSample>
 			<Name>Bluetooth LE Mouse</Name>
@@ -12,7 +11,7 @@
 		</TestedSample>
 		<TestedSample>
 			<Name>Bluetooth LE Proximity Tag</Name>
-			<SkipIfNotFound>false</SkipIfNotFound>
+			<SkipIfNotFound>true</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-BLEProximity</TestDirSuffix>
 		</TestedSample>	 
@@ -69,42 +68,6 @@
 			<SampleConfiguration>			
 			</SampleConfiguration>            
 		</TestedSample>
-		
-		<TestedSample>
-			<Name>MQTT publisher (IoT)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-IoT_MQTT_publisher</TestDirSuffix>
-			<DeviceRegex>^nRF52840.*$</DeviceRegex>
-		</TestedSample>	 
-		<TestedSample>
-			<Name>MQTT subscriber (IoT)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-IoT_MQTT_subscriber</TestDirSuffix>
-			<DeviceRegex>^nRF52840.*$</DeviceRegex>
-		</TestedSample>	 		
-		<TestedSample>
-			<Name>ICMP Demo (IoT)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-IoT_icmp</TestDirSuffix>
-			<DeviceRegex>^nRF52840.*$</DeviceRegex>
-		</TestedSample>	 
-		<TestedSample>
-			<Name>TCP server (IoT)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-IoT_tcp_server</TestDirSuffix>
-			<DeviceRegex>^nRF52840.*$</DeviceRegex>
-		</TestedSample>	 
-		<TestedSample>
-			<Name>TCP client (IoT)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-IoT_tcp_client</TestDirSuffix>
-			<DeviceRegex>^nRF52840.*$</DeviceRegex>
-		</TestedSample>	 
 	</Samples>
 	<DeviceParameterSets>
 		<DeviceParameterSet>

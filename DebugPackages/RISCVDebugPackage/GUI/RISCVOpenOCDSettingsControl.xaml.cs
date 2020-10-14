@@ -27,7 +27,7 @@ namespace RISCVDebugPackage.GUI
 
         public event EventHandler SettingsChanged;
         RISCVOpenOCDSettingsEditor _Editor;
-
+        private RISCVOpenOCDDebugController _Controller;
 
         public ICustomSettingsTypeProvider TypeProvider { get; }
 
@@ -37,11 +37,11 @@ namespace RISCVDebugPackage.GUI
 
         public bool SupportsLiveVariables => true;
 
-        public RISCVOpenOCDSettingsControl(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host, ICustomSettingsTypeProvider typeProvider)
+        public RISCVOpenOCDSettingsControl(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host, RISCVOpenOCDDebugController controller)
         {
             _Method = method;
             _Host = host;
-            TypeProvider = typeProvider;
+            TypeProvider = _Controller = controller;
             host.InstallStyles(this);
 
             InitializeComponent();
@@ -76,7 +76,7 @@ namespace RISCVDebugPackage.GUI
         public void SetConfiguration(object configuration, KnownInterfaceInstance context)
         {
             var settings = configuration as RISCVOpenOCDSettings;
-            _Editor = new RISCVOpenOCDSettingsEditor(_Host, _Method.Directory, settings, context);
+            _Editor = new RISCVOpenOCDSettingsEditor(_Host, _Method, settings, _Controller, context);
 
             _Editor.PropertyChanged += (s, e) => SettingsChanged?.Invoke(this, EventArgs.Empty);
             DataContext = _Editor;

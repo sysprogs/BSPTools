@@ -103,10 +103,7 @@
     <Resource Include="GUI\Icons\add16.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\products\VisualGDB\support\OpenOCDPackage\OpenOCDPackage.csproj">
-      <Project>{84589bb6-390b-49ec-a412-d7cadc0ee289}</Project>
-      <Name>OpenOCDPackage</Name>
-    </ProjectReference>
+    <Resource Include="GUI\Icons\reset16.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="GUI\Icons\warn16.png" />
@@ -115,9 +112,9 @@
     <Resource Include="GUI\Icons\bulb16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props" 
-		  Condition="Exists('$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props')"/>
+  <Import Project="$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props" Condition="Exists('$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props')" />
   <Import Project="..\..\BSPEngine.targets" />
+  <Import Project="..\OpenOCDPackage.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

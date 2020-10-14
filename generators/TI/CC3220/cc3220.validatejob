@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<ToolchainPath>[SysGCC-arm-eabi-7.2.0]</ToolchainPath>
 	<BSPPath>$$JOBDIR$$\Output</BSPPath>
 	<DeviceRegex>CC.*</DeviceRegex>
 	<Samples>
@@ -12,31 +11,15 @@
 			<TestDirSuffix>-pwmled</TestDirSuffix>
 			<SampleConfiguration>			
 			</SampleConfiguration>
-			<FrameworkConfiguration>			
-				<Entries>
-					<KeyValue>
-						<Key>com.sysprogs.arm.ti.cc3200.free_rtos.heap</Key>
-						<Value>heap_3</Value>
-					</KeyValue>
-				</Entries>
-			</FrameworkConfiguration>
 		</TestedSample> 
 		<TestedSample>
 			<Name>Network Terminal</Name>
 			<DataSections>true</DataSections>
-			<SkipIfNotFound>true</SkipIfNotFound>
+			<SkipIfNotFound>false</SkipIfNotFound>
 			<ValidateRegisters>false</ValidateRegisters>
 			<TestDirSuffix>-networkterm</TestDirSuffix>
 			<SampleConfiguration>			
 			</SampleConfiguration>
-			<FrameworkConfiguration>			
-				<Entries>
-					<KeyValue>
-						<Key>com.sysprogs.bspoptions.FreeRTOS_Heap_Implementation</Key>
-						<Value>Heap3 - use newlib malloc()/free()</Value>
-					</KeyValue>
-				</Entries>
-			</FrameworkConfiguration>
 		</TestedSample>
 	</Samples>
 </TestJob>

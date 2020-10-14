@@ -47,7 +47,7 @@
 
 /* Include Files */
 
-#include "HL_sys_common.h"
+#include "$$com.sysprogs.halcogen.common.h$$"
 
 /* USER CODE BEGIN (1) */
 /* USER CODE END */
@@ -61,12 +61,9 @@
 */
 
 /* USER CODE BEGIN (2) */
-#include "HL_gio.h"
+#include "$$com.sysprogs.halcogen.gio.h$$"
 
 /* USER CODE END */
-
-uint8	emacAddress[6U] = 	{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU};
-uint32 	emacPhyAddress	=	1U;
 
 void delay()
 {
@@ -78,10 +75,10 @@ int main(void)
 {
 /* USER CODE BEGIN (3) */
     gioInit();
-    gioSetDirection(gioPORTB, (1 << 6) | (1 << 7));
+    gioSetDirection(gio$$com.sysprogs.examples.halcogen.LEDPORT$$, (1 << $$com.sysprogs.examples.halcogen.LEDBIT$$));
     for (;;)
     {
-        gioToggleBit(gioPORTB, 6);
+        gioToggleBit(gio$$com.sysprogs.examples.halcogen.LEDPORT$$, $$com.sysprogs.examples.halcogen.LEDBIT$$);
         delay();
     }
 

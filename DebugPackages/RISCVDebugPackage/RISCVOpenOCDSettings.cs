@@ -19,26 +19,26 @@ namespace RISCVDebugPackage
         Manual,
         nSRST,
     }
-
+    
     public class RISCVOpenOCDSettingsEditor : OpenOCDSettingsEditor
     {
         public new RISCVOpenOCDSettings Settings => (RISCVOpenOCDSettings)base.Settings;
 
-        public RISCVOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, RISCVOpenOCDSettings settings, KnownInterfaceInstance context)
-            : base(host, baseDir, settings ?? new RISCVOpenOCDSettings(), context, settings == null)
+        public RISCVOpenOCDSettingsEditor(IBSPConfiguratorHost host, LoadedBSP.LoadedDebugMethod method, RISCVOpenOCDSettings settings, RISCVOpenOCDDebugController controller, KnownInterfaceInstance context)
+            : base(host, method.Directory, settings, context, controller, settings == null)
         {
         }
 
-        public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Visible;
-        public System.Windows.Visibility ResetModeVisibility => System.Windows.Visibility.Collapsed;
+        protected override OpenOCDSettings CreateDefaultSettings() => new RISCVOpenOCDSettings();
 
-        protected override string AdapterSpeedCommand => "adapter_khz";
+        public System.Windows.Visibility ProgramOptionVisibility => System.Windows.Visibility.Visible;
+        public System.Windows.Visibility ResetModeVisibility { get; } = System.Windows.Visibility.Collapsed;
 
         protected override void InsertResetAndHaltCommands(int idxLoad, QuickSetupDatabase.ProgrammingInterface iface, QuickSetupDatabase.TargetDeviceFamily device)
         {
             const string unprotectCommand = "mon flash protect 0 64 last off";
-            const string resetHalt = "mon reset halt";
-            const string restartAtEntry = "mon reset halt"; // set $pc = _start";
+            const string resetHalt = "mon reset init";
+            //const string restartAtEntry = "mon reset halt"; // set $pc = _start";
             int idx;
 
             idx = Settings.StartupCommands.IndexOf(unprotectCommand);
@@ -49,9 +49,9 @@ namespace RISCVDebugPackage
             if (idx == -1)
                 Settings.StartupCommands.Insert(idxLoad, resetHalt);
 
-            idx = Settings.StartupCommands.IndexOf(restartAtEntry, idxLoad + 1);
+            /*idx = Settings.StartupCommands.IndexOf(restartAtEntry, idxLoad + 1);
             if (idx == -1)
-                Settings.StartupCommands.Add(restartAtEntry);
+                Settings.StartupCommands.Add(restartAtEntry);*/
         }
 
         public static bool IsE300CPU(LoadedBSP.ConfiguredMCU mcu)

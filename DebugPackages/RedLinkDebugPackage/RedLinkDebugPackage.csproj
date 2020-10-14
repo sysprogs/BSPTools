@@ -84,4 +84,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\BSPEngine.targets" />
+  <Import Project="$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props" 
+		  Condition="Exists('$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props')"/>
 </Project>

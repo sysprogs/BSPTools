@@ -23,9 +23,11 @@ namespace ESP8266DebugPackage
 
         protected override abstract IGDBStubInstance CreateStub(DebugStartContext context, OpenOCDSettings settings, OpenOCDCommandLine cmdLine, int gdbPort, int telnetPort, string temporaryScript, IExternalToolInstance tool, string sharedSessionID);
 
+        public override string AdapterSpeedCommand => "adapter_khz";
+
         public override object TryConvertLegacyConfiguration(IBSPConfiguratorHost host, string methodDirectory, Dictionary<string, string> legacyConfiguration)
         {
-            ESPxxOpenOCDSettingsEditor editor = new ESPxxOpenOCDSettingsEditor(host, methodDirectory, null, default(KnownInterfaceInstance), _IsESP32);
+            ESPxxOpenOCDSettingsEditor editor = new ESPxxOpenOCDSettingsEditor(host, methodDirectory, null, default(KnownInterfaceInstance), _IsESP32, this);
             string value;
             if (legacyConfiguration.TryGetValue("com.sysprogs.esp8266.openocd.iface_script", out value))
                 editor.ReplaceScript(OpenOCDCommandLine.ScriptType.Interface, value);
@@ -179,23 +181,16 @@ namespace ESP8266DebugPackage
                     using (var ctx = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Programming FLASH memory" }))
                     {
                         int blkNum = 0;
-                        Regex rgWriteXBytes = new Regex("wrote ([0-9]+) bytes from file");
                         foreach (var blk in blocks)
                         {
                             ctx.ReportTaskProgress(blkNum++, blocks.Count);
                             string path = blk.FileName.Replace('\\', '/');
                             if (path.Contains(" "))
                                 throw new Exception($"ESP32 OpenOCD does not support spaces in paths. Please relocate {path} to a location without spaces");
-                            var result = session.RunGDBCommand($"mon program_esp32 \"{path}\" 0x{blk.Offset:x}");
+                            var result = session.RunGDBCommand($"mon program_esp \"{path}\" 0x{blk.Offset:x}");
                             bool succeeded = result.StubOutput?.FirstOrDefault(l => l.Contains("** Programming Finished **")) != null;
                             if (!succeeded)
                                 throw new Exception("FLASH programming failed. Please try unplugging the board and plugging it back. If nothing helps, please review the gdb/OpenOCD logs for details.");
-                            var m = result.StubOutput.Select(l => rgWriteXBytes.Match(l)).FirstOrDefault(m2 => m2.Success);
-                            if (m == null)
-                                throw new Exception("FLASH programming did not report the amount of written bytes. Please review the gdb/OpenOCD logs for details.");
-                            int bytesWritten = int.Parse(m.Groups[1].Value);
-                            if (bytesWritten == 0 && blk.Size > 0)
-                                throw new Exception("FLASH programming did not write any data. This is a known bug of ESP32 OpenOCD. Please restart your device and JTAG programmer and try again.");
                         }
                     }
                 }

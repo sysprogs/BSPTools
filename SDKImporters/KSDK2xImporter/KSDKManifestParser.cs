@@ -53,7 +53,7 @@ namespace KSDK2xImporter
                 }
             }
 
-            void AttachSVDFilesAndLinkerScriptsToDevices()
+            void AttachSVDFilesAndLinkerScriptsToDevices(ISDKImportHost host)
             {
                 foreach (var sd in _SpecializedDevices)
                 {
@@ -68,7 +68,7 @@ namespace KSDK2xImporter
                             {
                                 var fullPath = svdFiles[0].GetLocalPath(_Directory);
 
-                                var mcuDef = SVDParser.ParseSVDFile(fullPath, sd.Device.DeviceName);
+                                var mcuDef = host?.TryParseSVDFile(fullPath, sd.Device.DeviceName) ?? SVDParser.ParseSVDFile(fullPath, sd.Device.DeviceName);
                                 var convertedFile = new FileReference(Path.ChangeExtension(svdFiles[0].RelativePath, ".vgdbdevice"), svdFiles[0].Type);
 
                                 XmlSerializer ser = new XmlSerializer(typeof(MCUDefinition));
@@ -180,7 +180,7 @@ namespace KSDK2xImporter
                 return result.ToArray();
             }
 
-            public ParsedSDK ParseKSDKManifest()
+            public ParsedSDK ParseKSDKManifest(ISDKImportHost host)
             {
                 LoadDevicesAndFamilies();
 
@@ -190,14 +190,17 @@ namespace KSDK2xImporter
                     .Where(c => !c.SkipUnconditionally)
                     .ToArray();
 
-                AttachSVDFilesAndLinkerScriptsToDevices();
+                AttachSVDFilesAndLinkerScriptsToDevices(host);
                 Dictionary<string, FileCondition> fileConditions = new Dictionary<string, FileCondition>();
 
                 var frameworks = TranslateComponentsToFrameworks(fileConditions);
                 var vendorSamples = TranslateSampleProjects();
 
                 var version = _Manifest.DocumentElement.GetAttribute("version");
-                if (version == "")
+                if (string.IsNullOrEmpty(version))
+                    version = _Manifest.DocumentElement.SelectSingleNode("ksdk/@version")?.InnerText;
+
+                if (string.IsNullOrEmpty(version))
                     version = "unknown";
 
                 var allFamilies = _SpecializedDevices.Select(d => d.BuildMCUFamily()).ToArray();
@@ -296,7 +299,7 @@ namespace KSDK2xImporter
                     HashSet<string> moreFlags = new HashSet<string>();
                     if (File.Exists(cmakeLists))
                     {
-                        foreach(var line in File.ReadAllLines(cmakeLists))
+                        foreach (var line in File.ReadAllLines(cmakeLists))
                         {
                             var match = rgCPUOrFPU.Match(line);
                             if (match.Success)
@@ -334,7 +337,7 @@ namespace KSDK2xImporter
             XmlDocument doc = new XmlDocument();
             doc.Load(manifestFile);
 
-            var bsp = new ParserImpl(location.Directory, doc, host.WarningSink).ParseKSDKManifest();
+            var bsp = new ParserImpl(location.Directory, doc, host.WarningSink).ParseKSDKManifest(host);
             bsp.Save(location.Directory);
 
             return new ImportedExternalSDK { BSPID = bsp.BSP.PackageID, Directory = location.Directory };

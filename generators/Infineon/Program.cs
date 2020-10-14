@@ -39,7 +39,7 @@ namespace InfineonXMC_bsp_generator
                     Flags = SectionFlags.DefineShortLabels | SectionFlags.ProvideLongLabels,
                 });
 
-                LDSTemplate = LDSTemplateX1;                
+                LDSTemplate = LDSTemplateX1;
             }
 
             protected override LinkerScriptTemplate GetTemplateForMCU(MCUBuilder mcu)
@@ -56,7 +56,7 @@ namespace InfineonXMC_bsp_generator
                 ramBase = SRAMBase;
             }
 
-            public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
+            public override MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 MemoryLayout layout = new MemoryLayout { DeviceName = mcu.Name, Memories = new List<Memory>() };
                 string aDir = Directories.InputDir + @"\CMSIS\Infineon\" + family.Definition.Name + @"_series\Source\GCC";
@@ -97,7 +97,7 @@ namespace InfineonXMC_bsp_generator
                         aStartFlash = m.Groups[3].Value;
                         aLenFlash = m.Groups[4].Value;
                     }
-                    
+
                     for (int i = 0; i < sramRegexes.Length; i++)
                         if (sramMatches[i] == null)
                         {
@@ -109,7 +109,7 @@ namespace InfineonXMC_bsp_generator
                     continue;
                 }
 
-                foreach(var m in sramMatches)
+                foreach (var m in sramMatches)
                 {
                     if (m != null)
                     {
@@ -142,7 +142,7 @@ namespace InfineonXMC_bsp_generator
                     Size = Convert.ToUInt32(aLenRam, 16),
                 });
 
-                return layout;
+                return new MemoryLayoutAndSubstitutionRules(layout);
             }
         }
         //===============================================================
@@ -210,30 +210,7 @@ namespace InfineonXMC_bsp_generator
             };
 
         }
-        //===========================================================
-        //  Correct name Mcu for Segger
-        static void UpdateNameMcuToSeggerFormat(ref List<MCU> pMcuList)
-        {
-            List<MCUBuilder> aoUpdateListNCU = new List<MCUBuilder>();
-            Regex aReg = new Regex(@"^(XMC[\d]+)[_]?([\w]?)([\d]+)[x]?([\w]+)");
-            foreach (var mcu in pMcuList)
-            {
-                var m = aReg.Match(mcu.ID);
-                if (!m.Success)
-                    throw new Exception("Error: Failed to update name of Mcu");
-                mcu.ID = $"{m.Groups[1].Value}-{m.Groups[4].Value}";
-            }
-            // Remove dublicate
-            for (int i = 0; i < pMcuList.Count - 1; i++)
-            {
-                for (var c = i + 1; c < pMcuList.Count; c++)
-                    if (pMcuList[i].ID == pMcuList[c].ID)
-                    {
-                        pMcuList.RemoveAt(c);
-                        c--;
-                    }
-            }
-        }
+
         //===========================================================
         // Correct name Mcu for macros
         static List<MCUBuilder> UpdateListMCU(List<MCUBuilder> pMcuList)
@@ -246,6 +223,8 @@ namespace InfineonXMC_bsp_generator
                 if (!m.Success)
                     throw new Exception("Error: Failed to update name of Mcu");
                 mcu.Name = $"{m.Groups[1].Value}_{m.Groups[2].Value}{m.Groups[3].Value}x{m.Groups[5].Value}";
+                if (mcu.Core == CortexCore.M4)
+                    mcu.FPU = FPUType.SP;
                 if (aoUpdateListNCU.IndexOf(mcu) < 0)
                     aoUpdateListNCU.Add(mcu);
             }
@@ -257,88 +236,86 @@ namespace InfineonXMC_bsp_generator
             if (args.Length < 1)
                 throw new Exception("Usage: InfineonXMC.exe <InfineonXMC SW package directory>");
 
-            var bspBuilder = new InfineonXMCBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-
-            var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuInfineonDevices.csv",
-               "Product", "Program Memory(KB) ", "SRAM (KB) ", "CORE", true);
-            devices = UpdateListMCU(devices);
-
-            List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
-            foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
-                allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
-
-            var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
-            if (rejects.Count > 0)
-                throw new Exception($"Found {rejects.Count} MCUs not assigned to any family");
-            List<MCUFamily> familyDefinitions = new List<MCUFamily>();
-            List<MCU> mcuDefinitions = new List<MCU>();
-            List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-            List<string> exampleDirs = new List<string>();
-
-            bool noPeripheralRegisters = args.Contains("/noperiph");
-            List<KeyValuePair<string, string>> macroToHeaderMap = new List<KeyValuePair<string, string>>();
-
-            var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
-            var flags = new ToolFlags();
-            List<string> projectFiles = new List<string>();
-            commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
-
-            foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample.RelativePath);
-
-            foreach (var fam in allFamilies)
+            using (var bspBuilder = new InfineonXMCBSPBuilder(BSPDirectories.MakeDefault(args)))
             {
-                var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
-                if (rejectedMCUs.Length != 0)
+                var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuInfineonDevices.csv",
+                   "Product", "Program Memory(KB) ", "SRAM (KB) ", "CORE", true);
+                devices = UpdateListMCU(devices);
+
+                List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+                foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
+                    allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
+
+                var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
+                if (rejects.Count > 0)
+                    throw new Exception($"Found {rejects.Count} MCUs not assigned to any family");
+                List<MCUFamily> familyDefinitions = new List<MCUFamily>();
+                List<MCU> mcuDefinitions = new List<MCU>();
+                List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+                List<string> exampleDirs = new List<string>();
+
+                bool noPeripheralRegisters = args.Contains("/noperiph");
+                List<KeyValuePair<string, string>> macroToHeaderMap = new List<KeyValuePair<string, string>>();
+
+                var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
+                var flags = new ToolFlags();
+                List<string> projectFiles = new List<string>();
+                commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
+
+                foreach (var sample in commonPseudofamily.CopySamples())
+                    exampleDirs.Add(sample.RelativePath);
+
+                foreach (var fam in allFamilies)
                 {
-                    Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
-                    foreach (var mcu in rejectedMCUs)
-                        Console.WriteLine("\t{0}", mcu.Name);
+                    var rejectedMCUs = fam.RemoveUnsupportedMCUs();
+                    if (rejectedMCUs.Length != 0)
+                    {
+                        Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
+                        foreach (var mcu in rejectedMCUs)
+                            Console.WriteLine("\t{0}", mcu.Name);
+                    }
+
+                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir));
+                    if (!noPeripheralRegisters)
+                        fam.AttachPeripheralRegisters(new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, @"CMSIS\Infineon\SVD\" + fam.Definition.Name + ".svd"), fam.Definition.Name) });
+
+                    var famObj = fam.GenerateFamilyObject(true);
+
+                    famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
+                    famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
+
+                    famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, commonPseudofamily.Definition.AdditionalSystemVars);
+                    famObj.CompilationFlags = famObj.CompilationFlags.Merge(flags);
+                    famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
+
+                    familyDefinitions.Add(famObj);
+                    fam.GenerateLinkerScripts(false);
+                    foreach (var mcu in fam.MCUs)
+                        mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters));
+
+                    foreach (var fw in fam.GenerateFrameworkDefinitions())
+                        frameworks.Add(fw);
+
+                    foreach (var sample in fam.CopySamples())
+                        exampleDirs.Add(sample.RelativePath);
                 }
 
-                fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir));
-                if (!noPeripheralRegisters)
-                    fam.AttachPeripheralRegisters(new MCUDefinitionWithPredicate[] { SVDParser.ParseSVDFile(Path.Combine(fam.Definition.PrimaryHeaderDir, @"CMSIS\Infineon\SVD\" + fam.Definition.Name + ".svd"), fam.Definition.Name) });
+                BoardSupportPackage bsp = new BoardSupportPackage
+                {
+                    PackageID = "com.sysprogs.arm.infineon.xmc",
+                    PackageDescription = "Infineon XMC Devices",
+                    GNUTargetID = "arm-eabi",
+                    GeneratedMakFileName = "infineon_xmc.mak",
+                    MCUFamilies = familyDefinitions.ToArray(),
+                    SupportedMCUs = mcuDefinitions.ToArray(),
+                    Frameworks = frameworks.ToArray(),
+                    Examples = exampleDirs.ToArray(),
+                    FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
+                    PackageVersion = "2.1.24R2"
+                };
 
-                var famObj = fam.GenerateFamilyObject(true);
-
-                famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
-                famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
-
-                famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, commonPseudofamily.Definition.AdditionalSystemVars);
-                famObj.CompilationFlags = famObj.CompilationFlags.Merge(flags);
-                famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
-
-                familyDefinitions.Add(famObj);
-                fam.GenerateLinkerScripts(false);
-                foreach (var mcu in fam.MCUs)
-                    mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters));
-
-                foreach (var fw in fam.GenerateFrameworkDefinitions())
-                    frameworks.Add(fw);
-
-                foreach (var sample in fam.CopySamples())
-                    exampleDirs.Add(sample.RelativePath);
+                bspBuilder.Save(bsp, true);
             }
-
-            UpdateNameMcuToSeggerFormat(ref mcuDefinitions);
-
-            BoardSupportPackage bsp = new BoardSupportPackage
-            {
-                PackageID = "com.sysprogs.arm.infineon.xmc",
-                PackageDescription = "Infineon XMC Devices",
-                GNUTargetID = "arm-eabi",
-                GeneratedMakFileName = "infineon_xmc.mak",
-                MCUFamilies = familyDefinitions.ToArray(),
-                SupportedMCUs = mcuDefinitions.ToArray(),
-                Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.ToArray(),
-                FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "2.1.24"
-            };
-
-            bspBuilder.Save(bsp, true);
-
         }
     }
 }

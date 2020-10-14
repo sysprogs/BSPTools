@@ -122,7 +122,7 @@
 
 /* Include Files */
 
-#include "HL_sys_common.h"
+#include "$$com.sysprogs.halcogen.common.h$$"
 
 /* USER CODE BEGIN (1) */
 /* Include FreeRTOS scheduler files */
@@ -130,8 +130,8 @@
 #include "os_task.h"
 
 /* Include HET header file - types, definitions and function declarations for system driver */
-#include "HL_het.h"
-#include "HL_gio.h"
+#include "$$com.sysprogs.halcogen.het.h$$"
+#include "$$com.sysprogs.halcogen.gio.h$$"
 
 /* Define Task Handles */
 xTaskHandle xTask1Handle;
@@ -142,7 +142,7 @@ void vTask1(void *pvParameters)
     for(;;)
     {
         /* Taggle HET[1] with timer tick */
-        gioToggleBit(gioPORTB, 6);
+        gioToggleBit(gio$$com.sysprogs.examples.halcogen.LEDPORT$$, $$com.sysprogs.examples.halcogen.LEDBIT$$);
         vTaskDelay(100);
     }   
 }
@@ -164,7 +164,7 @@ int main(void)
     
     /* Set high end timer GIO port hetPort pin direction to all output */
     gioInit();
-    gioSetDirection(gioPORTB, (1 << 6) | (1 << 7));
+    gioSetDirection(gio$$com.sysprogs.examples.halcogen.LEDPORT$$, (1 << $$com.sysprogs.examples.halcogen.LEDBIT$$));
 
 
     /* Create Task 1 */

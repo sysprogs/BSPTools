@@ -12,7 +12,7 @@ namespace nrf5x
 {
     public class NRFConfigFileParser : IConfigurationFileParser
     {
-        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file)
+        public ConfigurationFileTemplateEx BuildConfigurationFileTemplate(string file, ConfigFileDefinition cf)
         {
             Regex rgIfndef = new Regex("^#ifndef ([^ ]+)");
             Regex rgDefine = new Regex("^#define ([^ ]+)( )([^ ]+)$");

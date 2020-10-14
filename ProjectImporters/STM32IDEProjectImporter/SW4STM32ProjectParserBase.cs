@@ -195,9 +195,10 @@ namespace STM32IDEProjectImporter
             }
         }
 
-        class SourceEntry
+        public class SourceEntry
         {
             public string Name;
+            public string Excluding;
 
             public string RelativePath;
 
@@ -205,6 +206,7 @@ namespace STM32IDEProjectImporter
             public SourceEntry(XmlElement e)
             {
                 Name = e.GetAttribute("name");
+                Excluding = e.GetAttribute("excluding");
                 var flags = e.GetAttribute("flags");
                 if (!flags.Contains("VALUE_WORKSPACE_PATH") || e.GetAttribute("kind") != "sourcePath")
                     throw new Exception("Don't know how to handle a source entry");
@@ -322,17 +324,17 @@ namespace STM32IDEProjectImporter
             Dictionary<string, SourceEntry> sourceReferences = new Dictionary<string, SourceEntry>();
             foreach (var node in cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>())
             {
-                if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
-                {
-                    var entry = new SourceFilterEntry(node);
-                    if (entry.IsValid)
-                        sourceFilters.Add(entry);
-                }
-                else if (!string.IsNullOrEmpty(node.GetAttribute("name")))
+                if (!string.IsNullOrEmpty(node.GetAttribute("name")))
                 {
                     var entry = new SourceEntry(node);
                     if (entry.IsValid)
                         sourceReferences[entry.Name] = entry;
+                }
+                else if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
+                {
+                    var entry = new SourceFilterEntry(node);
+                    if (entry.IsValid)
+                        sourceFilters.Add(entry);
                 }
             }
 
@@ -356,13 +358,34 @@ namespace STM32IDEProjectImporter
                     else if (Directory.Exists(src.FullPath))
                     {
                         var fullPath = Path.GetFullPath(src.FullPath);
+                        HashSet<string> excludedFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+                        if (src.AssociatedSourceEntry?.Excluding is string s && !string.IsNullOrEmpty(s))
+                            foreach (var f in s.Split('|'))
+                                excludedFiles.Add(f.Replace('\\', '/'));
+
                         foreach (var file in Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories))
                         {
                             var ext = Path.GetExtension(file).ToLower();
                             if (ext == ".c" || ext == ".cpp" || ext == ".cc" || ext == ".s")
                             {
-                                string relPath = file.Substring(fullPath.Length).TrimStart('\\');
-                                result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath.Replace('\\', '/') });
+                                string relPath = file.Substring(fullPath.Length).TrimStart('\\').Replace('\\', '/');
+                                if (excludedFiles.Contains(relPath))
+                                    continue;
+
+                                bool excludedByPrefix = false;
+                                foreach(var excl in excludedFiles)
+                                {
+                                    if (relPath.StartsWith(excl + "/", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        excludedByPrefix = true;
+                                        break;
+                                    }
+                                }
+
+                                if (excludedByPrefix)
+                                    continue;
+                                
+                                result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath });
                             }
                         }
                     }
@@ -541,16 +564,20 @@ namespace STM32IDEProjectImporter
                     string testedDir = baseDir;
                     for (; ;)
                     {
-                        if (File.Exists(Path.Combine(testedDir, pathInsideWorkspace)))
+                        var candidate = Path.Combine(testedDir, pathInsideWorkspace);
+                        if (File.Exists(candidate) || Directory.Exists(candidate))
                             return Path.GetFullPath(Path.Combine(testedDir, pathInsideWorkspace));
                         var parentDir = Path.GetDirectoryName(testedDir);
                         if (parentDir == null || parentDir.Length < 2 || parentDir == testedDir)
-                            break;
+                            return pathInsideWorkspace; //This is a fallback option that likely won't work, but it's better than throwing an exception
 
                         testedDir = parentDir;
                     }
                 }
-                catch { }
+                catch
+                {
+                    return pathInsideWorkspace;
+                }
             }
 
             var m = rgParentSyntax.Match(path);
@@ -583,6 +610,8 @@ namespace STM32IDEProjectImporter
         {
             public string FullPath;
             public string VirtualPath;
+
+            public SourceEntry AssociatedSourceEntry;
 
             public override string ToString() => FullPath;
         }
@@ -631,7 +660,7 @@ namespace STM32IDEProjectImporter
                         if (fullPath == null)
                             continue;
 
-                        sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name });
+                        sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name, AssociatedSourceEntry = sr });
                     }
                 }
             }

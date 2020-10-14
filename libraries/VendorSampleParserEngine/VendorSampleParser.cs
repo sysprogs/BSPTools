@@ -509,6 +509,8 @@ namespace VendorSampleParserEngine
             UpdateErrors,
         }
 
+        protected virtual string FilterSDKDir(string dir) => dir;
+
         public void Run(string[] args)
         {
             string SDKdir = null;
@@ -528,7 +530,7 @@ namespace VendorSampleParserEngine
                     mode = Enum.GetValues(typeof(RunMode)).OfType<RunMode>().First(v => v.ToString().ToLower() == arg.Substring(1).ToLower());
                 }
                 else
-                    SDKdir = arg;
+                    SDKdir = FilterSDKDir(arg);
             }
 
             if (SDKdir == null || mode == RunMode.Invalid)

@@ -113,14 +113,21 @@ namespace ESP8266DebugPackage
         //ESP32 OpenOCD supports software breakpoints in FLASH, but only if they are requested as hardware breakpoints. The following command ensures all breakpoints are requested as hardware ones.
         const string BreakpointFixCommand = "mon gdb_breakpoint_override hard";
 
-        public ESPxxOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, ESPxxOpenOCDSettings settings, KnownInterfaceInstance context, bool isESP32)
-            : base(host, baseDir, settings ?? (isESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings()), context)
+        public ESPxxOpenOCDSettingsEditor(IBSPConfiguratorHost host, string baseDir, ESPxxOpenOCDSettings settings, KnownInterfaceInstance context, bool isESP32, ESPxxDebugController controller)
+            : base(host, baseDir, settings ?? (isESP32 ? (OpenOCDSettings)new ESP32OpenOCDSettings() : new ESP8266OpenOCDSettings()), context, controller)
         {
             IsESP32 = isESP32;
 
             _ESPIDFMode = host.MCU.Configuration.ContainsKey("com.sysprogs.esp32.idf.sdkconfig");
 
-            Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
+            if (Device.SelectedItem.Script == null)
+            {
+                if (Device.Items.Count > 0)
+                    ResetToDefaultDevice();
+                else
+                    Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
+            }
+
             if (settings == null)
             {
                 ExplicitFrequencyEnabled = true;

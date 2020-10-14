@@ -148,6 +148,17 @@ namespace KSDK2xImporter.HelperTypes
                 AdditionalPreprocessorMacros = Defines.Select(d => d.Definition).ToArray(),
             };
 
+            if (framework.ID.StartsWith(FrameworkIDPrefix))
+            {
+                var shortID = framework.ID.Substring(FrameworkIDPrefix.Length);
+                shortID = shortID.Replace("CMSIS_Driver_include", "dinc");
+                shortID = shortID.Replace("_CMSISInclude", "_inc");
+                if (shortID.StartsWith("platform."))
+                    shortID = shortID.Replace("platform.", "p.");
+
+                framework.ShortUniqueName = shortID;
+            }
+
             if (specificDevice != null)
             {
                 framework.ClassID = framework.ID;

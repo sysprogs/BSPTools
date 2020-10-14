@@ -1,8 +1,11 @@
 #include "SysprogsTestHooks.h"
-#include <FastSemihosting.h>
 #include <string.h>
 
 #ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
+
+#ifndef SIMULATION
+#include <FastSemihosting.h>
+#endif
 
 #include <SysprogsProfilerInterface.h>
 
@@ -81,6 +84,10 @@ static int WaitForConnectionOnLocalSocket(const char* name)
 }
 #endif
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 class TestOutputPipe
 {
 private:
@@ -96,7 +103,7 @@ public:
         const char *pPipe = getenv("SYSPROGS_TEST_REPORTING_PIPE");
         if (pPipe && pPipe[0])
         {
-            m_Pipe = open(pPipe, O_WRONLY);
+            m_Pipe = open(pPipe, O_WRONLY | O_BINARY);
         }
 #ifdef ANDROID
         else if ((pPipe = getenv("SYSPROGS_TEST_REPORTING_SOCKET")) != NULL)
@@ -231,6 +238,16 @@ void __attribute__((noinline)) SysprogsTestHook_TestStartingEx(const char *pFull
     WriteTestOutput(pFullyQualifiedName, nameLength, 0, 0);
 }
 
+void __attribute__((noinline)) SysprogsTestHook_TestStartingEx2(const char *pGroupName, const char *pTestName)
+{
+    TestOutputSynchronizer sync;
+	int nameLength = strlen(pGroupName) + 1 + strlen(pTestName);
+    unsigned char type = strpTestStartingByName;
+    WriteTestPacketSize(nameLength + 1, &type, 1);
+	WriteTestOutput(pGroupName, strlen(pGroupName), ".", 1);
+	WriteTestOutput(pTestName, strlen(pTestName), 0, 0);
+}
+
 void __attribute__((noinline)) SysprogsTestHook_TestEnded()
 {
     TestOutputSynchronizer sync;
@@ -277,6 +294,13 @@ void __attribute__((noinline)) SysprogsTestHook_TestFailed(void *pTest, const ch
     }
 }
 
+void __attribute__((noinline)) SysprogsTestHook_TestsCompleted()
+{
+    asm("nop");
+}
+
+#ifdef SYSPROGS_TEST_PLATFORM_EMBEDDED
+
 static volatile int s_IsRunningUnitTests;
 
 int __attribute__((noinline)) IsRunningUnitTests()
@@ -285,7 +309,15 @@ int __attribute__((noinline)) IsRunningUnitTests()
 	return s_IsRunningUnitTests;
 }
 
-void __attribute__((noinline)) SysprogsTestHook_TestsCompleted()
+#elif defined (SIMULATION) && defined(TINY_EMBEDDED_TEST)
+
+namespace TinyEmbeddedTest
 {
-    asm("nop");
+	bool IsRunningUnitTestsInSimulation();
 }
+
+int __attribute__((noinline)) IsRunningUnitTests()
+{
+	return TinyEmbeddedTest::IsRunningUnitTestsInSimulation();
+}
+#endif

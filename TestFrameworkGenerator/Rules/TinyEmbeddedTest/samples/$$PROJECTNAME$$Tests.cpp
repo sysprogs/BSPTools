@@ -1,4 +1,5 @@
 #include <TinyEmbeddedTest.h>
+#include <MemoryLeakTests.h>
 #include <stdio.h>
 
 /*
@@ -69,4 +70,10 @@ TEST(DemoTestGroup, SuccessfulTest2)
 {
     //This test should succeed;
     OutputTestMessage("Hello from Test #2\n");
+}
+
+TEST(DemoTestGroup, MemoryLeakTest)
+{
+	CHECK_FOR_MEMORY_LEAKS_NAMED("Main scope");
+	void *p = malloc(123);
 }

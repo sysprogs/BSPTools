@@ -19,10 +19,10 @@ namespace nrf5x
 {
     internal class Program
     {
+        const uint FLASHBase = 0x00000000, SRAMBase = 0x20000000;
+
         class NordicBSPBuilder : BSPBuilder
         {
-            const uint FLASHBase = 0x00000000, SRAMBase = 0x20000000;
-
             public readonly Nrf5xRuleGenerator RuleGenerator;
 
             public NordicBSPBuilder(BSPDirectories dirs)
@@ -31,10 +31,6 @@ namespace nrf5x
                 ShortName = "nRF5x";
                 OnValueForSmartBooleanProperties = "yes";   //Backward compatibility with v15 and older BSPs.
                 RuleGenerator = new Nrf5xRuleGenerator(this);
-                string extraSections = "|. = ALIGN(4);|PROVIDE(__start_fs_data = .);|KEEP(*(.fs_data))|PROVIDE(__stop_fs_data = .);|. = ALIGN(4);|";
-                extraSections += "|. = ALIGN(4);|PROVIDE(__start_pwr_mgmt_data = .);|KEEP(*(.pwr_mgmt_data))|PROVIDE(__stop_pwr_mgmt_data = .);|. = ALIGN(4);|";
-
-                LDSTemplate.Sections.First(s => s.Name == ".data").CustomContents = extraSections.Split('|');
             }
 
             public override void GetMemoryBases(out uint flashBase, out uint ramBase)
@@ -62,7 +58,7 @@ namespace nrf5x
                     Access = MemoryAccess.Undefined,
                     Type = MemoryType.FLASH,
                     Start = FLASHBase,
-                    Size = (uint)mcu.FlashSize,
+                    Size = (uint)mcu.FlashSize * 1024,
                 });
 
                 layout.Memories.Add(new Memory
@@ -71,329 +67,51 @@ namespace nrf5x
                     Access = MemoryAccess.Undefined,
                     Type = MemoryType.RAM,
                     Start = SRAMBase,
-                    Size = (uint)mcu.RAMSize,
+                    Size = (uint)mcu.RAMSize * 1024,
                 });
 
                 return new MemoryLayoutAndSubstitutionRules(layout);
             }
 
-
-            public struct SoftDevice
-            {
-                public string Name;
-                public string Description;
-                public uint FLASHSize;
-                public uint SRAMSize;
-                public bool HardwareFP;
-                public Regex DeviceRegex;
-                public string LdOriginalName;
-
-                public LDFileMemoryInfo LinkerScriptWithMaximumReservedRAM;
-                public string UserFriendlyName => string.IsNullOrEmpty(Description) ? Name : $"{Name} ({Description})";
-
-                public SoftDevice(string name, string deviceRegex, bool hardwareFP, string desc, string pDirSdk)
-                {
-                    Name = name;
-                    HardwareFP = hardwareFP;
-                    LinkerScriptWithMaximumReservedRAM = FindLdsFile(pDirSdk, Name);
-                    LdOriginalName = LinkerScriptWithMaximumReservedRAM.FullPath;
-                    FLASHSize = (uint)LinkerScriptWithMaximumReservedRAM.FLASH.Origin;
-                    SRAMSize = (uint)LinkerScriptWithMaximumReservedRAM.RAM.Origin - SRAMBase;
-                    DeviceRegex = new Regex(deviceRegex, RegexOptions.IgnoreCase);
-                    Description = desc;
-                }
-
-                static LDFileMemoryInfo FindLdsFile(string pDir, string sdname)
-                {
-                    var allMatchingLinkerScripts = Directory.GetFiles(pDir, "*.ld", SearchOption.AllDirectories)
-                        .Where(fn => !fn.Contains("bootloader"))
-                        .Where(fn => fn.IndexOf($"\\{sdname}\\", StringComparison.InvariantCultureIgnoreCase) != -1)
-                        .Select(fn => new LDFileMemoryInfo(fn))
-                        .Where(i => i.HasAllNecessarySymbols)
-                        .ToArray();
-
-                    var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Origin).Last();
-                    //            var maxRAM = allMatchingLinkerScripts.OrderBy(s => s.RAM.Length).Last();
-                    var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Origin).Last();
-                    //                   var maxFLASH = allMatchingLinkerScripts.OrderBy(s => s.FLASH.Length).Last();
-
-                    if (!maxFLASH.FLASH.Equals(maxRAM.FLASH))
-                        throw new Exception("Inconsistent maximum linker scripts"); //The 'max RAM' script has a different FLASH size than the 'max FLASH' script.
-
-                    return maxRAM;
-                }
-
-                public bool IsCompatible(string name)
-                {
-                    return DeviceRegex.IsMatch(name);
-                }
-            }
-
-
-            public List<SoftDevice> SoftDevices = new List<SoftDevice>();
-
-
             public const string SoftdevicePropertyID = "com.sysprogs.bspoptions.nrf5x.softdevice";
 
             public override void GenerateLinkerScriptsAndUpdateMCU(string ldsDirectory, string familyFilePrefix, MCUBuilder mcu, MemoryLayoutAndSubstitutionRules layout, string generalizedName)
             {
-                foreach (var sd in SoftDevices)
+                var nrfMCU = (NordicMCUBuilder)mcu;
+
+                NordicLinkerScriptGenerator.CopyCommonScripts(Directories.InputDir, ldsDirectory);
+
+                foreach (var sd in nrfMCU.Softdevices)
                 {
-                    if (!sd.IsCompatible(mcu.Name))
-                        continue;
-                    if (sd.LinkerScriptWithMaximumReservedRAM == null)
+                    if (sd.ReservedRAM == 0 || sd.ReservedFLASH == 0)
                     {
-                        //Due to the complexity of the Nordic SDK, we need to reuse the original linker scripts instead of generating them from scratch.
-                        throw new Exception("Could not locate the original linker script for this device.");
+                        throw new Exception("Unknown FLASH/RAM size for " + sd.Name);
                     }
                     else
                     {
-                        BuildLinkerScriptBasedOnOriginalNordicScripts(ldsDirectory, generalizedName, sd);
+                        NordicLinkerScriptGenerator.BuildLinkerScriptBasedOnOriginalNordicScripts(ldsDirectory, generalizedName,  nrfMCU, sd);
                     }
                 }
                 mcu.LinkerScriptPath = $"$$SYS:BSP_ROOT$$/{familyFilePrefix}LinkerScripts/{generalizedName}_$${SoftdevicePropertyID}$$.lds";
             }
 
-            enum LinkerScriptGenerationPass
+            internal void GenerateSoftdeviceLibraries(IEnumerable<SoftdeviceDefinition> softdevices)
             {
-                BeforeFirst,
-
-                Regular,
-                Reserve,
-                Nosoftdev,
-
-                AfterLast
-            }
-
-            void DoBuildLinkerScriptBasedOnOriginalNordicScripts(string ldsDirectory, string generalizedName, SoftDevice sd, LinkerScriptGenerationPass pass)
-            {
-                string[] providedSymbols =
+                foreach (var sd in softdevices)
                 {
-                    "PROVIDE(_sbss = __bss_start__);",
-                    "PROVIDE(_ebss = __bss_end__);",
-                    "PROVIDE(_sdata = __data_start__);",
-                    "PROVIDE(_sidata = __etext);",
-                    "PROVIDE(_estack = __StackTop);",
-                    "PROVIDE(_edata =__data_end__);",
-                    "PROVIDE(__isr_vector = __StackTop);",
-                    "PROVIDE(_etext = __etext);"
-                };
-
-                List<string> lines = File.ReadAllLines(sd.LdOriginalName).ToList();
-                lines.Insert(0, $"/* Based on {sd.LdOriginalName} */");
-
-                InsertPowerMgmtData(lines);
-
-                var m = Regex.Match(lines.Find(s => s.Contains("INCLUDE")) ?? " ", "INCLUDE[ ]*\"([a-z0-9_.]*)");
-                if (m.Success)
-                {
-                    string[] incf = Directory.GetFiles(Directories.InputDir, m.Groups[1].Value, SearchOption.AllDirectories);
-                    if (incf.Length > 1)
-                        throw new Exception("Ambiguous 'common' include file.");
-                    if (!File.Exists(Path.Combine(ldsDirectory, m.Groups[1].Value)))
-                    {
-                        string commonLds = Path.Combine(ldsDirectory, m.Groups[1].Value);
-
-                        var commonLines = File.ReadAllLines(incf[0]).ToList();
-                        var idx = commonLines.IndexOf("    .text :");
-                        if (idx == -1)
-                            throw new Exception("Could not find the beginning of section .text");
-                        commonLines.Insert(idx, "    _stext = .;");
-
-                        File.WriteAllLines(commonLds, commonLines.ToArray());
-                    }
-                }
-
-                if (pass == LinkerScriptGenerationPass.Nosoftdev)
-                {
-                    var indFl = lines.FindOrThrow(s => s.Contains("FLASH"));
-                    lines[indFl] = $"  FLASH (RX) :  ORIGIN = 0x{FLASHBase:x}, LENGTH = 0x{sd.LinkerScriptWithMaximumReservedRAM.FLASH.Origin + sd.LinkerScriptWithMaximumReservedRAM.FLASH.Length:x}";
-                }
-                else
-                {
-                    var mems = sd.LinkerScriptWithMaximumReservedRAM;
-
-                    lines.Insert(lines.FindOrThrow(s => s.Contains("FLASH")), $"  FLASH_SOFTDEVICE (RX) : ORIGIN = 0x{FLASHBase:x8}, LENGTH = 0x{mems.FLASH.Origin - FLASHBase:x8}");
-                    lines.Insert(lines.FindOrThrow(s => s.Contains("RAM")), $"  SRAM_SOFTDEVICE (RWX) : ORIGIN = 0x{SRAMBase:x8}, LENGTH = 0x{mems.RAM.Origin - SRAMBase:x8}");
-                    var idxSectionList = lines.FindOrThrow(s => s == "SECTIONS") + 1;
-                    while (lines[idxSectionList].Trim() == "{")
-                        idxSectionList++;
-
-                    if (lines[idxSectionList].Contains(". = ALIGN"))
-                        idxSectionList++;
-
-                    if (pass == LinkerScriptGenerationPass.Regular)
-                    {
-                        lines.InsertRange(idxSectionList, new[] {
-                            "  .softdevice :",
-                            "  {",
-                            "    KEEP(*(.softdevice))",
-                            "    FILL(0xFFFFFFFF);",
-                            $"    . = 0x{mems.FLASH.Origin - FLASHBase:x8};",
-                            "  } > FLASH_SOFTDEVICE",
-                            "",
-                            "  .softdevice_sram :",
-                            "  {",
-                            "    FILL(0xFFFFFFFF);",
-                            $"    . = 0x{mems.RAM.Origin - SRAMBase:x8};",
-                            "  } > SRAM_SOFTDEVICE"
-                            });
-
-                        lines.Insert(lines.FindOrThrow(s => s.Contains("MEMORY")), $"GROUP({sd.Name}_softdevice.o)");
-                    }
-
-                }
-
-                lines.AddRange(providedSymbols);
-
-                string suffix;
-                if (pass == LinkerScriptGenerationPass.Nosoftdev)
-                    suffix = "nosoftdev";
-                else if (pass == LinkerScriptGenerationPass.Reserve)
-                    suffix = $"{sd.Name.ToLower()}_reserve";
-                else
-                    suffix = sd.Name.ToLower();
-
-                File.WriteAllLines(Path.Combine(ldsDirectory, $"{generalizedName}_{suffix}.lds"), lines);
-            }
-
-            void BuildLinkerScriptBasedOnOriginalNordicScripts(string ldsDirectory, string generalizedName, SoftDevice sd)
-            {
-                for (LinkerScriptGenerationPass pass = LinkerScriptGenerationPass.BeforeFirst + 1; pass < LinkerScriptGenerationPass.AfterLast; pass++)
-                    DoBuildLinkerScriptBasedOnOriginalNordicScripts(ldsDirectory, generalizedName, sd, pass);
-            }
-
-            private static void InsertPowerMgmtData(List<string> lines)
-            {
-                int idx = lines.IndexOf("  .log_const_data :");
-                if (idx == -1)
-                    throw new Exception("Could not find the beginning of section .text");
-
-                lines.InsertRange(idx, new string[]
-                {
-                    "   .pwr_mgmt_data :",
-                    "  {",
-                    "    PROVIDE(__start_pwr_mgmt_data = .);",
-                    "    KEEP(*(SORT(.pwr_mgmt_data*)))",
-                    "    PROVIDE(__stop_pwr_mgmt_data = .);",
-                    "  } > FLASH"
-                });
-            }
-
-            internal void GenerateSoftdeviceLibraries()
-            {
-                foreach (var sd in SoftDevices)
-                {
-                    string sdDir = BSPRoot + @"\nRF5x\components\softdevice\" + sd.Name + @"\hex";
-                    string abi = "";
-                    if (sd.HardwareFP)
-                        abi = " \"-mfloat-abi=hard\" \"-mfpu=fpv4-sp-d16\"";
-                    else
-                        abi = " \"-mfloat-abi=soft\"";
+                    string sdDir = $@"{BSPRoot}\nRF5x\components\softdevice\{sd.Name}   \hex";
 
                     string hexFileName = Path.GetFullPath(Directory.GetFiles(sdDir, "*.hex")[0]);
-                    var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName + abi, UseShellExecute = false };
-                    info.EnvironmentVariables["PATH"] += @";c:\sysgcc\arm-eabi\bin";
+                    var info = new ProcessStartInfo { FileName = BSPRoot + @"\nRF5x\SoftdeviceLibraries\ConvertSoftdevice.bat", Arguments = sd.Name + " " + hexFileName, UseShellExecute = false };
+                    info.EnvironmentVariables["PATH"] += @";e:\sysgcc\arm-eabi\bin";
                     Process.Start(info).WaitForExit();
-                    string softdevLib = string.Format(@"{0}\nRF5x\SoftdeviceLibraries\{1}_softdevice.o", BSPRoot, sd.Name);
+
+                    string softdevLib = $@"{BSPRoot}\nRF5x\SoftdeviceLibraries\hard\{sd.Name}_softdevice.o";
                     if (!File.Exists(softdevLib) || File.ReadAllBytes(softdevLib).Length < 32768)
                         throw new Exception("Failed to convert a softdevice");
                 }
             }
 
-        }
-
-        static StartupFileGenerator.InterruptVectorTable GenerateStartupFile(string pDir, string pFBase)
-        {
-            var vectorTable = new StartupFileGenerator.InterruptVectorTable
-            {
-                FileName = "startup_" + pFBase + "x.c",
-                Vectors = StartupFileGenerator.ParseInterruptVectors(Path.Combine(pDir, "arm_startup_" + pFBase + ".s"),
-                    "^__Vectors",
-                    @"__Vectors_End",
-                    @"^[ \t]+DCD[ \t]+([^ \t]+)[ \t]+; *([^ \t].*)$",
-                    @"^[ \t]+DCD[ \t]+([^ \t]+)$",
-                    @"^[ \t]+;.*",
-                    null,
-                    1,
-                    2),
-            };
-
-            if (pFBase.ToLower() == "nrf51")
-            {
-                vectorTable.AdditionalResetHandlerLines = new string[]
-                {
-                        "asm volatile(\".equ NRF_POWER_RAMON_ADDRESS,0x40000524\");",
-                        "asm volatile(\".equ NRF_POWER_RAMON_RAMxON_ONMODE_Msk,3\");",
-                        "asm volatile(\"LDR     R0, =NRF_POWER_RAMON_ADDRESS\");",
-                        "asm volatile(\"LDR     R2, [R0]\");",
-                        "asm volatile(\"MOVS    R1, #NRF_POWER_RAMON_RAMxON_ONMODE_Msk\");",
-                        "asm volatile(\"ORR     R2, R2, R1\");",
-                        "asm volatile(\"STR     R2, [R0]\");",
-                };
-            }
-
-            vectorTable.Vectors = new StartupFileGenerator.InterruptVector[] { new StartupFileGenerator.InterruptVector { Name = "_estack" } }.Concat(vectorTable.Vectors).ToArray();
-
-            vectorTable.MatchPredicate = m => m.Name.StartsWith(pFBase);
-            return vectorTable;
-        }
-
-        struct SingleMemoryInfo
-        {
-            public ulong Length;
-            public ulong Origin;
-        }
-
-        class LDFileMemoryInfo
-        {
-            public readonly SingleMemoryInfo FLASH, RAM;
-            public readonly string FullPath;
-
-            bool _HasBLEObservers, _HasPowerMgt;
-
-            public bool HasAllNecessarySymbols => _HasBLEObservers;// && _HasPowerMgt;
-
-            public override string ToString() => FullPath;
-
-            public LDFileMemoryInfo(string fn)
-            {
-                FullPath = fn;
-                foreach (var line in File.ReadAllLines(fn))
-                {
-                    if (line.Contains("__stop_sdh_ble_observers"))
-                        _HasBLEObservers = true;
-                    if (line.Contains("__start_pwr_mgmt_data"))
-                        _HasBLEObservers = true;
-
-                    var m = Regex.Match(line, $".*(FLASH|RAM).*ORIGIN[ =]+0x([a-fA-F0-9]+).*LENGTH[ =]+0x([a-fA-F0-9]+)");
-                    if (m.Success)
-                    {
-                        var info = new SingleMemoryInfo
-                        {
-                            Origin = ulong.Parse(m.Groups[2].Value, System.Globalization.NumberStyles.HexNumber),
-                            Length = ulong.Parse(m.Groups[3].Value, System.Globalization.NumberStyles.HexNumber)
-                        };
-
-                        switch (m.Groups[1].Value)
-                        {
-                            case "FLASH":
-                                FLASH = info;
-                                break;
-                            case "RAM":
-                                RAM = info;
-                                break;
-                            default:
-                                throw new Exception("Unexpected memory: " + m.Groups[1].Value);
-                        }
-                    }
-                }
-
-                if (FLASH.Length == 0 || FLASH.Origin == 0)
-                    throw new Exception("Missing FLASH in " + fn);
-                if (RAM.Length == 0 || RAM.Origin == 0)
-                    throw new Exception("Missing RAM in " + fn);
-            }
         }
 
         class NordicFamilyBuilder : MCUFamilyBuilder
@@ -428,47 +146,21 @@ namespace nrf5x
             }
         }
 
-        class NordicMCUBuilder : MCUBuilder
-        {
-            public readonly string DefaultSoftdevice;
-
-            public NordicMCUBuilder(string name, int flashKB, int ramKB, CortexCore core, string defaultSoftdevice, string defaultBoard)
-            {
-                Name = name;
-                FlashSize = flashKB * 1024;
-                RAMSize = ramKB * 1024;
-                Core = core;
-                DefaultSoftdevice = defaultSoftdevice;
-                StartupFile = "$$SYS:BSP_ROOT$$/nRF5x/modules/nrfx/mdk/gcc_startup_nrf$$com.sysprogs.bspoptions.nrf5x.mcu.basename$$.S";
-            }
-        }
 
         static void Main(string[] args)
         {
             if (args.Length < 1)
                 throw new Exception("Usage: nrf5x.exe <Nordic SW package directory>");
 
-            using (var bspBuilder = new NordicBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules", @"..\..\logs")))
+            using (var bspBuilder = new NordicBSPBuilder(BSPDirectories.MakeDefault(args)))
             {
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S132", "nrf52832.*", true, null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S140", "nrf52840.*", true, null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S112", "nrf5281.*", false, null, bspBuilder.Directories.InputDir));
-                bspBuilder.SoftDevices.Add(new NordicBSPBuilder.SoftDevice("S113", "nrf528.*", true, null, bspBuilder.Directories.InputDir));
-
-                List<MCUBuilder> devices = new List<MCUBuilder>
-                {
-                    new NordicMCUBuilder("nRF52832_XXAA", 512,  64,  CortexCore.M4,       "S132", "PCA10040"),
-                    new NordicMCUBuilder("nRF52810_XXAA", 192,  24,  CortexCore.M4_NOFPU, "S112", "PCA10040"),
-                    new NordicMCUBuilder("nRF52811_XXAA", 192,  24,  CortexCore.M4_NOFPU, "S112", "PCA10056"),
-                    new NordicMCUBuilder("nRF52833_XXAA", 512,  128, CortexCore.M4,       "S140", "PCA10100"),
-                    new NordicMCUBuilder("nRF52840_XXAA", 1024, 256, CortexCore.M4,       "S140", "PCA10056"),
-                };
+                var db = new NordicDeviceDatabase(bspBuilder.Directories.RulesDir, bspBuilder.Directories.InputDir);
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
                     allFamilies.Add(new NordicFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
-                var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
+                var rejects = BSPGeneratorTools.AssignMCUsToFamilies(db.Devices, allFamilies);
 
                 List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
                 List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
@@ -502,7 +194,7 @@ namespace nrf5x
                     bspBuilder.RuleGenerator.GenerateRulesForFamily(fam.Definition);
 
                     List<MCUDefinitionWithPredicate> hardwareRegisterFiles = new List<MCUDefinitionWithPredicate>();
-                    foreach(var svd in Directory.GetFiles(fam.Definition.PrimaryHeaderDir, "*.svd"))
+                    foreach (var svd in Directory.GetFiles(fam.Definition.PrimaryHeaderDir, "*.svd"))
                     {
                         var name = Path.GetFileNameWithoutExtension(svd).ToUpper();
                         if (name == "NRF52")
@@ -533,9 +225,10 @@ namespace nrf5x
                     familyDefinitions.Add(famObj);
                     fam.GenerateLinkerScripts(false);
 
-                    foreach (var mcu in fam.MCUs)
+                    foreach (var mcu in fam.MCUs.Cast<NordicMCUBuilder>())
                     {
-                        var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters, false, MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
+                        var corFlags = MCUFamilyBuilder.CoreSpecificFlags.All | MCUFamilyBuilder.CoreSpecificFlags.ConciseFPUMacro & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory;
+                        var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters, false, corFlags);
 
                         if (mcu.Name.StartsWith("nRF52832"))
                         {
@@ -548,11 +241,14 @@ namespace nrf5x
                             new PropertyEntry.Enumerated.Suggestion {InternalValue = "nosoftdev", UserFriendlyName = "None"}
                         };
 
-                        var compatibleSoftdevs = bspBuilder.SoftDevices.Where(sd => sd.IsCompatible(mcu.Name)).SelectMany(
+                        if (mcu.Softdevices.Count < 1)
+                            throw new Exception("No softdevices found for " + mcu.Name);
+
+                        var compatibleSoftdevs = mcu.Softdevices.SelectMany(
                             s => new[]
                             {
-                                new PropertyEntry.Enumerated.Suggestion {InternalValue = s.Name, UserFriendlyName = s.UserFriendlyName},
-                                new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name + "_reserve", UserFriendlyName = $"{s.UserFriendlyName} (programmed separately)"}
+                                new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name.ToUpper(), UserFriendlyName = s.Name.ToUpper()},
+                                new PropertyEntry.Enumerated.Suggestion { InternalValue = s.Name.ToUpper() + "_reserve", UserFriendlyName = $"{s.Name.ToUpper()} (programmed separately)"}
                             });
 
                         if (mcuDef.ConfigurableProperties == null)
@@ -572,18 +268,23 @@ namespace nrf5x
                             }
                         });
 
-                        if (mcu.Name.StartsWith("nRF52") && !mcu.Name.StartsWith("nRF5281"))
+                        if (mcu.Summary.HasFPU)
                         {
-                            var prop = mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode") as PropertyEntry.Enumerated;
+                            var prop = mcuDef.ConfigurableProperties.PropertyGroups[0].Properties.Find(p => p.UniqueID == "com.sysprogs.bspoptions.arm.floatmode.short") as PropertyEntry.Enumerated;
                             var idx = Array.FindIndex(prop.SuggestionList, p => p.UserFriendlyName == "Hardware");
                             prop.DefaultEntryIndex = idx;
                             prop.SuggestionList[idx].UserFriendlyName = "Hardware (required when using a softdevice)";   //Otherwise the system_nrf52.c file won't initialize the FPU and the internal initialization of the softdevice will later fail.
+                        }
+                        else
+                        {
+                            //This is needed to locate the SoftFP version of the softdevice object file
+                            mcuDef.AdditionalSystemVars = (mcuDef.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.floatmode.short", Value = "soft" } }).ToArray();
                         }
 
                         string defaultConfig;
                         if (mcu.Name.StartsWith("nRF52840"))
                             defaultConfig = "pca10056/s140";
-                        else if (mcu.Name.StartsWith("nRF52810"))
+                        else if (mcu.Name.StartsWith("nRF52810") || mcu.Name.StartsWith("nRF52820"))
                             defaultConfig = "pca10040e/s112";
                         else if (mcu.Name.StartsWith("nRF52811"))
                             defaultConfig = "pca10056e/s112";
@@ -614,18 +315,18 @@ namespace nrf5x
 
                 const string softdevExpression = "$$com.sysprogs.bspoptions.nrf5x.softdevice$$";
 
-                foreach (var softdev in bspBuilder.SoftDevices)
+                foreach (var softdev in db.Softdevices)
                     condFlags.Add(new ConditionalToolFlags
                     {
-                        FlagCondition = new Condition.Equals { Expression = softdevExpression, ExpectedValue = softdev.Name + "_reserve" },
+                        FlagCondition = new Condition.Equals { Expression = softdevExpression, ExpectedValue = softdev.LowercaseName + "_reserve" },
                         Flags = new ToolFlags
                         {
-                            PreprocessorMacros = familyDefinitions.First().CompilationFlags.PreprocessorMacros.Where(f => f.Contains(softdevExpression)).Select(f => f.Replace(softdevExpression, softdev.Name)).ToArray(),
-                            IncludeDirectories = familyDefinitions.First().CompilationFlags.IncludeDirectories.Where(f => f.Contains(softdevExpression)).Select(f => f.Replace(softdevExpression, softdev.Name)).ToArray()
+                            PreprocessorMacros = familyDefinitions.First().CompilationFlags.PreprocessorMacros.Where(f => f.Contains(softdevExpression)).Select(f => f.Replace(softdevExpression, softdev.LowercaseName)).ToArray(),
+                            IncludeDirectories = familyDefinitions.First().CompilationFlags.IncludeDirectories.Where(f => f.Contains(softdevExpression)).Select(f => f.Replace(softdevExpression, softdev.LowercaseName)).ToArray()
                         }
                     });
 
-                bspBuilder.GenerateSoftdeviceLibraries();
+                bspBuilder.GenerateSoftdeviceLibraries(db.Softdevices);
                 bspBuilder.RuleGenerator.PatchGeneratedFrameworks(frameworks, condFlags);
 
                 //  CheckEntriesSample(Path.Combine(bspBuilder.Directories.OutputDir, @"nRF5x\components\libraries"),
@@ -644,8 +345,8 @@ namespace nrf5x
                     Frameworks = frameworks.ToArray(),
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    PackageVersion = "16.0",
-                    FirstCompatibleVersion = "16.0",
+                    PackageVersion = "17.0",
+                    FirstCompatibleVersion = "17.0",
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
                     MinimumEngineVersion = "5.0",
                     ConditionalFlags = condFlags.ToArray(),
@@ -656,7 +357,7 @@ namespace nrf5x
 
                 List<ConfigurationFixSampleReference> samplesForComputingSymbolLists = new List<ConfigurationFixSampleReference>();
 
-                foreach (var sampleName in new[] { "BLEMouse", "IoT/Icmp", "BLEMultilinkCentral", "LEDBlink_FreeRTOS" })
+                foreach (var sampleName in new[] { "BLEMouse", "BLEMultilinkCentral", "LEDBlink_FreeRTOS" })
                 {
                     samplesForComputingSymbolLists.Add(new ConfigurationFixSampleReference
                     {

@@ -32,7 +32,7 @@ namespace VendorSampleParserEngine
                 set
                 {
                     if (value != null)
-                        UniqueID = value[0].SelectSingleNode("SampleName").InnerText + "-" + value[0].SelectSingleNode("BoardNameOrDeviceID").InnerText;
+                        UniqueID = value[0].SelectSingleNode("SampleName")?.InnerText + "-" + value[0].SelectSingleNode("DeviceID")?.InnerText;
                 }
             }
 

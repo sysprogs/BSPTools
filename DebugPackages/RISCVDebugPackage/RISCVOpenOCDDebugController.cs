@@ -9,13 +9,15 @@ using System.Threading;
 
 namespace RISCVDebugPackage
 {
-    public class RISCVOpenOCDDebugController : IDebugMethodController, ICustomSettingsTypeProvider
+    public class RISCVOpenOCDDebugController : IDebugMethodController, ICustomSettingsTypeProvider, IOpenOCDDebugController
     {
         public virtual Type[] SettingsObjectTypes => new[] { typeof(RISCVOpenOCDSettings) };
 
         public virtual ICustomSettingsTypeProvider TypeProvider => this;
 
         public virtual bool SupportsConnectionTesting => true;
+
+        public string AdapterSpeedCommand => "adapter_khz";
 
         public virtual ICustomDebugMethodConfigurator CreateConfigurator(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host)
         {
@@ -198,7 +200,7 @@ namespace RISCVDebugPackage
                     session.RunGDBCommand("-target-select remote :$$SYS:GDB_PORT$$");
 
                     var expr = session.EvaluateExpression("(void *)$pc == _start");
-                    if (expr.TrimStart('0', 'x') != "1")
+                    if (expr?.TrimStart('0', 'x') != "1")
                     {
                         session.SendInformationalOutput("Warning: unexpected value of $pc after a reset");
                         session.RunGDBCommand("set $pc = _start");

@@ -30,16 +30,18 @@ namespace ESP8266DebugPackage.GUI
         private IBSPConfiguratorHost _Host;
         private readonly bool _IsESP32;
 
-        public ESPxxOpenOCDSettingsControl(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host, ICustomSettingsTypeProvider typeProvider, bool isESP32)
+        readonly ESPxxDebugController _Controller;
+        public ESPxxOpenOCDSettingsControl(LoadedBSP.LoadedDebugMethod method, IBSPConfiguratorHost host, ESPxxDebugController controller, bool isESP32)
         {
             _Method = method;
             _Host = host;
             _IsESP32 = isESP32;
-            TypeProvider = typeProvider;
+            TypeProvider = _Controller = controller;
             host.InstallStyles(this);
             InitializeComponent();
 
             host.MakeSearchableComboBox(InterfaceComboBox, (i, f) => _Editor?.FilterItem(i, f) ?? false, Resources["interfaceScriptSelectionControl"]);
+            host.MakeSearchableComboBox(DeviceComboBox, (i, f) => _Editor?.FilterItem(i, f) ?? false, Resources["deviceScriptSelectionControl"]);
         }
 
 
@@ -62,7 +64,7 @@ namespace ESP8266DebugPackage.GUI
             else
                 settings = configuration as ESP8266OpenOCDSettings;
 
-            _Editor = new ESPxxOpenOCDSettingsEditor(_Host, _Method.Directory, settings, context, _IsESP32);
+            _Editor = new ESPxxOpenOCDSettingsEditor(_Host, _Method.Directory, settings, context, _IsESP32, _Controller);
 
             _Editor.PropertyChanged += (s, e) => SettingsChanged?.Invoke(this, EventArgs.Empty);
             DataContext = _Editor;
@@ -120,6 +122,12 @@ namespace ESP8266DebugPackage.GUI
         private void ESP32Diag_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://visualgdb.com/tutorials/esp32/flashdiag");
+        }
+
+        private void ResetToDefaultDevice(object sender, RoutedEventArgs e)
+        {
+            _Editor.ResetToDefaultDevice();
+            DeviceComboBox.IsDropDownOpen = false;
         }
     }
 

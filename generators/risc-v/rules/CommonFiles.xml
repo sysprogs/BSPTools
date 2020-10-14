@@ -3,29 +3,20 @@
 	<CoreFramework>
 		<CopyJobs>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\..\OpenOCD</SourceFolder>
-				<FilesToCopy>*</FilesToCopy>
-				<ProjectInclusionMask>-*</ProjectInclusionMask>
-				<AutoIncludeMask>-*</AutoIncludeMask>
-			</CopyJob>
-			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\bsp</SourceFolder>
-				<FilesToCopy>*</FilesToCopy>
+				<FilesToCopy>-*\build\*;-*\lib\*;*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>
 				<SymlinkResolutionMask>env\*</SymlinkResolutionMask>
-				<Patches>
-					<Patch xsi:type="InsertLines">
-						<FilePath>include\sifive\const.h</FilePath>
-						<AfterLine>#define _SIFIVE_CONST_H</AfterLine>
-						<InsertedLines>
-							<string>#include &lt;sys/cdefs.h&gt;</string>
-						</InsertedLines>
-					</Patch>					
-				</Patches>
 			</CopyJob>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\software</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask>-*</AutoIncludeMask>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\FreeRTOS-metal</SourceFolder>
 				<FilesToCopy>*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask>-*</AutoIncludeMask>
@@ -34,96 +25,33 @@
 	</CoreFramework>	
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>RISC-V Core Library</Name>
-			<ID>com.sysprogs.risc-v.core</ID>
+			<Name>RISC-V Bare Metal Compatibility Library</Name>
+			<ID>com.sysprogs.risc-v.metal</ID>
 			<ProjectFolderName>Core</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\bsp</SourceFolder>
-					<AlreadyCopied>true</AlreadyCopied>
-					<FilesToCopy>env\*;include\*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h;*.S</ProjectInclusionMask>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/bsp/env;$$SYS:BSP_ROOT$$/bsp/env/$$com.sysprogs.risc-v.board$$;$$SYS:BSP_ROOT$$/bsp/include</AdditionalIncludeDirs>
-					<AutoIncludeMask>-*</AutoIncludeMask>
-					<SimpleFileConditions>
-						<string>env\\coreplexip-e31-arty\\.*: $$com.sysprogs.risc-v.board$$ == coreplexip-e31-arty</string>
-						<string>env\\coreplexip-e51-arty\\.*: $$com.sysprogs.risc-v.board$$ == coreplexip-e51-arty</string>
-						<string>env\\freedom-e300-arty\\.*: $$com.sysprogs.risc-v.board$$ == freedom-e300-arty</string>
-						<string>env\\freedom-e300-hifive1\\.*: $$com.sysprogs.risc-v.board$$ == freedom-e300-hifive1</string>
-					</SimpleFileConditions>				
-				</CopyJob>	
-			</CopyJobs>
-		</Framework>	
-		<Framework>
-			<Name>RISC-V Common Function Wrappers</Name>
-			<ID>com.sysprogs.risc-v.wrappers</ID>
-			<ProjectFolderName>Wrappers</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\bsp</SourceFolder>
-					<AlreadyCopied>true</AlreadyCopied>
-					<FilesToCopy>libwrap\*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h;*.S</ProjectInclusionMask>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\freedom-metal</SourceFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-pico\*;-metal\*;*.c;*.h;*.S</ProjectInclusionMask>
+					<AdditionalIncludeDirs></AdditionalIncludeDirs>
 					<AutoIncludeMask>-*</AutoIncludeMask>
 				</CopyJob>	
 			</CopyJobs>
 		</Framework>	
-		<Framework>
-			<Name>RISC-V Common Drivers</Name>
-			<ID>com.sysprogs.risc-v.drivers</ID>
-			<ProjectFolderName>Drivers</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\bsp</SourceFolder>
-					<AlreadyCopied>true</AlreadyCopied>
-					<FilesToCopy>drivers\*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h;*.S</ProjectInclusionMask>
-					<!-- <PreprocessorMacros>USE_PLIC;USE_M_TIME</PreprocessorMacros> -->
- 					<PreprocessorMacros>$$com.sysprogs.risc-v.use_plic$$;$$com.sysprogs.risc-v.use_mtime$$</PreprocessorMacros>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/bsp/drivers</AdditionalIncludeDirs>
-					<AutoIncludeMask>-*</AutoIncludeMask>
-				</CopyJob>	
-			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Properties>
-					  <PropertyEntry xsi:type="Boolean">
-						<Name>Handle PLIC interrupt</Name>
-						<UniqueID>com.sysprogs.risc-v.use_plic</UniqueID>
-						<ValueForTrue>USE_PLIC</ValueForTrue>
-					  </PropertyEntry>
-					  <PropertyEntry xsi:type="Boolean">
-						<Name>Handle machine timer interrupt</Name>
-						<UniqueID>com.sysprogs.risc-v.use_mtime</UniqueID>
-						<ValueForTrue>USE_M_TIME</ValueForTrue>
-					  </PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
-		</Framework>	
-	
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:INPUT_DIR$$\software\demo_gpio</SourceFolder>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$\software\sifive-welcome</SourceFolder>
 			<CopyFilters>*.c;*.h</CopyFilters>
-			<DestinationFolder>Samples\demo_gpio</DestinationFolder>
+			<DestinationFolder>Samples\sifive-welcome</DestinationFolder>
 			<EmbeddedSample>
 				<Name>Basic GPIO example</Name>
 				<Description>This is a very basic GPIO example</Description>
 				<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
-				<DefaultConfiguration>
-					<Entries>
-						<KeyValue><Key>com.sysprogs.risc-v.use_plic</Key><Value>USE_PLIC</Value></KeyValue>
-						<KeyValue><Key>com.sysprogs.risc-v.use_mtime</Key><Value>USE_M_TIME</Value></KeyValue>
-					</Entries>
-				</DefaultConfiguration>
+				<RequiredFrameworks>
+					<string>com.sysprogs.risc-v.metal</string>
+				</RequiredFrameworks>
 			</EmbeddedSample>
 		</SmartSample>
 	</SmartSamples>
