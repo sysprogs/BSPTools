@@ -121,11 +121,11 @@ namespace STM32IDEProjectImporter
                 virtualPathComponents = new[] { "virtual", "sample", "path" };
 
             XmlDocument cproject = new XmlDocument();
-            cproject.Load(projectFile);
-
             XmlDocument project = new XmlDocument();
+
             try
             {
+                cproject.Load(projectFile);
                 project.Load(Path.Combine(projectFileDir, ".project"));
             }
             catch (Exception ex)
@@ -230,6 +230,7 @@ namespace STM32IDEProjectImporter
             public string LinkerScript;
             public List<string> Libraries;
             public string LDFLAGS;
+            public bool UseCMSE;
         }
 
         const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
@@ -315,6 +316,7 @@ namespace STM32IDEProjectImporter
                 result.LinkerScript = Path.GetFullPath(linkerScript);
 
             result.LDFLAGS = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.otherflags", true);
+            result.UseCMSE = gccNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.mcmse", true) == "true";
 
             result.Libraries = new List<string>();
 
@@ -472,6 +474,11 @@ namespace STM32IDEProjectImporter
             if (opts.LDFLAGS?.Contains("rdimon.specs") == true)
             {
                 mcuConfig.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.toolchainoptions.arm.libctype", Value = "--specs=rdimon.specs" });
+            }
+
+            if (opts.UseCMSE)
+            {
+                mcuConfig.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.bspoptions.cmse", Value = "-mcmse" });
             }
 
             try

@@ -71,13 +71,15 @@ static int8_t $$PROJECTNAME$$_Init     (void);
 static int8_t $$PROJECTNAME$$_DeInit   (void);
 static int8_t $$PROJECTNAME$$_Control  (uint8_t cmd, uint8_t* pbuf, uint16_t length);
 static int8_t $$PROJECTNAME$$_Receive  (uint8_t* pbuf, uint32_t *Len);
+static int8_t $$PROJECTNAME$$_TransmitCompleted(uint8_t *Buf, uint32_t *Len, uint8_t epnum);
 
 USBD_CDC_ItfTypeDef USBD_CDC_$$PROJECTNAME$$_fops = 
 {
   $$PROJECTNAME$$_Init,
   $$PROJECTNAME$$_DeInit,
   $$PROJECTNAME$$_Control,
-  $$PROJECTNAME$$_Receive
+  $$PROJECTNAME$$_Receive,
+  $$PROJECTNAME$$_TransmitCompleted
 };
 
 USBD_CDC_LineCodingTypeDef linecoding =
@@ -220,6 +222,11 @@ static int8_t $$PROJECTNAME$$_Receive(uint8_t* Buf, uint32_t *Len)
 	s_RxBuffer.Size = *Len;
 	s_RxBuffer.ReadDone = 1;
 	return (0);
+}
+
+static int8_t $$PROJECTNAME$$_TransmitCompleted(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
+{
+	return 0;
 }
 
 /**
