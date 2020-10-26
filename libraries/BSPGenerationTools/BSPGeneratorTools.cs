@@ -32,6 +32,7 @@ namespace BSPGenerationTools
         A7,
         R4,
         R5,
+        NonARM,
     }
 
     public enum FPUType
@@ -878,6 +879,8 @@ namespace BSPGenerationTools
                     break;
                 case CortexCore.A7:
                     throw new Exception("Cortex-A7 core requires a Linux-based toolchain.");
+                case CortexCore.NonARM:
+                    break;
                 default:
                     throw new Exception("Unsupported core type");
             }

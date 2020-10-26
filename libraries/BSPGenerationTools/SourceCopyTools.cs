@@ -240,6 +240,7 @@ namespace BSPGenerationTools
 
         public bool AlreadyCopied;  //The files have been copied (and patched) by some previous jobs. This job is defined only to add the files to the project.
         public string[] GuardedFiles;
+        public string GuardFormat;
         public string SymlinkResolutionMask;
 
         public Patch[] Patches;
@@ -713,7 +714,7 @@ namespace BSPGenerationTools
                     if (i == lines.Count)
                         throw new Exception("Cannot find a place to insert guard in " + fn);
 
-                    lines.Insert(i, string.Format("#if defined({0}) && {0}", macro));
+                    lines.Insert(i, string.Format(GuardFormat ?? "#if defined({0}) && {0}", macro));
                     lines.Add("#endif //" + macro);
                     File.WriteAllLines(fn, lines);
                 }
@@ -873,6 +874,14 @@ namespace BSPGenerationTools
         public string AutoOptions;      //Comma-separated list of device names where 'x' is used as a wildcard (e.g. STM32F100xx will be converted to a "STM32F100.." regex)
         public Option[] Options;        //Value/regex pair for the options that cannot be defined using the simplified AutoOptions format.
 
+        public enum AutoOptionFormatType
+        {
+            Mask,
+            Prefix
+        }
+
+        public AutoOptionFormatType AutoOptionFormat = AutoOptionFormatType.Mask;
+
         public class Option
         {
             public string Value;
@@ -886,11 +895,19 @@ namespace BSPGenerationTools
             if (_Cache == null)
             {
                 _Cache = new List<KeyValuePair<Regex, string>>();
-                foreach (var op in Options)
+                foreach (var op in Options ?? new Option[0])
                     _Cache.Add(new KeyValuePair<Regex, string>(new Regex(op.Regex), op.Value));
                 if (AutoOptions != null)
                     foreach (var ao in AutoOptions.Split(';'))
-                        _Cache.Add(new KeyValuePair<Regex, string>(new Regex(ao.Replace('x', '.')), ao));
+                    {
+                        string rg;
+                        if (AutoOptionFormat == AutoOptionFormatType.Prefix)
+                            rg = ao.TrimEnd('x') + ".*";
+                        else
+                            rg = ao.Replace('x', '.');
+
+                        _Cache.Add(new KeyValuePair<Regex, string>(new Regex(rg), ao));
+                    }
             }
 
             if (name.EndsWith("_M4"))
