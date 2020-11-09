@@ -626,6 +626,9 @@ namespace STM32IDEProjectImporter
                 if (path == "")
                     continue;
 
+                if (path.StartsWith("virtual:"))
+                    continue;
+
                 int type = int.Parse(node.SelectSingleNode("type")?.InnerText ?? throw new Exception("Resource type unspecified"));
 
                 string fullPath = TranslatePath(projectDir, path, PathTranslationFlags.None);
