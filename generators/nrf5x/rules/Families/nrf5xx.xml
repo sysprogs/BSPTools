@@ -355,7 +355,7 @@
 						<string>UART[uart]|=>None[];uart\\app_uart.c=>Without FIFO[app_uart];uart\\app_uart_fifo.c=>With FIFO[app_uart_fifo]</string>
 						<string>Redirect printf() output to UART[uart_retarget]|uart\\retarget.c</string>
 					</SmartFileConditions>
-					<ProjectInclusionMask>-util\*;-*\hardfault_handler*;-ant_fs\*;-console\*;-bootloader_dfu\*init_template*;-timer\experimental\*;-*nrf_crypto_svc.c;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-util\*;-*\hardfault_handler_(keil|iar)*;-*hardfault\nrf51\*;-ant_fs\*;-console\*;-bootloader_dfu\*init_template*;-timer\experimental\*;-*nrf_crypto_svc.c;*</ProjectInclusionMask>
 					<AutoIncludeMask>-ant_fs\*;-console\*;*.h</AutoIncludeMask>
 					<Patches>
 						<Patch xsi:type="ReplaceLine">
