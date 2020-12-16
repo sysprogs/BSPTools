@@ -177,6 +177,11 @@ namespace ESP8266DebugPackage
 
                     cmds.Add(new CustomStartStep("print *((int *)0x60000900)", "set *((int *)0x60000900)=0"));
                     cmds.Add(parsedLoader.QueueInvocation(0, settings.ProgramSectorSize.ToString(), settings.EraseSectorSize.ToString(), null, 0, 0, true));
+
+                    if (settings.FLASHResources != null)
+                        foreach (var r in settings.FLASHResources)
+                            regions.Add(r.ToProgrammableRegion(service, true));
+
                     foreach (var region in regions)
                         parsedLoader.QueueRegionProgramming(cmds, region);
                 }

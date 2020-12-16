@@ -34,7 +34,7 @@ namespace ESP8266DebugPackage
         public int SuggestionLogicRevision;
 
         public FLASHResource[] FLASHResources { get; set; }
-        
+
         public abstract ESP8266BinaryImage.IESPxxImageHeader GetFLASHSettings();
     }
 
@@ -88,9 +88,17 @@ namespace ESP8266DebugPackage
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Path)));
         }
 
-        public ProgrammableRegion ToProgrammableRegion(IDebugStartService service)
+        public ProgrammableRegion ToProgrammableRegion(IDebugStartService service, bool querySize = false)
         {
-            return new ProgrammableRegion { FileName = service.ExpandProjectVariables(Path, true, true), Offset = ParseAddress(Offset) };
+            var result = new ProgrammableRegion { FileName = service.ExpandProjectVariables(Path, true, true), Offset = ParseAddress(Offset) };
+            if (querySize)
+            {
+                if (!File.Exists(result.FileName))
+                    throw new Exception("Missing FLASH resource:" + result.FileName);
+                result.Size = (int)new FileInfo(result.FileName).Length;
+            }
+
+            return result;
         }
 
         private int ParseAddress(string offset)
@@ -109,7 +117,7 @@ namespace ESP8266DebugPackage
         public bool IsESP32 { get; }
 
         const int SuggestionLogicRevision = 1;
-        
+
         //ESP32 OpenOCD supports software breakpoints in FLASH, but only if they are requested as hardware breakpoints. The following command ensures all breakpoints are requested as hardware ones.
         const string BreakpointFixCommand = "mon gdb_breakpoint_override hard";
 
@@ -204,9 +212,9 @@ namespace ESP8266DebugPackage
 
         protected override void InsertResetAndHaltCommands(int idxLoad, QuickSetupDatabase.ProgrammingInterface iface, QuickSetupDatabase.TargetDeviceFamily device)
         {
-/*            int idxHalt = Settings.StartupCommands.IndexOf("mon reset halt");
-            if (idxHalt == -1)
-                Settings.StartupCommands.Insert(idxLoad, "mon reset halt");*/
+            /*            int idxHalt = Settings.StartupCommands.IndexOf("mon reset halt");
+                        if (idxHalt == -1)
+                            Settings.StartupCommands.Insert(idxLoad, "mon reset halt");*/
         }
 
         protected override bool SuppressCommandLineReset => true;
