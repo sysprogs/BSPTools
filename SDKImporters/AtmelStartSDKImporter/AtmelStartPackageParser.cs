@@ -308,6 +308,14 @@ namespace AtmelStartSDKImporter
                 }
             };
 
+            string mainFileName = "main.c";
+            if (!File.Exists(Path.Combine(extractedProjectDirectory, mainFileName)))
+            {
+                var candidates = Directory.GetFiles(extractedProjectDirectory, "*_main.c");
+                if (candidates.Length == 1)
+                    mainFileName = Path.GetFileName(candidates[0]);
+            }
+
             var bsp = new BoardSupportPackage
             {
                 PackageID = "com.sysprogs.atstart." + device,
@@ -316,7 +324,7 @@ namespace AtmelStartSDKImporter
                 BSPImporterID = ID,
                 MCUFamilies = new[] { new MCUFamily { ID = "ATSTART" } },
                 SupportedMCUs = new[] { mcu },
-                Frameworks = xml.SelectNodes("package/components/component").OfType<XmlElement>().Select(GenerateFrameworkForComponent).Where(f => f != null).ToArray(),
+                Frameworks = xml.SelectNodes("package/components/component").OfType<XmlElement>().Select(f => GenerateFrameworkForComponent(f, mainFileName)).Where(f => f != null).ToArray(),
 
                 EmbeddedSamples = new[]
                 {
@@ -328,7 +336,7 @@ namespace AtmelStartSDKImporter
                         {
                             new AdditionalSourceFile
                             {
-                                SourcePath = "$$SYS:BSP_ROOT$$/main.c",
+                                SourcePath = "$$SYS:BSP_ROOT$$/" + mainFileName,
                                 TargetFileName = "$$PROJECTNAME$$.c",
                             }
                         }
@@ -360,7 +368,7 @@ namespace AtmelStartSDKImporter
             mcu.CompilationFlags = mcu.CompilationFlags.Merge(new ToolFlags { IncludeDirectories = extraIncludeDirs });
         }
 
-        private static EmbeddedFramework GenerateFrameworkForComponent(XmlElement el)
+        private static EmbeddedFramework GenerateFrameworkForComponent(XmlElement el, string mainFileName)
         {
             string name = el.GetAttribute("Cclass");
             if (string.IsNullOrEmpty(name))
@@ -379,7 +387,7 @@ namespace AtmelStartSDKImporter
                 ProjectFolderName = name,
                 DefaultEnabled = true,
 
-                AdditionalSourceFiles = files.Where(f => f.Category == "source" && f.OriginalPath.ToLower() != "main.c").Select(f => f.Path).ToArray(),
+                AdditionalSourceFiles = files.Where(f => f.Category == "source" && StringComparer.InvariantCultureIgnoreCase.Compare(f.OriginalPath.ToLower(), mainFileName) != 0).Select(f => f.Path).ToArray(),
                 AdditionalHeaderFiles = files.Where(f => f.Category == "header").Select(f => f.Path).ToArray(),
                 AdditionalIncludeDirs = files.Where(f => f.Category == "include").Select(f => f.Path).Distinct().ToArray(),
             };
