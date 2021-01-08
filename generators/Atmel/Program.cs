@@ -25,6 +25,12 @@ namespace Atmel_bsp_generator
                 : base(dirs)
             {
                 ShortName = "Atmel";
+
+                LDSTemplate.SymbolAliases = new[]
+                {
+                    new SymbolAlias{Name = "__ram_end__", Target = "_edata"},
+                    new SymbolAlias{Name = "_end", Target = "end"},
+                };
             }
 
             public override string GetMCUTypeMacro(MCUBuilder mcu)
@@ -39,7 +45,7 @@ namespace Atmel_bsp_generator
                 ramBase = SRAMBase;
             }
 
-            public override MemoryLayout GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
+            public override MemoryLayoutAndSubstitutionRules GetMemoryLayout(MCUBuilder mcu, MCUFamilyBuilder family)
             {
                 //No additional memory information available for this MCU. Build a basic memory layout from known RAM/FLASH sizes.
                 MemoryLayout layout = new MemoryLayout();
@@ -116,7 +122,7 @@ namespace Atmel_bsp_generator
                     Size = (uint)mcu.RAMSize
                 });
 
-                return layout;
+                return new MemoryLayoutAndSubstitutionRules(layout);
             }
         }
 
@@ -310,7 +316,6 @@ namespace Atmel_bsp_generator
                     aIncludeMask = @"-*/*;*.h";
                 }
 
-
                 bleFrameworks.Add(new Framework
                 {
                     Name = "Atmel Services " + dir,
@@ -319,19 +324,18 @@ namespace Atmel_bsp_generator
                     ProjectFolderName = "Services_" + dir,
                     DefaultEnabled = false,
 
-                    CopyJobs = new CopyJob[]
-                               {
-                            new CopyJob
-                            {
-                                SourceFolder = @"$$BSPGEN:INPUT_DIR$$\common\services\"+dir,
-                                TargetFolder = @"common\services\"+dir,
-                                FilesToCopy = "-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*mega*;-*avr*;-*uc3*;*.c;*.h",
-                                AutoIncludeMask =aIncludeMask,
-                                ProjectInclusionMask = "*.c",
-                                SimpleFileConditions = a_SimpleFileConditions.ToArray(),
-            }
-            },
-
+                    CopyJobs = new []
+                    {
+                        new CopyJob
+                        {
+                            SourceFolder = @"$$BSPGEN:INPUT_DIR$$\common\services\"+dir,
+                            TargetFolder = @"common\services\"+dir,
+                            FilesToCopy = "-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*mega*;-*avr*;-*uc3*;*.c;*.h",
+                            AutoIncludeMask =aIncludeMask,
+                            ProjectInclusionMask = "*.c",
+                            SimpleFileConditions = a_SimpleFileConditions.ToArray(),
+                        }
+                    },
                 });
             }
             return bleFrameworks;
@@ -344,19 +348,19 @@ namespace Atmel_bsp_generator
             {
 
                 //  Debug
-               /*  if (!line.Contains("spi") && !line.Contains("sercom") && !line.Contains("i2c") && !line.Contains("uart"))
-                       continue;
-                */
+                /*  if (!line.Contains("spi") && !line.Contains("sercom") && !line.Contains("i2c") && !line.Contains("uart"))
+                        continue;
+                 */
                 if (line.EndsWith(@"sercom\spi_master_vec"))
                     continue;
                 string addContinB11 = "$$com.sysprogs.atmel.sam32._header_prefix$$!=samb11";
 
                 if (line.EndsWith("sercom"))
                 {
-                    string[] strFilesSercom = Directory.GetFiles(line,"*.c",SearchOption.TopDirectoryOnly);// Path.Combine(pBspDir.InputDir, pstrTypSam + @"\drivers\sercom"));
+                    string[] strFilesSercom = Directory.GetFiles(line, "*.c", SearchOption.TopDirectoryOnly);// Path.Combine(pBspDir.InputDir, pstrTypSam + @"\drivers\sercom"));
 
-                   foreach(var fl in strFilesSercom)
-                         a_SimpleFileConditions.Add("^sercom\\\\" + Path.GetFileName(fl) + @":" + addContinB11);
+                    foreach (var fl in strFilesSercom)
+                        a_SimpleFileConditions.Add("^sercom\\\\" + Path.GetFileName(fl) + @":" + addContinB11);
 
                     string[] strPropFrimSercom = Directory.GetDirectories(line);// Path.Combine(pBspDir.InputDir, pstrTypSam + @"\drivers\sercom"));
                     SetDriverConditions(strPropFrimSercom, ref propFr, ref a_SimpleFileConditions, ref aInclJob, pstrTypSam);
@@ -446,7 +450,7 @@ namespace Atmel_bsp_generator
                             aAddSimpleCond = "^" + addPatch + a_name + @"\\" + aPatchPref + @"\\:$$com.sysprogs.atmel.sam32._header_prefix$$ =~ " + prefs;
 
                             a_SimpleFileConditions.Add(aAddSimpleCond + "&& " + aDrivCond + addContinB11);
-                                 
+
 
                             aflIsCond = true;
 
@@ -623,119 +627,125 @@ namespace Atmel_bsp_generator
             if (args.Length < 1)
                 throw new Exception("Usage: EFM32.exe <Atmel SW package directory>");
 
-            var bspBuilder = new AtmelBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules"));
-
-            var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuAtmel.csv",
-                "Device Name", "Flash (kBytes)", "SRAM (kBytes)", "CPU", true);
-            RemoveDuplicateMCU(ref devices);
-
-
-            List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
-            foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
-                allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
-
-            var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
-            List<MCUFamily> familyDefinitions = new List<MCUFamily>();
-            List<MCU> mcuDefinitions = new List<MCU>();
-            List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-
-            List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
-
-            CopyAddSourceFiles(bspBuilder.Directories.InputDir);
-
-            bool noPeripheralRegisters = args.Contains("/noperiph");
-            List<KeyValuePair<string, string>> macroToHeaderMap = new List<KeyValuePair<string, string>>();
-
-            var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
-
-            //Embedded Frameworks
-            var AddFrW = GenereteAddFrameWorks(bspBuilder.Directories, "ServicesFrimwork.txt");
-            commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
-            AddFrW = GenereteAddFrameWorksDir(bspBuilder.Directories, "sam");
-            commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
-            AddFrW = GenereteAddFrameWorksDir(bspBuilder.Directories, "sam0");
-            commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
-
-            foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
-                frameworks.Add(fw);
-
-            var flags = new ToolFlags();
-            List<string> projectFiles = new List<string>();
-            commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
-
-            foreach (var sample in commonPseudofamily.CopySamples())
-                exampleDirs.Add(sample);
-
-            foreach (var fam in allFamilies)
+            using (var bspBuilder = new AtmelBSPBuilder(BSPDirectories.MakeDefault(args)))
             {
-                var rejectedMCUs = fam.RemoveUnsupportedMCUs(true);
-                if (rejectedMCUs.Length != 0)
+                var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\McuAtmel.csv",
+                    "Device Name", "Flash (kBytes)", "SRAM (kBytes)", "CPU", true);
+                RemoveDuplicateMCU(ref devices);
+
+                foreach(var mcu in devices)
                 {
-                    Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
-                    foreach (var mcu in rejectedMCUs)
-                        Console.WriteLine("\t{0}", mcu.Name);
+                    if (mcu.Core == CortexCore.M4)
+                        mcu.FPU = FPUType.SP;
                 }
 
 
-                fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
+                List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+                foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\Families", "*.xml"))
+                    allFamilies.Add(new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn)));
 
-                var famObj = fam.GenerateFamilyObject(true);
+                var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
+                List<MCUFamily> familyDefinitions = new List<MCUFamily>();
+                List<MCU> mcuDefinitions = new List<MCU>();
+                List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
 
-                famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
-                famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
+                List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
 
-                famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, commonPseudofamily.Definition.AdditionalSystemVars);
-                famObj.CompilationFlags = famObj.CompilationFlags.Merge(flags);
-                famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
+                CopyAddSourceFiles(bspBuilder.Directories.InputDir);
 
-                familyDefinitions.Add(famObj);
-                var memoryLayouts = fam.GenerateLinkerScripts(false);
-                if (!noPeripheralRegisters)
-                    fam.AttachPeripheralRegisters(ParsePeripheralRegisters(bspBuilder.Directories.OutputDir, fam));
+                bool noPeripheralRegisters = args.Contains("/noperiph");
+                List<KeyValuePair<string, string>> macroToHeaderMap = new List<KeyValuePair<string, string>>();
 
-                foreach (var mcu in fam.MCUs)
-                {
-                    var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters);
-                    var layout = memoryLayouts[mcu.Name];
+                var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
 
-                    var ram = layout.Memories.First(m => m.Type == MemoryType.RAM);
-                    var flash = layout.Memories.First(m => m.Type == MemoryType.FLASH);
+                //Embedded Frameworks
+                var AddFrW = GenereteAddFrameWorks(bspBuilder.Directories, "ServicesFrimwork.txt");
+                commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
+                AddFrW = GenereteAddFrameWorksDir(bspBuilder.Directories, "sam");
+                commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
+                AddFrW = GenereteAddFrameWorksDir(bspBuilder.Directories, "sam0");
+                commonPseudofamily.Definition.AdditionalFrameworks = commonPseudofamily.Definition.AdditionalFrameworks.Concat(AddFrW).ToArray();
 
-                    mcuDef.RAMBase = ram.Start;
-                    mcuDef.RAMSize = (int)ram.Size;
-
-                    mcuDef.FLASHBase = flash.Start;
-                    mcuDef.FLASHSize = (int)flash.Size;
-
-                    mcuDefinitions.Add(mcuDef);
-                }
-
-                foreach (var fw in fam.GenerateFrameworkDefinitions())
+                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
                     frameworks.Add(fw);
 
-                foreach (var sample in fam.CopySamples())
+                var flags = new ToolFlags();
+                List<string> projectFiles = new List<string>();
+                commonPseudofamily.CopyFamilyFiles(ref flags, projectFiles);
+
+                foreach (var sample in commonPseudofamily.CopySamples())
                     exampleDirs.Add(sample);
 
+                foreach (var fam in allFamilies)
+                {
+                    var rejectedMCUs = fam.RemoveUnsupportedMCUs();
+                    if (rejectedMCUs.Length != 0)
+                    {
+                        Console.WriteLine("Unsupported {0} MCUs:", fam.Definition.Name);
+                        foreach (var mcu in rejectedMCUs)
+                            Console.WriteLine("\t{0}", mcu.Name);
+                    }
+
+
+                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
+
+                    var famObj = fam.GenerateFamilyObject(true);
+
+                    famObj.AdditionalSourceFiles = LoadedBSP.Combine(famObj.AdditionalSourceFiles, projectFiles.Where(f => !MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
+                    famObj.AdditionalHeaderFiles = LoadedBSP.Combine(famObj.AdditionalHeaderFiles, projectFiles.Where(f => MCUFamilyBuilder.IsHeaderFile(f)).ToArray());
+
+                    famObj.AdditionalSystemVars = LoadedBSP.Combine(famObj.AdditionalSystemVars, commonPseudofamily.Definition.AdditionalSystemVars);
+                    famObj.CompilationFlags = famObj.CompilationFlags.Merge(flags);
+                    famObj.CompilationFlags.PreprocessorMacros = LoadedBSP.Combine(famObj.CompilationFlags.PreprocessorMacros, new string[] { "$$com.sysprogs.bspoptions.primary_memory$$_layout" });
+
+                    familyDefinitions.Add(famObj);
+                    var memoryLayouts = fam.GenerateLinkerScripts(false);
+                    if (!noPeripheralRegisters)
+                        fam.AttachPeripheralRegisters(ParsePeripheralRegisters(bspBuilder.Directories.OutputDir, fam));
+
+                    foreach (var mcu in fam.MCUs)
+                    {
+                        var mcuDef = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters);
+                        var layout = memoryLayouts[mcu.Name].Layout;
+
+                        var ram = layout.Memories.First(m => m.Type == MemoryType.RAM);
+                        var flash = layout.Memories.First(m => m.Type == MemoryType.FLASH);
+
+                        mcuDef.RAMBase = ram.Start;
+                        mcuDef.RAMSize = (int)ram.Size;
+
+                        mcuDef.FLASHBase = flash.Start;
+                        mcuDef.FLASHSize = (int)flash.Size;
+
+                        mcuDefinitions.Add(mcuDef);
+                    }
+
+                    foreach (var fw in fam.GenerateFrameworkDefinitions())
+                        frameworks.Add(fw);
+
+                    foreach (var sample in fam.CopySamples())
+                        exampleDirs.Add(sample);
+
+                }
+
+                BoardSupportPackage bsp = new BoardSupportPackage
+                {
+                    PackageID = "com.sysprogs.arm.atmel.sam-cortex",
+                    PackageDescription = "Atmel ARM Cortex Devices",
+                    GNUTargetID = "arm-eabi",
+                    GeneratedMakFileName = "atmel.mak",
+                    MCUFamilies = familyDefinitions.ToArray(),
+                    SupportedMCUs = mcuDefinitions.ToArray(),
+                    Frameworks = frameworks.ToArray(),
+                    Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+
+                    FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
+                    PackageVersion = "3.35.2R2"
+                };
+
+                bspBuilder.Save(bsp, true);
             }
-
-            BoardSupportPackage bsp = new BoardSupportPackage
-            {
-                PackageID = "com.sysprogs.arm.atmel.sam-cortex",
-                PackageDescription = "Atmel ARM Cortex Devices",
-                GNUTargetID = "arm-eabi",
-                GeneratedMakFileName = "atmel.mak",
-                MCUFamilies = familyDefinitions.ToArray(),
-                SupportedMCUs = mcuDefinitions.ToArray(),
-                Frameworks = frameworks.ToArray(),
-                Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-
-                FileConditions = bspBuilder.MatchedFileConditions.ToArray(),
-                PackageVersion = "3.35.2"
-            };
-
-            bspBuilder.Save(bsp, true);
-
         }
     }
 }

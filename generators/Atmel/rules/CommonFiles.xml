@@ -29,7 +29,7 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\common\utils</SourceFolder>
 					<FilesToCopy>-*example*.c;-*example*.h;-*unit_test*.*;-*doxygen*;-*avr*;*.c;*.h</FilesToCopy>
 					<TargetFolder>common</TargetFolder>
-					<ProjectInclusionMask>-osprintf*;-stdio*;*.c</ProjectInclusionMask>
+					<ProjectInclusionMask>-osprintf*;-stdio*;*.c;-*utf8.?</ProjectInclusionMask>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
 					 <SimpleFileConditions> 
 						<string>\\.*:$$com.sysprogs.atmel.sam32._header_prefix$$!=samb11</string>
