@@ -203,7 +203,7 @@ namespace SLab_bsp_generator
                     continue;
                 m = Regex.Match(lnstr, @"#define __CM([\d\w]+)_REV[0-9xU /*<]+(Cortex-M[0-7+]+).*");
                 if (m.Success)
-                    mcu.Core = BSPGeneratorTools.ParseCoreName(m.Groups[2].Value);
+                    mcu.Core = BSPGeneratorTools.ParseCoreName(m.Groups[2].Value, out mcu.FPU);
 
                 if (IsMcuFull(mcu))
                     break;
@@ -278,7 +278,6 @@ namespace SLab_bsp_generator
 
             using (var bspBuilder = new SLabBSPBuilder(new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules", @"..\..\logs")))
             {
-
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 var ignoredFamilyNames = File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, "rulesfamaly.txt"));
 
@@ -401,7 +400,7 @@ namespace SLab_bsp_generator
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
-                    PackageVersion = "5.9.6"
+                    PackageVersion = "5.9.8"
                 };
 
                 Console.WriteLine("Saving BSP...");
