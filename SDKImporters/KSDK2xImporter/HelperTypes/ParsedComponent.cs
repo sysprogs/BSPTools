@@ -69,7 +69,9 @@ namespace KSDK2xImporter.HelperTypes
                 LongName = Name;
 
             Filter = new ParsedFilter(componentNode);
-            SourceLists = componentNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSourceList(e)).ToArray();
+            string basePath = componentNode.GetAttribute("package_base_path");
+
+            SourceLists = componentNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSourceList(e, basePath)).ToArray();
             Defines = componentNode.SelectNodes("defines/define").OfType<XmlElement>().Select(el => new ParsedDefine(el)).ToArray();
 
             var dependencies = componentNode.GetAttribute("dependencies");
