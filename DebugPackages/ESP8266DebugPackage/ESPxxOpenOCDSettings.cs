@@ -130,7 +130,7 @@ namespace ESP8266DebugPackage
 
             if (Device.SelectedItem.Script == null)
             {
-                if (Device.Items.Count > 0)
+                if (Device.Items.Length > 0)
                     ResetToDefaultDevice();
                 else
                     Device.SelectedItem = new ScriptSelector<QuickSetupDatabase.TargetDeviceFamily>.Item { Script = isESP32 ? "target/esp32.cfg" : "target/esp8266.cfg" };
