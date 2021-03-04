@@ -156,38 +156,26 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/PolarSSL/include;$$SYS:BSP_ROOT$$/PolarSSL/include/polarssl</AdditionalIncludeDirs>
 					<PreprocessorMacros></PreprocessorMacros>
 					<AdvancedRenameRules>library\\(arc4|des|md4|md5|sha1)\.c$=>PolarSSL_{1}.c</AdvancedRenameRules>
-					<SimpleFileConditions>
-					</SimpleFileConditions>
-						<Patches>
-							<!--Patch xsi:type="InsertLines">
-							<FilePath>library\net.c</FilePath>
-							<AfterLine>#include "config.h"</AfterLine>
-							<InsertedLines>
-								<string>#if !LWIP_SOCKET</string>
-								<string>#error To use PolarSSL, please set LWIP_SOCKET to 1 in your lwipopts.h</string>
-								<string>#endif</string>
-							</InsertedLines>
-						</Patch>			
-
-						<Patch xsi:type="InsertLines">
-							<FilePath>library\bignum.c</FilePath>
-							<AfterLine>    while( c != 0 );</AfterLine>
-							<InsertedLines>
-								<string>    /*</string>
-								<string></string>
-								<string>		WARNING!</string>
-								<string>		If you get an 'r7 cannot be used in asm here' error, open the File Properties for this</string>
-								<string>		file and set C/C++->Optimization->Omit Frame Pointer to 'yes'</string>
-								<string></string>
-								<string>*/</string>								
-							</InsertedLines>
-						</Patch-->			
-						<!--Patch xsi:type="ReplaceLine">
-							<FilePath>library\x509parse.c</FilePath>
-							<OldLine>#include &lt;dirent.h&gt;</OldLine>
-							<NewLine>//#include &lt;dirent.h&gt;</NewLine>
-						</Patch-->						
-					</Patches>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>	
+		<Framework>
+			<Name>MbedTLS</Name>
+			<ID>com.sysprogs.arm.stm32.mbedtls</ID>
+			<ProjectFolderName>MbedTLS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>		
+			<CopyJobs>			
+				<CopyJob>
+					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\Third_Party\mbedTLS</SourceFolder>
+					<FilesToCopy>include\mbedtls\*.h;library\*.c</FilesToCopy>
+					<ProjectInclusionMask>-library\timing.c;-library\x509*;-library\templates\*;*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/mbedtls/include</AdditionalIncludeDirs>
+					<PreprocessorMacros>MBEDTLS_NO_PLATFORM_ENTROPY</PreprocessorMacros>
+					<AdvancedRenameRules>library\\([^.\\]+)\.c$=>mbedtls_{1}.c</AdvancedRenameRules>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>	
@@ -198,10 +186,6 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
                     <ConfigurationFileTemplate>
                         <SourcePath>$$SYS:BSP_ROOT$$/FatFs/src/ffconf_template.h</SourcePath>
                         <TargetFileName>ffconf.h</TargetFileName>
-
-
-
-
 
                         <ExpandMacros>false</ExpandMacros>
                         </ConfigurationFileTemplate>
