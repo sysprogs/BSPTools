@@ -186,13 +186,11 @@ namespace stm32_bsp_generator
                 fpu = ((XmlElement)node.ParentNode).GetAttribute("fpu");
 
                 var memories = node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
-                if (memories.Length == 0)
-                {
-                    if (explicitCore == null)
-                        throw new Exception("Missing memories for " + RefName);
-
+                if (memories.Length == 0 && explicitCore != null)
                     memories = node.SelectNodes($"memories/C{explicitCore}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
-                }
+
+                if (memories.Length == 0)
+                    throw new Exception("Missing memories for " + RefName);
 
                 define = node.SelectSingleNode("define")?.InnerText ?? node.ParentNode.SelectSingleNode("define")?.InnerText ?? throw new Exception("Unknown preprocessor macro for " + RPN);
                 return memories;
@@ -356,7 +354,10 @@ namespace stm32_bsp_generator
 
                     if (cores.Length > 1)
                     {
-                        CoreSuffix = shortCore.Replace('+', 'p');
+                        if (shortCore == "M0+")
+                            CoreSuffix = "M0PLUS";
+                        else
+                            CoreSuffix = shortCore.Replace('+', 'p');
 
                         if (coreIndex > 0)
                         {
@@ -369,6 +370,7 @@ namespace stm32_bsp_generator
                         CoreSuffix = null;
 
                     Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts, out Define, out string fpu);
+
                     FPU = ParseFPU(fpu);
 
                     if (cores.Length > 1 && coreIndex > 0 && Core == CortexCore.M4)

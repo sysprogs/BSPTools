@@ -198,6 +198,7 @@ namespace stm32_bsp_generator
                     });
 
                     halFramework.CopyJobs[0].PreprocessorMacros += ";$$com.sysprogs.bspoptions.stm32.hal_legacy$$";
+                    halFramework.CopyJobs[0].PreprocessorMacros = halFramework.CopyJobs[0].PreprocessorMacros.Trim(';');
 
                     reverseFileConditions?.GetHandleForFramework(halFramework)?.AttachMinimalConfigurationValue("com.sysprogs.bspoptions.stm32.hal_legacy", "");
                 }

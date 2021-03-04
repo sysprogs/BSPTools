@@ -927,7 +927,8 @@ namespace BSPGenerationTools
             {
                 if ((flagsToDefine & CoreSpecificFlags.ConciseFPUMacro) == CoreSpecificFlags.ConciseFPUMacro)
                 {
-                    family.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+                    if (family.ConfigurableProperties == null)
+                        family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
                     family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
                         new PropertyEntry.Enumerated
                         {
@@ -945,7 +946,8 @@ namespace BSPGenerationTools
                 }
                 else if ((flagsToDefine & CoreSpecificFlags.FPU) == CoreSpecificFlags.FPU)
                 {
-                    family.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+                    if (family.ConfigurableProperties == null)
+                        family.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
                     family.ConfigurableProperties.PropertyGroups[0].Properties.Add(
                         new PropertyEntry.Enumerated
                         {
