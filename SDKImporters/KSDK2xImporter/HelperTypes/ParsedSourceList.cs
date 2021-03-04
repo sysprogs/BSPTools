@@ -59,7 +59,7 @@ namespace KSDK2xImporter.HelperTypes
     class ParsedSourceList
     {
         //WARNING: all paths and masks can include variables, such as $|core|
-        public readonly string SourcePath, TargetPath;
+        public readonly string SourcePath;
         public readonly SourceType Type;
 
         public readonly string ExtraCondition;
@@ -67,10 +67,22 @@ namespace KSDK2xImporter.HelperTypes
 
         public readonly string[] Masks;
 
-        public ParsedSourceList(XmlElement e)
+        public ParsedSourceList(XmlElement e, string basePath)
         {
             SourcePath = e.GetAttribute("path");
-            TargetPath = e.GetAttribute("target_path");
+            if (string.IsNullOrEmpty(SourcePath))
+            {
+                var relPath = e.GetAttribute("relative_path");
+                if (!string.IsNullOrEmpty(relPath) && !string.IsNullOrEmpty(basePath))
+                {
+                    if (relPath.Trim('/') == ".")
+                        SourcePath = basePath;
+                    else
+                        SourcePath = $"{basePath}/{relPath}";
+                }
+            }
+
+            //TargetPath = e.GetAttribute("target_path");
             ExtraCondition = e.GetAttribute("condition");
             Filter = new ParsedFilter(e);
 

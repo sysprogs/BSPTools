@@ -55,6 +55,8 @@ namespace KSDK2xImporter
 
             void AttachSVDFilesAndLinkerScriptsToDevices(ISDKImportHost host)
             {
+                int devicesWithLinkerScripts = 0, devicesWithoutLinkerScripts = 0;
+
                 foreach (var sd in _SpecializedDevices)
                 {
                     if (_Components.FirstOrDefault(c => c.Type == ComponentType.SVDFile && c.Filter.MatchesDevice(sd)) is ParsedComponent svdComponent)
@@ -87,7 +89,16 @@ namespace KSDK2xImporter
 
                     sd.DiscoveredLinkerScripts = _Components.Where(c => c.Type == ComponentType.LinkerScript && c.Filter.MatchesDevice(sd))
                         .SelectMany(c => c.LocateAllFiles(sd, _Directory)).ToArray();
+
+                    if (sd.DiscoveredLinkerScripts.Length > 0)
+                        devicesWithLinkerScripts++;
+                    else
+                        devicesWithoutLinkerScripts++;
                 }
+
+                if (devicesWithoutLinkerScripts > 0 && devicesWithLinkerScripts == 0)
+                    if (!host.AskWarn("The specified SDK does not contain any linker scripts. Please double-check that you have selected the GNU toolchain when exporting it. Ignore and proceed?"))
+                        throw new OperationCanceledException();
             }
 
             class PerFileContext

@@ -62,7 +62,7 @@ namespace KSDK2xImporter.HelperTypes
             ExplicitFPUSetting = exampleNode.SelectSingleNode("toolchainSettings/toolchainSetting/option[@id='com.crt.advproject.gcc.fpu']")?.InnerText;
             LanguageStandard = exampleNode.SelectSingleNode("toolchainSettings/toolchainSetting/option[@id='com.crt.advproject.c.misc.dialect']")?.InnerText;
             FPUType = exampleNode.SelectSingleNode("toolchainSettings/toolchainSetting/option[@id='com.crt.advproject.gcc.fpu']")?.InnerText;
-            SourceLists = exampleNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSourceList(e)).ToArray();
+            SourceLists = exampleNode.SelectNodes("source").OfType<XmlElement>().Select(e => new ParsedSourceList(e, null)).ToArray();
             CoreID = exampleNode.GetAttribute("device_core");
             Category = exampleNode.GetAttribute("category");
         }

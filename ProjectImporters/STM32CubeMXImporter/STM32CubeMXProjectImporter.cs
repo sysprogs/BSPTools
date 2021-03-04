@@ -503,6 +503,18 @@ namespace STM32CubeMXImporter
                 return path.Replace('\\', '/');
         }
 
+        static bool FilePathValidAndExists(string path)
+        {
+            try
+            {
+                return File.Exists(path);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public MCUDefinitionFromProject GenerateMCUDefinitionFromProject(ReconfigurableProjectImportParameters parameters, IProjectImportService service)
         {
             var gpdscFile = Path.ChangeExtension(parameters.ProjectFile, ".gpdsc");
@@ -510,11 +522,13 @@ namespace STM32CubeMXImporter
             var parsedProject = ParseProjectFile(gpdscFile, true);
             string baseDir = Path.GetFullPath(Path.GetDirectoryName(parameters.ProjectFile));
 
+            var allExistingFiles = parsedProject.AllFiles.Where(FilePathValidAndExists).ToArray();
+
             var mcu = new MCU
             {
                 ID = parsedProject.DeviceName,
-                AdditionalSourceFiles = parsedProject.AllFiles.Where(f => f.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f, baseDir)).ToArray(),
-                AdditionalHeaderFiles = parsedProject.AllFiles.Where(f => !f.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f, baseDir)).ToArray(),
+                AdditionalSourceFiles = allExistingFiles.Where(f => f.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f, baseDir)).ToArray(),
+                AdditionalHeaderFiles = allExistingFiles.Where(f => !f.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f, baseDir)).ToArray(),
                 CompilationFlags = new ToolFlags
                 {
                     IncludeDirectories = parsedProject.IncludeDirectories.Select(d => MakeBSPPath(d, baseDir)).ToArray(),
