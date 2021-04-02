@@ -251,9 +251,9 @@ namespace ESP8266DebugPackage
             }
         }
 
-        protected override void ApplyCommandLine(OpenOCDCommandLine cmdLine)
+        protected override void ApplyCommandLine(OpenOCDCommandLine cmdLine, bool parseTargetScript = true)
         {
-            base.ApplyCommandLine(cmdLine);
+            base.ApplyCommandLine(cmdLine, parseTargetScript);
             OnPropertyChanged(nameof(FLASHVoltage));
         }
 
