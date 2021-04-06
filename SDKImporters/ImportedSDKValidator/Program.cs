@@ -147,6 +147,8 @@ namespace ImportedSDKValidator
             Console.WriteLine("Warning: " + warning);
             WarningCount++;
         }
+
+        public MCUDefinition TryParseSVDFile(string fullPath, string deviceName) => null;
     }
 
 

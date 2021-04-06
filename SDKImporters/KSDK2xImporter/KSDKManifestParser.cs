@@ -115,7 +115,7 @@ namespace KSDK2xImporter
             private HashSet<string> _AllComponentIDs;
             HashSet<string> _ImplicitlyIncludedFrameworks;
 
-            EmbeddedFramework[] TranslateComponentsToFrameworks(Dictionary<string, FileCondition> fileConditions)
+            List<EmbeddedFramework> TranslateComponentsToFrameworks(Dictionary<string, FileCondition> fileConditions)
             {
                 List<EmbeddedFramework> result = new List<EmbeddedFramework>();
                 var usedProjectFolderNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
@@ -188,7 +188,18 @@ namespace KSDK2xImporter
                         _ImplicitlyIncludedFrameworks.Add(component.TargetFrameworkID);
                 }
 
-                return result.ToArray();
+                return result;
+            }
+
+            class FrameworkRepairContext
+            {
+                public EmbeddedFramework Framework;
+                public int References;
+
+                public FrameworkRepairContext(EmbeddedFramework fw)
+                {
+                    Framework = fw;
+                }
             }
 
             public ParsedSDK ParseKSDKManifest(ISDKImportHost host)
@@ -206,6 +217,8 @@ namespace KSDK2xImporter
 
                 var frameworks = TranslateComponentsToFrameworks(fileConditions);
                 var vendorSamples = TranslateSampleProjects();
+                MergeImplicitFrameworks(frameworks, vendorSamples);
+
 
                 var version = _Manifest.DocumentElement.GetAttribute("version");
                 if (string.IsNullOrEmpty(version))
@@ -224,7 +237,7 @@ namespace KSDK2xImporter
                         PackageDescription = "Imported MCUXpresso SDK for " + allFamilies[0].ID,
                         PackageVersion = version,
                         GNUTargetID = "arm-eabi",
-                        Frameworks = frameworks,
+                        Frameworks = frameworks.ToArray(),
                         MCUFamilies = allFamilies.ToArray(),
                         SupportedMCUs = _SpecializedDevices.SelectMany(d => d.Complete(_GlobalDefines)).ToArray(),
                         FileConditions = fileConditions.Values.ToArray(),
@@ -237,6 +250,62 @@ namespace KSDK2xImporter
                         Samples = vendorSamples.ToArray()
                     }
                 };
+            }
+
+            private void MergeImplicitFrameworks(List<EmbeddedFramework> frameworks, List<VendorSample> vendorSamples)
+            {
+                Dictionary<string, FrameworkRepairContext> frameworksByID = new Dictionary<string, FrameworkRepairContext>();
+                foreach (var fw in frameworks)
+                    frameworksByID[fw.ID] = new FrameworkRepairContext(fw);
+
+                foreach (var fw in frameworks)
+                {
+                    if (fw.RequiredFrameworks == null)
+                        continue;
+
+                    foreach (var fwID in fw.RequiredFrameworks)
+                        if (frameworksByID.TryGetValue(fwID, out var obj))
+                            obj.References++;
+                }
+
+                foreach (var sample in vendorSamples)
+                {
+                    if (sample.Configuration.Frameworks == null)
+                        continue;
+
+                    foreach (var fwID in sample.Configuration.Frameworks)
+                        if (frameworksByID.TryGetValue(fwID, out var obj))
+                            obj.References++;
+                }
+
+                HashSet<EmbeddedFramework> deletedFrameworks = new HashSet<EmbeddedFramework>();
+                foreach (var fw in frameworks)
+                {
+                    int idx = fw.ID.LastIndexOf('.');
+                    if (idx == -1)
+                        continue;
+
+                    string libID = fw.ID.Substring(0, idx) + ".lib" + fw.ID.Substring(idx);
+                    if (frameworksByID.TryGetValue(libID, out var obj))
+                    {
+                        if (obj.References == 0)
+                        {
+                            deletedFrameworks.Add(obj.Framework);
+                            MergeFrameworks(fw, obj.Framework);
+                        }
+                    }
+                }
+
+                frameworks.RemoveAll(deletedFrameworks.Contains);
+            }
+
+            private void MergeFrameworks(EmbeddedFramework left, EmbeddedFramework right)
+            {
+                left.AdditionalIncludeDirs = LoadedBSP.Combine(left.AdditionalIncludeDirs, right.AdditionalIncludeDirs);
+                left.AdditionalPreprocessorMacros = LoadedBSP.Combine(left.AdditionalPreprocessorMacros, right.AdditionalPreprocessorMacros);
+                left.AdditionalHeaderFiles = LoadedBSP.Combine(left.AdditionalHeaderFiles, right.AdditionalHeaderFiles);
+                left.AdditionalSourceFiles = LoadedBSP.Combine(left.AdditionalSourceFiles, right.AdditionalSourceFiles);
+                left.AdditionalSystemVars = LoadedBSP.Combine(left.AdditionalSystemVars, right.AdditionalSystemVars);
             }
 
             public List<VendorSample> TranslateSampleProjects()

@@ -110,7 +110,27 @@ namespace KSDK2xImporter.HelperTypes
 
             string exclude = el.GetAttribute("exclude");
             if (exclude.ToLower() == "true")
-                SkipUnconditionally = true;
+            {
+                if (!ShouldIgnoreExcludeAttribute(el))
+                    SkipUnconditionally = true;
+            }
+        }
+
+        private bool ShouldIgnoreExcludeAttribute(XmlElement el)
+        {
+            if (el.GetAttribute("type") != "asm_include")
+                return false;
+
+            var parentID = (el.ParentNode as XmlElement)?.GetAttribute("id");
+            if (parentID?.StartsWith("middleware.azure_rtos.tx.template") == true)
+            {
+                //This works around a bug in the MCUXpresso SDK generator.
+                //As of April 2021, generating a GCC SDK with Azure RTOS will mark tx_timer_interrupt.S and a few other files with the 'exclude' attribute.
+                //This doesn't happen when generating the MCUXpresso SDK.
+                return true;
+            }
+
+            return false;
         }
 
         public bool MatchesDevice(SpecializedDevice device)

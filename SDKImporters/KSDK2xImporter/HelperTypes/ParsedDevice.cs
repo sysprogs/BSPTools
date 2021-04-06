@@ -250,7 +250,8 @@ namespace KSDK2xImporter.HelperTypes
                     MemoryMap = (Device.Memories.Length == 0) ? null : new AdvancedMemoryMap { Memories = Device.Memories },
                     CompilationFlags = new ToolFlags
                     {
-                        PreprocessorMacros = globalDefines.Select(d => ExpandVariables(d.Definition, pkg)).Where(d => !d.Contains("$")).ToArray()
+                        PreprocessorMacros = globalDefines.Select(d => ExpandVariables(d.Definition, pkg)).Where(d => !d.Contains("$")).ToArray(),
+                        AdditionalLibraries = new[] {"m"},  //fsl_str.c on i.MXRT1064 uses pow() 
                     },
 
                     MCUDefinitionFile = ConvertedSVDFile.RelativePath?.Replace('\\', '/')
