@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace STM32CubeMXImporter
@@ -558,6 +559,7 @@ namespace STM32CubeMXImporter
             {
                 case ProjectReconfigurationReason.RegenerateFiles:
                     temporaryScriptFile = service.GetTemporaryFileName();
+                    PatchIOCFileIfNeeded(context.ProjectFile, service.GUI);
                     File.WriteAllLines(temporaryScriptFile, new[]
                     {
                         "project toolchain \"Makefile\"",
@@ -606,6 +608,31 @@ namespace STM32CubeMXImporter
                 result.Finalizer = () => File.Delete(temporaryScriptFile);
 
             return result;
+        }
+
+        private void PatchIOCFileIfNeeded(string iocFile, IBasicGUIService gui)
+        {
+            try
+            {
+                if (!File.Exists(iocFile))
+                    return;
+
+                var lines = File.ReadAllLines(iocFile);
+                for(int i = 0; i < lines.Length;i++)
+                {
+                    if (lines[i].StartsWith("ProjectManager.MainLocation="))
+                    {
+                        if (gui.Prompt($"{Path.GetFileName(iocFile)} overrides the location of the source directory. This may break project generation.\r\nDo you want to reset it to the default value?", MessageBoxIcon.Question))
+                        {
+                            lines[i] = "#" + lines[i];
+                            File.WriteAllLines(iocFile, lines);
+                        }
+
+                        return;
+                    }
+                }
+            }
+            catch { }
         }
 
         public MCU[] LoadMCUList(IProjectImportService service, Dictionary<string, string> toolLocations)
