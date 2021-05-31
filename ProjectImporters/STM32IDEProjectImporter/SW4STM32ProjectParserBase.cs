@@ -309,7 +309,10 @@ namespace STM32IDEProjectImporter
             result.MCU = toolchainConfigNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu");
             result.BoardName = toolchainConfigNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board");
 
-            var relLinkerScript = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.script");
+            var relLinkerScript = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.script", true);
+            if (relLinkerScript == null)
+                relLinkerScript = cppLinkerNode?.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.option.script", true);
+
             var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.None);
 
             if (linkerScript != null)
@@ -550,6 +553,9 @@ namespace STM32IDEProjectImporter
 
         string TranslatePath(string baseDir, string path, PathTranslationFlags flags)
         {
+            if (path == null)
+                return null;
+
             path = path.Trim('\"');
 
             string workspacePrefix = "${workspace_loc:/${ProjName}/";
