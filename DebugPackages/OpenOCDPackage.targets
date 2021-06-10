@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<ItemGroup Condition="!Exists('$(MSBuildThisFileDirectory)..\..\..\..\products\VisualGDB\BSPEngine\BSPEngine.csproj')">
-		<Reference Include="BSPEngine">
+	<PropertyGroup>
+		<OpenOCDPackageProjectPath>$(MSBuildThisFileDirectory)..\..\..\..\products\VisualGDB\support\OpenOCDPackage\OpenOCDPackage.csproj</OpenOCDPackageProjectPath>
+	</PropertyGroup>
+
+	<ItemGroup Condition="!Exists('$(OpenOCDPackageProjectPath)')">
+		<Reference Include="OpenOCDPackage">
 		  <HintPath>$(MSBuildThisFileDirectory)OpenOCDPackage2.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 	
-	<ItemGroup Condition="Exists('$(MSBuildThisFileDirectory)..\..\..\..\products\VisualGDB\support\OpenOCDPackage\OpenOCDPackage.csproj')">
-		<ProjectReference Include="$(MSBuildThisFileDirectory)..\..\..\..\products\VisualGDB\support\OpenOCDPackage\OpenOCDPackage.csproj">
+	<ItemGroup Condition="Exists('$(OpenOCDPackageProjectPath)')">
+		<ProjectReference Include="$(OpenOCDPackageProjectPath)">
 			<Project>{84589BB6-390B-49EC-A412-D7CADC0EE289}</Project>
 			<Name>OpenOCDPackage</Name>
 		</ProjectReference>
