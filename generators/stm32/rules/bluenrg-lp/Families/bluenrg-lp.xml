@@ -1,0 +1,361 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>BlueNRG-LP</Name>
+	<DeviceRegex>^BlueNRG.*</DeviceRegex>
+	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$/Drivers/CMSIS/Device/ST/BlueNRG_LP/Include</PrimaryHeaderDir>
+	<StartupFileDir>$$BSPGEN:INPUT_DIR$$/Drivers/CMSIS/Device/ST/BlueNRG_LP/Source</StartupFileDir>
+	<CompilationFlags>
+		<PreprocessorMacros>
+			<string>CONFIG_DEVICE_BLUENRG_LP</string>
+		</PreprocessorMacros>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
+	</CompilationFlags>
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$/Drivers/CMSIS</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*system_BlueNRG_LP.c*.c;*.h</ProjectInclusionMask>
+				<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.bluenrg.core.|BlueNRG Device</SmartPropertyGroup>
+				<SmartPreprocessorMacros>
+					<string>SMPS Configuration[speed]|CONFIG_HW_SMPS_{0}|10uH=>10 uH (4 MHz);2_2uH=>2.2 uH (8 MHz);1_5uH=>1.5 uH (8 MHz);NONE=>None</string>
+					<string>HSE Capacitor Tuning Value[hse_tune]|CONFIG_HW_HSE_TUNE={0}|@32</string>
+					<string>Low-speed Oscillator Source[ls]|CONFIG_HW_LS_{0}|XTAL=>External 32 KHz Crystal;RO=>Internal RO</string>
+				</SmartPreprocessorMacros>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$/Middlewares/ST</SourceFolder>
+				<FilesToCopy>-*External_micro*;*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AdvancedRenameRules>\\([^\\]+)\.s$=>{1}.S</AdvancedRenameRules>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$/Drivers</SourceFolder>
+				<FilesToCopy>-*External_micro*;*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AdvancedRenameRules>\\([^\\]+)\.s$=>{1}.S</AdvancedRenameRules>
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>BlueNRG HAL Library</Name>
+			<ID>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.hal</ID>
+			<ProjectFolderName>HAL</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Drivers/Peripherals_Drivers</SourceFolder>
+					<TargetFolder>Drivers/Peripherals_Drivers</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*_template*;->rf_driver_hal_(microphone|adc_ex|power_manager|radio_2g4|vtimer)\..*;-*rf_driver_hal_adc_ex.c;*\rf_driver_hal*.c;*\rf_driver_hal*.h</ProjectInclusionMask>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<!-- These files to not require a bluenrg_lp_hal.conf.h -->
+			<Name>BlueNRG Auxiliary HAL Drivers</Name>
+			<ID>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.hal_aux</ID>
+			<ProjectFolderName>HAL (Auxiliary)</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Drivers/Peripherals_Drivers</SourceFolder>
+					<TargetFolder>Drivers/Peripherals_Drivers</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>>rf_driver_hal_(power_manager|radio_2g4|vtimer)\..*</ProjectInclusionMask>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>BlueNRG Low-Level Driver Library</Name>
+			<ID>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</ID>
+			<ProjectFolderName>Low-Level</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Drivers/Peripherals_Drivers</SourceFolder>
+					<TargetFolder>Drivers/Peripherals_Drivers</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*_template*;*\rf_driver_ll*.c;*\rf_driver_ll*.h</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.bluenrg.lp.rf.|RF Driver</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>Enable Advanced Low-Level Driver Functions[full]|{0}|USE_FULL_LL_DRIVER</string>
+					</SmartPreprocessorMacros>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>STEVAL-IDB011V1 Board Support</Name>
+			<ID>com.sysprogs.arm.stm32.bluenrg.lp.bsp.steval-idb011v1</ID>
+			<ProjectFolderName>Board</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Drivers/BSP</SourceFolder>
+					<PreprocessorMacros>STEVAL_IDB011V1</PreprocessorMacros>
+					<TargetFolder>Drivers/BSP</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*template_*;*.c;*.h</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.bluenrg.bsp.|STEVAL-IDB011V1 Board</SmartPropertyGroup>
+					<SmartFileConditions>
+						<!-- '-' in front of the name means 'disabled by default' -->
+						<string>LPS22HH Enhanced Inertial Module Driver[lps2hh]|.*\\lps22hh_STdC\.*</string>
+						<string>LSM6DSOX Enhanced Inertial Module Driver[lsm6dsox]|.*\\lsm6dsox_STdC\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Bluetooth LE Application Support</Name>
+			<ID>com.sysprogs.arm.stm32.bluenrg.lp.ble.app</ID>
+			<ProjectFolderName>BLE Application</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.ble.stack</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Middlewares/ST/BLE_Application</SourceFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<PreprocessorMacros>STEVAL_IDB011V1</PreprocessorMacros>
+					<TargetFolder>ST/BLE_Application</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.bluenrg.ble.app.|Bluetooth LE Application</SmartPropertyGroup>
+					<SmartFileConditions>
+						<!-- '-' in front of the name means 'disabled by default' -->
+						<string>-OTA Support[ota]|OTA\.*</string>
+						<string>Central Profile[central]|Profile_Central\.*</string>
+						<string>GATT Profiles[profiles]|Profiles\.*</string>
+						<string>Queued Write Support[queued_write]|Queued_Write\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>BlueNRG HAL Utilities</Name>
+			<ID>com.sysprogs.arm.stm32.bluenrg.lp.hal_utils</ID>
+			<ProjectFolderName>BlueNRG Hal Utilities</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Middlewares/ST/hal</SourceFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<TargetFolder>ST/hal</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.s</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.bluenrg.hal.utils.|HAL Utilities</SmartPropertyGroup>
+					<SmartFileConditions>
+						<!-- '-' in front of the name means 'disabled by default' -->
+						<string>-Include clock callbacks[clock]|src\\clock.c</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Bluetooth LE Stack</Name>
+			<ID>com.sysprogs.arm.stm32.bluenrg.lp.ble.stack</ID>
+			<ProjectFolderName>BLE Stack</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Middlewares/ST/Bluetooth_LE</SourceFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<PreprocessorMacros>STEVAL_IDB011V1</PreprocessorMacros>
+					<TargetFolder>ST/Bluetooth_LE</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*static_stack*;*.c;*.h;*.a</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.bluenrg.ble.stack.|Bluetooth LE Stack</SmartPropertyGroup>
+					<SmartPreprocessorMacros>
+						<string>BLE Stack Configuration[conf]|BLE_STACK_{0}_CONF|BASIC=>Basic;FULL=>Full;SLAVE_DLE=>Slave Mode + DLE;SLAVE_DLE_LE_2M_CODED=>Slave Mode + DLE + LE 2M/Coded PHY;CUSTOM=>Custom</string>
+					</SmartPreprocessorMacros>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>FreeRTOS</Name>
+			<ID>com.sysprogs.arm.stm32.freertos</ID>
+			<ProjectFolderName>FreeRTOS</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$/Middlewares/ST/FreeRTOS</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_CM0</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.freertos.|FreeRTOS</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>Heap Implementation[heap]|
+Source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing[heap_1];
+Source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation[heap_2];
+Source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()[heap_3];
+Source\\portable\\MemMang\\heap_4.c=>+Heap4 - contiguous heap area[heap_4];
+Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
+						</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.rtos_type</Key>
+					<Value>com.sysprogs.freertos</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
+		</Framework>
+	</AdditionalFrameworks>
+	<AdditionalFrameworkTemplates>
+		<FrameworkTemplate>
+			<Separator>&#10;</Separator>
+			<ArgumentSeparator>:</ArgumentSeparator>
+			<Range>aesmgr:AES Manager:ST/AESMGR:
+blecntr:Bluetooth LE Controller:ST/BLECNTR:
+bluevoice:BlueVoice Library:ST/BlueVoice_Library:
+cryptolib:Cryptographic Library:ST/cryptolib:
+nvmdb:NVM Database Manager:ST/NVMDB:
+pkamgr:PKA Manager:ST/PKAMGR:
+rngmgr:RNG Manager:ST/RNGMGR:
+</Range>
+			<Template>
+				<Name>$$BSPGEN:FRAMEWORKARG1$$</Name>
+				<ID>com.sysprogs.arm.stm32.bluenrg.lp.$$BSPGEN:FRAMEWORK$$</ID>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORKARG1$$</ProjectFolderName>
+				<DefaultEnabled>true</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$BSPGEN:INPUT_DIR$$\Middlewares\$$BSPGEN:FRAMEWORKARG2$$</SourceFolder>
+						<ProjectInclusionMask>-*_template.*;-*nvm_db_conf.c.c;*.c;*.h;*.s;*.a</ProjectInclusionMask>
+						<FilesToCopy>*</FilesToCopy>
+						<AutoIncludeMask>*.h</AutoIncludeMask>	
+						<TargetFolder>$$BSPGEN:FRAMEWORKARG2$$</TargetFolder>
+						<AlreadyCopied>true</AlreadyCopied>
+					</CopyJob>	
+				</CopyJobs>			
+			</Template>
+		</FrameworkTemplate>
+	</AdditionalFrameworkTemplates>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$\Projects\Peripheral_Examples\Examples_HAL\GPIO\GPIO_IOToggle</SourceFolder>
+			<DestinationFolder>Samples/LEDBlink</DestinationFolder>
+			<CopyFilters>-Binary\*;-EWARM\*;-MDK-ARM\*;-SW4STM32\*;-*.project;-*.cproject;*</CopyFilters>
+			<EmbeddedSample>
+				<Name>Blinking LED</Name>
+				<Description>A basic GPIO example using the HAL library</Description>
+				<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+				<AdditionalIncludeDirectories>
+					<string>Inc</string>
+				</AdditionalIncludeDirectories>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.hal</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+				</RequiredFrameworks>
+			</EmbeddedSample>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$\Projects\BLE_Examples\BLE_Beacon</SourceFolder>
+			<DestinationFolder>Samples/BLE_Beacon</DestinationFolder>
+			<CopyFilters>-Binary\*;-EWARM\*;-MDK-ARM\*;-SW4STM32\*;-*.project;-*.cproject;*</CopyFilters>
+			<EmbeddedSample>
+				<Name>Bluetooth LE Beacon Demo</Name>
+				<Description>A basic Bluetooth LE Beacon Demo</Description>
+				<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+				<AdditionalIncludeDirectories>
+					<string>Inc</string>
+				</AdditionalIncludeDirectories>
+				<PreprocessorMacros>
+					<string>USER_BUTTON=BSP_PUSH1</string>
+					<string>LEGACY_ADV</string>
+				</PreprocessorMacros>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.hal_aux</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.bsp.steval-idb011v1</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.ble.app</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.ble.stack</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.aesmgr</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.blecntr</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.cryptolib</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.hal_utils</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.nvmdb</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.pkamgr</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rngmgr</string>
+				</RequiredFrameworks>
+			</EmbeddedSample>
+		</SmartSample>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:INPUT_DIR$$\Projects\BLE_Examples\BLE_Beacon_FreeRTOS</SourceFolder>
+			<DestinationFolder>Samples/BLE_Beacon_FreeRTOS</DestinationFolder>
+			<CopyFilters>-Binary\*;-EWARM\*;-MDK-ARM\*;-SW4STM32\*;-*.project;-*.cproject;*</CopyFilters>
+			<EmbeddedSample>
+				<Name>Bluetooth LE Beacon (FreeRTOS)</Name>
+				<Description>A basic Bluetooth LE Beacon Demo using FreeRTOS</Description>
+				<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+				<AdditionalIncludeDirectories>
+					<string>Inc</string>
+				</AdditionalIncludeDirectories>
+				<PreprocessorMacros>
+					<string>USER_BUTTON=BSP_PUSH1</string>
+					<string>LEGACY_ADV</string>
+				</PreprocessorMacros>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.hal_aux</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rf_driver.ll</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.bsp.steval-idb011v1</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.ble.app</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.ble.stack</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.aesmgr</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.blecntr</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.cryptolib</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.hal_utils</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.nvmdb</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.pkamgr</string>
+					<string>com.sysprogs.arm.stm32.bluenrg.lp.rngmgr</string>
+					<string>com.sysprogs.arm.stm32.freertos</string>
+				</RequiredFrameworks>
+			</EmbeddedSample>
+		</SmartSample>
+	</SmartSamples>
+      <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.stm32.hal_header_prefix</Key>
+          <Value>bluenrg</Value>
+        </SysVarEntry>
+        <SysVarEntry>
+          <Key>com.sysprogs.bspoptions.stm32.hal_system_file</Key>
+          <Value>Drivers/CMSIS/Device/ST/BlueNRG_LP/Source/system_BlueNRG_LP.c</Value>
+        </SysVarEntry>
+        <SysVarEntry>
+          <Key>com.sysprogs.bspoptions.stm32.hal_config_template_file</Key>
+          <Value>Drivers/Peripherals_Drivers/inc/rf_driver_hal_conf_template.h</Value>
+        </SysVarEntry>
+      </AdditionalSystemVars>
+</FamilyDefinition>

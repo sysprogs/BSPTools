@@ -732,10 +732,18 @@ namespace BSPGenerationTools
             if (Definition.AdditionalSourceFiles != null)
                 projectFiles.AddRange(Definition.AdditionalSourceFiles);
 
-            family.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
+            family.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f) && !f.EndsWith(".a")).ToArray();
             family.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
 
             family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, Definition.AdditionalSystemVars);
+
+            if (Definition.CoreFramework.ConfigurableProperties != null)
+            {
+                if (Definition.ConfigurableProperties == null)
+                    Definition.ConfigurableProperties = Definition.CoreFramework.ConfigurableProperties;
+                else
+                    Definition.ConfigurableProperties.Import(Definition.CoreFramework.ConfigurableProperties);
+            }
 
             if (Definition.ConfigurableProperties != null || allowExcludingStartupFiles)
             {
@@ -749,7 +757,7 @@ namespace BSPGenerationTools
                 {
                     family.ConfigurableProperties.Import(new PropertyList
                     {
-                        PropertyGroups = new List<PropertyGroup>()
+                    PropertyGroups = new List<PropertyGroup>()
                     {
                         new PropertyGroup
                         {
@@ -1130,8 +1138,9 @@ namespace BSPGenerationTools
                     foreach (var job in fw.CopyJobs)
                         flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties, BSP.ReverseFileConditions.GetHandleForFramework(fw)));
 
-                    fwDef.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f)).ToArray();
+                    fwDef.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f) && !f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).ToArray();
                     fwDef.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
+                    fwDef.AdditionalLibraries = projectFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).ToArray();
 
                     fwDef.AdditionalIncludeDirs = flags.IncludeDirectories;
                     fwDef.AdditionalPreprocessorMacros = flags.PreprocessorMacros;
@@ -1361,7 +1370,7 @@ namespace BSPGenerationTools
 
         }
 
-        public void AttachStartupFiles(IEnumerable<StartupFileGenerator.InterruptVectorTable> files, string startupFileFolder = "StartupFiles", string pFileNameTemplate = "StartupFileTemplate.c")
+        public virtual void AttachStartupFiles(IEnumerable<StartupFileGenerator.InterruptVectorTable> files, string startupFileFolder = "StartupFiles", string pFileNameTemplate = "StartupFileTemplate.c")
         {
             var allFiles = files.ToArray();
             foreach (var mcu in MCUs)

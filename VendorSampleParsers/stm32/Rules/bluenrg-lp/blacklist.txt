@@ -1,0 +1,2 @@
+BLE_Examples-BLE_SensorDemo_Central
+BLE_Examples-BLE_SensorDemo_StaticStack

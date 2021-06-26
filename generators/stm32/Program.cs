@@ -205,12 +205,14 @@ namespace stm32_bsp_generator
             }
         }
 
-        static string GetSubfamilyDefine(MCUBuilder builder)
+        static string GetSubfamilyDefine(STM32Ruleset ruleset, MCUBuilder builder)
         {
+            if (ruleset == STM32Ruleset.BlueNRG_LP)
+                return "BLUENRG_LP";
             return (builder as DeviceListProviders.CubeProvider.STM32MCUBuilder)?.MCU.Define ?? throw new Exception("Unknown primary macro for " + builder.Name);
         }
 
-        static IEnumerable<StartupFileGenerator.InterruptVectorTable> ParseStartupFiles(string dir, MCUFamilyBuilder fam)
+        static IEnumerable<StartupFileGenerator.InterruptVectorTable> ParseStartupFiles(string dir, MCUFamilyBuilder fam, STM32Ruleset ruleset)
         {
             var allFiles = Directory.GetFiles(dir);
 
@@ -227,7 +229,7 @@ namespace stm32_bsp_generator
                 yield return new StartupFileGenerator.InterruptVectorTable
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
-                    MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(m), subfamily) == 0,
+                    MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(ruleset, m), subfamily) == 0,
                     Vectors = StartupFileGenerator.ParseInterruptVectors(fn,
                         tableStart: "g_pfnVectors:",
                         tableEnd: @"/\*{10,999}|^[^/\*]+\*/
@@ -242,7 +244,7 @@ namespace stm32_bsp_generator
             }
         }
 
-        private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice, ParseReportWriter writer)
+        private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice, ParseReportWriter writer, STM32Ruleset ruleset)
         {
             List<MCUDefinitionWithPredicate> result = new List<MCUDefinitionWithPredicate>();
             string subfamilySuffix = "";
@@ -272,7 +274,7 @@ namespace stm32_bsp_generator
                 {
                     MCUName = subfamily + subfamilySuffix,
                     RegisterSets = PeripheralRegisterGenerator2.GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, fam.MCUs[0].Core, writer),
-                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(m), subfamilyForMatching) == 0,
+                    MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(ruleset, m), subfamilyForMatching) == 0,
                 };
 
                 result.Add(r);
@@ -289,10 +291,9 @@ namespace stm32_bsp_generator
             public SamplePrioritizer(string rulesFile)
             {
                 int index = 1;
-                foreach (var line in File.ReadAllLines(rulesFile))
-                {
-                    _Rules.Add(new KeyValuePair<Regex, int>(new Regex(line, RegexOptions.IgnoreCase), index++));
-                }
+                if (File.Exists(rulesFile))
+                    foreach (var line in File.ReadAllLines(rulesFile))
+                        _Rules.Add(new KeyValuePair<Regex, int>(new Regex(line, RegexOptions.IgnoreCase), index++));
             }
 
             public int GetScore(string path)
@@ -314,13 +315,6 @@ namespace stm32_bsp_generator
 
         }
 
-        enum STM32Ruleset
-        {
-            Classic,
-            STM32WB,
-            STM32MP1
-        }
-
         //Usage: stm32.exe /rules:{Classic|STM32WB|STM32MP1} [/fetch] [/noperiph] [/nofixes]
         static void Main(string[] args)
         {
@@ -337,10 +331,12 @@ namespace stm32_bsp_generator
                 SDKFetcher.FetchLatestSDKs(sdkRoot, cubeRoot);
             }
 
+            string explicitSource = args.FirstOrDefault(a => a.StartsWith("/source:"))?.Substring(8);
+
             string rulesetName = args.FirstOrDefault(a => a.StartsWith("/rules:"))?.Substring(7) ?? STM32Ruleset.Classic.ToString();
             STM32Ruleset ruleset = Enum.GetValues(typeof(STM32Ruleset))
                 .OfType<STM32Ruleset>()
-                .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), rulesetName) == 0);
+                .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), rulesetName.Replace('-', '_')) == 0);
 
             ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
             IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
@@ -348,9 +344,18 @@ namespace stm32_bsp_generator
             using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output\" + rulesetName, @"..\..\rules\" + rulesetName, @"..\..\Logs\" + rulesetName), cubeRoot))
             using (var wr = new ParseReportWriter(Path.Combine(bspBuilder.Directories.LogDir, "registers.log")))
             {
-                var devices = provider.LoadDeviceList(bspBuilder);
-                if (devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP1")).Count() > 0)
-                    throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
+                if (explicitSource != null)
+                    bspBuilder.SystemVars["BSPGEN:INPUT_DIR"] = explicitSource;
+
+                List<MCUBuilder> devices;
+                if (ruleset == STM32Ruleset.BlueNRG_LP)
+                    devices = new List<MCUBuilder> { new BlueNRGFamilyBuilder.BlueNRGMCUBuilder() };
+                else
+                {
+                    devices = provider.LoadDeviceList(bspBuilder);
+                    if (devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP1")).Count() > 0)
+                        throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
+                }
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
@@ -369,13 +374,14 @@ namespace stm32_bsp_generator
                         int idx = fam.PrimaryHeaderDir.IndexOf('\\');
                         string baseDir = fam.PrimaryHeaderDir.Substring(0, idx);
                         if (!baseDir.StartsWith("$$STM32:"))
-                            throw new Exception("Invalid base directory. Please recheck the family definition.");
+                            baseDir = explicitSource ?? throw new Exception("Invalid base directory. Please recheck the family definition.");
 
                         string baseFamName = fam.Name;
                         if (baseFamName.EndsWith("_M4"))
                             baseFamName = baseFamName.Substring(0, baseFamName.Length - 3);
 
-                        referencedSDKs.Add(sdksByVariable[baseDir]);
+                        if (ruleset != STM32Ruleset.BlueNRG_LP)
+                            referencedSDKs.Add(sdksByVariable[baseDir]);
 
                         var dict = new Dictionary<string, string>
                         {
@@ -426,7 +432,8 @@ namespace stm32_bsp_generator
                         fam.AdditionalFrameworks = fam.AdditionalFrameworks.Concat(extraFrameworksWithoutMissingFolders).ToArray();
                     }
 
-                    bspBuilder.InsertLegacyHALRulesIfNecessary(fam, bspBuilder.ReverseFileConditions);
+                    if (ruleset != STM32Ruleset.BlueNRG_LP)
+                        bspBuilder.InsertLegacyHALRulesIfNecessary(fam, bspBuilder.ReverseFileConditions);
                     switch (ruleset)
                     {
                         case STM32Ruleset.STM32WB:
@@ -434,6 +441,9 @@ namespace stm32_bsp_generator
                             break;
                         case STM32Ruleset.STM32MP1:
                             allFamilies.Add(new STM32MP1FamilyBuilder(bspBuilder, fam));
+                            break;
+                        case STM32Ruleset.BlueNRG_LP:
+                            allFamilies.Add(new BlueNRGFamilyBuilder(bspBuilder, fam));
                             break;
                         case STM32Ruleset.Classic:
                         default:
@@ -474,9 +484,9 @@ namespace stm32_bsp_generator
                 {
                     fam.RemoveUnsupportedMCUs();
 
-                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
+                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam, ruleset));
                     if (!noPeripheralRegisters)
-                        fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam, specificDeviceForDebuggingPeripheralRegisterGenerator, wr),
+                        fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam, specificDeviceForDebuggingPeripheralRegisterGenerator, wr, ruleset),
                             throwIfNotFound: specificDeviceForDebuggingPeripheralRegisterGenerator == null);
 
                     familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
@@ -715,4 +725,14 @@ namespace stm32_bsp_generator
         }
 
     }
+
+    public enum STM32Ruleset
+    {
+        Classic,
+        STM32WB,
+        STM32MP1,
+        BlueNRG_LP
+    }
+
+
 }

@@ -30,7 +30,7 @@ namespace STM32IDEProjectImporter
             public MultiConfigurationContext Context;
         }
 
-        ConfigurationWithContext[] DetectConfigurationContexts(XmlDocument cproject, string projectFile)
+        ConfigurationWithContext[] DetectConfigurationContexts(XmlDocument cproject, string projectFile, ProjectSubtype subtype)
         {
             var cconfigurationNodes = cproject.SelectNodes("cproject/storageModule[@moduleId='org.eclipse.cdt.core.settings']/cconfiguration").OfType<XmlElement>().ToArray();
             if (cconfigurationNodes.Length == 0)
@@ -38,6 +38,9 @@ namespace STM32IDEProjectImporter
 
             if (cconfigurationNodes.Length > 1)
             {
+                if (subtype == ProjectSubtype.WiSEStudio)
+                    return new[] { new ConfigurationWithContext { CConfiguration = cconfigurationNodes[0] } };
+
                 var nonReleaseNodes = cconfigurationNodes.Where(n => !n.GetAttribute("id").Contains(".release.")).ToArray();
                 if (nonReleaseNodes.Length > 0)
                     cconfigurationNodes = nonReleaseNodes;
@@ -105,7 +108,7 @@ namespace STM32IDEProjectImporter
                 else
                     virtualPath = optionalProjectRootForLocatingHeaders.Substring(topLevelDir.Length);
 
-                var virtualPathComponents = virtualPath.Trim('\\').Split('\\').Except(new[] { "SW4STM32", "Projects", "STM32CubeIDE" }, StringComparer.InvariantCultureIgnoreCase).ToArray();
+                var virtualPathComponents = virtualPath.Trim('\\').Split('\\').Except(new[] { "SW4STM32", "Projects", "STM32CubeIDE", "WiSE-Studio" }, StringComparer.InvariantCultureIgnoreCase).ToArray();
 
                 ParseSingleProject(optionalProjectRootForLocatingHeaders, projectFile, virtualPathComponents, boardName, extraIncludeDirs, subtype, result);
             }
@@ -138,7 +141,7 @@ namespace STM32IDEProjectImporter
 
             try
             {
-                configs = DetectConfigurationContexts(cproject, projectFile);
+                configs = DetectConfigurationContexts(cproject, projectFile, subtype);
             }
             catch (Exception ex)
             {
@@ -218,6 +221,7 @@ namespace STM32IDEProjectImporter
             Auto,
             SW4STM32,
             STM32CubeIDE,
+            WiSEStudio,
         }
 
         public struct CommonConfigurationOptions
@@ -344,7 +348,106 @@ namespace STM32IDEProjectImporter
             var sources = ParseSourceList(project, cprojectDir, sourceFilters.ToArray(), sourceReferences)
                 .Where(f => !f.FullPath.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
 
+
             result.SourceFiles = ExpandSourcePaths(sources);
+
+            return result;
+        }
+
+        Dictionary<string, HashSet<string>> _LibraryDirCache = new Dictionary<string, HashSet<string>>();
+
+
+        CommonConfigurationOptions ExtractWiSEOptions(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
+        {
+            var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
+            CommonConfigurationOptions result = new CommonConfigurationOptions();
+
+            var gccNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'fr.ac6.ide.wise.managedbuild.tool.c.compiler']") as XmlElement ?? throw new Exception("Missing gcc tool node");
+            var linkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'fr.ac6.ide.wise.managedbuild.tool.c.linker']") as XmlElement ?? throw new Exception("Missing linker tool node");
+            var cppLinkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'fr.ac6.ide.wise.managedbuild.tool.cpp.linker']") as XmlElement;
+
+            result.IncludeDirectories = gccNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.compiler.include.paths")
+                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
+                .Where(d => d != null).ToArray();
+
+            result.PreprocessorMacros = gccNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.compiler.defs")
+                .Select(a => a.Trim()).Where(a => a != "" && a != "DEBUG" && a != "RELEASE").ToArray();
+
+            result.MCU = "BlueNRG-LP";
+            result.BoardName = "STEVAL-IDB011V1";
+
+            var relLinkerScript = linkerNode.LookupOptionValue("fr.ac6.ide.wise.managedbuild.option.c.linker.script", true);
+            if (relLinkerScript == null)
+                relLinkerScript = cppLinkerNode?.LookupOptionValue("fr.ac6.ide.wise.managedbuild.option.cpp.linker.script", true);
+
+            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.AddExtraComponentToBaseDir);
+
+            if (linkerScript != null)
+                result.LinkerScript = Path.GetFullPath(linkerScript);
+
+            result.Libraries = new List<string>();
+            var libDirs = (linkerNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.linker.paths", true) ?? new string[0])
+                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
+                .Where(d => d != null).ToArray();
+
+            var libNames = linkerNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.linker.libs", true) ?? new string[0];
+            foreach(var libName in libNames)
+            {
+                string foundName = null;
+                foreach(var libDir in libDirs)
+                {
+                    if (!_LibraryDirCache.TryGetValue(libDir, out var files))
+                        _LibraryDirCache[libDir] = files = Directory.GetFiles(libDir, "*.a").Select(Path.GetFileName).ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+
+                    if (files.Contains($"lib{libName}.a"))
+                    {
+                        foundName = Path.Combine(libDir, $"lib{libName}.a");
+                        break;
+                    }
+                }
+
+                if (foundName != null)
+                    result.Libraries.Add(foundName);
+                else
+                {
+                    //Could not find the library
+                }
+            }
+
+            List<SourceFilterEntry> sourceFilters = new List<SourceFilterEntry>();
+            Dictionary<string, SourceEntry> sourceReferences = new Dictionary<string, SourceEntry>();
+            foreach (var node in cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>())
+            {
+                if (!string.IsNullOrEmpty(node.GetAttribute("name")))
+                {
+                    var entry = new SourceEntry(node);
+                    if (entry.IsValid)
+                        sourceReferences[entry.Name] = entry;
+                }
+                else if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
+                {
+                    var entry = new SourceFilterEntry(node);
+                    if (entry.IsValid)
+                        sourceFilters.Add(entry);
+                }
+            }
+
+            var sources = ParseSourceList(project, cprojectDir, sourceFilters.ToArray(), sourceReferences)
+                .Where(f => !f.FullPath.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
+
+            result.SourceFiles = ExpandSourcePaths(sources);
+
+            for (int i = 0; i < result.SourceFiles.Count; i++)
+            {
+                var source = result.SourceFiles[i];
+                if (source.FullPath.EndsWith(".s"))
+                {
+                    var newName = source.FullPath.Substring(0, source.FullPath.Length - 2) + ".S";
+                    File.Move(source.FullPath, newName);
+                    source.FullPath = newName;
+                    result.SourceFiles[i] = source;
+                }
+            }
 
             return result;
         }
@@ -376,7 +479,7 @@ namespace STM32IDEProjectImporter
                                     continue;
 
                                 bool excludedByPrefix = false;
-                                foreach(var excl in excludedFiles)
+                                foreach (var excl in excludedFiles)
                                 {
                                     if (relPath.StartsWith(excl + "/", StringComparison.InvariantCultureIgnoreCase))
                                     {
@@ -387,7 +490,7 @@ namespace STM32IDEProjectImporter
 
                                 if (excludedByPrefix)
                                     continue;
-                                
+
                                 result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath });
                             }
                         }
@@ -436,6 +539,8 @@ namespace STM32IDEProjectImporter
 
             if (subtype == ProjectSubtype.SW4STM32)
                 opts = ExtractSW4STM32Options(cproject, project, cconfiguration, cprojectFileDir);
+            else if (subtype == ProjectSubtype.WiSEStudio)
+                opts = ExtractWiSEOptions(cproject, project, cconfiguration, cprojectFileDir);
             else
                 opts = ExtractSTM32CubeIDEOptions(cproject, project, cconfiguration, cprojectFileDir);
 
@@ -568,7 +673,7 @@ namespace STM32IDEProjectImporter
                 try
                 {
                     string testedDir = baseDir;
-                    for (; ;)
+                    for (; ; )
                     {
                         var candidate = Path.Combine(testedDir, pathInsideWorkspace);
                         if (File.Exists(candidate) || Directory.Exists(candidate))
@@ -644,6 +749,9 @@ namespace STM32IDEProjectImporter
                 if (rgStartup.IsMatch(fullPath))
                     continue;   //Our BSP already provides a startup file
 
+                if (StringComparer.InvariantCultureIgnoreCase.Compare(Path.GetFileName(fullPath), "system_BlueNRG_LP.c") == 0)
+                    continue;   //This is the startup file on BlueNRG
+
                 if (sourceFilters != null)
                 {
                     if (ShouldSkipNode(node, sourceFilters))
@@ -709,6 +817,15 @@ namespace STM32IDEProjectImporter
             if (result.Length == 0 && !isOptional)
                 throw new Exception("No values found for " + optionName);
             return result;
+        }
+
+        public static HashSet<_Ty> ToHashSet<_Ty>(this IEnumerable<_Ty> coll, IEqualityComparer<_Ty> comparer = null)
+        {
+            var dict = comparer == null ? new HashSet<_Ty>() : new HashSet<_Ty>(comparer);
+            if (coll != null)
+                foreach (var item in coll)
+                    dict.Add(item);
+            return dict;
         }
     }
 }

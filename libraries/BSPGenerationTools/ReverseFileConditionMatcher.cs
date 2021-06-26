@@ -50,7 +50,7 @@ namespace BSPGenerationTools
 
         static Dictionary<string, RequestedConfiguration> TranslateObjectList(ReverseConditionTable table, IEnumerable<ObjectEntry> list, Dictionary<string, string> optionalDictionary = null)
         {
-            Dictionary<string, RequestedConfiguration> result = new Dictionary<string, RequestedConfiguration>();
+            Dictionary<string, RequestedConfiguration> result = new Dictionary<string, RequestedConfiguration>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var entry in list)
             {
                 var cfg = new RequestedConfiguration { Framework = table.Frameworks[entry.OneBasedFrameworkIndex - 1] };
@@ -137,7 +137,9 @@ namespace BSPGenerationTools
 
                 foreach (var fwObj in frameworkObjects)
                 {
-                    frameworks.Add(fwObj.ID);
+                    if (fwObj.ID != null)   //It could be reference to a built-in MCU-level setting
+                        frameworks.Add(fwObj.ID);
+
                     foreach (var kv in fwObj.MinimalConfiguration ?? new SysVarEntry[0])
                     {
                         //Unless a configuration value was explicitly detected from the macros/files, set it to 'disabled' (that might be different from the GUI default).

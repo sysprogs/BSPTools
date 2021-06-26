@@ -97,6 +97,10 @@ namespace stm32_bsp_generator
 
         public static HardwareRegisterSet[] GeneratePeripheralRegisterDefinitionsFromHeaderFile(string peripheralHeaderFile, CortexCore core, ParseReportWriter reportWriter)
         {
+            if (StringComparer.InvariantCultureIgnoreCase.Compare(Path.GetFileName(peripheralHeaderFile), "bluenrg_lpx.h") == 0)
+                peripheralHeaderFile = peripheralHeaderFile.Substring(0, peripheralHeaderFile.Length - 3) + ".h";
+
+
             using (var handle = reportWriter.BeginParsingFile(peripheralHeaderFile))
             {
                 var parser = new HeaderFileParser(peripheralHeaderFile, handle);
@@ -238,13 +242,13 @@ namespace stm32_bsp_generator
                     var type = field.Type
                                 .Where(t => t.Type == CppTokenizer.TokenType.Identifier)
                                 .Select(t => t.Value)
-                                .Where(t => t != "__IO" && t != "__I" && t != "__IM" && t != "__O" && t != "const")
+                                .Where(t => t != "__IO" && t != "__I" && t != "__IM" && t != "__O" && t != "const" && t != "__IOM" && t != "__OM")
                                 .ToArray();
 
                     bool isReadOnly = field.Type.Count(t => t.Value == "__I" || t.Value == "const") > 0;
 
                     if (type.Length > 1)
-                        throw new Exception("Could not reduce register type to a single token: " + string.Join("", type));
+                        throw new Exception("Could not reduce register type to a single token: " + string.Join(" ", type));
 
                     int size;
 
