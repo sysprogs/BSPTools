@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPEngine.Eclipse;
 using Microsoft.SqlServer.Server;
 using Microsoft.Win32;
 using System;
@@ -9,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 
-namespace STM32CubeMXImporter
+namespace STM32ProjectImporter
 {
     public class STM32CubeMXProjectImporter : IReconfigurableProjectImporter
     {
@@ -27,8 +28,8 @@ namespace STM32CubeMXImporter
 
         class STM32CubeExeTool : ProjectReconfigurationTool
         {
-            public STM32CubeExeTool()
-                : base("com.st.stm32cubemx", "STM32CubeMX", "STM32CubeMX Executable|STM32CubeMX.exe")
+            public STM32CubeExeTool(IReconfigurableProjectImporter importer)
+                : base(importer, "com.st.stm32cubemx", "STM32CubeMX", "STM32CubeMX Executable|STM32CubeMX.exe")
             {
             }
 
@@ -57,8 +58,8 @@ namespace STM32CubeMXImporter
 
         class JDKJavaTool : ProjectReconfigurationTool
         {
-            public JDKJavaTool()
-                : base("com.java.jdk", "JDK", "Java Executable|java.exe")
+            public JDKJavaTool(IReconfigurableProjectImporter importer)
+                : base(importer, "com.java.jdk", "JDK", "Java Executable|java.exe")
             {
             }
 
@@ -80,8 +81,14 @@ namespace STM32CubeMXImporter
             }
         }
 
-        readonly STM32CubeExeTool _STM32CubeMX = new STM32CubeExeTool();
-        readonly JDKJavaTool _Java = new JDKJavaTool();
+        readonly STM32CubeExeTool _STM32CubeMX;
+        readonly JDKJavaTool _Java;
+
+        public STM32CubeMXProjectImporter()
+        {
+            _STM32CubeMX = new STM32CubeExeTool(this);
+            _Java = new JDKJavaTool(this);
+        }
 
         public ProjectReconfigurationTool[] ReconfigurationTools => new ProjectReconfigurationTool[] { _STM32CubeMX, _Java };
 
@@ -496,6 +503,9 @@ namespace STM32CubeMXImporter
 
         static string MakeBSPPath(string path, string baseDir)
         {
+            if (path == null)
+                return null;
+
             path = Path.GetFullPath(path);
 
             if (path.StartsWith(baseDir, StringComparison.InvariantCultureIgnoreCase))
@@ -518,10 +528,20 @@ namespace STM32CubeMXImporter
 
         public MCUDefinitionFromProject GenerateMCUDefinitionFromProject(ReconfigurableProjectImportParameters parameters, IProjectImportService service)
         {
-            var gpdscFile = Path.ChangeExtension(parameters.ProjectFile, ".gpdsc");
+            var dir = Path.GetDirectoryName(parameters.ProjectFile);
 
+            if (EclipseProject.ExistsInDirectory(dir))
+            {
+                return GenerateMCUDefinitionFromSTM32CubeIDE(service, new EclipseProject(dir, service?.Logger));
+            }
+            else
+                return GenerateMCUDefinitionFromGPDSC(service, Path.ChangeExtension(parameters.ProjectFile, ".gpdsc"));
+        }
+
+        MCUDefinitionFromProject GenerateMCUDefinitionFromGPDSC(IProjectImportService service, string gpdscFile)
+        {
             var parsedProject = ParseProjectFile(gpdscFile, true);
-            string baseDir = Path.GetFullPath(Path.GetDirectoryName(parameters.ProjectFile));
+            string baseDir = Path.GetFullPath(Path.GetDirectoryName(gpdscFile));
 
             var allExistingFiles = parsedProject.AllFiles.Where(FilePathValidAndExists).ToArray();
 
@@ -546,28 +566,102 @@ namespace STM32CubeMXImporter
             };
         }
 
-        public ReconfigurationToolInvocation GetToolLaunchInfo(IProjectImportService service, ProjectReconfigurationContext context, Dictionary<string, string> toolLocations)
+        MCUDefinitionFromProject GenerateMCUDefinitionFromSTM32CubeIDE(IProjectImportService service, EclipseProject project)
         {
-            var javaExe = toolLocations[_Java.ID];
-            var stm32CubeMX = toolLocations[_STM32CubeMX.ID];
+            var configuration = project.NonReleaseConfigurationsIfAny.FirstOrDefault() ?? throw new Exception($"{project.CProjectFile} does not contain any importable configurations");
+            var options = SW4STM32ProjectParserBase.ExtractSTM32CubeIDEOptions(configuration);
+
+            List<string> cflags = new List<string>();
+            var tools = configuration.RequireTools(EclipseTool.None);
+
+            XmlElement mcuNode = LoadFamilyList(service, out string xmlFile).SelectSingleNode($"Families/Family/SubFamily/Mcu[@RefName='{options.MCU}']") as XmlElement ?? throw new Exception($"Could not locate '{options.MCU}' in {xmlFile}");
+            var core = mcuNode.SelectSingleNode("Core")?.InnerText ?? throw new Exception($"The definition for '{options.MCU}' does not specify the core");
+
+            cflags.Add("-mcpu=" + TranslateCoreName(core));
+
+            string fpuPrefix = "com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.value.";
+            string fpuValue = tools.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu");
+            if (!string.IsNullOrEmpty(fpuValue))
+            {
+                if (!fpuValue.StartsWith(fpuPrefix))
+                    throw new Exception("Unknown FPU type: " + fpuValue);
+                cflags.Add("-mfpu=" + fpuValue.Substring(fpuPrefix.Length));
+            }
+
+            string abiPrefix = "com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.value.";
+            string abiValue = tools.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi");
+            if (!string.IsNullOrEmpty(abiValue))
+            {
+                if (!abiValue.StartsWith(abiPrefix))
+                    throw new Exception("Unknown FPU type: " + abiValue);
+                cflags.Add("-m" + abiValue.Substring(abiPrefix.Length) + "-float");
+            }
+
+            var mcu = new MCU
+            {
+                ID = options.MCU,
+                AdditionalSourceFiles = options.SourceFiles.Where(f => f.FullPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f.FullPath, project.BaseDirectory)).ToArray(),
+                AdditionalHeaderFiles = options.SourceFiles.Where(f => !f.FullPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f.FullPath, project.BaseDirectory)).ToArray(),
+                CompilationFlags = new ToolFlags
+                {
+                    IncludeDirectories = options.IncludeDirectories.Select(d => MakeBSPPath(d, project.BaseDirectory)).ToArray(),
+                    PreprocessorMacros = options.PreprocessorMacros,
+                    COMMONFLAGS = string.Join(" ", cflags.ToArray()),
+                    LinkerScript = MakeBSPPath(options.LinkerScript, project.BaseDirectory),
+                }
+            };
+
+            return new MCUDefinitionFromProject
+            {
+                MCU = mcu,
+            };
+        }
+
+        string TranslateCoreName(string core)
+        {
+            const string prefix = "Arm Cortex-";
+            if (!core.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase))
+                throw new Exception("Unknown core: " + core);
+
+            string shortCore = core.Substring(prefix.Length);
+            return "cortex-" + shortCore.ToLower().Replace("+", "plus");
+        }
+
+        public ReconfigurationToolInvocation GetToolLaunchInfo(IProjectImportService service, ProjectReconfigurationContext context)
+        {
+            var javaExe = service.LocateTool(_Java);
+            var stm32CubeMX = service.LocateTool(_STM32CubeMX);
 
             string args = "";
             string temporaryScriptFile = null;
             string text = "Launching STM32CubeMX...";
 
-            switch(context.Reason)
+            switch (context.Reason)
             {
                 case ProjectReconfigurationReason.RegenerateFiles:
                     temporaryScriptFile = service.GetTemporaryFileName();
-                    PatchIOCFileIfNeeded(context.ProjectFile, service.GUI);
-                    File.WriteAllLines(temporaryScriptFile, new[]
+
+                    if (EclipseProject.ExistsInDirectory(Path.GetDirectoryName(context.ProjectFile)))
                     {
+                        File.WriteAllLines(temporaryScriptFile, new[]
+                        {
+                            "project toolchain \"STM32CubeIDE\"",
+                            "project generate",
+                            "exit",
+                        });
+                    }
+                    else
+                    {
+                        PatchIOCFileIfNeeded(context.ProjectFile, service.GUI);
+                        File.WriteAllLines(temporaryScriptFile, new[]
+                        {
                         "project toolchain \"Makefile\"",
                         "project generate",
                         "project toolchain \"Other Toolchains (GPDSC)\"",
                         "project generate",
                         "exit",
-                    });
+                        });
+                    }
 
                     args = $"\"{context.ProjectFile}\" -s \"{temporaryScriptFile}\"";
                     text = "Regenerating project...";
@@ -579,7 +673,7 @@ namespace STM32CubeMXImporter
                         $"load {context.DeviceID}",
                         "project name " + Path.GetFileNameWithoutExtension(context.ProjectFile),
                         $"project path \"{Path.GetDirectoryName(context.ProjectFile)}\"",
-                        "project toolchain \"Other Toolchains (GPDSC)\"",
+                        "project toolchain \"STM32CubeIDE\"",
                     });
 
                     args = $" -s \"{temporaryScriptFile}\"";
@@ -618,7 +712,7 @@ namespace STM32CubeMXImporter
                     return;
 
                 var lines = File.ReadAllLines(iocFile);
-                for(int i = 0; i < lines.Length;i++)
+                for (int i = 0; i < lines.Length; i++)
                 {
                     if (lines[i].StartsWith("ProjectManager.MainLocation="))
                     {
@@ -635,24 +729,34 @@ namespace STM32CubeMXImporter
             catch { }
         }
 
-        public MCU[] LoadMCUList(IProjectImportService service, Dictionary<string, string> toolLocations)
+        XmlDocument LoadFamilyList(IProjectImportService service, out string xmlFile)
         {
-            var stm32cubeMXExe = toolLocations[_STM32CubeMX.ID];
-            var xmlFile = Path.Combine(Path.GetDirectoryName(stm32cubeMXExe), @"db\mcu\families.xml");
-            List<MCU> result = new List<MCU>();
+            var stm32cubeMXExe = service.LocateTool(_STM32CubeMX);
+            xmlFile = Path.Combine(Path.GetDirectoryName(stm32cubeMXExe), @"db\mcu\families.xml");
 
             var xml = new XmlDocument();
             xml.Load(xmlFile);
-            foreach(var family in xml.DocumentElement.SelectNodes("Family").OfType<XmlElement>())
+            return xml;
+        }
+
+        const string MCUIDAttribute = "RefName";
+
+        public MCU[] LoadMCUList(IProjectImportService service)
+        {
+            List<MCU> result = new List<MCU>();
+
+            var xml = LoadFamilyList(service, out _);
+
+            foreach (var family in xml.DocumentElement.SelectNodes("Family").OfType<XmlElement>())
             {
                 var familyName = family.GetAttribute("Name");
-                foreach(var subfamily in family.SelectNodes("SubFamily").OfType<XmlElement>())
+                foreach (var subfamily in family.SelectNodes("SubFamily").OfType<XmlElement>())
                 {
                     var subfamilyName = subfamily.GetAttribute("Name");
-                    foreach(var mcu in subfamily.SelectNodes("Mcu").OfType<XmlElement>())
+                    foreach (var mcu in subfamily.SelectNodes("Mcu").OfType<XmlElement>())
                     {
                         var mcuName = mcu.GetAttribute("Name");
-                        var refName = mcu.GetAttribute("RefName");
+                        var refName = mcu.GetAttribute(MCUIDAttribute);
                         if (!string.IsNullOrEmpty(mcuName) && !string.IsNullOrEmpty(refName))
                         {
                             var mcuObject = new MCU

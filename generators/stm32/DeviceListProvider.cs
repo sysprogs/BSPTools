@@ -19,19 +19,6 @@ namespace stm32_bsp_generator
 
     static class DeviceListProviders
     {
-        public class CSVProvider : IDeviceListProvider
-        {
-            public List<MCUBuilder> LoadDeviceList(Program.STM32BSPBuilder bspBuilder)
-            {
-                var devices = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\stm32devices.csv", "Part Number", "FLASH Size (Prog)", "Internal RAM Size", "Core", true);
-                var devicesOld = BSPGeneratorTools.ReadMCUDevicesFromCommaDelimitedCSVFile(bspBuilder.Directories.RulesDir + @"\stm32devicesOld.csv", "Part Number", "FLASH Size (Prog)", "Internal RAM Size", "Core", true);
-                foreach (var d in devicesOld)
-                    if (!devices.Contains(d))
-                        devices.Add(d);
-                return devices;
-            }
-        }
-
         public class DeviceMemoryDatabase
         {
             private XmlDocument _Document;

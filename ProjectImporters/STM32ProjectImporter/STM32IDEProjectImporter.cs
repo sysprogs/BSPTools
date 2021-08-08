@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace STM32IDEProjectImporter
+namespace STM32ProjectImporter
 {
     public class STM32IDEProjectImporter : IExternalProjectImporter
     {

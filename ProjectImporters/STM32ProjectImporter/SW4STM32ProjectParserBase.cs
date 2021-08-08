@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPEngine.Eclipse;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
-namespace STM32IDEProjectImporter
+namespace STM32ProjectImporter
 {
     public class SW4STM32ProjectParserBase
     {
@@ -26,43 +27,37 @@ namespace STM32IDEProjectImporter
 
         struct ConfigurationWithContext
         {
-            public XmlElement CConfiguration;
+            public EclipseProject.CConfiguration CConfiguration;
             public MultiConfigurationContext Context;
         }
 
-        ConfigurationWithContext[] DetectConfigurationContexts(XmlDocument cproject, string projectFile, ProjectSubtype subtype)
+        ConfigurationWithContext[] DetectConfigurationContexts(EclipseProject project, ProjectSubtype subtype)
         {
-            var cconfigurationNodes = cproject.SelectNodes("cproject/storageModule[@moduleId='org.eclipse.cdt.core.settings']/cconfiguration").OfType<XmlElement>().ToArray();
-            if (cconfigurationNodes.Length == 0)
+            if (project.Configurations.Length == 0)
                 throw new Exception("No 'cconfiguration' nodes found");
 
-            if (cconfigurationNodes.Length > 1)
+            if (project.Configurations.Length > 1)
             {
                 if (subtype == ProjectSubtype.WiSEStudio)
-                    return new[] { new ConfigurationWithContext { CConfiguration = cconfigurationNodes[0] } };
-
-                var nonReleaseNodes = cconfigurationNodes.Where(n => !n.GetAttribute("id").Contains(".release.")).ToArray();
-                if (nonReleaseNodes.Length > 0)
-                    cconfigurationNodes = nonReleaseNodes;
+                    return new[] { new ConfigurationWithContext { CConfiguration = project.Configurations[0] } };
             }
 
             List<ConfigurationWithContext> result = new List<ConfigurationWithContext>();
-            foreach (var cconfiguration in cconfigurationNodes)
+            foreach (var cconfiguration in project.NonReleaseConfigurationsIfAny)
             {
                 MultiConfigurationContext mctx = null;
-                if (cconfigurationNodes.Length > 1)
+                if (project.NonReleaseConfigurationsIfAny.Length > 1)
                 {
-                    if (cconfigurationNodes.Length != 2)
-                        throw new Exception("Unexpected configuration count for " + projectFile);
+                    if (project.NonReleaseConfigurationsIfAny.Length != 2)
+                        throw new Exception("Unexpected configuration count for " + project.CProjectFile);
 
-                    string artifactName = cconfiguration.SelectSingleNode("storageModule[@moduleId='cdtBuildSystem']/configuration/@artifactName")?.Value;
+                    string artifactName = cconfiguration.ArtifactName;
                     if (artifactName.EndsWith("_CM4"))
                         mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "_M4", UserFriendlyNameSuffix = " (Cortex-M4 Core)" };
                     else if (artifactName.EndsWith("_CM7"))
                         mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "", UserFriendlyNameSuffix = " (Cortex-M7 Core)" };
                     else
                         throw new Exception("Don't know how to interpret the difference between multiple configurations for a project. Please review it manually.");
-
                 }
 
                 result.Add(new ConfigurationWithContext { CConfiguration = cconfiguration, Context = mctx });
@@ -70,7 +65,7 @@ namespace STM32IDEProjectImporter
 
             if (result.Select(c => c.Context?.IDSuffix ?? "").Distinct().Count() != result.Count)
             {
-                OnMultipleConfigurationsFound(projectFile);
+                OnMultipleConfigurationsFound(project.CProjectFile);
                 result = result.Take(1).ToList();
             }
 
@@ -123,13 +118,13 @@ namespace STM32IDEProjectImporter
             if (virtualPathComponents == null)
                 virtualPathComponents = new[] { "virtual", "sample", "path" };
 
-            XmlDocument cproject = new XmlDocument();
-            XmlDocument project = new XmlDocument();
+            EclipseProject project;
 
             try
             {
-                cproject.Load(projectFile);
-                project.Load(Path.Combine(projectFileDir, ".project"));
+                project = new EclipseProject(Path.GetDirectoryName(projectFile));
+
+                project.FileNotFound += Project_FileNotFound;
             }
             catch (Exception ex)
             {
@@ -141,7 +136,7 @@ namespace STM32IDEProjectImporter
 
             try
             {
-                configs = DetectConfigurationContexts(cproject, projectFile, subtype);
+                configs = DetectConfigurationContexts(project, subtype);
             }
             catch (Exception ex)
             {
@@ -157,7 +152,7 @@ namespace STM32IDEProjectImporter
                 {
                     sampleID = string.Join("-", virtualPathComponents) + cfg.Context?.IDSuffix;
 
-                    var sample = ParseSingleConfiguration(cproject, project, cfg.CConfiguration, optionalProjectRootForLocatingHeaders, Path.GetDirectoryName(projectFile),
+                    var sample = ParseSingleConfiguration(cfg.CConfiguration, optionalProjectRootForLocatingHeaders, Path.GetDirectoryName(projectFile),
                         boardName, cfg.Context, subtype);
                     sample.IncludeDirectories = sample.IncludeDirectories.Concat(extraIncludeDirs ?? new List<string>()).ToArray();
                     sample.VirtualPath = string.Join("\\", virtualPathComponents.Take(virtualPathComponents.Length - 1).ToArray());
@@ -173,48 +168,7 @@ namespace STM32IDEProjectImporter
             }
         }
 
-        struct SourceFilterEntry
-        {
-            public string[] Prefixes;
-
-            public bool IsValid => Prefixes != null && Prefixes.Length > 0;
-
-            public SourceFilterEntry(XmlElement e)
-            {
-                var excl = e.GetAttribute("excluding");
-                var flags = e.GetAttribute("flags");
-                if (!flags.Contains("VALUE_WORKSPACE_PATH") || e.GetAttribute("kind") != "sourcePath")
-                    throw new Exception("Don't know how to handle a source entry");
-
-                Prefixes = excl.Split('|').Where(p => p != "").ToArray();
-            }
-
-            public bool MatchesVirtualPath(string virtualPath)
-            {
-                foreach (var pfx in Prefixes)
-                    if (virtualPath.StartsWith(pfx))
-                        return true;
-                return false;
-            }
-        }
-
-        public class SourceEntry
-        {
-            public string Name;
-            public string Excluding;
-
-            public string RelativePath;
-
-            public bool IsValid => !string.IsNullOrEmpty(Name);
-            public SourceEntry(XmlElement e)
-            {
-                Name = e.GetAttribute("name");
-                Excluding = e.GetAttribute("excluding");
-                var flags = e.GetAttribute("flags");
-                if (!flags.Contains("VALUE_WORKSPACE_PATH") || e.GetAttribute("kind") != "sourcePath")
-                    throw new Exception("Don't know how to handle a source entry");
-            }
-        }
+        private void Project_FileNotFound(ref string missingFilePath) => OnFileNotFound(missingFilePath);
 
         public enum ProjectSubtype
         {
@@ -230,286 +184,95 @@ namespace STM32IDEProjectImporter
             public string[] PreprocessorMacros;
             public string BoardName;
             public string MCU;
-            public List<ParsedSourceFile> SourceFiles;
+            public List<EclipseProject.ParsedSourceFile> SourceFiles;
             public string LinkerScript;
             public List<string> Libraries;
             public string LDFLAGS;
             public bool UseCMSE;
         }
 
-        const string ToolchainConfigKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/folderInfo/toolChain";
-        const string SourceEntriesKey = "storageModule[@moduleId='cdtBuildSystem']/configuration/sourceEntries/entry";
-
-        CommonConfigurationOptions ExtractSW4STM32Options(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
+        CommonConfigurationOptions ExtractSW4STM32Options(EclipseProject.CConfiguration configuration)
         {
-            var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
-            CommonConfigurationOptions result = new CommonConfigurationOptions();
+            var tools = configuration.RequireTools(EclipseTool.CCompiler | EclipseTool.CLinker);
 
-            var gccNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.compiler')]") as XmlElement ?? throw new Exception("Missing gcc tool node");
-            var linkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.linker')]") as XmlElement ?? throw new Exception("Missing linker tool node");
-            var cppLinkerNode = toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.cpp.linker')]") as XmlElement;
-
-            result.IncludeDirectories = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.include.paths")
-                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
-                .Where(d => d != null).ToArray();
-
-            result.PreprocessorMacros = gccNode.LookupOptionValueAsList("gnu.c.compiler.option.preprocessor.def.symbols")
-                .Select(a => a.Trim()).Where(a => a != "").ToArray();
-
-            result.BoardName = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.board", true);
-            result.MCU = toolchainConfigNode.LookupOptionValue("fr.ac6.managedbuild.option.gnu.cross.mcu");
-            List<string> libs = new List<string>();
-
-            string[] libraryPaths = linkerNode.LookupOptionValueAsList("gnu.c.link.option.paths", true);
-            foreach (var lib in linkerNode.LookupOptionValueAsList("gnu.c.link.option.libs", true))
+            return new CommonConfigurationOptions
             {
-                if (!lib.StartsWith(":"))
-                    throw new Exception("Unexpected library file format: " + lib);
+                IncludeDirectories = tools.Compiler.ReadList("gnu.c.compiler.option.include.paths", PathTranslationFlags.AddExtraComponentToBaseDir),
+                PreprocessorMacros = tools.Compiler.ReadList("gnu.c.compiler.option.preprocessor.def.symbols"),
 
-                foreach (var libDir in libraryPaths)
-                {
-                    var fullPath = TranslatePath(cprojectDir, libDir, PathTranslationFlags.AddExtraComponentToBaseDir);
+                BoardName = tools.ReadOptionalValue("fr.ac6.managedbuild.option.gnu.cross.board"),
+                MCU = tools.ReadValue("fr.ac6.managedbuild.option.gnu.cross.mcu"),
+                Libraries = tools.Linker.ResolveLibraries("gnu.c.link.option.libs", "gnu.c.link.option.paths"),
 
-                    string candidate = Path.Combine(fullPath, $"{lib.Substring(1)}");
-                    if (File.Exists(candidate))
-                    {
-                        libs.Add(Path.GetFullPath(candidate));
-                        break;
-                    }
-                }
+                LinkerScript = tools.Linker.ReadOptionalValue("fr.ac6.managedbuild.tool.gnu.cross.c.linker.script", PathTranslationFlags.AddExtraComponentToBaseDir),
 
-            }
-
-            var sourceFilters = cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>().Select(e => new SourceFilterEntry(e)).Where(e => e.IsValid).ToArray();
-            var relLinkerScript = linkerNode.LookupOptionValue("fr.ac6.managedbuild.tool.gnu.cross.c.linker.script");
-            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.AddExtraComponentToBaseDir);
-
-            if (linkerScript != null)
-                result.LinkerScript = Path.GetFullPath(linkerScript);
-
-            result.LDFLAGS = linkerNode.LookupOptionValue("gnu.c.link.option.ldflags");
-            result.SourceFiles = ParseSourceList(project, cprojectDir, sourceFilters);
-            result.Libraries = libs;
-
-            return result;
+                LDFLAGS = tools.Linker.ReadValue("gnu.c.link.option.ldflags"),
+                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile)
+            };
         }
 
-        CommonConfigurationOptions ExtractSTM32CubeIDEOptions(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
+        static Regex rgStartup = new Regex("startup_stm.*\\.s");
+
+        static bool ShouldIncludeSourceFile(string fullPath, int resourceType)
         {
-            var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
-            CommonConfigurationOptions result = new CommonConfigurationOptions();
+            if (fullPath.EndsWith(".ioc", StringComparison.InvariantCultureIgnoreCase))
+                return false; //.ioc files have too long names that will exceed our path length limit
 
-            var gccNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler']") as XmlElement ?? throw new Exception("Missing gcc tool node");
-            var linkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker']") as XmlElement ?? throw new Exception("Missing linker tool node");
-            var cppLinkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker']") as XmlElement;
+            if (rgStartup.IsMatch(fullPath))
+                return false;   //Our BSP already provides a startup file
 
-            result.IncludeDirectories = gccNode.LookupOptionValueAsList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths")
-                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
-                .Where(d => d != null).ToArray();
+            if (StringComparer.InvariantCultureIgnoreCase.Compare(Path.GetFileName(fullPath), "system_BlueNRG_LP.c") == 0)
+                return false;   //This is the startup file on BlueNRG
 
-            result.PreprocessorMacros = gccNode.LookupOptionValueAsList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols")
-                .Select(a => a.Trim()).Where(a => a != "" && a != "DEBUG" && a != "RELEASE").ToArray();
+            return true;
+        }
 
-            result.MCU = toolchainConfigNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu");
-            result.BoardName = toolchainConfigNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board");
-
-            var relLinkerScript = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.script", true);
-            if (relLinkerScript == null)
-                relLinkerScript = cppLinkerNode?.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.option.script", true);
-
-            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.None);
-
-            if (linkerScript != null)
-                result.LinkerScript = Path.GetFullPath(linkerScript);
-
-            result.LDFLAGS = linkerNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.otherflags", true);
-            result.UseCMSE = gccNode.LookupOptionValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.mcmse", true) == "true";
-
-            result.Libraries = new List<string>();
-
-            List<SourceFilterEntry> sourceFilters = new List<SourceFilterEntry>();
-            Dictionary<string, SourceEntry> sourceReferences = new Dictionary<string, SourceEntry>();
-            foreach (var node in cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>())
+        public static CommonConfigurationOptions ExtractSTM32CubeIDEOptions(EclipseProject.CConfiguration configuration)
+        {
+            var tools = configuration.RequireTools(EclipseTool.CCompiler | EclipseTool.CLinker | EclipseTool.CPPLinker);
+            return new CommonConfigurationOptions
             {
-                if (!string.IsNullOrEmpty(node.GetAttribute("name")))
-                {
-                    var entry = new SourceEntry(node);
-                    if (entry.IsValid)
-                        sourceReferences[entry.Name] = entry;
-                }
-                else if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
-                {
-                    var entry = new SourceFilterEntry(node);
-                    if (entry.IsValid)
-                        sourceFilters.Add(entry);
-                }
-            }
+                IncludeDirectories = tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths", PathTranslationFlags.AddExtraComponentToBaseDir),
+                PreprocessorMacros = tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols", "DEBUG", "RELEASE"),
 
-            var sources = ParseSourceList(project, cprojectDir, sourceFilters.ToArray(), sourceReferences)
-                .Where(f => !f.FullPath.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
+                MCU = tools.ReadValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu"),
+                BoardName = tools.ReadValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board"),
 
+                LinkerScript = tools.Linker.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.script", PathTranslationFlags.None) ??
+                               tools.CPPLinker.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.option.script", PathTranslationFlags.None),
 
-            result.SourceFiles = ExpandSourcePaths(sources);
+                LDFLAGS = tools.Linker.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.otherflags"),
+                UseCMSE = tools.Compiler.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.mcmse") == "true",
 
-            return result;
+                Libraries = new List<string>(),
+                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile)
+            };
         }
 
         Dictionary<string, HashSet<string>> _LibraryDirCache = new Dictionary<string, HashSet<string>>();
 
-
-        CommonConfigurationOptions ExtractWiSEOptions(XmlDocument cproject, XmlDocument project, XmlElement cconfiguration, string cprojectDir)
+        CommonConfigurationOptions ExtractWiSEOptions(EclipseProject.CConfiguration configuration)
         {
-            var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
-            CommonConfigurationOptions result = new CommonConfigurationOptions();
+            var tools = configuration.RequireTools(EclipseTool.CCompiler | EclipseTool.CLinker | EclipseTool.CPPLinker);
 
-            var gccNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'fr.ac6.ide.wise.managedbuild.tool.c.compiler']") as XmlElement ?? throw new Exception("Missing gcc tool node");
-            var linkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'fr.ac6.ide.wise.managedbuild.tool.c.linker']") as XmlElement ?? throw new Exception("Missing linker tool node");
-            var cppLinkerNode = toolchainConfigNode.SelectSingleNode("tool[@superClass = 'fr.ac6.ide.wise.managedbuild.tool.cpp.linker']") as XmlElement;
-
-            result.IncludeDirectories = gccNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.compiler.include.paths")
-                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
-                .Where(d => d != null).ToArray();
-
-            result.PreprocessorMacros = gccNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.compiler.defs")
-                .Select(a => a.Trim()).Where(a => a != "" && a != "DEBUG" && a != "RELEASE").ToArray();
-
-            result.MCU = "BlueNRG-LP";
-            result.BoardName = "STEVAL-IDB011V1";
-
-            var relLinkerScript = linkerNode.LookupOptionValue("fr.ac6.ide.wise.managedbuild.option.c.linker.script", true);
-            if (relLinkerScript == null)
-                relLinkerScript = cppLinkerNode?.LookupOptionValue("fr.ac6.ide.wise.managedbuild.option.cpp.linker.script", true);
-
-            var linkerScript = TranslatePath(cprojectDir, relLinkerScript, PathTranslationFlags.AddExtraComponentToBaseDir);
-
-            if (linkerScript != null)
-                result.LinkerScript = Path.GetFullPath(linkerScript);
-
-            result.Libraries = new List<string>();
-            var libDirs = (linkerNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.linker.paths", true) ?? new string[0])
-                .Select(a => TranslatePath(cprojectDir, a, PathTranslationFlags.AddExtraComponentToBaseDir))
-                .Where(d => d != null).ToArray();
-
-            var libNames = linkerNode.LookupOptionValueAsList("fr.ac6.ide.wise.managedbuild.option.c.linker.libs", true) ?? new string[0];
-            foreach(var libName in libNames)
+            return new CommonConfigurationOptions
             {
-                string foundName = null;
-                foreach(var libDir in libDirs)
-                {
-                    if (!_LibraryDirCache.TryGetValue(libDir, out var files))
-                        _LibraryDirCache[libDir] = files = Directory.GetFiles(libDir, "*.a").Select(Path.GetFileName).ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+                IncludeDirectories = tools.Compiler.ReadList("fr.ac6.ide.wise.managedbuild.option.c.compiler.include.paths", PathTranslationFlags.AddExtraComponentToBaseDir),
+                PreprocessorMacros = tools.Compiler.ReadList("fr.ac6.ide.wise.managedbuild.option.c.compiler.defs", "DEBUG", "RELEASE"),
 
-                    if (files.Contains($"lib{libName}.a"))
-                    {
-                        foundName = Path.Combine(libDir, $"lib{libName}.a");
-                        break;
-                    }
-                }
+                MCU = "BlueNRG-LP",
+                BoardName = "STEVAL-IDB011V1",
 
-                if (foundName != null)
-                    result.Libraries.Add(foundName);
-                else
-                {
-                    //Could not find the library
-                }
-            }
+                LinkerScript = tools.Linker.ReadOptionalValue("fr.ac6.ide.wise.managedbuild.option.c.linker.script", PathTranslationFlags.AddExtraComponentToBaseDir) ??
+                               tools.CPPLinker.ReadOptionalValue("fr.ac6.ide.wise.managedbuild.option.cpp.linker.script", PathTranslationFlags.AddExtraComponentToBaseDir),
 
-            List<SourceFilterEntry> sourceFilters = new List<SourceFilterEntry>();
-            Dictionary<string, SourceEntry> sourceReferences = new Dictionary<string, SourceEntry>();
-            foreach (var node in cconfiguration.SelectNodes(SourceEntriesKey).OfType<XmlElement>())
-            {
-                if (!string.IsNullOrEmpty(node.GetAttribute("name")))
-                {
-                    var entry = new SourceEntry(node);
-                    if (entry.IsValid)
-                        sourceReferences[entry.Name] = entry;
-                }
-                else if (!string.IsNullOrEmpty(node.GetAttribute("excluding")))
-                {
-                    var entry = new SourceFilterEntry(node);
-                    if (entry.IsValid)
-                        sourceFilters.Add(entry);
-                }
-            }
+                Libraries = tools.Linker.ResolveLibraries("fr.ac6.ide.wise.managedbuild.option.c.linker.libs", "fr.ac6.ide.wise.managedbuild.option.c.linker.paths", _LibraryDirCache),
 
-            var sources = ParseSourceList(project, cprojectDir, sourceFilters.ToArray(), sourceReferences)
-                .Where(f => !f.FullPath.EndsWith(".ioc")).ToList();  //.ioc files have too long names that will exceed our path length limit
-
-            result.SourceFiles = ExpandSourcePaths(sources);
-
-            for (int i = 0; i < result.SourceFiles.Count; i++)
-            {
-                var source = result.SourceFiles[i];
-                if (source.FullPath.EndsWith(".s"))
-                {
-                    var newName = source.FullPath.Substring(0, source.FullPath.Length - 2) + ".S";
-                    File.Move(source.FullPath, newName);
-                    source.FullPath = newName;
-                    result.SourceFiles[i] = source;
-                }
-            }
-
-            return result;
+                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile, true)
+            };
         }
 
-        private List<ParsedSourceFile> ExpandSourcePaths(List<ParsedSourceFile> sources)
-        {
-            List<ParsedSourceFile> result = new List<ParsedSourceFile>();
-            foreach (var src in sources)
-            {
-                try
-                {
-                    if (File.Exists(src.FullPath))
-                        result.Add(src);
-                    else if (Directory.Exists(src.FullPath))
-                    {
-                        var fullPath = Path.GetFullPath(src.FullPath);
-                        HashSet<string> excludedFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-                        if (src.AssociatedSourceEntry?.Excluding is string s && !string.IsNullOrEmpty(s))
-                            foreach (var f in s.Split('|'))
-                                excludedFiles.Add(f.Replace('\\', '/'));
-
-                        foreach (var file in Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories))
-                        {
-                            var ext = Path.GetExtension(file).ToLower();
-                            if (ext == ".c" || ext == ".cpp" || ext == ".cc" || ext == ".s")
-                            {
-                                string relPath = file.Substring(fullPath.Length).TrimStart('\\').Replace('\\', '/');
-                                if (excludedFiles.Contains(relPath))
-                                    continue;
-
-                                bool excludedByPrefix = false;
-                                foreach (var excl in excludedFiles)
-                                {
-                                    if (relPath.StartsWith(excl + "/", StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        excludedByPrefix = true;
-                                        break;
-                                    }
-                                }
-
-                                if (excludedByPrefix)
-                                    continue;
-
-                                result.Add(new ParsedSourceFile { FullPath = file, VirtualPath = src.VirtualPath + "/" + relPath });
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //Nothing exists at this path
-                    }
-                }
-                catch
-                {
-                }
-            }
-            return result;
-        }
-
-        private VendorSample ParseSingleConfiguration(XmlDocument cproject,
-            XmlDocument project,
-            XmlElement cconfiguration,
+        private VendorSample ParseSingleConfiguration(EclipseProject.CConfiguration configuration,
             string optionalProjectRootForLocatingHeaders,
             string cprojectFileDir,
             string boardName,
@@ -518,7 +281,7 @@ namespace STM32IDEProjectImporter
         {
             VendorSample result = new VendorSample
             {
-                UserFriendlyName = (project.SelectSingleNode("projectDescription/name") as XmlElement)?.InnerText ?? throw new Exception("Failed to determine sample name"),
+                UserFriendlyName = configuration.Project.Name ?? throw new Exception("Failed to determine sample name"),
                 NoImplicitCopy = true,
             };
 
@@ -528,21 +291,21 @@ namespace STM32IDEProjectImporter
             CommonConfigurationOptions opts;
             if (subtype == ProjectSubtype.Auto)
             {
-                var toolchainConfigNode = cconfiguration.SelectSingleNode(ToolchainConfigKey) as XmlNode ?? throw new Exception("Failed to locate the configuration node");
-                if (toolchainConfigNode.SelectSingleNode("tool[starts-with(@id, 'fr.ac6.managedbuild.tool.gnu.cross.c.compiler')]") != null)
+                var toolchainType = configuration.OptionalToolchain?.SuperClass ?? "";
+                if (toolchainType.StartsWith("fr.ac6.managedbuild.toolchain.gnu.cross"))
                     subtype = ProjectSubtype.SW4STM32;
-                else if (toolchainConfigNode.SelectSingleNode("tool[@superClass = 'com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler']") != null)
+                else if (toolchainType.StartsWith("com.st.stm32cube.ide.mcu.gnu.managedbuild"))
                     subtype = ProjectSubtype.STM32CubeIDE;
                 else
                     throw new Exception("Failed to detect the project type");
             }
 
             if (subtype == ProjectSubtype.SW4STM32)
-                opts = ExtractSW4STM32Options(cproject, project, cconfiguration, cprojectFileDir);
+                opts = ExtractSW4STM32Options(configuration);
             else if (subtype == ProjectSubtype.WiSEStudio)
-                opts = ExtractWiSEOptions(cproject, project, cconfiguration, cprojectFileDir);
+                opts = ExtractWiSEOptions(configuration);
             else
-                opts = ExtractSTM32CubeIDEOptions(cproject, project, cconfiguration, cprojectFileDir);
+                opts = ExtractSTM32CubeIDEOptions(configuration);
 
             var mcu = opts.MCU;
 
@@ -644,160 +407,6 @@ namespace STM32IDEProjectImporter
 
             result.HeaderFiles = headers.ToArray();
             return result;
-        }
-
-        Regex rgParentSyntax = new Regex("(\\$%7B|)PARENT-([0-9]+)-PROJECT_LOC(|..|%7D)/(.*)");
-
-        [Flags]
-        enum PathTranslationFlags
-        {
-            None = 0,
-            AddExtraComponentToBaseDir = 1,
-            ReturnEvenIfMissing = 2,
-        }
-
-        string TranslatePath(string baseDir, string path, PathTranslationFlags flags)
-        {
-            if (path == null)
-                return null;
-
-            path = path.Trim('\"');
-
-            string workspacePrefix = "${workspace_loc:/${ProjName}/";
-            string workspacePrefix2 = "${workspace_loc:/";
-            if (path.StartsWith(workspacePrefix))
-                path = path.Substring(workspacePrefix.Length).TrimEnd('}');
-            else if (path.StartsWith(workspacePrefix2))
-            {
-                string pathInsideWorkspace = path.Substring(workspacePrefix2.Length).Replace("${ProjName}", Path.GetFileName(baseDir)).TrimEnd('}');
-                try
-                {
-                    string testedDir = baseDir;
-                    for (; ; )
-                    {
-                        var candidate = Path.Combine(testedDir, pathInsideWorkspace);
-                        if (File.Exists(candidate) || Directory.Exists(candidate))
-                            return Path.GetFullPath(Path.Combine(testedDir, pathInsideWorkspace));
-                        var parentDir = Path.GetDirectoryName(testedDir);
-                        if (parentDir == null || parentDir.Length < 2 || parentDir == testedDir)
-                            return pathInsideWorkspace; //This is a fallback option that likely won't work, but it's better than throwing an exception
-
-                        testedDir = parentDir;
-                    }
-                }
-                catch
-                {
-                    return pathInsideWorkspace;
-                }
-            }
-
-            var m = rgParentSyntax.Match(path);
-            if (m.Success)
-            {
-                //e.g. PARENT-1-PROJECT_LOC/startup_stm32mp15xx.s => ../startup_stm32mp15xx.s
-                path = string.Join("/", Enumerable.Range(0, int.Parse(m.Groups[2].Value)).Select(i => "..").ToArray()) + "/" + m.Groups[4].Value.TrimStart('/');
-            }
-
-            string fullPath;
-
-            if (path == "")
-                fullPath = baseDir; //This is sometimes used for include directories.
-            else if ((flags & PathTranslationFlags.AddExtraComponentToBaseDir) != PathTranslationFlags.None)
-                fullPath = Path.GetFullPath(Path.Combine(baseDir, Path.Combine("Build", path)));
-            else
-                fullPath = Path.GetFullPath(Path.Combine(baseDir, path));
-
-            if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
-            {
-                OnFileNotFound(fullPath);
-                if ((flags & PathTranslationFlags.ReturnEvenIfMissing) == PathTranslationFlags.None)
-                    return null;
-            }
-
-            return fullPath;
-        }
-
-        public struct ParsedSourceFile
-        {
-            public string FullPath;
-            public string VirtualPath;
-
-            public SourceEntry AssociatedSourceEntry;
-
-            public override string ToString() => FullPath;
-        }
-
-        private List<ParsedSourceFile> ParseSourceList(XmlDocument project, string projectDir, SourceFilterEntry[] sourceFilters, Dictionary<string, SourceEntry> sourceReferences = null)
-        {
-            Regex rgStartup = new Regex("startup_stm.*\\.s");
-            List<ParsedSourceFile> sources = new List<ParsedSourceFile>();
-            foreach (var node in project.SelectNodes("projectDescription/linkedResources/link").OfType<XmlElement>())
-            {
-                string path = node.SelectSingleNode("locationURI")?.InnerText ?? node.SelectSingleNode("location")?.InnerText ?? throw new Exception("Resource name unspecified");
-                if (path == "")
-                    continue;
-
-                if (path.StartsWith("virtual:"))
-                    continue;
-
-                int type = int.Parse(node.SelectSingleNode("type")?.InnerText ?? throw new Exception("Resource type unspecified"));
-
-                string fullPath = TranslatePath(projectDir, path, PathTranslationFlags.None);
-                if (fullPath == null)
-                    continue;
-
-                if (rgStartup.IsMatch(fullPath))
-                    continue;   //Our BSP already provides a startup file
-
-                if (StringComparer.InvariantCultureIgnoreCase.Compare(Path.GetFileName(fullPath), "system_BlueNRG_LP.c") == 0)
-                    continue;   //This is the startup file on BlueNRG
-
-                if (sourceFilters != null)
-                {
-                    if (ShouldSkipNode(node, sourceFilters))
-                        continue;
-                }
-
-                var name = node.SelectSingleNode("name")?.InnerText;
-                if (name != null && sourceReferences != null && sourceReferences.TryGetValue(name, out var sr))
-                    sr.RelativePath = path;
-
-                string virtualPath = name ?? Path.GetFileName(fullPath);
-                sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = virtualPath });
-            }
-
-            if (sourceReferences != null)
-            {
-                foreach (var sr in sourceReferences.Values)
-                {
-                    if (sr.RelativePath == null)
-                    {
-                        //There was no entry in linkedResources corresponding to this source specifier
-                        string fullPath = TranslatePath(projectDir, sr.Name, PathTranslationFlags.None);
-                        if (fullPath == null)
-                            continue;
-
-                        sources.Add(new ParsedSourceFile { FullPath = Path.GetFullPath(fullPath), VirtualPath = sr.Name, AssociatedSourceEntry = sr });
-                    }
-                }
-            }
-
-            return sources;
-        }
-
-        private bool ShouldSkipNode(XmlElement node, SourceFilterEntry[] sourceFilters)
-        {
-            var virtualPath = node.SelectSingleNode("name")?.InnerText;
-            if (string.IsNullOrEmpty(virtualPath))
-                return false;
-
-            foreach (var sf in sourceFilters)
-            {
-                if (sf.MatchesVirtualPath(virtualPath))
-                    return true;
-            }
-
-            return false;
         }
     }
 
