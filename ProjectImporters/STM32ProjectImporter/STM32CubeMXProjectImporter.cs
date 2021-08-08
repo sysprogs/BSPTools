@@ -641,8 +641,10 @@ namespace STM32ProjectImporter
                 case ProjectReconfigurationReason.RegenerateFiles:
                     temporaryScriptFile = service.GetTemporaryFileName();
 
-                    if (EclipseProject.ExistsInDirectory(Path.GetDirectoryName(context.ProjectFile)))
+                    if (!File.Exists(Path.ChangeExtension(context.ProjectFile, ".gpdsc")))
                     {
+                        //Use the new STM32CubeIDE-based workflow
+
                         File.WriteAllLines(temporaryScriptFile, new[]
                         {
                             "project toolchain \"STM32CubeIDE\"",
@@ -654,13 +656,13 @@ namespace STM32ProjectImporter
                     {
                         PatchIOCFileIfNeeded(context.ProjectFile, service.GUI);
                         File.WriteAllLines(temporaryScriptFile, new[]
-                        {
-                        "project toolchain \"Makefile\"",
-                        "project generate",
-                        "project toolchain \"Other Toolchains (GPDSC)\"",
-                        "project generate",
-                        "exit",
-                        });
+                            {
+                            "project toolchain \"Makefile\"",
+                            "project generate",
+                            "project toolchain \"Other Toolchains (GPDSC)\"",
+                            "project generate",
+                            "exit",
+                            });
                     }
 
                     args = $"\"{context.ProjectFile}\" -s \"{temporaryScriptFile}\"";
