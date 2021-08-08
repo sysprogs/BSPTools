@@ -648,6 +648,7 @@ namespace STM32ProjectImporter
                         File.WriteAllLines(temporaryScriptFile, new[]
                         {
                             "project toolchain \"STM32CubeIDE\"",
+                            "project generateunderroot 1",
                             "project generate",
                             "exit",
                         });
