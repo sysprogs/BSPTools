@@ -530,9 +530,13 @@ namespace STM32ProjectImporter
         {
             var dir = Path.GetDirectoryName(parameters.ProjectFile);
 
-            if (EclipseProject.ExistsInDirectory(dir))
+            if (EclipseProject.ExistsInDirectory(dir) || parameters.TargetSubdirectory != null)
             {
-                return GenerateMCUDefinitionFromSTM32CubeIDE(service, new EclipseProject(dir, service?.Logger));
+                string projectDir = dir;
+                if (!string.IsNullOrEmpty(parameters.TargetSubdirectory))
+                    projectDir = Path.Combine(dir, parameters.TargetSubdirectory);
+
+                return GenerateMCUDefinitionFromSTM32CubeIDE(service, new EclipseProject(projectDir, service?.Logger), dir);
             }
             else
                 return GenerateMCUDefinitionFromGPDSC(service, Path.ChangeExtension(parameters.ProjectFile, ".gpdsc"));
@@ -566,7 +570,7 @@ namespace STM32ProjectImporter
             };
         }
 
-        MCUDefinitionFromProject GenerateMCUDefinitionFromSTM32CubeIDE(IProjectImportService service, EclipseProject project)
+        MCUDefinitionFromProject GenerateMCUDefinitionFromSTM32CubeIDE(IProjectImportService service, EclipseProject project, string baseDir)
         {
             var configuration = project.NonReleaseConfigurationsIfAny.FirstOrDefault() ?? throw new Exception($"{project.CProjectFile} does not contain any importable configurations");
             var options = SW4STM32ProjectParserBase.ExtractSTM32CubeIDEOptions(configuration);
@@ -577,7 +581,10 @@ namespace STM32ProjectImporter
             XmlElement mcuNode = LoadFamilyList(service, out string xmlFile).SelectSingleNode($"Families/Family/SubFamily/Mcu[@RefName='{options.MCU}']") as XmlElement ?? throw new Exception($"Could not locate '{options.MCU}' in {xmlFile}");
             var core = mcuNode.SelectSingleNode("Core")?.InnerText ?? throw new Exception($"The definition for '{options.MCU}' does not specify the core");
 
-            cflags.Add("-mcpu=" + TranslateCoreName(core));
+            if (options.PreprocessorMacros?.Contains("CORE_CM4") == true)
+                cflags.Add("-mcpu=cortex-m4");  //This project is targeting the Cortex-M4 core of a multi-core device
+            else
+                cflags.Add("-mcpu=" + TranslateCoreName(core));
 
             string fpuPrefix = "com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.value.";
             string fpuValue = tools.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu");
@@ -600,14 +607,14 @@ namespace STM32ProjectImporter
             var mcu = new MCU
             {
                 ID = options.MCU,
-                AdditionalSourceFiles = options.SourceFiles.Where(f => f.FullPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f.FullPath, project.BaseDirectory)).ToArray(),
-                AdditionalHeaderFiles = options.SourceFiles.Where(f => !f.FullPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f.FullPath, project.BaseDirectory)).ToArray(),
+                AdditionalSourceFiles = options.SourceFiles.Where(f => f.FullPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f.FullPath, baseDir)).ToArray(),
+                AdditionalHeaderFiles = options.SourceFiles.Where(f => !f.FullPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase)).Select(f => MakeBSPPath(f.FullPath, baseDir)).ToArray(),
                 CompilationFlags = new ToolFlags
                 {
-                    IncludeDirectories = options.IncludeDirectories.Select(d => MakeBSPPath(d, project.BaseDirectory)).ToArray(),
+                    IncludeDirectories = options.IncludeDirectories.Select(d => MakeBSPPath(d, baseDir)).ToArray(),
                     PreprocessorMacros = options.PreprocessorMacros,
                     COMMONFLAGS = string.Join(" ", cflags.ToArray()),
-                    LinkerScript = MakeBSPPath(options.LinkerScript, project.BaseDirectory),
+                    LinkerScript = MakeBSPPath(options.LinkerScript, baseDir),
                 }
             };
 
@@ -782,6 +789,23 @@ namespace STM32ProjectImporter
             }
 
             return result.ToArray();
+        }
+
+        public string[] LocateTargetSubdirectories(IProjectImportService service, ProjectReconfigurationContext context)
+        {
+            var baseDir = Path.GetDirectoryName(context.ProjectFile);
+            if (File.Exists(Path.Combine(baseDir, ".project")) && !EclipseProject.ExistsInDirectory(baseDir))
+            {
+                List<string> result = new List<string>();
+                foreach (var subdir in Directory.GetDirectories(baseDir))
+                    if (EclipseProject.ExistsInDirectory(subdir))
+                        result.Add(Path.GetFileName(subdir));
+
+                if (result.Count > 0)
+                    return result.ToArray();
+            }
+
+            return null;
         }
     }
 }
