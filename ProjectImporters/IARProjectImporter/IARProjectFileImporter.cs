@@ -55,9 +55,12 @@ namespace IARProjectFileImporter
 
                 var file = new ImportedExternalProject.ImportedFile
                 {
-                    FullPath = ExpandRelativePath(fileNode.SelectSingleNode("name").InnerText ?? ""),
+                    FullPath = ExpandRelativePath(fileNode.SelectSingleNode("name").InnerText),
                     Configurations = configurations.ToList(),
                 };
+
+                if (file.FullPath == null)
+                    continue;
 
                 string extension = Path.GetExtension(file.FullPath);
                 file.IsHeader = extension.StartsWith("h", StringComparison.InvariantCultureIgnoreCase);
@@ -113,7 +116,9 @@ namespace IARProjectFileImporter
             while (path.IndexOf(@"\..") > 0)
             {
                 path = path.Remove(path.IndexOf(@"\.."), 3);
-                tmpDir = tmpDir.Remove(tmpDir.LastIndexOf(@"\"));
+                tmpDir = Path.GetDirectoryName(tmpDir);
+                if (tmpDir == null)
+                    return null;
             }
 
             path = path.Replace("$PROJ_DIR$", tmpDir);
@@ -128,7 +133,7 @@ namespace IARProjectFileImporter
             if (pNode != null)
             {
                 st.PreprocessorMacros = pNode.SelectNodes("option[name=\"CCDefines\"]/state").OfType<XmlElement>().Select(el => el.InnerText).ToArray();
-                st.IncludeDirectories = pNode.SelectNodes("(option[name=\"CCIncludePath2\"]|option[name=\"newCCIncludePaths\"])/state").OfType<XmlElement>().Select(el => ExpandRelativePath(el.InnerText)).ToArray();
+                st.IncludeDirectories = pNode.SelectNodes("(option[name=\"CCIncludePath2\"]|option[name=\"newCCIncludePaths\"])/state").OfType<XmlElement>().Select(el => ExpandRelativePath(el.InnerText)).Where(d => !string.IsNullOrEmpty(d)).ToArray();
                 st.GeneratePreprocessorOutput = pNode.SelectSingleNode("option[name=\"CCPreprocFile\"]/state")?.InnerText == "1" ? true : false;
             }
             return st;
