@@ -82,7 +82,7 @@ namespace KSDK2xImporter
                     freertosPort = "ARM_CM3";
                     break;
                 case CortexCore.M7:
-                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb -mfpu=fpv4-sp-d16";
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
                     coreName = "M7";
                     freertosPort = "ARM_CM7/r0p1";

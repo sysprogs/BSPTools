@@ -375,22 +375,25 @@ namespace KSDK2xImporter
                 {
                     Dictionary<string, string> flags = new Dictionary<string, string>();
                     string dir = Path.Combine(_Directory, example.RelativePath);
-                    var cmakeLists = Path.Combine(dir, "armgcc\\CMakeLists.txt");
                     HashSet<string> moreFlags = new HashSet<string>();
-                    if (File.Exists(cmakeLists))
+                    foreach (var fn in new[] { "armgcc\\CMakeLists.txt", "armgcc\\flags.cmake" })
                     {
-                        foreach (var line in File.ReadAllLines(cmakeLists))
+                        var cmakeLists = Path.Combine(dir, fn);
+                        if (File.Exists(cmakeLists))
                         {
-                            var match = rgCPUOrFPU.Match(line);
-                            if (match.Success)
+                            foreach (var line in File.ReadAllLines(cmakeLists))
                             {
-                                if (!flags.TryGetValue(match.Groups[1].Value, out var oldValue) || oldValue == match.Groups[2].Value)
-                                    flags[match.Groups[1].Value] = match.Groups[2].Value;
-                                else
-                                    flags[match.Groups[1].Value] = null;
+                                var match = rgCPUOrFPU.Match(line);
+                                if (match.Success)
+                                {
+                                    if (!flags.TryGetValue(match.Groups[1].Value, out var oldValue) || oldValue == match.Groups[2].Value)
+                                        flags[match.Groups[1].Value] = match.Groups[2].Value;
+                                    else
+                                        flags[match.Groups[1].Value] = null;
+                                }
+                                if (line.Contains("-mthumb"))
+                                    moreFlags.Add("-mthumb");
                             }
-                            if (line.Contains("-mthumb"))
-                                moreFlags.Add("-mthumb");
                         }
                     }
 
