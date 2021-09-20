@@ -536,7 +536,7 @@ namespace STM32ProjectImporter
                 if (!string.IsNullOrEmpty(parameters.TargetSubdirectory))
                     projectDir = Path.Combine(dir, parameters.TargetSubdirectory);
 
-                return GenerateMCUDefinitionFromSTM32CubeIDE(service, new EclipseProject(projectDir, service?.Logger), dir);
+                return GenerateMCUDefinitionFromSTM32CubeIDE(service, new EclipseProject(projectDir, service?.Logger), dir, MultipleConfigurationResolutionMode.Last);
             }
             else
                 return GenerateMCUDefinitionFromGPDSC(service, Path.ChangeExtension(parameters.ProjectFile, ".gpdsc"));
@@ -570,9 +570,22 @@ namespace STM32ProjectImporter
             };
         }
 
-        MCUDefinitionFromProject GenerateMCUDefinitionFromSTM32CubeIDE(IProjectImportService service, EclipseProject project, string baseDir)
+        enum MultipleConfigurationResolutionMode
         {
-            var configuration = project.NonReleaseConfigurationsIfAny.FirstOrDefault() ?? throw new Exception($"{project.CProjectFile} does not contain any importable configurations");
+            First,
+            Last,
+        }
+
+        MCUDefinitionFromProject GenerateMCUDefinitionFromSTM32CubeIDE(IProjectImportService service, EclipseProject project, string baseDir, MultipleConfigurationResolutionMode mode)
+        {
+            EclipseProject.CConfiguration configuration;
+            if (mode == MultipleConfigurationResolutionMode.First)
+                configuration = project.NonReleaseConfigurationsIfAny.FirstOrDefault();
+            else
+                configuration = project.NonReleaseConfigurationsIfAny.LastOrDefault();
+
+            if (configuration == null)
+                throw new Exception($"{project.CProjectFile} does not contain any importable configurations");
             var options = SW4STM32ProjectParserBase.ExtractSTM32CubeIDEOptions(configuration);
 
             List<string> cflags = new List<string>();
