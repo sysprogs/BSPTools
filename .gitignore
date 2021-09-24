@@ -40,4 +40,5 @@ Output
 /DebugPackages/TiXDSDebugPackage/FLASH/CC3220SF/VisualGDB/VisualGDBCache/CC3220SF-Debug
 /VendorSampleParsers/stm32/Cache
 /VendorSampleParsers/Nordic/Cache
-/generators/nrf5x/logs
+BSPReport.txt
+RelocationReport.txt

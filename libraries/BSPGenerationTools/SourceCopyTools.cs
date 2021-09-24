@@ -552,7 +552,7 @@ namespace BSPGenerationTools
                 .Where(f => !bsp.SkipHiddenFiles || (File.GetAttributes(f) & FileAttributes.Hidden) != FileAttributes.Hidden)
                 .Select(f => f.Substring(expandedSourceFolder.Length + 1))
                 .Where(f => copyMasks.IsMatch(f))
-                .ToArray(); 
+                .ToArray();
 
             foreach (var dir in filesToCopy.Select(f => Path.Combine(absTarget, Path.GetDirectoryName(f))).Distinct())
                 Directory.CreateDirectory(dir);
@@ -626,28 +626,24 @@ namespace BSPGenerationTools
 
                 bool includedInProject = projectContents.IsMatch(f);
                 if (includedInProject)
+                {
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
 
-                ParsedCondition foundCondition = null;
-
-                if (conditions != null)
-                {
-                    foreach (var cond in conditions)
-                        if (cond.Regex.IsMatch(f))
-                        {
-                            bsp.AddFileCondition(new FileCondition { ConditionToInclude = cond.Condition, FilePath = encodedPath });
-                            cond.UseCount++;
-
-                            if (includedInProject)
+                    ParsedCondition foundCondition = null;
+                    if (conditions != null)
+                    {
+                        foreach (var cond in conditions)
+                            if (cond.Regex.IsMatch(f))
+                            {
+                                bsp.AddFileCondition(new FileCondition { ConditionToInclude = cond.Condition, FilePath = encodedPath });
+                                cond.UseCount++;
                                 cond.ReverseConditionHandle?.AttachFile(encodedPath);
 
-                            foundCondition = cond;
-                            break;
-                        }
-                }
+                                foundCondition = cond;
+                                break;
+                            }
+                    }
 
-                if (includedInProject)
-                {
                     bool createReverseConditionForJustFrameworkReference = foundCondition == null;
                     if (foundCondition != null && foundCondition.ReverseConditionHandle == null && ((Flags & CopyJobFlags.SimpleFileConditionsAreSecondary) != CopyJobFlags.None))
                     {
@@ -1038,7 +1034,7 @@ namespace BSPGenerationTools
         public string FamilySubdirectory;
         public string PrimaryHeaderDir;
         public string StartupFileDir;
-        
+
         public bool HasMixedCores; //Different devices within the family can have different cores (e.g. Cortex-M0 vs Cortex-M4)
         public bool HasMixedFPUs;
 

@@ -19,6 +19,7 @@
 				ti\posix\freertos\timer.c=>freertos_timer.c;
 				ti\grlib\display.c=>grlib_display.c;
 				ti\utils\json\source\utils.c=>json_utils.c;
+				ti\utils\json\source\json.c=>json_impl.c;
 				ti\display\display.c=>ti_display.c
 				</RenameRules>
 				<AdvancedRenameRules>ti\\drivers\\(adc|camera|i2c|i2s|spi|timer|uart|watchdog)\.c$=>drv_{1}.c;ti\\drivers\\apps\\(Button)\.c=>drv_{1}.c</AdvancedRenameRules>
@@ -46,7 +47,7 @@
 			<FrameworkID>com.sysprogs.arm.ti.cc3220.freertos</FrameworkID>
 		  </FlagCondition>
 		  <Flags>
-			<LinkerScript>$$SYS:BSP_ROOT$$/source/ti/boards/$$SYS:MCU_ID$$_LAUNCHXL/$$SYS:MCU_ID$$_LAUNCHXL_freertos.lds</LinkerScript>
+			<LinkerScript>$$SYS:BSP_ROOT$$/source/ti/boards/$$com.sysprogs.cc3220.board_dir$$/$$com.sysprogs.cc3220.board_dir$$_freertos.lds</LinkerScript>
 		  </Flags>
 		</ConditionalToolFlags>
 		<ConditionalToolFlags>
@@ -60,7 +61,7 @@
 				</Arguments>
 			</FlagCondition>
 		  <Flags>
-			<LinkerScript>$$SYS:BSP_ROOT$$/source/ti/boards/$$SYS:MCU_ID$$_LAUNCHXL/$$SYS:MCU_ID$$_LAUNCHXL_nortos.lds</LinkerScript>
+			<LinkerScript>$$SYS:BSP_ROOT$$/source/ti/boards/$$com.sysprogs.cc3220.board_dir$$/$$com.sysprogs.cc3220.board_dir$$_nortos.lds</LinkerScript>
 		  </Flags>
 		</ConditionalToolFlags>
 	  </ConditionalFlags>
@@ -211,7 +212,7 @@
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>
-		<Framework> <!-- MQTT -->
+		<Framework> <!-- JSON -->
 			<Name>JSON support</Name>
 			<ID>com.sysprogs.arm.ti.cc3220.json</ID>
 			<ProjectFolderName>JSON</ProjectFolderName>
@@ -261,15 +262,25 @@
 			<RequiredFrameworks>
 			</RequiredFrameworks>
 			<CopyJobs>
-			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\nortos</SourceFolder>
-				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
-				<FilesToCopy>-*.projectspec;*</FilesToCopy>
-				<AutoIncludeMask>-*</AutoIncludeMask>	
-				<TargetFolder>kernel\nortos</TargetFolder>
-				<AlreadyCopied>true</AlreadyCopied>
-				<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\nortos</SourceFolder>
+					<ProjectInclusionMask>-*ticlang*;-*\ccs\*;-*\iar\;-package\*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
+					<FilesToCopy>-*.projectspec;*</FilesToCopy>
+					<AutoIncludeMask>-*</AutoIncludeMask>	
+					<TargetFolder>kernel\nortos</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<PreprocessorMacros>NORTOS_SUPPORT</PreprocessorMacros>
+					<AdditionalIncludeDirs>?;</AdditionalIncludeDirs>
 				</CopyJob>	
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\source/ti/posix</SourceFolder>
+					<ProjectInclusionMask>*.h</ProjectInclusionMask>
+					<FilesToCopy>gcc\*</FilesToCopy>
+					<AutoIncludeMask>-*</AutoIncludeMask>	
+					<TargetFolder>source\ti\posix</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
+					<AdditionalIncludeDirs>gcc</AdditionalIncludeDirs>
+				</CopyJob>
 			</CopyJobs>
 			<AdditionalSystemVars>
 				<SysVarEntry>
@@ -300,8 +311,8 @@
 			<CopyJobs>
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos</SourceFolder>
-				<ProjectInclusionMask>-*\ccs\*;-*\iar\;-package\*;-*MSP432*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
-				<FilesToCopy>-*.projectspec;-*FreeRTOSConfig.h;-*.obj;*</FilesToCopy>
+				<ProjectInclusionMask>-*ticlang*;-*\ccs\*;-*\iar\;-package\*;-*MSP432*;-*_ccs.c;-*_iar.c;*.c;*.h</ProjectInclusionMask>
+				<FilesToCopy>-*CC26X*;-*.projectspec;-*FreeRTOSConfig.h;-*.obj;*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
 				<TargetFolder>kernel\freertos</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
@@ -316,20 +327,13 @@
 				<TargetFolder>source\ti\posix</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
 				<AdditionalIncludeDirs>gcc</AdditionalIncludeDirs>
-				<Patches>
-					<Patch xsi:type="ReplaceLine">
-						<FilePath>gcc\mqueue.h</FilePath>
-						<OldLine>typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</OldLine>
-						<NewLine>//typedef uint32_t mode_t;  /* TODO: sys/stat.h? */</NewLine>
-					</Patch>
-				</Patches> 
 			</CopyJob>
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\FreeRTOSv10.2.1_191129\FreeRTOS</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\FreeRTOSv10.2.1\FreeRTOS</SourceFolder>
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<FilesToCopy>source\portable\MemMang\*;source\portable\GCC\ARM_CM3\*;source\portable\GCC\ARM_CM4F\*;-source\portable\*;source\*</FilesToCopy>
 				<AutoIncludeMask>-*</AutoIncludeMask>	
-				<TargetFolder>FreeRTOSv10.2.1_191129\FreeRTOS</TargetFolder>
+				<TargetFolder>FreeRTOSv10.2.1\FreeRTOS</TargetFolder>
 				<AdditionalIncludeDirs>source\include;source\portable\GCC\ARM_CM3</AdditionalIncludeDirs>
 				<SmartPropertyGroup>com.sysprogs.bspoptions.cc3220.freertos.|FreeRTOS</SmartPropertyGroup>
 				<SmartFileConditions>
@@ -362,7 +366,7 @@ Source\\portable\\GCC\\ARM_CM4F\\.*=>+ARM Cortex M4 with Hardware FP[CM4F];
 				</Patches>
 			</CopyJob>	 -->
 			<CopyJob>
-				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos\builds\CC3220SF_LAUNCHXL\release</SourceFolder>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos\builds\cc32xx\release</SourceFolder>
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<FilesToCopy>FreeRTOSConfig.h</FilesToCopy>
 				<!--AutoIncludeMask>-*</AutoIncludeMask-->	
@@ -395,6 +399,7 @@ grlib:Graphics Library:source\ti\grlib:
 atcmd:AT Command Support:source\ti\net\atcmd:
 http:HTTP Client:source\ti\net\http:
 sntp:SNTP Support:source\ti\net\sntp:
+loggers:Loggers:source\ti\loggers:
 net_utils:Network Utilities:source\ti\net\utils:
 </Range>
 			<Template>

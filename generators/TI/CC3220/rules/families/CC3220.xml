@@ -4,7 +4,22 @@
 	<DeviceRegex>.*</DeviceRegex>
 	<PrimaryHeaderDir>$$BSPGEN:INPUT_DIR$$\source\ti\devices\cc32xx\inc</PrimaryHeaderDir>
 	<StartupFileDir>$$BSPGEN:INPUT_DIR$$\examples\project</StartupFileDir>
-	<Subfamilies></Subfamilies>
+	<Subfamilies>
+		<MCUClassifier>
+			<VariableName>com.sysprogs.cc3220.board_dir</VariableName>
+			<Required>true</Required>
+			<Options>	
+				<Option>
+					<Value>cc32xxs</Value>
+					<Regex>.*S$</Regex>					
+				</Option>
+				<Option>
+					<Value>cc32xxsf</Value>
+					<Regex>.*SF$</Regex>					
+				</Option>
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>
 	<CompilationFlags>
 		<IncludeDirectories>
 			<string>.</string>

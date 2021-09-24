@@ -19,7 +19,8 @@ namespace CC3220VendorSampleParser
 
         public FrameworkLocator(string sdkDir, string rulesDir)
         {
-            _AllFilesInSDK = Directory.GetFiles(sdkDir, "*", SearchOption.AllDirectories).Select(f => f.Substring(sdkDir.Length + 1).Replace('\\', '/')).ToArray();
+            var freeRTOSPrefix = Path.Combine(sdkDir, "FreeRTOSv");
+            _AllFilesInSDK = Directory.GetFiles(sdkDir, "*", SearchOption.AllDirectories).Where(f => !f.StartsWith(freeRTOSPrefix)).Select(f => f.Substring(sdkDir.Length + 1).Replace('\\', '/')).ToArray();
             _FamilyDefinition = XmlTools.LoadObject<FamilyDefinition>(Path.Combine(rulesDir, "CommonFiles.xml"));
 
             _AllFrameworks = _FamilyDefinition.AdditionalFrameworks.Concat(_FamilyDefinition.AdditionalFrameworkTemplates.SelectMany(t => t.Expand())).ToArray();

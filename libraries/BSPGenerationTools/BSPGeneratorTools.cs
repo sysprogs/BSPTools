@@ -737,7 +737,7 @@ namespace BSPGenerationTools
 
             family.AdditionalSystemVars = LoadedBSP.Combine(family.AdditionalSystemVars, Definition.AdditionalSystemVars);
 
-            if (Definition.CoreFramework.ConfigurableProperties != null)
+            if (Definition.CoreFramework?.ConfigurableProperties != null)
             {
                 if (Definition.ConfigurableProperties == null)
                     Definition.ConfigurableProperties = Definition.CoreFramework.ConfigurableProperties;

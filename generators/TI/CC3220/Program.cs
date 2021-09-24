@@ -8,6 +8,7 @@ using BSPGenerationTools;
 using LinkerScriptGenerator;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -62,7 +63,9 @@ namespace CC3200_bsp_generator
         {
             if (args.Length < 1)
                 throw new Exception("Usage: cc3220.exe <cc3220 SW package directory>");
-            string DirSDK = args[0];
+            string sdkDir = args[0];
+            GenerateDriverConfigs(sdkDir);
+
             using (var bspBuilder = new CC3220BSPBuilder(BSPDirectories.MakeDefault(args)))
             {
                 bool noPeripheralRegisters = args.Contains("/noperiph");
@@ -83,7 +86,7 @@ namespace CC3200_bsp_generator
                         Name = name,
                         MCUDefinitionFile = deviceDefinitionFile,
                         //LinkerScriptPath = $"$$SYS:BSP_ROOT$$/source/ti/boards/{name}_LAUNCHXL/{name}_LAUNCHXL_$$com.sysprogs.cc3220.rtos$$.lds",
-                        StartupFile = null
+                        StartupFile = null,
                     });
                 }
 
@@ -128,11 +131,33 @@ namespace CC3200_bsp_generator
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
                     ConditionalFlags = commonPseudofamily.Definition.ConditionalFlags,
-                    PackageVersion = "4.20.00"
+                    PackageVersion = "5.20.00"
                 };
                 bspBuilder.Save(bsp, !noPack);
 
                 //StandaloneBSPValidator.Program.Main(new[] { "..\\..\\cc3220.validatejob", "f:\\bsptest" });
+            }
+        }
+
+        private static void GenerateDriverConfigs(string sdkDir)
+        {
+            foreach(var makefile in Directory.GetFiles(Path.Combine(sdkDir, "examples"), "Makefile", SearchOption.AllDirectories))
+            {
+                var dir = Path.GetDirectoryName(makefile);
+                if (!dir.EndsWith("\\gcc", StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+
+                var configFile = Path.Combine(dir, "ti_drivers_config.c");
+                if (File.Exists(configFile))
+                    continue;
+
+                var proc = Process.Start(new ProcessStartInfo("make", "syscfg") { WorkingDirectory = dir, UseShellExecute = false });
+                proc.WaitForExit();
+                if (proc.ExitCode != 0)
+                    throw new Exception("Failed to generate " + configFile);
+
+                if (!File.Exists(configFile))
+                    throw new Exception(configFile + " did not get generated");
             }
         }
     }

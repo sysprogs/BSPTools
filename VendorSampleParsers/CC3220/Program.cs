@@ -215,7 +215,12 @@ namespace CC3220VendorSampleParser
                             var fullPath = Path.GetFullPath(Path.Combine(aCurDir, file));
 
                             if (!File.Exists(fullPath))
+                            {
+                                if (fullPath.EndsWith(".h"))
+                                    continue;
+
                                 throw new Exception("Missing " + fullPath);
+                            }
                             lstFileC.Add(fullPath);
                         }
                     }
@@ -233,6 +238,26 @@ namespace CC3220VendorSampleParser
                         lstConstDir.Add(m.Groups[1].Value, m.Groups[2].Value);
                 }
 
+                var genlibsFile = Path.Combine(Path.GetDirectoryName(nameFile), "ti_utils_build_linker.cmd.genlibs");
+                if (File.Exists(genlibsFile))
+                {
+                    foreach(var line in File.ReadAllLines(genlibsFile))
+                    {
+                        var name = line.Trim(' ', '\t', '\"');
+                        if (name.EndsWith(".a"))
+                        {
+                            if (name.EndsWith("runtime_release.a"))
+                                continue;
+                            if (name.EndsWith("atcmd.a") && !relativePath.ToLower().Contains("at_commands"))
+                            {
+                                //Several examples reference it, but actually don't need it, and provide conflicting definitions of SimpleLink callbacks, that would trigger build errors.
+                                continue;
+                            }
+
+                            referencedFrameworks.Add(_FrameworkLocator.LocateFrameworkForLibraryFile(Path.GetFileName(name)));
+                        }
+                    }
+                }
 
                 if (lstFileInc.Where(f => f.Contains("$")).Count() > 0)
                     throw new Exception("Path contains macros " + string.Join(", ", lstFileInc.Where(f => f.Contains("$"))));
@@ -295,7 +320,7 @@ namespace CC3220VendorSampleParser
 
                 var filestr = File.ReadAllLines(impfile);
 
-                FREERTOS_INSTALL_DIR = Path.Combine(SDKdir, "FreeRTOSv10.2.1_191129");
+                FREERTOS_INSTALL_DIR = Path.Combine(SDKdir, "FreeRTOSv10.2.1");
 
                 for (int c = 0; c < filestr.Count(); c++)
                 {
