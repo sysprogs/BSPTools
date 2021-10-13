@@ -77,8 +77,9 @@ namespace msp430
             XmlSerializer regSer = new XmlSerializer(typeof(MCUDefinition));
 
             string[] files = Directory.GetFiles(Path.Combine(toolchainDir, "include"), "*.h");
+            Regex rgLD = new Regex(@"PROVIDE\(([0-9A-Za-z_]+)[ \t]+= *(0x[0-9a-fA-F]+)\);");
 
-            for (int i = 0; i <files.Length; i++)
+            for (int i = 0; i < files.Length; i++)
             {
                 string file = files[i];
 
@@ -114,6 +115,7 @@ namespace msp430
                 string ld = Path.ChangeExtension(file, ".ld");
                 if (!File.Exists(ld))
                     continue;
+
                 foreach (var line in File.ReadAllLines(ld))
                 {
                     if (line.StartsWith("  RAM"))
@@ -132,29 +134,47 @@ namespace msp430
                     }
                 }
 
+                var symLD = Path.ChangeExtension(ld, "").TrimEnd('.') + "_symbols.ld";
+                Dictionary<string, string> symbols = new Dictionary<string, string>();
+                if (File.Exists(symLD))
+                {
+                    foreach (var ldLine in File.ReadAllLines(symLD))
+                    {
+                        var m = rgLD.Match(ldLine);
+                        if (m.Success)
+                        {
+                            symbols[m.Groups[1].Value] = m.Groups[2].Value;
+                        }
+                    }
+                }
+
                 if (mcu.RAMSize == 0)
                     throw new Exception("RAM size cannot be 0");
 
+                Regex rgRegister = new Regex("extern volatile (.*) ([^ ]+) __asm__\\(\"([^\"]+)\"\\)");
+                Regex rgRegister2 = new Regex("extern volatile (.*) ([^ ]+);");
 
                 foreach (var line in lines)
                 {
-                    Regex rgRegister = new Regex("extern volatile (.*) ([^ ]+) __asm__\\(\"([^\"]+)\"\\)");
-
                     var m = rgRegister.Match(line);
                     if (!m.Success)
                     {
-                        if (line.Contains("extern") && line.Contains("__asm__"))
-                            throw new Exception("Suspicious line");
-                        continue;
+                        m = rgRegister2.Match(line);
+                        if (!m.Success)
+                        {
+                            if (line.Contains("extern") && line.Contains("__asm__"))
+                                throw new Exception("Suspicious line");
+                            if (line.Contains("extern volatile"))
+                                throw new Exception("Suspicious line");
+                            continue;
+                        }
                     }
 
                     string type = m.Groups[1].Value;
                     string name = m.Groups[2].Value;
                     if (name.EndsWith("_H") || name.EndsWith("_L"))
                         continue;
-                    if (!m.Groups[3].Value.StartsWith("0x"))
-                        throw new Exception("Invalid addr for " + name);
-                    ulong addr = ulong.Parse(m.Groups[3].Value.Substring(2), System.Globalization.NumberStyles.HexNumber);
+
 
                     HardwareRegister reg = new HardwareRegister();
                     // TODO: the registers are not all 8 bits
@@ -172,7 +192,18 @@ namespace msp430
                         throw new Exception("Unknown type");
 
                     reg.Name = name;
-                    reg.Address = m.Groups[3].Value;
+                    if (m.Groups.Count > 3)
+                        reg.Address = m.Groups[3].Value;
+                    else
+                    {
+                        if (!symbols.TryGetValue(reg.Name, out reg.Address))
+                            continue;
+                    }
+
+                    if (!reg.Address.StartsWith("0x"))
+                        throw new Exception("Invalid addr for " + name);
+                    ulong addr = ulong.Parse(reg.Address.Substring(2), System.Globalization.NumberStyles.HexNumber);
+
                     regs.Add(reg);
                 }
 
@@ -340,9 +371,10 @@ namespace msp430
                     throw new NotSupportedException();
 
                 string addr = el.Attributes["baseaddr"].Value;
-                if (addr != "0x0000")
-                    throw new NotSupportedException();
+                if (!addr.StartsWith("0x"))
+                    throw new Exception("Unsupported base");
 
+                uint baseAddr = uint.Parse(addr.Substring(2), System.Globalization.NumberStyles.HexNumber);
 
                 if (peripheralDefinition.EndsWith("_NotVisible.xml"))
                     continue;
@@ -350,7 +382,10 @@ namespace msp430
                 XmlDocument xmlModule = new XmlDocument();
                 xmlModule.Load(peripheralDefinition);
 
-                var newSet = new HardwareRegisterSet { UserFriendlyName = xmlModule.SelectSingleNode("module").Attributes["description"].Value };
+                var newSet = new HardwareRegisterSet { UserFriendlyName = (xmlModule.SelectSingleNode("module") as XmlElement).GetAttribute("description") };
+                if (newSet.UserFriendlyName == "")
+                    newSet.UserFriendlyName = xmlModule.SelectSingleNode("module").Attributes["id"].Value;
+
                 newRegisterSets.Add(newSet);
 
                 List<HardwareRegister> newRegs = new List<HardwareRegister>();
@@ -358,7 +393,7 @@ namespace msp430
                 foreach (XmlElement reg in xmlModule.SelectNodes("module/register"))
                 {
                     string registerID = reg.Attributes["id"].Value;
-                    ulong lAddr = ParseAddr(reg.Attributes["offset"].Value.Trim());
+                    ulong lAddr = ParseAddr(reg.Attributes["offset"].Value.Trim()) + baseAddr;
                     ulong oldAddr;
                     int sizeInBits = int.Parse(reg.Attributes["width"].Value);
                     if (oldRegisters.TryGetValue(registerID, out oldAddr))
@@ -400,7 +435,7 @@ namespace msp430
                             }
 
                             string valName = val.Attributes["id"].Value;
-                            int value = int.Parse(val.Attributes["value"].Value);
+                            int value = ParseInt(val.Attributes["value"].Value);
                             if (value >= subValues.Length)
                                 bad = true;
                             else
@@ -465,6 +500,13 @@ namespace msp430
             hardwareRegisterSets = newRegisterSets.ToArray();
         }
 
+        private static int ParseInt(string value)
+        {
+            if (value.StartsWith("0x"))
+                return int.Parse(value.Substring(2), System.Globalization.NumberStyles.HexNumber);
+            else
+                return int.Parse(value);
+        }
 
         public static UInt64 ParseAddr(string str)
         {
