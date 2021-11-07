@@ -178,7 +178,7 @@ namespace BSPGenerationTools
                         List<object> args = new List<object>();
                         foreach (Group g in m.Groups)
                             args.Add(g.Value);
-                        lines[i] = string.Format(lines[i], args.ToArray());
+                        lines[i] = string.Format(ValueFormat, args.ToArray());
                         hitCount++;
                     }
                 }
