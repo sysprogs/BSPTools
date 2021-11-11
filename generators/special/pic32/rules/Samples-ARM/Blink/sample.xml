@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>Blink</Name>
+  <Description>A very basic sample demonstrating how to control the LEDs via a GPIO port</Description>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+   <RequiredFrameworks>
+  </RequiredFrameworks> 
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+		  <DefaultValue>0</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>15</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>1</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>15</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay (cycles)</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYCYCLES</UniqueID>
+		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+		  <DefaultValue>10000</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+</EmbeddedProjectSample>

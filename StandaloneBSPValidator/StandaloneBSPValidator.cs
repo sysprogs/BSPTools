@@ -103,6 +103,7 @@ namespace StandaloneBSPValidator
         public RegisterRenamingRule[] RegisterRenamingRules;
         public string[] NonValidatedRegisters;
         public string[] UndefinedMacros;
+        public string BSPSubfolderMask;
     }
 
     public class Program
@@ -516,8 +517,26 @@ namespace StandaloneBSPValidator
                 foreach (var kv in sampleObj.Sample.DefaultConfiguration.Entries)
                     configuredSample.FrameworkParameters[kv.Key] = kv.Value;
 
+            Dictionary<string, string> mcuDict = null;
+
             ApplyConfiguration(configuredSample.FrameworkParameters, extraParameters?.FrameworkConfiguration, sample.FrameworkConfiguration);
             ApplyConfiguration(configuredSample.Parameters, extraParameters?.SampleConfiguration, sample.SampleConfiguration);
+
+            foreach(var kv in configuredSample.Parameters.ToArray())
+            {
+                if (kv.Value.Contains("$$"))
+                {
+                    if (mcuDict == null)
+                    {
+                        mcuDict = new Dictionary<string, string>();
+                        if (configuredMCU.ExpandedMCU.AdditionalSystemVars != null)
+                            foreach (var kv2 in configuredMCU.ExpandedMCU.AdditionalSystemVars)
+                                mcuDict[kv2.Key] = kv2.Value;
+                    }
+
+                    configuredSample.Parameters[kv.Key] = VariableHelper.ExpandVariables(kv.Value, mcuDict);
+                }
+            }
 
             Dictionary<string, bool> frameworkIDs = new Dictionary<string, bool>();
             foreach (var fw in sampleObj.Sample.RequiredFrameworks ?? new string[0])
@@ -914,8 +933,22 @@ namespace StandaloneBSPValidator
         {
             var job = XmlTools.LoadObject<TestJob>(jobFile);
             job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(jobFile));
-            var bsp = LoadBSP(job.ToolchainPath, job.BSPPath);
 
+            if (job.BSPSubfolderMask != null)
+            {
+                foreach(var dir in Directory.GetDirectories(job.BSPPath, job.BSPSubfolderMask))
+                {
+                    job.BSPPath = dir;
+                    TestBSP(job, outputDir);
+                }
+            }
+            else
+                TestBSP(job, outputDir);
+        }
+
+        static void TestBSP(TestJob job, string outputDir)
+        {
+            var bsp = LoadBSP(job.ToolchainPath, job.BSPPath);
             TestBSP(job, bsp, outputDir);
         }
 

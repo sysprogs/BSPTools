@@ -290,23 +290,14 @@ namespace BSPGenerationTools
             }
         }
 
-        public void Save(BoardSupportPackage bsp, bool produceBSPArchive, bool addFixedStackHeapFramework = true)
+        public static void SaveBSP(BoardSupportPackage bsp, string dir, bool produceBSPArchive)
         {
-            if (addFixedStackHeapFramework)
-            {
-                string dir = Path.Combine(Directories.OutputDir, "StackAndHeap");
-                Directory.CreateDirectory(dir);
-                File.Copy(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "StackAndHeap.c"), Path.Combine(dir, "StackAndHeap.c"));
-                var framework = XmlTools.LoadObject<EmbeddedFramework>(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "StackAndHeap.xml"));
-                bsp.Frameworks = LoadedBSP.Combine(bsp.Frameworks, new[] { framework });
-            }
-
-            XmlTools.SaveObject(bsp, Path.Combine(BSPRoot, "BSP.XML"));
+            XmlTools.SaveObject(bsp, Path.Combine(dir, "BSP.XML"));
 
             string archiveName = string.Format("{0}-{1}.vgdbxbsp", bsp.PackageID.Split('.').Last(), bsp.PackageVersion);
 
             if (produceBSPArchive)
-                TarPacker.PackDirectoryToTGZ(BSPRoot, Path.Combine(BSPRoot, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp");
+                TarPacker.PackDirectoryToTGZ(dir, Path.Combine(dir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp");
 
             BSPSummary lst = new BSPSummary
             {
@@ -320,7 +311,21 @@ namespace BSPGenerationTools
             foreach (var mcu in bsp.SupportedMCUs)
                 lst.MCUs.Add(new BSPSummary.MCU { Name = mcu.ID, FLASHSize = mcu.FLASHSize, RAMSize = mcu.RAMSize, UserFriendlyName = mcu.UserFriendlyName });
 
-            XmlTools.SaveObject(lst, Path.Combine(BSPRoot, Path.ChangeExtension(archiveName, ".xml")));
+            XmlTools.SaveObject(lst, Path.Combine(dir, Path.ChangeExtension(archiveName, ".xml")));
+        }
+
+        public void Save(BoardSupportPackage bsp, bool produceBSPArchive, bool addFixedStackHeapFramework = true)
+        {
+            if (addFixedStackHeapFramework)
+            {
+                string dir = Path.Combine(Directories.OutputDir, "StackAndHeap");
+                Directory.CreateDirectory(dir);
+                File.Copy(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "StackAndHeap.c"), Path.Combine(dir, "StackAndHeap.c"));
+                var framework = XmlTools.LoadObject<EmbeddedFramework>(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "StackAndHeap.xml"));
+                bsp.Frameworks = LoadedBSP.Combine(bsp.Frameworks, new[] { framework });
+            }
+
+            SaveBSP(bsp, BSPRoot, produceBSPArchive);
         }
 
 
@@ -757,7 +762,7 @@ namespace BSPGenerationTools
                 {
                     family.ConfigurableProperties.Import(new PropertyList
                     {
-                    PropertyGroups = new List<PropertyGroup>()
+                        PropertyGroups = new List<PropertyGroup>()
                     {
                         new PropertyGroup
                         {
@@ -1337,6 +1342,20 @@ namespace BSPGenerationTools
                     yield return new CopiedSample { RelativePath = sample.DestinationFolder, IsTestProjectSample = sample.IsTestProjectSample };
                 }
             }
+        }
+
+        public static bool MaskToBitRange(ulong mask, out int firstBit, out int bitCount)
+        {
+            const int maxBits = 64;
+            for (firstBit = 0; firstBit < maxBits; firstBit++)
+                if ((mask & (1UL << firstBit)) != 0)
+                    break;
+
+            for (bitCount = 0; bitCount < (maxBits - firstBit); bitCount++)
+                if ((mask & (1UL << (firstBit + bitCount))) == 0)
+                    break;
+
+            return firstBit < maxBits;
         }
 
         public void AttachPeripheralRegisters(IEnumerable<MCUDefinitionWithPredicate> registers, string deviceDefinitionFolder = "DeviceDefinitions", bool throwIfNotFound = true)

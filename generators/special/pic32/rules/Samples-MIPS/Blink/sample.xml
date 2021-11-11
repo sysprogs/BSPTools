@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>Blink</Name>
+  <Description>A very basic sample demonstrating how to control the LEDs via a GPIO port</Description>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+   <RequiredFrameworks>
+  </RequiredFrameworks> 
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><InternalValue>A</InternalValue><UserFriendlyName>PORTA</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>B</InternalValue><UserFriendlyName>PORTB</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>C</InternalValue><UserFriendlyName>PORTC</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>D</InternalValue><UserFriendlyName>PORTD</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>E</InternalValue><UserFriendlyName>PORTE</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>F</InternalValue><UserFriendlyName>PORTF</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>G</InternalValue><UserFriendlyName>PORTG</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>H</InternalValue><UserFriendlyName>PORTH</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>I</InternalValue><UserFriendlyName>PORTI</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>J</InternalValue><UserFriendlyName>PORTJ</UserFriendlyName></Suggestion>
+			<Suggestion><InternalValue>K</InternalValue><UserFriendlyName>PORTK</UserFriendlyName></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>3</DefaultEntryIndex>
+		  <DefaultEntryValue>$$com.sysprogs.pic32.default_port$$</DefaultEntryValue>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.LEDBIT</UniqueID>
+		  <Description>Specifies the port number of the LED port</Description>
+		  <DefaultValue>1</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>15</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>Delay (cycles)</Name>
+		  <UniqueID>com.sysprogs.examples.ledblink.DELAYCYCLES</UniqueID>
+		  <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+		  <DefaultValue>10000</DefaultValue>
+		</PropertyEntry>
+	  </Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+</EmbeddedProjectSample>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<CompilationFlags>
+		<COMMONFLAGS>$$com.sysprogs.pic32.legacy_libc$$ -fno-common</COMMONFLAGS>
+	</CompilationFlags>
+  <ConfigurableProperties>
+	<PropertyGroups>
+	  <PropertyGroup>
+		<Properties>
+          <PropertyEntry xsi:type="Boolean">
+            <Name>Enable legacy libc</Name>
+            <UniqueID>com.sysprogs.pic32.legacy_libc</UniqueID>
+            <ValueForTrue>-legacy-libc</ValueForTrue>
+            <DefaultValue>true</DefaultValue>
+          </PropertyEntry>		  
+		</Properties>
+		<CollapsedByDefault>false</CollapsedByDefault>
+	  </PropertyGroup>
+	</PropertyGroups>
+  </ConfigurableProperties>
+	
+	
+</FamilyDefinition>

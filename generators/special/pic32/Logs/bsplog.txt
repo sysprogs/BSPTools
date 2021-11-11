@@ -1,0 +1,1174 @@
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM1216MC00048\atdf\PIC32CM1216MC00048.atdf: WARNING: Could not find registers for OTP5_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM1216MC00048\atdf\PIC32CM1216MC00048.atdf: WARNING: Could not find registers for TEMP_LOG_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM1216MC00048\atdf\PIC32CM1216MC00048.atdf: WARNING: Could not find registers for USER_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM1216MC00032\atdf\PIC32CM1216MC00032.atdf: WARNING: Could not find registers for OTP5_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM1216MC00032\atdf\PIC32CM1216MC00032.atdf: WARNING: Could not find registers for TEMP_LOG_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM1216MC00032\atdf\PIC32CM1216MC00032.atdf: WARNING: Could not find registers for USER_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM6408MC00048\atdf\PIC32CM6408MC00048.atdf: WARNING: Could not find registers for OTP5_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM6408MC00048\atdf\PIC32CM6408MC00048.atdf: WARNING: Could not find registers for TEMP_LOG_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM6408MC00048\atdf\PIC32CM6408MC00048.atdf: WARNING: Could not find registers for USER_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM6408MC00032\atdf\PIC32CM6408MC00032.atdf: WARNING: Could not find registers for OTP5_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM6408MC00032\atdf\PIC32CM6408MC00032.atdf: WARNING: Could not find registers for TEMP_LOG_FUSES
+M:\MPLABX\v5.50\packs\Microchip\PIC32CM-MC_DFP\1.2.52\PIC32CM6408MC00032\atdf\PIC32CM6408MC00032.atdf: WARNING: Could not find registers for USER_FUSES
+WARNING: OFF group has too many values (268435456)
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: Skipping the ADCDATA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPK064\p32MK1024GPK064.S
+WARNING: Skipping the ADCDATA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPK064\p32MK1024GPK064.S
+WARNING: Skipping the ADCDATA33 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPK064\p32MK1024GPK064.S
+WARNING: Skipping the ADCDATA34 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPK064\p32MK1024GPK064.S
+WARNING: Skipping the ADCDATA45 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPK064\p32MK1024GPK064.S
+WARNING: Skipping the ADCDATA46 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPK064\p32MK1024GPK064.S
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG048\p32MK0512GPG048.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG048\p32MK0512GPG048.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG048\p32MK0512GPG048.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG048\p32MK0512GPG048.S
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG064\p32MK0512GPG064.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG064\p32MK0512GPG064.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG064\p32MK0512GPG064.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPG064\p32MK0512GPG064.S
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG048\p32MK0256GPG048.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG048\p32MK0256GPG048.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG048\p32MK0256GPG048.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG048\p32MK0256GPG048.S
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCTRG6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPD064\p32MK0512GPD064.S
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCTRG6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPD064\p32MK1024GPD064.S
+WARNING: OFF group has too many values (268435456)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCTRG6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPE064\p32MK0512GPE064.S
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCDATA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPK064\p32MK0512GPK064.S
+WARNING: Skipping the ADCDATA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPK064\p32MK0512GPK064.S
+WARNING: Skipping the ADCDATA33 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPK064\p32MK0512GPK064.S
+WARNING: Skipping the ADCDATA34 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPK064\p32MK0512GPK064.S
+WARNING: Skipping the ADCDATA45 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPK064\p32MK0512GPK064.S
+WARNING: Skipping the ADCDATA46 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0512GPK064\p32MK0512GPK064.S
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG064\p32MK0256GPG064.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG064\p32MK0256GPG064.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG064\p32MK0256GPG064.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK0256GPG064\p32MK0256GPG064.S
+WARNING: OFF group has too many values (268435456)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCTRG6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-GP_DFP\1.5.130\xc32\32MK1024GPE064\p32MK1024GPE064.S
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ064\p32MK0512MCJ064.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ064\p32MK0512MCJ064.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ064\p32MK0512MCJ064.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ064\p32MK0512MCJ064.S
+WARNING: Skipping the CFD1TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD1TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD2TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD3TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: Skipping the CFD4TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM100\p32MK1024MCM100.S
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ048\p32MK0512MCJ048.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ048\p32MK0512MCJ048.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ048\p32MK0512MCJ048.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCJ048\p32MK0512MCJ048.S
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCTRG6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the ADCDATA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the ADCDATA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the ADCDATA33 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the ADCDATA34 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the ADCDATA45 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the ADCDATA46 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD1TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD2TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD3TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: Skipping the CFD4TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCM064\p32MK1024MCM064.S
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: Skipping the ADCDATA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the ADCDATA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the ADCDATA33 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the ADCDATA34 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the ADCDATA45 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the ADCDATA46 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD1TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD2TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD3TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: Skipping the CFD4TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM064\p32MK0512MCM064.S
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ064\p32MK0256MCJ064.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ064\p32MK0256MCJ064.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ064\p32MK0256MCJ064.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ064\p32MK0256MCJ064.S
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCTRG6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF126 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF127 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF128 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF129 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF139 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF140 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF141 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF142 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF143 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF144 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF145 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF146 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF147 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF151 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF152 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the OFF153 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCF064\p32MK0512MCF064.S
+WARNING: Skipping the CFD1TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA4 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA5 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA7 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA8 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA9 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA10 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA11 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA12 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA13 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA14 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA15 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA16 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA17 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA18 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA19 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA20 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA21 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA22 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA23 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA24 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA25 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA26 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA27 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA28 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA29 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA30 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD1TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD2TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD3TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: Skipping the CFD4TXQSTA31 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0512MCM100\p32MK0512MCM100.S
+WARNING: No offset provided for RCON
+WARNING: No offset provided for RSWRST
+WARNING: No offset provided for RNMICON
+WARNING: No offset provided for PWRCON
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the ADCTRG6 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF126 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF127 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF128 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF129 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF139 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF140 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF141 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF142 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF143 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF144 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF145 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF146 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF147 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF151 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF152 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: Skipping the OFF153 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK1024MCF064\p32MK1024MCF064.S
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the CLCIN1R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ048\p32MK0256MCJ048.S
+WARNING: Skipping the CLCIN2R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ048\p32MK0256MCJ048.S
+WARNING: Skipping the CLCIN3R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ048\p32MK0256MCJ048.S
+WARNING: Skipping the CLCIN4R register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MK-MC_DFP\1.8.132\xc32\32MK0256MCJ048\p32MK0256MCJ048.S
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: SYSCLK_65535 group has too many values (65535)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: DIV_65534 group has too many values (32767)
+M:\MPLABX\v5.50\packs\Microchip\PIC32MX_DFP\1.5.259\atdf\PIC32MX430F064L.atdf: WARNING: Missing offset for: ADC
+M:\MPLABX\v5.50\packs\Microchip\PIC32MX_DFP\1.5.259\atdf\PIC32MX430F064L.atdf: WARNING: Missing offset for: TBAA_RPIN
+M:\MPLABX\v5.50\packs\Microchip\PIC32MX_DFP\1.5.259\atdf\PIC32MX430F064L.atdf: WARNING: Missing offset for: TBAA_RPORx
+WARNING: DIV_65534 group has too many values (32767)
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAK169\p32MZ1064DAK169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAA169\p32MZ1064DAA169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAR169\p32MZ2025DAR169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAB169\p32MZ2025DAB169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAK169\p32MZ1025DAK169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAB288\p32MZ2064DAB288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAG169\p32MZ2025DAG169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAR176\p32MZ2064DAR176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAL169\p32MZ1064DAL169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAG176\p32MZ1064DAG176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAS176\p32MZ1025DAS176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAS176\p32MZ2064DAS176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAL176\p32MZ2025DAL176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAH169\p32MZ2025DAH169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAS169\p32MZ2064DAS169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAB169\p32MZ2064DAB169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAB176\p32MZ1064DAB176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAA288\p32MZ2064DAA288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAH169\p32MZ1025DAH169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAB169\p32MZ1025DAB169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAA176\p32MZ2064DAA176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAL169\p32MZ1025DAL169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAG169\p32MZ1025DAG169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAK176\p32MZ2064DAK176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAS169\p32MZ1064DAS169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAR176\p32MZ1064DAR176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAA169\p32MZ2025DAA169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAL169\p32MZ2025DAL169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAK169\p32MZ2064DAK169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAA288\p32MZ2025DAA288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAB288\p32MZ1064DAB288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAH176\p32MZ2025DAH176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAS169\p32MZ2025DAS169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAR176\p32MZ1025DAR176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAA176\p32MZ1025DAA176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAK176\p32MZ2025DAK176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAG169\p32MZ2064DAG169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAG176\p32MZ2064DAG176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAG176\p32MZ2025DAG176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAL176\p32MZ2064DAL176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAA288\p32MZ1064DAA288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAA176\p32MZ1064DAA176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAB176\p32MZ2025DAB176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAK176\p32MZ1064DAK176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAS169\p32MZ1025DAS169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAB176\p32MZ2064DAB176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAA288\p32MZ1025DAA288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAB169\p32MZ1064DAB169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAH176\p32MZ1064DAH176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAG169\p32MZ1064DAG169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAA176\p32MZ2025DAA176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAL176\p32MZ1064DAL176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAL169\p32MZ2064DAL169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAB288\p32MZ1025DAB288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAB288\p32MZ2025DAB288.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAS176\p32MZ1064DAS176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAR169\p32MZ1064DAR169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAL176\p32MZ1025DAL176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1064DAH169\p32MZ1064DAH169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAB176\p32MZ1025DAB176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAH176\p32MZ1025DAH176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAG176\p32MZ1025DAG176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAA169\p32MZ2064DAA169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAK169\p32MZ2025DAK169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAH169\p32MZ2064DAH169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAR169\p32MZ1025DAR169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAR169\p32MZ2064DAR169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAS176\p32MZ2025DAS176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2025DAR176\p32MZ2025DAR176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ2064DAH176\p32MZ2064DAH176.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAA169\p32MZ1025DAA169.S
+WARNING: CRYSTAL_12MHZ group has too many values (196608)
+WARNING: RANGE_1X group has too many values (65536)
+WARNING: OFF group has too many values (268435456)
+WARNING: Skipping the USBLPMR2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-DA_DFP\1.4.118\xc32\32MZ1025DAK176\p32MZ1025DAK176.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH124\p32MZ1024EFH124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH124\p32MZ1024EFH124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH124\p32MZ1024EFH124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH124\p32MZ1024EFH124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH124\p32MZ1024EFH124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH124\p32MZ1024EFH124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF100\p32MZ0512EFF100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF100\p32MZ0512EFF100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF100\p32MZ0512EFF100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF100\p32MZ0512EFF100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF100\p32MZ0512EFF100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF100\p32MZ0512EFF100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG124\p32MZ2048EFG124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG124\p32MZ2048EFG124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG124\p32MZ2048EFG124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG124\p32MZ2048EFG124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG124\p32MZ2048EFG124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG124\p32MZ2048EFG124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF124\p32MZ0512EFF124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF124\p32MZ0512EFF124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF124\p32MZ0512EFF124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF124\p32MZ0512EFF124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF124\p32MZ0512EFF124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFF124\p32MZ0512EFF124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH100\p32MZ2048EFH100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH100\p32MZ2048EFH100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH100\p32MZ2048EFH100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH100\p32MZ2048EFH100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH100\p32MZ2048EFH100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH100\p32MZ2048EFH100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH124\p32MZ2048EFH124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH124\p32MZ2048EFH124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH124\p32MZ2048EFH124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH124\p32MZ2048EFH124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH124\p32MZ2048EFH124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFH124\p32MZ2048EFH124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM100\p32MZ1024EFM100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM100\p32MZ1024EFM100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM100\p32MZ1024EFM100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM100\p32MZ1024EFM100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM100\p32MZ1024EFM100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM100\p32MZ1024EFM100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM124\p32MZ1024EFM124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM124\p32MZ1024EFM124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM124\p32MZ1024EFM124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM124\p32MZ1024EFM124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM124\p32MZ1024EFM124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFM124\p32MZ1024EFM124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF124\p32MZ1024EFF124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF124\p32MZ1024EFF124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF124\p32MZ1024EFF124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF124\p32MZ1024EFF124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF124\p32MZ1024EFF124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF124\p32MZ1024EFF124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE124\p32MZ0512EFE124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE124\p32MZ0512EFE124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE124\p32MZ0512EFE124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE124\p32MZ0512EFE124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE124\p32MZ0512EFE124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE124\p32MZ0512EFE124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE100\p32MZ0512EFE100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE100\p32MZ0512EFE100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE100\p32MZ0512EFE100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE100\p32MZ0512EFE100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE100\p32MZ0512EFE100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFE100\p32MZ0512EFE100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK124\p32MZ1024EFK124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK124\p32MZ1024EFK124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK124\p32MZ1024EFK124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK124\p32MZ1024EFK124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK124\p32MZ1024EFK124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK124\p32MZ1024EFK124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF100\p32MZ1024EFF100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF100\p32MZ1024EFF100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF100\p32MZ1024EFF100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF100\p32MZ1024EFF100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF100\p32MZ1024EFF100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFF100\p32MZ1024EFF100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK100\p32MZ1024EFK100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK100\p32MZ1024EFK100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK100\p32MZ1024EFK100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK100\p32MZ1024EFK100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK100\p32MZ1024EFK100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFK100\p32MZ1024EFK100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM124\p32MZ2048EFM124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM124\p32MZ2048EFM124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM124\p32MZ2048EFM124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM124\p32MZ2048EFM124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM124\p32MZ2048EFM124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM124\p32MZ2048EFM124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH100\p32MZ1024EFH100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH100\p32MZ1024EFH100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH100\p32MZ1024EFH100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH100\p32MZ1024EFH100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH100\p32MZ1024EFH100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFH100\p32MZ1024EFH100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM100\p32MZ2048EFM100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM100\p32MZ2048EFM100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM100\p32MZ2048EFM100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM100\p32MZ2048EFM100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM100\p32MZ2048EFM100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFM100\p32MZ2048EFM100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG124\p32MZ1024EFG124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG124\p32MZ1024EFG124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG124\p32MZ1024EFG124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG124\p32MZ1024EFG124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG124\p32MZ1024EFG124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG124\p32MZ1024EFG124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG100\p32MZ1024EFG100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG100\p32MZ1024EFG100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG100\p32MZ1024EFG100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG100\p32MZ1024EFG100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG100\p32MZ1024EFG100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFG100\p32MZ1024EFG100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK100\p32MZ0512EFK100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK100\p32MZ0512EFK100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK100\p32MZ0512EFK100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK100\p32MZ0512EFK100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK100\p32MZ0512EFK100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK100\p32MZ0512EFK100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG100\p32MZ2048EFG100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG100\p32MZ2048EFG100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG100\p32MZ2048EFG100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG100\p32MZ2048EFG100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG100\p32MZ2048EFG100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ2048EFG100\p32MZ2048EFG100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK124\p32MZ0512EFK124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK124\p32MZ0512EFK124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK124\p32MZ0512EFK124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK124\p32MZ0512EFK124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK124\p32MZ0512EFK124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ0512EFK124\p32MZ0512EFK124.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE100\p32MZ1024EFE100.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE100\p32MZ1024EFE100.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE100\p32MZ1024EFE100.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE100\p32MZ1024EFE100.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE100\p32MZ1024EFE100.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE100\p32MZ1024EFE100.S
+WARNING: Skipping the EBICS1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE124\p32MZ1024EFE124.S
+WARNING: Skipping the EBICS2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE124\p32MZ1024EFE124.S
+WARNING: Skipping the EBICS3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE124\p32MZ1024EFE124.S
+WARNING: Skipping the EBIMSK1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE124\p32MZ1024EFE124.S
+WARNING: Skipping the EBIMSK2 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE124\p32MZ1024EFE124.S
+WARNING: Skipping the EBIMSK3 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-EF_DFP\1.3.58\xc32\32MZ1024EFE124\p32MZ1024EFE124.S
+WARNING: Skipping the ADCCMP0 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S
+WARNING: Skipping the ADCEISTAT1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S
+WARNING: Skipping the ADCSVCON register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S
+M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\atdf\PIC32MZ1025W104132.atdf: WARNING: Missing module: BA414E
+WARNING: Skipping the CVDSD0T1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S
+WARNING: Skipping the CVDSD1T1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S
+WARNING: Skipping the CVDSD2T1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S
+WARNING: Skipping the CVDSD3T1 register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S
+WARNING: Skipping the CVDDBG register that is missing in M:\MPLABX\v5.50\packs\Microchip\PIC32MZ-W_DFP\1.4.193\xc32\32MZ1025W104132\p32MZ1025W104132.S

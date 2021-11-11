@@ -62,6 +62,7 @@
     <Compile Include="TarPacker.cs" />
     <Compile Include="VendorSample.cs" />
     <Compile Include="VendorSampleRelocator.cs" />
+    <Compile Include="XmlExtensions.cs" />
     <Compile Include="ZipFile.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <BSPPath>$$JOBDIR$$\Output</BSPPath>
+	<BSPSubfolderMask>PIC32*</BSPSubfolderMask>
+	<ToolchainPath>F:\tools\xc32\v3.01</ToolchainPath>
+	<DeviceRegex>.*</DeviceRegex>
+	<Samples>
+		 <TestedSample>
+ 			<Name>Blink</Name>
+			<SkipIfNotFound>false</SkipIfNotFound>
+			<ValidateRegisters>false</ValidateRegisters>
+			<DeviceRegex>.*</DeviceRegex>
+			<SampleConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
+						<Value>$$com.sysprogs.pic32.default_port$$</Value>
+					</KeyValue>
+				</Entries>
+			</SampleConfiguration>
+		 </TestedSample>
+	</Samples>
+</TestJob>
