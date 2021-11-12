@@ -149,7 +149,7 @@ namespace pic32
                         ID = name,
                         CompilationFlags = new ToolFlags
                         {
-                            COMMONFLAGS = $"\"-mdfp=$$SYS:BSP_ROOT_FORWARD$${dfpSuffix}\" -mprocessor={nameWithoutPrefix}"
+                            COMMONFLAGS = $"-mdfp=\"$$SYS:BSP_ROOT_FORWARD$${dfpSuffix}\" -mprocessor={nameWithoutPrefix}"
                         },
                         MemoryMap = new AdvancedMemoryMap
                         {
