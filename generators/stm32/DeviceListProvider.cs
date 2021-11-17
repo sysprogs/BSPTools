@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using LinkerScriptGenerator;
 using BSPEngine;
+using System.Text.RegularExpressions;
 
 namespace stm32_bsp_generator
 {
@@ -132,6 +133,9 @@ namespace stm32_bsp_generator
                     return Name;
                 }
 
+                static Regex rgFLASH = new Regex("^FLASH[0-9]*$");
+                static Regex rgRAM = new Regex("^(S?RAM[0-9]*|.*RAM)$");
+
                 public Memory ToMemoryDefinition()
                 {
                     MemoryType type;
@@ -139,24 +143,12 @@ namespace stm32_bsp_generator
                         type = MemoryType.RAM;
                     else
                     {
-                        switch (Name)
-                        {
-                            case "FLASH":
-                            case "FLASH1":
-                            case "FLASH2":
-                                type = MemoryType.FLASH;
-                                break;
-                            case "RAM":
-                            case "RAM1":
-                            case "RAM2":
-                            case "CCMRAM":
-                            case "DTCMRAM":
-                            case "ITCMRAM":
-                                type = MemoryType.RAM;
-                                break;
-                            default:
-                                throw new Exception("Unknown memory type " + Name);
-                        }
+                        if (rgFLASH.IsMatch(Name))
+                            type = MemoryType.FLASH;
+                        else if (rgRAM.IsMatch(Name))
+                            type = MemoryType.RAM;
+                        else
+                            throw new Exception("Unknown memory type " + Name);
                     }
 
                     return new Memory { Name = (Name == "RAM") ? "SRAM" : Name, Start = Start, Size = Size * 1024, Type = type };
@@ -223,17 +215,13 @@ namespace stm32_bsp_generator
                     Dictionary<string, string> memorySubstitutionRulesForRAMMode = null;
 
                     if (MCU.Name.StartsWith("STM32H7") && MCU.Name.EndsWith("M4"))
-                    {
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000), MemoryLocationRule.ByName("RAM_D2"));
-                    }
                     else if (MCU.Name.StartsWith("STM32MP1"))
-                    {
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByName("RAM1"));
-                    }
+                    else if (MCU.Name.StartsWith("STM32WL"))
+                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByName("SRAM", "SRAM1")) ?? layout.TryLocateOnlyMemory(MemoryType.RAM, true);
                     else
-                    {
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x20000000));
-                    }
 
                     if (MCU.Name.StartsWith("STM32H7") && !MCU.Name.EndsWith("M4"))
                     {

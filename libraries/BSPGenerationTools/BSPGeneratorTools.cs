@@ -433,8 +433,17 @@ namespace BSPGenerationTools
                     Report.ReportRawError($"'{fw.ProjectFolderName}' is used by both {id} and {tmp}. This will break builds in Visual Studio.");
                 }
                 usedFoldersToCompatibleIDs[fw.ProjectFolderName] = id;
-            }
 
+                if (fw.ConfigurationFileTemplates != null)
+                {
+                    foreach(var ft in fw.ConfigurationFileTemplates)
+                    {
+                        var path = ExpandVariables(ft.SourcePath).Replace("$$SYS:BSP_ROOT$$", Directories.OutputDir);
+                        if (!File.Exists(path))
+                            Report.ReportMergeableError("Missing configuration template", ft.SourcePath);
+                    }
+                }
+            }
 
             var allSources = bsp.MCUFamilies.SelectMany(f => TranslateFileList(f.AdditionalSourceFiles, f.ID))
                 .Concat(bsp.SupportedMCUs.SelectMany(m => TranslateFileList(m.AdditionalSourceFiles, m.ID)))
@@ -1011,9 +1020,10 @@ namespace BSPGenerationTools
 
         public void CopyFamilyFiles(ref ToolFlags flags, List<string> projectFiles)
         {
+            var unused = new List<ConfigurationFileTemplate>();
             if (Definition.CoreFramework != null)
                 foreach (var job in Definition.CoreFramework.CopyJobs)
-                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties, BSP.ReverseFileConditions.RootHandle));
+                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties, BSP.ReverseFileConditions.RootHandle, unused));
         }
 
         class MemoryComparer : IEqualityComparer<Memory>
@@ -1130,9 +1140,12 @@ namespace BSPGenerationTools
                         RequiredFrameworks = fw.RequiredFrameworks,
                         IncompatibleFrameworks = fw.IncompatibleFrameworks,
                         ClassID = fw.ClassID,
-                        ConfigurationFileTemplates = fw.ConfigurationFileTemplates,
                         AdditionalForcedIncludes = fw.AdditionalForcedIncludes?.Split(';'),
                     };
+
+                    var configTemplates = new List<ConfigurationFileTemplate>();
+                    if (fw.ConfigurationFileTemplates != null)
+                        configTemplates.AddRange(fw.ConfigurationFileTemplates);
 
                     if (fw.Filter != null)
                         fwDef.MCUFilterRegex = fw.Filter;
@@ -1141,7 +1154,10 @@ namespace BSPGenerationTools
 
                     ToolFlags flags = new ToolFlags();
                     foreach (var job in fw.CopyJobs)
-                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties, BSP.ReverseFileConditions.GetHandleForFramework(fw)));
+                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties, BSP.ReverseFileConditions.GetHandleForFramework(fw), configTemplates));
+
+                    if (configTemplates.Count > 0)
+                        fwDef.ConfigurationFileTemplates = configTemplates.ToArray();
 
                     fwDef.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f) && !f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).ToArray();
                     fwDef.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();

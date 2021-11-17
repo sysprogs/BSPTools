@@ -64,9 +64,9 @@
       <Project>{62944c6c-b57e-449c-8bcc-98f22e665f5f}</Project>
       <Name>VendorSampleParserEngine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ProjectImporters\STM32IDEProjectImporter\STM32IDEProjectImporter.csproj">
-      <Project>{0d633ebf-0201-4c25-bd7a-03485377bea7}</Project>
-      <Name>STM32IDEProjectImporter</Name>
+    <ProjectReference Include="..\..\ProjectImporters\STM32ProjectImporter\STM32ProjectImporter.csproj">
+      <Project>{CC462956-3263-4EFA-8305-B951F67C48D7}</Project>
+      <Name>STM32ProjectImporter</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\StandaloneBSPValidator\StandaloneBSPValidator.csproj">
       <Project>{add117b0-6ac5-4e07-ba8b-8fdf35bdf421}</Project>

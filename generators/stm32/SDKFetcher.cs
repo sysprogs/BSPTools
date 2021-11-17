@@ -18,7 +18,7 @@ namespace stm32_bsp_generator
         {
             Directory.CreateDirectory(sdkRoot);
             var xml = new XmlDocument();
-            var catalogFile = cubeRoot + @"\db\plugins\updater\STMupdaters.xml";
+            var catalogFile = cubeRoot + @"\db\plugins\updater\STMUpdaterDefinitions.xml";
             var daysOld = (DateTime.Now - File.GetLastWriteTime(catalogFile)).TotalDays;
             if (daysOld > 40)
                 throw new Exception($"STM32CubeMX device list {daysOld:f0} days old. Please update STM32CubeMX.");

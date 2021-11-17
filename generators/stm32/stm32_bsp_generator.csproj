@@ -56,6 +56,7 @@
     <Compile Include="Rulesets\STM32ClassicFamilyBuilder.cs" />
     <Compile Include="Rulesets\STM32MP1FamilyBuilder.cs" />
     <Compile Include="Rulesets\STM32WBFamilyBuilder.cs" />
+    <Compile Include="Rulesets\STM32WLFamilyBuilder.cs" />
     <Compile Include="SDKFetcher.cs" />
     <Compile Include="StartupGenerator.cs" />
     <Compile Include="STM32ConfigFileParser.cs" />

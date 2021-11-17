@@ -249,6 +249,7 @@ namespace BSPGenerationTools
         public string VendorSpecificAttributes;
         public CopyJobFlags Flags;
         public string SmartConditionsPromotedToPreprocessorMacros;
+        public string TemplateFileSpec;
 
         [Flags]
         public enum CopyJobFlags
@@ -319,11 +320,13 @@ namespace BSPGenerationTools
         }
 
 
-        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties, ReverseFileConditionBuilder.Handle reverseConditions)
+        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties, ReverseFileConditionBuilder.Handle reverseConditions, List<ConfigurationFileTemplate> configFiles)
         {
             List<ParsedCondition> conditions = null;
             List<ConditionRecord> allConditions = new List<ConditionRecord>();
             List<string> preprocessorMacros = new List<string>();
+
+            Regex configTemplateRegex = TemplateFileSpec == null ? null : new Regex(TemplateFileSpec);
 
             if (SimpleFileConditions != null)
             {
@@ -625,7 +628,16 @@ namespace BSPGenerationTools
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
 
                 bool includedInProject = projectContents.IsMatch(f);
-                if (includedInProject)
+                var m = configTemplateRegex?.Match(f);
+                if (m?.Success == true)
+                {
+                    configFiles.Add(new ConfigurationFileTemplate
+                    {
+                        SourcePath = encodedPath,
+                        TargetFileName = Path.GetFileName(f.Substring(0, m.Groups[1].Index) + f.Substring(m.Groups[1].Index + m.Groups[1].Length)),
+                    });
+                }
+                else if (includedInProject)
                 {
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
 

@@ -186,7 +186,6 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
                     <ConfigurationFileTemplate>
                         <SourcePath>$$SYS:BSP_ROOT$$/FatFs/src/ffconf_template.h</SourcePath>
                         <TargetFileName>ffconf.h</TargetFileName>
-
                         <ExpandMacros>false</ExpandMacros>
                         </ConfigurationFileTemplate>
 					</ConfigurationFileTemplates>				  

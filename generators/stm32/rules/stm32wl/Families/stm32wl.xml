@@ -1,0 +1,368 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>STM32WL</Name>
+	<DeviceRegex>^STM32WL.*</DeviceRegex>
+	<FamilySubdirectory>STM32WLxxxx</FamilySubdirectory>
+	<PrimaryHeaderDir>$$STM32:WL_DIR$$\Drivers\CMSIS\Device\ST\STM32WLxx\Include</PrimaryHeaderDir>
+	<StartupFileDir>$$STM32:WL_DIR$$\Drivers\CMSIS\Device\ST\STM32WLxx\Source\Templates\gcc</StartupFileDir>
+	<HasMixedCores>true</HasMixedCores>
+	<CompilationFlags>
+		<PreprocessorMacros>
+		</PreprocessorMacros>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
+	</CompilationFlags>
+	<CoreFramework>
+		<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask/>
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>STM32 Key Management Services</Name>
+			<ID>com.sysprogs.arm.stm32.wl.kms</ID>
+			<ProjectFolderName>Key Management Services</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\ST\STM32_Key_Management_Services</SourceFolder>
+					<TargetFolder>Lib\ST_KMS</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+<!--					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wl.kms.|Key Management Services</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>Crypto Implementation[crypto]|
+Interface\\CryptoApi\\HAL\\.*=>STM32 HAL[hal];
+Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
+					</SmartFileConditions>-->
+				</CopyJob>
+			</CopyJobs>
+		</Framework>		
+		<Framework>
+			<Name>STM32 Secure Engine</Name>
+			<ID>com.sysprogs.arm.stm32.wl.secure</ID>
+			<ProjectFolderName>Secure Engine</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\ST\STM32_Secure_Engine</SourceFolder>
+					<TargetFolder>Lib\ST_Secure</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-Utilities\*;*.c;*.h</ProjectInclusionMask>
+					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>		
+		<Framework>
+			<Name>LoRaWAN Support</Name>
+			<ID>com.sysprogs.arm.stm32.wl.lorawan</ID>
+			<ProjectFolderName>LoRaWAN Support</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+				<string>com.sysprogs.arm.stm32.utilities</string>
+				<string>com.sysprogs.arm.stm32.utilities_timer</string>
+				<string>com.sysprogs.arm.stm32.subghz_phy</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\LoRaWAN</SourceFolder>
+					<TargetFolder>Lib\LoRaWAN</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+					<AdvancedRenameRules>\\(cmac)\.c$=>lorawan_{1}.c</AdvancedRenameRules>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>		
+		<Framework>
+			<Name>MBED Crypto</Name>
+			<ID>com.sysprogs.arm.stm32.mbed-crypto</ID>
+			<ProjectFolderName>MBED-Crypto</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\mbed-crypto</SourceFolder>
+					<TargetFolder>Lib\mbed-crypto</TargetFolder>
+					<FilesToCopy>include\*;library\*</FilesToCopy>
+					<ProjectInclusionMask>-library\timing.c;*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32WLxxxx/Lib/mbed-crypto/include;$$SYS:BSP_ROOT$$/STM32WLxxxx/Lib/mbed-crypto/include/mbedtls;$$SYS:BSP_ROOT$$/STM32WLxxxx/Lib/mbed-crypto/include/psa</AdditionalIncludeDirs>
+					<PreprocessorMacros>MBEDTLS_NO_PLATFORM_ENTROPY</PreprocessorMacros>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Sub-GHz Phy Driver</Name>
+			<ID>com.sysprogs.arm.stm32.subghz_phy</ID>
+			<ProjectFolderName>SubGHz</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.utilities</string>
+				<string>com.sysprogs.arm.stm32.utilities.timer</string>
+				<string>com.sysprogs.arm.stm32.utilities.misc</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\SubGHz_Phy</SourceFolder>
+					<TargetFolder>Lib\SubGHz_Phy</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>STM32 Utilities - Common</Name>
+			<ID>com.sysprogs.arm.stm32.utilities</ID>
+			<ProjectFolderName>Utilities</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Utilities</SourceFolder>
+					<TargetFolder>Utilities</TargetFolder>
+					<FilesToCopy>conf\*;Fonts\*;sequencer\*;</FilesToCopy> <!-- as of 1.0.0, the 'lcd' folder is broken -->
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>SigFox</Name>
+			<ID>com.sysprogs.arm.stm32.wl.sigfox</ID>
+			<ProjectFolderName>SigFox</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.wl.sigfox</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\Sigfox</SourceFolder>
+					<TargetFolder>Lib\SigFox</TargetFolder>
+					<FilesToCopy>*</FilesToCopy> <!-- as of 1.0.0, the 'lcd' folder is broken -->
+					<ProjectInclusionMask>-SigfoxLibTest\*;*.c;*.h;*.a</ProjectInclusionMask>
+					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>Development Board Support</Name>
+			<ID>com.sysprogs.arm.stm32.stm32bsp</ID>
+			<ProjectFolderName>Board</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Drivers\BSP</SourceFolder>
+					<TargetFolder>BSP</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>		
+	</AdditionalFrameworks>
+	<AdditionalFrameworkTemplates>
+		<FrameworkTemplate>
+			<Separator>&#10;</Separator>
+			<ArgumentSeparator>:</ArgumentSeparator>
+			<Range>misc:Miscellaneous
+timer:Timer
+trace:Trace
+lpm:LPM
+</Range>
+			<Template>
+				<Name>STM32 Utilities - $$BSPGEN:FRAMEWORKARG1$$</Name>
+				<ID>com.sysprogs.arm.stm32.utilities.$$BSPGEN:FRAMEWORK$$</ID>
+				<ProjectFolderName>Utils-$$BSPGEN:FRAMEWORKARG1$$</ProjectFolderName>
+				<DefaultEnabled>false</DefaultEnabled>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.hal</string>
+					<string>com.sysprogs.arm.stm32.utilities</string>
+				</RequiredFrameworks>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$STM32:WL_DIR$$\Utilities\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<TargetFolder>Utilities\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<FilesToCopy>*</FilesToCopy>
+						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+						<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+					</CopyJob>
+				</CopyJobs>
+			</Template>
+		</FrameworkTemplate>
+	</AdditionalFrameworkTemplates>
+	<SmartSamples>
+	<!--
+		<SmartSample>
+			<SourceFolder>$$STM32:WB_DIR$$\Projects\P-NUCLEO-WB55.Nucleo\Applications\BLE\BLE_HeartRate</SourceFolder>
+			<DestinationFolder>Samples/Nucleo/BLE_HeartRate</DestinationFolder>
+			<CopyFilters>-Binary\*;-EWARM\*;-MDK-ARM\*;-SW4STM32\*;*</CopyFilters>
+			<Patches>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>Core\Inc\app_conf.h</FilePath>
+					<OldLine>#define CFG_DEBUGGER_SUPPORTED    0</OldLine>
+					<NewLine>#define CFG_DEBUGGER_SUPPORTED    1</NewLine>
+				</Patch>					
+			</Patches>
+			<EmbeddedSample>
+				<Name>Heart Rate Service Demo</Name>
+				<Description>A basic HRS service demo for the STM32Nucleo board</Description>
+				<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+				<AdditionalIncludeDirectories>
+					<string>Core/Inc</string>
+					<string>STM32_WPAN/App</string>
+				</AdditionalIncludeDirectories>
+				  <RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.stm32bsp</string>
+					<string>com.sysprogs.arm.stm32.hal</string>
+					<string>com.sysprogs.arm.stm32.ble.core</string>
+					<string>com.sysprogs.arm.stm32.ble_utilities</string>
+					<string>com.sysprogs.arm.stm32.ble.thread</string>
+					<string>com.sysprogs.arm.stm32.utilities</string>
+				  </RequiredFrameworks>
+				  <DefaultConfiguration>
+					<Entries>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.Board_Type</Key>
+						<Value>nucleo</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.dis</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.hci_tl</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hrs</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.wb_utils.scheduler</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.shci</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.shci_tl</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.openthread.config_file</Key>
+						<Value>&lt;openthread_api_config_ftd.h&gt;</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.Adafruit_Shield_Support</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.board.External_Components</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.bls</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.crs_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.eds_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hids</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.hts</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.ias</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.lls</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.mesh</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.otas_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.p2p_st</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.ble.tps</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.vcp</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.openthread</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.thread_iface.lhci</Key>
+						<Value />
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.utils.lpm</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					  <KeyValue>
+						<Key>com.sysprogs.bspoptions.stm32.utils.sequencer</Key>
+						<Value>1</Value>
+					  </KeyValue>
+					</Entries>
+				  </DefaultConfiguration>
+			</EmbeddedSample>
+		</SmartSample>
+	-->
+	</SmartSamples>
+      <AdditionalSystemVars>
+        <SysVarEntry>
+          <Key>com.sysprogs.stm32.hal_header_prefix</Key>
+          <Value>stm32wlxx</Value>
+        </SysVarEntry>
+        <SysVarEntry>
+          <Key>com.sysprogs.bspoptions.stm32.hal_system_file</Key>
+          <Value>STM32WLxxxx/CMSIS_HAL/Device/ST/STM32WLxx/Source/Templates/system_stm32wlxx.c</Value>
+        </SysVarEntry>
+        <SysVarEntry>
+          <Key>com.sysprogs.bspoptions.stm32.hal_config_template_file</Key>
+          <Value>STM32WLxxxx/STM32WLxx_HAL_Driver/Inc/stm32wlxx_hal_conf_template.h</Value>
+        </SysVarEntry>
+      </AdditionalSystemVars>
+</FamilyDefinition>
