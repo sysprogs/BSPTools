@@ -232,13 +232,13 @@ namespace GeneratorSampleStm32
         class STM32SampleRelocator : VendorSampleRelocator
         {
             private ConstructedVendorSampleDirectory _Directory;
-            readonly bool _IsBlueNRG;
+            private STM32Ruleset _Ruleset;
 
-            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping, bool isBlueNRG)
+            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping, STM32Ruleset ruleset)
                 : base(optionalConditionTableForFrameworkMapping)
             {
                 _Directory = dir;
-                _IsBlueNRG = isBlueNRG;
+                _Ruleset = ruleset;
                 /*
                     Known problems with trying to map frameworks:
                       HAL:
@@ -264,6 +264,7 @@ namespace GeneratorSampleStm32
                         Configuration = new Dictionary<string, string>() }*/
                 };
 
+
                 AutoPathMappings = new PathMapping[]
                 {
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/STM32[^/\\]+xx_HAL_Driver/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32{1}xx_HAL_Driver/{2}"),
@@ -278,7 +279,7 @@ namespace GeneratorSampleStm32
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP1/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
                 };
 
-                if (isBlueNRG)
+                if (_Ruleset == STM32Ruleset.BlueNRG_LP)
                 {
                     AutoPathMappings = AutoPathMappings.Concat(new PathMapping[]
                     {
@@ -322,7 +323,7 @@ namespace GeneratorSampleStm32
             {
                 base.FilterPreprocessorMacros(ref macros);
 
-                if (_IsBlueNRG)
+                if (_Ruleset == STM32Ruleset.BlueNRG_LP)
                     macros = macros.Where(m => m != "CONFIG_DEVICE_BLUENRG_LP").ToArray();
                 else
                     macros = macros.Where(m => !m.StartsWith("STM32") || m.Contains("_")).Concat(new string[] { "$$com.sysprogs.stm32.hal_device_family$$" }).ToArray();
@@ -333,21 +334,21 @@ namespace GeneratorSampleStm32
                 return string.Join("\\", originalPath.Split('/').Skip(2).Reverse().Skip(1).Reverse());
             }
 
-            protected override PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => new STM32PathMapper(_Directory, _IsBlueNRG);
+            protected override PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => new STM32PathMapper(_Directory, _Ruleset);
         }
 
         class STM32PathMapper : VendorSampleRelocator.PathMapper
         {
-            public STM32PathMapper(ConstructedVendorSampleDirectory dir, bool isBlueNRG)
+            public STM32PathMapper(ConstructedVendorSampleDirectory dir, STM32Ruleset ruleset)
                 : base(dir)
             {
-                _IsBlueNRG = isBlueNRG;
+                _Ruleset = ruleset;
             }
 
             const string Prefix1 = @"C:/QuickStep/STM32Cube_FW_H7_clean/Firmware";
 
             Regex rgFWFolder = new Regex(@"^(\$\$SYS:VSAMPLE_DIR\$\$)/[^/]+/STM32Cube_FW_([^_]+)_V[^/]+/(.*)$", RegexOptions.IgnoreCase);
-            readonly bool _IsBlueNRG;
+            private STM32Ruleset _Ruleset;
 
             public override string MapPath(string path)
             {
@@ -359,7 +360,7 @@ namespace GeneratorSampleStm32
                 }
 
                 string result = base.MapPath(path);
-                if (_IsBlueNRG)
+                if (_Ruleset == STM32Ruleset.BlueNRG_LP)
                 {
 
                 }
@@ -390,10 +391,10 @@ namespace GeneratorSampleStm32
             public STM32VendorSampleParser(string ruleset)
                 : base(@"..\..\generators\stm32\output\" + ruleset, (ruleset == "bluenrg-lp") ? "BlueNRG SDK Samples" : "STM32 CubeMX Samples", ruleset)
             {
-                _IsBlueNRG = ruleset == "bluenrg-lp";
+                _Ruleset = (STM32Ruleset)Enum.Parse(typeof(STM32Ruleset), ruleset, true);
             }
 
-            readonly bool _IsBlueNRG;
+            STM32Ruleset _Ruleset;
 
             protected override VendorSampleRelocator CreateRelocator(ConstructedVendorSampleDirectory sampleDir)
             {
@@ -402,7 +403,7 @@ namespace GeneratorSampleStm32
                 if (File.Exists(conditionTableFile))
                     table = XmlTools.LoadObject<ReverseConditionTable>(conditionTableFile);
 
-                return new STM32SampleRelocator(sampleDir, table, _IsBlueNRG);
+                return new STM32SampleRelocator(sampleDir, table, _Ruleset);
             }
 
             static bool IsNonGCCFile(VendorSample vs, string fn)
@@ -431,7 +432,10 @@ namespace GeneratorSampleStm32
             protected override ParsedVendorSamples ParseVendorSamples(string SDKdir, IVendorSampleFilter filter)
             {
                 var SDKs = XmlTools.LoadObject<STM32SDKCollection>(Path.Combine(BSPDirectory, "SDKVersions.xml"));
-                if (_IsBlueNRG)
+
+                bool isBlueNRG = _Ruleset == STM32Ruleset.BlueNRG_LP;
+
+                if (isBlueNRG)
                     SDKs.SDKs = new STM32SDKCollection.SDK[] { new STM32SDKCollection.SDK { Family = "BlueNRG-LP", Version = "builtin" } };
 
                 using (var parser = new SW4STM32ProjectParser(CacheDirectory, BSP.BSP.SupportedMCUs))
@@ -442,7 +446,7 @@ namespace GeneratorSampleStm32
                     {
                         List<string> addInc = new List<string>();
                         string topLevelDir;
-                        if (_IsBlueNRG)
+                        if (isBlueNRG)
                             topLevelDir = SDKdir;
                         else
                             topLevelDir = Directory.GetDirectories(Path.Combine(SDKdir, sdk.FolderName), "STM32Cube_*")[0];
@@ -507,10 +511,10 @@ namespace GeneratorSampleStm32
 
                             if (samplesForThisBoard == 0)
                             {
-                                for (int pass = 0; pass < (_IsBlueNRG ? 1 : 2); pass++)
+                                for (int pass = 0; pass < (isBlueNRG ? 1 : 2); pass++)
                                 {
                                     string dirName;
-                                    if (_IsBlueNRG)
+                                    if (isBlueNRG)
                                         dirName = "WiSE-Studio";
                                     else if (pass == 0)
                                         dirName = "SW4STM32";
@@ -523,7 +527,7 @@ namespace GeneratorSampleStm32
                                             continue;   //We are only reparsing a subset of samples
 
                                         SW4STM32ProjectParser.ProjectSubtype subtype;
-                                        if (_IsBlueNRG)
+                                        if (isBlueNRG)
                                         {
                                             subtype = SW4STM32ProjectParser.ProjectSubtype.WiSEStudio;
                                             if (boardName == "External_Micro")

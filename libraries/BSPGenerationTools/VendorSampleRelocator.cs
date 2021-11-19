@@ -19,9 +19,9 @@ namespace BSPGenerationTools
 
         readonly ReverseFileConditionMatcher _ConditionMatcher;
 
-        public static void ValidateVendorSampleDependencies(ConstructedVendorSampleDirectory dir, string toolchainDir)
+        public static void ValidateVendorSampleDependencies(ConstructedVendorSampleDirectory dir, string toolchainDir, string logFile)
         {
-            using (var sw = File.CreateText(@"e:\temp\0.txt"))
+            using (var sw = File.CreateText(logFile))
             {
                 foreach (var vs in dir.Samples)
                 {
@@ -246,13 +246,16 @@ namespace BSPGenerationTools
                             .Concat(new[] { s.LinkerScript })
                             .Concat(s.SourceFiles)
                             .Concat(s.HeaderFiles ?? new string[0])
+                            .Concat(s.AuxiliaryLinkerScripts ?? new string[0])
                             .Distinct()
                             .Select(d => new ParsedDependency { OriginalFile = d, MappedFile = mapper.MapPath(d) })
                             .Where(d => d.MappedFile != null)
                             .ToArray();
 
+                //1. Translate absolute paths to the $$SYS:VSAMPLE_DIR$$ syntax. All files referenced here should be also also included in 'deps' in order to be copied.
                 mapper.MapPathList(ref s.HeaderFiles);
                 mapper.MapPathList(ref s.IncludeDirectories);
+                mapper.MapPathList(ref s.AuxiliaryLinkerScripts);
                 mapper.MapPathList(ref s.SourceFiles);
 
                 s.LinkerScript = mapper.MapPath(s.LinkerScript);

@@ -436,7 +436,7 @@ namespace BSPGenerationTools
 
                 if (fw.ConfigurationFileTemplates != null)
                 {
-                    foreach(var ft in fw.ConfigurationFileTemplates)
+                    foreach (var ft in fw.ConfigurationFileTemplates)
                     {
                         var path = ExpandVariables(ft.SourcePath).Replace("$$SYS:BSP_ROOT$$", Directories.OutputDir);
                         if (!File.Exists(path))
@@ -1055,7 +1055,7 @@ namespace BSPGenerationTools
 
         public virtual MemoryLayoutCollection GenerateLinkerScripts(bool generalizeWherePossible)
         {
-            string ldsDirectory = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, "LinkerScripts");
+            string ldsDirectory = Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory ?? ".", "LinkerScripts");
             Directory.CreateDirectory(ldsDirectory);
 
             Dictionary<string, bool> generalizationResults = new Dictionary<string, bool>();
@@ -1119,7 +1119,7 @@ namespace BSPGenerationTools
         }
 
 
-        public IEnumerable<EmbeddedFramework> GenerateFrameworkDefinitions()
+        public IEnumerable<EmbeddedFramework> GenerateFrameworkDefinitions(HashSet<string> excludedFrameworks = null)
         {
             if (Definition.AdditionalFrameworks != null)
             {
@@ -1130,6 +1130,9 @@ namespace BSPGenerationTools
 
                 foreach (var fw in allFrameworks)
                 {
+                    if (excludedFrameworks?.Contains(fw.ID) == true)
+                        continue;
+
                     List<string> projectFiles = new List<string>();
                     var fwDef = new EmbeddedFramework
                     {
@@ -1416,7 +1419,7 @@ namespace BSPGenerationTools
                     if (f.MatchPredicate == null || f.MatchPredicate(mcu))
                     {
                         mcu.StartupFile = "$$SYS:BSP_ROOT$$/" + FamilyFilePrefix + startupFileFolder + "/" + f.FileName;
-                        f.Save(Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory, startupFileFolder, f.FileName), pFileNameTemplate);
+                        f.Save(Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory ?? ".", startupFileFolder, f.FileName), pFileNameTemplate);
                         matched = true;
                         break;
                     }

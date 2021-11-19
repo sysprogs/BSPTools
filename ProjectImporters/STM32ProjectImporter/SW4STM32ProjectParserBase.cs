@@ -227,9 +227,15 @@ namespace STM32ProjectImporter
             return true;
         }
 
-        public static CommonConfigurationOptions ExtractSTM32CubeIDEOptions(EclipseProject.CConfiguration configuration)
+        public static CommonConfigurationOptions ExtractSTM32CubeIDEOptions(EclipseProject.CConfiguration configuration, Dictionary<string, HashSet<string>> libraryDirCache = null)
         {
             var tools = configuration.RequireTools(EclipseTool.CCompiler | EclipseTool.CLinker | EclipseTool.CPPLinker);
+
+            const string cflagsKey = "com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.otherflags";
+            var ldflags = tools.Linker.ReadOptionalValue(cflagsKey)?.Trim();
+            if (string.IsNullOrEmpty(ldflags))
+                ldflags = string.Join(" ", tools.Linker.ReadOptionalList(cflagsKey) ?? new string[0]);
+
             return new CommonConfigurationOptions
             {
                 IncludeDirectories = tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths", PathTranslationFlags.AddExtraComponentToBaseDir),
@@ -241,10 +247,10 @@ namespace STM32ProjectImporter
                 LinkerScript = tools.Linker.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.script", PathTranslationFlags.None) ??
                                tools.CPPLinker.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.option.script", PathTranslationFlags.None),
 
-                LDFLAGS = tools.Linker.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.otherflags"),
+                LDFLAGS = ldflags,
                 UseCMSE = tools.Compiler.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.mcmse") == "true",
 
-                Libraries = new List<string>(),
+                Libraries = tools.Linker.ResolveLibraries("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.libraries", "com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.directories", libraryDirCache),
                 SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile)
             };
         }
@@ -305,7 +311,7 @@ namespace STM32ProjectImporter
             else if (subtype == ProjectSubtype.WiSEStudio)
                 opts = ExtractWiSEOptions(configuration);
             else
-                opts = ExtractSTM32CubeIDEOptions(configuration);
+                opts = ExtractSTM32CubeIDEOptions(configuration, _LibraryDirCache);
 
             var mcu = opts.MCU;
 
@@ -350,6 +356,30 @@ namespace STM32ProjectImporter
             if (opts.UseCMSE)
             {
                 mcuConfig.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.bspoptions.cmse", Value = "-mcmse" });
+            }
+
+            if (!string.IsNullOrEmpty(opts.LDFLAGS))
+            {
+                var flags = opts.LDFLAGS.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                List<string> linkerScripts = new List<string>();
+
+                for (int i = 0; i < flags.Length; i++)
+                {
+                    string path;
+                    if (flags[i] == "-L" && i < (flags.Length - 1))
+                        path = flags[++i];
+                    else if (flags[i].StartsWith("-L") && flags[i].Length > 2)
+                        path = flags[i].Substring(2);
+                    else
+                        continue;
+
+                    path = configuration.Project.TranslatePath(path, PathTranslationFlags.AddExtraComponentToBaseDir);
+                    if (path != null)
+                        linkerScripts.AddRange(Directory.GetFiles(path, "*.ld"));
+                }
+
+                if (linkerScripts.Count > 0)
+                    result.AuxiliaryLinkerScripts = linkerScripts.ToArray();
             }
 
             try

@@ -16,10 +16,17 @@
 	<CoreFramework>
 		<CopyJobs>
 			<CopyJob>
-				<SourceFolder>$$STM32:WB_DIR$$\Middlewares\ST\STM32_WPAN</SourceFolder>
+				<SourceFolder>$$STM32:WL_DIR$$\Utilities</SourceFolder>
 				<FilesToCopy>*</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask/>
+			</CopyJob>
+			<CopyJob>
+				<SourceFolder>$$STM32:WL_DIR$$\Middlewares</SourceFolder>
+				<FilesToCopy>*</FilesToCopy>
+				<ProjectInclusionMask>-*</ProjectInclusionMask>
+				<AutoIncludeMask/>
+				<AdvancedRenameRules>.*LoRaWAN.*\\(cmac)\.c$=>lorawan_{1}.c</AdvancedRenameRules>
 			</CopyJob>
 		</CopyJobs>
 	</CoreFramework>
@@ -35,8 +42,9 @@
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\ST\STM32_Key_Management_Services</SourceFolder>
-					<TargetFolder>Lib\ST_KMS</TargetFolder>
+					<TargetFolder>Middlewares\ST\STM32_Key_Management_Services</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
+					<AlreadyCopied>true</AlreadyCopied>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
 <!--					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wl.kms.|Key Management Services</SmartPropertyGroup>
@@ -59,7 +67,8 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\ST\STM32_Secure_Engine</SourceFolder>
-					<TargetFolder>Lib\ST_Secure</TargetFolder>
+					<TargetFolder>Middlewares\ST\STM32_Secure_Engine</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-Utilities\*;*.c;*.h</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
@@ -80,7 +89,8 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\LoRaWAN</SourceFolder>
-					<TargetFolder>Lib\LoRaWAN</TargetFolder>
+					<TargetFolder>Middlewares\Third_Party\LoRaWAN</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
@@ -96,7 +106,8 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\mbed-crypto</SourceFolder>
-					<TargetFolder>Lib\mbed-crypto</TargetFolder>
+					<TargetFolder>Middlewares\Third_Party\mbed-crypto</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>include\*;library\*</FilesToCopy>
 					<ProjectInclusionMask>-library\timing.c;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -118,7 +129,8 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\SubGHz_Phy</SourceFolder>
-					<TargetFolder>Lib\SubGHz_Phy</TargetFolder>
+					<TargetFolder>Middlewares\Third_Party\SubGHz_Phy</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
@@ -136,7 +148,7 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:WL_DIR$$\Utilities</SourceFolder>
-					<TargetFolder>Utilities</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>conf\*;Fonts\*;sequencer\*;</FilesToCopy> <!-- as of 1.0.0, the 'lcd' folder is broken -->
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
@@ -154,7 +166,8 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\Sigfox</SourceFolder>
-					<TargetFolder>Lib\SigFox</TargetFolder>
+					<TargetFolder>Middlewares\Third_Party\Sigfox</TargetFolder>
+					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>*</FilesToCopy> <!-- as of 1.0.0, the 'lcd' folder is broken -->
 					<ProjectInclusionMask>-SigfoxLibTest\*;*.c;*.h;*.a</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
@@ -202,6 +215,7 @@ lpm:LPM
 					<CopyJob>
 						<SourceFolder>$$STM32:WL_DIR$$\Utilities\$$BSPGEN:FRAMEWORK$$</SourceFolder>
 						<TargetFolder>Utilities\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<AlreadyCopied>true</AlreadyCopied>						
 						<FilesToCopy>*</FilesToCopy>
 						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 						<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>

@@ -320,7 +320,12 @@ namespace BSPGenerationTools
         }
 
 
-        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties, ReverseFileConditionBuilder.Handle reverseConditions, List<ConfigurationFileTemplate> configFiles)
+        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp,
+            List<string> projectFiles, 
+            string subdir, 
+            ref PropertyList configurableProperties,
+            ReverseFileConditionBuilder.Handle reverseConditions, 
+            List<ConfigurationFileTemplate> configFiles)
         {
             List<ParsedCondition> conditions = null;
             List<ConditionRecord> allConditions = new List<ConditionRecord>();

@@ -391,6 +391,11 @@ namespace stm32_bsp_generator
                             { "STM32:FAMILY_DIR" , baseDir },
                         };
 
+                        if (!string.IsNullOrEmpty(fam.FamilySubdirectory))
+                            dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$/" + fam.FamilySubdirectory;
+                        else
+                            dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$";
+
                         var extraFrameworkFamily = XmlTools.LoadObject<FamilyDefinition>(extraFrameworksFile);
 
                         //USB host/device libraries are not always compatible between different device families. Hence we need to ship separate per-family copies of those.
@@ -513,13 +518,8 @@ namespace stm32_bsp_generator
                         allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
                 }
 
-                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
-                {
-                    if (familySpecificFrameworkIDs.Contains(fw.ID))
-                        continue;   //The device families can override the common frameworks (e.g. utils) by providing a framework with exactly the same ID.
-
+                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions(familySpecificFrameworkIDs))
                     frameworks.Add(fw);
-                }
 
                 foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
                     exampleDirs.Add(sample);
