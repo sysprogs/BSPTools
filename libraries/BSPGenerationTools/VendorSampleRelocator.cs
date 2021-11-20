@@ -61,9 +61,12 @@ namespace BSPGenerationTools
         {
             protected readonly ConstructedVendorSampleDirectory _SampleDir;
 
+            readonly Dictionary<string, string> _CopiedFiles;
+
             public PathMapper(ConstructedVendorSampleDirectory dir)
             {
                 _SampleDir = dir;
+                _CopiedFiles = CopiedFileMonitor.Load(dir.BSPDirectory, true);
             }
 
             //Returns null for toolchain-relative paths that need to be excluded
@@ -71,6 +74,9 @@ namespace BSPGenerationTools
             {
                 if (string.IsNullOrEmpty(path) || (!Path.IsPathRooted(path) && !path.Contains("$$")))
                     return null;
+
+                if (_CopiedFiles.Count > 0 && _CopiedFiles.TryGetValue(Path.GetFullPath(path), out var mapped))
+                    return mapped;
 
                 if (!path.Contains("$$"))
                     path = Path.GetFullPath(path).Replace('/', '\\');

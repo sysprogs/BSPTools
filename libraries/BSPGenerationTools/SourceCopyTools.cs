@@ -325,7 +325,8 @@ namespace BSPGenerationTools
             string subdir, 
             ref PropertyList configurableProperties,
             ReverseFileConditionBuilder.Handle reverseConditions, 
-            List<ConfigurationFileTemplate> configFiles)
+            List<ConfigurationFileTemplate> configFiles,
+            CopiedFileMonitor copiedFileMonitor)
         {
             List<ParsedCondition> conditions = null;
             List<ConditionRecord> allConditions = new List<ConditionRecord>();
@@ -604,6 +605,8 @@ namespace BSPGenerationTools
                     bsp.RenamedFileTable[oldTargetFile] = newName;
                 }
 
+                var absSourcePath = Path.Combine(expandedSourceFolder, f);
+
                 if (AlreadyCopied)
                 {
                     if (!File.Exists(targetFile))
@@ -612,7 +615,6 @@ namespace BSPGenerationTools
                 else
                 {
                     bool resolved = false;
-                    var absSourcePath = Path.Combine(expandedSourceFolder, f);
                     if (potentialSymlinks.IsMatch(f))
                     {
                         for (; ; )
@@ -626,11 +628,15 @@ namespace BSPGenerationTools
                     }
 
                     if (!resolved)
+                    {
                         File.Copy(absSourcePath, targetFile, true);
+                    }
                 }
 
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
+
+                copiedFileMonitor.RememberFileMapping(absSourcePath, targetFile, encodedPath);
 
                 bool includedInProject = projectContents.IsMatch(f);
                 var m = configTemplateRegex?.Match(f);
@@ -821,6 +827,7 @@ namespace BSPGenerationTools
         public string[] IncompatibleFrameworks; //Mutually exclusive frameworks (e.g. HAL is incompatible with StdPeriph)
         public ConfigurationFileTemplate[] ConfigurationFileTemplates;
         public string AdditionalForcedIncludes;
+        public string LibraryOrder;     //A list of regexes, separated by ';', matching exactly one library each
 
         public ConfigFileDefinition[] ConfigFiles;
     }

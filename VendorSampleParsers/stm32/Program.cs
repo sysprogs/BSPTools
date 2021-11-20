@@ -278,15 +278,6 @@ namespace GeneratorSampleStm32
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(WB)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP1/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
                 };
-
-                if (_Ruleset == STM32Ruleset.BlueNRG_LP)
-                {
-                    AutoPathMappings = AutoPathMappings.Concat(new PathMapping[]
-                    {
-                        new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/Drivers/(.*)", "$$SYS:BSP_ROOT$$/Drivers/{1}"),
-                        new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/Middlewares/ST/(.*)", "$$SYS:BSP_ROOT$$/ST/{1}"),
-                    }).ToArray();
-                }
             }
 
             public override Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter)

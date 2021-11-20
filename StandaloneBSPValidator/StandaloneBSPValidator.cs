@@ -399,7 +399,7 @@ namespace StandaloneBSPValidator
 
             flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories).Distinct().ToArray();
             flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
-            var linkerScriptDirs = (vs.AuxiliaryLinkerScripts ?? new string[0]).Select(ld => Path.GetDirectoryName(ld)).Distinct().ToArray();
+            var linkerScriptDirs = (vs.AuxiliaryLinkerScripts ?? new string[0]).Select(ld => Path.GetDirectoryName(ld)).Distinct().Select(dir => VariableHelper.ExpandVariables(dir, bspDict, frameworkCfg)).ToArray();
             flags.AdditionalLibraryDirectories = LoadedBSP.Combine(flags.AdditionalLibraryDirectories, linkerScriptDirs);
 
             flags.LDFLAGS = flags.LDFLAGS + " " + vs.LDFLAGS;

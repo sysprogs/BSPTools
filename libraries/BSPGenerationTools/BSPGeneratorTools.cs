@@ -190,9 +190,64 @@ namespace BSPGenerationTools
         public static BSPDirectories MakeDefault(string[] args) => new BSPDirectories(args[0], @"..\..\Output", @"..\..\rules", @"..\..\logs");
     }
 
+    public class CopiedFileMonitor
+    {
+        readonly Dictionary<string, string> _AllCopiedFiles = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
+        public void RememberFileMapping(string absSource, string absTarget, string encodedPath)
+        {
+            _AllCopiedFiles[Path.GetFullPath(absSource)] = encodedPath;
+        }
+
+        public const string MetadataSubdir = ".bspgen";
+        public const string MappingFileName = "CopiedFiles.txt";
+
+        public void SaveMapping(string bspDir)
+        {
+            Directory.CreateDirectory(Path.Combine(bspDir, MetadataSubdir));
+            using (var sw = new StreamWriter(Path.Combine(bspDir, MetadataSubdir, MappingFileName)))
+            {
+                foreach (var kv in _AllCopiedFiles)
+                    sw.WriteLine($"{kv.Key} => {kv.Value}");
+            }
+        }
+
+        public static Dictionary<string, string> Load(string bspDir, bool deriveDirectoryMappings)
+        {
+            Dictionary<string, string> copiedFiles = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
+            var fn = Path.Combine(bspDir, MetadataSubdir, MappingFileName);
+            if (File.Exists(fn))
+                foreach (var line in File.ReadAllLines(fn))
+                {
+                    int idx = line.IndexOf("=>");
+                    if (idx == -1)
+                        continue;
+
+                    string realPath = line.Substring(0, idx).Trim(), bspPath = line.Substring(idx + 2).Trim();
+                    copiedFiles[realPath] = bspPath;
+                }
+
+            if (deriveDirectoryMappings)
+            {
+                foreach (var kv in copiedFiles.ToArray())
+                {
+                    int idx = kv.Value.LastIndexOf('/');
+                    if (idx == -1)
+                        throw new Exception("Could not find the directory name for " + kv.Value);
+                    copiedFiles[Path.GetDirectoryName(kv.Key)] = kv.Value.Substring(0, idx);
+                }
+            }
+
+            return copiedFiles;
+        }
+    }
+
     public abstract class BSPBuilder : IDisposable
     {
         public readonly ReverseFileConditionBuilder ReverseFileConditions = new ReverseFileConditionBuilder();
+        public readonly CopiedFileMonitor CopiedFileMonitor = new CopiedFileMonitor();
+
         public readonly BSPReportWriter Report;
 
         public LinkerScriptTemplate LDSTemplate;
@@ -297,7 +352,7 @@ namespace BSPGenerationTools
             string archiveName = string.Format("{0}-{1}.vgdbxbsp", bsp.PackageID.Split('.').Last(), bsp.PackageVersion);
 
             if (produceBSPArchive)
-                TarPacker.PackDirectoryToTGZ(dir, Path.Combine(dir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp");
+                TarPacker.PackDirectoryToTGZ(dir, Path.Combine(dir, archiveName), fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp", subdir => subdir.ToLower() != ".bspgen");
 
             BSPSummary lst = new BSPSummary
             {
@@ -525,6 +580,7 @@ namespace BSPGenerationTools
         public void Dispose()
         {
             Report.Dispose();
+            CopiedFileMonitor.SaveMapping(Directories.OutputDir);
         }
 
         struct QueuedConfigurationFileTemplate
@@ -1023,7 +1079,15 @@ namespace BSPGenerationTools
             var unused = new List<ConfigurationFileTemplate>();
             if (Definition.CoreFramework != null)
                 foreach (var job in Definition.CoreFramework.CopyJobs)
-                    flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref Definition.CoreFramework.ConfigurableProperties, BSP.ReverseFileConditions.RootHandle, unused));
+                {
+                    flags = flags.Merge(job.CopyAndBuildFlags(BSP,
+                        projectFiles,
+                        Definition.FamilySubdirectory,
+                        ref Definition.CoreFramework.ConfigurableProperties,
+                        BSP.ReverseFileConditions.RootHandle,
+                        unused,
+                        BSP.CopiedFileMonitor));
+                }
         }
 
         class MemoryComparer : IEqualityComparer<Memory>
@@ -1157,7 +1221,15 @@ namespace BSPGenerationTools
 
                     ToolFlags flags = new ToolFlags();
                     foreach (var job in fw.CopyJobs)
-                        flags = flags.Merge(job.CopyAndBuildFlags(BSP, projectFiles, Definition.FamilySubdirectory, ref fw.ConfigurableProperties, BSP.ReverseFileConditions.GetHandleForFramework(fw), configTemplates));
+                    {
+                        flags = flags.Merge(job.CopyAndBuildFlags(BSP,
+                            projectFiles,
+                            Definition.FamilySubdirectory,
+                            ref fw.ConfigurableProperties,
+                            BSP.ReverseFileConditions.GetHandleForFramework(fw),
+                            configTemplates,
+                            BSP.CopiedFileMonitor));
+                    }
 
                     if (configTemplates.Count > 0)
                         fwDef.ConfigurationFileTemplates = configTemplates.ToArray();
@@ -1165,6 +1237,30 @@ namespace BSPGenerationTools
                     fwDef.AdditionalSourceFiles = projectFiles.Where(f => !IsHeaderFile(f) && !f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).ToArray();
                     fwDef.AdditionalHeaderFiles = projectFiles.Where(f => IsHeaderFile(f)).ToArray();
                     fwDef.AdditionalLibraries = projectFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).ToArray();
+
+                    if (fw.LibraryOrder != null && fwDef.AdditionalLibraries.Length > 0)
+                    {
+                        Regex[] regexes = fw.LibraryOrder.Split(';').Select(s => new Regex(s, RegexOptions.IgnoreCase)).ToArray();
+                        Dictionary<string, int> libRanks = new Dictionary<string, int>();
+                        foreach (var lib in fwDef.AdditionalLibraries)
+                        {
+                            int match = -1;
+                            for (int i = 0; i < regexes.Length; i++)
+                                if (regexes[i].IsMatch(lib))
+                                {
+                                    if (match != -1)
+                                        throw new Exception($"'{lib}' matches both '{regexes[match]}' and '{regexes[i]}' for {fw.ID}");
+                                    match = i;
+                                }
+
+                            if (match < 0)
+                                throw new Exception($"'{lib}' doesn't match any order regexes for {fw.ID}");
+
+                            libRanks[lib] = match;
+                        }
+
+                        fwDef.AdditionalLibraries = fwDef.AdditionalLibraries.OrderBy(l => libRanks[l]).ToArray();
+                    }
 
                     fwDef.AdditionalIncludeDirs = flags.IncludeDirectories;
                     fwDef.AdditionalPreprocessorMacros = flags.PreprocessorMacros;

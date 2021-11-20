@@ -66,7 +66,7 @@
 					<ProjectInclusionMask>-*stm32??xx_ll_usb.?;&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<AlreadyCopied>true</AlreadyCopied>
-					<AdditionalIncludeDirs>Inc;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Core/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Include</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>Inc;$$STM32:TARGET_FAMILY_DIR$$/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$STM32:TARGET_FAMILY_DIR$$/CMSIS_HAL/Core/Include;$$STM32:TARGET_FAMILY_DIR$$/CMSIS_HAL/Include</AdditionalIncludeDirs>
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>

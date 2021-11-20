@@ -2,7 +2,6 @@
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>STM32WL</Name>
 	<DeviceRegex>^STM32WL.*</DeviceRegex>
-	<FamilySubdirectory>STM32WLxxxx</FamilySubdirectory>
 	<PrimaryHeaderDir>$$STM32:WL_DIR$$\Drivers\CMSIS\Device\ST\STM32WLxx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:WL_DIR$$\Drivers\CMSIS\Device\ST\STM32WLxx\Source\Templates\gcc</StartupFileDir>
 	<HasMixedCores>true</HasMixedCores>
@@ -46,13 +45,17 @@
 					<FilesToCopy>*</FilesToCopy>
 					<AlreadyCopied>true</AlreadyCopied>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask>-iKMS\*;-niKMS\*;*.h</AutoIncludeMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
-<!--					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wl.kms.|Key Management Services</SmartPropertyGroup>
+					<AdditionalIncludeDirs>$$com.sysprogs.bspoptions.stm32.wl.kms.api$$</AdditionalIncludeDirs>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wl.kms.|Key Management Services</SmartPropertyGroup>
 					<SmartFileConditions>
-						<string>Crypto Implementation[crypto]|
-Interface\\CryptoApi\\HAL\\.*=>STM32 HAL[hal];
-Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
-					</SmartFileConditions>-->
+						<string>tKMS API[api]]|
+^iKMS\\.*=>Outside secure enclave (iKMS)[iKMS];
+^niKMS\\.*=>Within secure enclave (niKMS)[niKMS]</string>
+						<string>-Core[core]|^(Core\\*|Interface\\CryptoApi\\ca_core.c)</string>
+						<string>-Modules[modules]|^Modules\\*</string>
+					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>		
@@ -72,6 +75,11 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 					<FilesToCopy>*</FilesToCopy>
 					<ProjectInclusionMask>-Utilities\*;*.c;*.h</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wl.secure.|STM32 Secure Engine</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>Interface[interface]|Core\\.*interface.*</string>
+						<string>-Core[core]|Core\\.*</string>
+					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>		
@@ -84,7 +92,6 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 				<string>com.sysprogs.arm.stm32.hal</string>
 				<string>com.sysprogs.arm.stm32.utilities</string>
 				<string>com.sysprogs.arm.stm32.utilities_timer</string>
-				<string>com.sysprogs.arm.stm32.subghz_phy</string>
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
@@ -95,6 +102,16 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
 					<AdvancedRenameRules>\\(cmac)\.c$=>lorawan_{1}.c</AdvancedRenameRules>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.wl.kms.|LoRaWAN</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>-FragDecoder|^LmHandler\\Packages\\FragDecoder\..</string>
+						<string>-LmhpClockSync|^LmHandler\\Packages\\LmhpClockSync\..</string>
+						<string>-LmhpCompliance|^LmHandler\\Packages\\LmhpCompliance\..</string>
+						<string>-LmhpDataDistribution|^LmHandler\\Packages\\LmhpDataDistribution\..</string>
+						<string>-LmhpFirmwareManagement|^LmHandler\\Packages\\LmhpFirmwareManagement\..</string>
+						<string>-LmhpFragmentation|^LmHandler\\Packages\\LmhpFragmentation\..</string>
+						<string>-LmhpRemoteMcastSetup|^LmHandler\\Packages\\LmhpRemoteMcastSetup\..</string>
+					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>		
@@ -111,7 +128,7 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 					<FilesToCopy>include\*;library\*</FilesToCopy>
 					<ProjectInclusionMask>-library\timing.c;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32WLxxxx/Lib/mbed-crypto/include;$$SYS:BSP_ROOT$$/STM32WLxxxx/Lib/mbed-crypto/include/mbedtls;$$SYS:BSP_ROOT$$/STM32WLxxxx/Lib/mbed-crypto/include/psa</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>include;include/mbedtls;include/psa</AdditionalIncludeDirs>
 					<PreprocessorMacros>MBEDTLS_NO_PLATFORM_ENTROPY</PreprocessorMacros>
 				</CopyJob>
 			</CopyJobs>
@@ -169,10 +186,11 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 					<TargetFolder>Middlewares\Third_Party\Sigfox</TargetFolder>
 					<AlreadyCopied>true</AlreadyCopied>
 					<FilesToCopy>*</FilesToCopy> <!-- as of 1.0.0, the 'lcd' folder is broken -->
-					<ProjectInclusionMask>-SigfoxLibTest\*;*.c;*.h;*.a</ProjectInclusionMask>
+					<ProjectInclusionMask>*.c;*.h;*.a</ProjectInclusionMask>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
 				</CopyJob>
 			</CopyJobs>
+			<LibraryOrder>SFX_ADDON_;SFX_LIB_;Sgfx-Cmac-;Sgfx-Monarch-</LibraryOrder>
 		</Framework>
 		<Framework>
 			<Name>Development Board Support</Name>
@@ -191,7 +209,26 @@ Interface\\CryptoApi\\MBED\\.*=>Mbed[mbed]</string>
 					<TemplateFileSpec>.*(_template)\.[ch]$</TemplateFileSpec>
 				</CopyJob>
 			</CopyJobs>
-		</Framework>		
+		</Framework>	
+		<Framework>
+			<Name>FatFs</Name>
+			<ID>com.sysprogs.arm.stm32.FatFs</ID>
+			<ProjectFolderName>FatFs</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>		
+			<CopyJobs>			
+				<CopyJob>
+					<SourceFolder>$$STM32:WL_DIR$$\Middlewares\Third_Party\FatFs</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-src\drivers\*;-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>src;src/drivers</AdditionalIncludeDirs>
+					<PreprocessorMacros></PreprocessorMacros>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>	
 	</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
@@ -372,11 +409,11 @@ lpm:LPM
         </SysVarEntry>
         <SysVarEntry>
           <Key>com.sysprogs.bspoptions.stm32.hal_system_file</Key>
-          <Value>STM32WLxxxx/CMSIS_HAL/Device/ST/STM32WLxx/Source/Templates/system_stm32wlxx.c</Value>
+          <Value>CMSIS_HAL/Device/ST/STM32WLxx/Source/Templates/system_stm32wlxx.c</Value>
         </SysVarEntry>
         <SysVarEntry>
           <Key>com.sysprogs.bspoptions.stm32.hal_config_template_file</Key>
-          <Value>STM32WLxxxx/STM32WLxx_HAL_Driver/Inc/stm32wlxx_hal_conf_template.h</Value>
+          <Value>STM32WLxx_HAL_Driver/Inc/stm32wlxx_hal_conf_template.h</Value>
         </SysVarEntry>
       </AdditionalSystemVars>
 </FamilyDefinition>
