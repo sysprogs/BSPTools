@@ -58,10 +58,10 @@ namespace BSPGenerationTools
                     cfg.Configuration = table.ConditionTable[entry.OneBasedConfigurationFragmentIndex - 1].RequestedConfiguration;
 
                 string key = entry.ObjectName;
-                if (optionalDictionary != null && optionalDictionary.TryGetValue(key, out var val))
-                    key = val;
-
                 result[key] = cfg;
+
+                if (optionalDictionary != null && optionalDictionary.TryGetValue(key, out var val))
+                    result[val] = cfg;
             }
 
             return result;

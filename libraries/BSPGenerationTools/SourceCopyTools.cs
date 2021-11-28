@@ -249,6 +249,7 @@ namespace BSPGenerationTools
         public string VendorSpecificAttributes;
         public CopyJobFlags Flags;
         public string SmartConditionsPromotedToPreprocessorMacros;
+        public string TemplateFileSpec;
 
         [Flags]
         public enum CopyJobFlags
@@ -319,11 +320,19 @@ namespace BSPGenerationTools
         }
 
 
-        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp, List<string> projectFiles, string subdir, ref PropertyList configurableProperties, ReverseFileConditionBuilder.Handle reverseConditions)
+        public ToolFlags CopyAndBuildFlags(BSPBuilder bsp,
+            List<string> projectFiles, 
+            string subdir, 
+            ref PropertyList configurableProperties,
+            ReverseFileConditionBuilder.Handle reverseConditions, 
+            List<ConfigurationFileTemplate> configFiles,
+            CopiedFileMonitor copiedFileMonitor)
         {
             List<ParsedCondition> conditions = null;
             List<ConditionRecord> allConditions = new List<ConditionRecord>();
             List<string> preprocessorMacros = new List<string>();
+
+            Regex configTemplateRegex = TemplateFileSpec == null ? null : new Regex(TemplateFileSpec);
 
             if (SimpleFileConditions != null)
             {
@@ -596,6 +605,8 @@ namespace BSPGenerationTools
                     bsp.RenamedFileTable[oldTargetFile] = newName;
                 }
 
+                var absSourcePath = Path.Combine(expandedSourceFolder, f);
+
                 if (AlreadyCopied)
                 {
                     if (!File.Exists(targetFile))
@@ -604,7 +615,6 @@ namespace BSPGenerationTools
                 else
                 {
                     bool resolved = false;
-                    var absSourcePath = Path.Combine(expandedSourceFolder, f);
                     if (potentialSymlinks.IsMatch(f))
                     {
                         for (; ; )
@@ -618,14 +628,27 @@ namespace BSPGenerationTools
                     }
 
                     if (!resolved)
+                    {
                         File.Copy(absSourcePath, targetFile, true);
+                    }
                 }
 
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
 
+                copiedFileMonitor.RememberFileMapping(absSourcePath, targetFile, encodedPath);
+
                 bool includedInProject = projectContents.IsMatch(f);
-                if (includedInProject)
+                var m = configTemplateRegex?.Match(f);
+                if (m?.Success == true)
+                {
+                    configFiles.Add(new ConfigurationFileTemplate
+                    {
+                        SourcePath = encodedPath,
+                        TargetFileName = Path.GetFileName(f.Substring(0, m.Groups[1].Index) + f.Substring(m.Groups[1].Index + m.Groups[1].Length)),
+                    });
+                }
+                else if (includedInProject)
                 {
                     projectFiles.Add(encodedPath.Replace('\\', '/'));
 
@@ -804,6 +827,7 @@ namespace BSPGenerationTools
         public string[] IncompatibleFrameworks; //Mutually exclusive frameworks (e.g. HAL is incompatible with StdPeriph)
         public ConfigurationFileTemplate[] ConfigurationFileTemplates;
         public string AdditionalForcedIncludes;
+        public string LibraryOrder;     //A list of regexes, separated by ';', matching exactly one library each
 
         public ConfigFileDefinition[] ConfigFiles;
     }

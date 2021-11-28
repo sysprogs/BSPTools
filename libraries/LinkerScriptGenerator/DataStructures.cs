@@ -212,6 +212,18 @@ namespace LinkerScriptGenerator
             return null;
         }
 
+        public Memory TryLocateOnlyMemory(MemoryType type, bool markPrimary)
+        {
+            var mems = Memories.Where(m => m.Type == type).ToArray();
+            if (mems.Length == 1)
+            {
+                if (markPrimary)
+                    mems[0].IsPrimary = true;
+                return mems[0];
+            }
+
+            return null;
+        }
 
         public Memory TryLocateAndMarkPrimaryMemory(MemoryType type, params MemoryLocationRule[] rules)
         {

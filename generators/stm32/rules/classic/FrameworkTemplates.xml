@@ -35,7 +35,7 @@
 			<ConfigFiles>
 				<ConfigFileDefinition>
 					<Path>$$STM32:FAMILY_DIR$$\Drivers\$$STM32:FAMILY$$xx_HAL_Driver\Inc\$$STM32:FAMILY_L$$xx_hal_conf_template.h</Path>
-					<TargetPathForInsertingIntoProject>$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/$$STM32:FAMILY$$xx_HAL_Driver/Inc/$$STM32:FAMILY_L$$xx_hal_conf_template.h</TargetPathForInsertingIntoProject>
+					<TargetPathForInsertingIntoProject>$$STM32:TARGET_FAMILY_DIR$$/$$STM32:FAMILY$$xx_HAL_Driver/Inc/$$STM32:FAMILY_L$$xx_hal_conf_template.h</TargetPathForInsertingIntoProject>
 					<FinalName>$$STM32:FAMILY_L$$xx_hal_conf.h</FinalName>
 					<ParserClass>stm32_bsp_generator.STM32ConfigFileParser</ParserClass>
 					<TestableHeaderFiles>
@@ -66,7 +66,7 @@
 					<ProjectInclusionMask>-*stm32??xx_ll_usb.?;&gt;.*stm32[^\\]+_ll_[^\\]+\.(h|c|cpp)</ProjectInclusionMask>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$</PreprocessorMacros>
 					<AlreadyCopied>true</AlreadyCopied>
-					<AdditionalIncludeDirs>Inc;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Core/Include;$$SYS:BSP_ROOT$$/$$STM32:FAMILY$$xxxx/CMSIS_HAL/Include</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>Inc;$$STM32:TARGET_FAMILY_DIR$$/CMSIS_HAL/Device/ST/$$STM32:FAMILY$$xx/Include;$$STM32:TARGET_FAMILY_DIR$$/CMSIS_HAL/Core/Include;$$STM32:TARGET_FAMILY_DIR$$/CMSIS_HAL/Include</AdditionalIncludeDirs>
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>
@@ -84,7 +84,7 @@
 					<AlreadyCopied>true</AlreadyCopied>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
-					<FilesToCopy>*system_stm*.c</FilesToCopy>
+					<FilesToCopy>-*NN_Lib_Tests*;*system_stm*.c</FilesToCopy>
 				</CopyJob>
 			</CopyJobs>			
 		</Framework>

@@ -391,6 +391,11 @@ namespace stm32_bsp_generator
                             { "STM32:FAMILY_DIR" , baseDir },
                         };
 
+                        if (!string.IsNullOrEmpty(fam.FamilySubdirectory))
+                            dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$/" + fam.FamilySubdirectory;
+                        else
+                            dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$";
+
                         var extraFrameworkFamily = XmlTools.LoadObject<FamilyDefinition>(extraFrameworksFile);
 
                         //USB host/device libraries are not always compatible between different device families. Hence we need to ship separate per-family copies of those.
@@ -426,7 +431,10 @@ namespace stm32_bsp_generator
                         {
                             string expandedJobSourceDir = j.SourceFolder;
                             bspBuilder.ExpandVariables(ref expandedJobSourceDir);
-                            return !Directory.Exists(expandedJobSourceDir);
+                            if (!Directory.Exists(expandedJobSourceDir))
+                                return true;
+
+                            return false;
                         }) == 0);
 
                         fam.AdditionalFrameworks = fam.AdditionalFrameworks.Concat(extraFrameworksWithoutMissingFolders).ToArray();
@@ -445,6 +453,9 @@ namespace stm32_bsp_generator
                         case STM32Ruleset.BlueNRG_LP:
                             allFamilies.Add(new BlueNRGFamilyBuilder(bspBuilder, fam));
                             break;
+                        case STM32Ruleset.STM32WL:
+                            allFamilies.Add(new STM32WLFamilyBuilder(bspBuilder, fam));
+                            break;
                         case STM32Ruleset.Classic:
                         default:
                             allFamilies.Add(new STM32ClassicFamilyBuilder(bspBuilder, fam));
@@ -458,7 +469,7 @@ namespace stm32_bsp_generator
                 {
                     foreach (var r in rejects)
                     {
-                        if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB"))
+                        if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB") || r.Name.StartsWith("STM32WL"))
                             continue;
 
                         bspBuilder.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
@@ -475,8 +486,7 @@ namespace stm32_bsp_generator
                 string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
 
                 var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
-                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions())
-                    frameworks.Add(fw);
+                HashSet<string> familySpecificFrameworkIDs = new HashSet<string>();
 
                 List<ConditionalToolFlags> allConditionalToolFlags = new List<ConditionalToolFlags>();
 
@@ -496,7 +506,10 @@ namespace stm32_bsp_generator
                         mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null));
 
                     foreach (var fw in fam.GenerateFrameworkDefinitions())
+                    {
+                        familySpecificFrameworkIDs.Add(fw.ID);
                         frameworks.Add(fw);
+                    }
 
                     foreach (var sample in fam.CopySamples())
                         exampleDirs.Add(sample);
@@ -504,6 +517,9 @@ namespace stm32_bsp_generator
                     if (fam.Definition.ConditionalFlags != null)
                         allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
                 }
+
+                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions(familySpecificFrameworkIDs))
+                    frameworks.Add(fw);
 
                 foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
                     exampleDirs.Add(sample);
@@ -731,7 +747,8 @@ namespace stm32_bsp_generator
         Classic,
         STM32WB,
         STM32MP1,
-        BlueNRG_LP
+        BlueNRG_LP,
+        STM32WL,
     }
 
 

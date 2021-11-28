@@ -399,6 +399,8 @@ namespace StandaloneBSPValidator
 
             flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories).Distinct().ToArray();
             flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
+            var linkerScriptDirs = (vs.AuxiliaryLinkerScripts ?? new string[0]).Select(ld => Path.GetDirectoryName(ld)).Distinct().Select(dir => VariableHelper.ExpandVariables(dir, bspDict, frameworkCfg)).ToArray();
+            flags.AdditionalLibraryDirectories = LoadedBSP.Combine(flags.AdditionalLibraryDirectories, linkerScriptDirs);
 
             flags.LDFLAGS = flags.LDFLAGS + " " + vs.LDFLAGS;
             flags = LoadedBSP.ConfiguredMCU.ExpandToolFlags(flags, bspDict, null);
@@ -717,6 +719,7 @@ namespace StandaloneBSPValidator
                 vendorSample.AllDependencies = Directory.GetFiles(mcuDir, "*.d")
                     .SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":")))
                     .Concat(prj.SourceFiles.SelectMany(sf => FindIncludedResources(vendorSample.Path, sf)))
+                    .Concat(vendorSample.AuxiliaryLinkerScripts ?? new string[0])
                     .Distinct()
                     .ToArray();
             }

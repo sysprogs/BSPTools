@@ -1,7 +1,7 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
 using BSPGenerationTools.Parsing;
-using STM32IDEProjectImporter;
+using STM32ProjectImporter;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -267,6 +267,7 @@ namespace stm32_bsp_generator
                             size = 1;
                             break;
                         case "RSSLIB_S_CloseExitHDP_TypeDef":   //Actually a function pointer
+                        case "RSSLIB_S_CloseExitHDP_t":
                             size = 4;
                             break;
                         default:
