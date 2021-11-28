@@ -241,7 +241,7 @@ namespace RISCVDebugPackage
                 if (_TelnetPort == 0)
                     return null;
 
-                return new LiveMemoryEvaluator(_TelnetPort);
+                return new LiveMemoryEvaluator(_TelnetPort, _Settings.LiveMemoryTimeout, _Settings.TelnetHostName);
             }
 
             public void Dispose()
