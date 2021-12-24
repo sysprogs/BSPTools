@@ -70,6 +70,38 @@ namespace VendorSampleParserEngine
                 _Report = new VendorSampleTestReport { BSPVersion = BSP.BSP.PackageVersion, BSPID = BSP.BSP.PackageID };
         }
 
+        public static string LocateLogFile(string bspID, string sampleID, VendorSamplePass specificPass = VendorSamplePass.None)
+        {
+            var testDir = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPTools\VendorSampleParsers").GetValue("TestDirectory") as string;
+
+            if (specificPass == VendorSamplePass.None)
+            {
+                foreach (var subdir in Directory.GetDirectories(Path.Combine(testDir, bspID)))
+                {
+                    var file = subdir + $@"\{sampleID}\build.log";
+                    if (File.Exists(file))
+                        return file;
+                }
+            }
+            else
+            {
+                string passDir = null;
+
+                if (specificPass == VendorSamplePass.InPlaceBuild)
+                    passDir = "Pass1";
+                else if (specificPass == VendorSamplePass.RelocatedBuild)
+                    passDir = "Pass2";
+                else
+                    throw new Exception("Invalid pass: " + specificPass);
+
+                var fn = Path.Combine(testDir, $@"{bspID}\{passDir}\{sampleID}\build.log");
+                if (File.Exists(fn))
+                    return fn;
+            }
+
+            return null;
+        }
+
         //Used to track samples that could not be parsed, so we can compare the statistics between BSP versions.
         public struct UnparseableVendorSample
         {
@@ -562,10 +594,17 @@ namespace VendorSampleParserEngine
             {
                 foreach (var rec in _Report.Records)
                 {
+                    if (rec.LastSucceededPass == VendorSamplePass.InPlaceBuild || rec.LastSucceededPass == VendorSamplePass.InitialParse)
+                    {
+                        var logFile = LocateLogFile(_Report.BSPID, rec.UniqueID, rec.LastSucceededPass + 1);
+                        if (logFile != null)
+                        {
+                            rec.KnownProblemID = _KnownProblems.TryClassifyError(logFile)?.ID;
+                        }
+                    }
                 }
 
                 XmlTools.SaveObject(_Report, ReportFile);
-
                 return;
             }
 

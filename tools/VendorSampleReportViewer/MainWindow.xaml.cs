@@ -45,17 +45,11 @@ namespace VendorSampleReportViewer
             try
             {
                 var ctx = (sender as FrameworkElement).DataContext as ControllerImpl.SampleRow.SampleCell ?? throw new Exception("Invalid data context");
-                var testDir = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPTools\VendorSampleParsers").GetValue("TestDirectory") as string;
-                foreach(var subdir in System.IO.Directory.GetDirectories(System.IO.Path.Combine(testDir, _Controller.BSPID)))
-                {
-                    var file = subdir + $@"\{ctx.SampleSubdir}\build.log";
-                    if (System.IO.File.Exists(file))
-                    {
-                        Process.Start(file);
-                    }
-                }
+
+                var fn = VendorSampleParserEngine.VendorSampleParser.LocateLogFile(_Controller.BSPID, ctx.SampleSubdir) ?? throw new Exception("Could not find the log file");
+                Process.Start(fn);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Vendor Sample Result Viewer", MessageBoxButton.OK, MessageBoxImage.Error);
             }

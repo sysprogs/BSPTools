@@ -107,7 +107,7 @@
 						<string>-FragDecoder|^LmHandler\\Packages\\FragDecoder\..</string>
 						<string>-LmhpClockSync|^LmHandler\\Packages\\LmhpClockSync\..</string>
 						<string>-LmhpCompliance|^LmHandler\\Packages\\LmhpCompliance\..</string>
-						<string>-LmhpDataDistribution|^LmHandler\\Packages\\LmhpDataDistribution\..</string>
+						<string>-LmhpPackagesRegistration|^LmHandler\\Packages\\LmhpPackagesRegistration\..</string>
 						<string>-LmhpFirmwareManagement|^LmHandler\\Packages\\LmhpFirmwareManagement\..</string>
 						<string>-LmhpFragmentation|^LmHandler\\Packages\\LmhpFragmentation\..</string>
 						<string>-LmhpRemoteMcastSetup|^LmHandler\\Packages\\LmhpRemoteMcastSetup\..</string>
@@ -128,7 +128,7 @@
 					<FilesToCopy>include\*;library\*</FilesToCopy>
 					<ProjectInclusionMask>-library\timing.c;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
-					<AdditionalIncludeDirs>include;include/mbedtls;include/psa</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>include;include/psa</AdditionalIncludeDirs>
 					<PreprocessorMacros>MBEDTLS_NO_PLATFORM_ENTROPY</PreprocessorMacros>
 				</CopyJob>
 			</CopyJobs>

@@ -18,37 +18,43 @@ namespace stm32_bsp_generator
         {
             Directory.CreateDirectory(sdkRoot);
             var xml = new XmlDocument();
-            var catalogFile = cubeRoot + @"\db\plugins\updater\STMUpdaterDefinitions.xml";
-            var daysOld = (DateTime.Now - File.GetLastWriteTime(catalogFile)).TotalDays;
-            if (daysOld > 40)
-                throw new Exception($"STM32CubeMX device list {daysOld:f0} days old. Please update STM32CubeMX.");
 
-            WebClient wc0 = new WebClient();
-            wc0.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0";
-            wc0.Headers[HttpRequestHeader.Accept] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
-            wc0.Headers[HttpRequestHeader.AcceptLanguage] = "en-US,en;q=0.5";
-
-            var onlineCatalog = wc0.DownloadData("https://www.st.com/resource/en/utility2/updaters.zip");
-            using (var archive = new ZipArchive(new MemoryStream(onlineCatalog)))
+            if (true)
             {
-                using (var stream = archive.GetEntry("STMupdaters.xml").Open())
-                {
-                    byte[] data = new byte[65536];
-                    MemoryStream ms = new MemoryStream();
-                    for (; ; )
-                    {
-                        int done = stream.Read(data, 0, data.Length);
-                        if (done == 0)
-                            break;
-                        ms.Write(data, 0, done);
-                    }
+                WebClient wc0 = new WebClient();
+                wc0.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0";
+                wc0.Headers[HttpRequestHeader.Accept] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+                wc0.Headers[HttpRequestHeader.AcceptLanguage] = "en-US,en;q=0.5";
 
-                    string text = Encoding.UTF8.GetString(ms.ToArray());
-                    xml.LoadXml(text);
+                var onlineCatalog = wc0.DownloadData("https://www.st.com/resource/en/utility2/updaters.zip");
+                using (var archive = new ZipArchive(new MemoryStream(onlineCatalog)))
+                {
+                    using (var stream = archive.GetEntry("STMUpdaterDefinitions.xml").Open())
+                    {
+                        byte[] data = new byte[65536];
+                        MemoryStream ms = new MemoryStream();
+                        for (; ; )
+                        {
+                            int done = stream.Read(data, 0, data.Length);
+                            if (done == 0)
+                                break;
+                            ms.Write(data, 0, done);
+                        }
+
+                        string text = Encoding.UTF8.GetString(ms.ToArray());
+                        xml.LoadXml(text);
+                    }
                 }
             }
+            else
+            {
+                var catalogFile = cubeRoot + @"\db\plugins\updater\STMUpdaterDefinitions.xml";
+                var daysOld = (DateTime.Now - File.GetLastWriteTime(catalogFile)).TotalDays;
+                if (daysOld > 40)
+                    throw new Exception($"STM32CubeMX device list {daysOld:f0} days old. Please update STM32CubeMX.");
 
-            //xml.Load(catalogFile);
+                xml.Load(catalogFile);
+            }
 
             var firmwaresNode = xml.DocumentElement.ChildNodes.OfType<XmlElement>().First(e => e.Name == "Firmwares");
             List<ReleaseDefinition> releases = new List<ReleaseDefinition>();

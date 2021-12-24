@@ -41,5 +41,30 @@
 			<ErrorMessage>section `.ExtFlashSection' will not fit in </ErrorMessage>
 			<Description>External FLASH</Description>
 		</ErrorEntry>
+		<ErrorEntry>
+			<ID>mapping_fwimg</ID>
+			<ErrorMessage>cannot open linker script file mapping_fwimg.ld</ErrorMessage>
+			<Description>mapping_fwimg</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>must_preprocess_ld</ID>
+			<ErrorMessage>gnoring invalid character `#' in expression</ErrorMessage>
+			<Description>Preprocess LD</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>kms_platf_objects_config</ID>
+			<ErrorMessage>kms_platf_objects_config.h: No such file or directory</ErrorMessage>
+			<Description>KMS config</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>SE_KMS_OpenSession</ID>
+			<ErrorMessage>undefined reference to `SE_KMS_OpenSession'</ErrorMessage>
+			<Description>SE_KMS_OpenSession</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>PWR_STOPENTRY_WFI</ID>
+			<ErrorMessage>error: 'PWR_STOPENTRY_WFI' undeclared</ErrorMessage>
+			<Description>PWR_STOPENTRY_WFI</Description>
+		</ErrorEntry>
 	</Entries>
 </KnownSampleProblemDatabase>

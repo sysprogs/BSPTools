@@ -189,6 +189,8 @@ namespace STM32ProjectImporter
             public List<string> Libraries;
             public string LDFLAGS;
             public bool UseCMSE;
+
+            public string[] LibrarySearchDirs;  //Will not be directly mapped to LDFLAGS unless they contain linker scripts
         }
 
         CommonConfigurationOptions ExtractSW4STM32Options(EclipseProject.CConfiguration configuration)
@@ -236,6 +238,8 @@ namespace STM32ProjectImporter
             if (string.IsNullOrEmpty(ldflags))
                 ldflags = string.Join(" ", tools.Linker.ReadOptionalList(cflagsKey) ?? new string[0]);
 
+            const string LibraryDirsKey = "com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.directories";
+
             return new CommonConfigurationOptions
             {
                 IncludeDirectories = tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths", PathTranslationFlags.AddExtraComponentToBaseDir),
@@ -250,8 +254,9 @@ namespace STM32ProjectImporter
                 LDFLAGS = ldflags,
                 UseCMSE = tools.Compiler.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.mcmse") == "true",
 
-                Libraries = tools.Linker.ResolveLibraries("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.libraries", "com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.directories", libraryDirCache),
-                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile)
+                Libraries = tools.Linker.ResolveLibraries("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.libraries", LibraryDirsKey, libraryDirCache),
+                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile),
+                LibrarySearchDirs = tools.Linker.ReadOptionalList(LibraryDirsKey, PathTranslationFlags.AddExtraComponentToBaseDir)
             };
         }
 
@@ -358,10 +363,11 @@ namespace STM32ProjectImporter
                 mcuConfig.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.bspoptions.cmse", Value = "-mcmse" });
             }
 
+            List<string> linkerScripts = new List<string>();
+
             if (!string.IsNullOrEmpty(opts.LDFLAGS))
             {
                 var flags = opts.LDFLAGS.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                List<string> linkerScripts = new List<string>();
 
                 for (int i = 0; i < flags.Length; i++)
                 {
@@ -377,10 +383,16 @@ namespace STM32ProjectImporter
                     if (path != null)
                         linkerScripts.AddRange(Directory.GetFiles(path, "*.ld"));
                 }
-
-                if (linkerScripts.Count > 0)
-                    result.AuxiliaryLinkerScripts = linkerScripts.ToArray();
             }
+
+            foreach(var dir in opts.LibrarySearchDirs ?? new string[0])
+            {
+                if (Directory.Exists(dir))
+                    linkerScripts.AddRange(Directory.GetFiles(dir, "*.ld"));
+            }
+
+            if (linkerScripts.Count > 0)
+                result.AuxiliaryLinkerScripts = linkerScripts.ToArray();
 
             try
             {
