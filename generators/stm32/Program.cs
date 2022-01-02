@@ -437,7 +437,7 @@ namespace stm32_bsp_generator
                             return false;
                         }) == 0);
 
-                        fam.AdditionalFrameworks = fam.AdditionalFrameworks.Concat(extraFrameworksWithoutMissingFolders).ToArray();
+                        fam.AdditionalFrameworks = (fam.AdditionalFrameworks ?? new Framework[0]).Concat(extraFrameworksWithoutMissingFolders).ToArray();
                     }
 
                     if (ruleset != STM32Ruleset.BlueNRG_LP)

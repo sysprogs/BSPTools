@@ -235,6 +235,7 @@ namespace BSPGenerationTools
         public string[] SimpleFileConditions;   //See <CONDITION SYNTAX> above
 
         public string SmartPropertyGroup;   //Syntax: [Group ID]|[Name]
+        public string[] AutoSmartFileConditions; 
         public string[] SmartFileConditions; //Will be automatically translated to SimpleFileConditions & properties. Option name|list of (regex => option value). See CC3220 BSP for examples.
         public string[] SmartPreprocessorMacros;
 
@@ -250,6 +251,7 @@ namespace BSPGenerationTools
         public CopyJobFlags Flags;
         public string SmartConditionsPromotedToPreprocessorMacros;
         public string TemplateFileSpec;
+        public bool ExcludeFromVendorSampleMapping;
 
         [Flags]
         public enum CopyJobFlags
@@ -319,7 +321,6 @@ namespace BSPGenerationTools
             }
         }
 
-
         public ToolFlags CopyAndBuildFlags(BSPBuilder bsp,
             List<string> projectFiles, 
             string subdir, 
@@ -351,6 +352,47 @@ namespace BSPGenerationTools
             string expandedSourceFolder = SourceFolder;
             bsp.ExpandVariables(ref expandedSourceFolder);
 
+            var copyMasks = new CopyFilters(FilesToCopy);
+            var projectContents = new CopyFilters(ProjectInclusionMask);
+
+            var filesToCopy = Directory.GetFiles(expandedSourceFolder, "*", SearchOption.AllDirectories)
+                .Where(f => !bsp.SkipHiddenFiles || (File.GetAttributes(f) & FileAttributes.Hidden) != FileAttributes.Hidden)
+                .Select(f => f.Substring(expandedSourceFolder.Length + 1))
+                .Where(f => copyMasks.IsMatch(f))
+                .ToArray();
+
+            if (AutoSmartFileConditions != null)
+            {
+                List<string> computedConditions = new List<string>();
+
+                if (SmartFileConditions != null)
+                    throw new Exception($"The copy job for {SourceFolder} defines AutoSmartFileConditions and hence cannot define regular SmartFileConditions");
+
+                foreach(var cond in AutoSmartFileConditions)
+                {
+                    const string marker = "(***)";
+                    int idx = cond.IndexOf(marker);
+                    if (idx == -1)
+                        throw new Exception($"The '{cond}' condition must contain the '{marker}' marker");
+
+                    var regex = new Regex(cond.Replace(marker, "(.+)"), RegexOptions.IgnoreCase);
+                    if (regex.GetGroupNames().Length != 2)  //one extra group for the 'whole regex'
+                        throw new Exception($"The '{regex}' regex should only contain 1 group");
+
+                    var groupNames = filesToCopy.Where(projectContents.IsMatch)
+                        .Select(f => regex.Match(f))
+                        .Where(m => m.Success)
+                        .Select(m => m.Groups[1].Value)
+                        .Distinct()
+                        .ToArray();
+
+                    foreach (var gn in groupNames)
+                        computedConditions.Add($"-{gn}|" + cond.Replace(marker, gn));
+                }
+
+                SmartFileConditions = computedConditions.ToArray();
+            }
+
             if (SmartFileConditions != null || SmartPreprocessorMacros != null)
             {
                 var preproRegex = string.IsNullOrEmpty(SmartConditionsPromotedToPreprocessorMacros) ? null : new Regex(SmartConditionsPromotedToPreprocessorMacros);
@@ -360,7 +402,7 @@ namespace BSPGenerationTools
                     configurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup>() };
                 if (!string.IsNullOrEmpty(SmartPropertyGroup))
                 {
-                    string[] elements = SmartPropertyGroup.Split('|');
+                    string[] elements = bsp.ExpandVariables(SmartPropertyGroup).Split('|');
                     var id = elements[0];
 
                     grp = configurableProperties.PropertyGroups.FirstOrDefault(g => g.UniqueID == id);
@@ -552,16 +594,8 @@ namespace BSPGenerationTools
             else if (folderInsideBSPPrefix != "" && !folderInsideBSPPrefix.StartsWith("/"))
                 folderInsideBSPPrefix = "/" + folderInsideBSPPrefix;
 
-            var copyMasks = new CopyFilters(FilesToCopy);
             var autoIncludes = new CopyFilters(AutoIncludeMask);
             var potentialSymlinks = new CopyFilters(SymlinkResolutionMask);
-            var projectContents = new CopyFilters(ProjectInclusionMask);
-
-            var filesToCopy = Directory.GetFiles(expandedSourceFolder, "*", SearchOption.AllDirectories)
-                .Where(f => !bsp.SkipHiddenFiles || (File.GetAttributes(f) & FileAttributes.Hidden) != FileAttributes.Hidden)
-                .Select(f => f.Substring(expandedSourceFolder.Length + 1))
-                .Where(f => copyMasks.IsMatch(f))
-                .ToArray();
 
             foreach (var dir in filesToCopy.Select(f => Path.Combine(absTarget, Path.GetDirectoryName(f))).Distinct())
                 Directory.CreateDirectory(dir);
@@ -636,7 +670,8 @@ namespace BSPGenerationTools
                 File.SetAttributes(targetFile, File.GetAttributes(targetFile) & ~FileAttributes.ReadOnly);
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
 
-                copiedFileMonitor.RememberFileMapping(absSourcePath, targetFile, encodedPath);
+                if (!ExcludeFromVendorSampleMapping)
+                    copiedFileMonitor.RememberFileMapping(absSourcePath, targetFile, encodedPath);
 
                 bool includedInProject = projectContents.IsMatch(f);
                 var m = configTemplateRegex?.Match(f);
@@ -951,13 +986,16 @@ namespace BSPGenerationTools
 
     public class FrameworkTemplate
     {
+        public string RangeFromDir;
+        public string RangeFilters;
+
         public string Range;
         public Framework Template;
         public string ArgumentSeparator = "\0";
         public string Separator = " ";
 
         //Warning: the expansion is not complete and should be updated as needed
-        public IEnumerable<Framework> Expand()
+        public IEnumerable<Framework> Expand(BSPBuilder bspBuilder)
         {
             XmlSerializer ser = new XmlSerializer(typeof(Framework));
             MemoryStream ms = new MemoryStream();
@@ -966,7 +1004,24 @@ namespace BSPGenerationTools
             if (Separator == "\\n")
                 Separator = "\n";
 
-            foreach (var item in Range.Split(Separator[0]))
+            string[] range;
+
+            if (!string.IsNullOrEmpty(Range))
+                range = Range.Split(Separator[0]);
+            else
+            {
+                if (string.IsNullOrEmpty(RangeFromDir))
+                    throw new Exception($"Framework template for {Template?.Name} does not specify neither range nor range dir");
+
+                var dir = bspBuilder.ExpandVariables(RangeFromDir);
+                if (!Directory.Exists(dir))
+                    throw new DirectoryNotFoundException("Missing " + dir);
+
+                var filters = new CopyFilters(RangeFilters);
+                range = Directory.GetDirectories(dir).Select(Path.GetFileName).Where(filters.IsMatch).ToArray();
+            }
+
+            foreach (var item in range)
             {
                 var n = item.Trim(' ', '\r', '\n', '\t');
                 if (n == "")
@@ -976,6 +1031,7 @@ namespace BSPGenerationTools
                 Framework deepCopy = (Framework)ser.Deserialize(ms);
                 Expand(ref deepCopy.Name, n);
                 Expand(ref deepCopy.ID, n);
+                Expand(ref deepCopy.ClassID, n);
                 Expand(ref deepCopy.ProjectFolderName, n);
                 foreach (var job in deepCopy.CopyJobs)
                 {
@@ -983,7 +1039,16 @@ namespace BSPGenerationTools
                     Expand(ref job.TargetFolder, n);
                     Expand(ref job.FilesToCopy, n);
                     Expand(ref job.ProjectInclusionMask, n);
-                    Expand(ref job.AdditionalIncludeDirs, n);
+                    Expand(ref job.SmartPropertyGroup, n);
+                }
+
+                if (deepCopy.ConfigurableProperties?.PropertyGroups != null)
+                {
+                    foreach(var g in deepCopy.ConfigurableProperties.PropertyGroups)
+                    {
+                        Expand(ref g.Name, n);
+                        Expand(ref g.UniqueID, n);
+                    }
                 }
 
                 yield return deepCopy;
@@ -995,7 +1060,7 @@ namespace BSPGenerationTools
             if (str == null)
                 return;
             if (ArgumentSeparator[0] == '\0')
-                str = str.Replace("$$BSPGEN:FRAMEWORK$$", name);
+                str = str.Replace("$$BSPGEN:FRAMEWORK$$", name).Replace("$$BSPGEN:FRAMEWORK_LOWER$$", name.ToLower());
             else
             {
                 string[] args = name.Split(ArgumentSeparator[0]);

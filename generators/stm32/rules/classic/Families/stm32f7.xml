@@ -20,121 +20,41 @@
 		</CopyJobs>
 	</CoreFramework>
 	<HasMixedFPUs>true</HasMixedFPUs>
-	<AdditionalFrameworks>
-		<Framework>
-			<Name>STM32F746G-Discovery drivers</Name>
-			<Filter>STM32F746.*</Filter>
-			<ID>com.sysprogs.arm.stm32.bspdrv.stm32f746g-discovery</ID>
-			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.STM32F7_hal</string>
-			</RequiredFrameworks>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.stm32756G_eval</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>Board</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Drivers\BSP\STM32746G-Discovery</SourceFolder>
-					<TargetFolder>BSP\STM32746G-Discovery</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
-					<SimpleFileConditions>
-						<string>stm32746g_discovery_audio.*: $$com.sysprogs.bspoptions.stm32746g_discovery.audio$$ == 1</string>
-						<string>stm32746g_discovery_camera.*: $$com.sysprogs.bspoptions.stm32746g_discovery.camera$$ == 1</string>
-						<string>stm32746g_discovery_eeprom.*: $$com.sysprogs.bspoptions.stm32746g_discovery.eeprom$$ == 1</string>
-						<string>stm32746g_discovery_lcd.*: $$com.sysprogs.bspoptions.stm32746g_discovery.lcd$$ == 1</string>
-						<string>stm32746g_discovery_qspi.*: $$com.sysprogs.bspoptions.stm32746g_discovery.qspi$$ == 1</string>
-						<string>stm32746g_discovery_sd\..*: $$com.sysprogs.bspoptions.stm32746g_discovery.sd$$ == 1</string>
-						<string>stm32746g_discovery_sdram.*: $$com.sysprogs.bspoptions.stm32746g_discovery.sdram$$ == 1</string>
-						<string>stm32746g_discovery_ts.*: $$com.sysprogs.bspoptions.stm32746g_discovery.ts$$ == 1</string>
-					</SimpleFileConditions>
-				</CopyJob>
-			</CopyJobs>			
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>STM32746G-Discovery drivers</Name>
-					<UniqueID>com.sysprogs.bspoptions.stm32746g_discovery.</UniqueID>
-					<Properties>
-						<PropertyEntry xsi:type="Boolean"><Name>Audio driver</Name><UniqueID>audio</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Camera driver</Name><UniqueID>camera</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>EEPROM driver</Name><UniqueID>eeprom</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>LCD driver</Name><UniqueID>lcd</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>QSPI driver</Name><UniqueID>qspi</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>SD driver</Name><UniqueID>sd</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>SDRAM driver</Name><UniqueID>sdram</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Touch Screen driver</Name><UniqueID>ts</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
-		</Framework>
-		<Framework>
-			<Name>STM32756G_EVAL drivers</Name>
-			<ID>com.sysprogs.arm.stm32.bspdrv.stm32756G_eval</ID>
-			<Filter>STM32F756.*</Filter>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.STM32F7_hal</string>
-			</RequiredFrameworks>
-			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.stm32f746g-discovery</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>Board</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Drivers\BSP\STM32756G_EVAL</SourceFolder>
-					<TargetFolder>BSP\STM32756G_EVAL</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
-					<SimpleFileConditions>
-						<string>stm32756g_eval_audio.*: $$com.sysprogs.bspoptions.stm32756G_eval.audio$$ == 1</string>
-						<string>stm32756g_eval_camera.*: $$com.sysprogs.bspoptions.stm32756G_eval.camera$$ == 1</string>
-						<string>stm32756g_eval_eeprom.*: $$com.sysprogs.bspoptions.stm32756G_eval.eeprom$$ == 1</string>
-						<string>stm32756g_eval_io.*: $$com.sysprogs.bspoptions.stm32756G_eval.io$$ == 1</string>
-						<string>stm32756g_eval_lcd.*: $$com.sysprogs.bspoptions.stm32756G_eval.lcd$$ == 1</string>
-						<string>stm32756g_eval_nor.*: $$com.sysprogs.bspoptions.stm32756G_eval.nor$$ == 1</string>
-						<string>stm32756g_eval_qspi.*: $$com.sysprogs.bspoptions.stm32756G_eval.qspi$$ == 1</string>
-						<string>stm32756g_eval_sd\..*: $$com.sysprogs.bspoptions.stm32756G_eval.sd$$ == 1</string>
-						<string>stm32756g_eval_sdram.*: $$com.sysprogs.bspoptions.stm32756G_eval.sdram$$ == 1</string>
-						<string>stm32756g_eval_sram.*: $$com.sysprogs.bspoptions.stm32756G_eval.sram$$ == 1</string>
-						<string>stm32756g_eval_ts.*: $$com.sysprogs.bspoptions.stm32756G_eval.ts$$ == 1</string>
-					</SimpleFileConditions>
-				</CopyJob>
-			</CopyJobs>			
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>STM32756G_EVAL drivers</Name>
-					<UniqueID>com.sysprogs.bspoptions.stm32756G_eval.</UniqueID>
-					<Properties>
-						<PropertyEntry xsi:type="Boolean"><Name>Audio driver</Name><UniqueID>audio</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Camera driver</Name><UniqueID>camera</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>EEPROM driver</Name><UniqueID>eeprom</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>External I/O driver</Name><UniqueID>io</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>LCD driver</Name><UniqueID>lcd</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>NOR FLASH driver</Name><UniqueID>nor</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>QSPI driver</Name><UniqueID>qspi</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>SD driver</Name><UniqueID>sd</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>SDRAM driver</Name><UniqueID>sdram</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Touch Screen driver</Name><UniqueID>ts</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
-		</Framework>
-	</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
-			<Range>ampire480272 ampire640480 exc7200 ft5336 mfxstm32l152 n25q128a n25q512a ov9655 rk043fn48h s5k5cag stmpe811 ts3510 wm8994</Range>
+			<RangeFromDir>$$STM32:F7_DIR$$\Drivers\BSP</RangeFromDir>
+			<RangeFilters>-Components;*</RangeFilters>
+			<Template>
+				<Name>$$BSPGEN:FRAMEWORK$$ drivers</Name>
+				<ID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK_LOWER$$</ID>
+				<Filter>STM32F7.*</Filter>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.STM32F7_hal</string>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORK$$</ProjectFolderName>
+				<DefaultEnabled>false</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$STM32:F7_DIR$$\Drivers\BSP\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<TargetFolder>BSP\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<FilesToCopy>*</FilesToCopy>
+						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+						<SmartPropertyGroup>com.sysprogs.bspoptions.$$BSPGEN:FRAMEWORK_LOWER$$.|$$BSPGEN:FRAMEWORK$$</SmartPropertyGroup>
+						<AutoSmartFileConditions>
+							<string>^[^_]+_[^_]+_(***)\.[ch]$</string>
+						</AutoSmartFileConditions>
+					</CopyJob>
+				</CopyJobs>			
+			</Template>
+		</FrameworkTemplate>
+		<FrameworkTemplate>
+			<RangeFromDir>$$STM32:F7_DIR$$\Drivers\BSP\Components</RangeFromDir>
+			<RangeFilters>-Common;*</RangeFilters>
 			<Template>
 				<Name>$$BSPGEN:FRAMEWORK$$ Driver</Name>
 				<ID>com.sysprogs.arm.stm32.bspdrv.f7_$$BSPGEN:FRAMEWORK$$</ID>
+				<ClassID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK$$</ClassID>
+				<Filter>STM32F7.*</Filter>
 				<RequiredFrameworks>
 					<string>com.sysprogs.arm.stm32.STM32F7_hal</string>
 				</RequiredFrameworks>
@@ -143,6 +63,7 @@
 				<CopyJobs>
 					<CopyJob>
 						<SourceFolder>$$STM32:F7_DIR$$\Drivers\BSP\Components</SourceFolder>
+						<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
 						<TargetFolder>BSP\Components</TargetFolder>
 						<FilesToCopy>$$BSPGEN:FRAMEWORK$$\*;Common\*</FilesToCopy>
 						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>

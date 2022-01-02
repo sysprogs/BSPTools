@@ -20,86 +20,43 @@
 		<CopyJobs>
 		</CopyJobs>
 	</CoreFramework>
-	<AdditionalFrameworks>
-		<Framework>
-			<Name>STM32H743I_EVAL drivers</Name>
-			<ID>com.sysprogs.arm.stm32.bspdrv.stm32h743i_eval</ID>
-			<ClassID>com.sysprogs.arm.stm32.bspdrv</ClassID>
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.STM32H7_hal</string>
-			</RequiredFrameworks>
-			<!--IncompatibleFrameworks>	
-				<string>com.sysprogs.arm.stm32.stm32756G_eval</string>
-			</IncompatibleFrameworks-->
-			<ProjectFolderName>Board</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H743I-EVAL</SourceFolder>
-					<TargetFolder>BSP\STM32H743I-EVAL</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
-					<SimpleFileConditions>
-						<string>stm32h743i_eval_audio.*: $$com.sysprogs.bspoptions.stm32h743i_eval.audio$$ == 1</string>
-						<string>stm32h743i_eval_eeprom.*: $$com.sysprogs.bspoptions.stm32h743i_eval.eeprom$$ == 1</string>
-						<string>stm32h743i_eval_lcd.*: $$com.sysprogs.bspoptions.stm32h743i_eval.lcd$$ == 1</string>
-						<string>stm32h743i_eval_qspi.*: $$com.sysprogs.bspoptions.stm32h743i_eval.qspi$$ == 1</string>
-						<string>stm32h743i_eval_sdram.*: $$com.sysprogs.bspoptions.stm32h743i_eval.sdram$$ == 1</string>
-						<string>stm32h743i_eval_sd.*: $$com.sysprogs.bspoptions.stm32h743i_eval.sd$$ == 1</string>
-						<string>stm32h743i_eval_ts.*: $$com.sysprogs.bspoptions.stm32h743i_eval.ts$$ == 1</string>
-						<string>stm32h743i_eval_io.*: $$com.sysprogs.bspoptions.stm32h743i_eval.io$$ == 1</string>
-					</SimpleFileConditions>
-				</CopyJob>
-			</CopyJobs>			
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>STM32H743I_EVAL drivers</Name>
-					<UniqueID>com.sysprogs.bspoptions.stm32h743i_eval.</UniqueID>
-					<Properties>
-						<PropertyEntry xsi:type="Boolean"><Name>Audio driver</Name><UniqueID>audio</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>EEPROM driver</Name><UniqueID>eeprom</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>LCD driver</Name><UniqueID>lcd</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>QSPI driver</Name><UniqueID>qspi</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>SD driver</Name><UniqueID>sd</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>SDRAM driver</Name><UniqueID>sdram</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Touch Screen driver</Name><UniqueID>ts</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>External I/O driver</Name><UniqueID>io</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
-		</Framework>
-		<Framework>
-			<Name>STM32H7xx_Nucleo_144</Name>
-			<ID>com.sysprogs.arm.stm32.bspdrv.nucleo144</ID>
-			<!-- Do not set the ClassID for this framework as otherwise it will conflict with STM32H743I-Eval BSP framework -->
-			<RequiredFrameworks>
-				<string>com.sysprogs.arm.stm32.STM32H7_hal</string>
-			</RequiredFrameworks>
-			<ProjectFolderName>Nucleo144</ProjectFolderName>
-			<DefaultEnabled>true</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\STM32H7xx_Nucleo</SourceFolder>
-					<TargetFolder>BSP\STM32H7xx_Nucleo</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
-					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
-				</CopyJob>
-			</CopyJobs>			
-			<ConfigurableProperties>				
-			</ConfigurableProperties>			
-		</Framework>
-	</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
-			<Range>ampire480272 ampire640480 exc7200 ft5336 mfxstm32l152 n25q128a n25q512a ov9655 rk043fn48h s5k5cag stmpe811 ts3510 wm8994 lan8742</Range>
+			<RangeFromDir>$$STM32:H7_DIR$$\Drivers\BSP</RangeFromDir>
+			<RangeFilters>-Components;*</RangeFilters>
+			<Template>
+				<Name>$$BSPGEN:FRAMEWORK$$ drivers</Name>
+				<ID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK_LOWER$$</ID>
+				<Filter>STM32H7.*</Filter>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.STM32H7_hal</string>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORK$$</ProjectFolderName>
+				<DefaultEnabled>false</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<TargetFolder>BSP\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<FilesToCopy>*</FilesToCopy>
+						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+						<SmartPropertyGroup>com.sysprogs.bspoptions.$$BSPGEN:FRAMEWORK_LOWER$$.|$$BSPGEN:FRAMEWORK$$</SmartPropertyGroup>
+						<AutoSmartFileConditions>
+							<string>^[^_]+_[^_]+_(***)\.[ch]$</string>
+						</AutoSmartFileConditions>
+					</CopyJob>
+				</CopyJobs>			
+			</Template>
+		</FrameworkTemplate>
+		<FrameworkTemplate>
+			<RangeFromDir>$$STM32:H7_DIR$$\Drivers\BSP\Components</RangeFromDir>
+			<RangeFilters>-Common;*</RangeFilters>
 			<Template>
 				<Name>$$BSPGEN:FRAMEWORK$$ Driver</Name>
-				<ID>com.sysprogs.arm.stm32.bspdrv.f7_$$BSPGEN:FRAMEWORK$$</ID>
+				<ID>com.sysprogs.arm.stm32.bspdrv.h7_$$BSPGEN:FRAMEWORK$$</ID>
+				<ClassID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK$$</ClassID>
+				<Filter>STM32H7.*</Filter>
 				<RequiredFrameworks>
-					<string>com.sysprogs.arm.stm32.f7_hal</string>
+					<string>com.sysprogs.arm.stm32.h7_hal</string>
 				</RequiredFrameworks>
 				<ProjectFolderName>$$BSPGEN:FRAMEWORK$$ Driver</ProjectFolderName>
 				<DefaultEnabled>true</DefaultEnabled>
@@ -107,6 +64,7 @@
 					<CopyJob>
 						<SourceFolder>$$STM32:H7_DIR$$\Drivers\BSP\Components</SourceFolder>
 						<TargetFolder>BSP\Components</TargetFolder>
+						<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
 						<FilesToCopy>$$BSPGEN:FRAMEWORK$$\*;Common\*</FilesToCopy>
 						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 					</CopyJob>

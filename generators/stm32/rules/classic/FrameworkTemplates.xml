@@ -116,6 +116,7 @@ Class\\CustomHID\\.*=>Custom Human Interface Device (CustomHID)[CustomHID];
 Class\\DFU\\.*=>Device Firmware Update (DFU)[DFU];
 Class\\HID\\.*=>Human Interface Device (HID)[HID];
 Class\\MSC\\.*=>Mass Storage (MSC)[MSC];
+Class\\VIDEO\\.*=>Video[Video];
 =>None[none]
 </string>
 					</SmartFileConditions>

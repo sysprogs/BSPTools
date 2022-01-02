@@ -277,6 +277,8 @@ namespace GeneratorSampleStm32
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/WB/Middlewares/ST/STM32_WPAN(.*)", "$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN{1}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(WB)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP1/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
+
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(F4|F7|H7)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
                 };
             }
 
@@ -415,6 +417,15 @@ namespace GeneratorSampleStm32
                     var dict = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
                     dict["com.sysprogs.bspoptions.arm.floatmode"] = "-mfloat-abi=soft";
                     vs.Configuration.MCUConfiguration = new PropertyDictionary2(dict);
+                }
+
+                if (vs.SourceFiles.FirstOrDefault(f => f.Contains("iar_cortexM4l_math.a")) != null)
+                {
+                    vs.SourceFiles = vs.SourceFiles.Where(f => !f.Contains("iar_cortexM4l_math.a")).ToArray();
+                    if (vs.Configuration.Frameworks != null)
+                        throw new NotSupportedException("Support concatenation");
+
+                    vs.Configuration.Frameworks = new[] { "com.sysprogs.arm.stm32.dsp" };
                 }
             }
 

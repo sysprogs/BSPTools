@@ -11,7 +11,7 @@
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
+					<SourceFolder>$$STM32:L4_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
@@ -176,6 +176,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/mbedtls/include</AdditionalIncludeDirs>
 					<PreprocessorMacros>MBEDTLS_NO_PLATFORM_ENTROPY</PreprocessorMacros>
 					<AdvancedRenameRules>library\\([^.\\]+)\.c$=>mbedtls_{1}.c</AdvancedRenameRules>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping> <!-- See lwIP -->
 				</CopyJob>
 			</CopyJobs>
 		</Framework>	
@@ -222,7 +223,6 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.hal</string>
 			</RequiredFrameworks>			
-			
 			<CopyJobs>			
 				<CopyJob>
 					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\Third_Party\LwIP</SourceFolder>
@@ -235,7 +235,8 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>system\\OS\\sys_arch.c: fw:com.sysprogs.arm.stm32.freertos</string>
 						<string>src\\netif\\ppp\\polarssl\\: $$com.sysprogs.bspoptions.stm32.lwip.pssl$$ == 1</string>
 					</SimpleFileConditions>
-						<Patches>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping> <!-- Different SDKs have slightly different versions of lwIP with non-trivial include paths, so translating the paths automatically may break build -->
+					<Patches>
 						<Patch xsi:type="InsertLines">
 							<FilePath>src\include\lwip\sockets.h</FilePath>
 							<AfterLine>#endif /* LWIP_TIMEVAL_PRIVATE */</AfterLine>
@@ -298,6 +299,23 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 				  </PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>			
+		</Framework>
+		<Framework>
+			<Name>STM32 Audio</Name>
+			<ID>com.sysprogs.arm.stm32.audio</ID>
+			<ProjectFolderName>Audio</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\STM32_Audio</SourceFolder>
+					<TargetFolder>Middlewares\ST\STM32_Audio</TargetFolder>
+					<FilesToCopy>*.c;*.h;*_GCC_*.a</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+				</CopyJob>
+			</CopyJobs>
 		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>

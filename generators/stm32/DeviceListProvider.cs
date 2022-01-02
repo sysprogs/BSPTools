@@ -134,22 +134,17 @@ namespace stm32_bsp_generator
                 }
 
                 static Regex rgFLASH = new Regex("^FLASH[0-9]*$");
-                static Regex rgRAM = new Regex("^(S?RAM[0-9]*|.*RAM)$");
+                static Regex rgRAM = new Regex("^(S?RAM[0-9]*|.*RAM)(|_D[0-9]+)$");
 
                 public Memory ToMemoryDefinition()
                 {
                     MemoryType type;
-                    if (Name.StartsWith("RAM_D"))
+                    if (rgFLASH.IsMatch(Name))
+                        type = MemoryType.FLASH;
+                    else if (rgRAM.IsMatch(Name))
                         type = MemoryType.RAM;
                     else
-                    {
-                        if (rgFLASH.IsMatch(Name))
-                            type = MemoryType.FLASH;
-                        else if (rgRAM.IsMatch(Name))
-                            type = MemoryType.RAM;
-                        else
-                            throw new Exception("Unknown memory type " + Name);
-                    }
+                        throw new Exception("Unknown memory type " + Name);
 
                     return new Memory { Name = (Name == "RAM") ? "SRAM" : Name, Start = Start, Size = Size * 1024, Type = type };
                 }

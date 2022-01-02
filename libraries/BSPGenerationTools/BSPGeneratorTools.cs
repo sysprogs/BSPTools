@@ -468,7 +468,7 @@ namespace BSPGenerationTools
                 {
                     if (fw.Count() > 1 && !reportedClassIDs.Contains(fw.Key))
                     {
-                        Report.ReportRawError($"{fw.Key} ClassID corresponds to more then 1 framework on {dev.ID}:");
+                        Report.ReportRawError($"{fw.Key} ClassID corresponds to more than 1 framework on {dev.ID}:");
                         foreach (var fwObj in fw)
                             Report.ReportRawError($"    {fwObj.ID}");
                         Report.ReportRawError($"This will break referencing those frameworks via VisualGDB Project Properties. Specify MCUFilterRegex for those frameworks to ensure only 1 is compatible with each device.");
@@ -1190,7 +1190,7 @@ namespace BSPGenerationTools
                 IEnumerable<Framework> allFrameworks = Definition.AdditionalFrameworks;
                 if (Definition.AdditionalFrameworkTemplates != null)
                     foreach (var t in Definition.AdditionalFrameworkTemplates)
-                        allFrameworks = allFrameworks.Concat(t.Expand());
+                        allFrameworks = allFrameworks.Concat(t.Expand(BSP));
 
                 foreach (var fw in allFrameworks)
                 {

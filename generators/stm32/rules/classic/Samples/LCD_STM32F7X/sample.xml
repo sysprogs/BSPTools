@@ -6,17 +6,17 @@
 	<RequiredFrameworks>
 		<string>com.sysprogs.arm.stm32.hal</string>
 		<string>com.sysprogs.arm.stm32.ll</string>
-		<string>com.sysprogs.arm.stm32.bspdrv.stm32f746g-discovery</string>
+		<string>com.sysprogs.arm.stm32.bspdrv.stm32746g-discovery</string>
 		<string>com.sysprogs.arm.stm32.hal_systeminit</string>
 	</RequiredFrameworks>
 	  <DefaultConfiguration>
     <Entries>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.stm32746g_discovery.lcd</Key>
+        <Key>com.sysprogs.bspoptions.stm32746g-discovery.lcd</Key>
         <Value>1</Value>
       </KeyValue>
       <KeyValue>
-        <Key>com.sysprogs.bspoptions.stm32746g_discovery.sdram</Key>
+        <Key>com.sysprogs.bspoptions.stm32746g-discovery.sdram</Key>
         <Value>1</Value>
       </KeyValue>
 	  </Entries>

@@ -126,6 +126,58 @@
 			</CopyJobs>			
 		</Framework>
 	</AdditionalFrameworks>
+	<AdditionalFrameworkTemplates>
+		<FrameworkTemplate>
+			<RangeFromDir>$$STM32:F4_DIR$$\Drivers\BSP</RangeFromDir>
+			<RangeFilters>-Components;*</RangeFilters>
+			<Template>
+				<Name>$$BSPGEN:FRAMEWORK$$ drivers</Name>
+				<ID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK_LOWER$$</ID>
+				<Filter>STM32F4.*</Filter>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.STM32F4_hal</string>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORK$$</ProjectFolderName>
+				<DefaultEnabled>false</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$STM32:F4_DIR$$\Drivers\BSP\$$BSPGEN:FRAMEWORK$$</SourceFolder>
+						<TargetFolder>BSP\$$BSPGEN:FRAMEWORK$$</TargetFolder>
+						<FilesToCopy>*</FilesToCopy>
+						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+						<SmartPropertyGroup>com.sysprogs.bspoptions.$$BSPGEN:FRAMEWORK_LOWER$$.|$$BSPGEN:FRAMEWORK$$</SmartPropertyGroup>
+						<AutoSmartFileConditions>
+							<string>^[^_]+_[^_]+_(***)\.[ch]$</string>
+						</AutoSmartFileConditions>
+					</CopyJob>
+				</CopyJobs>			
+			</Template>
+		</FrameworkTemplate>
+		<FrameworkTemplate>
+			<RangeFromDir>$$STM32:F4_DIR$$\Drivers\BSP\Components</RangeFromDir>
+			<RangeFilters>-Common;*</RangeFilters>
+			<Template>
+				<Name>$$BSPGEN:FRAMEWORK$$ Driver</Name>
+				<ID>com.sysprogs.arm.stm32.bspdrv.f4_$$BSPGEN:FRAMEWORK$$</ID>
+				<ClassID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK$$</ClassID>
+				<Filter>STM32F4.*</Filter>
+				<RequiredFrameworks>
+					<string>com.sysprogs.arm.stm32.STM32F4_hal</string>
+				</RequiredFrameworks>
+				<ProjectFolderName>$$BSPGEN:FRAMEWORK$$ Driver</ProjectFolderName>
+				<DefaultEnabled>true</DefaultEnabled>
+				<CopyJobs>
+					<CopyJob>
+						<SourceFolder>$$STM32:F4_DIR$$\Drivers\BSP\Components</SourceFolder>
+						<TargetFolder>BSP\Components</TargetFolder>
+						<AdditionalIncludeDirs>?</AdditionalIncludeDirs>
+						<FilesToCopy>$$BSPGEN:FRAMEWORK$$\*;Common\*</FilesToCopy>
+						<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+					</CopyJob>
+				</CopyJobs>			
+			</Template>
+		</FrameworkTemplate>
+	</AdditionalFrameworkTemplates>
 	<SmartSamples>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_STM32F4X</SourceFolder>

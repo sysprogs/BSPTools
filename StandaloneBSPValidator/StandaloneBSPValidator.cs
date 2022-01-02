@@ -667,6 +667,13 @@ namespace StandaloneBSPValidator
             comments.Add("\tLDFLAGS:" + flags.LDFLAGS);
             comments.Add("\tCOMMONFLAGS:" + flags.COMMONFLAGS);
 
+            if (vendorSample.Configuration.Frameworks != null)
+            {
+                comments.Add("Referenced frameworks:");
+                foreach(var fw in vendorSample.Configuration.Frameworks)
+                    comments.Add("\t" + fw);
+            }
+
             job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"),
                 "test.bin", 
                 comments, 

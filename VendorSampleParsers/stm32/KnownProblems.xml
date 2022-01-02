@@ -37,9 +37,9 @@
 			<Description>Multiple BSP sources</Description>
 		</ErrorEntry>
 		<ErrorEntry>
-			<ID>invalid_external_flash_placement</ID>
-			<ErrorMessage>section `.ExtFlashSection' will not fit in </ErrorMessage>
-			<Description>External FLASH</Description>
+			<ID>overflow</ID>
+			<ErrorMessage>will not fit in region</ErrorMessage>
+			<Description>Overflow</Description>
 		</ErrorEntry>
 		<ErrorEntry>
 			<ID>mapping_fwimg</ID>
@@ -65,6 +65,16 @@
 			<ID>PWR_STOPENTRY_WFI</ID>
 			<ErrorMessage>error: 'PWR_STOPENTRY_WFI' undeclared</ErrorMessage>
 			<Description>PWR_STOPENTRY_WFI</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>STM32_Audio</ID>
+			<ErrorMessage>#include "../../../Middlewares/ST/STM32_Audio</ErrorMessage>
+			<Description>STM32_Audio</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>lwIP</ID>
+			<ErrorMessage>lwip/opt.h: No such file or directory</ErrorMessage>
+			<Description>lwIP</Description>
 		</ErrorEntry>
 	</Entries>
 </KnownSampleProblemDatabase>

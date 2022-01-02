@@ -20,7 +20,24 @@
 		</CopyJobs>
 	</CoreFramework>
 	<AdditionalFrameworks>
-	
+		<Framework>
+			<Name>STM32G4 DSP Library</Name>
+			<ID>com.sysprogs.arm.stm32.STM32G4_DSP</ID>
+			<ClassID>com.sysprogs.arm.stm32.dsp</ClassID>
+			<ProjectFolderName>DSP</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:G4_DIR$$\Drivers\CMSIS\DSP</SourceFolder>
+					<FilesToCopy>-DSP_LIB_TestSuite\*;-Examples\*;-Projects\*;*.c;*.h;Lib\GCC\*.a</FilesToCopy>
+					<ProjectInclusionMask>-Source\*;*.a</ProjectInclusionMask>
+					<SimpleFileConditions>
+						<string>.*libarm_cortexM4l_math\.a: $$com.sysprogs.bspoptions.arm.floatmode$$ != -mfloat-abi=hard</string>
+						<string>.*libarm_cortexM4lf_math\.a: $$com.sysprogs.bspoptions.arm.floatmode$$ == -mfloat-abi=hard</string>
+					</SimpleFileConditions>
+				</CopyJob>
+			</CopyJobs>			
+		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>
 	</SmartSamples>
