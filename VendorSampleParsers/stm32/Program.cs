@@ -427,6 +427,19 @@ namespace GeneratorSampleStm32
 
                     vs.Configuration.Frameworks = new[] { "com.sysprogs.arm.stm32.dsp" };
                 }
+
+                for (int i = 0; i < vs.SourceFiles.Length; i++)
+                {
+                    const string suffix1 = @"IAR8.x\touchgfx_core_release.a";
+                    if (vs.SourceFiles[i].EndsWith(suffix1, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var replacement = vs.SourceFiles[i].Substring(0, vs.SourceFiles[i].Length - suffix1.Length) + @"gcc\libtouchgfx-float-abi-hard.a";
+                        if (!File.Exists(replacement))
+                            throw new Exception("Missing IAR->GCC substitute: " + replacement);
+
+                        vs.SourceFiles[i] = replacement;
+                    }
+                }
             }
 
             const bool UseLegacySampleParser = false;

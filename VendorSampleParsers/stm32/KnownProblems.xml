@@ -76,5 +76,20 @@
 			<ErrorMessage>lwip/opt.h: No such file or directory</ErrorMessage>
 			<Description>lwIP</Description>
 		</ErrorEntry>
+		<ErrorEntry>
+			<ID>Util</ID>
+			<ErrorMessage>undefined reference to `UTIL_LCD_Clear'</ErrorMessage>
+			<Description>Util</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>Secure</ID>
+			<ErrorMessage>undefined reference to `SECURE_SystemCoreClockUpdate'</ErrorMessage>
+			<Description>Secure</Description>
+		</ErrorEntry>
+		<ErrorEntry>
+			<ID>missing_bin</ID>
+			<ErrorMessage>: Error: file not found: ../</ErrorMessage>
+			<Description>BIN</Description>
+		</ErrorEntry>
 	</Entries>
 </KnownSampleProblemDatabase>

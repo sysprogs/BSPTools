@@ -21,7 +21,7 @@ namespace StandaloneBSPValidator
         public string DeviceRegex;
         public bool SkipIfNotFound;
         public bool ValidateRegisters;
-        public bool DataSections;
+        public bool DataSections, NoRTTI;
         public PropertyDictionary2 SampleConfiguration;
         public PropertyDictionary2 FrameworkConfiguration;
         public PropertyDictionary2 MCUConfiguration;
@@ -350,7 +350,7 @@ namespace StandaloneBSPValidator
             if (sampleDirPath != null)
                 bspDict["SYS:VSAMPLE_DIR"] = sampleDirPath;
 
-            var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]);
+            var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]) { NoRTTI = true };
 
             var projectCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
 
@@ -546,7 +546,7 @@ namespace StandaloneBSPValidator
             foreach (var fw in sample.AdditionalFrameworks ?? new string[0])
                 frameworkIDs[fw] = true;
 
-            var prj = new GeneratedProject(testDirectory, configuredMCU, frameworkIDs.Keys.ToArray()) { DataSections = sample.DataSections };
+            var prj = new GeneratedProject(testDirectory, configuredMCU, frameworkIDs.Keys.ToArray()) { DataSections = sample.DataSections, NoRTTI = sample.NoRTTI };
             prj.DoGenerateProjectFromEmbeddedSample(configuredSample, false, bspDict);
 
             prj.AddBSPFilesToProject(bspDict, configuredSample.FrameworkParameters, frameworkIDs);

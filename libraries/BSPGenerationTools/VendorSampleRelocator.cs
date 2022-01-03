@@ -90,11 +90,6 @@ namespace BSPGenerationTools
 
                 throw new Exception("Don't know how to map " + path);
             }
-
-            public void MapPathList(ref string[] files)
-            {
-                files = files?.Select(MapPath)?.Where(f => f != null)?.ToArray();
-            }
         }
 
         public struct ParsedDependency
@@ -226,6 +221,26 @@ namespace BSPGenerationTools
         protected virtual string BuildVirtualSamplePath(string originalPath) => null;
         protected virtual PathMapper CreatePathMapper(ConstructedVendorSampleDirectory dir) => null;
 
+        static void MapPathList(ref string[] files, Func<string, string> mapping)
+        {
+            files = files?.Select(mapping)?.Where(f => f != null)?.ToArray();
+        }
+
+        static void TranslateVendorSamplePaths(VendorSample s, ref ParsedDependency[] deps, Func<string, string> mapping)
+        {
+            for (int i = 0; i < deps.Length; i++)
+                deps[i].MappedFile = mapping(deps[i].MappedFile ?? deps[i].OriginalFile);
+
+            deps = deps.Where(d => d.MappedFile != null).ToArray();
+
+            MapPathList(ref s.HeaderFiles, mapping);
+            MapPathList(ref s.IncludeDirectories, mapping);
+            MapPathList(ref s.AuxiliaryLinkerScripts, mapping);
+            MapPathList(ref s.SourceFiles, mapping);
+
+            s.LinkerScript = mapping(s.LinkerScript);
+            s.Path = mapping(s.Path);
+        }
 
         public virtual Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter)
         {
@@ -243,6 +258,8 @@ namespace BSPGenerationTools
             Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
 
+            int shortPathIndex = 0;
+
             foreach (var s in sampleList)
             {
                 if (s.AllDependencies == null)
@@ -254,38 +271,17 @@ namespace BSPGenerationTools
                             .Concat(s.HeaderFiles ?? new string[0])
                             .Concat(s.AuxiliaryLinkerScripts ?? new string[0])
                             .Distinct()
-                            .Select(d => new ParsedDependency { OriginalFile = d, MappedFile = mapper.MapPath(d) })
-                            .Where(d => d.MappedFile != null)
+                            .Select(d => new ParsedDependency { OriginalFile = d, MappedFile = d })
                             .ToArray();
 
-                //1. Translate absolute paths to the $$SYS:VSAMPLE_DIR$$ syntax. All files referenced here should be also also included in 'deps' in order to be copied.
-                mapper.MapPathList(ref s.HeaderFiles);
-                mapper.MapPathList(ref s.IncludeDirectories);
-                mapper.MapPathList(ref s.AuxiliaryLinkerScripts);
-                mapper.MapPathList(ref s.SourceFiles);
+                var rawPath = s.Path;
 
-                s.LinkerScript = mapper.MapPath(s.LinkerScript);
+                //1. Translate absolute paths to the $$SYS:VSAMPLE_DIR$$ syntax. All files referenced here should be also also included in 'deps' in order to be copied.
+                TranslateVendorSamplePaths(s, ref deps, mapper.MapPath);
 
                 s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref s.PreprocessorMacros, ref deps, s.Configuration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
-                const int ReasonableVendorSampleDirPathLengthForUsers = 120;
-
-                foreach (var dep in deps)
-                {
-                    if (dep.MappedFile.StartsWith("$$SYS:BSP_ROOT$$/"))
-                        continue;   //The file was already copied
-                    copiedFiles[dep.OriginalFile] = dep.MappedFile.Replace(SampleRootDirMarker, outputDir);
-
-                    int estimatedTargetPathLength = ReasonableVendorSampleDirPathLengthForUsers + dep.MappedFile.Length - SampleRootDirMarker.Length;
-                    if (estimatedTargetPathLength > 254)
-                        reportWriter.ReportMergeableError("Path too long", dep.MappedFile);
-                }
-
-                s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
-
-                var rawPath = s.Path;
-                s.Path = mapper.MapPath(rawPath);
                 if (s.Path == null)
                     throw new Exception("Invalid sample path for " + s.UserFriendlyName);
 
@@ -297,7 +293,7 @@ namespace BSPGenerationTools
                     string prefix = s.Path.TrimEnd('/', '\\') + "/";
                     if (s.LinkerScript.StartsWith(prefix))
                         s.LinkerScript = s.LinkerScript.Substring(prefix.Length).TrimStart('/');
-                    else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$") || s.LinkerScript.StartsWith("$$SYS:VSAMPLE_DIR$$"))
+                    else if (s.LinkerScript.StartsWith("$$SYS:BSP_ROOT$$") || s.LinkerScript.StartsWith(SampleRootDirMarker))
                     {
                         //Nothing to do. VisualGDB will automatically expand this.
                     }
@@ -306,6 +302,32 @@ namespace BSPGenerationTools
                         throw new Exception($"Unexpected linker script path {s.LinkerScript}. VisualGDB may not be able to expand it.");
                     }
                 }
+
+                if (deps.Any(dep => dep.MappedFile.StartsWith(s.Path) && IsPathTooLong(dep)))
+                {
+                    //Relocate the sample to a shorter path
+                    string longPath = s.Path;
+                    string shortPath = $"{SampleRootDirMarker}/_/{shortPathIndex++:d3}";
+
+                    TranslateVendorSamplePaths(s, ref deps, path =>
+                    {
+                        if (path.StartsWith(longPath))
+                            return shortPath + path.Substring(longPath.Length);
+                        return path;
+                    });
+                }
+
+                foreach (var dep in deps)
+                {
+                    if (dep.MappedFile.StartsWith("$$SYS:BSP_ROOT$$/"))
+                        continue;   //The file was already copied
+                    copiedFiles[dep.OriginalFile] = dep.MappedFile.Replace(SampleRootDirMarker, outputDir);
+
+                    if (IsPathTooLong(dep))
+                        reportWriter.ReportMergeableError("Path too long", dep.MappedFile);
+                }
+
+                s.AllDependencies = deps.Select(d => d.MappedFile).ToArray();
 
                 finalSamples.Add(s);
             }
@@ -330,6 +352,15 @@ namespace BSPGenerationTools
             }
 
             return copiedFiles;
+        }
+
+        static bool IsPathTooLong(ParsedDependency dep)
+        {
+            const int ReasonableVendorSampleDirPathLengthForUsers = 120;
+
+            int estimatedTargetPathLength = ReasonableVendorSampleDirPathLengthForUsers + dep.MappedFile.Length - SampleRootDirMarker.Length;
+
+            return estimatedTargetPathLength > 254;
         }
     }
 }

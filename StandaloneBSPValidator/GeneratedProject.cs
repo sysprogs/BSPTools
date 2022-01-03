@@ -211,7 +211,7 @@ namespace StandaloneBSPValidator
         }
 
         public const string MapFileName = "test.map";
-        public bool DataSections;
+        public bool DataSections, NoRTTI;
 
         internal ToolFlags GetToolFlags(Dictionary<string, string> systemDict, Dictionary<string, string> frameworkDict, IDictionary frameworkIDs)
         {
@@ -221,6 +221,9 @@ namespace StandaloneBSPValidator
                 flags.CXXFLAGS += " -fdata-sections";
                 flags.CFLAGS += " -fdata-sections";
             }
+
+            if (NoRTTI)
+                flags.CXXFLAGS += " -fno-rtti";
 
             var mcuFlags = MCU.ExpandToolFlags(systemDict, null);
             flags = flags.Merge(mcuFlags);
