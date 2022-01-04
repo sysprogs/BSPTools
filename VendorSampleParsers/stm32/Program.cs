@@ -265,7 +265,8 @@ namespace GeneratorSampleStm32
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.threadx",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/(common|ports)/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                        Configuration = new Dictionary<string, string>{ { "com.sysprogs.bspoptions.stm32.threadx.user_define", "TX_INCLUDE_USER_DEFINE_FILE"} }
+                        Configuration = new Dictionary<string, string>{ { "com.sysprogs.bspoptions.stm32.threadx.user_define", "TX_INCLUDE_USER_DEFINE_FILE"} },
+                        SkipFrameworkRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/common_modules/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                     },
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.filex",
@@ -288,7 +289,9 @@ namespace GeneratorSampleStm32
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/usbx/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         FileBasedConfig = new[]
                         {
-                            new FileBasedConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}")
+                            new FileBasedConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}"),
+                            new FileBasedConfigEntry(@"usbx/common/usbx_device_classes/src/ux_device_class_(audio|cdc_acm|cdc_ecm|dfu|hid|pima|rndis|storage)_.*", "com.sysprogs.bspoptions.stm32.usbx.device_class_{1}"),
+                            new FileBasedConfigEntry(@"usbx/common/usbx_host_classes/src/ux_host_class_(asix|audio|cdc_acm|cdc_ecm|gser|hid|hub|pima|printer|prolific|storage|swar|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.host_class_{1}"),
                         }
                     }
                 };

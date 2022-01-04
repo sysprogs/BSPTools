@@ -446,6 +446,29 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<SmartFileConditions>
 						<string>-USB Host Support[host_controllers]|common\\usbx(|_stm32)_host_controllers\\.*</string>
 						<string>-USB Device Support[device_controllers]|common\\usbx(|_stm32)_device_controllers\\.*</string>
+						
+						<string>-Audio Device Class[device_class_audio]|common\\usbx_device_classes\\src\\ux_device_class_audio.*</string>
+						<string>-CDC ACM Device Class[device_class_cdc_acm]|common\\usbx_device_classes\\src\\ux_device_class_cdc_acm.*</string>
+						<string>-CDC ECM Device Class[device_class_cdc_ecm]|common\\usbx_device_classes\\src\\ux_device_class_cdc_ecm.*</string>
+						<string>-DFU Device Class[device_class_dfu]|common\\usbx_device_classes\\src\\ux_device_class_dfu.*</string>
+						<string>-HID Device Class[device_class_hid]|common\\usbx_device_classes\\src\\ux_device_class_hid.*</string>
+						<string>-PIMA Device Class[device_class_pima]|common\\usbx_device_classes\\src\\ux_device_class_pima.*</string>
+						<string>-RNDIS Device Class[device_class_rndis]|common\\usbx_device_classes\\src\\ux_device_class_rndis.*</string>
+						<string>-Storage Device Class[device_class_storage]|common\\usbx_device_classes\\src\\ux_device_class_storage.*</string>
+
+						<string>-ASIX Host Class[host_class_asix]|common\\usbx_host_classes\\src\\ux_host_class_asix.*</string>
+						<string>-Audio Host Class[host_class_audio]|common\\usbx_host_classes\\src\\ux_host_class_audio.*</string>
+						<string>-CDC_ACM Host Class[host_class_cdc_acm]|common\\usbx_host_classes\\src\\ux_host_class_cdc_acm.*</string>
+						<string>-CDC_ECM Host Class[host_class_cdc_ecm]|common\\usbx_host_classes\\src\\ux_host_class_cdc_ecm.*</string>
+						<string>-GSER Host Class[host_class_gser]|common\\usbx_host_classes\\src\\ux_host_class_gser.*</string>
+						<string>-HID Host Class[host_class_hid]|common\\usbx_host_classes\\src\\ux_host_class_hid.*</string>
+						<string>-Hub Host Class[host_class_hub]|common\\usbx_host_classes\\src\\ux_host_class_hub.*</string>
+						<string>-PIMA Host Class[host_class_pima]|common\\usbx_host_classes\\src\\ux_host_class_pima.*</string>
+						<string>-Printer Host Class[host_class_printer]|common\\usbx_host_classes\\src\\ux_host_class_printer.*</string>
+						<string>-Prolific Host Class[host_class_prolific]|common\\usbx_host_classes\\src\\ux_host_class_prolific.*</string>
+						<string>-Storage Host Class[host_class_storage]|common\\usbx_host_classes\\src\\ux_host_class_storage.*</string>
+						<string>-SWAR Host Class[host_class_swar]|common\\usbx_host_classes\\src\\ux_host_class_swar.*</string>
+						<string>-Video Host Class[host_class_video]|common\\usbx_host_classes\\src\\ux_host_class_video.*</string>
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
