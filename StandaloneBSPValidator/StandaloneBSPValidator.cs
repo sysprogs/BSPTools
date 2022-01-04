@@ -216,7 +216,13 @@ namespace StandaloneBSPValidator
                     {
                         sw.WriteLine($"{task.PrimaryOutput}: " + string.Join(" ", task.AllInputs));
 
-                        if (task.Arguments.Length > 7000)
+                        if ((task.AllInputs?.Sum(x => x.Length) ?? 0) > 5000 && task.Arguments.Contains("$^"))
+                        {
+                            string rspFile = Path.ChangeExtension(Path.GetFileName(task.PrimaryOutput), ".rsp");
+                            File.WriteAllText(Path.Combine(Path.GetDirectoryName(filePath), rspFile), string.Join(" ", task.AllInputs));
+                            sw.WriteLine($"\t{modeFlag}{task.Executable} " + task.Arguments.Replace("$^", "@" + rspFile));
+                        }
+                        else if (task.Arguments.Length > 7000)
                         {
                             string prefixArgs = "", extArgs = task.Arguments;
 
@@ -667,7 +673,7 @@ namespace StandaloneBSPValidator
             comments.Add("\tLDFLAGS:" + flags.LDFLAGS);
             comments.Add("\tCOMMONFLAGS:" + flags.COMMONFLAGS);
 
-            if (vendorSample.Configuration.Frameworks != null)
+            if (vendorSample?.Configuration.Frameworks != null)
             {
                 comments.Add("Referenced frameworks:");
                 foreach(var fw in vendorSample.Configuration.Frameworks)

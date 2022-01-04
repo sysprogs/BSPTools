@@ -103,13 +103,26 @@ namespace BSPGenerationTools
             }
         }
 
+        protected struct FileBasedConfigEntry
+        {
+            public readonly Regex Regex;
+            public readonly string Format;
+
+            public FileBasedConfigEntry(string regex, string format)
+            {
+                Regex = new Regex(regex, RegexOptions.IgnoreCase);
+                Format = format;
+            }
+        }
+
         protected class AutoDetectedFramework
         {
             public Regex FileRegex;
             public Regex DisableTriggerRegex;   //Matching trigger will be disabled for files matching FileRegex and DisableTriggerRegex
             public string FrameworkID;
 
-            public Dictionary<string, string> Configuration;
+            public Dictionary<string, string> Configuration = new Dictionary<string, string>();
+            public FileBasedConfigEntry[] FileBasedConfig;
 
             public bool FindAndFilterOut<_Ty>(ref _Ty[] sources, Func<_Ty, string> conv = null)
             {
@@ -162,11 +175,25 @@ namespace BSPGenerationTools
         protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref string[] preprocessorMacros, ref ParsedDependency[] dependencies, VendorSampleConfiguration existingConfiguration)
         {
             List<AutoDetectedFramework> matchedFrameworks = new List<AutoDetectedFramework>();
+            Dictionary<string, string> extraConfiguration = new Dictionary<string, string>();
 
             foreach (var fw in AutoDetectedFrameworks ?? new AutoDetectedFramework[0])
             {
                 if (sources?.FirstOrDefault(s => fw.FileRegex.IsMatch(s) && fw.DisableTriggerRegex?.IsMatch(s) != true) != null)
                 {
+                    if (fw.FileBasedConfig != null)
+                    {
+                        foreach(var e in fw.FileBasedConfig)
+                        {
+                            foreach(var fn in sources)
+                            {
+                                var m = e.Regex.Match(fn);
+                                if (m.Success)
+                                    extraConfiguration[string.Format(e.Format, m.Groups.Cast<object>().ToArray())] = "1";
+                            }
+                        }
+                    }
+
                     fw.FindAndFilterOut(ref sources);
                     fw.FindAndFilterOut(ref headers);
                     fw.FindAndFilterOut(ref includeDirs);
@@ -193,7 +220,6 @@ namespace BSPGenerationTools
             dependencies = dependencies.Where(d => d.MappedFile != null).ToArray();
 
             HashSet<string> extraFrameworks = new HashSet<string>();
-            Dictionary<string, string> extraConfiguration = new Dictionary<string, string>();
 
             foreach (var fw in matchedFrameworks)
                 foreach (var kv in fw.Configuration)

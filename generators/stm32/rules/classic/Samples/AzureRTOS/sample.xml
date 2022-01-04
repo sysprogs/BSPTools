@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>LEDBlink (AzureRTOS)</Name>
+	<Description>A 2-threaded 'Blinking LED' example demonstrating the use of AzureRTOS.</Description>
+	<MCUFilterRegex>STM32.*</MCUFilterRegex>
+	<ConfigurableProperties>
+	<PropertyGroups>
+	<PropertyGroup>
+	  <Properties>
+		<PropertyEntry xsi:type="Enumerated">
+		  <Name>LED Port Group</Name>
+		  <UniqueID>com.sysprogs.examples.stm32.LEDPORT</UniqueID>
+		  <Description>Specifies the port group where the LED is connected</Description>
+		  <SuggestionList>
+			<Suggestion><InternalValue>GPIOA</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOB</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOC</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOD</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOE</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOF</InternalValue></Suggestion>
+			<Suggestion><InternalValue>GPIOG</InternalValue></Suggestion>
+		  </SuggestionList>
+		  <DefaultEntryIndex>3</DefaultEntryIndex>
+		  <AllowFreeEntry>false</AllowFreeEntry>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED1 Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.stm32.LED1BIT</UniqueID>
+		  <Description>Specifies the port number of the LED1 port</Description>
+		  <DefaultValue>12</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>15</MaxValue>
+		</PropertyEntry>
+		<PropertyEntry xsi:type="Integral">
+		  <Name>LED2 Port Number</Name>
+		  <UniqueID>com.sysprogs.examples.stm32.LED2BIT</UniqueID>
+		  <Description>Specifies the port number of the LED2 port</Description>
+		  <DefaultValue>13</DefaultValue>
+		  <MinValue>0</MinValue>
+		  <MaxValue>15</MaxValue>
+		</PropertyEntry>
+		</Properties>
+	  <CollapsedByDefault>false</CollapsedByDefault>
+	</PropertyGroup>
+	</PropertyGroups>
+	</ConfigurableProperties>
+	<RequiredFrameworks>
+		<string>com.sysprogs.arm.stm32.hal</string>
+		<string>com.sysprogs.arm.stm32.ll</string>
+		<string>com.sysprogs.arm.stm32.threadx</string>
+	</RequiredFrameworks>
+	<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
+</EmbeddedProjectSample>

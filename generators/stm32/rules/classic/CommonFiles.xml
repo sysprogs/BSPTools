@@ -318,9 +318,9 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			</CopyJobs>
 		</Framework>
 		<Framework>
-			<Name>AzureRTOS</Name>
+			<Name>AzureRTOS - ThreadX</Name>
 			<ID>com.sysprogs.arm.stm32.threadx</ID>
-			<ProjectFolderName>AzureRTOS</ProjectFolderName>
+			<ProjectFolderName>ThreadX</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.hal</string>
@@ -332,7 +332,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
 					<ProjectInclusionMask>common\*.c;common\*.h;-*\example_build\*;ports\cortex_*\gnu\*</ProjectInclusionMask>
-					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.threadx.|AzureRTOS</SmartPropertyGroup>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.threadx.|ThreadX</SmartPropertyGroup>
 					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
 					<AdditionalIncludeDirs>common/inc;ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
 					<SmartPreprocessorMacros>
@@ -356,6 +356,99 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<Value>com.sysprogs.threadx</Value>
 				</SysVarEntry>
 			</AdditionalSystemVars>
+		</Framework>
+		<Framework>
+			<Name>AzureRTOS - FileX</Name>
+			<ID>com.sysprogs.arm.stm32.filex</ID>
+			<ProjectFolderName>FileX</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\filex</SourceFolder>
+					<TargetFolder>AzureRTOS\filex</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
+					<ProjectInclusionMask>-common\drivers\template\*;common\*.c;common\*.h;ports\cortex_*\*.c;ports\cortex_*\*.h;</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.filex.|FileX</SmartPropertyGroup>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
+					<AdditionalIncludeDirs>common/inc;ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
+					<SimpleFileConditions> 
+						<string>ports\\cortex_m0\\.*:$$com.sysprogs.bspoptions.arm.core$$==M0</string>
+						<string>ports\\cortex_m3\\.*:$$com.sysprogs.bspoptions.arm.core$$==M3</string>
+						<string>ports\\cortex_m4\\.*:$$com.sysprogs.bspoptions.arm.core$$==M4</string>
+						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
+					</SimpleFileConditions>
+					<SmartFileConditions>
+						<string>-NAND driver[levelx_nand]|.*\\fx_stm32_levelx_nand_driver\.(h|c)</string>
+						<string>-NOR driver[levelx_nor]|.*\\fx_stm32_levelx_nor_driver\.(h|c)</string>
+						<string>-MMC driver[mmc]|.*\\fx_stm32_mmc_driver\.(h|c)</string>
+						<string>-SD driver[sd]|.*\\fx_stm32_sd_driver\.(h|c)</string>
+						<string>-SRAM driver[sram]|.*\\fx_stm32_sram_driver\.(h|c)</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>AzureRTOS - LevelX</Name>
+			<ID>com.sysprogs.arm.stm32.levelx</ID>
+			<ProjectFolderName>LevelX</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\levelx</SourceFolder>
+					<TargetFolder>AzureRTOS\levelx</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
+					<ProjectInclusionMask>-common\drivers\template\*;common\*.c;common\*.h;ports\cortex_*\*.c;ports\cortex_*\*.h;</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.levelx.|LevelX</SmartPropertyGroup>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
+					<AdditionalIncludeDirs>common/inc</AdditionalIncludeDirs>
+					<SmartFileConditions>
+						<string>-NAND simulator driver[nand_simulator]|.*\\lx_stm32_nand_simulator_driver\.(h|c)</string>
+						<string>-NOR simulator driver[nor_simulator]|.*\\lx_stm32_nor_simulator_driver\.(h|c)</string>
+						<string>-OSPI simulator driver[ospi]|.*\\lx_stm32_ospi_driver\.(h|c)</string>
+						<string>-QSPI simulator driver[qspi]|.*\\lx_stm32_qspi_driver\.(h|c)</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>AzureRTOS - USBX</Name>
+			<ID>com.sysprogs.arm.stm32.usbx</ID>
+			<ProjectFolderName>USBX</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\usbx</SourceFolder>
+					<TargetFolder>AzureRTOS\usbx</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask>-ports*;*.h</AutoIncludeMask>
+					<AdditionalIncludeDirs>ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
+					<ProjectInclusionMask>common\*.c;common\*.h;ports\cortex_*\gnu\*.c;ports\cortex_*\gnu\*.h;</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.usbx.|USBX</SmartPropertyGroup>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
+					<SimpleFileConditions> 
+						<string>ports\\cortex_a7\\.*:$$com.sysprogs.bspoptions.arm.core$$==A7</string>
+						<string>ports\\cortex_m0\\.*:$$com.sysprogs.bspoptions.arm.core$$==M0</string>
+						<string>ports\\cortex_m3\\.*:$$com.sysprogs.bspoptions.arm.core$$==M3</string>
+						<string>ports\\cortex_m4\\.*:$$com.sysprogs.bspoptions.arm.core$$==M4</string>
+						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
+					</SimpleFileConditions>
+					<SmartFileConditions>
+						<string>-USB Host Support[host_controllers]|common\\usbx(|_stm32)_host_controllers\\.*</string>
+						<string>-USB Device Support[device_controllers]|common\\usbx(|_stm32)_device_controllers\\.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
 		</Framework>
 	</AdditionalFrameworks>
 	<SmartSamples>

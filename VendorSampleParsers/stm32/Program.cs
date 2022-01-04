@@ -265,8 +265,30 @@ namespace GeneratorSampleStm32
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.threadx",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/(common|ports)/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                        Configuration = new Dictionary<string, string>{
-                            { "com.sysprogs.bspoptions.stm32.threadx.user_define",  "TX_INCLUDE_USER_DEFINE_FILE"}
+                        Configuration = new Dictionary<string, string>{ { "com.sysprogs.bspoptions.stm32.threadx.user_define", "TX_INCLUDE_USER_DEFINE_FILE"} }
+                    },
+
+                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.filex",
+                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/filex/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        FileBasedConfig = new[]
+                        {
+                            new FileBasedConfigEntry(@"filex/common/drivers/fx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.filex.{1}")
+                        }
+                    },
+
+                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.levelx",
+                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/levelx/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        FileBasedConfig = new[]
+                        {
+                            new FileBasedConfigEntry(@"levelx/common/drivers/lx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.levelx.{1}")
+                        }
+                    },
+
+                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.usbx",
+                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/usbx/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        FileBasedConfig = new[]
+                        {
+                            new FileBasedConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}")
                         }
                     }
                 };
