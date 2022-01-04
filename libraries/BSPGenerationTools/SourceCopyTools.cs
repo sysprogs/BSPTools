@@ -252,6 +252,7 @@ namespace BSPGenerationTools
         public string SmartConditionsPromotedToPreprocessorMacros;
         public string TemplateFileSpec;
         public bool ExcludeFromVendorSampleMapping;
+        public bool OrthogonalConditions;
 
         [Flags]
         public enum CopyJobFlags
@@ -698,7 +699,9 @@ namespace BSPGenerationTools
                                 cond.ReverseConditionHandle?.AttachFile(encodedPath);
 
                                 foundCondition = cond;
-                                break;
+
+                                if (!OrthogonalConditions)
+                                    break;
                             }
                     }
 

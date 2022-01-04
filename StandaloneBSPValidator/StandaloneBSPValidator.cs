@@ -613,7 +613,7 @@ namespace StandaloneBSPValidator
             }
 
 
-            bool errorsFound = false;
+            List<string> errorLines = new List<string>();
             foreach (var g in job.CompileTasks.GroupBy(t => t.PrimaryOutput.ToLower()))
             {
                 if (g.Count() > 1)
@@ -622,15 +622,11 @@ namespace StandaloneBSPValidator
                     foreach (var j2 in g)
                         j2.AttachDisambiguationSuffix($"_{++i}");
 
-                    Console.WriteLine($"ERROR: {g.Key} corresponds to the following files:");
+                    errorLines.Add($"ERROR: {g.Key} corresponds to the following files:");
                     foreach (var f in g)
-                        Console.WriteLine("\t" + f.AllInputs.FirstOrDefault());
-                    errorsFound = true;
+                        errorLines.Add("\t" + f.AllInputs.FirstOrDefault());
                 }
             }
-
-            if (errorsFound && (validationFlags & BSPValidationFlags.ResolveNameCollisions) == BSPValidationFlags.None)
-                throw new Exception("Multiple source files with the same name found");
 
             job.OtherTasks.Add(new BuildTask
             {
@@ -689,6 +685,14 @@ namespace StandaloneBSPValidator
             {
                 string firstSrcFileInPrjDir = prj.SourceFiles.First(fn => Path.GetDirectoryName(fn) == mcuDir);
                 InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), registerValidationParameters);
+            }
+
+            if (errorLines.Count > 0 && (validationFlags & BSPValidationFlags.ResolveNameCollisions) == BSPValidationFlags.None)
+            {
+                errorLines.Insert(0, "Found critical errors while trying to generate Makefile:");
+                var buildLog = Path.Combine(mcuDir, "build.log");
+                File.WriteAllLines(buildLog, errorLines);
+                return new TestResult(TestBuildResult.Failed, buildLog);
             }
 
             bool buildSucceeded;

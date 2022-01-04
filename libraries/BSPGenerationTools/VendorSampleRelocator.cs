@@ -119,6 +119,7 @@ namespace BSPGenerationTools
         {
             public Regex FileRegex;
             public Regex DisableTriggerRegex;   //Matching trigger will be disabled for files matching FileRegex and DisableTriggerRegex
+            public Regex SkipFrameworkRegex;   //Framework will be skipped if any of these files are found
             public string FrameworkID;
 
             public Dictionary<string, string> Configuration = new Dictionary<string, string>();
@@ -134,6 +135,17 @@ namespace BSPGenerationTools
                 int len = sources.Length;
                 sources = sources.Where(s => !FileRegex.IsMatch(conv(s))).ToArray();
                 return sources.Length != len;
+            }
+
+            public bool IsMatchingSourceFile(string fn)
+            {
+                if (!FileRegex.IsMatch(fn))
+                    return false;
+
+                if (DisableTriggerRegex?.IsMatch(fn) == true)
+                    return false;
+
+                return true;
             }
         }
 
@@ -179,28 +191,38 @@ namespace BSPGenerationTools
 
             foreach (var fw in AutoDetectedFrameworks ?? new AutoDetectedFramework[0])
             {
-                if (sources?.FirstOrDefault(s => fw.FileRegex.IsMatch(s) && fw.DisableTriggerRegex?.IsMatch(s) != true) != null)
+                if (sources?.FirstOrDefault(fw.IsMatchingSourceFile) == null)
+                    continue;
+
+                if (fw.SkipFrameworkRegex != null && sources?.FirstOrDefault(s => fw.SkipFrameworkRegex.IsMatch(s)) != null)
+                    continue;
+
+                if (fw.FileBasedConfig != null)
                 {
-                    if (fw.FileBasedConfig != null)
+                    foreach(var e in fw.FileBasedConfig)
                     {
-                        foreach(var e in fw.FileBasedConfig)
+                        foreach(var fn in sources)
                         {
-                            foreach(var fn in sources)
+                            var m = e.Regex.Match(fn);
+                            if (m.Success)
                             {
-                                var m = e.Regex.Match(fn);
-                                if (m.Success)
-                                    extraConfiguration[string.Format(e.Format, m.Groups.Cast<object>().ToArray())] = "1";
+                                var kv = string.Format(e.Format, m.Groups.Cast<object>().ToArray());
+                                int idx = kv.IndexOf('=');
+                                if (idx == -1)
+                                    extraConfiguration[kv] = "1";
+                                else
+                                    extraConfiguration[kv.Substring(0, idx)] = kv.Substring(idx + 1);
                             }
                         }
                     }
-
-                    fw.FindAndFilterOut(ref sources);
-                    fw.FindAndFilterOut(ref headers);
-                    fw.FindAndFilterOut(ref includeDirs);
-                    fw.FindAndFilterOut(ref dependencies, d => d.MappedFile);
-
-                    matchedFrameworks.Add(fw);
                 }
+
+                fw.FindAndFilterOut(ref sources);
+                fw.FindAndFilterOut(ref headers);
+                fw.FindAndFilterOut(ref includeDirs);
+                fw.FindAndFilterOut(ref dependencies, d => d.MappedFile);
+
+                matchedFrameworks.Add(fw);
             }
 
             foreach (var map in AutoPathMappings ?? new PathMapping[0])
