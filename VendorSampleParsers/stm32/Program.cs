@@ -262,6 +262,13 @@ namespace GeneratorSampleStm32
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/Third_Party/LwIP", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         DisableTriggerRegex = new Regex(@"^$", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         Configuration = new Dictionary<string, string>() }*/
+
+                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.threadx",
+                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/(common|ports)/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        Configuration = new Dictionary<string, string>{
+                            { "com.sysprogs.bspoptions.stm32.threadx.user_define",  "TX_INCLUDE_USER_DEFINE_FILE"}
+                        }
+                    }
                 };
 
 

@@ -165,7 +165,7 @@ namespace BSPGenerationTools
 
             foreach (var fw in AutoDetectedFrameworks ?? new AutoDetectedFramework[0])
             {
-                if (sources?.FirstOrDefault(s => fw.FileRegex.IsMatch(s) && !fw.DisableTriggerRegex.IsMatch(s)) != null)
+                if (sources?.FirstOrDefault(s => fw.FileRegex.IsMatch(s) && fw.DisableTriggerRegex?.IsMatch(s) != true) != null)
                 {
                     fw.FindAndFilterOut(ref sources);
                     fw.FindAndFilterOut(ref headers);

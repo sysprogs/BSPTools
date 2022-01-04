@@ -344,7 +344,7 @@ namespace STM32ProjectImporter
             ValidateFinalMCUName(mcu);
 
             result.DeviceID = mcu;
-            result.SourceFiles = opts.SourceFiles.Select(f => f.FullPath).Concat(opts.Libraries).Distinct().ToArray();
+            result.SourceFiles = opts.SourceFiles.Select(f => FixAssemblyFileExtension(f.FullPath)).Concat(opts.Libraries).Distinct().ToArray();
             result.IncludeDirectories = opts.IncludeDirectories;
             result.PreprocessorMacros = opts.PreprocessorMacros;
             result.BoardName = boardName ?? opts.BoardName;
@@ -449,6 +449,18 @@ namespace STM32ProjectImporter
 
             result.HeaderFiles = headers.ToArray();
             return result;
+        }
+
+        static string FixAssemblyFileExtension(string fullPath)
+        {
+            if (fullPath.EndsWith(".s"))
+            {
+                var newPath = fullPath.Substring(0, fullPath.Length - 1) + "S";
+                File.Move(fullPath, newPath);
+                return newPath;
+            }
+
+            return fullPath;
         }
     }
 

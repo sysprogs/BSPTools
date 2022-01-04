@@ -566,7 +566,7 @@ namespace BSPGenerationTools
                 if (kv.Value.Conditions.Count == 1 && !string.IsNullOrEmpty(kv.Key))
                     continue;  //Only 1 file instance found for this device type.
 
-                var conditionsByEqualsExpression = kv.Value.Conditions.GroupBy(c => (c as Condition.Equals)?.Expression).ToArray();
+                var conditionsByEqualsExpression = kv.Value.Conditions.GroupBy(ExtractRelevantVariable).ToArray();
                 if (conditionsByEqualsExpression.Length == 1 && conditionsByEqualsExpression[0].Key != null)
                     continue;  //All conditions refer to the same variable. They are likely mutually exclusive.
 
@@ -575,6 +575,18 @@ namespace BSPGenerationTools
             }
 
             return true;
+        }
+
+        private string ExtractRelevantVariable(Condition cond)
+        {
+            if (cond is Condition.Not cn)
+                return ExtractRelevantVariable(cn.Argument);
+            else if (cond is Condition.Equals ce)
+                return ce.Expression;
+            else if (cond is Condition.MatchesRegex cm)
+                return cm.Expression;
+            else
+                return null;
         }
 
         public void Dispose()
@@ -905,7 +917,7 @@ namespace BSPGenerationTools
 
         internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core, FPUType? fpuType)
         {
-            string coreName = null, freertosPort = null;
+            string coreName = null, freertosPort = null, threadxPort = null;
             switch (core)
             {
                 case CortexCore.M0:

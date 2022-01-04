@@ -353,8 +353,8 @@ namespace StandaloneBSPValidator
             var prj = new GeneratedProject(configuredMCU, vs, mcuDir, bspDict, vs.Configuration.Frameworks ?? new string[0]) { NoRTTI = true };
 
             var projectCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.MCUConfiguration);
-
             var frameworkCfg = PropertyDictionary2.ReadPropertyDictionary(vs.Configuration.Configuration);
+
             foreach (var k in projectCfg.Keys)
                 bspDict[k] = projectCfg[k];
             var frameworkIDs = vs.Configuration.Frameworks?.ToDictionary(fw => fw, fw => true);

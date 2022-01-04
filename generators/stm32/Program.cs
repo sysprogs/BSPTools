@@ -529,6 +529,8 @@ namespace stm32_bsp_generator
 
                 var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.Directories.RulesDir, "BSPTemplate.xml"));
 
+                frameworks.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.UserFriendlyName, b.UserFriendlyName));
+
                 bsp.MCUFamilies = familyDefinitions.ToArray();
                 bsp.SupportedMCUs = mcuDefinitions.ToArray();
                 bsp.Frameworks = frameworks.ToArray();

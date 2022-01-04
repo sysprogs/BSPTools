@@ -135,7 +135,64 @@ namespace stm32_bsp_generator
             }
 
             if (newSDKsFetched > 0)
+            {
+                InstallAzureRTOS(expectedSDKs, sdkRoot);
                 XmlTools.SaveObject(expectedSDKs, Path.Combine(sdkRoot, SDKListFileName));
+            }
+        }
+
+        private static void InstallAzureRTOS(STM32SDKCollection sdks, string sdkRoot)
+        {
+            var azureRoot = Path.Combine(sdkRoot, "AzureRTOS");
+            string[] copiedPaths = new[] { @"Middlewares\ST", @"Projects" };
+
+            foreach (var sdk in sdks.SDKs)
+            {
+                var azureFolder = Path.Combine(azureRoot, "x-cube-azrtos-" + sdk.Family.ToLower());
+                if (!Directory.Exists(azureFolder))
+                    continue;
+
+                Console.WriteLine($"Installing {Path.GetFileName(azureFolder)}...");
+
+                foreach (var subdir in copiedPaths)
+                {
+                    var src = Path.GetFullPath(Path.Combine(azureFolder, subdir));
+                    if (!Directory.Exists(src))
+                        continue;
+
+                    var dst = Path.Combine(sdkRoot, sdk.FolderName);
+                    dst = Directory.GetDirectories(dst).SingleOrDefault();
+                    dst = Path.Combine(dst, subdir);
+
+                    if (!Directory.Exists(dst))
+                        throw new Exception("Missing " + dst);
+
+                    var markerFile = Path.Combine(dst, "AzureDirs.txt");
+
+                    if (File.Exists(markerFile))
+                    {
+                        foreach (var s2 in File.ReadAllLines(markerFile))
+                        {
+                            var p2 = Path.Combine(dst, s2);
+                            if (Directory.Exists(p2))
+                                Directory.Delete(p2, true);
+                        }
+                        File.Delete(markerFile);
+                    }
+
+                    var allAzureSubdirs = Directory.GetDirectories(src, "*", SearchOption.AllDirectories).Select(d => d.Substring(src.Length + 1)).ToArray();
+                    var subdirsMissingInSDK = allAzureSubdirs.Where(sd => !Directory.Exists(Path.Combine(dst, sd))).OrderBy(s => s.ToLower()).ToList();
+
+                    for (int i = 1; i < subdirsMissingInSDK.Count; i++)
+                    {
+                        if (subdirsMissingInSDK[i].StartsWith(subdirsMissingInSDK[i - 1] + "\\", StringComparison.InvariantCultureIgnoreCase))
+                            subdirsMissingInSDK.RemoveAt(i--);
+                    }
+
+                    File.WriteAllLines(markerFile, subdirsMissingInSDK);
+                    PathTools.CopyDirectoryRecursive(src, dst);
+                }
+            }
         }
 
         private static void DownloadAndUnpack(WebClient wc, string URL, string targetDir)

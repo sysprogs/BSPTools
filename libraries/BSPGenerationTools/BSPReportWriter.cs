@@ -125,7 +125,7 @@ namespace BSPGenerationTools
             }
 
             if (errors > 0 || _RawErrors.Count > 0)
-                throw new Exception($"BSP generation failed. Examine {reportFile} for details.");
+                throw new Exception($"BSP generation failed. Examine {Path.GetFullPath(reportFile)} for details.");
 
             _Disposed = true;
         }
