@@ -547,6 +547,7 @@ namespace VendorSampleParserEngine
         {
             string SDKdir = null;
             string specificSampleName = null;
+            bool pass2Incremental = false;
             RunMode mode = RunMode.Invalid;
 
             foreach (var arg in args)
@@ -557,6 +558,8 @@ namespace VendorSampleParserEngine
                     mode = RunMode.SingleSample;
                     specificSampleName = arg.Substring(singlePrefix.Length);
                 }
+                else if (arg == "/pass2")
+                    pass2Incremental = true;
                 else if (arg.StartsWith("/"))
                 {
                     mode = Enum.GetValues(typeof(RunMode)).OfType<RunMode>().First(v => v.ToString().ToLower() == arg.Substring(1).ToLower());
@@ -643,7 +646,7 @@ namespace VendorSampleParserEngine
             switch (mode)
             {
                 case RunMode.Incremental:
-                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => _Report.ShouldBuildIncrementally(s.InternalUniqueID, VendorSamplePass.InPlaceBuild)).ToArray();
+                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => _Report.ShouldBuildIncrementally(s.InternalUniqueID, pass2Incremental ? VendorSamplePass.RelocatedBuild : VendorSamplePass.InPlaceBuild)).ToArray();
                     break;
                 case RunMode.Release:
                     insertionQueue = sampleDir.Samples;

@@ -2,6 +2,7 @@
 using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -150,7 +151,22 @@ namespace stm32_bsp_generator
             {
                 var azureFolder = Path.Combine(azureRoot, "x-cube-azrtos-" + sdk.Family.ToLower());
                 if (!Directory.Exists(azureFolder))
-                    continue;
+                {
+                    Directory.CreateDirectory(azureRoot);
+                    var info = new ProcessStartInfo
+                    {
+                        FileName = "git",
+                        WorkingDirectory = azureRoot,
+                        Arguments = "clone https://github.com/STMicroelectronics/x-cube-azrtos-" + sdk.Family.ToLower(),
+                        UseShellExecute = false,
+                    };
+
+                    var proc = Process.Start(info);
+                    proc.WaitForExit();
+
+                    if (!Directory.Exists(azureFolder))
+                        continue;
+                }
 
                 Console.WriteLine($"Installing {Path.GetFileName(azureFolder)}...");
 
