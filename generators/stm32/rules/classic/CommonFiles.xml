@@ -446,6 +446,8 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<SmartFileConditions>
 						<string>-USB Host Support[host_controllers]|common\\usbx(|_stm32)_host_controllers\\.*</string>
 						<string>-USB Device Support[device_controllers]|common\\usbx(|_stm32)_device_controllers\\.*</string>
+						<string>-Network Support[network]|common\\usbx_network\\.*</string>
+						<string>-Pictbridge Support[pictbridge]|common\\usbx_pictbridge\\.*</string>
 						
 						<string>-Audio Device Class[device_class_audio]|common\\usbx_device_classes\\src\\ux_device_class_audio.*</string>
 						<string>-CDC ACM Device Class[device_class_cdc_acm]|common\\usbx_device_classes\\src\\ux_device_class_cdc_acm.*</string>
