@@ -264,7 +264,7 @@ namespace GeneratorSampleStm32
                         Configuration = new Dictionary<string, string>() }*/
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.threadx",
-                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/(common|ports)/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/common/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         Configuration = new Dictionary<string, string>{ { "com.sysprogs.bspoptions.stm32.threadx.user_define", "TX_INCLUDE_USER_DEFINE_FILE"} },
                         SkipFrameworkRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/common_modules/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                     },
