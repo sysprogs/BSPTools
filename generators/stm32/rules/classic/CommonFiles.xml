@@ -331,7 +331,8 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<TargetFolder>AzureRTOS\threadx</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
-					<ProjectInclusionMask>common\*.c;common\*.h;-*\example_build\*;ports\cortex_*\gnu\*</ProjectInclusionMask>
+					<!-- tx_initialize_low_level.S included in m23/m33 ports is redundant against the sample projects -->
+					<ProjectInclusionMask>common\*.c;common\*.h;-*\example_build\*;-*\tx_initialize_low_level.*;ports\cortex_*\gnu\*</ProjectInclusionMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.threadx.|ThreadX</SmartPropertyGroup>
 					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
 					<AdditionalIncludeDirs>common/inc;ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
@@ -346,7 +347,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
 						<string>ports\\cortex_m23\\.*:$$com.sysprogs.bspoptions.arm.core$$==M23</string>
 						<string>ports\\cortex_m33\\.*:$$com.sysprogs.bspoptions.arm.core$$==M33</string>
-						<string>common\\src\\tx_thread_stack_error_(handler|notify)\.[ch]:$$com.sysprogs.bspoptions.arm.core$$!=~[AM][0-9]$</string>
+						<string>common\\src\\tx_thread_stack_error_(handler|notify)\.[ch]:$$com.sysprogs.bspoptions.arm.core$$=~[AM][0-9]$</string>
 					</SimpleFileConditions>
 				</CopyJob>
 			</CopyJobs>
@@ -388,6 +389,12 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>-SD driver[sd]|.*\\fx_stm32_sd_driver\.(h|c)</string>
 						<string>-SRAM driver[sram]|.*\\fx_stm32_sram_driver\.(h|c)</string>
 					</SmartFileConditions>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\filex\ports\generic</SourceFolder>
+					<TargetFolder>AzureRTOS\filex\ports\cortex_m33\gnu</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
@@ -472,6 +479,12 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>-SWAR Host Class[host_class_swar]|common\\usbx_host_classes\\src\\ux_host_class_swar.*</string>
 						<string>-Video Host Class[host_class_video]|common\\usbx_host_classes\\src\\ux_host_class_video.*</string>
 					</SmartFileConditions>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\usbx\ports\generic</SourceFolder>
+					<TargetFolder>AzureRTOS\usbx\ports\cortex_m33\gnu</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>

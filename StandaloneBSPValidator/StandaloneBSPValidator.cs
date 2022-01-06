@@ -633,7 +633,7 @@ namespace StandaloneBSPValidator
                 Executable = prefix + "g++",
                 Arguments = $"{flags.StartGroup} {flags.EffectiveLDFLAGS} $^ {flags.EndGroup} -o $@",
                 AllInputs = job.CompileTasks.Select(t => t.PrimaryOutput)
-                    .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)))
+                    .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).Select(fn => fn.Replace('\\', '/')))
                     .ToArray(),
                 PrimaryOutput = "test.elf",
             });

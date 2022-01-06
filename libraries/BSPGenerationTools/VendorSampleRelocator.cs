@@ -125,6 +125,8 @@ namespace BSPGenerationTools
             public Dictionary<string, string> Configuration = new Dictionary<string, string>();
             public FileBasedConfigEntry[] FileBasedConfig;
 
+            public Regex UnsupportedDeviceRegex;
+
             public bool FindAndFilterOut<_Ty>(ref _Ty[] sources, Func<_Ty, string> conv = null)
             {
                 if (sources == null)
@@ -184,13 +186,16 @@ namespace BSPGenerationTools
         protected AutoDetectedFramework[] AutoDetectedFrameworks;
         protected PathMapping[] AutoPathMappings;
 
-        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(ref string[] sources, ref string[] headers, ref string[] includeDirs, ref string[] preprocessorMacros, ref ParsedDependency[] dependencies, VendorSampleConfiguration existingConfiguration)
+        protected virtual VendorSampleConfiguration DetectKnownFrameworksAndFilterPaths(string deviceID, ref string[] sources, ref string[] headers, ref string[] includeDirs, ref string[] preprocessorMacros, ref ParsedDependency[] dependencies, VendorSampleConfiguration existingConfiguration)
         {
             List<AutoDetectedFramework> matchedFrameworks = new List<AutoDetectedFramework>();
             Dictionary<string, string> extraConfiguration = new Dictionary<string, string>();
 
             foreach (var fw in AutoDetectedFrameworks ?? new AutoDetectedFramework[0])
             {
+                if (fw.UnsupportedDeviceRegex?.IsMatch(deviceID) == true)
+                    continue;
+
                 if (sources?.FirstOrDefault(fw.IsMatchingSourceFile) == null)
                     continue;
 
@@ -327,7 +332,7 @@ namespace BSPGenerationTools
                 //1. Translate absolute paths to the $$SYS:VSAMPLE_DIR$$ syntax. All files referenced here should be also also included in 'deps' in order to be copied.
                 TranslateVendorSamplePaths(s, ref deps, mapper.MapPath);
 
-                s.Configuration = DetectKnownFrameworksAndFilterPaths(ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref s.PreprocessorMacros, ref deps, s.Configuration);
+                s.Configuration = DetectKnownFrameworksAndFilterPaths(s.DeviceID, ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref s.PreprocessorMacros, ref deps, s.Configuration);
                 FilterPreprocessorMacros(ref s.PreprocessorMacros);
 
                 if (s.Path == null)

@@ -271,6 +271,7 @@ namespace GeneratorSampleStm32
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.filex",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/filex/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        UnsupportedDeviceRegex = new Regex("STM32U5.*"),    //Incompatible config file for now
                         FileBasedConfig = new[]
                         {
                             new FileBasedConfigEntry(@"filex/common/drivers/fx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.filex.{1}")
@@ -279,6 +280,7 @@ namespace GeneratorSampleStm32
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.levelx",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/levelx/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        UnsupportedDeviceRegex = new Regex("STM32U5.*"),    //Incompatible config file for now
                         FileBasedConfig = new[]
                         {
                             new FileBasedConfigEntry(@"levelx/common/drivers/lx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.levelx.{1}")

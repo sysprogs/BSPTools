@@ -842,7 +842,7 @@ namespace BSPGenerationTools
             if (idx != -1)
                 return new Condition.Equals { Expression = rawCond.Substring(0, idx).Trim(), ExpectedValue = rawCond.Substring(idx + 2).Trim() };
             else if ((idx = rawCond.IndexOf("!=~")) != -1)
-                return new Condition.Not { Argument = new Condition.MatchesRegex { Expression = rawCond.Substring(0, idx).Trim(), Regex = rawCond.Substring(idx + 2).Trim() } };
+                return new Condition.Not { Argument = new Condition.MatchesRegex { Expression = rawCond.Substring(0, idx).Trim(), Regex = rawCond.Substring(idx + 3).Trim() } };
             else if ((idx = rawCond.IndexOf("=~")) != -1)
                 return new Condition.MatchesRegex { Expression = rawCond.Substring(0, idx).Trim(), Regex = rawCond.Substring(idx + 2).Trim() };
             else if ((idx = rawCond.IndexOf("!=")) != -1)

@@ -167,6 +167,22 @@ namespace stm32_bsp_generator
                     if (!Directory.Exists(azureFolder))
                         continue;
                 }
+                else
+                {
+                    Directory.CreateDirectory(azureRoot);
+                    var info = new ProcessStartInfo
+                    {
+                        FileName = "git",
+                        WorkingDirectory = azureFolder,
+                        Arguments = "pull",
+                        UseShellExecute = false,
+                    };
+
+                    var proc = Process.Start(info);
+                    proc.WaitForExit();
+                    if (proc.ExitCode != 0)
+                        throw new Exception("Failed to update " + azureFolder);
+                }
 
                 Console.WriteLine($"Installing {Path.GetFileName(azureFolder)}...");
 
