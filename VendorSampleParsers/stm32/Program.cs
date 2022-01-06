@@ -265,6 +265,7 @@ namespace GeneratorSampleStm32
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.threadx",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/(common|ports)/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        DisableTriggerRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/ports/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         Configuration = new Dictionary<string, string>{ { "com.sysprogs.bspoptions.stm32.threadx.user_define", "TX_INCLUDE_USER_DEFINE_FILE"} },
                         SkipFrameworkRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/common_modules/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                     },
@@ -289,6 +290,7 @@ namespace GeneratorSampleStm32
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.usbx",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/usbx/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        UnsupportedDeviceRegex = new Regex("STM32G0.*"),    //Incompatible config file for now
                         FileBasedConfig = new[]
                         {
                             new FileBasedConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}"),
@@ -482,6 +484,17 @@ namespace GeneratorSampleStm32
             protected override ParsedVendorSamples ParseVendorSamples(string SDKdir, IVendorSampleFilter filter)
             {
                 var SDKs = XmlTools.LoadObject<STM32SDKCollection>(Path.Combine(BSPDirectory, "SDKVersions.xml"));
+
+                if (SDKs.BSPVersion != "2022.01")
+                {
+                    //As of BSP 2022.01, SDKs for different device families came with slightly incompatible versions of LevelX/FileX/USBX
+                    //To make them work fine, the vendor samples from the affected SDKs were configured to not reference the frameworks.
+                    //This will likely no longer be the case with the newer AzureRTOS packages and SDKs, so the following steps should be 
+                    //followed when moving to the newer SDK versions:
+                    //1. Make sure the latest versions of the x-cube-azrtos repos are used
+                    //2. Remove the 'UnsupportedDeviceRegex' assignments above
+                    throw new NotImplementedException("TODO: remove the hacks described above");
+                }
 
                 bool isBlueNRG = _Ruleset == STM32Ruleset.BlueNRG_LP;
 

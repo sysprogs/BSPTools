@@ -75,7 +75,7 @@ namespace STM32ProjectImporter
         protected virtual void OnMultipleConfigurationsFound(string projectFile) { }
         protected virtual void OnParseFailed(Exception ex, string sampleID, string projectFileDir, string warningText) { }
         protected virtual void AdjustMCUName(ref string mcu) { }
-        protected virtual void ValidateFinalMCUName(string mcu) { }
+        protected virtual void ValidateFinalMCUName(ref string mcu) { }
         protected virtual void OnFileNotFound(string fullPath) { }
         protected virtual void OnVendorSampleParsed(VendorSample sample, CommonConfigurationOptions options) { }
 
@@ -341,7 +341,7 @@ namespace STM32ProjectImporter
                 result.UserFriendlyName += mc.UserFriendlyNameSuffix;
             }
 
-            ValidateFinalMCUName(mcu);
+            ValidateFinalMCUName(ref mcu);
 
             result.DeviceID = mcu;
             result.SourceFiles = opts.SourceFiles.Select(f => FixAssemblyFileExtension(f.FullPath)).Concat(opts.Libraries).Distinct().ToArray();
