@@ -54,12 +54,18 @@ namespace GeneratorSampleStm32.ProjectParsers
             }
         }
 
-        protected override void ValidateFinalMCUName(string mcu)
+        protected override void ValidateFinalMCUName(ref string mcu)
         {
-            base.ValidateFinalMCUName(mcu);
+            base.ValidateFinalMCUName(ref mcu);
 
             if (!_SupportedMCUNames.Contains(mcu))
             {
+                if (mcu.Length > 11 && _SupportedMCUNames.Contains(mcu.Substring(0, 11)))
+                {
+                    mcu = mcu.Substring(0, 11);
+                    return;
+                }
+
                 _Report.ReportMergeableError("Invalid MCU", mcu);
             }
         }
