@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31605.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVaRICEDebugPackage", "AVaRICEDebugPackage\AVaRICEDebugPackage.csproj", "{80C36FE9-1ED8-4A42-B62C-A0C90F6C75C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESP8266DebugPackage", "ESP8266DebugPackage\ESP8266DebugPackage.csproj", "{0BA701ED-2C4E-4F2E-A80D-53270273BD06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedLinkDebugPackage", "RedLinkDebugPackage\RedLinkDebugPackage.csproj", "{8DC1B57A-A516-4F4D-8E89-9B0C69D14796}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenesasDebugPackage", "RenesasDebugPackage\RenesasDebugPackage.csproj", "{E330F522-A7E4-450E-97E5-244F7E14E114}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RISCVDebugPackage", "RISCVDebugPackage\RISCVDebugPackage.csproj", "{1DBCDEFF-2978-4BEE-935E-7E3A3D06BD94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiXDSDebugPackage", "TiXDSDebugPackage\TiXDSDebugPackage.csproj", "{40EA547D-5A86-4948-8F95-06272C650B64}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80C36FE9-1ED8-4A42-B62C-A0C90F6C75C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80C36FE9-1ED8-4A42-B62C-A0C90F6C75C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80C36FE9-1ED8-4A42-B62C-A0C90F6C75C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80C36FE9-1ED8-4A42-B62C-A0C90F6C75C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BA701ED-2C4E-4F2E-A80D-53270273BD06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BA701ED-2C4E-4F2E-A80D-53270273BD06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BA701ED-2C4E-4F2E-A80D-53270273BD06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BA701ED-2C4E-4F2E-A80D-53270273BD06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DC1B57A-A516-4F4D-8E89-9B0C69D14796}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DC1B57A-A516-4F4D-8E89-9B0C69D14796}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DC1B57A-A516-4F4D-8E89-9B0C69D14796}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DC1B57A-A516-4F4D-8E89-9B0C69D14796}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E330F522-A7E4-450E-97E5-244F7E14E114}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E330F522-A7E4-450E-97E5-244F7E14E114}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E330F522-A7E4-450E-97E5-244F7E14E114}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E330F522-A7E4-450E-97E5-244F7E14E114}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DBCDEFF-2978-4BEE-935E-7E3A3D06BD94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DBCDEFF-2978-4BEE-935E-7E3A3D06BD94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DBCDEFF-2978-4BEE-935E-7E3A3D06BD94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DBCDEFF-2978-4BEE-935E-7E3A3D06BD94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40EA547D-5A86-4948-8F95-06272C650B64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40EA547D-5A86-4948-8F95-06272C650B64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40EA547D-5A86-4948-8F95-06272C650B64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40EA547D-5A86-4948-8F95-06272C650B64}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9AE7B72-0445-471D-B0AE-77331D709538}
+	EndGlobalSection
+EndGlobal

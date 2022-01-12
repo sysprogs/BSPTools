@@ -96,7 +96,24 @@ namespace ESP8266DebugPackage
                 _Context = context;
             }
 
-            public override ILiveMemoryEvaluator CreateLiveMemoryEvaluator(IDebugStartService service) => null;
+            public override ILiveMemoryEvaluator CreateLiveMemoryEvaluator(IDebugStartService service)
+            {
+                if (service.SystemDictionary.TryGetValue("com.sysprogs.visualgdb.gdb_override", out var value))
+                {
+                    try
+                    {
+                        var fn = Path.GetFileName(value);
+                        if (fn.StartsWith("riscv", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            //ESP32C3 devices are based on RISC-V and do support the live memory engine with the latest ESP-IDF versions.
+                            return base.CreateLiveMemoryEvaluator(service);
+                        }
+                    }
+                    catch { }
+                }
+
+                return null;
+            }
 
             protected override bool SkipCommandOnAttach(string cmd)
             {
