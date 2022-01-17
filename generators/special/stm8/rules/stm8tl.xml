@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>STM8TL</Name>
+	<DeviceRegex>STM8TL.*</DeviceRegex>
+	<CompilationFlags>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
+	</CompilationFlags>
+	
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>StdPeriph Driver</Name>
+			<ID>com.sysprogs.stm8.stdperiph.tl</ID>
+			<ClassID>com.sysprogs.stm8.stdperiph</ClassID>
+			<ProjectFolderName>Peripherals</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM8TL5x_StdPeriph_Lib_V1.0.1\Libraries\STM8TL5x_StdPeriph_Driver</SourceFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>
+	</AdditionalFrameworks>
+	
+
+</FamilyDefinition>

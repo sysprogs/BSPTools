@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31605.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stm8_bsp_generator", "stm8_bsp_generator.csproj", "{816BCA5C-84B9-4F52-8369-96158F35D888}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{816BCA5C-84B9-4F52-8369-96158F35D888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{816BCA5C-84B9-4F52-8369-96158F35D888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{816BCA5C-84B9-4F52-8369-96158F35D888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{816BCA5C-84B9-4F52-8369-96158F35D888}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BC4C7F5D-044F-4718-993B-DB0CABB7C380}
+	EndGlobalSection
+EndGlobal

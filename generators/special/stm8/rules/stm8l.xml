@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>STM8L15</Name>
+	<DeviceRegex>STM8(AL|L15|L05).*</DeviceRegex>
+	<CompilationFlags>
+		<PreprocessorMacros>
+			<string>$$com.sysprogs.stm8.mcudef$$</string>
+		</PreprocessorMacros>
+	</CompilationFlags>
+	<Subfamilies>			
+		<MCUClassifier>
+			<VariableName>com.sysprogs.stm8.mcudef</VariableName>
+			<Required>true</Required>
+			<Options>
+				<Option>
+					<Value>STM8L15X_LD</Value>
+					<Regex>STM8L15..[23]</Regex>
+				</Option>
+				<Option>
+					<Value>STM8L15X_MD</Value>
+					<Regex>STM8L15.[CKG][46]</Regex>
+				</Option>
+				<Option>
+					<Value>STM8L15X_MDP</Value>
+					<Regex>STM8L15.R6</Regex>
+				</Option>
+				<Option>
+					<Value>STM8L15X_HD</Value>
+					<Regex>STM8L15..8</Regex>
+				</Option>
+				<Option>
+					<Value>STM8L05X_LD_VL</Value>
+					<Regex>STM8L051.3</Regex>
+				</Option>
+				<Option>
+					<Value>STM8L05X_MD_VL</Value>
+					<Regex>STM8L052.6</Regex>
+				</Option>
+				<Option>
+					<Value>STM8L05X_HD_VL</Value>
+					<Regex>STM8L052.8</Regex>
+				</Option>
+				<Option>
+					<Value>STM8AL31_L_MD</Value>
+					<Regex>STM8AL.*</Regex>
+				</Option>
+			</Options>
+		</MCUClassifier>
+	</Subfamilies>			
+	<CompilationFlags>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
+	</CompilationFlags>
+	
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>StdPeriph Driver</Name>
+			<ID>com.sysprogs.stm8.stdperiph.l15</ID>
+			<ClassID>com.sysprogs.stm8.stdperiph</ClassID>
+			<ProjectFolderName>Peripherals</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\STM8L15x-16x-05x-AL31-L_StdPeriph_Lib\Libraries\STM8L15x_StdPeriph_Driver</SourceFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>*.c;*.h;*.S;*.cpp</ProjectInclusionMask>
+				</CopyJob>			
+			</CopyJobs>
+		</Framework>
+	</AdditionalFrameworks>
+	
+
+</FamilyDefinition>
