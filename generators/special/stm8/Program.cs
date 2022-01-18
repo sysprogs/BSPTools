@@ -56,6 +56,13 @@ namespace stm8_bsp_generator
                 Description = "A basic GPIO demo from the STM8 driver package",
                 MCUFilterRegex = fam.Definition.DeviceRegex,
                 DoNotUpgradeCToCpp = true,
+                AdditionalSourcesToCopy = new[]
+                {
+                    new AdditionalSourceFile
+                    {
+                        SourcePath = "$$SYS:BSP_ROOT$$/Devices/$$com.sysprogs.stm8.devpath$$_vectors.c"
+                    }
+                }
             };
 
             XmlTools.SaveObject(sample, Path.Combine(targetDir, "sample.xml"));
@@ -64,9 +71,9 @@ namespace stm8_bsp_generator
 
         public void PatchDriverFiles()
         {
-            foreach(var dir in Directory.GetDirectories(Directories.OutputDir, "*_StdPeriph_Driver"))
+            foreach (var dir in Directory.GetDirectories(Directories.OutputDir, "*_StdPeriph_Driver"))
             {
-                foreach(var src in Directory.GetFiles(dir + "\\src", "*.c"))
+                foreach (var src in Directory.GetFiles(dir + "\\src", "*.c"))
                 {
                     var name = Path.GetFileNameWithoutExtension(src);
                     int idx = name.LastIndexOf('_');
@@ -79,7 +86,7 @@ namespace stm8_bsp_generator
                     if (string.Join("\r\n", lines).Contains(instName + "->"))
                     {
                         bool patched = false;
-                        for(int i = 0; i < lines.Count;i++)
+                        for (int i = 0; i < lines.Count; i++)
                         {
                             if (lines[i].StartsWith("#include \"stm8"))
                             {
@@ -159,8 +166,33 @@ namespace stm8_bsp_generator
         {
             var result = base.GenerateDefinition(fam, bspBuilder, requirePeripheralRegisters, allowIncompleteDefinition, flagsToAdd);
 
-            result.CompilationFlags.CFLAGS = string.Join(" ", Definition.Options);
+            result.CompilationFlags.COMMONFLAGS = string.Join(" ", Definition.Options);
+            result.CompilationFlags.PreprocessorMacros = result.CompilationFlags.PreprocessorMacros.Concat(new[] { "$$com.sysprogs.stm8.stp_crts$$" }).ToArray();
             result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.stm8.devpath", Value = MakeRelativePath("") } }).ToArray();
+
+            if (result.ConfigurableProperties != null)
+                throw new Exception("Support merging of properties");
+
+            result.ConfigurableProperties = new PropertyList
+            {
+                PropertyGroups = new List<PropertyGroup>
+                {
+                    new PropertyGroup
+                    {
+                        Properties = new List<PropertyEntry>
+                        {
+                            new PropertyEntry.Boolean
+                            {
+                                Name = "Include CRT startup files",
+                                UniqueID= "com.sysprogs.stm8.stp_crts",
+                                ValueForTrue = "__STP_CRTS__",
+                                ValueForFalse = "",
+                                DefaultValue = true
+                            }
+                        }
+                    }
+                }
+            };
 
             result.CompilationFlags.LinkerScript = "$$SYS:BSP_ROOT$$/Devices/" + MakeRelativePath(".lkf");
             return result;
