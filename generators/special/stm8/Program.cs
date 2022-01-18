@@ -30,45 +30,6 @@ namespace stm8_bsp_generator
             throw new NotImplementedException();
         }
 
-        public string LocateAndCopyGPIOSample(MCUFamilyBuilder fam)
-        {
-            var driverDir = ExpandVariables(fam.Definition.AdditionalFrameworks[0].CopyJobs[0].SourceFolder);
-
-            var dir = Path.Combine(driverDir, @"..\..\Project");
-            if (!Directory.Exists(dir))
-                dir = Path.Combine(driverDir, @"..\..\Projects");
-            dir = Directory.GetDirectories(dir, "*_Examples")[0];
-            dir = Path.GetFullPath(Path.Combine(dir, "GPIO"));
-
-            var dirs = Directory.GetDirectories(dir);
-            if (dirs.Length == 1)
-                dir = dirs[0];
-            else
-                dir = dirs.Where(f => Path.GetFileName(f).Contains("Polling")).First();
-
-            var targetDir = Path.Combine(Directories.OutputDir, $"Samples\\{fam.Definition.Name}\\GPIO");
-            Directory.CreateDirectory(targetDir);
-            PathTools.CopyDirectoryRecursive(dir, targetDir);
-
-            EmbeddedProjectSample sample = new EmbeddedProjectSample
-            {
-                Name = "GPIO Demo",
-                Description = "A basic GPIO demo from the STM8 driver package",
-                MCUFilterRegex = fam.Definition.DeviceRegex,
-                DoNotUpgradeCToCpp = true,
-                AdditionalSourcesToCopy = new[]
-                {
-                    new AdditionalSourceFile
-                    {
-                        SourcePath = "$$SYS:BSP_ROOT$$/Devices/$$com.sysprogs.stm8.devpath$$_vectors.c"
-                    }
-                }
-            };
-
-            XmlTools.SaveObject(sample, Path.Combine(targetDir, "sample.xml"));
-            return $"Samples/{fam.Definition.Name}/GPIO";
-        }
-
         public void PatchDriverFiles()
         {
             foreach (var dir in Directory.GetDirectories(Directories.OutputDir, "*_StdPeriph_Driver"))
@@ -162,13 +123,17 @@ namespace stm8_bsp_generator
 
         public string MakeRelativePath(string ext) => $"{Definition.Family}/{Definition.MCUName}{ext}";
 
+
         public override MCU GenerateDefinition(MCUFamilyBuilder fam, BSPBuilder bspBuilder, bool requirePeripheralRegisters, bool allowIncompleteDefinition = false, MCUFamilyBuilder.CoreSpecificFlags flagsToAdd = MCUFamilyBuilder.CoreSpecificFlags.All)
         {
             var result = base.GenerateDefinition(fam, bspBuilder, requirePeripheralRegisters, allowIncompleteDefinition, flagsToAdd);
 
             result.CompilationFlags.COMMONFLAGS = string.Join(" ", Definition.Options);
             result.CompilationFlags.PreprocessorMacros = result.CompilationFlags.PreprocessorMacros.Concat(new[] { "$$com.sysprogs.stm8.stp_crts$$" }).ToArray();
-            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.stm8.devpath", Value = MakeRelativePath("") } }).ToArray();
+            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] 
+            { 
+                new SysVarEntry { Key = "com.sysprogs.stm8.devpath", Value = MakeRelativePath("") },
+            }).ToArray();
 
             if (result.ConfigurableProperties != null)
                 throw new Exception("Support merging of properties");
@@ -199,6 +164,53 @@ namespace stm8_bsp_generator
         }
     }
 
+    class STM8FamilyBuilder : MCUFamilyBuilder
+    {
+        public STM8FamilyBuilder(BSPBuilder bspBuilder, FamilyDefinition definition)
+            : base(bspBuilder, definition)
+        {
+        }
+
+        public string LocateDefaultConfigFile()
+        {
+            var driverDir = BSP.ExpandVariables(Definition.AdditionalFrameworks[0].CopyJobs[0].SourceFolder);
+
+            var dir = Path.Combine(driverDir, @"..\..\Project");
+            if (!Directory.Exists(dir))
+                dir = Path.Combine(driverDir, @"..\..\Projects");
+            dir = Directory.GetDirectories(dir, "*_Examples")[0];
+            dir = Path.GetFullPath(Path.Combine(dir, "GPIO"));
+
+            var dirs = Directory.GetDirectories(dir);
+            if (dirs.Length == 1)
+                dir = dirs[0];
+            else
+                dir = dirs.Where(f => Path.GetFileName(f).Contains("Polling")).First();
+
+            return Directory.GetFiles(dir, "*_conf.h")[0];
+        }
+
+        public override MCUFamily GenerateFamilyObject(CoreSpecificFlags flagsToGenerate, bool allowExcludingStartupFiles = false)
+        {
+            var result = base.GenerateFamilyObject(flagsToGenerate, allowExcludingStartupFiles);
+            var cfgFile = LocateDefaultConfigFile();
+            var configDir = Path.Combine(BSP.Directories.OutputDir, "Devices");
+            Directory.CreateDirectory(configDir);
+            var targetCfgFile = Path.Combine(configDir, Path.GetFileName(cfgFile));
+            File.Copy(cfgFile, targetCfgFile);
+            File.SetAttributes(targetCfgFile, File.GetAttributes(targetCfgFile) & ~FileAttributes.ReadOnly);
+
+            var sdkName = Path.GetFileNameWithoutExtension(cfgFile);
+            if (!sdkName.EndsWith("_conf"))
+                throw new Exception("Unexpected SDK conf file: " + cfgFile);
+            sdkName = sdkName.Substring(0, sdkName.Length - 5);
+
+            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new  SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.stm8.sdk_name", Value = sdkName } }).ToArray();
+
+            return result;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -218,14 +230,13 @@ namespace stm8_bsp_generator
 
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir, "*.xml"))
                 {
-                    MCUFamilyBuilder famBuilder = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn));
+                    MCUFamilyBuilder famBuilder = new STM8FamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn));
                     allFamilies.Add(famBuilder);
                 }
 
                 List<MCUFamily> familyDefinitions = new List<MCUFamily>();
                 List<MCU> mcuDefinitions = new List<MCU>();
                 List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-                List<string> exampleDirs = new List<string>();
 
                 var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
 
@@ -238,8 +249,6 @@ namespace stm8_bsp_generator
 
                     foreach (var fw in fam.GenerateFrameworkDefinitions())
                         frameworks.Add(fw);
-
-                    exampleDirs.Add(bspBuilder.LocateAndCopyGPIOSample(fam));
                 }
 
                 if (generateLinkerScripts)
@@ -250,6 +259,9 @@ namespace stm8_bsp_generator
 
                 bspBuilder.PatchDriverFiles();
 
+                var sampleDir = Path.Combine(bspBuilder.Directories.OutputDir, "Samples");
+                PathTools.CopyDirectoryRecursive(Path.Combine(bspBuilder.Directories.RulesDir, "Samples"), sampleDir);
+
                 BoardSupportPackage bsp = new BoardSupportPackage
                 {
                     PackageID = "com.sysprogs.stm8",
@@ -259,9 +271,9 @@ namespace stm8_bsp_generator
                     MCUFamilies = familyDefinitions.ToArray(),
                     SupportedMCUs = mcuDefinitions.ToArray(),
                     Frameworks = frameworks.ToArray(),
-                    Examples = exampleDirs.ToArray(),
+                    Examples = Directory.GetDirectories(sampleDir).Select(s => @"Samples\" + s).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
-                    PackageVersion = "2022.01"
+                    PackageVersion = "2022.01",
                 };
 
                 bspBuilder.ValidateBSP(bsp);

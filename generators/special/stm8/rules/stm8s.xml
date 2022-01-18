@@ -7,6 +7,20 @@
 			<string>$$com.sysprogs.stm8.mcudef$$</string>
 		</PreprocessorMacros>
 	</CompilationFlags>
+	<AdditionalSystemVars>
+		<SysVarEntry>
+			<Key>com.sysprogs.stm8.gpio_toggle_func</Key>
+			<Value>GPIO_WriteReverse</Value>
+		</SysVarEntry>
+		<SysVarEntry>
+			<Key>com.sysprogs.stm8.gpio_fast_output_mode</Key>
+			<Value>GPIO_MODE_OUT_PP_LOW_FAST</Value>
+		</SysVarEntry>
+		<SysVarEntry>
+			<Key>com.sysprogs.stm8.gpio_pin_prefix</Key>
+			<Value>GPIO_PIN</Value>
+		</SysVarEntry>
+	</AdditionalSystemVars>
 	<Subfamilies>			
 		<MCUClassifier>
 			<VariableName>com.sysprogs.stm8.mcudef</VariableName>

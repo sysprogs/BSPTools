@@ -7,6 +7,20 @@
 			<string>.</string>
 		</IncludeDirectories>
 	</CompilationFlags>
+	<AdditionalSystemVars>
+		<SysVarEntry>
+			<Key>com.sysprogs.stm8.gpio_toggle_func</Key>
+			<Value>GPIO_ToggleBits</Value>
+		</SysVarEntry>
+		<SysVarEntry>
+			<Key>com.sysprogs.stm8.gpio_fast_output_mode</Key>
+			<Value>GPIO_Mode_Out_PP_Low_Fast</Value>
+		</SysVarEntry>
+		<SysVarEntry>
+			<Key>com.sysprogs.stm8.gpio_pin_prefix</Key>
+			<Value>GPIO_Pin</Value>
+		</SysVarEntry>
+	</AdditionalSystemVars>
 	
 	<AdditionalFrameworks>
 		<Framework>
