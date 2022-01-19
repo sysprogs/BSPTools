@@ -257,7 +257,18 @@ namespace stm8_bsp_generator
                 throw new Exception("Unexpected SDK conf file: " + cfgFile);
             sdkName = sdkName.Substring(0, sdkName.Length - 5);
 
-            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.stm8.sdk_name", Value = sdkName } }).ToArray();
+            var vectorFiles = Directory.GetFiles(Path.GetDirectoryName(LocateExamplesDirectory()), "*_interrupt_vector.c", SearchOption.AllDirectories);
+            if (vectorFiles.Length != 1)
+                throw new Exception("Failed to locate the vector file");
+
+            var targetVectorFile = Path.Combine(configDir, sdkName + "_vectors.c");
+            File.Copy(vectorFiles[0], targetVectorFile);
+            File.SetAttributes(targetVectorFile, File.GetAttributes(targetVectorFile) & ~FileAttributes.ReadOnly);
+
+            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[]
+            {
+                new SysVarEntry { Key = "com.sysprogs.stm8.sdk_name", Value = sdkName }
+            }).ToArray();
 
             return result;
         }
@@ -289,7 +300,7 @@ namespace stm8_bsp_generator
                     {
                         new CopiedFile
                         {
-                            SourcePath = "$$SYS:BSP_ROOT$$/Devices/$$com.sysprogs.stm8.devpath$$_vectors.c"
+                            SourcePath = "$$SYS:BSP_ROOT$$/Devices/$$com.sysprogs.stm8.sdk_name$$_vectors.c"
                         }
                     }
                 };
