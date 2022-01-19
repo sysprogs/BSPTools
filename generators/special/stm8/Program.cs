@@ -4,9 +4,11 @@ using BSPGenerationTools.Parsing;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 namespace stm8_bsp_generator
 {
@@ -66,6 +68,50 @@ namespace stm8_bsp_generator
 
                 }
             }
+        }
+
+        public void GenerateOpenOCDScripts(List<STM8FLASHLayout> layouts)
+        {
+            List<TargetDeviceFamily> families = new List<TargetDeviceFamily>();
+            var scriptDir = Path.Combine(Directories.OutputDir, @".bspgen\openocd\share\openocd\scripts\target");
+            var quickSetupDir = Path.Combine(Directories.OutputDir, @".bspgen\openocd\QuickSetup");
+
+            Directory.CreateDirectory(scriptDir);
+            Directory.CreateDirectory(quickSetupDir);
+
+            foreach(var l in layouts)
+            {
+                var scriptName = l.Name.ToLower() + ".cfg";
+
+                using (var sw = new StreamWriter(Path.Combine(scriptDir, scriptName)))
+                {
+                    sw.WriteLine($"set FLASHEND 0x{l.FLASHEnd:x4}");
+                    sw.WriteLine($"set BLOCKSIZE 0x{l.BlockSize:x2}");
+
+                    if (l.EEPROMEnd != 0 && l.EEPROMStart != 0)
+                    {
+                        sw.WriteLine($"set EEPROMSTART 0x{l.EEPROMStart:x4}");
+                        sw.WriteLine($"set EEPROMEND 0x{l.EEPROMEnd:x4}");
+                    }
+
+                    if (l.OptionEnd != 0)
+                        sw.WriteLine($"set OPTIONEND 0x{l.OptionEnd:x4}");
+
+                    sw.WriteLine();
+                    sw.WriteLine($"source [find target/{l.BaseScript}]");
+                }
+
+                families.Add(new TargetDeviceFamily
+                {
+                    ID = l.Name.ToUpper(),
+                    Name = l.Name,
+                    MatchRegex = l.DeviceRegex,
+                    BspID = "com.sysprogs.stm8",
+                    ScriptFile = "target/" + scriptName
+                });
+            }
+
+            XmlTools.SaveObject(families.ToArray(), Path.Combine(quickSetupDir, "devices.xml"));
         }
     }
 
@@ -130,8 +176,8 @@ namespace stm8_bsp_generator
 
             result.CompilationFlags.COMMONFLAGS = string.Join(" ", Definition.Options);
             result.CompilationFlags.PreprocessorMacros = result.CompilationFlags.PreprocessorMacros.Concat(new[] { "$$com.sysprogs.stm8.stp_crts$$" }).ToArray();
-            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] 
-            { 
+            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[]
+            {
                 new SysVarEntry { Key = "com.sysprogs.stm8.devpath", Value = MakeRelativePath("") },
             }).ToArray();
 
@@ -171,7 +217,7 @@ namespace stm8_bsp_generator
         {
         }
 
-        public string LocateDefaultConfigFile()
+        string LocateExamplesDirectory()
         {
             var driverDir = BSP.ExpandVariables(Definition.AdditionalFrameworks[0].CopyJobs[0].SourceFolder);
 
@@ -179,7 +225,13 @@ namespace stm8_bsp_generator
             if (!Directory.Exists(dir))
                 dir = Path.Combine(driverDir, @"..\..\Projects");
             dir = Directory.GetDirectories(dir, "*_Examples")[0];
-            dir = Path.GetFullPath(Path.Combine(dir, "GPIO"));
+            return Path.GetFullPath(dir);
+        }
+
+        public string LocateDefaultConfigFile()
+        {
+            var dir = LocateExamplesDirectory();
+            dir = Path.Combine(dir, "GPIO");
 
             var dirs = Directory.GetDirectories(dir);
             if (dirs.Length == 1)
@@ -205,10 +257,150 @@ namespace stm8_bsp_generator
                 throw new Exception("Unexpected SDK conf file: " + cfgFile);
             sdkName = sdkName.Substring(0, sdkName.Length - 5);
 
-            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new  SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.stm8.sdk_name", Value = sdkName } }).ToArray();
+            result.AdditionalSystemVars = (result.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = "com.sysprogs.stm8.sdk_name", Value = sdkName } }).ToArray();
 
             return result;
         }
+
+        public const string VendorSampleSubdir = "VendorSamples";
+
+        public void CopyVendorSamples(List<VendorSample> vendorSamples)
+        {
+            var srcDir = LocateExamplesDirectory();
+            var targetDir = Path.GetFullPath(Path.Combine(BSP.Directories.OutputDir, VendorSampleSubdir, Definition.Name));
+            Directory.CreateDirectory(targetDir);
+            PathTools.CopyDirectoryRecursive(srcDir, targetDir);
+
+            foreach (var readmeFile in Directory.GetFiles(targetDir, "readme.txt", SearchOption.AllDirectories))
+            {
+                var dir = Path.GetDirectoryName(readmeFile);
+                var relPath = Definition.Name + "\\" + dir.Substring(targetDir.Length + 1);
+
+                var vs = new VendorSample
+                {
+                    InternalUniqueID = relPath.Replace('\\', '-'),
+                    UserFriendlyName = Path.GetFileName(relPath),
+                    Path = "$$SYS:VSAMPLE_DIR$$/" + relPath.Replace('\\', '/'),
+                    DeviceID = Definition.DeviceRegex,
+                    VirtualPath = relPath,
+                    NoImplicitCopy = false,
+                    BSPReferencesAreCopyable = false,
+                    ExtraFiles = new[]
+                    {
+                        new CopiedFile
+                        {
+                            SourcePath = "$$SYS:BSP_ROOT$$/Devices/$$com.sysprogs.stm8.devpath$$_vectors.c"
+                        }
+                    }
+                };
+
+                vendorSamples.Add(vs);
+            }
+        }
+
+        public void ParseFLASHLayouts(List<STM8FLASHLayout> layouts)
+        {
+            var driverDir = BSP.ExpandVariables(Definition.AdditionalFrameworks[0].CopyJobs[0].SourceFolder);
+            var flashFile = Directory.GetFiles(driverDir, "*_flash.h", SearchOption.AllDirectories)[0];
+
+            Regex rgDefine = new Regex("[ \t]*#define[ \t]+([^ \t]+)[ \t]+\\(\\(uint[0-9]+_t\\)(0x[0-9a-fA-F]+|[0-9]+)\\)");
+            Regex rgCondition = new Regex("defined *\\((STM8[^\\)]+)\\)");
+            var lines = File.ReadAllLines(flashFile);
+
+            Dictionary<string, uint> unconditionals = new Dictionary<string, uint>();
+            Dictionary<string, uint> currentDict = unconditionals;
+            var macrosByCondition = new Dictionary<string, Dictionary<string, uint>>();
+
+            foreach (var line in lines)
+            {
+                if (line.Contains("Exported types"))
+                    break;
+                if (line.StartsWith("#if defined") || line.StartsWith("#elif defined"))
+                {
+                    currentDict = new Dictionary<string, uint>();
+                    foreach (var cond in rgCondition.Matches(line).OfType<Match>().Select(m => m.Groups[1].Value))
+                        macrosByCondition[cond] = currentDict;
+                }
+                else if (line.StartsWith("#endif"))
+                    currentDict = unconditionals;
+                else
+                {
+                    var m = rgDefine.Match(line);
+                    if (m.Success)
+                    {
+                        var macro = m.Groups[1].Value;
+                        uint value = (uint)HeaderFileParser.ParseMaybeHex(m.Groups[2].Value);
+                        currentDict[macro] = value;
+                    }
+                }
+            }
+
+            if (Definition.Subfamilies == null)
+            {
+                AddFLASHLayout(layouts, unconditionals, Definition.DeviceRegex, unconditionals, Definition.Name);
+            }
+            else
+            {
+                foreach (var rule in Definition.Subfamilies[0].GetExpandedRules())
+                {
+                    AddFLASHLayout(layouts, macrosByCondition[rule.Value], rule.Key.ToString(), unconditionals, rule.Value);
+                }
+            }
+
+        }
+
+
+        private void AddFLASHLayout(List<STM8FLASHLayout> layouts, Dictionary<string, uint> dict, string regex, Dictionary<string, uint> uncond, string name)
+        {
+            uint end;
+            if (!dict.TryGetValue("FLASH_PROG_END_PHYSICAL_ADDRESS", out end) && !dict.TryGetValue("FLASH_PROGRAM_END_PHYSICAL_ADDRESS", out end) && !dict.TryGetValue("FLASH_END_PHYSICAL_ADDRESS", out end))
+                throw new Exception("Unknown end of FLASH");
+
+            string baseScript = Definition.Name.StartsWith("STM8S") ? "stm8s.cfg" : "stm8l.cfg";
+
+            var layout = new STM8FLASHLayout(name, regex, baseScript) { FLASHEnd = end, BlockSize = dict["FLASH_BLOCK_SIZE"] };
+
+            if (!dict.TryGetValue("FLASH_DATA_EEPROM_END_PHYSICAL_ADDRESS", out layout.EEPROMEnd) && 
+                !dict.TryGetValue("FLASH_DATA_END_PHYSICAL_ADDRESS", out layout.EEPROMEnd))
+            {
+                //This device has no EEPROM
+            }
+
+            if (!dict.TryGetValue("FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS", out layout.EEPROMStart) && 
+                !dict.TryGetValue("FLASH_DATA_START_PHYSICAL_ADDRESS", out layout.EEPROMStart))
+            {
+                //This device has no EEPROM
+            }
+
+            if (!uncond.TryGetValue("OPTION_BYTES_END_PHYSICAL_ADDRESS", out layout.OptionEnd) && 
+                !uncond.TryGetValue("OPTION_BYTE_END_PHYSICAL_ADDRESS", out layout.OptionEnd) && 
+                !uncond.TryGetValue("FLASH_OPTION_BYTES_END_PHYSICAL_ADDRESS", out layout.OptionEnd))
+            {
+
+            }
+
+            layouts.Add(layout);
+        }
+    }
+
+    public class TargetDeviceFamily
+    {
+        public string ID, Name, MatchRegex, BspID, ScriptFile;
+    }
+
+    class STM8FLASHLayout
+    {
+        public uint FLASHEnd, EEPROMStart, EEPROMEnd, OptionEnd, BlockSize;
+        public readonly string Name, DeviceRegex, BaseScript;
+
+        public STM8FLASHLayout(string name, string regex, string baseScript)
+        {
+            Name = name;
+            DeviceRegex = regex;
+            BaseScript = baseScript;
+        }
+
+        public override string ToString() => DeviceRegex;
     }
 
     class Program
@@ -227,12 +419,19 @@ namespace stm8_bsp_generator
                 var devices = CXSTM8DefinitionParser.ParseMCUs(CXSTM8Dir).Select(dev => new STM8MCUBuilder(dev)).ToArray();
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+                List<VendorSample> vendorSamples = new List<VendorSample>();
+                List<STM8FLASHLayout> layouts = new List<STM8FLASHLayout>();
 
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir, "*.xml"))
                 {
-                    MCUFamilyBuilder famBuilder = new STM8FamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn));
+                    var famBuilder = new STM8FamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(fn));
                     allFamilies.Add(famBuilder);
+                    famBuilder.CopyVendorSamples(vendorSamples);
+
+                    famBuilder.ParseFLASHLayouts(layouts);
                 }
+
+                bspBuilder.GenerateOpenOCDScripts(layouts);
 
                 List<MCUFamily> familyDefinitions = new List<MCUFamily>();
                 List<MCU> mcuDefinitions = new List<MCU>();
@@ -271,10 +470,18 @@ namespace stm8_bsp_generator
                     MCUFamilies = familyDefinitions.ToArray(),
                     SupportedMCUs = mcuDefinitions.ToArray(),
                     Frameworks = frameworks.ToArray(),
-                    Examples = Directory.GetDirectories(sampleDir).Select(s => @"Samples\" + s).ToArray(),
+                    Examples = Directory.GetDirectories(sampleDir).Select(s => @"Samples\" + Path.GetFileName(s)).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
+                    VendorSampleDirectoryPath = STM8FamilyBuilder.VendorSampleSubdir,
+                    VendorSampleCatalogName = "STM8 SDK Samples",
                     PackageVersion = "2022.01",
                 };
+
+
+                XmlSerializer ser = new XmlSerializer(typeof(VendorSampleDirectory));
+                using (var fs = File.Create(Path.Combine(bspBuilder.Directories.OutputDir, STM8FamilyBuilder.VendorSampleSubdir, "VendorSamples.xml.gz")))
+                using (var gs = new GZipStream(fs, CompressionMode.Compress, true))
+                    ser.Serialize(gs, new VendorSampleDirectory { Samples = vendorSamples.ToArray() });
 
                 bspBuilder.ValidateBSP(bsp);
                 bspBuilder.Save(bsp, !generateLinkerScripts, false);

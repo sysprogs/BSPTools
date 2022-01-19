@@ -3,6 +3,9 @@
 	<Name>STM8L15</Name>
 	<DeviceRegex>STM8(AL|L15|L05).*</DeviceRegex>
 	<CompilationFlags>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.stm8.mcudef$$</string>
 		</PreprocessorMacros>
@@ -61,11 +64,6 @@
 			</Options>
 		</MCUClassifier>
 	</Subfamilies>			
-	<CompilationFlags>
-		<IncludeDirectories>
-			<string>.</string>
-		</IncludeDirectories>
-	</CompilationFlags>
 	
 	<AdditionalFrameworks>
 		<Framework>

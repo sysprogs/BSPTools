@@ -6,6 +6,9 @@
 		<PreprocessorMacros>
 			<string>$$com.sysprogs.stm8.mcudef$$</string>
 		</PreprocessorMacros>
+		<IncludeDirectories>
+			<string>.</string>
+		</IncludeDirectories>
 	</CompilationFlags>
 	<AdditionalSystemVars>
 		<SysVarEntry>
@@ -38,11 +41,6 @@
 			</Options>
 		</MCUClassifier>
 	</Subfamilies>			
-	<CompilationFlags>
-		<IncludeDirectories>
-			<string>.</string>
-		</IncludeDirectories>
-	</CompilationFlags>
 	
 	<AdditionalFrameworks>
 		<Framework>

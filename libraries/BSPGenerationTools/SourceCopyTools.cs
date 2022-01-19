@@ -950,6 +950,12 @@ namespace BSPGenerationTools
 
         List<KeyValuePair<Regex, string>> _Cache;
 
+        public IEnumerable<KeyValuePair<Regex, string>> GetExpandedRules()
+        {
+            TryMatchMCUName("");
+            return _Cache;
+        }
+
         public string TryMatchMCUName(string name)
         {
             if (_Cache == null)
