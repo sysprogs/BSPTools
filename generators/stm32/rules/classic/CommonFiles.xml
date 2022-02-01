@@ -16,7 +16,7 @@
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
-					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/$$com.sysprogs.bspoptions.stm32.freertos.cmsis$$;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/Portable/gcc/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/$$com.sysprogs.bspoptions.stm32.freertos.cmsis$$;$$SYS:BSP_ROOT$$/FreeRTOS/Source/include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/portable/GCC/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
 					<Patches>
 						<Patch xsi:type="ReplaceLine">
 							<FilePath>Source\portable\GCC\ARM_CM4F\port.c</FilePath>
