@@ -25,6 +25,7 @@ namespace BSPGenerationTools
         Invalid,
         M0,
         M0Plus,
+        M23,
         M3,
         M33,
         M4,
@@ -915,6 +916,8 @@ namespace BSPGenerationTools
                 mcuObj.CompilationFlags.COMMONFLAGS += " " + flag;
         }
 
+        public const string ARMCoreVariableName = "com.sysprogs.bspoptions.arm.core";
+
         internal static void AddCoreSpecificFlags(CoreSpecificFlags flagsToDefine, MCUFamily family, CortexCore core, FPUType? fpuType)
         {
             string coreName = null, freertosPort = null, threadxPort = null;
@@ -931,6 +934,12 @@ namespace BSPGenerationTools
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM0PLUS" };
                     freertosPort = "ARM_CM0";
                     coreName = "M0";
+                    break;
+                case CortexCore.M23:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m23 -mthumb";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM23" };
+                    coreName = "M23";
+                    freertosPort = "ARM_CM23";
                     break;
                 case CortexCore.M3:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m3 -mthumb";
@@ -1059,7 +1068,7 @@ namespace BSPGenerationTools
             List<SysVarEntry> vars = new List<SysVarEntry>();
 
             if (coreName != null)
-                vars.Add(new SysVarEntry { Key = "com.sysprogs.bspoptions.arm.core", Value = coreName });
+                vars.Add(new SysVarEntry { Key = ARMCoreVariableName, Value = coreName });
             if (freertosPort != null)
                 vars.Add(new SysVarEntry { Key = "com.sysprogs.freertos.default_port", Value = freertosPort });
 

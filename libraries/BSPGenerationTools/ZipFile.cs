@@ -8,7 +8,7 @@ namespace BSPGenerationTools
 {
     public class ZipFile
     {
-        readonly Stream _Stream;
+        protected readonly Stream _Stream;
 
         public struct Entry
         {
@@ -158,5 +158,29 @@ namespace BSPGenerationTools
                 dataStream.Dispose();
         }
 
+
+        public byte[] ExtractEntry(Entry entry)
+        {
+            using (var ms = new MemoryStream())
+            {
+                ExtractEntry(entry, ms);
+                return ms.ToArray();
+            }
+        }
+        public static DisposableZipFile Open(string fn) => new DisposableZipFile(fn);
+    }
+
+
+    public class DisposableZipFile : ZipFile, IDisposable
+    {
+        public DisposableZipFile(string fn)
+            : base(new FileStream(fn, FileMode.Open, FileAccess.Read))
+        {
+        }
+
+        public void Dispose()
+        {
+            _Stream.Dispose();
+        }
     }
 }
