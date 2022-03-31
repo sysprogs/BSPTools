@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -101,7 +102,7 @@ namespace renesas_ra_bsp_generator
             {
                 private PackDescriptionReader _Reader;
                 private XmlElement _Element;
-                public string FrameworkID => $"com.renesas.arm.{Vendor}.{Class}.{Subgroup}";
+                public string FrameworkID => $"com.renesas.arm.{Vendor}.{Class}.{Subgroup}".Replace(' ', '_');
 
                 public readonly string Vendor, Class, Group, Subgroup;
 
@@ -117,6 +118,17 @@ namespace renesas_ra_bsp_generator
                 }
 
                 public string Description => _Element.SelectSingleNode("description")?.InnerXml;
+                public string MCUVariant
+                {
+                    get
+                    {
+                        var v = _Element.GetAttribute("Cvariant");
+                        if (v == "")
+                            v = null;
+
+                        return v;
+                    }
+                }
 
                 public struct PathAndType
                 {
@@ -222,13 +234,26 @@ namespace renesas_ra_bsp_generator
             public struct PackFileSummary
             {
                 public string Version;
-                internal string LinkerScript;
+                public string LinkerScript;
             }
 
-            public PackFileSummary TranslateComponents(string packFile, List<EmbeddedFramework> frameworkList, string subdir)
+            public enum ComponentType
+            {
+                Common,
+                Board,
+                MCU,
+                CMSIS,
+            }
+
+
+            public PackFileSummary TranslateComponents(string packFile, List<EmbeddedFramework> frameworkList, string subdir, ComponentType type)
             {
                 PackFileSummary summary = new PackFileSummary();
                 Console.WriteLine($"Translating {packFile}...");
+
+                PackDescriptionReader.Component.PathAndType[] deviceSpecificFiles = null;
+
+                const string BSPComponentPrefix = "Board support package for ";
 
                 using (var zf = ZipFile.Open(packFile))
                 {
@@ -236,10 +261,41 @@ namespace renesas_ra_bsp_generator
 
                     summary.Version = rdr.ReleaseVersion;
 
+                    var fspDataPaths = rdr.Components.FirstOrDefault(IsFSPDataComponent)?.TranslateAndCopy(Directories.OutputDir, subdir, this);
+
                     foreach (var comp in rdr.Components)
                     {
                         var translatedPaths = comp.TranslateAndCopy(Directories.OutputDir, subdir, this);
                         var description = comp.Description;
+
+                        if (comp.MCUVariant != null)
+                        {
+                            //As of 3.3.0, all MCU-specific components are always the same and can be folder into the family-specific component.
+                            if (type != ComponentType.MCU || !description.StartsWith(BSPComponentPrefix))
+                                throw new Exception("MCU-specific component folding only supported for BSP components");
+
+                            if (deviceSpecificFiles == null)
+                                deviceSpecificFiles = translatedPaths.ToArray();
+                            else if (!Enumerable.SequenceEqual(deviceSpecificFiles, translatedPaths))
+                                throw new Exception("BSP components for different devices have different file lists. They should be translated to conditions or variable references.");
+
+                            continue;
+                        }
+
+                        if (comp.MCUVariant == null && description.StartsWith(BSPComponentPrefix))
+                        {
+                            if (deviceSpecificFiles == null)
+                                throw new Exception("MCU-specific component was not parsed at the time of parsing the family-specific one");
+
+                            if (fspDataPaths == null)
+                                throw new Exception("FSP data component was not parsed at the time of parsing the family-specific one");
+
+                            //Just merge the MCU-specific files (that should be the same) into the family-specific file list
+                            translatedPaths.AddRange(deviceSpecificFiles);
+                        }
+
+                        if (IsFSPDataComponent(comp))
+                            continue;
 
                         if (description == "Renesas Bluetooth Low Energy Library")
                         {
@@ -262,6 +318,13 @@ namespace renesas_ra_bsp_generator
                             AdditionalLibraries = translatedPaths.Where(p => p.Type == "library").Select(p => p.Path).ToArray(),
                         };
 
+                        if (FamilyPrefixes.TryGetValue(comp.Group, out var prefix))
+                        {
+                            fw.MCUFilterRegex = prefix + ".*";
+                            fw.ClassID = fw.ID;
+                            fw.ID += "." + comp.Group;
+                        }
+
                         var linkerScript = translatedPaths.Where(p => p.Type == "linkerScript").SingleOrDefault(p => p.Type == "linkerScript").Path;
                         if (comp.Subgroup == "fsp_common")
                         {
@@ -277,6 +340,50 @@ namespace renesas_ra_bsp_generator
 
                 return summary;
             }
+
+            static bool IsFSPDataComponent(PackDescriptionReader.Component component)
+            {
+                return component.Description.EndsWith("- FSP Data");
+            }
+
+            static int CountMatchingCharacters(string left, string right)
+            {
+                int i;
+                for (i = 0; i < Math.Min(left.Length, right.Length); i++)
+                    if (left[i] != right[i])
+                        return i;
+                return i;
+            }
+
+            Dictionary<string, string> FamilyPrefixes = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
+            public void ComputeFamilyRegexes(RenesasDeviceDatabase.ParsedDevice[] devs)
+            {
+                foreach (var fam in devs.GroupBy(d => d.FamilyName))
+                {
+                    string prefix = null;
+                    foreach(var dev in fam)
+                    {
+                        if (prefix == null)
+                            prefix = dev.FinalMCUName;
+                        else
+                            prefix = prefix.Substring(0, CountMatchingCharacters(prefix, dev.FinalMCUName));
+                    }
+
+                    FamilyPrefixes[fam.Key] = prefix;
+                }
+
+                foreach(var dev in devs)
+                {
+                    foreach(var kv in FamilyPrefixes)
+                    {
+                        bool prefixMatch = dev.FinalMCUName.StartsWith(kv.Value);
+                        bool isThisFamily = dev.FamilyName == kv.Key;
+                        if (prefixMatch != isThisFamily)
+                            throw new Exception("Computed family prefixes are either to narrow, or too broad");
+                    }
+                }
+            }
         }
 
         static void Main(string[] args)
@@ -288,9 +395,29 @@ namespace renesas_ra_bsp_generator
             {
                 var devs = RenesasDeviceDatabase.DiscoverDevices(bspGen.Directories.InputDir);
 
+                bspGen.ComputeFamilyRegexes(devs);
+
                 List<MCUFamily> familyDefinitions = new List<MCUFamily>();
                 List<MCU> mcuDefinitions = new List<MCU>();
                 List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+
+                var mainPackFile = Directory.GetFiles(bspGen.Directories.InputDir, "Renesas.RA.*.pack").Single();
+                var summary = bspGen.TranslateComponents(mainPackFile, frameworks, "core", RenesasBSPBuilder.ComponentType.Common);
+
+                foreach (var fn in Directory.GetFiles(bspGen.Directories.InputDir, "*.pack"))
+                {
+                    Regex rgMCU = new Regex("Renesas.RA_mcu_([^.]+)\\.", RegexOptions.IgnoreCase);
+                    Regex rgBoard = new Regex("Renesas.RA_board_([^.]+)\\.", RegexOptions.IgnoreCase);
+                    Match m;
+
+                    var nameOnly = Path.GetFileName(fn);
+                    if ((m = rgMCU.Match(nameOnly)).Success)
+                        bspGen.TranslateComponents(fn, frameworks, "mcu/" + m.Groups[1], RenesasBSPBuilder.ComponentType.MCU);
+                    else if ((m = rgBoard.Match(nameOnly)).Success)
+                        bspGen.TranslateComponents(fn, frameworks, "board/" + m.Groups[1], RenesasBSPBuilder.ComponentType.MCU);
+                    else if (nameOnly.StartsWith("Arm.CMSIS", StringComparison.InvariantCultureIgnoreCase))
+                        bspGen.TranslateComponents(fn, frameworks, "cmsis", RenesasBSPBuilder.ComponentType.CMSIS);
+                }
 
                 foreach (var fam in devs.GroupBy(d => d.FamilyName))
                 {
@@ -299,11 +426,13 @@ namespace renesas_ra_bsp_generator
                         Name = fam.Key,
                         CompilationFlags = new ToolFlags
                         {
-                            PreprocessorMacros = new[] 
+                            PreprocessorMacros = new[]
                             {
                                 "_RENESAS_RA_",
                                 "_RA_CORE=C$$com.sysprogs.bspoptions.arm.core$$",
-                            }
+                            },
+
+                            LinkerScript = summary.LinkerScript,
                         }
                     });
 
@@ -312,7 +441,7 @@ namespace renesas_ra_bsp_generator
                         famBuilder.MCUs.Add(new MCUBuilder { Name = mcu.Name, Core = mcu.Core });
                         mcuDefinitions.Add(new MCU
                         {
-                            ID = mcu.Name,
+                            ID = mcu.FinalMCUName,
                             FamilyID = fam.Key,
                             HierarchicalPath = $@"Renesas\ARM\{fam.Key}",
                             RAMSize = (int)mcu.MemoryMap.First(m => m.Type == "InternalRam").Size,
@@ -330,8 +459,6 @@ namespace renesas_ra_bsp_generator
                     familyDefinitions.Add(famObj);
                 }
 
-                var mainPackFile = Directory.GetFiles(bspGen.Directories.InputDir, "Renesas.RA.*.pack").Single();
-                var summary = bspGen.TranslateComponents(mainPackFile, frameworks, "core");
 
                 Console.WriteLine("Building BSP archive...");
 

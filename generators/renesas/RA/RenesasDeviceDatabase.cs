@@ -21,6 +21,8 @@ namespace renesas_ra_bsp_generator
             public MemoryArea[] MemoryMap;
 
             public override string ToString() => Name;
+
+            public string FinalMCUName => Name;
         }
 
         public static CortexCore ParseCortexCore(string core)
