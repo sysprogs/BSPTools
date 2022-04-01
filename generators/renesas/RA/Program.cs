@@ -13,6 +13,26 @@ namespace renesas_ra_bsp_generator
 {
     class Program
     {
+        public struct ComponentID
+        {
+            public readonly string Vendor, Class, Group, Subgroup;
+            
+            public readonly string Variant;
+
+            public string FrameworkID => $"com.renesas.arm.{Vendor}.{Class}.{Subgroup}".Replace(' ', '_');
+
+            public ComponentID(XmlElement el)
+            {
+                Vendor = el.GetAttribute("Cvendor");
+                Class = el.GetAttribute("Cclass");
+                Group = el.GetAttribute("Cgroup");
+                Subgroup = el.GetAttribute("Csub");
+                Variant = el.GetAttribute("Cvariant");
+            }
+
+            public override string ToString() => $"{Vendor}.{Class}.{Group}.{Subgroup}";
+        }
+
         class PackDescriptionReader
         {
             private ZipFile _ZipFile;
@@ -102,19 +122,14 @@ namespace renesas_ra_bsp_generator
             {
                 private PackDescriptionReader _Reader;
                 private XmlElement _Element;
-                public string FrameworkID => $"com.renesas.arm.{Vendor}.{Class}.{Subgroup}".Replace(' ', '_');
 
-                public readonly string Vendor, Class, Group, Subgroup;
-
+                public readonly ComponentID ID;
                 public Component(PackDescriptionReader packDescriptionReader, XmlElement c)
                 {
                     _Reader = packDescriptionReader;
                     _Element = c;
 
-                    Vendor = _Element.GetAttribute("Cvendor");
-                    Class = _Element.GetAttribute("Cclass");
-                    Group = _Element.GetAttribute("Cgroup");
-                    Subgroup = _Element.GetAttribute("Csub");
+                    ID = new ComponentID(_Element);
                 }
 
                 public string Description => _Element.SelectSingleNode("description")?.InnerXml;
@@ -138,9 +153,10 @@ namespace renesas_ra_bsp_generator
                     public override string ToString() => $"[{Type}] {Path}";
                 }
 
-                public List<PathAndType> TranslateAndCopy(string baseOutputDir, string subdir, BSPBuilder bspGen)
+                public List<PathAndType> TranslateAndCopy(string baseOutputDir, BSPBuilder bspGen)
                 {
-                    var outputDir = Path.Combine(baseOutputDir, subdir);
+                    //var outputDir = Path.Combine(baseOutputDir, subdir);
+                    var outputDir = baseOutputDir;
                     Directory.CreateDirectory(outputDir);
 
                     List<PathAndType> translatedPaths = new List<PathAndType>();
@@ -161,7 +177,7 @@ namespace renesas_ra_bsp_generator
                                 continue;   //Unconditionally skip
                         }
 
-                        string mappedPath = $"$$SYS:BSP_ROOT$$/{subdir}/{name}".TrimEnd('/');
+                        string mappedPath = $"$$SYS:BSP_ROOT$$/{name}".TrimEnd('/');
                         if (ShouldRenameFile(name, out var newName))
                         {
                             int idx = mappedPath.LastIndexOf('/');
@@ -200,8 +216,11 @@ namespace renesas_ra_bsp_generator
                             }
 
                             Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-                            using (var fs = File.Create(targetPath))
-                                _Reader._ZipFile.ExtractEntry(e, fs);
+                            var data = _Reader._ZipFile.ExtractEntry(e);
+                            if (!File.Exists(targetPath))
+                                File.WriteAllBytes(targetPath, data);
+                            else if (!Enumerable.SequenceEqual(File.ReadAllBytes(targetPath), data))
+                                throw new Exception("Conflicting contents for " + targetPath);
                         }
                     }
 
@@ -245,13 +264,15 @@ namespace renesas_ra_bsp_generator
                 CMSIS,
             }
 
+            HashSet<string> _BoardFrameworks = new HashSet<string>();
 
-            public PackFileSummary TranslateComponents(string packFile, List<EmbeddedFramework> frameworkList, string subdir, ComponentType type)
+            public PackFileSummary TranslateComponents(string packFile, List<EmbeddedFramework> frameworkList, ComponentType type)
             {
                 PackFileSummary summary = new PackFileSummary();
                 Console.WriteLine($"Translating {packFile}...");
 
                 PackDescriptionReader.Component.PathAndType[] deviceSpecificFiles = null;
+                HashSet<ComponentID> usedIDs = new HashSet<ComponentID>();
 
                 const string BSPComponentPrefix = "Board support package for ";
 
@@ -261,11 +282,19 @@ namespace renesas_ra_bsp_generator
 
                     summary.Version = rdr.ReleaseVersion;
 
-                    var fspDataPaths = rdr.Components.FirstOrDefault(IsFSPDataComponent)?.TranslateAndCopy(Directories.OutputDir, subdir, this);
+                    var fspDataPaths = rdr.Components.FirstOrDefault(IsFSPDataComponent)?.TranslateAndCopy(Directories.OutputDir, this);
 
                     foreach (var comp in rdr.Components)
                     {
-                        var translatedPaths = comp.TranslateAndCopy(Directories.OutputDir, subdir, this);
+                        if (usedIDs.Contains(comp.ID))
+                        {
+                            Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Duplicate component in " + Path.GetFileName(packFile), comp.ID.ToString(), false);
+                            continue;
+                        }
+
+                        usedIDs.Add(comp.ID);
+
+                        var translatedPaths = comp.TranslateAndCopy(Directories.OutputDir, this);
                         var description = comp.Description;
 
                         if (comp.MCUVariant != null)
@@ -301,32 +330,52 @@ namespace renesas_ra_bsp_generator
                         {
                             //As of v3.3.0, multiple BLE components have the same description, causing conflicts in folder names.
                             //We fix it manually by renaming them based in the subgroup ID.
-                            if (!comp.Subgroup.StartsWith("r_ble_"))
+                            if (!comp.ID.Subgroup.StartsWith("r_ble_"))
                                 throw new Exception("Unexpected subgroup for a BLE component");
 
-                            description = "Renesas BLE - " + char.ToUpper(comp.Subgroup[6]) + comp.Subgroup.Substring(7);
+                            description = "Renesas BLE - " + char.ToUpper(comp.ID.Subgroup[6]) + comp.ID.Subgroup.Substring(7);
                         }
 
                         EmbeddedFramework fw = new EmbeddedFramework
                         {
-                            ID = comp.FrameworkID,
+                            ID = comp.ID.FrameworkID,
                             ProjectFolderName = description,
                             UserFriendlyName = description,
-                            AdditionalSourceFiles = translatedPaths.Where(p => p.Type == "source").Select(p => p.Path).ToArray(),
-                            AdditionalHeaderFiles = translatedPaths.Where(p => p.Type == "header").Select(p => p.Path).ToArray(),
-                            AdditionalIncludeDirs = translatedPaths.Where(p => p.Type == "include").Select(p => p.Path).ToArray(),
-                            AdditionalLibraries = translatedPaths.Where(p => p.Type == "library").Select(p => p.Path).ToArray(),
+                            AdditionalSourceFiles = translatedPaths.Where(p => p.Type == "source").Select(p => p.Path).Distinct().ToArray(),
+                            AdditionalHeaderFiles = translatedPaths.Where(p => p.Type == "header").Select(p => p.Path).Distinct().ToArray(),
+                            AdditionalIncludeDirs = translatedPaths.Where(p => p.Type == "include").Select(p => p.Path).Distinct().ToArray(),
+                            AdditionalLibraries = translatedPaths.Where(p => p.Type == "library").Select(p => p.Path).Distinct().ToArray(),
                         };
 
-                        if (FamilyPrefixes.TryGetValue(comp.Group, out var prefix))
+                        if (FamilyPrefixes.TryGetValue(comp.ID.Group, out var prefix))
                         {
                             fw.MCUFilterRegex = prefix + ".*";
                             fw.ClassID = fw.ID;
-                            fw.ID += "." + comp.Group;
+                            fw.ID += "." + comp.ID.Group;
+                        }
+                        else if (type == ComponentType.Board)
+                        {
+                            int idx = comp.ID.Subgroup.IndexOf('_');
+                            string family;
+                            if (comp.ID.Subgroup == "custom")
+                                family = comp.ID.Subgroup;
+                            else
+                            {
+                                family = comp.ID.Subgroup.Substring(0, idx);
+                                if (family == "ra6m3g")
+                                    prefix = FamilyPrefixes[family.TrimEnd('g')];
+                                else
+                                    prefix = FamilyPrefixes[family];
+
+                                fw.MCUFilterRegex = prefix + ".*";
+                            }
                         }
 
+                        if (type == ComponentType.Board)
+                            _BoardFrameworks.Add(fw.ID);
+
                         var linkerScript = translatedPaths.Where(p => p.Type == "linkerScript").SingleOrDefault(p => p.Type == "linkerScript").Path;
-                        if (comp.Subgroup == "fsp_common")
+                        if (comp.ID.Subgroup == "fsp_common")
                         {
                             summary.LinkerScript = linkerScript ?? throw new Exception("Missing linker script");
                             fw.DefaultEnabled = true;
@@ -362,7 +411,7 @@ namespace renesas_ra_bsp_generator
                 foreach (var fam in devs.GroupBy(d => d.FamilyName))
                 {
                     string prefix = null;
-                    foreach(var dev in fam)
+                    foreach (var dev in fam)
                     {
                         if (prefix == null)
                             prefix = dev.FinalMCUName;
@@ -373,14 +422,56 @@ namespace renesas_ra_bsp_generator
                     FamilyPrefixes[fam.Key] = prefix;
                 }
 
-                foreach(var dev in devs)
+                foreach (var dev in devs)
                 {
-                    foreach(var kv in FamilyPrefixes)
+                    foreach (var kv in FamilyPrefixes)
                     {
                         bool prefixMatch = dev.FinalMCUName.StartsWith(kv.Value);
                         bool isThisFamily = dev.FamilyName == kv.Key;
                         if (prefixMatch != isThisFamily)
                             throw new Exception("Computed family prefixes are either to narrow, or too broad");
+                    }
+                }
+            }
+
+            public void MakeBoardFrameworksMutuallyExclusive(List<EmbeddedFramework> frameworks)
+            {
+                foreach (var fw in frameworks)
+                {
+                    if (!_BoardFrameworks.Contains(fw.ID))
+                        continue;
+
+                    fw.IncompatibleFrameworks = _BoardFrameworks.Except(new[] { fw.ID }).ToArray();
+                }
+            }
+
+            public void MakeOverlappingFrameworksMutuallyExclusive(List<EmbeddedFramework> frameworks)
+            {
+                Dictionary<string, List<EmbeddedFramework>> frameworksByFile = new Dictionary<string, List<EmbeddedFramework>>();
+                foreach (var fw in frameworks)
+                {
+                    foreach (var src in fw.AdditionalSourceFiles)
+                    {
+                        if (!frameworksByFile.TryGetValue(src, out var lst))
+                            frameworksByFile[src] = lst = new List<EmbeddedFramework>();
+
+                        lst.Add(fw);
+                    }
+                }
+
+                foreach(var kv in frameworksByFile)
+                {
+                    if (kv.Value.Count > 1)
+                    {
+                        foreach (var fw in kv.Value)
+                        {
+                            var incompatibleFrameworks = kv.Value.Select(f2 => f2.ID).Except(new[] { fw.ID }).ToArray();
+
+                            if (fw.IncompatibleFrameworks != null && !Enumerable.SequenceEqual(incompatibleFrameworks, fw.IncompatibleFrameworks))
+                                throw new Exception($"{fw.UserFriendlyName} already has an incompatible framework list");
+
+                            fw.IncompatibleFrameworks = incompatibleFrameworks;
+                        }
                     }
                 }
             }
@@ -402,7 +493,7 @@ namespace renesas_ra_bsp_generator
                 List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
 
                 var mainPackFile = Directory.GetFiles(bspGen.Directories.InputDir, "Renesas.RA.*.pack").Single();
-                var summary = bspGen.TranslateComponents(mainPackFile, frameworks, "core", RenesasBSPBuilder.ComponentType.Common);
+                var summary = bspGen.TranslateComponents(mainPackFile, frameworks, RenesasBSPBuilder.ComponentType.Common);
 
                 foreach (var fn in Directory.GetFiles(bspGen.Directories.InputDir, "*.pack"))
                 {
@@ -412,12 +503,15 @@ namespace renesas_ra_bsp_generator
 
                     var nameOnly = Path.GetFileName(fn);
                     if ((m = rgMCU.Match(nameOnly)).Success)
-                        bspGen.TranslateComponents(fn, frameworks, "mcu/" + m.Groups[1], RenesasBSPBuilder.ComponentType.MCU);
+                        bspGen.TranslateComponents(fn, frameworks, RenesasBSPBuilder.ComponentType.MCU);
                     else if ((m = rgBoard.Match(nameOnly)).Success)
-                        bspGen.TranslateComponents(fn, frameworks, "board/" + m.Groups[1], RenesasBSPBuilder.ComponentType.MCU);
+                        bspGen.TranslateComponents(fn, frameworks, RenesasBSPBuilder.ComponentType.Board);
                     else if (nameOnly.StartsWith("Arm.CMSIS", StringComparison.InvariantCultureIgnoreCase))
-                        bspGen.TranslateComponents(fn, frameworks, "cmsis", RenesasBSPBuilder.ComponentType.CMSIS);
+                        bspGen.TranslateComponents(fn, frameworks, RenesasBSPBuilder.ComponentType.CMSIS);
                 }
+
+                bspGen.MakeBoardFrameworksMutuallyExclusive(frameworks);
+                bspGen.MakeOverlappingFrameworksMutuallyExclusive(frameworks);
 
                 foreach (var fam in devs.GroupBy(d => d.FamilyName))
                 {

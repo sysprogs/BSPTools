@@ -481,8 +481,14 @@ namespace BSPGenerationTools
             }
 
             Dictionary<string, string> usedFoldersToCompatibleIDs = new Dictionary<string, string>();
+            HashSet<string> usedIDs = new HashSet<string>();
             foreach (var fw in bsp.Frameworks ?? new EmbeddedFramework[0])
             {
+                if (usedIDs.Contains(fw.ID))
+                    Report.ReportMergeableError("Duplicate framework with ID", fw.ID);
+
+                usedIDs.Add(fw.ID);
+
                 var id = fw.ClassID ?? fw.ID;
                 if (usedFoldersToCompatibleIDs.TryGetValue(fw.ProjectFolderName, out var tmp) && tmp != id)
                 {
@@ -503,7 +509,7 @@ namespace BSPGenerationTools
 
             var allSources = bsp.MCUFamilies.SelectMany(f => TranslateFileList(f.AdditionalSourceFiles, f.ID))
                 .Concat(bsp.SupportedMCUs.SelectMany(m => TranslateFileList(m.AdditionalSourceFiles, m.ID)))
-                .Concat(bsp.Frameworks.SelectMany(fw => TranslateFileList(fw.AdditionalSourceFiles, fw.MCUFilterRegex?.ToString())))
+                .Concat(bsp.Frameworks.SelectMany(fw => TranslateFileList(fw.AdditionalSourceFiles, fw.MCUFilterRegex?.ToString(), fw)))
                 .Distinct();
 
             var sourcesByName = allSources.Where(s => s.File.EndsWith(".c", StringComparison.InvariantCultureIgnoreCase) || s.File.EndsWith(".cpp", StringComparison.InvariantCultureIgnoreCase))
@@ -527,18 +533,19 @@ namespace BSPGenerationTools
         {
         }
 
-        private IEnumerable<FileWithContext> TranslateFileList(string[] files, string deviceSpecificCondition)
+        private IEnumerable<FileWithContext> TranslateFileList(string[] files, string deviceSpecificCondition, EmbeddedFramework framework = null)
         {
             if (files == null)
                 return new FileWithContext[0];
 
-            return files.Select(f => new FileWithContext { File = f, DeviceSpecificCondition = deviceSpecificCondition });
+            return files.Select(f => new FileWithContext { File = f, DeviceSpecificCondition = deviceSpecificCondition, RelatedFramework = framework });
         }
 
         struct FileWithContext
         {
             public string File;
             public string DeviceSpecificCondition;
+            public EmbeddedFramework RelatedFramework;
 
             public override string ToString() => File;
         }
@@ -562,6 +569,13 @@ namespace BSPGenerationTools
                 lst.Conditions.Add(cond?.ConditionToInclude);
             }
 
+            if (files.FirstOrDefault(fc => fc.RelatedFramework?.IncompatibleFrameworks == null).File == null)
+            {
+                //All files come from frameworks
+                if (AreReferencingFrameworksMutuallyExclusive(files))
+                    return true;
+            }
+
             foreach (var kv in conditionsByDevice)
             {
                 if (kv.Value.Conditions.Count == 1 && !string.IsNullOrEmpty(kv.Key))
@@ -573,6 +587,26 @@ namespace BSPGenerationTools
 
                 Debugger.Break();   //Most likely, we are not accounting for some special case. Investigate it.
                 return false;
+            }
+
+            return true;
+        }
+
+        private bool AreReferencingFrameworksMutuallyExclusive(FileWithContext[] files)
+        {
+            for (int i = 0; i < files.Length; i++)
+            {
+                for (int j = i + 1; j < files.Length; j++)
+                {
+                    if (files[i].RelatedFramework.IncompatibleFrameworks.Contains(files[j].RelatedFramework.ID) &&
+                        files[j].RelatedFramework.IncompatibleFrameworks.Contains(files[i].RelatedFramework.ID))
+                    {
+                        continue;
+                    }
+
+                    //Files #i and #j do not come from mutually exclusive frameworks.
+                    return false;
+                }
             }
 
             return true;
