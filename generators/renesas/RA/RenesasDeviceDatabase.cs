@@ -12,17 +12,27 @@ namespace renesas_ra_bsp_generator
 {
     class RenesasDeviceDatabase
     {
+        public struct DeviceVariant
+        {
+            public string Name;
+            public string MemoryRegionsText;
+
+            public override string ToString() => Name;
+        }
+
         public class ParsedDevice
         {
             public string Name;
             public CortexCore Core;
-            public List<string> Variants = new List<string>();
+            public List<DeviceVariant> Variants = new List<DeviceVariant>();
             public string FamilyName;
             public MemoryArea[] MemoryMap;
 
             public override string ToString() => Name;
 
             public string FinalMCUName => Name;
+
+            public string UniqueMemoryRegionsDefinition => Variants.Select(v => v.MemoryRegionsText).Distinct().Single();
         }
 
         public static CortexCore ParseCortexCore(string core)
@@ -53,6 +63,10 @@ namespace renesas_ra_bsp_generator
                     if (pgrFiles.Length != 1)
                         throw new Exception("Unexpected number of device list files");
 
+                    Dictionary<string, ZipFile.Entry> rzoneFiles = zf.Entries
+                        .Where(e => e.FileName.EndsWith(".rzone", StringComparison.InvariantCultureIgnoreCase))
+                        .ToDictionary(e => Path.GetFileNameWithoutExtension(e.FileName), StringComparer.InvariantCultureIgnoreCase);
+
                     var xml = new XmlDocument();
                     xml.LoadXml(Encoding.UTF8.GetString(zf.ExtractEntry(pgrFiles[0])));
 
@@ -72,18 +86,35 @@ namespace renesas_ra_bsp_generator
                                 if (!result.TryGetValue(shortName, out var devObj))
                                     result[shortName] = devObj = new ParsedDevice { Name = shortName, Core = parsedCore, FamilyName = familyName, MemoryMap = deviceMemories[fullName] };
 
-                                devObj.Variants.Add(fullName);
+                                devObj.Variants.Add(BuildDeviceVariant(fullName, zf.ExtractEntry(rzoneFiles[fullName])));                                
 
                                 if (deviceMemories.TryGetValue(fullName, out var thisMap) && !Enumerable.SequenceEqual(thisMap, devObj.MemoryMap))
                                     throw new Exception($"Inconistent memory maps for {devObj.Variants[0]}/{fullName}");
                             }
                         }
                     }
-
                 }
             }
 
             return result.Values.ToArray();
+        }
+
+        public static DeviceVariant BuildDeviceVariant(string deviceName, byte[] rzoneFileContents)
+        {
+            var xml = new XmlDocument();
+            xml.LoadXml(Encoding.UTF8.GetString(rzoneFileContents));
+            StringBuilder memoryRegionsFile = new StringBuilder();
+            foreach(var mem in xml.DocumentElement.SelectElements("resources/memories/memory"))
+            {
+                var name = mem.GetStringAttribute("name");
+                var size = mem.GetUlongAttribute("size");
+                var start = mem.GetUlongAttribute("start");
+
+                memoryRegionsFile.AppendLine($"{name}_START = 0x{start:x8};");
+                memoryRegionsFile.AppendLine($"{name}_LENGTH = 0x{size:x};");
+            }
+
+            return new DeviceVariant { Name = deviceName, MemoryRegionsText = memoryRegionsFile.ToString() };
         }
 
         private static Dictionary<string, MemoryArea[]> LoadDeviceMemories(DisposableZipFile zf)

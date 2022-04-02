@@ -16,22 +16,35 @@ namespace renesas_ra_bsp_generator
         public struct ComponentID
         {
             public readonly string Vendor, Class, Group, Subgroup;
-            
+
             public readonly string Variant;
 
             public string FrameworkID => $"com.renesas.arm.{Vendor}.{Class}.{Subgroup}".Replace(' ', '_');
 
-            public ComponentID(XmlElement el)
+            public ComponentID(XmlElement el, bool isReference = false)
             {
-                Vendor = el.GetAttribute("Cvendor");
-                Class = el.GetAttribute("Cclass");
-                Group = el.GetAttribute("Cgroup");
-                Subgroup = el.GetAttribute("Csub");
-                Variant = el.GetAttribute("Cvariant");
+                string prefix = isReference ? "" : "C";
+
+                Vendor = el.GetAttribute(prefix + "vendor");
+                Class = el.GetAttribute(prefix + "class");
+                Group = el.GetAttribute(prefix + "group");
+                Subgroup = el.GetAttribute(isReference ? "subgroup" : "Csub");
+                Variant = el.GetAttribute(prefix + "variant");
             }
 
             public override string ToString() => $"{Vendor}.{Class}.{Group}.{Subgroup}";
         }
+
+        static string GetDirectoryName(string path)
+        {
+            int idx = path.LastIndexOfAny(new[] { '/', '\\' });
+            if (idx == -1)
+                throw new Exception($"{path} does not contain a '/' or '\\'");
+
+            return path.Substring(0, idx);
+        }
+
+        static string RenamePath(string path, string newName) => GetDirectoryName(path) + "/" + newName;
 
         class PackDescriptionReader
         {
@@ -179,10 +192,7 @@ namespace renesas_ra_bsp_generator
 
                         string mappedPath = $"$$SYS:BSP_ROOT$$/{name}".TrimEnd('/');
                         if (ShouldRenameFile(name, out var newName))
-                        {
-                            int idx = mappedPath.LastIndexOf('/');
-                            mappedPath = mappedPath.Substring(0, idx + 1) + newName;
-                        }
+                            mappedPath = RenamePath(mappedPath, newName);
 
                         translatedPaths.Add(new PathAndType { Path = mappedPath, Type = file.GetAttribute("category") });
                         filesToExtract.Add(name);
@@ -265,6 +275,10 @@ namespace renesas_ra_bsp_generator
             }
 
             HashSet<string> _BoardFrameworks = new HashSet<string>();
+            HashSet<string> _FamilyPrefixesWithPrimaryBoards = new HashSet<string>();
+            Dictionary<ComponentID, string> _TranslatedComponents = new Dictionary<ComponentID, string>();
+
+            string _BoardPackageClassID, _MCUPackageClassID;
 
             public PackFileSummary TranslateComponents(string packFile, List<EmbeddedFramework> frameworkList, ComponentType type)
             {
@@ -351,6 +365,8 @@ namespace renesas_ra_bsp_generator
                         {
                             fw.MCUFilterRegex = prefix + ".*";
                             fw.ClassID = fw.ID;
+                            VerifyMatch(ref _MCUPackageClassID, fw.ClassID);
+
                             fw.ID += "." + comp.ID.Group;
                         }
                         else if (type == ComponentType.Board)
@@ -368,6 +384,14 @@ namespace renesas_ra_bsp_generator
                                     prefix = FamilyPrefixes[family];
 
                                 fw.MCUFilterRegex = prefix + ".*";
+
+                                if (!_FamilyPrefixesWithPrimaryBoards.Contains(prefix))
+                                {
+                                    //Mark this as the primary board
+                                    _FamilyPrefixesWithPrimaryBoards.Add(prefix);
+                                    fw.ClassID = fw.ID.Substring(0, fw.ID.LastIndexOf('.')) + ".default_board";
+                                    VerifyMatch(ref _BoardPackageClassID, fw.ClassID);
+                                }
                             }
                         }
 
@@ -383,11 +407,21 @@ namespace renesas_ra_bsp_generator
                         else if (linkerScript != null)
                             throw new Exception("Linker script can only be defined by the core framework");
 
+                        _TranslatedComponents[comp.ID] = fw.IDForReferenceList;
                         frameworkList.Add(fw);
                     }
                 }
 
                 return summary;
+            }
+
+            private void VerifyMatch(ref string storedID, string ID)
+            {
+                if (storedID == null)
+                    storedID = ID;
+
+                if (storedID != ID)
+                    throw new Exception($"Mismatching ID: {ID}, expected {storedID}");
             }
 
             static bool IsFSPDataComponent(PackDescriptionReader.Component component)
@@ -459,7 +493,7 @@ namespace renesas_ra_bsp_generator
                     }
                 }
 
-                foreach(var kv in frameworksByFile)
+                foreach (var kv in frameworksByFile)
                 {
                     if (kv.Value.Count > 1)
                     {
@@ -474,6 +508,96 @@ namespace renesas_ra_bsp_generator
                         }
                     }
                 }
+            }
+
+            public string[] TranslateExamples(string mainPackFile)
+            {
+                Console.WriteLine("Translating sample projects...");
+                List<string> result = new List<string>();
+
+                using (var zf = ZipFile.Open(mainPackFile))
+                {
+                    foreach(var e in zf.Entries)
+                    {
+                        if (e.FileName.StartsWith(".templates", StringComparison.CurrentCultureIgnoreCase) && e.FileName.EndsWith("/configuration.xml", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            var sampleName = Path.GetFileName(Path.GetDirectoryName(e.FileName));
+                            var xml = new XmlDocument();
+                            xml.LoadXml(Encoding.UTF8.GetString(zf.ExtractEntry(e)));
+
+                            if (sampleName != "baremetal_blinky")
+                                continue;
+
+                            var refs = xml.DocumentElement.SelectElements("raComponentSelection/component")
+                                .Select(c => new ComponentID(c, true))
+                                .Where(c => c.Class != "Projects")
+                                .Select(c => _TranslatedComponents[c])
+                                .Concat(new[] { 
+                                    _BoardPackageClassID ?? throw new Exception("Could not locate the primary board package"),
+                                    _MCUPackageClassID ?? throw new Exception("Could not locate the primary MCU package"),
+                                })
+                                .ToArray();
+
+                            //Extract sample files, if any
+                            var targetDir = Path.Combine(Directories.OutputDir, "samples", sampleName);
+                            result.Add("samples/" + sampleName);
+                            string sampleDir = GetDirectoryName(e.FileName);
+                            Directory.CreateDirectory(targetDir);
+                            foreach(var e2 in zf.Entries)
+                            {
+                                if (e2.FileName.StartsWith(sampleDir + "/src") && !e2.IsDirectory)
+                                {
+                                    var targetPath = Path.Combine(targetDir, e2.FileName.Substring(sampleDir.Length + 5));
+                                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+                                    File.WriteAllBytes(targetPath, zf.ExtractEntry(e2));
+                                }
+                            }
+
+                            var sample = new EmbeddedProjectSample
+                            {
+                                Name = sampleName,
+                                Description = xml.DocumentElement.SelectSingleNode("raComponentSelection/component[@class='Projects']/description")?.InnerText,
+                                RequiredFrameworks = refs,
+                            };
+
+                            XmlTools.SaveObject(sample, Path.Combine(targetDir, "sample.xml"));
+                        }
+                    }
+                }
+
+                return result.ToArray();
+            }
+
+            bool _CommonLinkerScriptPatched;
+            public string GenerateLinkerScript(RenesasDeviceDatabase.ParsedDevice mcu, string commonLinkerScript)
+            {
+                if (!_CommonLinkerScriptPatched)
+                {
+                    var expandedCommonLinkerScript = commonLinkerScript.Replace("$$SYS:BSP_ROOT$$", Directories.OutputDir);
+                    var lines = File.ReadAllLines(expandedCommonLinkerScript);
+                    bool found = false;
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        if (lines[i] == "INCLUDE memory_regions.ld")
+                        {
+                            lines[i] = "/* " + lines[i] + " */";
+                            found = true;
+                        }
+                    }
+
+                    if (!found)
+                        throw new Exception("Could not patch the common linker script");
+
+                    File.WriteAllLines(expandedCommonLinkerScript, lines);
+                    _CommonLinkerScriptPatched = true;
+                }
+
+                var deviceScriptPath = RenamePath(commonLinkerScript, mcu.Name + ".ld");
+                var expandedDeviceScriptPath = deviceScriptPath.Replace("$$SYS:BSP_ROOT$$", Directories.OutputDir);
+
+                File.WriteAllText(expandedDeviceScriptPath, mcu.UniqueMemoryRegionsDefinition + $"\r\nINCLUDE \"{Path.GetFileName(commonLinkerScript)}\"");
+
+                return deviceScriptPath;
             }
         }
 
@@ -525,8 +649,10 @@ namespace renesas_ra_bsp_generator
                                 "_RENESAS_RA_",
                                 "_RA_CORE=C$$com.sysprogs.bspoptions.arm.core$$",
                             },
-
-                            LinkerScript = summary.LinkerScript,
+                            AdditionalLibraryDirectories = new[]
+                            {
+                                GetDirectoryName(summary.LinkerScript), //So that the device-specific scripts can include the common script
+                            }
                         }
                     });
 
@@ -542,6 +668,10 @@ namespace renesas_ra_bsp_generator
                             RAMBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRam").Start,
                             FLASHSize = (int)mcu.MemoryMap.First(m => m.Type == "InternalRom").Size,
                             FLASHBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRom").Start,
+                            CompilationFlags = new ToolFlags
+                            {
+                                LinkerScript = bspGen.GenerateLinkerScript(mcu, summary.LinkerScript)
+                            }
                         });
 
                         if (mcu.MemoryMap.Length != 2)
@@ -565,8 +695,7 @@ namespace renesas_ra_bsp_generator
                     MCUFamilies = familyDefinitions.ToArray(),
                     SupportedMCUs = mcuDefinitions.ToArray(),
                     Frameworks = frameworks.ToArray(),
-                    //Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
-                    //TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
+                    Examples = bspGen.TranslateExamples(mainPackFile),
                     PackageVersion = summary.Version,
                     FileConditions = bspGen.MatchedFileConditions.Values.ToArray(),
                     MinimumEngineVersion = "5.4",
