@@ -137,12 +137,14 @@ namespace renesas_ra_bsp_generator
                 private XmlElement _Element;
 
                 public readonly ComponentID ID;
+                public readonly string Version;
                 public Component(PackDescriptionReader packDescriptionReader, XmlElement c)
                 {
                     _Reader = packDescriptionReader;
                     _Element = c;
 
                     ID = new ComponentID(_Element);
+                    Version = _Element.GetStringAttribute("Cversion");
                 }
 
                 public string Description => _Element.SelectSingleNode("description")?.InnerXml;
@@ -157,6 +159,8 @@ namespace renesas_ra_bsp_generator
                         return v;
                     }
                 }
+
+                public string ExpectedModuleDescriptionFile => $".module_descriptions/{ID.Vendor}##{ID.Class}##{ID.Group}##{ID.Subgroup}##{ID.Variant}##{Version}.xml";
 
                 public struct PathAndType
                 {
@@ -293,6 +297,7 @@ namespace renesas_ra_bsp_generator
                 using (var zf = ZipFile.Open(packFile))
                 {
                     var rdr = new PackDescriptionReader(zf);
+                    var filesByName = zf.Entries.ToDictionary(e => e.FileName, StringComparer.InvariantCultureIgnoreCase);
 
                     summary.Version = rdr.ReleaseVersion;
 
@@ -408,6 +413,19 @@ namespace renesas_ra_bsp_generator
                             throw new Exception("Linker script can only be defined by the core framework");
 
                         _TranslatedComponents[comp.ID] = fw.IDForReferenceList;
+
+                        if (filesByName.TryGetValue(comp.ExpectedModuleDescriptionFile, out var moduleDesc))
+                        {
+                            using (var ms = new MemoryStream())
+                            {
+                                zf.ExtractEntry(moduleDesc, ms);
+                                ms.Position = 0;
+                                var xml = new XmlDocument();
+                                xml.Load(ms);
+                                ConfigurationFileTranslator.TranslateConfigurationFiles(fw, xml, Directories.OutputDir, Report);
+                            }
+                        }
+
                         frameworkList.Add(fw);
                     }
                 }
