@@ -160,7 +160,9 @@ namespace renesas_ra_bsp_generator
                     }
                 }
 
-                public string ExpectedModuleDescriptionFile => $".module_descriptions/{ID.Vendor}##{ID.Class}##{ID.Group}##{ID.Subgroup}##{ID.Variant}##{Version}.xml";
+                public string ExpectedModuleDescriptionFileBase => $".module_descriptions/{ID.Vendor}##{ID.Class}##{ID.Group}##{ID.Subgroup}##{ID.Variant}##{Version}";
+                public string ExpectedModuleDescriptionFile => ExpectedModuleDescriptionFileBase + ".xml";
+                public string ExpectedModuleConfigurationFile => ExpectedModuleDescriptionFileBase + "##configuration.xml";
 
                 public struct PathAndType
                 {
@@ -283,6 +285,7 @@ namespace renesas_ra_bsp_generator
             Dictionary<ComponentID, string> _TranslatedComponents = new Dictionary<ComponentID, string>();
 
             string _BoardPackageClassID, _MCUPackageClassID;
+            ConfigurationFileTranslator _ConfigFileTranslator = new ConfigurationFileTranslator();
 
             public PackFileSummary TranslateComponents(string packFile, List<EmbeddedFramework> frameworkList, ComponentType type)
             {
@@ -318,7 +321,7 @@ namespace renesas_ra_bsp_generator
 
                         if (comp.MCUVariant != null)
                         {
-                            //As of 3.3.0, all MCU-specific components are always the same and can be folder into the family-specific component.
+                            //As of 3.3.0, all MCU-specific components are always the same and can be folded into the family-specific component.
                             if (type != ComponentType.MCU || !description.StartsWith(BSPComponentPrefix))
                                 throw new Exception("MCU-specific component folding only supported for BSP components");
 
@@ -415,16 +418,10 @@ namespace renesas_ra_bsp_generator
                         _TranslatedComponents[comp.ID] = fw.IDForReferenceList;
 
                         if (filesByName.TryGetValue(comp.ExpectedModuleDescriptionFile, out var moduleDesc))
-                        {
-                            using (var ms = new MemoryStream())
-                            {
-                                zf.ExtractEntry(moduleDesc, ms);
-                                ms.Position = 0;
-                                var xml = new XmlDocument();
-                                xml.Load(ms);
-                                ConfigurationFileTranslator.TranslateConfigurationFiles(fw, xml, Directories.OutputDir, Report);
-                            }
-                        }
+                            _ConfigFileTranslator.TranslateConfigurationFiles(fw, zf.ExtractXMLFile(moduleDesc), Report);
+
+                        if (filesByName.TryGetValue(comp.ExpectedModuleConfigurationFile, out var moduleConf))
+                            _ConfigFileTranslator.TranslateModuleConfiguration(fw, zf.ExtractXMLFile(moduleConf), Report);
 
                         frameworkList.Add(fw);
                     }
@@ -535,7 +532,7 @@ namespace renesas_ra_bsp_generator
 
                 using (var zf = ZipFile.Open(mainPackFile))
                 {
-                    foreach(var e in zf.Entries)
+                    foreach (var e in zf.Entries)
                     {
                         if (e.FileName.StartsWith(".templates", StringComparison.CurrentCultureIgnoreCase) && e.FileName.EndsWith("/configuration.xml", StringComparison.InvariantCultureIgnoreCase))
                         {
@@ -550,7 +547,7 @@ namespace renesas_ra_bsp_generator
                                 .Select(c => new ComponentID(c, true))
                                 .Where(c => c.Class != "Projects")
                                 .Select(c => _TranslatedComponents[c])
-                                .Concat(new[] { 
+                                .Concat(new[] {
                                     _BoardPackageClassID ?? throw new Exception("Could not locate the primary board package"),
                                     _MCUPackageClassID ?? throw new Exception("Could not locate the primary MCU package"),
                                 })
@@ -561,7 +558,7 @@ namespace renesas_ra_bsp_generator
                             result.Add("samples/" + sampleName);
                             string sampleDir = GetDirectoryName(e.FileName);
                             Directory.CreateDirectory(targetDir);
-                            foreach(var e2 in zf.Entries)
+                            foreach (var e2 in zf.Entries)
                             {
                                 if (e2.FileName.StartsWith(sampleDir + "/src") && !e2.IsDirectory)
                                 {
@@ -662,6 +659,9 @@ namespace renesas_ra_bsp_generator
                         Name = fam.Key,
                         CompilationFlags = new ToolFlags
                         {
+                            IncludeDirectories = new[] {
+                                "$$SYS:BSP_ROOT$$", //Used in generated configuration files via '#include <ra/...>'
+                            },
                             PreprocessorMacros = new[]
                             {
                                 "_RENESAS_RA_",
@@ -701,7 +701,7 @@ namespace renesas_ra_bsp_generator
                     familyDefinitions.Add(famObj);
                 }
 
-
+                frameworks.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.UserFriendlyName, b.UserFriendlyName));
                 Console.WriteLine("Building BSP archive...");
 
                 BoardSupportPackage bsp = new BoardSupportPackage
@@ -716,7 +716,7 @@ namespace renesas_ra_bsp_generator
                     Examples = bspGen.TranslateExamples(mainPackFile),
                     PackageVersion = summary.Version,
                     FileConditions = bspGen.MatchedFileConditions.Values.ToArray(),
-                    MinimumEngineVersion = "5.4",
+                    MinimumEngineVersion = "5.6.105",
                 };
 
                 bspGen.ValidateBSP(bsp);

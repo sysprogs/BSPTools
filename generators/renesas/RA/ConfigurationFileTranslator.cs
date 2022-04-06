@@ -13,31 +13,20 @@ namespace renesas_ra_bsp_generator
 {
     class ConfigurationFileTranslator
     {
-        struct LinePredicate
+        class PropertyContext
         {
-            public string Prefix, Suffix;
-
-            public override string ToString() => $"{Prefix}<...>{Suffix}";
-
-            public bool IsMatch(string line) => line.StartsWith(Prefix) && line.EndsWith(Suffix);
-
-            public ConfigurationFilePropertyClass ToPropertyClass(params string[] propertyNames)
-            {
-                return new ConfigurationFilePropertyClass
-                {
-                    NormalRegex = new SerializableRegularExpression($"^{Regex.Escape(Prefix)}(.*){Regex.Escape(Suffix)}$"),
-                    NameIndex = 0,
-                    ValueIndex = 1,
-                    IndentIndex = 0,
-                    Properties = propertyNames,
-                };
-            }
+            public PropertyEntry Entry;
+            public XmlElement OriginalElement;
         }
 
-        public static void TranslateConfigurationFiles(EmbeddedFramework fw, XmlDocument xml, string outputDir, BSPReportWriter report)
+        readonly Dictionary<string, PropertyContext> _AllProperties = new Dictionary<string, PropertyContext>();
+
+        public void TranslateConfigurationFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
         {
             var rgPropertyReference = new Regex(@"\$\{([^${}]+)\}");
-            List<ConfigurationFileTemplate> templates = new List<ConfigurationFileTemplate>();
+            var rgIncludeRA = new Regex("#include[ \t]+\"\\.\\.[./]+/(ra/.*)\"");
+            List<GeneratedConfigurationFile> files = new List<GeneratedConfigurationFile>();
+            List<PropertyGroup> propertyGroups = new List<PropertyGroup>();
 
             foreach (var cf in xml.DocumentElement.SelectElements("config"))
             {
@@ -47,9 +36,9 @@ namespace renesas_ra_bsp_generator
                 List<string> configLines = new List<string>();
 
                 var propertiesByID = pg.Properties.ToDictionary(p => p.UniqueID);
-                Dictionary<string, LinePredicate> linePredicatesByProperty = new Dictionary<string, LinePredicate>();
 
                 string baseIndent = null;
+                List<GeneratedConfigurationFile.Fragment> fragments = new List<GeneratedConfigurationFile.Fragment>();
 
                 foreach (var rawLine in cf.SelectSingleNode("content").InnerText.Split('\n'))
                 {
@@ -63,82 +52,63 @@ namespace renesas_ra_bsp_generator
                     if (line.StartsWith(baseIndent))
                         line = line.Substring(baseIndent.Length);
 
+                    if (line.StartsWith("#include"))
+                    {
+                        var m = rgIncludeRA.Match(line);
+                        if (m.Success)
+                        {
+                            //Replace the self-relative path with a path relative to $$SYS:BSP_ROOT$$.
+                            line = $"#include <{m.Groups[1]}>";
+                        }
+                    }
+
+                    //Translate the ${var.name} references to $$var.name$$
                     var matches = rgPropertyReference.Matches(line);
-                    if (matches.Count > 1)
-                    {
-                        report.ReportRawError($"{fn}: Line references multiple config variables: {line}");
-                        continue;
-                    }
+                    foreach (var m in matches.OfType<Match>().OrderByDescending(m => m.Index))
+                        line = line.Substring(0, m.Index) + $"$${m.Groups[1].Value}$$" + line.Substring(m.Index + m.Length);
 
-                    if (matches.Count == 0)
+                    foreach(var m in matches.OfType<Match>())
                     {
-                        configLines.Add(line);
-                    }
-                    else
-                    {
-                        var m = matches[0];
                         var vn = m.Groups[1].Value;
-                        string effectiveValue;
 
-                        //lines.Add(new ConfigLine.VariableReference { Prefix = line.Substring(0, m.Index), Suffix = line.Substring(m.Index + m.Length), VariableName = vn });
                         if (propertiesByID.TryGetValue(vn, out var pe))
                         {
                             //This module directly defines the property referenced in this line
-                            effectiveValue = pe.GetDefaultValue();
                         }
                         else if (vn.StartsWith("interface."))
                         {
                             //This is a special variable used to determine whether another module is referenced
-                            effectiveValue = "RA_NOT_DEFINED";  //TODO: create a virtual property
                         }
                         else
                         {
-                            effectiveValue = "RA_NOT_DEFINED";
                             report.ReportRawError($"{fn}: Unknown property name: {vn}");
                         }
-
-                        var predicate = new LinePredicate { Prefix = line.Substring(0, m.Index), Suffix = line.Substring(m.Index + m.Length) };
-                        linePredicatesByProperty[vn] = predicate;
-                        configLines.Add($"{predicate.Prefix}{effectiveValue}{predicate.Suffix}");
                     }
+
+                    configLines.Add(line);
                 }
 
-                foreach (var pr in linePredicatesByProperty)
+                fragments.Add(new GeneratedConfigurationFile.Fragment.BasicFragment { Lines = configLines.ToArray() });
+
+                files.Add(new GeneratedConfigurationFile
                 {
-                    var matchingLines = configLines.Where(pr.Value.IsMatch).ToArray();
-                    if (matchingLines.Length != 1)
-                        report.ReportRawError($"Ambiguous config lines: {matchingLines.Length} lines in {Path.GetFileName(fn)} match the {pr.Key} template");
-                }
-
-                var relPath = $"config/{fw.ID}/{Path.GetFileName(fn)}";
-                var fullPath = Path.Combine(outputDir, relPath);
-                if (File.Exists(fullPath))
-                    throw new Exception($"{fullPath} already exists");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-
-                configLines.Insert(0, "#pragma once");
-                configLines.Insert(1, $"//This is a generated configuration file for the '{fw.UserFriendlyName}' framework ({fw.ID})");
-                configLines.Insert(2, "");
-                File.WriteAllLines(fullPath, configLines);
-
-                templates.Add(new ConfigurationFileTemplate
-                {
-                    SourcePath = "$$SYS:BSP_ROOT$$/" + relPath,
-                    TargetFileName = Path.GetFileName(fn),
-                    PropertyClasses = linePredicatesByProperty.Select(kv => kv.Value.ToPropertyClass(kv.Key)).ToArray(),
-                    PropertyList = new PropertyList
-                    {
-                        PropertyGroups = new List<PropertyGroup> { pg }
-                    }
+                    RelativePath = "ra_cfg/" + fn,
+                    Contents = fragments.ToArray(),
+                    UndefinedVariableValue = "RA_NOT_DEFINED",
                 });
+
+                if (pg.Properties.Count > 0)
+                    propertyGroups.Add(pg);
             }
 
-            if (templates.Count > 0)
-                fw.ConfigurationFileTemplates = templates.ToArray();
+            if (files.Count > 0)
+                fw.GeneratedConfigurationFiles = files.ToArray();
+
+            if (propertyGroups.Count > 0)
+                fw.ConfigurableProperties = new PropertyList { PropertyGroups = propertyGroups };
         }
 
-        private static PropertyGroup TranslateModuleProperties(EmbeddedFramework fw, XmlElement cf)
+        PropertyGroup TranslateModuleProperties(EmbeddedFramework fw, XmlElement cf)
         {
             var pg = new PropertyGroup { Name = fw.UserFriendlyName };
             foreach (var prop in cf.SelectElements("property"))
@@ -170,13 +140,75 @@ namespace renesas_ra_bsp_generator
                     };
                 }
 
+                _AllProperties[id] = new PropertyContext { Entry = entry, OriginalElement = prop };
+
                 entry.UniqueID = id;
                 entry.Name = name;
 
                 pg.Properties.Add(entry);
             }
 
+            string prefix = ComputeCommonPrefix(pg.Properties.Select(p => p.UniqueID ?? ""));
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                int idx = prefix.LastIndexOf('.');
+                if (idx != -1)
+                {
+                    pg.UniqueID = prefix.Substring(0, idx + 1);
+                    foreach (var prop in pg.Properties)
+                        prop.UniqueID = prop.UniqueID.Substring(idx + 1);
+                }
+            }
+
+            if (pg.UniqueID == null)
+                pg.Name = null;
+
             return pg;
+        }
+
+        static string GetCommonPart(string x, string y)
+        {
+            int len = Math.Min(x.Length, y.Length);
+            for (int i = 0; i < len; i++)
+                if (x[i] != y[i])
+                    return x.Substring(0, i);
+            return x.Substring(0, len);
+        }
+
+        static string ComputeCommonPrefix(IEnumerable<string> strings)
+        {
+            string prefix = null;
+            foreach(var str in strings)
+            {
+                if (prefix == null)
+                    prefix = str;
+                else
+                    prefix = GetCommonPart(str, prefix);
+            }
+
+            return prefix;
+        }
+
+        public void TranslateModuleConfiguration(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
+        {
+            foreach(var prop in xml.DocumentElement.SelectElements("raBspConfiguration/config/property"))
+            {
+                var id = prop.GetStringAttribute("id");
+                var value = prop.GetStringAttribute("value");
+
+                var propertyCtx = _AllProperties[id];
+                if (propertyCtx.Entry is PropertyEntry.Enumerated ep)
+                {
+                    string defaultValueKey = "_default." + id;
+                    var option = propertyCtx.OriginalElement.SelectSingleNode($"option[@id='{value}']") as XmlElement ?? throw new Exception("Failed to locate the option element for " + value);
+
+                    var optionValue = option.GetStringAttribute("value");
+                    fw.AdditionalSystemVars = (fw.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = defaultValueKey , Value = optionValue } }).ToArray();
+                    ep.DefaultEntryValue = $"$${defaultValueKey}$$";
+                }
+                else
+                    throw new Exception($"The '{id}' property set by the {fw.ID} framework is not an enumerated property");
+            }
         }
     }
 }
