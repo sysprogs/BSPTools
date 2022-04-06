@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ArrayOfFragment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Fragment xsi:type="BasicFragment">
+    <Lines>
+      <string>#include "r_ioport.h"</string>
+    </Lines>
+  </Fragment>
+  <Fragment xsi:type="ListFragment">
+    <VariableName>com.renesas.ra.device.pin_names</VariableName>
+    <Token>[pin]</Token>
+    <Separator>;</Separator>
+    <Template>
+      <string>#define [pin] ($$com.renesas.ra.pin.[pin].value$$)</string>
+    </Template>
+  </Fragment>
+  <Fragment xsi:type="ListFragment">
+    <VariableName>com.renesas.ra.device.pincfg_symbols</VariableName>
+    <Token>[pincfg]</Token>
+    <Separator>;</Separator>
+    <Template>
+      <string>extern const ioport_cfg_t [pincfg]; /* $$com.renesas.ra.pincfg.[pincfg].name$$ */</string>
+    </Template>
+  </Fragment>
+  <Fragment xsi:type="BasicFragment">
+    <Lines>
+      <string></string>
+      <string>void BSP_PinConfigSecurityInit();</string>
+    </Lines>
+  </Fragment>
+</ArrayOfFragment>

@@ -1,0 +1,15 @@
+
+/* generated configuration header file - do not edit */
+#ifndef BSP_PIN_CFG_H_
+#define BSP_PIN_CFG_H_
+#include "r_ioport.h"
+[#list pins as pin]
+#define ${pin.name} (IOPORT_PORT_${pin.port}_PIN_${pin.pin})[#if pin.comment??] /* ${pin.comment} */[/#if]
+[/#list]
+[#list configs as config]
+extern const ioport_cfg_t ${config.symbol}; /* ${config.name} */
+[/#list]
+
+void BSP_PinConfigSecurityInit();
+#endif /* BSP_PIN_CFG_H_ */
+        
