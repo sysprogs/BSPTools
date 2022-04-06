@@ -19,7 +19,13 @@ namespace renesas_ra_bsp_generator
             public XmlElement OriginalElement;
         }
 
+        struct UnknownProperty
+        {
+            public string PropertyName, ReferringFile;
+        }
+
         readonly Dictionary<string, PropertyContext> _AllProperties = new Dictionary<string, PropertyContext>();
+        readonly List<UnknownProperty> _UnknownProperties = new List<UnknownProperty>();
 
         public void TranslateModuleDescriptionFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
         {
@@ -88,7 +94,7 @@ namespace renesas_ra_bsp_generator
                             }
                             else
                             {
-                                report.ReportRawError($"{fn}: Unknown property name: {vn}");
+                                _UnknownProperties.Add(new UnknownProperty { PropertyName = vn, ReferringFile = fn });
                             }
 
                             line = line.Substring(0, m.Index) + value + line.Substring(m.Index + m.Length);
@@ -258,6 +264,14 @@ namespace renesas_ra_bsp_generator
 
                 if (vars.Count > 0)
                     cfg.Framework.AdditionalSystemVars = (cfg.Framework.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(vars).ToArray();
+            }
+
+            foreach(var rec in _UnknownProperties)
+            {
+                if (!_AllProperties.ContainsKey(rec.PropertyName))
+                {
+                    report.ReportMergeableError("Unknown property name:", rec.PropertyName);
+                }
             }
         }
 
