@@ -21,7 +21,7 @@ namespace renesas_ra_bsp_generator
 
         readonly Dictionary<string, PropertyContext> _AllProperties = new Dictionary<string, PropertyContext>();
 
-        public void TranslateConfigurationFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
+        public void TranslateModuleDescriptionFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
         {
             var rgPropertyReference = new Regex(@"\$\{([^${}]+)\}");
             var rgIncludeRA = new Regex("#include[ \t]+\"\\.\\.[./]+/(ra/.*)\"");
@@ -34,6 +34,7 @@ namespace renesas_ra_bsp_generator
                 PropertyGroup pg = TranslateModuleProperties(fw, cf);
 
                 List<string> configLines = new List<string>();
+                Dictionary<string, string> fixedProperties = new Dictionary<string, string>();
 
                 var propertiesByID = pg.Properties.ToDictionary(p => p.UniqueID);
 
@@ -64,13 +65,17 @@ namespace renesas_ra_bsp_generator
 
                     //Translate the ${var.name} references to $$var.name$$
                     var matches = rgPropertyReference.Matches(line);
-                    foreach (var m in matches.OfType<Match>().OrderByDescending(m => m.Index))
-                        line = line.Substring(0, m.Index) + $"$${m.Groups[1].Value}$$" + line.Substring(m.Index + m.Length);
 
-                    foreach(var m in matches.OfType<Match>())
+                    foreach(var m in matches.OfType<Match>().OrderByDescending(m => m.Index))
                     {
                         var vn = m.Groups[1].Value;
+                        var value = $"$${vn}$$";
 
+                        if (fixedProperties.TryGetValue(vn, out var fixedValue))
+                        {
+                            //The value was provided right here
+                            value = fixedValue;
+                        }
                         if (propertiesByID.TryGetValue(vn, out var pe))
                         {
                             //This module directly defines the property referenced in this line
@@ -83,6 +88,9 @@ namespace renesas_ra_bsp_generator
                         {
                             report.ReportRawError($"{fn}: Unknown property name: {vn}");
                         }
+
+                        line = line.Substring(0, m.Index) + value + line.Substring(m.Index + m.Length);
+
                     }
 
                     configLines.Add(line);
@@ -110,12 +118,27 @@ namespace renesas_ra_bsp_generator
 
         PropertyGroup TranslateModuleProperties(EmbeddedFramework fw, XmlElement cf)
         {
+            Regex rgIDCodeProperty = new Regex("config.bsp.common.id([1-4]|_fixed)");
             var pg = new PropertyGroup { Name = fw.UserFriendlyName };
             foreach (var prop in cf.SelectElements("property"))
             {
                 string id = prop.GetStringAttribute("id") ?? throw new Exception("Missing property ID");
                 var name = prop.TryGetStringAttribute("display");
                 var defaultValue = prop.TryGetStringAttribute("default");
+
+                if (defaultValue == null)
+                {
+                    var m = rgIDCodeProperty.Match(id);
+                    if (m.Success)
+                    {
+                        //The original BSP contains non-trivial JavaScript logic for computing the individual IDs (including the default one).
+                        //Since VisualGDB does not have a JavaScript interpreter, we simply specify the default value explicitly, and allow the user to override them.
+                        if (m.Groups[1].Length > 1)
+                            defaultValue = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+                        else
+                            defaultValue = "FFFFFFFF";
+                    }
+                }
 
                 var options = prop.SelectElements("option").ToArray();
                 PropertyEntry entry;
@@ -189,25 +212,43 @@ namespace renesas_ra_bsp_generator
             return prefix;
         }
 
-        public void TranslateModuleConfiguration(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
+        public void ProcessModuleConfiguration(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
         {
-            foreach(var prop in xml.DocumentElement.SelectElements("raBspConfiguration/config/property"))
+            _PendingConfigurationTranslations.Add(new PendingConfigurationTranslation { Framework = fw, Xml = xml });
+        }
+
+
+        struct PendingConfigurationTranslation
+        {
+            public EmbeddedFramework Framework;
+            public XmlDocument Xml;
+        }
+
+        List<PendingConfigurationTranslation> _PendingConfigurationTranslations = new List<PendingConfigurationTranslation>();
+
+        public void TranslatePendingModuleConfigurations(BSPReportWriter report)
+        {
+            foreach(var cfg in _PendingConfigurationTranslations)
             {
-                var id = prop.GetStringAttribute("id");
-                var value = prop.GetStringAttribute("value");
-
-                var propertyCtx = _AllProperties[id];
-                if (propertyCtx.Entry is PropertyEntry.Enumerated ep)
+                foreach (var prop in cfg.Xml.DocumentElement.SelectElements("raBspConfiguration/config/property"))
                 {
-                    string defaultValueKey = "_default." + id;
-                    var option = propertyCtx.OriginalElement.SelectSingleNode($"option[@id='{value}']") as XmlElement ?? throw new Exception("Failed to locate the option element for " + value);
+                    var id = prop.GetStringAttribute("id");
+                    var value = prop.GetStringAttribute("value");
 
-                    var optionValue = option.GetStringAttribute("value");
-                    fw.AdditionalSystemVars = (fw.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = defaultValueKey , Value = optionValue } }).ToArray();
-                    ep.DefaultEntryValue = $"$${defaultValueKey}$$";
+
+                    var propertyCtx = _AllProperties[id];
+                    if (propertyCtx.Entry is PropertyEntry.Enumerated ep)
+                    {
+                        string defaultValueKey = "_default." + id;
+                        var option = propertyCtx.OriginalElement.SelectSingleNode($"option[@id='{value}']") as XmlElement ?? throw new Exception("Failed to locate the option element for " + value);
+
+                        var optionValue = option.GetStringAttribute("value");
+                        cfg.Framework.AdditionalSystemVars = (cfg.Framework.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(new[] { new SysVarEntry { Key = defaultValueKey, Value = optionValue } }).ToArray();
+                        ep.DefaultEntryValue = $"$${defaultValueKey}$$";
+                    }
+                    else
+                        report.ReportRawError($"The '{id}' property set by the {cfg.Framework.ID} framework is not an enumerated property");
                 }
-                else
-                    throw new Exception($"The '{id}' property set by the {fw.ID} framework is not an enumerated property");
             }
         }
     }

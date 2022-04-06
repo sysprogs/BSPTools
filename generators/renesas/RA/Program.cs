@@ -284,7 +284,7 @@ namespace renesas_ra_bsp_generator
             HashSet<string> _FamilyPrefixesWithPrimaryBoards = new HashSet<string>();
             Dictionary<ComponentID, string> _TranslatedComponents = new Dictionary<ComponentID, string>();
 
-            string _BoardPackageClassID, _MCUPackageClassID;
+            string _BoardPackageClassID, _FamilyPackageClassID, _MCUPackageClassID, _FSPClassID;
             ConfigurationFileTranslator _ConfigFileTranslator = new ConfigurationFileTranslator();
 
             public PackFileSummary TranslateComponents(string packFile, List<EmbeddedFramework> frameworkList, ComponentType type)
@@ -292,10 +292,7 @@ namespace renesas_ra_bsp_generator
                 PackFileSummary summary = new PackFileSummary();
                 Console.WriteLine($"Translating {packFile}...");
 
-                PackDescriptionReader.Component.PathAndType[] deviceSpecificFiles = null;
                 HashSet<ComponentID> usedIDs = new HashSet<ComponentID>();
-
-                const string BSPComponentPrefix = "Board support package for ";
 
                 using (var zf = ZipFile.Open(packFile))
                 {
@@ -303,8 +300,6 @@ namespace renesas_ra_bsp_generator
                     var filesByName = zf.Entries.ToDictionary(e => e.FileName, StringComparer.InvariantCultureIgnoreCase);
 
                     summary.Version = rdr.ReleaseVersion;
-
-                    var fspDataPaths = rdr.Components.FirstOrDefault(IsFSPDataComponent)?.TranslateAndCopy(Directories.OutputDir, this);
 
                     foreach (var comp in rdr.Components)
                     {
@@ -318,35 +313,6 @@ namespace renesas_ra_bsp_generator
 
                         var translatedPaths = comp.TranslateAndCopy(Directories.OutputDir, this);
                         var description = comp.Description;
-
-                        if (comp.MCUVariant != null)
-                        {
-                            //As of 3.3.0, all MCU-specific components are always the same and can be folded into the family-specific component.
-                            if (type != ComponentType.MCU || !description.StartsWith(BSPComponentPrefix))
-                                throw new Exception("MCU-specific component folding only supported for BSP components");
-
-                            if (deviceSpecificFiles == null)
-                                deviceSpecificFiles = translatedPaths.ToArray();
-                            else if (!Enumerable.SequenceEqual(deviceSpecificFiles, translatedPaths))
-                                throw new Exception("BSP components for different devices have different file lists. They should be translated to conditions or variable references.");
-
-                            continue;
-                        }
-
-                        if (comp.MCUVariant == null && description.StartsWith(BSPComponentPrefix))
-                        {
-                            if (deviceSpecificFiles == null)
-                                throw new Exception("MCU-specific component was not parsed at the time of parsing the family-specific one");
-
-                            if (fspDataPaths == null)
-                                throw new Exception("FSP data component was not parsed at the time of parsing the family-specific one");
-
-                            //Just merge the MCU-specific files (that should be the same) into the family-specific file list
-                            translatedPaths.AddRange(deviceSpecificFiles);
-                        }
-
-                        if (IsFSPDataComponent(comp))
-                            continue;
 
                         if (description == "Renesas Bluetooth Low Energy Library")
                         {
@@ -369,11 +335,22 @@ namespace renesas_ra_bsp_generator
                             AdditionalLibraries = translatedPaths.Where(p => p.Type == "library").Select(p => p.Path).Distinct().ToArray(),
                         };
 
-                        if (FamilyPrefixes.TryGetValue(comp.ID.Group, out var prefix))
+                        if (!string.IsNullOrEmpty(comp.ID.Variant))
+                        {
+                            fw.MCUFilterRegex = comp.ID.Variant;
+                            fw.ClassID = fw.ID + ".mcu";
+                            VerifyMatch(ref _MCUPackageClassID, fw.ClassID);
+                            fw.ID += "." + comp.ID.Variant;
+                        }
+                        else if (FamilyPrefixes.TryGetValue(comp.ID.Group, out var prefix))
                         {
                             fw.MCUFilterRegex = prefix + ".*";
-                            fw.ClassID = fw.ID;
-                            VerifyMatch(ref _MCUPackageClassID, fw.ClassID);
+                            fw.ClassID = fw.ID + ".family";
+
+                            if (comp.ID.Subgroup == "fsp")
+                                VerifyMatch(ref _FSPClassID, fw.ClassID);
+                            else
+                                VerifyMatch(ref _FamilyPackageClassID, fw.ClassID);
 
                             fw.ID += "." + comp.ID.Group;
                         }
@@ -418,10 +395,10 @@ namespace renesas_ra_bsp_generator
                         _TranslatedComponents[comp.ID] = fw.IDForReferenceList;
 
                         if (filesByName.TryGetValue(comp.ExpectedModuleDescriptionFile, out var moduleDesc))
-                            _ConfigFileTranslator.TranslateConfigurationFiles(fw, zf.ExtractXMLFile(moduleDesc), Report);
+                            _ConfigFileTranslator.TranslateModuleDescriptionFiles(fw, zf.ExtractXMLFile(moduleDesc), Report);
 
                         if (filesByName.TryGetValue(comp.ExpectedModuleConfigurationFile, out var moduleConf))
-                            _ConfigFileTranslator.TranslateModuleConfiguration(fw, zf.ExtractXMLFile(moduleConf), Report);
+                            _ConfigFileTranslator.ProcessModuleConfiguration(fw, zf.ExtractXMLFile(moduleConf), Report);
 
                         frameworkList.Add(fw);
                     }
@@ -437,11 +414,6 @@ namespace renesas_ra_bsp_generator
 
                 if (storedID != ID)
                     throw new Exception($"Mismatching ID: {ID}, expected {storedID}");
-            }
-
-            static bool IsFSPDataComponent(PackDescriptionReader.Component component)
-            {
-                return component.Description.EndsWith("- FSP Data");
             }
 
             static int CountMatchingCharacters(string left, string right)
@@ -550,6 +522,8 @@ namespace renesas_ra_bsp_generator
                                 .Concat(new[] {
                                     _BoardPackageClassID ?? throw new Exception("Could not locate the primary board package"),
                                     _MCUPackageClassID ?? throw new Exception("Could not locate the primary MCU package"),
+                                    _FamilyPackageClassID ?? throw new Exception("Could not locate the primary MCU package"),
+                                    _FSPClassID ?? throw new Exception("Could not locate the primary FSP package"),
                                 })
                                 .ToArray();
 
@@ -614,6 +588,11 @@ namespace renesas_ra_bsp_generator
 
                 return deviceScriptPath;
             }
+
+            public void GenerateFrameworkDependentDefaultValues()
+            {
+                _ConfigFileTranslator.TranslatePendingModuleConfigurations(Report);
+            }
         }
 
         static void Main(string[] args)
@@ -649,6 +628,7 @@ namespace renesas_ra_bsp_generator
                         bspGen.TranslateComponents(fn, frameworks, RenesasBSPBuilder.ComponentType.CMSIS);
                 }
 
+                bspGen.GenerateFrameworkDependentDefaultValues();
                 bspGen.MakeBoardFrameworksMutuallyExclusive(frameworks);
                 bspGen.MakeOverlappingFrameworksMutuallyExclusive(frameworks);
 
@@ -677,23 +657,28 @@ namespace renesas_ra_bsp_generator
                     foreach (var mcu in fam)
                     {
                         famBuilder.MCUs.Add(new MCUBuilder { Name = mcu.Name, Core = mcu.Core });
-                        mcuDefinitions.Add(new MCU
+                        foreach (var v in mcu.Variants)
                         {
-                            ID = mcu.FinalMCUName,
-                            FamilyID = fam.Key,
-                            HierarchicalPath = $@"Renesas\ARM\{fam.Key}",
-                            RAMSize = (int)mcu.MemoryMap.First(m => m.Type == "InternalRam").Size,
-                            RAMBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRam").Start,
-                            FLASHSize = (int)mcu.MemoryMap.First(m => m.Type == "InternalRom").Size,
-                            FLASHBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRom").Start,
-                            CompilationFlags = new ToolFlags
-                            {
-                                LinkerScript = bspGen.GenerateLinkerScript(mcu, summary.LinkerScript)
-                            }
-                        });
+                            var linkerScript = bspGen.GenerateLinkerScript(mcu, summary.LinkerScript);
 
-                        if (mcu.MemoryMap.Length != 2)
-                            throw new Exception("Unexpected number of memories. Generate a proper memory map!");
+                            mcuDefinitions.Add(new MCU
+                            {
+                                ID = v.Name,
+                                FamilyID = fam.Key,
+                                HierarchicalPath = $@"Renesas\ARM\{fam.Key}",
+                                RAMSize = (int)mcu.MemoryMap.First(m => m.Type == "InternalRam").Size,
+                                RAMBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRam").Start,
+                                FLASHSize = (int)mcu.MemoryMap.First(m => m.Type == "InternalRom").Size,
+                                FLASHBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRom").Start,
+                                CompilationFlags = new ToolFlags
+                                {
+                                    LinkerScript = linkerScript,
+                                }
+                            });
+
+                            if (mcu.MemoryMap.Length != 2)
+                                throw new Exception("Unexpected number of memories. Generate a proper memory map!");
+                        }
                     }
 
                     var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All);
