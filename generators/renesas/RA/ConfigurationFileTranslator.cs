@@ -15,8 +15,8 @@ namespace renesas_ra_bsp_generator
     {
         class PropertyContext
         {
-            public PropertyEntry Entry;
-            public XmlElement OriginalElement;
+            public List<PropertyEntry> Entries = new List<PropertyEntry>();
+            public Dictionary<string, string> IDToValueMapping = new Dictionary<string, string>();
         }
 
         struct UnknownProperty
@@ -25,6 +25,7 @@ namespace renesas_ra_bsp_generator
         }
 
         readonly Dictionary<string, PropertyContext> _AllProperties = new Dictionary<string, PropertyContext>();
+        readonly HashSet<string> _FixedValues = new HashSet<string>();
         readonly List<UnknownProperty> _UnknownProperties = new List<UnknownProperty>();
 
         public void TranslateModuleDescriptionFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
@@ -33,16 +34,15 @@ namespace renesas_ra_bsp_generator
             var rgIncludeRA = new Regex("#include[ \t]+\"\\.\\.[./]+/(ra/.*)\"");
             List<GeneratedConfigurationFile> files = new List<GeneratedConfigurationFile>();
             List<PropertyGroup> propertyGroups = new List<PropertyGroup>();
+            List<SysVarEntry> fixedValues = new List<SysVarEntry>();
 
             foreach (var cf in xml.DocumentElement.SelectElements("config"))
             {
                 var fn = cf.GetStringAttribute("path") ?? throw new Exception("Undefined config file path");
-                PropertyGroup pg = TranslateModuleProperties(fw, cf);
+                PropertyGroup[] pgs = TranslateModuleProperties(fw, cf, fixedValues);
 
                 List<string> configLines = new List<string>();
                 Dictionary<string, string> fixedProperties = new Dictionary<string, string>();
-
-                var propertiesByID = pg.Properties.ToDictionary(p => p.UniqueID);
 
                 string baseIndent = null;
                 List<GeneratedConfigurationFile.Fragment> fragments = new List<GeneratedConfigurationFile.Fragment>();
@@ -84,10 +84,6 @@ namespace renesas_ra_bsp_generator
                                 //The value was provided right here
                                 value = fixedValue;
                             }
-                            if (propertiesByID.TryGetValue(vn, out var pe))
-                            {
-                                //This module directly defines the property referenced in this line
-                            }
                             else if (vn.StartsWith("interface."))
                             {
                                 //This is a special variable used to determine whether another module is referenced
@@ -114,15 +110,115 @@ namespace renesas_ra_bsp_generator
                     UndefinedVariableValue = "RA_NOT_DEFINED",
                 });
 
-                if (pg.Properties.Count > 0)
-                    propertyGroups.Add(pg);
+                foreach (var pg in pgs)
+                    if (pg.Properties.Count > 0)
+                        propertyGroups.Add(pg);
             }
+
+            TranslateClockSettings(xml, files, propertyGroups);
 
             if (files.Count > 0)
                 fw.GeneratedConfigurationFiles = files.ToArray();
 
             if (propertyGroups.Count > 0)
                 fw.ConfigurableProperties = new PropertyList { PropertyGroups = propertyGroups };
+
+            if (fixedValues.Count > 0)
+                fw.AdditionalSystemVars = (fw.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(fixedValues).ToArray();
+        }
+
+        void TranslateClockSettings(XmlDocument xml, List<GeneratedConfigurationFile> files, List<PropertyGroup> propertyGroups)
+        {
+            var pg = new PropertyGroup { Name = "Clock Configuration" };
+            List<string> configLines = new List<string>();
+            foreach (var cf in xml.DocumentElement.SelectElements("bsp/clock"))
+            {
+                foreach (var node in cf.SelectElements("node"))
+                {
+                    string id = node.GetAttribute("id");
+                    string defaultValue = node.GetAttribute("default");
+                    var options = node.SelectElements("option").ToArray();
+
+                    var macro = options[0].TryGetStringAttribute("macroName");
+                    if (macro == null)
+                    {
+                        //This option is not reflected in the config file. Still register it so the board packages overriding it won't trigger errors.
+                        RegisterProperty(node, id, null);
+                        continue;
+                    }
+
+                    PropertyEntry entry;
+                    if (options.Length == 1 && options[0].GetStringAttribute("id") == "_edit")
+                    {
+                        //The 'enumerated' property is necessary to allow overriding the default value from other frameworks
+                        entry = new PropertyEntry.Enumerated { 
+                            AllowFreeEntry = true,
+                            SuggestionList = new[]
+                            {
+                                new PropertyEntry.Enumerated.Suggestion
+                                {
+                                    InternalValue = defaultValue,
+                                }
+                            }
+                        };
+                        configLines.Add($"#define {macro} " + options[0].GetStringAttribute("macroValue").Replace("${value}", $"$${id}$$"));
+                    }
+                    else
+                    {
+                        if (options.GroupBy(o => o.GetStringAttribute("macroName") ?? "").Count() != 1)
+                            throw new Exception($"Multiple options for {id} use different macro names");
+
+                        int defaultValueIndex = Enumerable.Range(0, options.Length).First(i => options[i].GetStringAttribute("id") == defaultValue);
+                        entry = new PropertyEntry.Enumerated
+                        {
+                            Description = id,
+                            DefaultEntryIndex = defaultValueIndex,
+                            SuggestionList = options.Select(o => new PropertyEntry.Enumerated.Suggestion
+                            {
+                                InternalValue = o.GetStringAttribute("macroValue"),
+                                UserFriendlyName = o.GetStringAttribute("display"),
+                            }).ToArray()
+                        };
+
+                        configLines.Add($"#define {macro} $${id}$$");
+                    }
+
+                    entry.UniqueID = id;
+                    entry.Name = macro;
+                    entry.Description = id;
+                    pg.Properties.Add(entry);
+                    RegisterProperty(node, id, entry, true);
+                }
+            }
+
+            if (pg.Properties.Count > 0)
+            {
+                pg.Properties.InsertRange(0, new[]{
+                    new PropertyEntry.Boolean { UniqueID = "board.clock.is_secure",   Name = "BSP_CFG_CLOCKS_SECURE",   ValueForTrue = "(1)", ValueForFalse = "(0)" },
+                    new PropertyEntry.Boolean { UniqueID = "board.clock.is_override", Name = "BSP_CFG_CLOCKS_OVERRIDE", ValueForTrue = "(1)", ValueForFalse = "(0)" }
+                });
+
+                configLines.InsertRange(0, new[]
+                {
+                    "#define BSP_CFG_CLOCKS_SECURE $$board.clock.is_secure$$",
+                    "#define BSP_CFG_CLOCKS_OVERRIDE $$board.clock.is_override$$",
+                });
+
+                AssignCommonPropertyGroupPrefix(pg);
+
+                propertyGroups.Add(pg);
+                files.Add(new GeneratedConfigurationFile
+                {
+                    RelativePath = "ra_gen/bsp_clock_cfg.h",
+                    Contents = new GeneratedConfigurationFile.Fragment[]
+                    {
+                        new GeneratedConfigurationFile.Fragment.BasicFragment
+                        {
+                            Lines = configLines.ToArray(),
+                        }
+                    }
+                });
+            }
         }
 
         private bool TranslateSpecialConfigFile(XmlElement cf, List<GeneratedConfigurationFile.Fragment> fragments)
@@ -143,7 +239,7 @@ namespace renesas_ra_bsp_generator
             return false;
         }
 
-        PropertyGroup TranslateModuleProperties(EmbeddedFramework fw, XmlElement cf)
+        PropertyGroup[] TranslateModuleProperties(EmbeddedFramework fw, XmlElement cf, List<SysVarEntry> fixedValues)
         {
             Regex rgIDCodeProperty = new Regex("config.bsp.common.id([1-4]|_fixed)");
             var pg = new PropertyGroup { Name = fw.UserFriendlyName };
@@ -169,7 +265,19 @@ namespace renesas_ra_bsp_generator
 
                 var options = prop.SelectElements("option").ToArray();
                 PropertyEntry entry;
-                if (options.Length > 0)
+                if (options.Length == 1 && options[0].GetStringAttribute("id") == defaultValue)
+                {
+                    fixedValues.Add(new SysVarEntry { Key = id, Value = options[0].GetStringAttribute("value") });
+                    _FixedValues.Add(id);
+                    continue;
+                }
+                else if (string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(defaultValue) && options.Length == 0)
+                {
+                    fixedValues.Add(new SysVarEntry { Key = id, Value = defaultValue });
+                    _FixedValues.Add(id);
+                    continue;
+                }
+                else if (options.Length > 0)
                 {
                     entry = new PropertyEntry.Enumerated
                     {
@@ -190,14 +298,27 @@ namespace renesas_ra_bsp_generator
                     };
                 }
 
-                _AllProperties[id] = new PropertyContext { Entry = entry, OriginalElement = prop };
+                RegisterProperty(prop, id, entry);
 
                 entry.UniqueID = id;
-                entry.Name = name;
+                if (string.IsNullOrEmpty(name))
+                    entry.Name = id.Split('.').LastOrDefault();
+                else
+                    entry.Name = name;
 
                 pg.Properties.Add(entry);
             }
 
+            AssignCommonPropertyGroupPrefix(pg);
+
+            if (pg.UniqueID == null)
+                pg.Name = null;
+
+            return SplitPropertyGroup(pg);
+        }
+
+        private static void AssignCommonPropertyGroupPrefix(PropertyGroup pg)
+        {
             string prefix = ComputeCommonPrefix(pg.Properties.Select(p => p.UniqueID ?? ""));
             if (!string.IsNullOrEmpty(prefix))
             {
@@ -209,11 +330,93 @@ namespace renesas_ra_bsp_generator
                         prop.UniqueID = prop.UniqueID.Substring(idx + 1);
                 }
             }
+        }
 
-            if (pg.UniqueID == null)
-                pg.Name = null;
+        private void RegisterProperty(XmlElement prop, string id, PropertyEntry entry, bool isClockEntry = false)
+        {
+            if (!_AllProperties.TryGetValue(id, out var ctx))
+                _AllProperties[id] = ctx = new PropertyContext();
 
-            return pg;
+            if (entry != null)
+                ctx.Entries.Add(entry);
+
+            foreach(var option in prop.SelectElements("option"))
+            {
+                var valID = option.GetStringAttribute("id");
+                string value;
+                if (isClockEntry)
+                {
+                    if (valID == "_edit")
+                        continue;
+
+                    value = option.GetStringAttribute("macroValue");
+                }
+                else
+                    value = option.GetAttribute("value");
+
+                ctx.IDToValueMapping[valID] = value;
+            }
+        }
+
+        /* Splits a single property group with properties like, e.g.:
+         *   Property 1
+         *   Subgroup | Property 2
+         *   Subgroup | Property 3
+         *  into multiple property groups, e.g.:
+         *  [Group Name]
+         *      Property 1
+         *  [Group Name] - Subroup
+         *      Property 2
+         *      Property 3
+         */
+        PropertyGroup[] SplitPropertyGroup(PropertyGroup pg)
+        {
+            if (pg.Properties.Count == 0)
+                return new PropertyGroup[0];
+
+            var propertiesByPrefix = pg.Properties.GroupBy(p =>
+            {
+                int idx = p.Name.LastIndexOf('|');
+                if (idx == -1)
+                    return "";
+                return p.Name.Substring(0, idx);
+            }).ToDictionary(g => g.Key, g => g.ToArray());
+
+            if (propertiesByPrefix.Count == 1)
+                return new[] { pg };
+
+            List<PropertyGroup> result = new List<PropertyGroup>();
+            foreach (var g in propertiesByPrefix)
+            {
+                if (g.Key == "")
+                    continue;
+
+                var prefix = ComputeCommonPrefix(g.Value.Select(p => p.UniqueID));
+                if (prefix != "")
+                {
+                    var newGroup = new PropertyGroup
+                    {
+                        Name = pg.Name + " - " + g.Key.Replace("|", " - "),
+                        UniqueID = pg.UniqueID + prefix,
+                        Properties = g.Value.ToList()
+                    };
+
+                    foreach (var p in newGroup.Properties)
+                    {
+                        p.Name = p.Name.Substring(g.Key.Length + 1);
+                        p.UniqueID = p.UniqueID.Substring(prefix.Length);
+                    }
+
+                    result.Add(newGroup);
+                }
+            }
+
+            var movedProperties = result.SelectMany(g => g.Properties).ToHashSet();
+            pg.Properties.RemoveAll(movedProperties.Contains);
+            if (pg.Properties.Count > 0)
+                result.Insert(0, pg);
+
+            return result.ToArray();
         }
 
         static string GetCommonPart(string x, string y)
@@ -266,16 +469,16 @@ namespace renesas_ra_bsp_generator
                     cfg.Framework.AdditionalSystemVars = (cfg.Framework.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(vars).ToArray();
             }
 
-            foreach(var rec in _UnknownProperties)
+            foreach (var rec in _UnknownProperties)
             {
-                if (!_AllProperties.ContainsKey(rec.PropertyName))
+                if (!_AllProperties.ContainsKey(rec.PropertyName) && !_FixedValues.Contains(rec.PropertyName))
                 {
                     report.ReportMergeableError("Unknown property name:", rec.PropertyName);
                 }
             }
         }
 
-        private static void TranslatePinNames(PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
+        static void TranslatePinNames(PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
         {
             List<string> pins = new List<string>();
             Regex rgPin = new Regex("p([0-9b])([0-9]{2})\\.symbolic_name");
@@ -295,29 +498,59 @@ namespace renesas_ra_bsp_generator
             vars.Add(new SysVarEntry { Key = "com.renesas.ra.device.pin_names", Value = string.Join(";", pins) });
         }
 
-        private void TranslateDefaultValueOverrides(BSPReportWriter report, PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
+        void TranslateDefaultValueOverrides(BSPReportWriter report, PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
         {
+            string frameworkID = cfg.Framework.ID;
             foreach (var prop in cfg.Xml.DocumentElement.SelectElements("raBspConfiguration/config/property"))
             {
                 var id = prop.GetStringAttribute("id");
                 var value = prop.GetStringAttribute("value");
 
-                var propertyCtx = _AllProperties[id];
-                if (propertyCtx.Entry is PropertyEntry.Enumerated ep)
+                OverrideDefaultPropertyValue(report, vars, frameworkID, id, value);
+            }
+
+            foreach (var prop in cfg.Xml.DocumentElement.SelectElements("raClockConfiguration/node"))
+            {
+                var id = prop.GetStringAttribute("id");
+                var value = prop.GetStringAttribute("option");
+                if (value == "_edit")
+                    value = prop.GetStringAttribute("mul");
+
+                OverrideDefaultPropertyValue(report, vars, frameworkID, id, value, true);
+            }
+        }
+
+        /* Allows frameworks to override default values of properties in other frameworks. This method creates a temporary variable, adjusts the original
+         * property to use it for the computation of the default value, and updates the new framework to set the value of this variable. */
+        private void OverrideDefaultPropertyValue(BSPReportWriter report, List<SysVarEntry> vars, string frameworkID, string id, string value, bool isClockProperty = false)
+        {
+            var propertyCtx = _AllProperties[id];
+
+            foreach (var e in propertyCtx.Entries)
+            {
+                if (e is PropertyEntry.Enumerated ep)
                 {
                     string defaultValueKey = "_default." + id;
-                    var option = propertyCtx.OriginalElement.SelectSingleNode($"option[@id='{value}']") as XmlElement ?? throw new Exception("Failed to locate the option element for " + value);
+                    string optionValue;
 
-                    var optionValue = option.GetStringAttribute("value");
+                    if (ep.AllowFreeEntry)
+                    {
+                        if (ep.SuggestionList.FirstOrDefault(s => s.InternalValue == value) == null)
+                            ep.SuggestionList = ep.SuggestionList.Concat(new[] { new PropertyEntry.Enumerated.Suggestion { InternalValue = value } }).ToArray();
+                        optionValue = value;
+                    }
+                    else
+                        optionValue = propertyCtx.IDToValueMapping[value];
+
                     vars.Add(new SysVarEntry { Key = defaultValueKey, Value = optionValue });
                     ep.DefaultEntryValue = $"$${defaultValueKey}$$";
                 }
                 else
-                    report.ReportRawError($"The '{id}' property set by the {cfg.Framework.ID} framework is not an enumerated property");
+                    report.ReportRawError($"The '{id}' property set by the {frameworkID} framework is not an enumerated property");
             }
         }
 
-        private static void TranslatePinConfigurations(PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
+        static void TranslatePinConfigurations(PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
         {
             var pincfg = cfg.Xml.DocumentElement.SelectSingleNode("raPinConfiguration/pincfg[@active='true']") as XmlElement;
 
