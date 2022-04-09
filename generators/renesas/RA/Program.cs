@@ -400,6 +400,9 @@ namespace renesas_ra_bsp_generator
                         if (filesByName.TryGetValue(comp.ExpectedModuleConfigurationFile, out var moduleConf))
                             _ConfigFileTranslator.ProcessModuleConfiguration(fw, zf.ExtractXMLFile(moduleConf), Report);
 
+                        if (type == ComponentType.Common && fw.ID.EndsWith(".fsp_common"))
+                            fw.GeneratedConfigurationFiles = XmlTools.LoadObject<GeneratedConfigurationFile[]>(@"..\..\Rules\common_data.xml");
+
                         frameworkList.Add(fw);
                     }
                 }
@@ -641,6 +644,11 @@ namespace renesas_ra_bsp_generator
                         {
                             IncludeDirectories = new[] {
                                 "$$SYS:BSP_ROOT$$", //Used in generated configuration files via '#include <ra/...>'
+                                
+                                //Project-relative directories with generated files
+                                "ra_cfg/fsp_cfg",
+                                "ra_cfg/fsp_cfg/bsp",
+                                "ra_gen"
                             },
                             PreprocessorMacros = new[]
                             {
@@ -687,6 +695,10 @@ namespace renesas_ra_bsp_generator
                 }
 
                 frameworks.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.UserFriendlyName, b.UserFriendlyName));
+
+                foreach (var fw in frameworks)
+                    fw.AdditionalSystemVars = fw.AdditionalSystemVars?.Distinct().ToArray();
+
                 Console.WriteLine("Building BSP archive...");
 
                 BoardSupportPackage bsp = new BoardSupportPackage

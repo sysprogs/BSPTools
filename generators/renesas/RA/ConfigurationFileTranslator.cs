@@ -28,11 +28,13 @@ namespace renesas_ra_bsp_generator
         readonly HashSet<string> _FixedValues = new HashSet<string>();
         readonly List<UnknownProperty> _UnknownProperties = new List<UnknownProperty>();
 
+        static Regex rgPropertyReference = new Regex(@"\$\{([^${}]+)\}");
+
         public void TranslateModuleDescriptionFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
         {
-            var rgPropertyReference = new Regex(@"\$\{([^${}]+)\}");
             var rgIncludeRA = new Regex("#include[ \t]+\"\\.\\.[./]+/(ra/.*)\"");
             List<GeneratedConfigurationFile> files = new List<GeneratedConfigurationFile>();
+            List<GeneratedConfigurationFile> mergeableFragments = new List<GeneratedConfigurationFile>();
             List<PropertyGroup> propertyGroups = new List<PropertyGroup>();
             List<SysVarEntry> fixedValues = new List<SysVarEntry>();
 
@@ -94,7 +96,6 @@ namespace renesas_ra_bsp_generator
                             }
 
                             line = line.Substring(0, m.Index) + value + line.Substring(m.Index + m.Length);
-
                         }
 
                         configLines.Add(line);
@@ -105,7 +106,7 @@ namespace renesas_ra_bsp_generator
 
                 files.Add(new GeneratedConfigurationFile
                 {
-                    RelativePath = "ra_cfg/" + fn,
+                    Name = "ra_cfg/" + fn,
                     Contents = fragments.ToArray(),
                     UndefinedVariableValue = "RA_NOT_DEFINED",
                 });
@@ -116,9 +117,13 @@ namespace renesas_ra_bsp_generator
             }
 
             TranslateClockSettings(xml, files, propertyGroups);
+            TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups);
 
             if (files.Count > 0)
                 fw.GeneratedConfigurationFiles = files.ToArray();
+
+            if (mergeableFragments.Count > 0)
+                fw.GeneratedConfigurationFragments = mergeableFragments.ToArray();
 
             if (propertyGroups.Count > 0)
                 fw.ConfigurableProperties = new PropertyList { PropertyGroups = propertyGroups };
@@ -151,7 +156,8 @@ namespace renesas_ra_bsp_generator
                     if (options.Length == 1 && options[0].GetStringAttribute("id") == "_edit")
                     {
                         //The 'enumerated' property is necessary to allow overriding the default value from other frameworks
-                        entry = new PropertyEntry.Enumerated { 
+                        entry = new PropertyEntry.Enumerated
+                        {
                             AllowFreeEntry = true,
                             SuggestionList = new[]
                             {
@@ -209,7 +215,7 @@ namespace renesas_ra_bsp_generator
                 propertyGroups.Add(pg);
                 files.Add(new GeneratedConfigurationFile
                 {
-                    RelativePath = "ra_gen/bsp_clock_cfg.h",
+                    Name = "ra_gen/bsp_clock_cfg.h",
                     Contents = new GeneratedConfigurationFile.Fragment[]
                     {
                         new GeneratedConfigurationFile.Fragment.BasicFragment
@@ -220,6 +226,97 @@ namespace renesas_ra_bsp_generator
                 });
             }
         }
+
+        void TranslateModuleConfiguration(string moduleName,
+                                          XmlDocument xml,
+                                          List<GeneratedConfigurationFile> files,
+                                          List<GeneratedConfigurationFile> fragments,
+                                          List<PropertyGroup> propertyGroups)
+        {
+            PropertyGroup pg = new PropertyGroup { Name = moduleName + " - Module Configuration" };
+            HashSet<string> localProperties = new HashSet<string>();
+
+            foreach (var module in xml.DocumentElement.SelectElements("module"))
+            {
+                foreach (var prop in module.SelectElements("property"))
+                {
+                    var id = prop.GetStringAttribute("id");
+                    localProperties.Add(id);
+
+                    var entry = new PropertyEntry.String
+                    {
+                        UniqueID = id,
+                        Name = prop.TryGetStringAttribute("display") ?? id,
+                        Description = prop.TryGetStringAttribute("description"),
+                        DefaultValue = prop.TryGetStringAttribute("default"),
+                    };
+
+                    pg.Properties.Add(entry);
+                    RegisterProperty(prop, id, entry);
+                }
+
+                TranslateModuleConfigurationFragment(module, "header", fragments, localProperties, moduleName);
+                TranslateModuleConfigurationFragment(module, "includes", fragments, localProperties, moduleName);
+                TranslateModuleConfigurationFragment(module, "declarations", fragments, localProperties, moduleName);
+            }
+
+            AssignCommonPropertyGroupPrefix(pg);
+
+            if (pg.Properties.Count > 0)
+            {
+                propertyGroups.Add(pg);
+            }
+        }
+
+        private void TranslateModuleConfigurationFragment(XmlElement module, string type, List<GeneratedConfigurationFile> files, HashSet<string> localProperties, string referringFile)
+        {
+            if (module.SelectSingleNode(type) is XmlElement e)
+            {
+                List<string> configLines = new List<string>();
+                string baseIndent = null;
+                foreach (var rawLine in e.InnerText.Split('\n'))
+                {
+                    var line = rawLine.TrimEnd();
+
+                    if (line.Trim() == "" && configLines.Count == 0)
+                        continue;
+
+                    if (baseIndent == null)
+                        baseIndent = line.Substring(0, line.Length - line.TrimStart(' ', '\t').Length);
+
+                    if (line.StartsWith(baseIndent))
+                        line = line.Substring(baseIndent.Length);
+
+                    //Translate the ${var.name} references to $$var.name$$
+                    var matches = rgPropertyReference.Matches(line);
+
+                    foreach (var m in matches.OfType<Match>().OrderByDescending(m => m.Index))
+                    {
+                        var vn = m.Groups[1].Value;
+                        int idx = vn.IndexOf("::");
+                        if (idx != -1)
+                            vn = vn.Substring(idx + 2);
+
+                        var value = $"$${vn}$$";
+
+                        if (!localProperties.Contains(vn))
+                            _UnknownProperties.Add(new UnknownProperty { PropertyName = vn, ReferringFile = referringFile });
+
+                        line = line.Substring(0, m.Index) + value + line.Substring(m.Index + m.Length);
+                    }
+
+                    configLines.Add(line);
+                }
+
+                files.Add(new GeneratedConfigurationFile
+                {
+                    Name = CommonDataSnippetPrefix + type,
+                    Contents = new GeneratedConfigurationFile.Fragment[] { new GeneratedConfigurationFile.Fragment.BasicFragment { Lines = configLines.ToArray() } }
+                });
+            }
+        }
+
+        public const string CommonDataSnippetPrefix = "com.renesas.ra.snippet.";
 
         private bool TranslateSpecialConfigFile(XmlElement cf, List<GeneratedConfigurationFile.Fragment> fragments)
         {
@@ -340,7 +437,7 @@ namespace renesas_ra_bsp_generator
             if (entry != null)
                 ctx.Entries.Add(entry);
 
-            foreach(var option in prop.SelectElements("option"))
+            foreach (var option in prop.SelectElements("option"))
             {
                 var valID = option.GetStringAttribute("id");
                 string value;

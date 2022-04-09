@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<ArrayOfGeneratedConfigurationFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <GeneratedConfigurationFile>
+    <Name>ra_gen/common_data.h</Name>
+    <Contents>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>#pragma once</string>
+          <string>#include &lt;stdint.h&gt;</string>
+          <string>#include "bsp_api.h"</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.snippet.includes</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>FSP_HEADER</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.snippet.header</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>void g_common_init(void);</string>
+          <string>FSP_FOOTER</string>
+        </Lines>
+      </Fragment>
+    </Contents>
+  </GeneratedConfigurationFile>
+  <GeneratedConfigurationFile>
+    <Name>ra_gen/common_data.c</Name>
+    <Contents>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>#include "common_data.h"</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.snippet.declarations</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>void g_common_init(void)</string>
+          <string>{</string>
+          <string>}</string>
+        </Lines>
+      </Fragment>
+    </Contents>
+  </GeneratedConfigurationFile>
+</ArrayOfGeneratedConfigurationFile>
