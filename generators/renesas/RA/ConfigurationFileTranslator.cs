@@ -117,7 +117,7 @@ namespace renesas_ra_bsp_generator
             }
 
             TranslateClockSettings(xml, files, propertyGroups);
-            TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups);
+            TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, "0");
 
             if (files.Count > 0)
                 fw.GeneratedConfigurationFiles = files.ToArray();
@@ -231,33 +231,30 @@ namespace renesas_ra_bsp_generator
                                           XmlDocument xml,
                                           List<GeneratedConfigurationFile> files,
                                           List<GeneratedConfigurationFile> fragments,
-                                          List<PropertyGroup> propertyGroups)
+                                          List<PropertyGroup> propertyGroups,
+                                          List<SysVarEntry> fixedValues,
+                                          string instanceName)
         {
             PropertyGroup pg = new PropertyGroup { Name = moduleName + " - Module Configuration" };
             HashSet<string> localProperties = new HashSet<string>();
 
             foreach (var module in xml.DocumentElement.SelectElements("module"))
             {
+                ModuleFlags flags = ModuleFlags.None;
+                if (module.GetAttribute("common") == "1")
+                    flags |= ModuleFlags.IsCommon;
+
                 foreach (var prop in module.SelectElements("property"))
                 {
                     var id = prop.GetStringAttribute("id");
                     localProperties.Add(id);
 
-                    var entry = new PropertyEntry.String
-                    {
-                        UniqueID = id,
-                        Name = prop.TryGetStringAttribute("display") ?? id,
-                        Description = prop.TryGetStringAttribute("description"),
-                        DefaultValue = prop.TryGetStringAttribute("default"),
-                    };
-
-                    pg.Properties.Add(entry);
-                    RegisterProperty(prop, id, entry);
+                    TranslateSingleProperty(prop, fixedValues, pg.Properties, PropertyTranslationFlags.None, instanceName);
                 }
 
-                TranslateModuleConfigurationFragment(module, "header", fragments, localProperties, moduleName);
-                TranslateModuleConfigurationFragment(module, "includes", fragments, localProperties, moduleName);
-                TranslateModuleConfigurationFragment(module, "declarations", fragments, localProperties, moduleName);
+                TranslateModuleConfigurationFragment(module, "header", fragments, localProperties, moduleName, flags, instanceName);
+                TranslateModuleConfigurationFragment(module, "includes", fragments, localProperties, moduleName, flags, instanceName);
+                TranslateModuleConfigurationFragment(module, "declarations", fragments, localProperties, moduleName, flags, instanceName);
             }
 
             AssignCommonPropertyGroupPrefix(pg);
@@ -268,7 +265,20 @@ namespace renesas_ra_bsp_generator
             }
         }
 
-        private void TranslateModuleConfigurationFragment(XmlElement module, string type, List<GeneratedConfigurationFile> files, HashSet<string> localProperties, string referringFile)
+        [Flags]
+        enum ModuleFlags
+        {
+            None,
+            IsCommon = 1,
+        }
+
+        void TranslateModuleConfigurationFragment(XmlElement module,
+                                                  string type,
+                                                  List<GeneratedConfigurationFile> files,
+                                                  HashSet<string> localProperties,
+                                                  string referringFile,
+                                                  ModuleFlags flags,
+                                                  string instanceName)
         {
             if (module.SelectSingleNode(type) is XmlElement e)
             {
@@ -277,6 +287,7 @@ namespace renesas_ra_bsp_generator
                 foreach (var rawLine in e.InnerText.Split('\n'))
                 {
                     var line = rawLine.TrimEnd();
+                    line = SubstituteInstanceName(line, instanceName);
 
                     if (line.Trim() == "" && configLines.Count == 0)
                         continue;
@@ -308,15 +319,22 @@ namespace renesas_ra_bsp_generator
                     configLines.Add(line);
                 }
 
+                string prefix;
+                if ((flags & ModuleFlags.IsCommon) != ModuleFlags.None)
+                    prefix = CommonDataSnippetPrefix;
+                else
+                    prefix = HALDataSnippetPrefix;
+
                 files.Add(new GeneratedConfigurationFile
                 {
-                    Name = CommonDataSnippetPrefix + type,
+                    Name = prefix + type,
                     Contents = new GeneratedConfigurationFile.Fragment[] { new GeneratedConfigurationFile.Fragment.BasicFragment { Lines = configLines.ToArray() } }
                 });
             }
         }
 
-        public const string CommonDataSnippetPrefix = "com.renesas.ra.snippet.";
+        public const string HALDataSnippetPrefix = "com.renesas.ra.snippet.hal.";
+        public const string CommonDataSnippetPrefix = "com.renesas.ra.snippet.common.";
 
         private bool TranslateSpecialConfigFile(XmlElement cf, List<GeneratedConfigurationFile.Fragment> fragments)
         {
@@ -336,74 +354,97 @@ namespace renesas_ra_bsp_generator
             return false;
         }
 
+        [Flags]
+        enum PropertyTranslationFlags
+        {
+            None = 0,
+            ComputeDefaultValuesForFlashID = 1,
+            TreatZeroOptionsAsFixedValues = 2,
+        }
+
+        Regex rgIDCodeProperty = new Regex("config.bsp.common.id([1-4]|_fixed)");
+
+        static string SubstituteInstanceName(string str, string inst) => inst == null ? str : str?.Replace("${_instance}", inst);
+
+        PropertyEntry TranslateSingleProperty(XmlElement prop,
+                                              List<SysVarEntry> fixedValues,
+                                              List<PropertyEntry> properties,
+                                              PropertyTranslationFlags flags = PropertyTranslationFlags.None,
+                                              string instanceName = null)
+        {
+            string id = prop.GetStringAttribute("id") ?? throw new Exception("Missing property ID");
+            var name = prop.TryGetStringAttribute("display");
+            var defaultValue = prop.TryGetStringAttribute("default");
+
+            if (defaultValue == null && (flags & PropertyTranslationFlags.ComputeDefaultValuesForFlashID) != PropertyTranslationFlags.None)
+            {
+                var m = rgIDCodeProperty.Match(id);
+                if (m.Success)
+                {
+                    //The original BSP contains non-trivial JavaScript logic for computing the individual IDs (including the default one).
+                    //Since VisualGDB does not have a JavaScript interpreter, we simply specify the default value explicitly, and allow the user to override them.
+                    if (m.Groups[1].Length > 1)
+                        defaultValue = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+                    else
+                        defaultValue = "FFFFFFFF";
+                }
+            }
+
+            var options = prop.SelectElements("option").ToArray();
+            PropertyEntry entry;
+            if (options.Length == 1 && options[0].GetStringAttribute("id") == defaultValue)
+            {
+                var val = options[0].GetStringAttribute("value");
+                fixedValues.Add(new SysVarEntry { Key = id, Value = SubstituteInstanceName(val, instanceName) });
+                _FixedValues.Add(id);
+                return null;
+            }
+            else if (string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(defaultValue) && options.Length == 0
+                && (flags & PropertyTranslationFlags.TreatZeroOptionsAsFixedValues) != PropertyTranslationFlags.None)
+            {
+                fixedValues.Add(new SysVarEntry { Key = id, Value = SubstituteInstanceName(defaultValue, instanceName) });
+                _FixedValues.Add(id);
+                return null;
+            }
+            else if (options.Length > 0)
+            {
+                entry = new PropertyEntry.Enumerated
+                {
+                    DefaultEntryIndex = Enumerable.Range(0, options.Length).FirstOrDefault(i => options[i].GetStringAttribute("id") == defaultValue),
+                    SuggestionList = options.Select(o =>
+                    new PropertyEntry.Enumerated.Suggestion
+                    {
+                        InternalValue = SubstituteInstanceName(o.GetAttribute("value") ?? throw new Exception("Missing option value"), instanceName),
+                        UserFriendlyName = SubstituteInstanceName(o.GetAttribute("display") ?? throw new Exception("Missing option label"), instanceName),
+                    }).ToArray()
+                };
+            }
+            else
+            {
+                entry = new PropertyEntry.String
+                {
+                    DefaultValue = SubstituteInstanceName(defaultValue, instanceName),
+                };
+            }
+
+            RegisterProperty(prop, id, entry);
+
+            entry.UniqueID = id;
+            if (string.IsNullOrEmpty(name))
+                entry.Name = id.Split('.').LastOrDefault();
+            else
+                entry.Name = name;
+
+            properties.Add(entry);
+            return entry;
+        }
+
         PropertyGroup[] TranslateModuleProperties(EmbeddedFramework fw, XmlElement cf, List<SysVarEntry> fixedValues)
         {
-            Regex rgIDCodeProperty = new Regex("config.bsp.common.id([1-4]|_fixed)");
             var pg = new PropertyGroup { Name = fw.UserFriendlyName };
             foreach (var prop in cf.SelectElements("property"))
             {
-                string id = prop.GetStringAttribute("id") ?? throw new Exception("Missing property ID");
-                var name = prop.TryGetStringAttribute("display");
-                var defaultValue = prop.TryGetStringAttribute("default");
-
-                if (defaultValue == null)
-                {
-                    var m = rgIDCodeProperty.Match(id);
-                    if (m.Success)
-                    {
-                        //The original BSP contains non-trivial JavaScript logic for computing the individual IDs (including the default one).
-                        //Since VisualGDB does not have a JavaScript interpreter, we simply specify the default value explicitly, and allow the user to override them.
-                        if (m.Groups[1].Length > 1)
-                            defaultValue = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-                        else
-                            defaultValue = "FFFFFFFF";
-                    }
-                }
-
-                var options = prop.SelectElements("option").ToArray();
-                PropertyEntry entry;
-                if (options.Length == 1 && options[0].GetStringAttribute("id") == defaultValue)
-                {
-                    fixedValues.Add(new SysVarEntry { Key = id, Value = options[0].GetStringAttribute("value") });
-                    _FixedValues.Add(id);
-                    continue;
-                }
-                else if (string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(defaultValue) && options.Length == 0)
-                {
-                    fixedValues.Add(new SysVarEntry { Key = id, Value = defaultValue });
-                    _FixedValues.Add(id);
-                    continue;
-                }
-                else if (options.Length > 0)
-                {
-                    entry = new PropertyEntry.Enumerated
-                    {
-                        DefaultEntryIndex = Enumerable.Range(0, options.Length).FirstOrDefault(i => options[i].GetStringAttribute("id") == defaultValue),
-                        SuggestionList = options.Select(o =>
-                        new PropertyEntry.Enumerated.Suggestion
-                        {
-                            InternalValue = o.GetAttribute("value") ?? throw new Exception("Missing option value"),
-                            UserFriendlyName = o.GetAttribute("display") ?? throw new Exception("Missing option label"),
-                        }).ToArray()
-                    };
-                }
-                else
-                {
-                    entry = new PropertyEntry.String
-                    {
-                        DefaultValue = defaultValue,
-                    };
-                }
-
-                RegisterProperty(prop, id, entry);
-
-                entry.UniqueID = id;
-                if (string.IsNullOrEmpty(name))
-                    entry.Name = id.Split('.').LastOrDefault();
-                else
-                    entry.Name = name;
-
-                pg.Properties.Add(entry);
+                TranslateSingleProperty(prop, fixedValues, pg.Properties, PropertyTranslationFlags.ComputeDefaultValuesForFlashID | PropertyTranslationFlags.TreatZeroOptionsAsFixedValues);
             }
 
             AssignCommonPropertyGroupPrefix(pg);

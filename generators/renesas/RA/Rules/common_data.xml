@@ -11,7 +11,7 @@
         </Lines>
       </Fragment>
       <Fragment xsi:type="MergeableFragment">
-        <InputName>com.renesas.ra.snippet.includes</InputName>
+        <InputName>com.renesas.ra.snippet.common.includes</InputName>
       </Fragment>
       <Fragment xsi:type="BasicFragment">
         <Lines>
@@ -19,7 +19,7 @@
         </Lines>
       </Fragment>
       <Fragment xsi:type="MergeableFragment">
-        <InputName>com.renesas.ra.snippet.header</InputName>
+        <InputName>com.renesas.ra.snippet.common.header</InputName>
       </Fragment>
       <Fragment xsi:type="BasicFragment">
         <Lines>
@@ -38,12 +38,64 @@
         </Lines>
       </Fragment>
       <Fragment xsi:type="MergeableFragment">
-        <InputName>com.renesas.ra.snippet.declarations</InputName>
+        <InputName>com.renesas.ra.snippet.common.declarations</InputName>
       </Fragment>
       <Fragment xsi:type="BasicFragment">
         <Lines>
           <string>void g_common_init(void)</string>
           <string>{</string>
+          <string>}</string>
+        </Lines>
+      </Fragment>
+    </Contents>
+  </GeneratedConfigurationFile>
+  <GeneratedConfigurationFile>
+    <Name>ra_gen/hal_data.h</Name>
+    <Contents>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>#pragma once</string>
+          <string>#include &lt;stdint.h&gt;</string>
+          <string>#include "bsp_api.h"</string>
+          <string>#include "common_data.h"</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.snippet.hal.includes</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>FSP_HEADER</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.snippet.hal.header</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>void hal_entry(void);</string>
+          <string>void g_hal_init(void);</string>
+          <string>FSP_FOOTER</string>
+        </Lines>
+      </Fragment>
+    </Contents>
+  </GeneratedConfigurationFile>
+  <GeneratedConfigurationFile>
+    <Name>ra_gen/hal_data.c</Name>
+    <Contents>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>#include "hal_data.h"</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.snippet.hal.declarations</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>void g_hal_init(void)</string>
+          <string>{</string>
+          <string>    g_common_init ();</string>
           <string>}</string>
         </Lines>
       </Fragment>
