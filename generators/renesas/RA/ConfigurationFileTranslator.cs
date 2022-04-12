@@ -28,6 +28,8 @@ namespace renesas_ra_bsp_generator
         readonly HashSet<string> _FixedValues = new HashSet<string>();
         readonly List<UnknownProperty> _UnknownProperties = new List<UnknownProperty>();
 
+        readonly EnumTranslator _EnumTranslator = new EnumTranslator();
+
         static Regex rgPropertyReference = new Regex(@"\$\{([^${}]+)\}");
 
         public void TranslateModuleDescriptionFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
@@ -117,6 +119,7 @@ namespace renesas_ra_bsp_generator
             }
 
             TranslateClockSettings(xml, files, propertyGroups);
+            _EnumTranslator.ProcessEnumDefinitions(xml, fixedValues);
             TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, "0");
 
             if (files.Count > 0)
@@ -226,6 +229,7 @@ namespace renesas_ra_bsp_generator
                 });
             }
         }
+
 
         void TranslateModuleConfiguration(string moduleName,
                                           XmlDocument xml,
@@ -392,7 +396,11 @@ namespace renesas_ra_bsp_generator
 
             var options = prop.SelectElements("option").ToArray();
             PropertyEntry entry;
-            if (options.Length == 1 && options[0].GetStringAttribute("id") == defaultValue)
+            if (prop.SelectSingleNode("select[@enum]/@enum")?.InnerText is string eid && eid != "")
+            {
+                entry = _EnumTranslator.CreatePendingEntryForEnum(eid);
+            }
+            else if (options.Length == 1 && options[0].GetStringAttribute("id") == defaultValue && fixedValues != null)
             {
                 var val = options[0].GetStringAttribute("value");
                 fixedValues.Add(new SysVarEntry { Key = id, Value = SubstituteInstanceName(val, instanceName) });
@@ -435,7 +443,7 @@ namespace renesas_ra_bsp_generator
             else
                 entry.Name = name;
 
-            properties.Add(entry);
+            properties?.Add(entry);
             return entry;
         }
 
@@ -594,7 +602,7 @@ namespace renesas_ra_bsp_generator
 
         List<PendingConfigurationTranslation> _PendingConfigurationTranslations = new List<PendingConfigurationTranslation>();
 
-        public void TranslatePendingModuleConfigurations(BSPReportWriter report)
+        public void GenerateFrameworkDependentDefaultValues(BSPReportWriter report)
         {
             foreach (var cfg in _PendingConfigurationTranslations)
             {
@@ -614,6 +622,8 @@ namespace renesas_ra_bsp_generator
                     report.ReportMergeableError("Unknown property name:", rec.PropertyName);
                 }
             }
+
+            _EnumTranslator.ExpandEnumReferences(report);
         }
 
         static void TranslatePinNames(PendingConfigurationTranslation cfg, List<SysVarEntry> vars)

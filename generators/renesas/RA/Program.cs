@@ -594,7 +594,7 @@ namespace renesas_ra_bsp_generator
 
             public void GenerateFrameworkDependentDefaultValues()
             {
-                _ConfigFileTranslator.TranslatePendingModuleConfigurations(Report);
+                _ConfigFileTranslator.GenerateFrameworkDependentDefaultValues(Report);
             }
         }
 
