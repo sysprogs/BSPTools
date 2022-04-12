@@ -231,6 +231,13 @@ namespace renesas_ra_bsp_generator
         }
 
 
+        class LocalPropertyContext
+        {
+            public List<string> BooleanSubproperties = new List<string>();
+
+            public string FinalExpression => string.Join("", BooleanSubproperties.Select(p => $"$${p}$$"));
+        }
+
         void TranslateModuleConfiguration(string moduleName,
                                           XmlDocument xml,
                                           List<GeneratedConfigurationFile> files,
@@ -240,7 +247,7 @@ namespace renesas_ra_bsp_generator
                                           string instanceName)
         {
             PropertyGroup pg = new PropertyGroup { Name = moduleName + " - Module Configuration" };
-            HashSet<string> localProperties = new HashSet<string>();
+            Dictionary<string, LocalPropertyContext> localProperties = new Dictionary<string, LocalPropertyContext>();
 
             foreach (var module in xml.DocumentElement.SelectElements("module"))
             {
@@ -251,9 +258,39 @@ namespace renesas_ra_bsp_generator
                 foreach (var prop in module.SelectElements("property"))
                 {
                     var id = prop.GetStringAttribute("id");
-                    localProperties.Add(id);
+                    if (prop.TryGetStringAttribute("bitmapPrefix") is string pfx)
+                    {
+                        //This is a special bitfield property that gets translated into multiple VisualGDB-level properties
+                        if (prop.TryGetStringAttribute("default") is string def && def != "0U")
+                            throw new Exception("Default values for bitfield properties are not supported");
 
-                    TranslateSingleProperty(prop, fixedValues, pg.Properties, PropertyTranslationFlags.None, instanceName);
+                        List<string> allOptions = new List<string>();
+
+                        var propName = prop.GetStringAttribute("display");
+
+                        foreach (var option in prop.SelectElements("option"))
+                        {
+                            var oid = option.GetStringAttribute("id");
+                            var ov = option.GetStringAttribute("value");
+                            var od = option.GetStringAttribute("display");
+
+                            allOptions.Add(oid);
+                            pg.Properties.Add(new PropertyEntry.Boolean
+                            {
+                                UniqueID = oid,
+                                Name = $"{propName} - {od}",
+                                ValueForTrue = $"{pfx}{ov} | ",
+                                ValueForFalse = ""
+                            });
+                        }
+
+                        localProperties[id] = new LocalPropertyContext { BooleanSubproperties = allOptions };
+                    }
+                    else
+                    {
+                        localProperties[id] = null;
+                        TranslateSingleProperty(prop, fixedValues, pg.Properties, PropertyTranslationFlags.None, instanceName);
+                    }
                 }
 
                 TranslateModuleConfigurationFragment(module, "header", fragments, localProperties, moduleName, flags, instanceName);
@@ -279,7 +316,7 @@ namespace renesas_ra_bsp_generator
         void TranslateModuleConfigurationFragment(XmlElement module,
                                                   string type,
                                                   List<GeneratedConfigurationFile> files,
-                                                  HashSet<string> localProperties,
+                                                  Dictionary<string, LocalPropertyContext> localProperties,
                                                   string referringFile,
                                                   ModuleFlags flags,
                                                   string instanceName)
@@ -314,8 +351,10 @@ namespace renesas_ra_bsp_generator
 
                         var value = $"$${vn}$$";
 
-                        if (!localProperties.Contains(vn))
+                        if (!localProperties.TryGetValue(vn, out var pctx))
                             _UnknownProperties.Add(new UnknownProperty { PropertyName = vn, ReferringFile = referringFile });
+                        else if (pctx != null)
+                            value = pctx.FinalExpression;
 
                         line = line.Substring(0, m.Index) + value + line.Substring(m.Index + m.Length);
                     }
