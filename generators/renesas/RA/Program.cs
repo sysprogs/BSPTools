@@ -567,6 +567,7 @@ namespace renesas_ra_bsp_generator
                                 RequiredFrameworks = refs,
                             };
 
+                            PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles"), targetDir);
                             XmlTools.SaveObject(sample, Path.Combine(targetDir, "sample.xml"));
                         }
                     }
@@ -706,6 +707,7 @@ namespace renesas_ra_bsp_generator
                     }
 
                     var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All);
+                    famObj.AdditionalTestProgramLines = new[] { "int __Vectors;" };
 
                     familyDefinitions.Add(famObj);
                 }
