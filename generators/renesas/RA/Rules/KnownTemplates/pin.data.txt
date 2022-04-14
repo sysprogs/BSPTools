@@ -1,0 +1,61 @@
+
+/* generated pin source file - do not edit */
+#include "bsp_api.h"
+#include "r_ioport_api.h"
+
+[#list configs as config]
+
+[#if config.pins?size > 0]
+const ioport_pin_cfg_t ${config.symbol}_data[] = {
+    [#list config.pins?sort_by("pin")?sort_by("port") as pin]
+    {
+        .pin = BSP_IO_PORT_${pin.port}_PIN_${pin.pin},
+        .pin_cfg = ([#list pin.masks?sort as mask](uint32_t) ${mask}[#if mask_has_next] | [/#if][/#list])
+    },
+    [/#list]
+};
+[/#if]
+
+[#if config.pins?size > 0]
+const ioport_cfg_t ${config.symbol} = {
+    .number_of_pins = sizeof(${config.symbol}_data)/sizeof(ioport_pin_cfg_t),
+    .p_pin_cfg_data = &${config.symbol}_data[0],
+};
+[#else]
+const ioport_cfg_t ${config.symbol} = {
+    .number_of_pins = 0,
+    .p_pin_cfg_data = NULL
+};
+[/#if]
+[/#list]
+
+#if BSP_TZ_SECURE_BUILD
+
+void R_BSP_PinCfgSecurityInit(void);
+
+/* Initialize SAR registers for secure pins. */
+void R_BSP_PinCfgSecurityInit(void)
+{
+    uint16_t pmsar[BSP_FEATURE_BSP_NUM_PMSAR];
+    memset(pmsar, 0xFF, BSP_FEATURE_BSP_NUM_PMSAR * sizeof(R_PMISC->PMSAR[0]));
+
+[#list configs as config]
+
+    for(uint32_t i = 0; i < ${config.symbol}.number_of_pins; i++)
+    {
+        uint32_t port_pin = ${config.symbol}.p_pin_cfg_data[i].pin;
+        uint32_t port = port_pin >> 8U;
+        uint32_t pin = port_pin & 0xFFU;
+        pmsar[port] &= (uint16_t) ~(1U << pin);
+    }
+
+    for(uint32_t i = 0; i < BSP_FEATURE_BSP_NUM_PMSAR; i++)
+    {
+        R_PMISC->PMSAR[i].PMSAR = pmsar[i];
+    }
+
+[/#list]
+}
+#endif
+
+        

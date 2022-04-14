@@ -5,24 +5,13 @@
       <string>#include "r_ioport.h"</string>
     </Lines>
   </Fragment>
-  <Fragment xsi:type="ListFragment">
-    <VariableName>com.renesas.ra.device.pin_names</VariableName>
-    <Token>[pin]</Token>
-    <Separator>;</Separator>
-    <Template>
-      <string>#define [pin] ($$com.renesas.ra.pin.[pin].value$$)</string>
-    </Template>
-  </Fragment>
-  <Fragment xsi:type="ListFragment">
-    <VariableName>com.renesas.ra.device.pincfg_symbols</VariableName>
-    <Token>[pincfg]</Token>
-    <Separator>;</Separator>
-    <Template>
-      <string>extern const ioport_cfg_t [pincfg]; /* $$com.renesas.ra.pincfg.[pincfg].name$$ */</string>
-    </Template>
+  <Fragment xsi:type="MergeableFragment">
+    <InputName>com.renesas.ra.device.pins.macros</InputName>
   </Fragment>
   <Fragment xsi:type="BasicFragment">
     <Lines>
+      <string></string>
+      <string>extern const ioport_cfg_t g_bsp_pin_cfg;</string>
       <string></string>
       <string>void BSP_PinConfigSecurityInit();</string>
     </Lines>

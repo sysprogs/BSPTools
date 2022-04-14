@@ -337,6 +337,9 @@ namespace renesas_ra_bsp_generator
 
                         if (!string.IsNullOrEmpty(comp.ID.Variant))
                         {
+                            if (type != ComponentType.MCU)
+                                throw new Exception("MCU-specific variants are only expected for MCU support packages");
+
                             fw.MCUFilterRegex = comp.ID.Variant;
                             fw.ClassID = fw.ID + ".mcu";
                             VerifyMatch(ref _MCUPackageClassID, fw.ClassID);
@@ -401,7 +404,15 @@ namespace renesas_ra_bsp_generator
                             _ConfigFileTranslator.ProcessModuleConfiguration(fw, zf.ExtractXMLFile(moduleConf), Report);
 
                         if (type == ComponentType.Common && fw.ID.EndsWith(".fsp_common"))
-                            fw.GeneratedConfigurationFiles = XmlTools.LoadObject<GeneratedConfigurationFile[]>(@"..\..\Rules\common_data.xml");
+                            fw.GeneratedConfigurationFiles = fw.GeneratedConfigurationFiles.Concat(XmlTools.LoadObject<GeneratedConfigurationFile[]>(@"..\..\Rules\common_data.xml")).ToArray();
+
+                        if (type == ComponentType.MCU && comp.ID.Variant != "")
+                        {
+                            var (pg, cf) = PinConfigurationTranslator.BuildPinPropertyGroup(_AllPinouts[comp.ID.Variant]);
+                            fw.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup>() };
+                            fw.ConfigurableProperties.PropertyGroups.Add(pg);
+                            fw.GeneratedConfigurationFragments = (fw.GeneratedConfigurationFragments ?? new GeneratedConfigurationFile[0]).Append(cf).ToArray();
+                        }
 
                         frameworkList.Add(fw);
                     }
@@ -429,6 +440,7 @@ namespace renesas_ra_bsp_generator
             }
 
             Dictionary<string, string> FamilyPrefixes = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            Dictionary<string, PinConfigurationTranslator.DevicePinout> _AllPinouts = new Dictionary<string, PinConfigurationTranslator.DevicePinout>();
 
             public void ComputeFamilyRegexes(RenesasDeviceDatabase.ParsedDevice[] devs)
             {
@@ -448,6 +460,9 @@ namespace renesas_ra_bsp_generator
 
                 foreach (var dev in devs)
                 {
+                    foreach (var v in dev.Variants)
+                        _AllPinouts[v.Name] = v.Pinout;
+
                     foreach (var kv in FamilyPrefixes)
                     {
                         bool prefixMatch = dev.FinalMCUName.StartsWith(kv.Value);
@@ -594,7 +609,7 @@ namespace renesas_ra_bsp_generator
 
             public void GenerateFrameworkDependentDefaultValues()
             {
-                _ConfigFileTranslator.GenerateFrameworkDependentDefaultValues(Report);
+                _ConfigFileTranslator.GenerateFrameworkDependentDefaultValues(Report, _AllPinouts);
             }
         }
 
@@ -662,6 +677,7 @@ namespace renesas_ra_bsp_generator
                         }
                     });
 
+                    
                     foreach (var mcu in fam)
                     {
                         famBuilder.MCUs.Add(new MCUBuilder { Name = mcu.Name, Core = mcu.Core });

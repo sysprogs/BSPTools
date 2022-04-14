@@ -118,6 +118,26 @@ namespace renesas_ra_bsp_generator
                         propertyGroups.Add(pg);
             }
 
+            if (xml.DocumentElement.SelectElements("pin[@config='config.bsp.pin']").SingleOrDefault() is XmlElement pinConfigFile)
+            {
+                List<GeneratedConfigurationFile.Fragment> fragments = new List<GeneratedConfigurationFile.Fragment>();
+                if (!TranslateSpecialConfigFile(pinConfigFile, fragments, "declarations"))
+                    throw new Exception("Could not find the template for the pin configuration file");
+
+                files.Add(new GeneratedConfigurationFile
+                {
+                    Name = "ra_gen/pin_data.c",
+                    Contents = fragments.ToArray(),
+                });
+            }
+            
+
+            if (xml.DocumentElement.SelectElements("board").SingleOrDefault()?.GetStringAttribute("device") is string dev)
+            {
+                //This is a board framework referencing a specific device. Refine the MCU filter.
+                fw.MCUFilterRegex = dev;
+            }
+
             TranslateClockSettings(xml, files, propertyGroups);
             _EnumTranslator.ProcessEnumDefinitions(xml, fixedValues);
             TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, "0");
@@ -379,13 +399,13 @@ namespace renesas_ra_bsp_generator
         public const string HALDataSnippetPrefix = "com.renesas.ra.snippet.hal.";
         public const string CommonDataSnippetPrefix = "com.renesas.ra.snippet.common.";
 
-        private bool TranslateSpecialConfigFile(XmlElement cf, List<GeneratedConfigurationFile.Fragment> fragments)
+        private bool TranslateSpecialConfigFile(XmlElement cf, List<GeneratedConfigurationFile.Fragment> fragments, string contentNodeName = "content")
         {
             var id = cf.TryGetStringAttribute("id");
             var expectedTemplate = $@"..\..\Rules\KnownTemplates\{id}.txt";
             if (File.Exists(expectedTemplate))
             {
-                var text = cf.SelectSingleNode("content").InnerText;
+                var text = cf.SelectSingleNode(contentNodeName).InnerText;
                 if (text != File.ReadAllText(expectedTemplate))
                     throw new Exception("Unexpected special template. Please update the logic below");
 
@@ -641,17 +661,21 @@ namespace renesas_ra_bsp_generator
 
         List<PendingConfigurationTranslation> _PendingConfigurationTranslations = new List<PendingConfigurationTranslation>();
 
-        public void GenerateFrameworkDependentDefaultValues(BSPReportWriter report)
+        public void GenerateFrameworkDependentDefaultValues(BSPReportWriter report, Dictionary<string, PinConfigurationTranslator.DevicePinout> devicePinouts)
         {
             foreach (var cfg in _PendingConfigurationTranslations)
             {
                 List<SysVarEntry> vars = new List<SysVarEntry>();
+                List<GeneratedConfigurationFile> fragments = new List<GeneratedConfigurationFile>();
                 TranslateDefaultValueOverrides(report, cfg, vars);
-                TranslatePinNames(cfg, vars);
-                TranslatePinConfigurations(cfg, vars);
+                var pinout = devicePinouts[cfg.Framework.MCUFilterRegex];   //If this doesn't yield any matches, check the assignment logic in TranslateModuleDescriptionFiles()
+
+                PinConfigurationTranslator.TranslatePinConfigurationsFromBoardComponent(cfg.Xml, vars, fragments, pinout, report);
 
                 if (vars.Count > 0)
                     cfg.Framework.AdditionalSystemVars = (cfg.Framework.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(vars).ToArray();
+                if (fragments.Count > 0)
+                    cfg.Framework.GeneratedConfigurationFragments = (cfg.Framework.GeneratedConfigurationFragments ?? new GeneratedConfigurationFile[0]).Concat(fragments).ToArray();
             }
 
             foreach (var rec in _UnknownProperties)
@@ -663,26 +687,6 @@ namespace renesas_ra_bsp_generator
             }
 
             _EnumTranslator.ExpandEnumReferences(report);
-        }
-
-        static void TranslatePinNames(PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
-        {
-            List<string> pins = new List<string>();
-            Regex rgPin = new Regex("p([0-9b])([0-9]{2})\\.symbolic_name");
-
-            foreach (var prop in cfg.Xml.DocumentElement.SelectElements("raPinConfiguration/symbolicName"))
-            {
-                var id = prop.GetStringAttribute("propertyId");
-                var value = prop.GetStringAttribute("value");
-                var m = rgPin.Match(id);
-                if (!m.Success)
-                    throw new Exception("Unexpected pin name: " + id);
-
-                pins.Add(value);
-                vars.Add(new SysVarEntry { Key = $"com.renesas.ra.pin.{value}.value", Value = $"IOPORT_PORT_0{m.Groups[1]}_PIN_{m.Groups[2]}" });
-            }
-
-            vars.Add(new SysVarEntry { Key = "com.renesas.ra.device.pin_names", Value = string.Join(";", pins) });
         }
 
         void TranslateDefaultValueOverrides(BSPReportWriter report, PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
@@ -734,20 +738,6 @@ namespace renesas_ra_bsp_generator
                 }
                 else
                     report.ReportRawError($"The '{id}' property set by the {frameworkID} framework is not an enumerated property");
-            }
-        }
-
-        static void TranslatePinConfigurations(PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
-        {
-            var pincfg = cfg.Xml.DocumentElement.SelectSingleNode("raPinConfiguration/pincfg[@active='true']") as XmlElement;
-
-            if (pincfg != null)
-            {
-                var name = pincfg.GetStringAttribute("name");
-                var symbol = pincfg.GetStringAttribute("symbol");
-
-                vars.Add(new SysVarEntry { Key = "com.renesas.ra.device.pincfg_symbols", Value = symbol });
-                vars.Add(new SysVarEntry { Key = $"com.renesas.ra.pincfg.{symbol}.name", Value = name });
             }
         }
     }

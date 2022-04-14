@@ -16,6 +16,7 @@ namespace renesas_ra_bsp_generator
         {
             public string Name;
             public string MemoryRegionsText;
+            public PinConfigurationTranslator.DevicePinout Pinout;
 
             public override string ToString() => Name;
         }
@@ -63,10 +64,23 @@ namespace renesas_ra_bsp_generator
                     if (pgrFiles.Length != 1)
                         throw new Exception("Unexpected number of device list files");
 
-                    Dictionary<string, ZipFile.Entry> rzoneFiles = zf.Entries
-                        .Where(e => e.FileName.EndsWith(".rzone", StringComparison.InvariantCultureIgnoreCase))
-                        .ToDictionary(e => Path.GetFileNameWithoutExtension(e.FileName), StringComparer.InvariantCultureIgnoreCase);
+                    Dictionary<string, ZipFile.Entry> rzoneFiles = new Dictionary<string, ZipFile.Entry>(StringComparer.InvariantCultureIgnoreCase);
+                    Dictionary<string, ZipFile.Entry> pincfgFiles = new Dictionary<string, ZipFile.Entry>(StringComparer.InvariantCultureIgnoreCase);
+                    Dictionary<string, PinConfigurationTranslator.DevicePinout> knownPinouts = new Dictionary<string, PinConfigurationTranslator.DevicePinout>();
 
+                    foreach(var e in zf.Entries)
+                    {
+                        if (e.FileName.EndsWith(".rzone", StringComparison.InvariantCultureIgnoreCase))
+                            rzoneFiles[Path.GetFileNameWithoutExtension(e.FileName)] = e;
+                        else if (e.FileName.EndsWith(".pincfg", StringComparison.InvariantCultureIgnoreCase))
+                            pincfgFiles[Path.GetFileNameWithoutExtension(e.FileName)] = e;
+                        else if (e.FileName.IndexOf(".pinmapping/PinCfg", StringComparison.InvariantCultureIgnoreCase) != -1 && e.FileName.EndsWith(".xml", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            var pinout = PinConfigurationTranslator.ParseDevicePinout(zf.ExtractEntry(e));
+                            knownPinouts[pinout.ID] = pinout;
+                        }
+                    }
+                        
                     var xml = new XmlDocument();
                     xml.LoadXml(Encoding.UTF8.GetString(zf.ExtractEntry(pgrFiles[0])));
 
@@ -86,7 +100,7 @@ namespace renesas_ra_bsp_generator
                                 if (!result.TryGetValue(shortName, out var devObj))
                                     result[shortName] = devObj = new ParsedDevice { Name = shortName, Core = parsedCore, FamilyName = familyName, MemoryMap = deviceMemories[fullName] };
 
-                                devObj.Variants.Add(BuildDeviceVariant(fullName, zf.ExtractEntry(rzoneFiles[fullName])));                                
+                                devObj.Variants.Add(BuildDeviceVariant(fullName, zf.ExtractEntry(rzoneFiles[fullName]), zf.ExtractEntry(pincfgFiles[fullName]), knownPinouts));
 
                                 if (deviceMemories.TryGetValue(fullName, out var thisMap) && !Enumerable.SequenceEqual(thisMap, devObj.MemoryMap))
                                     throw new Exception($"Inconistent memory maps for {devObj.Variants[0]}/{fullName}");
@@ -99,7 +113,8 @@ namespace renesas_ra_bsp_generator
             return result.Values.ToArray();
         }
 
-        public static DeviceVariant BuildDeviceVariant(string deviceName, byte[] rzoneFileContents)
+
+        public static DeviceVariant BuildDeviceVariant(string deviceName, byte[] rzoneFileContents, byte[] pincfgFileContents, Dictionary<string, PinConfigurationTranslator.DevicePinout> knownPinouts)
         {
             var xml = new XmlDocument();
             xml.LoadXml(Encoding.UTF8.GetString(rzoneFileContents));
@@ -114,7 +129,13 @@ namespace renesas_ra_bsp_generator
                 memoryRegionsFile.AppendLine($"{name}_LENGTH = 0x{size:x};");
             }
 
-            return new DeviceVariant { Name = deviceName, MemoryRegionsText = memoryRegionsFile.ToString() };
+            var xmlPinfg = new XmlDocument();
+            xmlPinfg.LoadXml(Encoding.UTF8.GetString(pincfgFileContents));
+            var nsmgr = new XmlNamespaceManager(xmlPinfg.NameTable);
+            nsmgr.AddNamespace("v1", "http://www.tasking.com/schema/pinsettings/v1.1");
+            var dev = xmlPinfg.DocumentElement.SelectSingleNode("v1:deviceSetting/@id", nsmgr)?.InnerXml ?? throw new Exception("Failed to locate the pinout ID");
+
+            return new DeviceVariant { Name = deviceName, MemoryRegionsText = memoryRegionsFile.ToString(), Pinout = knownPinouts[dev] };
         }
 
         private static Dictionary<string, MemoryArea[]> LoadDeviceMemories(DisposableZipFile zf)
