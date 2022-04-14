@@ -719,6 +719,8 @@ namespace renesas_ra_bsp_generator
 
             foreach (var e in propertyCtx.Entries)
             {
+                SysVarEntry entry = default;
+
                 if (e is PropertyEntry.Enumerated ep)
                 {
                     string defaultValueKey = "_default." + id;
@@ -733,11 +735,19 @@ namespace renesas_ra_bsp_generator
                     else
                         optionValue = propertyCtx.IDToValueMapping[value];
 
-                    vars.Add(new SysVarEntry { Key = defaultValueKey, Value = optionValue });
+                    var newVarEntry = new SysVarEntry { Key = defaultValueKey, Value = optionValue };
+                    entry ??= newVarEntry;
+
+                    if (entry.Value != newVarEntry.Value)
+                        throw new Exception("Inconsistent default values for " + id);
+
                     ep.DefaultEntryValue = $"$${defaultValueKey}$$";
                 }
                 else
                     report.ReportRawError($"The '{id}' property set by the {frameworkID} framework is not an enumerated property");
+
+                if (entry != null)
+                    vars.Add(entry);
             }
         }
     }

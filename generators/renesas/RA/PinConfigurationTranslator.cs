@@ -37,7 +37,7 @@ namespace renesas_ra_bsp_generator
 
             public bool IsValid => Port != 0;
 
-            public string GetMacroName(bool useBspSyntax) => (useBspSyntax ? "BSP_IO_PORT" : "IO_PORT") + $"_0{Port}_PIN_{Pin:d2}";
+            public string GetMacroName(bool useBspSyntax) => (useBspSyntax ? "BSP_IO_PORT" : "IOPORT_PORT") + $"_0{Port}_PIN_{Pin:d2}";
 
             public PinID(char port, int pin)
             {
@@ -63,17 +63,55 @@ namespace renesas_ra_bsp_generator
 
         public class PinMode
         {
+            public readonly PinSetting Setting;
             public string Name;
-            public string InternalID;
-            public string ModeMask;
+            public readonly string InternalID;
+            public readonly string ModeMask;
+
+            public bool IsEmpty => ModeMask == PinSetting.EmptyPinCfgValue;
+
+            public PinMode(PinSetting setting, string name, string internalID, string modeMask)
+            {
+                Setting = setting;
+                Name = name;
+                InternalID = internalID;
+                ModeMask = modeMask;
+            }
+
+            public string ValueForBSP
+            {
+                get
+                {
+                    if (IsEmpty)
+                        return Setting.IsFirst ? "0" : "";
+
+                    string result = "(uint32_t) " + ModeMask;
+                    if (!Setting.IsFirst)
+                        result = " | " + result;
+
+                    return result;
+                }
+            }
         }
 
         public class PinDefinition
         {
             public PinID ID;
-            public Dictionary<string, PinSetting> Settings = new Dictionary<string, PinSetting>();
+            public Dictionary<string, PinSetting> SettingsByID = new Dictionary<string, PinSetting>();
+            public List<PinSetting> Settings = new List<PinSetting>();  //All settings in original order
 
             public override string ToString() => $"{ID}: {Settings.Count} settings";
+
+            public bool Completed{ get; private set; }
+
+            public void Complete()
+            {
+                Completed = true;
+                if (!Settings[0].AffectsPincfgRegister)
+                    throw new Exception("First setting should affect PINCFG register");
+
+                Settings[0].IsFirst = true;
+            }
         }
 
         public class PinSetting
@@ -81,13 +119,17 @@ namespace renesas_ra_bsp_generator
             public const string EmptyPinCfgValue = "0";
 
             public string ID, Name;
-            public Dictionary<string, string> IDToPinCfg = new Dictionary<string, string>();
-            public Dictionary<string, PinMode> ModesByPinCfg = new Dictionary<string, PinMode>();
-            public string DefaultModeID;
+            public string FullID => PinConfigGroupID + ID;
+            public string DefaultValueID => "_default." + FullID;
 
-            public bool AffectsPincfgRegister => ModesByPinCfg.Count > 1 || ModesByPinCfg.First().Key != EmptyPinCfgValue;
+            public PinMode[] AllModes;                                  //Each mode listed exactly once
+            public Dictionary<string, PinMode> ModesByOriginalID;       //May have multiple entires for the same mode
 
-            public override string ToString() => $"{ID}: {ModesByPinCfg.Count} alternatives";
+            public bool IsFirst;
+
+            public bool AffectsPincfgRegister => AllModes != null && AllModes.Length > 1 || !AllModes[0].IsEmpty;
+
+            public override string ToString() => $"{ID}: {AllModes?.Length} alternatives";
         }
 
         public class DevicePinout
@@ -145,12 +187,16 @@ namespace renesas_ra_bsp_generator
                     else
                         pc.Name = $"{pinName} - " + cfgNode.GetStringAttribute("name");
 
+                    Dictionary<string, PinMode> modesByPincfg = new Dictionary<string, PinMode>();
+                    Dictionary<string, string> idToPincfg = new Dictionary<string, string>();
+                    string defaultModeID = null;
+
                     foreach (var altNode in cfgNode.SelectElements("alt"))
                     {
                         var altID = altNode.GetStringAttribute("id");
                         var altName = altNode.GetStringAttribute("name");
                         if (altNode.TryGetStringAttribute("default") == "true")
-                            pc.DefaultModeID = altID;
+                            defaultModeID = altID;
 
                         List<string> pincfgValues = new List<string>();
                         foreach (var reg in altNode.SelectElements("registerSetting"))
@@ -166,12 +212,12 @@ namespace renesas_ra_bsp_generator
                         if (pincfgValues.Count == 0)
                             pincfgMask = PinSetting.EmptyPinCfgValue;
 
-                        var mode = new PinMode { InternalID = altID, Name = altName, ModeMask = pincfgMask };
-                        pc.IDToPinCfg.Add(mode.InternalID, mode.ModeMask);    //Must be unique
-                        pc.ModesByPinCfg[mode.ModeMask] = mode;     //Might repeat
+                        var mode = new PinMode(pc, altName, altID, pincfgMask);
+                        idToPincfg.Add(mode.InternalID, mode.ModeMask);    //Must be unique
+                        modesByPincfg[mode.ModeMask] = mode;     //Might repeat
                     }
 
-                    foreach (var g in pc.ModesByPinCfg.Values.GroupBy(v => v.Name))
+                    foreach (var g in modesByPincfg.Values.GroupBy(v => v.Name))
                     {
                         if (g.Count() > 1)
                             foreach (var c in g)
@@ -184,9 +230,14 @@ namespace renesas_ra_bsp_generator
                             }
                     }
 
-                    pd.Settings[pc.ID] = pc;
+                    pc.AllModes = modesByPincfg.Values.ToArray();
+                    pc.ModesByOriginalID = idToPincfg.ToDictionary(kv => kv.Key, kv => modesByPincfg[kv.Value]);
+
+                    pd.SettingsByID.Add(pc.ID, pc);
+                    pd.Settings.Add(pc);
                 }
 
+                pd.Complete();
                 result.Pins[id] = pd;
             }
 
@@ -206,27 +257,31 @@ namespace renesas_ra_bsp_generator
             {
                 StringBuilder pinValueExpression = new StringBuilder();
 
-                foreach (var ps in pin.Settings.Values)
+                foreach (var ps in pin.Settings)
                 {
                     if (!ps.AffectsPincfgRegister)
                         continue;
 
                     bool isFirstProperty = pinValueExpression.Length == 0;
+                    if (isFirstProperty != ps.IsFirst)
+                        throw new Exception("Invalid 'IsFirst' field value.");  //BSP-level values for the first property do not include the leading '|'.
 
                     pg.Properties.Add(new PropertyEntry.Enumerated
                     {
                         UniqueID = ps.ID,
                         Name = ps.Name,
-                        DefaultEntryValue = $"$$_default.{ps.ID}$$",
-                        SuggestionList = ps.ModesByPinCfg.Values.Select(m => new PropertyEntry.Enumerated.Suggestion
+                        DefaultEntryValue = $"$${ps.DefaultValueID}$$",
+                        SuggestionList = ps.AllModes.Select(m => new PropertyEntry.Enumerated.Suggestion
                         {
-                            InternalValue = m.ModeMask,
+                            InternalValue = m.ValueForBSP,
                             UserFriendlyName = m.Name,
                         }).ToArray()
                     });
+
+                    pinValueExpression.Append($"$${ps.FullID}$$");
                 }
 
-                pinAssignmentLines.Add($"{{ .pin = {pin.ID.GetMacroName(true)}, .pin_cfg = {pinValueExpression} }},");
+                pinAssignmentLines.Add($"\t{{ .pin = {pin.ID.GetMacroName(true)}, .pin_cfg = {pinValueExpression} }},");
             }
 
             GeneratedConfigurationFile cf = new GeneratedConfigurationFile
@@ -283,7 +338,7 @@ namespace renesas_ra_bsp_generator
                     continue;
 
                 var pinDef = pinout.Pins[pinID];
-                if (!pinDef.Settings.TryGetValue(settingName, out var setting))
+                if (!pinDef.SettingsByID.TryGetValue(settingName, out var setting))
                 {
                     report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Unknown GPIO setting referenced by board definition", settingName, false);
                     continue;
@@ -292,16 +347,16 @@ namespace renesas_ra_bsp_generator
                 if (!setting.AffectsPincfgRegister)
                     continue;
 
-                string internalValue = null;
+                PinMode mode;
                 if (value.EndsWith(".asel"))
-                    internalValue = "IOPORT_CFG_ANALOG_ENABLE";
-                else if (!setting.IDToPinCfg.TryGetValue(value, out internalValue))
+                    mode = setting.ModesByOriginalID.Values.First(v => v.ModeMask == "IOPORT_CFG_ANALOG_ENABLE");
+                else if (!setting.ModesByOriginalID.TryGetValue(value, out mode))
                 {
                     report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Unknown GPIO setting value referenced by board definition", value, false);
                     continue;
                 }
 
-                vars.Add(new SysVarEntry { Key = "_default." + setting.ID, Value = internalValue });
+                vars.Add(new SysVarEntry { Key = setting.DefaultValueID, Value = mode.ValueForBSP });
             }
 
             if (pinMacros.Count > 0)
