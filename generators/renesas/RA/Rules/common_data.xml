@@ -89,6 +89,9 @@
         </Lines>
       </Fragment>
       <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.snippet.hal.macros</InputName>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
         <InputName>com.renesas.ra.snippet.hal.declarations</InputName>
       </Fragment>
       <Fragment xsi:type="BasicFragment">

@@ -316,6 +316,7 @@ namespace renesas_ra_bsp_generator
                 TranslateModuleConfigurationFragment(module, "header", fragments, localProperties, moduleName, flags, instanceName);
                 TranslateModuleConfigurationFragment(module, "includes", fragments, localProperties, moduleName, flags, instanceName);
                 TranslateModuleConfigurationFragment(module, "declarations", fragments, localProperties, moduleName, flags, instanceName);
+                TranslateModuleConfigurationFragment(module, "macros", fragments, localProperties, moduleName, flags, instanceName);
             }
 
             AssignCommonPropertyGroupPrefix(pg);

@@ -70,28 +70,19 @@ namespace renesas_ra_bsp_generator
 
             public bool IsEmpty => ModeMask == PinSetting.EmptyPinCfgValue;
 
-            public PinMode(PinSetting setting, string name, string internalID, string modeMask)
+            public PinMode(PinSetting setting, string name, string internalID, string[] pincfgValues)
             {
                 Setting = setting;
                 Name = name;
                 InternalID = internalID;
-                ModeMask = modeMask;
+
+                if (pincfgValues.Length == 0)
+                    ModeMask = PinSetting.EmptyPinCfgValue;
+                else
+                    ModeMask = string.Join(" | ", pincfgValues.Select(v => $"(uint32_t) {v}"));
             }
 
-            public string ValueForBSP
-            {
-                get
-                {
-                    if (IsEmpty)
-                        return Setting.IsFirst ? "0" : "";
-
-                    string result = "(uint32_t) " + ModeMask;
-                    if (!Setting.IsFirst)
-                        result = " | " + result;
-
-                    return result;
-                }
-            }
+            public string ValueForBSP => ModeMask;
         }
 
         public class PinDefinition
@@ -116,7 +107,7 @@ namespace renesas_ra_bsp_generator
 
         public class PinSetting
         {
-            public const string EmptyPinCfgValue = "0";
+            public const string EmptyPinCfgValue = "";
 
             public string ID, Name;
             public string FullID => PinConfigGroupID + ID;
@@ -208,11 +199,7 @@ namespace renesas_ra_bsp_generator
                             pincfgValues.Add(reg.GetStringAttribute("value"));
                         }
 
-                        string pincfgMask = string.Join(" | ", pincfgValues);
-                        if (pincfgValues.Count == 0)
-                            pincfgMask = PinSetting.EmptyPinCfgValue;
-
-                        var mode = new PinMode(pc, altName, altID, pincfgMask);
+                        var mode = new PinMode(pc, altName, altID, pincfgValues.ToArray());
                         idToPincfg.Add(mode.InternalID, mode.ModeMask);    //Must be unique
                         modesByPincfg[mode.ModeMask] = mode;     //Might repeat
                     }
@@ -252,19 +239,18 @@ namespace renesas_ra_bsp_generator
         public static (PropertyGroup, GeneratedConfigurationFile) BuildPinPropertyGroup(DevicePinout pinout)
         {
             var pg = new PropertyGroup { Name = "Pin Configuration", UniqueID = PinConfigGroupID };
-            List<string> pinAssignmentLines = new List<string>();
+            var pinAssignmentLines = new List<GeneratedConfigurationFile.Fragment.FormattedFragment.AdvancedFormattedLine>();
+            var tempVars = new List<GeneratedConfigurationFile.Fragment.FormattedFragment.IntermediateVariableAssignment>();
             foreach (var pin in pinout.Pins.Values)
             {
-                StringBuilder pinValueExpression = new StringBuilder();
+                string tempVar = "com.renesas.ra.device.pins.pin_cfg." + pin.ID;
+
+                List<string> inputVars = new List<string>();
 
                 foreach (var ps in pin.Settings)
                 {
                     if (!ps.AffectsPincfgRegister)
                         continue;
-
-                    bool isFirstProperty = pinValueExpression.Length == 0;
-                    if (isFirstProperty != ps.IsFirst)
-                        throw new Exception("Invalid 'IsFirst' field value.");  //BSP-level values for the first property do not include the leading '|'.
 
                     pg.Properties.Add(new PropertyEntry.Enumerated
                     {
@@ -278,10 +264,28 @@ namespace renesas_ra_bsp_generator
                         }).ToArray()
                     });
 
-                    pinValueExpression.Append($"$${ps.FullID}$$");
+                    inputVars.Add(ps.FullID);
                 }
 
-                pinAssignmentLines.Add($"\t{{ .pin = {pin.ID.GetMacroName(true)}, .pin_cfg = {pinValueExpression} }},");
+                tempVars.Add(new GeneratedConfigurationFile.Fragment.FormattedFragment.IntermediateVariableAssignment
+                {
+                    Variable = tempVar,
+                    Separator = " | ",
+                    InputVariables = inputVars.ToArray(),
+                });
+
+                pinAssignmentLines.Add(new GeneratedConfigurationFile.Fragment.FormattedFragment.AdvancedFormattedLine
+                {
+                    Format = $"\t{{ .pin = {pin.ID.GetMacroName(true)}, .pin_cfg = ($${tempVar}$$) }},",
+                    Condition = new Condition.Not
+                    {
+                        Argument = new Condition.Equals
+                        {
+                            Expression = $"$${tempVar}$$",
+                            ExpectedValue = "",
+                        }
+                    }
+                });
             }
 
             GeneratedConfigurationFile cf = new GeneratedConfigurationFile
@@ -289,8 +293,9 @@ namespace renesas_ra_bsp_generator
                 Name = "com.renesas.ra.device.pins.cfglines",
                 Contents = new[]
                 {
-                    new GeneratedConfigurationFile.Fragment.BasicFragment
+                    new GeneratedConfigurationFile.Fragment.FormattedFragment
                     {
+                        ExtraVariables = tempVars.ToArray(),
                         Lines = pinAssignmentLines.ToArray()
                     }
                 }
@@ -349,7 +354,7 @@ namespace renesas_ra_bsp_generator
 
                 PinMode mode;
                 if (value.EndsWith(".asel"))
-                    mode = setting.ModesByOriginalID.Values.First(v => v.ModeMask == "IOPORT_CFG_ANALOG_ENABLE");
+                    mode = setting.AllModes.Single(v => v.ModeMask.Contains("IOPORT_CFG_ANALOG_ENABLE"));
                 else if (!setting.ModesByOriginalID.TryGetValue(value, out mode))
                 {
                     report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Unknown GPIO setting value referenced by board definition", value, false);
