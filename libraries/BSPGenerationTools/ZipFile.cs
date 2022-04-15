@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace BSPGenerationTools
 {
@@ -167,6 +168,19 @@ namespace BSPGenerationTools
                 return ms.ToArray();
             }
         }
+
+        public XmlDocument ExtractXMLFile(Entry entry)
+        {
+            using (var ms = new MemoryStream())
+            {
+                ExtractEntry(entry, ms);
+                ms.Position = 0;
+                var xml = new XmlDocument();
+                xml.Load(ms);
+                return xml;
+            }
+        }
+
         public static DisposableZipFile Open(string fn) => new DisposableZipFile(fn);
     }
 

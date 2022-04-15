@@ -104,4 +104,12 @@
       </Fragment>
     </Contents>
   </GeneratedConfigurationFile>
+  <GeneratedConfigurationFile>
+    <Name>ra_cfg/fsp_cfg/bsp/board_cfg.h</Name>
+    <Contents>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.board_cfg</InputName>
+      </Fragment>
+    </Contents>
+  </GeneratedConfigurationFile>
 </ArrayOfGeneratedConfigurationFile>

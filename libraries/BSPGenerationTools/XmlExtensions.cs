@@ -10,12 +10,22 @@ namespace BSPGenerationTools
     public static class XmlExtensions
     {
         public static IEnumerable<XmlElement> SelectElements(this XmlElement el, string xpath) => el.SelectNodes(xpath).OfType<XmlElement>();
+        public static IEnumerable<XmlElement> SelectElements(this XmlElement el, string xpath, XmlNamespaceManager nsmgr) => el.SelectNodes(xpath, nsmgr).OfType<XmlElement>();
 
         public static string GetStringAttribute(this XmlElement el, string name)
         {
             var value = el.GetAttribute(name);
             if (string.IsNullOrEmpty(value))
                 throw new Exception($"The value of '{name}' should not be empty");
+
+            return value;
+        }        
+        
+        public static string TryGetStringAttribute(this XmlElement el, string name)
+        {
+            var value = el.GetAttribute(name);
+            if (string.IsNullOrEmpty(value))
+                return null;
 
             return value;
         }

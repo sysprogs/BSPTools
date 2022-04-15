@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<EmbeddedProjectSample xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>LEDBlink (basic)</Name>
+  <Description>The most basic Blinking LED example. Does not require a board definition.</Description>
+  <DoNotUpgradeCToCpp>false</DoNotUpgradeCToCpp>
+  <RequiredFrameworks>
+    <string>com.renesas.arm.Renesas.Common.fsp_common</string>
+    <string>com.renesas.arm.Renesas.HAL_Drivers.r_ioport</string>
+    <string>com.renesas.arm.Arm.CMSIS.CoreM</string>
+    <string>com.renesas.arm.Renesas.BSP.default_board</string>
+    <string>com.renesas.arm.Renesas.BSP.device.mcu</string>
+    <string>com.renesas.arm.Renesas.BSP.device.family</string>
+    <string>com.renesas.arm.Renesas.BSP.fsp.family</string>
+  </RequiredFrameworks>
+  <ConfigurableProperties>
+    <PropertyGroups>
+      <PropertyGroup>
+        <Name>LEDBlink Sample</Name>
+        <UniqueID>com.sysprogs.examples.ledblink.</UniqueID>
+        <Properties>
+          <PropertyEntry xsi:type="Enumerated">
+            <Name>LED Port Group</Name>
+            <UniqueID>LEDPORT</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the port group where the LED is connected</Description>
+            <SuggestionList>
+              <Suggestion><UserFriendlyName>PORT_00</UserFriendlyName><InternalValue>0</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_01</UserFriendlyName><InternalValue>1</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_02</UserFriendlyName><InternalValue>2</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_03</UserFriendlyName><InternalValue>3</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_04</UserFriendlyName><InternalValue>4</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_05</UserFriendlyName><InternalValue>5</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_06</UserFriendlyName><InternalValue>6</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_07</UserFriendlyName><InternalValue>7</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_08</UserFriendlyName><InternalValue>8</InternalValue></Suggestion>
+              <Suggestion><UserFriendlyName>PORT_09</UserFriendlyName><InternalValue>9</InternalValue></Suggestion>
+            </SuggestionList>
+            <DefaultEntryIndex>9</DefaultEntryIndex>
+            <AllowFreeEntry>false</AllowFreeEntry>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Enumerated">
+            <Name>LED Port Group</Name>
+            <UniqueID>LEDBIT</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the port group where the LED is connected</Description>
+            <SuggestionList>
+              <Suggestion><InternalValue>00</InternalValue></Suggestion>
+              <Suggestion><InternalValue>01</InternalValue></Suggestion>
+              <Suggestion><InternalValue>02</InternalValue></Suggestion>
+              <Suggestion><InternalValue>03</InternalValue></Suggestion>
+              <Suggestion><InternalValue>04</InternalValue></Suggestion>
+              <Suggestion><InternalValue>05</InternalValue></Suggestion>
+              <Suggestion><InternalValue>06</InternalValue></Suggestion>
+              <Suggestion><InternalValue>07</InternalValue></Suggestion>
+              <Suggestion><InternalValue>08</InternalValue></Suggestion>
+              <Suggestion><InternalValue>09</InternalValue></Suggestion>
+              <Suggestion><InternalValue>10</InternalValue></Suggestion>
+              <Suggestion><InternalValue>11</InternalValue></Suggestion>
+              <Suggestion><InternalValue>12</InternalValue></Suggestion>
+              <Suggestion><InternalValue>13</InternalValue></Suggestion>
+              <Suggestion><InternalValue>14</InternalValue></Suggestion>
+              <Suggestion><InternalValue>15</InternalValue></Suggestion>
+            </SuggestionList>
+            <DefaultEntryIndex>15</DefaultEntryIndex>
+            <AllowFreeEntry>false</AllowFreeEntry>
+          </PropertyEntry>
+          <PropertyEntry xsi:type="Integral">
+            <Name>Delay (msec)</Name>
+            <UniqueID>DELAYMSEC</UniqueID>
+            <OmitPrefixIfEmpty>false</OmitPrefixIfEmpty>
+            <Description>Specifies the delay (in milliseconds) between LED toggling events</Description>
+            <DefaultValue>500</DefaultValue>
+            <MinValue>-2147483648</MinValue>
+            <MaxValue>2147483647</MaxValue>
+            <Increment>1</Increment>
+          </PropertyEntry>
+        </Properties>
+        <CollapsedByDefault>false</CollapsedByDefault>
+      </PropertyGroup>
+    </PropertyGroups>
+  </ConfigurableProperties>  
+</EmbeddedProjectSample>

@@ -106,12 +106,28 @@ namespace renesas_ra_bsp_generator
                     fragments.Add(new GeneratedConfigurationFile.Fragment.BasicFragment { Lines = configLines.ToArray() });
                 }
 
-                files.Add(new GeneratedConfigurationFile
+                if (StringComparer.InvariantCultureIgnoreCase.Compare(fn, "ra_cfg/fsp_cfg/bsp/board_cfg.h") == 0)
                 {
-                    Name = "ra_cfg/" + fn,
-                    Contents = fragments.ToArray(),
-                    UndefinedVariableValue = "RA_NOT_DEFINED",
-                });
+                    /* Device-level header files require board_cfg.h unconditionally.
+                     * Hence, we need to generate it even if no board framework was referenced.
+                     * We implement it by saving the board-specific data to a mergable fragment,
+                       and generating the actual config file unconditionally (see common_data.xml)*/
+                    mergeableFragments.Add(new GeneratedConfigurationFile
+                    {
+                        Name = "com.renesas.ra.board_cfg",
+                        Contents = fragments.ToArray(),
+                        UndefinedVariableValue = "RA_NOT_DEFINED",
+                    });
+                }
+                else
+                {
+                    files.Add(new GeneratedConfigurationFile
+                    {
+                        Name = "ra_cfg/" + fn,
+                        Contents = fragments.ToArray(),
+                        UndefinedVariableValue = "RA_NOT_DEFINED",
+                    });
+                }
 
                 foreach (var pg in pgs)
                     if (pg.Properties.Count > 0)
@@ -132,7 +148,7 @@ namespace renesas_ra_bsp_generator
             }
             
 
-            if (xml.DocumentElement.SelectElements("board").SingleOrDefault()?.GetStringAttribute("device") is string dev)
+            if (xml.DocumentElement.SelectElements("board").SingleOrDefault()?.GetStringAttribute("device") is string dev && !fw.ID.EndsWith(".custom"))
             {
                 //This is a board framework referencing a specific device. Refine the MCU filter.
                 fw.MCUFilterRegex = dev;

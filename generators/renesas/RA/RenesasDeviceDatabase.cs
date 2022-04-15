@@ -28,7 +28,8 @@ namespace renesas_ra_bsp_generator
             public List<DeviceVariant> Variants = new List<DeviceVariant>();
             public string FamilyName;
             public MemoryArea[] MemoryMap;
-
+            public MCUDefinition HardwareRegisters;
+            
             public override string ToString() => Name;
 
             public string FinalMCUName => Name;
@@ -66,21 +67,24 @@ namespace renesas_ra_bsp_generator
 
                     Dictionary<string, ZipFile.Entry> rzoneFiles = new Dictionary<string, ZipFile.Entry>(StringComparer.InvariantCultureIgnoreCase);
                     Dictionary<string, ZipFile.Entry> pincfgFiles = new Dictionary<string, ZipFile.Entry>(StringComparer.InvariantCultureIgnoreCase);
+                    Dictionary<string, ZipFile.Entry> sfrxFiles = new Dictionary<string, ZipFile.Entry>(StringComparer.InvariantCultureIgnoreCase);
                     Dictionary<string, PinConfigurationTranslator.DevicePinout> knownPinouts = new Dictionary<string, PinConfigurationTranslator.DevicePinout>();
 
-                    foreach(var e in zf.Entries)
+                    foreach (var e in zf.Entries)
                     {
                         if (e.FileName.EndsWith(".rzone", StringComparison.InvariantCultureIgnoreCase))
                             rzoneFiles[Path.GetFileNameWithoutExtension(e.FileName)] = e;
                         else if (e.FileName.EndsWith(".pincfg", StringComparison.InvariantCultureIgnoreCase))
                             pincfgFiles[Path.GetFileNameWithoutExtension(e.FileName)] = e;
+                        else if (e.FileName.EndsWith(".sfrx", StringComparison.InvariantCultureIgnoreCase))
+                            sfrxFiles[Path.GetFileNameWithoutExtension(e.FileName)] = e;
                         else if (e.FileName.IndexOf(".pinmapping/PinCfg", StringComparison.InvariantCultureIgnoreCase) != -1 && e.FileName.EndsWith(".xml", StringComparison.InvariantCultureIgnoreCase))
                         {
                             var pinout = PinConfigurationTranslator.ParseDevicePinout(zf.ExtractEntry(e));
                             knownPinouts[pinout.ID] = pinout;
                         }
                     }
-                        
+
                     var xml = new XmlDocument();
                     xml.LoadXml(Encoding.UTF8.GetString(zf.ExtractEntry(pgrFiles[0])));
 
@@ -98,7 +102,16 @@ namespace renesas_ra_bsp_generator
                                 var shortName = dev.GetAttribute("DeviceCommand");
 
                                 if (!result.TryGetValue(shortName, out var devObj))
-                                    result[shortName] = devObj = new ParsedDevice { Name = shortName, Core = parsedCore, FamilyName = familyName, MemoryMap = deviceMemories[fullName] };
+                                {
+                                    result[shortName] = devObj = new ParsedDevice
+                                    {
+                                        Name = shortName,
+                                        Core = parsedCore,
+                                        FamilyName = familyName,
+                                        MemoryMap = deviceMemories[fullName],
+                                        HardwareRegisters = ParseSFRXFile(zf.ExtractXMLFile(sfrxFiles[shortName]), shortName)
+                                    };
+                                }
 
                                 devObj.Variants.Add(BuildDeviceVariant(fullName, zf.ExtractEntry(rzoneFiles[fullName]), zf.ExtractEntry(pincfgFiles[fullName]), knownPinouts));
 
@@ -113,13 +126,21 @@ namespace renesas_ra_bsp_generator
             return result.Values.ToArray();
         }
 
+        private static MCUDefinition ParseSFRXFile(XmlDocument doc, string mcuName)
+        {
+            return new MCUDefinition
+            {
+                MCUName = mcuName,
+                RegisterSets = doc.DocumentElement.SelectNodes("moduletable/module").OfType<XmlElement>().Select(TransformRegisterSet).Where(s => s != null).ToArray()
+            };
+        }
 
         public static DeviceVariant BuildDeviceVariant(string deviceName, byte[] rzoneFileContents, byte[] pincfgFileContents, Dictionary<string, PinConfigurationTranslator.DevicePinout> knownPinouts)
         {
             var xml = new XmlDocument();
             xml.LoadXml(Encoding.UTF8.GetString(rzoneFileContents));
             StringBuilder memoryRegionsFile = new StringBuilder();
-            foreach(var mem in xml.DocumentElement.SelectElements("resources/memories/memory"))
+            foreach (var mem in xml.DocumentElement.SelectElements("resources/memories/memory"))
             {
                 var name = mem.GetStringAttribute("name");
                 var size = mem.GetUlongAttribute("size");
@@ -161,5 +182,72 @@ namespace renesas_ra_bsp_generator
             }
             return result;
         }
+
+        #region Peripheral registers
+
+        private static HardwareRegisterSet TransformRegisterSet(XmlElement el)
+        {
+            var name = el.GetAttribute("name");
+            if (name == null)
+                return null;
+
+            var set =  new HardwareRegisterSet
+            {
+                UserFriendlyName = name,
+                Registers = el.SelectNodes("register").OfType<XmlElement>().SelectMany(r => new[] { r }.Concat(r.SelectNodes("register").OfType<XmlElement>())).Select(r =>
+                {
+                    var regSize = r.GetAttribute("size");
+                    var regAccess = r.GetAttribute("access");
+
+                    var reg = new HardwareRegister { Name = r.GetAttribute("name"), Address = r.GetAttribute("address") };
+                    if (reg.Name == null || reg.Address == null)
+                        return null;
+
+                    switch (regSize ?? "")
+                    {
+                        case "B":
+                            reg.SizeInBits = 8;
+                            break;
+                        case "W":
+                            reg.SizeInBits = 16;
+                            break;
+                        case "LW":
+                            reg.SizeInBits = 32;
+                            break;
+                        default:
+                            return null;
+                    }
+
+                    switch (regAccess)
+                    {
+                        case "R":
+                            reg.ReadOnly = true;
+                            break;
+                        case "RW":
+                            reg.ReadOnly = false;
+                            break;
+                        default:
+                            return null;
+                    }
+
+                    reg.SubRegisters = r.SelectNodes("bitfield").OfType<XmlElement>().Select(TransformSubregister).Where(sr => sr != null).ToArray();
+                    return reg;
+                }).Where(r => r != null).ToArray()
+            };
+
+            return set;
+        }
+
+        private static HardwareSubRegister TransformSubregister(XmlElement el)
+        {
+            string name = el.GetAttribute("name");
+            if (!int.TryParse(el.GetAttribute("bit"), out int bit))
+                return null;
+            if (!int.TryParse(el.GetAttribute("bitlength"), out int bitlength))
+                return null;
+
+            return new HardwareSubRegister { FirstBit = bit, SizeInBits = bitlength, Name = name };
+        }
+        #endregion
     }
 }

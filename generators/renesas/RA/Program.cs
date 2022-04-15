@@ -3,6 +3,7 @@ using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -520,6 +521,16 @@ namespace renesas_ra_bsp_generator
                 Console.WriteLine("Translating sample projects...");
                 List<string> result = new List<string>();
 
+                foreach (var dir in Directory.GetDirectories(Path.Combine(Directories.RulesDir, "Samples")))
+                {
+                    var sampleName = Path.GetFileName(dir);
+                    var targetDir = Path.Combine(Directories.OutputDir, "samples", sampleName);
+
+                    PathTools.CopyDirectoryRecursive(dir, targetDir);
+                    PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles"), targetDir);
+                    result.Add("samples/" + sampleName);
+                }
+
                 using (var zf = ZipFile.Open(mainPackFile))
                 {
                     foreach (var e in zf.Entries)
@@ -678,10 +689,17 @@ namespace renesas_ra_bsp_generator
                         }
                     });
 
-                    
+                    var hwregisterDir = Path.Combine(bspGen.Directories.OutputDir, "DeviceDefinitions");
+                    Directory.CreateDirectory(hwregisterDir);
+
                     foreach (var mcu in fam)
                     {
                         famBuilder.MCUs.Add(new MCUBuilder { Name = mcu.Name, Core = mcu.Core });
+
+                        using (var fs = File.Create(Path.Combine(hwregisterDir, mcu.HardwareRegisters.MCUName + ".xml.gz")))
+                        using (var gs = new GZipStream(fs, CompressionMode.Compress))
+                            XmlTools.SaveObjectToStream(mcu.HardwareRegisters, gs);
+
                         foreach (var v in mcu.Variants)
                         {
                             var linkerScript = bspGen.GenerateLinkerScript(mcu, summary.LinkerScript);
@@ -695,6 +713,7 @@ namespace renesas_ra_bsp_generator
                                 RAMBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRam").Start,
                                 FLASHSize = (int)mcu.MemoryMap.First(m => m.Type == "InternalRom").Size,
                                 FLASHBase = (uint)mcu.MemoryMap.First(m => m.Type == "InternalRom").Start,
+                                MCUDefinitionFile = $"DeviceDefinitions/{mcu.HardwareRegisters.MCUName}.xml",
                                 CompilationFlags = new ToolFlags
                                 {
                                     LinkerScript = linkerScript,
@@ -706,7 +725,7 @@ namespace renesas_ra_bsp_generator
                         }
                     }
 
-                    var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All);
+                    var famObj = famBuilder.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All & ~MCUFamilyBuilder.CoreSpecificFlags.PrimaryMemory);
                     famObj.AdditionalTestProgramLines = new[] { "int __Vectors;" };
 
                     familyDefinitions.Add(famObj);
