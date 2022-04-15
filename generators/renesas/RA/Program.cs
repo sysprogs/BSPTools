@@ -20,7 +20,9 @@ namespace renesas_ra_bsp_generator
 
             public readonly string Variant;
 
-            public string FrameworkID => $"com.renesas.arm.{Vendor}.{Class}.{Subgroup}".Replace(' ', '_');
+            public string SimplifiedID => $"com.renesas.arm.{Vendor}.{Class}.{Subgroup}".Replace(' ', '_');
+            public string FullID => $"com.renesas.arm.{Vendor}.{Class}.{Group}.{Subgroup}".Replace(' ', '_');
+            public string FrameworkID => Group == "all" ? SimplifiedID : FullID;
 
             public ComponentID(XmlElement el, bool isReference = false)
             {
@@ -237,11 +239,48 @@ namespace renesas_ra_bsp_generator
                             if (!File.Exists(targetPath))
                                 File.WriteAllBytes(targetPath, data);
                             else if (!Enumerable.SequenceEqual(File.ReadAllBytes(targetPath), data))
-                                throw new Exception("Conflicting contents for " + targetPath);
+                            {
+                                var oldContents = File.ReadAllText(targetPath).Replace("\r", "");
+                                var newContents = Encoding.UTF8.GetString(data).Replace("\r", "");
+                                if (AreFilesIncompatible(oldContents, newContents))
+                                    throw new Exception("Conflicting contents for " + targetPath);
+                            }
                         }
                     }
 
                     return translatedPaths;
+                }
+
+                static bool AreFilesIncompatible(string oldContents, string newContents)
+                {
+                    if (oldContents == newContents)
+                        return false;
+
+                    string longVersion, shortVersion;
+                    if (oldContents.Length > newContents.Length)
+                    {
+                        longVersion = oldContents;
+                        shortVersion = newContents;
+                    }
+                    else
+                    {
+                        longVersion = newContents;
+                        shortVersion = oldContents;
+                    }
+
+                    const string placeholder = "/* ${REA_DISCLAIMER_PLACEHOLDER} */\n";
+                    if (shortVersion.StartsWith(placeholder))
+                    {
+                        shortVersion = shortVersion.Substring(placeholder.Length);
+                        if (longVersion.EndsWith(shortVersion))
+                        {
+                            //One of the files has the disclaimer placeholder expanded
+                            return false;
+                        }
+
+                    }
+
+                    return true;
                 }
             }
 
@@ -279,6 +318,7 @@ namespace renesas_ra_bsp_generator
                 Board,
                 MCU,
                 CMSIS,
+                Other,
             }
 
             HashSet<string> _BoardFrameworks = new HashSet<string>();
@@ -336,20 +376,27 @@ namespace renesas_ra_bsp_generator
                             AdditionalLibraries = translatedPaths.Where(p => p.Type == "library").Select(p => p.Path).Distinct().ToArray(),
                         };
 
+
+                        if (comp.ID.Variant == "wrapper" && comp.ID.FrameworkID == "com.renesas.arm.AWS.Abstractions.Platform.network_afr")
+                            continue;
+
+                        if (description.EndsWith(" (Deprecated)"))
+                            continue;
+
                         if (!string.IsNullOrEmpty(comp.ID.Variant))
                         {
                             if (type != ComponentType.MCU)
                                 throw new Exception("MCU-specific variants are only expected for MCU support packages");
 
                             fw.MCUFilterRegex = comp.ID.Variant;
-                            fw.ClassID = fw.ID + ".mcu";
+                            fw.ClassID = comp.ID.SimplifiedID + ".mcu";
                             VerifyMatch(ref _MCUPackageClassID, fw.ClassID);
                             fw.ID += "." + comp.ID.Variant;
                         }
                         else if (FamilyPrefixes.TryGetValue(comp.ID.Group, out var prefix))
                         {
                             fw.MCUFilterRegex = prefix + ".*";
-                            fw.ClassID = fw.ID + ".family";
+                            fw.ClassID = comp.ID.SimplifiedID + ".family";
 
                             if (comp.ID.Subgroup == "fsp")
                                 VerifyMatch(ref _FSPClassID, fw.ClassID);
@@ -392,6 +439,10 @@ namespace renesas_ra_bsp_generator
                         {
                             summary.LinkerScript = linkerScript ?? throw new Exception("Missing linker script");
                             fw.DefaultEnabled = true;
+                        }
+                        else if (fw.ID == "com.renesas.arm.Arm.PSA.TF-M.Core")
+                        {
+                            //Special case: TFM linker script. Ignore it for now.
                         }
                         else if (linkerScript != null)
                             throw new Exception("Linker script can only be defined by the core framework");
@@ -485,6 +536,11 @@ namespace renesas_ra_bsp_generator
                 }
             }
 
+            class ExclusivityClass
+            {
+                public HashSet<EmbeddedFramework> Frameworks = new HashSet<EmbeddedFramework>();
+            }
+
             public void MakeOverlappingFrameworksMutuallyExclusive(List<EmbeddedFramework> frameworks)
             {
                 Dictionary<string, List<EmbeddedFramework>> frameworksByFile = new Dictionary<string, List<EmbeddedFramework>>();
@@ -499,19 +555,45 @@ namespace renesas_ra_bsp_generator
                     }
                 }
 
+                var frameworkExclusivityClasses = new Dictionary<EmbeddedFramework, ExclusivityClass>();
+
                 foreach (var kv in frameworksByFile)
                 {
-                    if (kv.Value.Count > 1)
+                    if (kv.Value.Count == 1)
+                        continue;
+
+                    var cls = new ExclusivityClass();
+
+                    foreach (var fw in kv.Value)
                     {
-                        foreach (var fw in kv.Value)
+                        if (fw.IncompatibleFrameworks != null)
+                            throw new Exception("Incompatible frameworks already defined for " + fw.UserFriendlyName);
+
+                        cls.Frameworks.Add(fw);
+                        if (frameworkExclusivityClasses.TryGetValue(fw, out var oldClass) && oldClass != cls)
                         {
-                            var incompatibleFrameworks = kv.Value.Select(f2 => f2.ID).Except(new[] { fw.ID }).ToArray();
-
-                            if (fw.IncompatibleFrameworks != null && !Enumerable.SequenceEqual(incompatibleFrameworks, fw.IncompatibleFrameworks))
-                                throw new Exception($"{fw.UserFriendlyName} already has an incompatible framework list");
-
-                            fw.IncompatibleFrameworks = incompatibleFrameworks;
+                            //Merge the exclusivity classes
+                            foreach(var fw2 in oldClass.Frameworks)
+                            {
+                                frameworkExclusivityClasses[fw2] = cls;
+                                cls.Frameworks.Add(fw2);
+                            }
                         }
+
+                        frameworkExclusivityClasses[fw] = cls;
+                    }
+                }
+
+                foreach(var cls in frameworkExclusivityClasses.Values.Distinct())
+                {
+                    foreach(var fw in cls.Frameworks)
+                    {
+                        var incompatibleFrameworks = cls.Frameworks.Select(f2 => f2.ID).Except(new[] { fw.ID }).ToArray();
+
+                        if (fw.IncompatibleFrameworks != null)
+                            throw new Exception($"{fw.UserFriendlyName} already has an incompatible framework list");
+
+                        fw.IncompatibleFrameworks = incompatibleFrameworks;
                     }
                 }
             }
@@ -541,7 +623,7 @@ namespace renesas_ra_bsp_generator
                             var xml = new XmlDocument();
                             xml.LoadXml(Encoding.UTF8.GetString(zf.ExtractEntry(e)));
 
-                            if (sampleName != "baremetal_blinky")
+                            if (!sampleName.EndsWith("_blinky"))
                                 continue;
 
                             var refs = xml.DocumentElement.SelectElements("raComponentSelection/component")
@@ -647,6 +729,7 @@ namespace renesas_ra_bsp_generator
                 {
                     Regex rgMCU = new Regex("Renesas.RA_mcu_([^.]+)\\.", RegexOptions.IgnoreCase);
                     Regex rgBoard = new Regex("Renesas.RA_board_([^.]+)\\.", RegexOptions.IgnoreCase);
+                    Regex rgBlinky = new Regex("Renesas.RA_([^_]+)_blinky\\.", RegexOptions.IgnoreCase);
                     Match m;
 
                     var nameOnly = Path.GetFileName(fn);
@@ -656,6 +739,12 @@ namespace renesas_ra_bsp_generator
                         bspGen.TranslateComponents(fn, frameworks, RenesasBSPBuilder.ComponentType.Board);
                     else if (nameOnly.StartsWith("Arm.CMSIS", StringComparison.InvariantCultureIgnoreCase))
                         bspGen.TranslateComponents(fn, frameworks, RenesasBSPBuilder.ComponentType.CMSIS);
+                    else if ((m = rgBlinky.Match(nameOnly)).Success)
+                        continue;   //Sample projects are handled separately.
+                    else if (fn == mainPackFile)
+                        continue;   //Already handled
+                    else
+                        bspGen.TranslateComponents(fn, frameworks, RenesasBSPBuilder.ComponentType.Other);
                 }
 
                 bspGen.GenerateFrameworkDependentDefaultValues();
