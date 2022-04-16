@@ -441,7 +441,14 @@ namespace BSPGenerationTools
             return mcu.Name;
         }
 
-        public void ValidateBSP(BoardSupportPackage bsp)
+        [Flags]
+        public enum BSPValidationFlags
+        {
+            None = 0,
+            SuppressDebuggerStops = 1,
+        }
+
+        public void ValidateBSP(BoardSupportPackage bsp, BSPValidationFlags flags = BSPValidationFlags.None)
         {
             int devicesWithZeroRAM = bsp.SupportedMCUs.Count(dev => dev.RAMSize == 0);
             if (devicesWithZeroRAM > 0)
@@ -519,11 +526,11 @@ namespace BSPGenerationTools
             {
                 if (grp.Count() > 1)
                 {
-                    if (!AreFilesMutuallyExclusive(bsp, grp.ToArray()))
+                    if (!AreFilesMutuallyExclusive(bsp, grp.ToArray(), flags))
                     {
                         Report.ReportRawError($"Found multiple files called '{grp.Key}':");
-                        foreach (var fn in grp)
-                            Report.ReportRawError("  " + fn);
+                        foreach (var fe in grp)
+                            Report.ReportRawError($"  {fe.File} [{fe.RelatedFramework?.ID}]");
                     }
                 }
             }
@@ -556,7 +563,7 @@ namespace BSPGenerationTools
         }
 
 
-        private bool AreFilesMutuallyExclusive(BoardSupportPackage bsp, FileWithContext[] files)
+        private bool AreFilesMutuallyExclusive(BoardSupportPackage bsp, FileWithContext[] files, BSPValidationFlags flags)
         {
             Dictionary<string, PerDeviceFileList> conditionsByDevice = new Dictionary<string, PerDeviceFileList>();
             foreach (var file in files)
@@ -585,7 +592,8 @@ namespace BSPGenerationTools
                 if (conditionsByEqualsExpression.Length == 1 && conditionsByEqualsExpression[0].Key != null)
                     continue;  //All conditions refer to the same variable. They are likely mutually exclusive.
 
-                Debugger.Break();   //Most likely, we are not accounting for some special case. Investigate it.
+                if ((flags & BSPValidationFlags.SuppressDebuggerStops) == BSPValidationFlags.None)
+                    Debugger.Break();   //Most likely, we are not accounting for some special case. Investigate it.
                 return false;
             }
 

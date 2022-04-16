@@ -460,17 +460,32 @@ namespace renesas_ra_bsp_generator
 
                         if (type == ComponentType.MCU && comp.ID.Variant != "")
                         {
+                            //This is a device support component. Attach a pinout property group to it.
                             var (pg, cf) = PinConfigurationTranslator.BuildPinPropertyGroup(_AllPinouts[comp.ID.Variant]);
                             fw.ConfigurableProperties ??= new PropertyList { PropertyGroups = new List<PropertyGroup>() };
                             fw.ConfigurableProperties.PropertyGroups.Add(pg);
                             fw.GeneratedConfigurationFragments = (fw.GeneratedConfigurationFragments ?? new GeneratedConfigurationFile[0]).Append(cf).ToArray();
                         }
 
+                        AddGeneratedHeadersToSearchPath(fw);
                         frameworkList.Add(fw);
                     }
                 }
 
                 return summary;
+            }
+
+            private void AddGeneratedHeadersToSearchPath(EmbeddedFramework fw)
+            {
+                if (fw.GeneratedConfigurationFiles == null)
+                    return;
+
+                var dirsRelativeToProject = fw.GeneratedConfigurationFiles
+                    .Where(f => f.Name.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase))
+                    .Select(f => GetDirectoryName(f.Name))
+                    .Distinct().ToArray();
+
+                fw.AdditionalIncludeDirs = fw.AdditionalIncludeDirs.Concat(dirsRelativeToProject).Distinct().ToArray();
             }
 
             private void VerifyMatch(ref string storedID, string ID)
@@ -573,7 +588,7 @@ namespace renesas_ra_bsp_generator
                         if (frameworkExclusivityClasses.TryGetValue(fw, out var oldClass) && oldClass != cls)
                         {
                             //Merge the exclusivity classes
-                            foreach(var fw2 in oldClass.Frameworks)
+                            foreach (var fw2 in oldClass.Frameworks)
                             {
                                 frameworkExclusivityClasses[fw2] = cls;
                                 cls.Frameworks.Add(fw2);
@@ -584,9 +599,9 @@ namespace renesas_ra_bsp_generator
                     }
                 }
 
-                foreach(var cls in frameworkExclusivityClasses.Values.Distinct())
+                foreach (var cls in frameworkExclusivityClasses.Values.Distinct())
                 {
-                    foreach(var fw in cls.Frameworks)
+                    foreach (var fw in cls.Frameworks)
                     {
                         var incompatibleFrameworks = cls.Frameworks.Select(f2 => f2.ID).Except(new[] { fw.ID }).ToArray();
 
@@ -598,7 +613,7 @@ namespace renesas_ra_bsp_generator
                 }
             }
 
-            public string[] TranslateExamples(string mainPackFile)
+            public string[] TranslateExamples(string mainPackFile, IEnumerable<EmbeddedFramework> frameworks)
             {
                 Console.WriteLine("Translating sample projects...");
                 List<string> result = new List<string>();
@@ -609,9 +624,14 @@ namespace renesas_ra_bsp_generator
                     var targetDir = Path.Combine(Directories.OutputDir, "samples", sampleName);
 
                     PathTools.CopyDirectoryRecursive(dir, targetDir);
-                    PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles"), targetDir);
+                    PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", "baremetal"), targetDir);
+                    PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", "all"), targetDir);
                     result.Add("samples/" + sampleName);
                 }
+
+                var frameworksByID = frameworks.ToLookup(fw => fw.IDForReferenceList);
+
+                Regex rgBlinkySample = new Regex("(.*)_blinky");
 
                 using (var zf = ZipFile.Open(mainPackFile))
                 {
@@ -623,7 +643,9 @@ namespace renesas_ra_bsp_generator
                             var xml = new XmlDocument();
                             xml.LoadXml(Encoding.UTF8.GetString(zf.ExtractEntry(e)));
 
-                            if (!sampleName.EndsWith("_blinky"))
+                            var m = rgBlinkySample.Match(sampleName);
+
+                            if (!m.Success)
                                 continue;
 
                             var refs = xml.DocumentElement.SelectElements("raComponentSelection/component")
@@ -637,6 +659,8 @@ namespace renesas_ra_bsp_generator
                                     _FSPClassID ?? throw new Exception("Could not locate the primary FSP package"),
                                 })
                                 .ToArray();
+
+                            RemoveIncompatibleReferences(ref refs, frameworksByID);
 
                             //Extract sample files, if any
                             var targetDir = Path.Combine(Directories.OutputDir, "samples", sampleName);
@@ -660,13 +684,51 @@ namespace renesas_ra_bsp_generator
                                 RequiredFrameworks = refs,
                             };
 
-                            PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles"), targetDir);
+                            PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", m.Groups[1].Value), targetDir);
+                            PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", "all"), targetDir);
                             XmlTools.SaveObject(sample, Path.Combine(targetDir, "sample.xml"));
                         }
                     }
                 }
 
                 return result.ToArray();
+            }
+
+            private void RemoveIncompatibleReferences(ref string[] refs, ILookup<string, EmbeddedFramework> frameworksByID)
+            {
+                while (DoRemoveIncompatibleReferences(ref refs, frameworksByID))
+                {
+                }
+            }
+
+            private bool DoRemoveIncompatibleReferences(ref string[] refs, ILookup<string, EmbeddedFramework> frameworksByID)
+            {
+                for (int i = 0; i < refs.Length; i++)
+                {
+                    foreach (var fw1 in frameworksByID[refs[i]])
+                    {
+                        for (int j = i + 1; j < refs.Length; j++)
+                        {
+                            foreach (var fw2 in frameworksByID[refs[j]])
+                            {
+                                if (fw1.IncompatibleFrameworks?.Contains(fw2.ID) == true || fw1.IncompatibleFrameworks?.Contains(fw2.IDForReferenceList) == true ||
+                                    fw2.IncompatibleFrameworks?.Contains(fw1.ID) == true || fw2.IncompatibleFrameworks?.Contains(fw1.IDForReferenceList) == true)
+                                {
+                                    //The sample references incompatible frameworks (e.g. FreeRTOS vs. FreeRTOS port).
+                                    //Unreference the framework with the least source files.
+                                    if (fw1.AdditionalSourceFiles.Length > fw2.AdditionalSourceFiles.Length)
+                                        refs = refs.Except(new[] { refs[j] }).ToArray();
+                                    else
+                                        refs = refs.Except(new[] { refs[i] }).ToArray();
+
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return false;
             }
 
             bool _CommonLinkerScriptPatched;
@@ -760,11 +822,6 @@ namespace renesas_ra_bsp_generator
                         {
                             IncludeDirectories = new[] {
                                 "$$SYS:BSP_ROOT$$", //Used in generated configuration files via '#include <ra/...>'
-                                
-                                //Project-relative directories with generated files
-                                "ra_cfg/fsp_cfg",
-                                "ra_cfg/fsp_cfg/bsp",
-                                "ra_gen"
                             },
                             PreprocessorMacros = new[]
                             {
@@ -836,13 +893,13 @@ namespace renesas_ra_bsp_generator
                     MCUFamilies = familyDefinitions.ToArray(),
                     SupportedMCUs = mcuDefinitions.ToArray(),
                     Frameworks = frameworks.ToArray(),
-                    Examples = bspGen.TranslateExamples(mainPackFile),
+                    Examples = bspGen.TranslateExamples(mainPackFile, frameworks),
                     PackageVersion = summary.Version,
                     FileConditions = bspGen.MatchedFileConditions.Values.ToArray(),
                     MinimumEngineVersion = "5.6.105",
                 };
 
-                bspGen.ValidateBSP(bsp);
+                bspGen.ValidateBSP(bsp, BSPBuilder.BSPValidationFlags.SuppressDebuggerStops);
                 bspGen.Save(bsp, false, false);
             }
 

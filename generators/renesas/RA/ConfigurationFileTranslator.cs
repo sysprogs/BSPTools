@@ -158,6 +158,17 @@ namespace renesas_ra_bsp_generator
             _EnumTranslator.ProcessEnumDefinitions(xml, fixedValues);
             TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, "0");
 
+            foreach(var iface in xml.SelectNodes("//provides/@interface").OfType<XmlAttribute>())
+            {
+                if (!iface.InnerText.StartsWith("interface."))
+                {
+                    report.ReportMergeableError("Unexpected interface ID", iface.InnerText);
+                    continue;
+                }
+
+                fixedValues.Add(new SysVarEntry { Key = iface.InnerText, Value = "1" });
+            }
+
             if (files.Count > 0)
                 fw.GeneratedConfigurationFiles = files.ToArray();
 
