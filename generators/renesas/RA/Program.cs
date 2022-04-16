@@ -648,6 +648,8 @@ namespace renesas_ra_bsp_generator
                             if (!m.Success)
                                 continue;
 
+                            string rtos = m.Groups[1].Value;
+
                             var refs = xml.DocumentElement.SelectElements("raComponentSelection/component")
                                 .Select(c => new ComponentID(c, true))
                                 .Where(c => c.Class != "Projects")
@@ -682,9 +684,10 @@ namespace renesas_ra_bsp_generator
                                 Name = sampleName,
                                 Description = xml.DocumentElement.SelectSingleNode("raComponentSelection/component[@class='Projects']/description")?.InnerText,
                                 RequiredFrameworks = refs,
+                                DoNotUpgradeCToCpp = rtos != "baremetal",
                             };
 
-                            PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", m.Groups[1].Value), targetDir);
+                            PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", rtos), targetDir);
                             PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", "all"), targetDir);
                             XmlTools.SaveObject(sample, Path.Combine(targetDir, "sample.xml"));
                         }
