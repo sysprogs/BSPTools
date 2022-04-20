@@ -112,4 +112,80 @@
       </Fragment>
     </Contents>
   </GeneratedConfigurationFile>
+  <GeneratedConfigurationFile>
+    <Name>ra_gen/vector_data.h</Name>
+    <Contents>
+      <Fragment xsi:type="FormattedFragment">
+        <ExtraVariables>
+          <IntermediateVariableAssignment xsi:type="CounterVariable">
+            <Variable>com.renesas.ra.vectors.count</Variable>
+            <FragmentID>com.renesas.ra.vectors.isrs.table</FragmentID>
+          </IntermediateVariableAssignment>
+        </ExtraVariables>
+        <Lines>
+          <AdvancedFormattedLine>
+            <Format>#ifndef VECTOR_DATA_IRQ_COUNT</Format>
+          </AdvancedFormattedLine>
+          <AdvancedFormattedLine>
+            <Format>#define VECTOR_DATA_IRQ_COUNT    ($$com.renesas.ra.vectors.count$$)</Format>
+          </AdvancedFormattedLine>
+          <AdvancedFormattedLine>
+            <Format>#endif</Format>
+          </AdvancedFormattedLine>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string></string>
+          <string>/* ISR prototypes */</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.vectors.isrs.decls</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>/* Vector table allocations */</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.vectors.macros</InputName>
+      </Fragment>
+    </Contents>
+  </GeneratedConfigurationFile>
+  <GeneratedConfigurationFile>
+    <Name>ra_gen/vector_data.c</Name>
+    <Contents>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>#include "bsp_api.h"</string>
+          <string>/* Do not build these data structures if no interrupts are currently allocated because IAR will have build errors. */</string>
+          <string>#if VECTOR_DATA_IRQ_COUNT > 0</string>
+          <string></string>
+          <string>BSP_DONT_REMOVE const fsp_vector_t g_vector_table[BSP_ICU_VECTOR_MAX_ENTRIES] BSP_PLACE_IN_SECTION(BSP_SECTION_APPLICATION_VECTORS) =</string>
+          <string>{</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.vectors.isrs.table</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>};</string>
+          <string></string>
+          <string>const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES] =</string>
+          <string>{</string>
+        </Lines>
+      </Fragment>
+      <Fragment xsi:type="MergeableFragment">
+        <InputName>com.renesas.ra.vectors.links</InputName>
+      </Fragment>
+      <Fragment xsi:type="BasicFragment">
+        <Lines>
+          <string>};</string>
+          <string>#endif</string>
+        </Lines>
+      </Fragment>
+    </Contents>
+  </GeneratedConfigurationFile>
 </ArrayOfGeneratedConfigurationFile>

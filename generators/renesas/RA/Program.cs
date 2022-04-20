@@ -625,7 +625,6 @@ namespace renesas_ra_bsp_generator
 
                     PathTools.CopyDirectoryRecursive(dir, targetDir);
                     PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", "baremetal"), targetDir);
-                    PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", "all"), targetDir);
                     result.Add("samples/" + sampleName);
                 }
 
@@ -688,7 +687,6 @@ namespace renesas_ra_bsp_generator
                             };
 
                             PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", rtos), targetDir);
-                            PathTools.CopyDirectoryRecursive(Path.Combine(Directories.RulesDir, "FixedFiles", "all"), targetDir);
                             XmlTools.SaveObject(sample, Path.Combine(targetDir, "sample.xml"));
                         }
                     }
@@ -769,6 +767,7 @@ namespace renesas_ra_bsp_generator
             public void GenerateFrameworkDependentDefaultValues()
             {
                 _ConfigFileTranslator.GenerateFrameworkDependentDefaultValues(Report, _AllPinouts);
+                _ConfigFileTranslator.ProcessInterruptDefinitions();
             }
         }
 

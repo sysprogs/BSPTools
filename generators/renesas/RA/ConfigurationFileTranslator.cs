@@ -2,6 +2,7 @@
 using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,48 @@ namespace renesas_ra_bsp_generator
 
         static Regex rgPropertyReference = new Regex(@"\$\{([^${}]+)\}");
 
+        class BSPEvent
+        {
+            public readonly string ID, Display, Value;
+
+            public string CommentText
+            {
+                get
+                {
+                    int idx = Display.LastIndexOf('|');
+                    if (idx == -1)
+                        return Display;
+                    else
+                        return Display.Substring(idx + 1);
+                }
+            }
+
+            public BSPEvent(XmlElement e)
+            {
+                ID = e.GetStringAttribute("id");
+                Display = e.GetStringAttribute("display");
+                Value = e.GetStringAttribute("value");
+            }
+
+            public override string ToString() => Value;
+        }
+
+        struct PendingEventAssignment
+        {
+            public string EventID, ISR;
+
+            public PendingEventAssignment(string eventID, string iSR)
+            {
+                EventID = eventID;
+                ISR = iSR;
+            }
+
+            public override string ToString() => $"{EventID} => {ISR}";
+        }
+
+        Dictionary<string, BSPEvent> _Events = new Dictionary<string, BSPEvent>();
+        Dictionary<EmbeddedFramework, PendingEventAssignment[]> _PendingEventAssignments = new Dictionary<EmbeddedFramework, PendingEventAssignment[]>();
+
         public void TranslateModuleDescriptionFiles(EmbeddedFramework fw, XmlDocument xml, BSPReportWriter report)
         {
             var rgIncludeRA = new Regex("#include[ \t]+\"\\.\\.[./]+/(ra/.*)\"");
@@ -39,6 +82,8 @@ namespace renesas_ra_bsp_generator
             List<GeneratedConfigurationFile> mergeableFragments = new List<GeneratedConfigurationFile>();
             List<PropertyGroup> propertyGroups = new List<PropertyGroup>();
             List<SysVarEntry> fixedValues = new List<SysVarEntry>();
+
+            Debug.Assert(xml.DocumentElement.Name == "raModuleDescription");
 
             foreach (var cf in xml.DocumentElement.SelectElements("config"))
             {
@@ -157,6 +202,7 @@ namespace renesas_ra_bsp_generator
             TranslateClockSettings(xml, files, propertyGroups);
             _EnumTranslator.ProcessEnumDefinitions(xml, fixedValues);
             TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, "0");
+            ParseEventDefinitions(xml);
 
             foreach (var iface in xml.SelectNodes("//provides/@interface").OfType<XmlAttribute>())
             {
@@ -169,6 +215,8 @@ namespace renesas_ra_bsp_generator
                 fixedValues.Add(new SysVarEntry { Key = iface.InnerText, Value = "1" });
             }
 
+            _PendingEventAssignments[fw] = xml.DocumentElement.SelectElements("module//interrupt").Select(interrupt => new PendingEventAssignment(interrupt.GetStringAttribute("event"), interrupt.GetStringAttribute("isr"))).ToArray();
+
             if (files.Count > 0)
                 fw.GeneratedConfigurationFiles = files.ToArray();
 
@@ -180,6 +228,12 @@ namespace renesas_ra_bsp_generator
 
             if (fixedValues.Count > 0)
                 fw.AdditionalSystemVars = (fw.AdditionalSystemVars ?? new SysVarEntry[0]).Concat(fixedValues).ToArray();
+        }
+
+        private void ParseEventDefinitions(XmlDocument xml)
+        {
+            foreach (var e in xml.DocumentElement.SelectElements("bsp/event"))
+                _Events[e.GetStringAttribute("id")] = new BSPEvent(e);
         }
 
         void TranslateClockSettings(XmlDocument xml, List<GeneratedConfigurationFile> files, List<PropertyGroup> propertyGroups)
@@ -778,6 +832,195 @@ namespace renesas_ra_bsp_generator
                 if (entry != null)
                     vars.Add(entry);
             }
+        }
+
+        const string EventVariablePrefix = "com.renesas.ra.interrupt.";
+
+        public void ProcessInterruptDefinitions()
+        {
+            Console.WriteLine("Generating interrupt definitions...");
+            foreach (var kv in _PendingEventAssignments)
+            {
+                var fw = kv.Key;
+                string conditionVariableID = null;
+
+                if (kv.Value.Length == 0)
+                    continue;
+
+                var pg = new PropertyGroup { Name = $"{fw.UserFriendlyName} - Interrupts", UniqueID = EventVariablePrefix };
+                fw.ConfigurableProperties.PropertyGroups.Add(pg);
+
+                foreach (var ea in kv.Value.Distinct())
+                {
+                    var m = rgPropertyReference.Match(ea.EventID);
+                    string shortEventName = null;
+
+                    if (m.Success)
+                    {
+                        var propName = m.Groups[1].Value;
+                        var rgMatchingEvent = new Regex("^" + Regex.Escape(ea.EventID.Substring(0, m.Groups[1].Index - 2)) + "([^.]+)" + Regex.Escape(ea.EventID.Substring(m.Groups[1].Index + m.Groups[1].Length + 1)) + "$");
+                        conditionVariableID = ea.EventID.Substring(0, m.Groups[1].Index - 2) + "X" + ea.EventID.Substring(m.Groups[1].Index + m.Groups[1].Length + 1) + "." + ea.ISR;
+
+                        int matchCount = 0;
+                        foreach (var evt in _Events.Values)
+                        {
+                            m = rgMatchingEvent.Match(evt.ID);
+                            if (m.Success)
+                            {
+                                if (!int.TryParse(m.Groups[1].Value, out _))
+                                    throw new Exception("Unexpected instance number: " + m.Groups[1].Value);
+
+                                MakeGeneralizedName(ref shortEventName, evt.Value);
+
+                                ProcessEventAssignment(fw, evt, ea.ISR, conditionVariableID, propName, m.Groups[1].Value);
+                                matchCount++;
+                            }
+                        }
+
+                        if (matchCount == 0)
+                            throw new Exception("No event matches " + ea.EventID);
+                    }
+                    else
+                    {
+                        conditionVariableID = ea.EventID + "." + ea.ISR;
+                        var evt = _Events[ea.EventID];
+                        shortEventName = evt.Value;
+                        ProcessEventAssignment(fw, evt, ea.ISR, conditionVariableID);
+                    }
+
+                    string propertyName = $"{shortEventName} => {ea.ISR}";
+
+                    if (pg.Properties.FirstOrDefault(p => p.UniqueID == conditionVariableID || p.Name == propertyName) is PropertyEntry oldProp)
+                        throw new Exception("Found a duplicate property entry for " + conditionVariableID);
+
+                    pg.Properties.Add(new PropertyEntry.Boolean { UniqueID = conditionVariableID, Name = propertyName, DefaultValue = true, ValueForTrue = "1" });
+                    pg.Properties.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.Name, b.Name));
+
+                }
+            }
+        }
+
+        private void MakeGeneralizedName(ref string generalizedName, string name)
+        {
+            if (generalizedName == null)
+                generalizedName = name;
+            else
+            {
+                int commonPrefixLength, commonSuffixLength;
+                for (commonPrefixLength = 0; commonPrefixLength < name.Length; commonPrefixLength++)
+                    if (name[commonPrefixLength] != generalizedName[commonPrefixLength])
+                        break;
+                for (commonSuffixLength = 0; commonSuffixLength < name.Length; commonSuffixLength++)
+                    if (name[name.Length - commonSuffixLength - 1] != generalizedName[generalizedName.Length - commonSuffixLength - 1])
+                        break;
+
+                string left = generalizedName.Substring(0, commonPrefixLength);
+                string right = generalizedName.Substring(generalizedName.Length - commonSuffixLength);
+                generalizedName = $"{left}x{right}";
+            }
+        }
+
+        private void ProcessEventAssignment(EmbeddedFramework framework,
+                                            BSPEvent evt,
+                                            string isr,
+                                            string shortConditionVariableID,
+                                            string conditionPropertyName = null,
+                                            string conditionPropertyValue = null)
+        {
+            string eventVariableName = EventVariablePrefix + shortConditionVariableID;
+
+            Condition cond = new Condition.Equals { Expression = $"$${eventVariableName}$$", ExpectedValue = "1" };
+            if (conditionPropertyName != null)
+                cond = new Condition.And { Arguments = new[] { cond, new Condition.Equals { Expression = $"$${conditionPropertyName}$$", ExpectedValue = conditionPropertyValue } } };
+
+            const string counterVarName = "com.renesas.ra.vectors.index";
+
+            framework.GeneratedConfigurationFragments = framework.GeneratedConfigurationFragments.Concat(new[]
+            {
+                new GeneratedConfigurationFile
+                {
+                    Name = "com.renesas.ra.vectors.isrs.decls",
+                    Condition = cond,
+                    Contents = new[]
+                    {
+                        new GeneratedConfigurationFile.Fragment.FormattedFragment
+                        {
+                            Lines = new[]
+                            {
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.AdvancedFormattedLine { Format = $"void {isr}(void);" }
+                            }
+                        }
+                    }
+                },
+                new GeneratedConfigurationFile
+                {
+                    Name = "com.renesas.ra.vectors.macros",
+                    Condition = cond,
+                    Contents = new[]
+                    {
+                        new GeneratedConfigurationFile.Fragment.FormattedFragment
+                        {
+                            ExtraVariables = new []
+                            {
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.IntermediateVariableAssignment.CounterVariable
+                                {
+                                    Variable = counterVarName,
+                                    Divisor = 2,
+                                }
+                            },
+                            Lines = new[]
+                            {
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.AdvancedFormattedLine { Format = $"#define VECTOR_NUMBER_{evt.Value} ((IRQn_Type) $${counterVarName}$$) /* {evt.CommentText} */" },
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.AdvancedFormattedLine { Format = $"#define {evt.Value}_IRQn ((IRQn_Type) $${counterVarName}$$) /* {evt.CommentText} */" },
+                            }
+                        }
+                    }
+                },
+                new GeneratedConfigurationFile
+                {
+                    Name = "com.renesas.ra.vectors.isrs.table",
+                    Condition = cond,
+                    Contents = new[]
+                    {
+                        new GeneratedConfigurationFile.Fragment.FormattedFragment
+                        {
+                            ExtraVariables = new []
+                            {
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.IntermediateVariableAssignment.CounterVariable
+                                {
+                                    Variable = counterVarName,
+                                }
+                            },
+                            Lines = new[]
+                            {
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.AdvancedFormattedLine { Format = $"\t[$${counterVarName}$$] = {isr}, /* {evt.CommentText} */" }
+                            }
+                        }
+                    }
+                },
+                new GeneratedConfigurationFile
+                {
+                    Name = "com.renesas.ra.vectors.links",
+                    Condition = cond,
+                    Contents = new[]
+                    {
+                        new GeneratedConfigurationFile.Fragment.FormattedFragment
+                        {
+                            ExtraVariables = new []
+                            {
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.IntermediateVariableAssignment.CounterVariable
+                                {
+                                    Variable = counterVarName,
+                                }
+                            },
+                            Lines = new[]
+                            {
+                                new GeneratedConfigurationFile.Fragment.FormattedFragment.AdvancedFormattedLine { Format = $"\t[$${counterVarName}$$] = BSP_PRV_IELS_ENUM(EVENT_{evt.Value}), /* {evt.CommentText} */" }
+                            }
+                        }
+                    }
+                },
+            }).ToArray();
         }
     }
 }

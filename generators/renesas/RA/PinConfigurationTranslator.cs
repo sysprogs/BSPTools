@@ -267,7 +267,7 @@ namespace renesas_ra_bsp_generator
                     inputVars.Add(ps.FullID);
                 }
 
-                tempVars.Add(new GeneratedConfigurationFile.Fragment.FormattedFragment.IntermediateVariableAssignment
+                tempVars.Add(new GeneratedConfigurationFile.Fragment.FormattedFragment.IntermediateVariableAssignment.FormattedVariable
                 {
                     Variable = tempVar,
                     Separator = " | ",
