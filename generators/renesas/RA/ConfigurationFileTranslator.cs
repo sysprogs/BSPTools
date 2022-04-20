@@ -146,7 +146,7 @@ namespace renesas_ra_bsp_generator
                     Contents = fragments.ToArray(),
                 });
             }
-            
+
 
             if (xml.DocumentElement.SelectElements("board").SingleOrDefault()?.GetStringAttribute("device") is string dev && !fw.ID.EndsWith(".custom"))
             {
@@ -158,7 +158,7 @@ namespace renesas_ra_bsp_generator
             _EnumTranslator.ProcessEnumDefinitions(xml, fixedValues);
             TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, "0");
 
-            foreach(var iface in xml.SelectNodes("//provides/@interface").OfType<XmlAttribute>())
+            foreach (var iface in xml.SelectNodes("//provides/@interface").OfType<XmlAttribute>())
             {
                 if (!iface.InnerText.StartsWith("interface."))
                 {
@@ -419,7 +419,8 @@ namespace renesas_ra_bsp_generator
                 files.Add(new GeneratedConfigurationFile
                 {
                     Name = prefix + type,
-                    Contents = new GeneratedConfigurationFile.Fragment[] { new GeneratedConfigurationFile.Fragment.BasicFragment { Lines = configLines.ToArray() } }
+                    Contents = new GeneratedConfigurationFile.Fragment[] { new GeneratedConfigurationFile.Fragment.BasicFragment { Lines = configLines.ToArray() } },
+                    UndefinedVariableValue = "RA_NOT_DEFINED",
                 });
             }
         }
