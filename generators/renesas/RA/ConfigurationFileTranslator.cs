@@ -538,9 +538,9 @@ namespace renesas_ra_bsp_generator
 
             var options = prop.SelectElements("option").ToArray();
             PropertyEntry entry;
-            if (prop.SelectSingleNode("select[@enum]/@enum")?.InnerText is string eid && eid != "")
+            if (prop.SelectNodes("select[@enum]/@enum").OfType<XmlAttribute>().ToArray() is XmlAttribute[] enums && enums.Length > 0)
             {
-                entry = _EnumTranslator.CreatePendingEntryForEnum(eid);
+                entry = _EnumTranslator.CreatePendingEntryForEnum(enums.Select(a => a.InnerText).ToArray(), prop.GetAttribute("default"));
             }
             else if (options.Length == 1 && options[0].GetStringAttribute("id") == defaultValue && fixedValues != null)
             {
@@ -769,7 +769,7 @@ namespace renesas_ra_bsp_generator
                 }
             }
 
-            _EnumTranslator.ExpandEnumReferences(report);
+            _EnumTranslator.ExpandEnumReferences(report, _Events.Values.Select(e => e.Value).ToArray());
         }
 
         void TranslateDefaultValueOverrides(BSPReportWriter report, PendingConfigurationTranslation cfg, List<SysVarEntry> vars)
@@ -895,7 +895,6 @@ namespace renesas_ra_bsp_generator
 
                     pg.Properties.Add(new PropertyEntry.Boolean { UniqueID = conditionVariableID, Name = propertyName, DefaultValue = true, ValueForTrue = "1" });
                     pg.Properties.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.Name, b.Name));
-
                 }
             }
         }

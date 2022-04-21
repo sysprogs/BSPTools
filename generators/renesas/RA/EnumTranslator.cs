@@ -51,7 +51,7 @@ namespace renesas_ra_bsp_generator
                     ectx.HasEmptyValue = true;
 
                 string translatedDefaultValue = null;
-                foreach(var o in ed.SelectElements("option"))
+                foreach (var o in ed.SelectElements("option"))
                 {
                     var oi = o.GetStringAttribute("id");
                     var ov = o.GetStringAttribute("value");
@@ -81,37 +81,54 @@ namespace renesas_ra_bsp_generator
         struct PendingEnumExpansion
         {
             public PropertyEntry.Enumerated Entry;
-            public string EnumID;
+            public string[] EnumIDs;
+            public string DefaultValue;
         }
 
         List<PendingEnumExpansion> _PendingEnumExpansions = new List<PendingEnumExpansion>();
 
 
-        public PropertyEntry.Enumerated CreatePendingEntryForEnum(string eid)
+        public PropertyEntry.Enumerated CreatePendingEntryForEnum(string[] eids, string defaultValue)
         {
             var ee = new PropertyEntry.Enumerated
             {
                 SuggestionList = new PropertyEntry.Enumerated.Suggestion[0],
             };
 
-            _PendingEnumExpansions.Add(new PendingEnumExpansion { Entry = ee, EnumID = eid });
+            _PendingEnumExpansions.Add(new PendingEnumExpansion { Entry = ee, EnumIDs = eids, DefaultValue = defaultValue });
             return ee;
         }
 
-        public void ExpandEnumReferences(BSPReportWriter report)
+        public void ExpandEnumReferences(BSPReportWriter report, string[] allInterruptNames)
         {
-            foreach(var ee in _PendingEnumExpansions)
+            foreach (var ee in _PendingEnumExpansions)
             {
-                if (_Enums.TryGetValue(ee.EnumID, out var ectx))
+                string specialEnum = null;
+                if (ee.EnumIDs.Length != 1)
+                {
+                    if (ee.EnumIDs.Length == 2)
+                        specialEnum = ee.EnumIDs[1];
+
+                    if (specialEnum != "_signal" && specialEnum != "_interrupt")
+                        throw new Exception("Unexpected multiple enums referenced by the property");
+                }
+
+                var enumID = ee.EnumIDs[0];
+                if (_Enums.TryGetValue(enumID, out var ectx))
                 {
                     ee.Entry.SuggestionList = ectx.BuildSuggestionList();
                     if (ectx.DefaultValue != null)
                         ee.Entry.DefaultEntryIndex = Enumerable.Range(0, ee.Entry.SuggestionList.Length).FirstOrDefault(i => ee.Entry.SuggestionList[i].InternalValue == ectx.DefaultValue);
                     if (ectx.DefaultValueInconsistent)
-                        ee.Entry.DefaultEntryValue = $"$${MakeDefaultValueID(ee.EnumID)}$$";
+                        ee.Entry.DefaultEntryValue = $"$${MakeDefaultValueID(enumID)}$$";
                 }
                 else
-                    report.ReportMergeableError("Unknown enum:", ee.EnumID);
+                    report.ReportMergeableError("Unknown enum:", enumID);
+
+                if (specialEnum == "_interrupt")
+                {
+                    ee.Entry.SuggestionList = ee.Entry.SuggestionList.Concat(allInterruptNames.OrderBy(n => n).Select(n => new PropertyEntry.Enumerated.Suggestion { InternalValue = n })).ToArray();
+                }
             }
         }
     }
