@@ -131,7 +131,7 @@ namespace esp32
             }
         }
 
-        public static HardwareRegisterSet[] ParsePeripheralRegisters(string sdkDir)
+        public static HardwareRegisterSet[] ParsePeripheralRegisters(string socDir)
         {
             Dictionary<string, ConstructedRegisterSet> registerSets = new Dictionary<string, ConstructedRegisterSet>();
             Regex rgBaseDefinition = new Regex("#define[ \t]+DR_REG_(.*)_BASE[ \t]+0x([0-9a-fA-F]+)$");
@@ -141,14 +141,14 @@ namespace esp32
 
             Regex rgiTimesNumber = new Regex(@"^[ (\t]*i[ \t)]*\*[ \t]*[ \t(]*0x([0-9a-fA-F]+)[ \t)]*$");
 
-            foreach (var match in File.ReadAllLines(Path.Combine(sdkDir, @"components\soc\esp32\include\soc\soc.h")).Select(line => rgBaseDefinition.Match(line)).Where(m => m.Success))
+            foreach (var match in File.ReadAllLines(Path.Combine(socDir, $@"include\soc\soc.h")).Select(line => rgBaseDefinition.Match(line)).Where(m => m.Success))
                 registerSets[match.Groups[1].Value] = new ConstructedRegisterSet
                 {
                     Name = match.Groups[1].Value,
                     Address = ulong.Parse(match.Groups[2].Value, System.Globalization.NumberStyles.HexNumber)
                 };
 
-            foreach (var fn in Directory.GetFiles(Path.Combine(sdkDir, @"components\soc\esp32\include\soc"), "*_reg.h"))
+            foreach (var fn in Directory.GetFiles(Path.Combine(socDir, $@"include\soc"), "*_reg.h"))
             {
                 Dictionary<string, MultiInstanceRegister> multiInstanceRegisterBases = new Dictionary<string, MultiInstanceRegister>();
 
