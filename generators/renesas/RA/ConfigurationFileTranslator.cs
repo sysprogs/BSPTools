@@ -61,15 +61,32 @@ namespace renesas_ra_bsp_generator
 
         struct PendingEventAssignment
         {
-            public string EventID, ISR;
+            public readonly string EventID, ISR;
+            public readonly PropertyGroup PropertyGroup;
+            public readonly PropertyEntry Property;
 
-            public PendingEventAssignment(string eventID, string iSR)
+            public PendingEventAssignment(string eventID, string iSR, PropertyGroup group, PropertyEntry entry)
             {
                 EventID = eventID;
+                PropertyGroup = group;
                 ISR = iSR;
+                Property = entry;
             }
 
             public override string ToString() => $"{EventID} => {ISR}";
+
+            public class Comparer : IEqualityComparer<PendingEventAssignment>
+            {
+                public bool Equals(PendingEventAssignment x, PendingEventAssignment y)
+                {
+                    return x.EventID == y.EventID && x.ISR == y.ISR;
+                }
+
+                public int GetHashCode(PendingEventAssignment obj)
+                {
+                    return obj.EventID.GetHashCode() ^ obj.ISR.GetHashCode();
+                }
+            }
         }
 
         Dictionary<string, BSPEvent> _Events = new Dictionary<string, BSPEvent>();
@@ -151,7 +168,7 @@ namespace renesas_ra_bsp_generator
                     fragments.Add(new GeneratedConfigurationFile.Fragment.BasicFragment { Lines = configLines.ToArray() });
                 }
 
-                if (StringComparer.InvariantCultureIgnoreCase.Compare(fn, "ra_cfg/fsp_cfg/bsp/board_cfg.h") == 0)
+                if (StringComparer.InvariantCultureIgnoreCase.Compare(fn, "fsp_cfg/bsp/board_cfg.h") == 0)
                 {
                     /* Device-level header files require board_cfg.h unconditionally.
                      * Hence, we need to generate it even if no board framework was referenced.
@@ -201,7 +218,8 @@ namespace renesas_ra_bsp_generator
 
             TranslateClockSettings(xml, files, propertyGroups);
             _EnumTranslator.ProcessEnumDefinitions(xml, fixedValues);
-            TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, "0");
+            List<PendingEventAssignment> events = new List<PendingEventAssignment>();
+            TranslateModuleConfiguration(fw.UserFriendlyName, xml, files, mergeableFragments, propertyGroups, fixedValues, events, "0");
             ParseEventDefinitions(xml);
 
             foreach (var iface in xml.SelectNodes("//provides/@interface").OfType<XmlAttribute>())
@@ -215,7 +233,7 @@ namespace renesas_ra_bsp_generator
                 fixedValues.Add(new SysVarEntry { Key = iface.InnerText, Value = "1" });
             }
 
-            _PendingEventAssignments[fw] = xml.DocumentElement.SelectElements("module//interrupt").Select(interrupt => new PendingEventAssignment(interrupt.GetStringAttribute("event"), interrupt.GetStringAttribute("isr"))).ToArray();
+            _PendingEventAssignments[fw] = events.ToArray();
 
             if (files.Count > 0)
                 fw.GeneratedConfigurationFiles = files.ToArray();
@@ -345,6 +363,7 @@ namespace renesas_ra_bsp_generator
                                           List<GeneratedConfigurationFile> fragments,
                                           List<PropertyGroup> propertyGroups,
                                           List<SysVarEntry> fixedValues,
+                                          List<PendingEventAssignment> events,
                                           string instanceName)
         {
             PropertyGroup pg = new PropertyGroup { Name = moduleName + " - Module Configuration" };
@@ -385,12 +404,18 @@ namespace renesas_ra_bsp_generator
                             });
                         }
 
+                        if (prop.SelectSingleNode("interrupt") != null)
+                            throw new Exception("Unexpected interrupt assignment in bitmap property");
+
                         localProperties[id] = new LocalPropertyContext { BooleanSubproperties = allOptions };
                     }
                     else
                     {
                         localProperties[id] = null;
-                        TranslateSingleProperty(prop, fixedValues, pg.Properties, PropertyTranslationFlags.None, instanceName);
+                        var entry = TranslateSingleProperty(prop, fixedValues, pg.Properties, PropertyTranslationFlags.None, instanceName);
+
+                        foreach (var interrupt in prop.SelectElements("interrupt"))
+                            events.Add(new PendingEventAssignment(interrupt.GetStringAttribute("event"), interrupt.GetStringAttribute("isr"), pg, entry));
                     }
                 }
 
@@ -842,24 +867,37 @@ namespace renesas_ra_bsp_generator
             foreach (var kv in _PendingEventAssignments)
             {
                 var fw = kv.Key;
-                string conditionVariableID = null;
 
                 if (kv.Value.Length == 0)
                     continue;
 
                 var pg = new PropertyGroup { Name = $"{fw.UserFriendlyName} - Interrupts", UniqueID = EventVariablePrefix };
-                fw.ConfigurableProperties.PropertyGroups.Add(pg);
 
-                foreach (var ea in kv.Value.Distinct())
+                foreach (var ea in kv.Value.Distinct(new PendingEventAssignment.Comparer()))
                 {
                     var m = rgPropertyReference.Match(ea.EventID);
                     string shortEventName = null;
+                    string conditionVariableID = null;
+
+                    Condition cond = null;
+                    if ((ea.Property as PropertyEntry.Enumerated)?.SuggestionList.FirstOrDefault(e => e.UserFriendlyName == "Disabled") is PropertyEntry.Enumerated.Suggestion disabledValue)
+                    {
+                        cond = new Condition.Not { Argument = new Condition.Equals { Expression = $"$${ea.PropertyGroup.UniqueID + ea.Property.UniqueID}$$", ExpectedValue = disabledValue.InternalValue } };
+                    }
+                    else
+                    {
+                        if (m.Success)
+                            conditionVariableID = ea.EventID.Substring(0, m.Groups[1].Index - 2) + "X" + ea.EventID.Substring(m.Groups[1].Index + m.Groups[1].Length + 1) + "." + ea.ISR;
+                        else
+                            conditionVariableID = ea.EventID + "." + ea.ISR;
+
+                        cond = new Condition.Equals { Expression = $"$${pg.UniqueID + conditionVariableID}$$", ExpectedValue = "1" };
+                    }
 
                     if (m.Success)
                     {
                         var propName = m.Groups[1].Value;
                         var rgMatchingEvent = new Regex("^" + Regex.Escape(ea.EventID.Substring(0, m.Groups[1].Index - 2)) + "([^.]+)" + Regex.Escape(ea.EventID.Substring(m.Groups[1].Index + m.Groups[1].Length + 1)) + "$");
-                        conditionVariableID = ea.EventID.Substring(0, m.Groups[1].Index - 2) + "X" + ea.EventID.Substring(m.Groups[1].Index + m.Groups[1].Length + 1) + "." + ea.ISR;
 
                         int matchCount = 0;
                         foreach (var evt in _Events.Values)
@@ -872,7 +910,7 @@ namespace renesas_ra_bsp_generator
 
                                 MakeGeneralizedName(ref shortEventName, evt.Value);
 
-                                ProcessEventAssignment(fw, evt, ea.ISR, conditionVariableID, propName, m.Groups[1].Value);
+                                ProcessEventAssignment(fw, evt, ea.ISR, cond, propName, m.Groups[1].Value);
                                 matchCount++;
                             }
                         }
@@ -882,20 +920,26 @@ namespace renesas_ra_bsp_generator
                     }
                     else
                     {
-                        conditionVariableID = ea.EventID + "." + ea.ISR;
                         var evt = _Events[ea.EventID];
                         shortEventName = evt.Value;
-                        ProcessEventAssignment(fw, evt, ea.ISR, conditionVariableID);
+                        ProcessEventAssignment(fw, evt, ea.ISR, cond);
                     }
 
-                    string propertyName = $"{shortEventName} => {ea.ISR}";
+                    if (conditionVariableID != null)
+                    {
+                        string propertyName = $"{shortEventName} => {ea.ISR}";
 
-                    if (pg.Properties.FirstOrDefault(p => p.UniqueID == conditionVariableID || p.Name == propertyName) is PropertyEntry oldProp)
-                        throw new Exception("Found a duplicate property entry for " + conditionVariableID);
+                        if (pg.Properties.FirstOrDefault(p => p.UniqueID == conditionVariableID || p.Name == propertyName) is PropertyEntry oldProp)
+                            throw new Exception("Found a duplicate property entry for " + conditionVariableID);
 
-                    pg.Properties.Add(new PropertyEntry.Boolean { UniqueID = conditionVariableID, Name = propertyName, DefaultValue = true, ValueForTrue = "1" });
-                    pg.Properties.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.Name, b.Name));
+                        pg.Properties.Add(new PropertyEntry.Boolean { UniqueID = conditionVariableID, Name = propertyName, DefaultValue = true, ValueForTrue = "1" });
+                        pg.Properties.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.Name, b.Name));
+                    }
                 }
+
+
+                if (pg.Properties.Count > 0)
+                    fw.ConfigurableProperties.PropertyGroups.Add(pg);
             }
         }
 
@@ -922,13 +966,10 @@ namespace renesas_ra_bsp_generator
         private void ProcessEventAssignment(EmbeddedFramework framework,
                                             BSPEvent evt,
                                             string isr,
-                                            string shortConditionVariableID,
+                                            Condition cond,
                                             string conditionPropertyName = null,
                                             string conditionPropertyValue = null)
         {
-            string eventVariableName = EventVariablePrefix + shortConditionVariableID;
-
-            Condition cond = new Condition.Equals { Expression = $"$${eventVariableName}$$", ExpectedValue = "1" };
             if (conditionPropertyName != null)
                 cond = new Condition.And { Arguments = new[] { cond, new Condition.Equals { Expression = $"$${conditionPropertyName}$$", ExpectedValue = conditionPropertyValue } } };
 
