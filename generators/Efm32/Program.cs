@@ -281,6 +281,11 @@ namespace SLab_bsp_generator
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                 var ignoredFamilyNames = File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, "rulesfamaly.txt"));
 
+                string versionPrefix = "version=";
+                var version = File.ReadAllLines(Path.Combine(bspBuilder.Directories.InputDir, ".studio\\efm32.properties")).First(l => l.StartsWith(versionPrefix)).Substring(versionPrefix.Length).Trim();
+                if (version.Count(c => c == '.') == 3 && version.EndsWith(".0"))
+                    version = version.Substring(0, version.Length - 2);
+
                 string DirDevices = Path.Combine(bspBuilder.Directories.InputDir, @"platform\Device\SiliconLabs");
                 string[] allFamilySubdirectories = Directory.GetDirectories(DirDevices);
                 Console.WriteLine("Enumerating devices...");
@@ -400,7 +405,7 @@ namespace SLab_bsp_generator
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
-                    PackageVersion = "5.9.8"
+                    PackageVersion = version
                 };
 
                 Console.WriteLine("Saving BSP...");
