@@ -197,6 +197,7 @@ namespace ESP8266DebugPackage
 
                     using (var ctx = session.CreateScopedProgressReporter("Programming FLASH...", new[] { "Programming FLASH memory" }))
                     {
+                        Regex rgProgrammingFinished = new Regex(@"\*\* Programming Finished (|in [^*]+)\*\*");
                         int blkNum = 0;
                         foreach (var blk in blocks)
                         {
@@ -205,7 +206,7 @@ namespace ESP8266DebugPackage
                             if (path.Contains(" "))
                                 throw new Exception($"ESP32 OpenOCD does not support spaces in paths. Please relocate {path} to a location without spaces");
                             var result = session.RunGDBCommand($"mon program_esp \"{path}\" 0x{blk.Offset:x}");
-                            bool succeeded = result.StubOutput?.FirstOrDefault(l => l.Contains("** Programming Finished **")) != null;
+                            bool succeeded = result.StubOutput?.FirstOrDefault(rgProgrammingFinished.IsMatch) != null;
                             if (!succeeded)
                                 throw new Exception("FLASH programming failed. Please try unplugging the board and plugging it back. If nothing helps, please review the gdb/OpenOCD logs for details.");
                         }
