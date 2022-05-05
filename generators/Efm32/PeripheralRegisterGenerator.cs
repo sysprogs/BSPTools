@@ -90,14 +90,14 @@ namespace SLab_bsp_generator
 
                     int asize = aDicSizeTypeDefStuct[str1] * Convert.ToInt32(asArray);
                     CustTypReg.SizeInBits = asize;
-                    if(asize <= 32)
-                        CustTypReg.Name = CustTypReg.Name.Substring(0, strIdx2);                  
+                    if (asize <= 32)
+                        CustTypReg.Name = CustTypReg.Name.Substring(0, strIdx2);
                 }
                 //Rename big strucures
-             foreach(var v in setsCustomMcu )
+                foreach (var v in setsCustomMcu)
                 {
-                List<HardwareRegister> lr = new List<HardwareRegister>();
-                 foreach (var r in   v.Registers)
+                    List<HardwareRegister> lr = new List<HardwareRegister>();
+                    foreach (var r in v.Registers)
                     {
                         int strIdx1 = r.Name.IndexOf("-");
                         int strIdx2 = r.Name.IndexOf(":");
@@ -105,20 +105,20 @@ namespace SLab_bsp_generator
                         {
                             lr.Add(DeepCopy(r));
                             continue;
-                        }                     
-                        string typ = r.Name.Substring(strIdx1+1, r.Name.Length - strIdx1 - 1);
+                        }
+                        string typ = r.Name.Substring(strIdx1 + 1, r.Name.Length - strIdx1 - 1);
                         foreach (var st in setsCustomMcu)
                         {
                             if (st.UserFriendlyName != typ)
                                 continue;
-                            foreach(var stsub in st.Registers)
-                             {
+                            foreach (var stsub in st.Registers)
+                            {
                                 HardwareRegister hr = DeepCopy(r);
-                                hr.Name = hr.Name.Substring(0,strIdx2) +"."+ stsub.Name;
+                                hr.Name = hr.Name.Substring(0, strIdx2) + "." + stsub.Name;
                                 hr.SizeInBits = stsub.SizeInBits;
                                 lr.Add(hr);
                             }
-                        }                      
+                        }
                     }
                     v.Registers = lr.ToArray();
                 }
@@ -142,12 +142,11 @@ namespace SLab_bsp_generator
             List<HardwareRegisterSet> oPerReg = new List<HardwareRegisterSet>();
             foreach (var ln in File.ReadAllLines(pFileName))
             {
-                
                 Match m = Regex.Match(ln.Replace("(uint32_t)", ""), @"#define[ \t]+([\w]+)_BASE[ \t]+[\(]?([\w ]+)[\)]?.*");
                 if (m.Success)
                 {
                     int aAdrBase;
-                    var str = m.Groups[2].Value.Replace("UL", "").Replace(" ","");
+                    var str = m.Groups[2].Value.Replace("UL", "").Replace(" ", "");
                     if (aDicBaseAdr.ContainsKey(str))
                         //aAdrBase = aDicBaseAdr[str];
                         continue;
@@ -191,10 +190,10 @@ namespace SLab_bsp_generator
 
         class RegexCollection
         {
-            public Regex argSearchReg = new Regex(@"[ \t]*(__IO|__I|__O)[ \t]+(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
-            public Regex argSearchRegReserv = new Regex(@"[ \t]*(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
-            public Regex argSearchRegTypeDef = new Regex(@"[ \t]*([A-Z0-9_]+)_TypeDef[ \t]+([A-Z0-9]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
-            public Regex argSearchFrendName = new Regex(@"^[ \t}]*([A-Z_0-9]+)(_TypeDef;).*", RegexOptions.Compiled);
+            public Regex argSearchReg = new Regex(@"[ \t]*(__IO|__I|__O|__IOM)[ \t]+(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9_]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
+            public Regex argSearchRegReserv = new Regex(@"[ \t]*(uint32_t|uint16_t|uint8_t)[ \t]+([A-Z0-9_]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
+            public Regex argSearchRegTypeDef = new Regex(@"[ \t]*([A-Z0-9_]+)_TypeDef[ \t]+([A-Z0-9_]+)[[]*([0-9]+)*[]]*[;]?.*", RegexOptions.Compiled);
+            public Regex argSearchFrendName = new Regex(@"^[ \t}]*([A-Z_0-9_]+)(_TypeDef;).*", RegexOptions.Compiled);
 
             public Regex argSearchRegShift = new Regex(@"(#define)[ \t_]*([A-Z_]+)(_SHIFT)[ \t]+([0-9]+).*", RegexOptions.Compiled);
             public Regex argSearchRegMask = new Regex(@"(#define)[ \t_]*([A-Z_]+)(_MASK)[ \t]+([0-9xA-F]*[U]?[L]?).*", RegexOptions.Compiled);
@@ -253,7 +252,7 @@ namespace SLab_bsp_generator
                         for (int a_cnt = 0; a_cnt < sizeArray; a_cnt++)
                         {
                             HardwareRegister setReg = new HardwareRegister();
-                            if (sizeArray > 1)
+                            if (m.Groups[3].Value.Length > 0)
                                 setReg.Name = m.Groups[2].Value + "[" + a_cnt + "]:1-" + m.Groups[1].Value;//name register - custom type
                             else
                                 setReg.Name = m.Groups[2].Value + ":" + sizeArray + "-" + m.Groups[1].Value;//name register - custom type
