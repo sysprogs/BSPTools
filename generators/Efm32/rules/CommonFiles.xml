@@ -21,7 +21,7 @@
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\emlib</SourceFolder>
-					<FilesToCopy>*.h;*.c</FilesToCopy>
+					<FilesToCopy>-host\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>framework\emlib</TargetFolder>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
 				</CopyJob>		

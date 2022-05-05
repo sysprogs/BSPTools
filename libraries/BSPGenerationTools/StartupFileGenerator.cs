@@ -30,7 +30,18 @@ namespace BSPGenerationTools
             }
         }
 
-        public static InterruptVector[] ParseInterruptVectors(string file, string tableStart, string tableEnd, string vectorLineA, string vectorLineB, string ignoredLine, string macroDef, int nameGroup, int commentGroup)
+        public delegate InterruptVector VectorLineHook(string[] lines, ref int lineIndex);
+
+        public static InterruptVector[] ParseInterruptVectors(string file,
+                                                              string tableStart,
+                                                              string tableEnd,
+                                                              string vectorLineA,
+                                                              string vectorLineB,
+                                                              string ignoredLine,
+                                                              string macroDef,
+                                                              int nameGroup,
+                                                              int commentGroup,
+                                                              VectorLineHook hook = null)
         {
             var rgTableStart = new Regex(tableStart);
             var rgTableEnd = new Regex(tableEnd);
@@ -43,8 +54,11 @@ namespace BSPGenerationTools
 
             bool insideTable = false;
             List<InterruptVector> result = new List<InterruptVector>();
-            foreach(var line in File.ReadAllLines(file))
+            var lines = File.ReadAllLines(file);
+            for (int i = 0; i <lines.Length; i++)
             {
+                string line = lines[i];
+
                 if (!insideTable)
                 {
                     if (rgMacroDef != null)
@@ -67,6 +81,16 @@ namespace BSPGenerationTools
                     else if (rgTableEnd.IsMatch(line))
                         break;
 
+                    if (hook != null)
+                    {
+                        var overrideVec = hook(lines, ref i);
+                        if (overrideVec != null)
+                        {
+                            result.Add(overrideVec);
+                            continue;
+                        }
+                    }
+
                     var m = rgVectorLineA.Match(line);
                     if (!m.Success && vectorLineB != null)
                         m = rgVectorLineB.Match(line);
@@ -83,7 +107,6 @@ namespace BSPGenerationTools
                         vec = null;
                     else if (macroValues.TryGetValue(vec.Name, out val))
                         vec.SpecialVectorValue = val;
-
 
                     result.Add(vec);
                 }

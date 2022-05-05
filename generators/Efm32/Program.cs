@@ -89,6 +89,22 @@ namespace SLab_bsp_generator
 
         enum enTypText { Text, MacroSection, MacroElseSection };
 
+        static StartupFileGenerator.InterruptVector VectorLineHook(string[] lines, ref int lineIndex)
+        {
+            var line = lines[lineIndex];
+            if (line.StartsWith("#ifdef"))
+            {
+                if (line != "#ifdef BOOTLOADER_ENABLE")
+                    throw new Exception("Unexpected conditional interrupt vector");
+
+                lineIndex += 4;
+                return new StartupFileGenerator.InterruptVector { Name = "Bootloader_MainStageTable" };
+            }
+
+            return null;
+        }
+
+
         static IEnumerable<StartupFileGenerator.InterruptVectorTable> ParseStartupFiles(string startupFileName, MCUFamilyBuilder fam)
         {
             List<StartupFileGenerator.InterruptVector[]> list = new List<StartupFileGenerator.InterruptVector[]>();
@@ -100,7 +116,9 @@ namespace SLab_bsp_generator
                      @"^[ \t]*/.*",
                      null,
                      1,
-                     2));
+                     2,
+                     VectorLineHook));
+
             List<StartupFileGenerator.InterruptVector> vectors = new List<StartupFileGenerator.InterruptVector>(list[0]);
             list.RemoveAt(0);
 
@@ -127,9 +145,8 @@ namespace SLab_bsp_generator
                 }
                 else
                 {
-                    if (vectors[i] != null)
-                        if (vectors[i].Name == "Default_Handler")
-                            vectors[i] = null;
+                    if (vectors[i].Name == "Default_Handler")
+                        vectors[i] = null;
                 }
 
             }
@@ -144,7 +161,7 @@ namespace SLab_bsp_generator
         private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam)
         {
             List<MCUDefinitionWithPredicate> RegistersPeriphs = new List<MCUDefinitionWithPredicate>();
-            Dictionary<string, HardwareRegisterSet[]> periphs = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegistersEFM32(dir + "\\Include", fam.Definition.FamilySubdirectory, fam.MCUs.Select(m=>m.Name).ToArray());
+            Dictionary<string, HardwareRegisterSet[]> periphs = PeripheralRegisterGenerator.GenerateFamilyPeripheralRegistersEFM32(dir + "\\Include", fam.Definition.FamilySubdirectory, fam.MCUs.Select(m => m.Name).ToArray());
 
             foreach (var subfamily in periphs.Keys)
             {
@@ -282,7 +299,11 @@ namespace SLab_bsp_generator
                 var ignoredFamilyNames = File.ReadAllLines(Path.Combine(bspBuilder.Directories.RulesDir, "rulesfamaly.txt"));
 
                 string versionPrefix = "version=";
-                var version = File.ReadAllLines(Path.Combine(bspBuilder.Directories.InputDir, ".studio\\efm32.properties")).First(l => l.StartsWith(versionPrefix)).Substring(versionPrefix.Length).Trim();
+                var propertiesFile = Path.Combine(bspBuilder.Directories.InputDir, @"app\mcu_example\app_mcu.properties");
+                if (!File.Exists(propertiesFile))
+                    propertiesFile = Path.Combine(bspBuilder.Directories.InputDir, @".studio\efm32.properties");
+
+                var version = File.ReadAllLines(propertiesFile).First(l => l.StartsWith(versionPrefix)).Substring(versionPrefix.Length).Trim();
                 if (version.Count(c => c == '.') == 3 && version.EndsWith(".0"))
                     version = version.Substring(0, version.Length - 2);
 
