@@ -672,7 +672,7 @@ namespace BSPGenerationTools
                 string encodedPath = "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + "/" + renamedRelativePath.Replace('\\', '/');
 
                 if (!ExcludeFromVendorSampleMapping)
-                    copiedFileMonitor.RememberFileMapping(absSourcePath, targetFile, encodedPath);
+                    copiedFileMonitor?.RememberFileMapping(absSourcePath, targetFile, encodedPath);
 
                 bool includedInProject = projectContents.IsMatch(f);
                 var m = configTemplateRegex?.Match(f);

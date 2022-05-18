@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.googletest</ID>
 	<Name>GoogleTest</Name>
-	<Version>20200912-1.10.0</Version>
+	<Version>20220517-1.10.0</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -41,6 +41,8 @@
 		  <PerTestArgumentTemplate>$(1).$(2)</PerTestArgumentTemplate>
           <TestIDRegex>(.*)::(.*)</TestIDRegex>
           <IDType>SecondaryID</IDType>
+          <CommandLineLengthLimit>131072</CommandLineLengthLimit>
+          <ResponseFileFormat>--gtest_flagfile={0}</ResponseFileFormat>
 	    </TestSelection>
 		<AdvancedTestDiscoverers>
 		  <TestDiscoverer xsi:type="OutputBasedTestDiscoverer">

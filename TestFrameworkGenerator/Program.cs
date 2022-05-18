@@ -67,7 +67,7 @@ namespace CppUTest
 
                 foreach (var job in rules.CopyJobs)
                 {
-                    flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null, ref fwObj.Common.ConfigurableProperties, null));
+                    flags = flags.Merge(job.CopyAndBuildFlags(dummyBSPBuilder, projectFiles, null, ref fwObj.Common.ConfigurableProperties, null, null, null));
                 }
 
                 var platformIndepenentFiles = projectFiles.Where(f => !dummyBSPBuilder.MatchedFileConditions.ContainsKey(f)).ToList();
