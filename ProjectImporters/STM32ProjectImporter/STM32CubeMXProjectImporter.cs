@@ -697,6 +697,9 @@ namespace STM32ProjectImporter
                         "project name " + Path.GetFileNameWithoutExtension(context.ProjectFile),
                         $"project path \"{Path.GetDirectoryName(context.ProjectFile)}\"",
                         "project toolchain \"STM32CubeIDE\"",
+                        "project generateunderroot 1",
+                        "SetStructure Advanced",
+                        $"config saveas \"{context.ProjectFile}\"",
                     });
 
                     args = $" -s \"{temporaryScriptFile}\"";
