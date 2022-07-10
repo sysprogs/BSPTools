@@ -11,13 +11,13 @@ void Delay()
 
 int main() 
 {
-	gpio_configure_pin(PIO_P$$com.sysprogs.examples.ledblink.LEDPORT$$$$com.sysprogs.examples.ledblink.LEDBIT$$, PIO_TYPE_PIO_OUTPUT_1 | PIO_DEFAULT);
+	gpio_configure_pin(PIO_P$$com.sysprogs.examples.ledblink.LEDPORT$$$$com.sysprogs.examples.ledblink.LEDBIT$$_IDX, PIO_TYPE_PIO_OUTPUT_1 | PIO_DEFAULT);
 	
 	for (;;)
 	{
-		gpio_set_pin_low(PIO_P$$com.sysprogs.examples.ledblink.LEDPORT$$$$com.sysprogs.examples.ledblink.LEDBIT$$);
+		gpio_set_pin_low(PIO_P$$com.sysprogs.examples.ledblink.LEDPORT$$$$com.sysprogs.examples.ledblink.LEDBIT$$_IDX);
 		Delay();
-		gpio_set_pin_high(PIO_P$$com.sysprogs.examples.ledblink.LEDPORT$$$$com.sysprogs.examples.ledblink.LEDBIT$$);
+		gpio_set_pin_high(PIO_P$$com.sysprogs.examples.ledblink.LEDPORT$$$$com.sysprogs.examples.ledblink.LEDBIT$$_IDX);
 		Delay();
 	}
 }

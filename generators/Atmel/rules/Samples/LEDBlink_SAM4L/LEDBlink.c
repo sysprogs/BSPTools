@@ -18,8 +18,8 @@ int main()
     for (;;)
     {
         Delay();
-        ioport_set_pin_level(PIN_PA00, IOPORT_PIN_LEVEL_LOW);
+        ioport_set_pin_level(LED1, IOPORT_PIN_LEVEL_LOW);
         Delay();
-        ioport_set_pin_level(PIN_PA00, IOPORT_PIN_LEVEL_HIGH);
+        ioport_set_pin_level(LED1, IOPORT_PIN_LEVEL_HIGH);
     }
 }
