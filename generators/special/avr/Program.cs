@@ -80,8 +80,8 @@ namespace avr
 
             public void ParseHeaderFile(string file)
             {
-                Regex rgFLASHRAM = new Regex(@"#define[ \t]+(RAMSIZE|RAMSTART|RAMEND|FLASHEND|INTERNAL_SRAM_START|INTERNAL_SRAM_SIZE|PROGMEM_SIZE)[ \t]+\(?([0-9a-fA-Fx]+)\)?[ \t]*($|/)");
-                Regex rgFLASHRAM2 = new Regex(@"#define[ \t]+(FLASHEND)[ \t]+\(?([0-9a-fA-Fx]+) - 1\)?[ \t]*($|/)");
+                Regex rgFLASHRAM = new Regex(@"#[ ]*define[ \t]+(RAMSIZE|RAMSTART|RAMEND|FLASHEND|INTERNAL_SRAM_START|INTERNAL_SRAM_SIZE|PROGMEM_SIZE)[ \t]+\(?([0-9a-fA-Fx]+)\)?[ \t]*($|/)");
+                Regex rgFLASHRAM2 = new Regex(@"#[ ]*define[ \t]+(FLASHEND)[ \t]+\(?([0-9a-fA-Fx]+) - 1\)?[ \t]*($|/)");
                 Regex rgIO = new Regex(@"#define[ \t]+([^ ]+)[ \t]+_SFR_IO([0-9]+)\(([0-9a-fA-Fx]+)\)");
                 Regex rgPin = new Regex(@"#define[ \t]+([^ ]+)[ \t]+([0-9]+)");
                 var lines = File.ReadAllLines(file);
