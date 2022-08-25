@@ -100,9 +100,12 @@ namespace KSDK2xImporter.HelperTypes
         }
 
 
-        public IEnumerable<FileReference> LocateAllFiles(SpecializedDevice device, string rootDir)
+        public IEnumerable<FileReference> LocateAllFiles(SpecializedDevice device, string rootDir, string prefix = null)
         {
-            var expandedPath = SpecializedDevice.ExpandVariables(SourcePath, device).Replace('\\', '/');
+            string basePath = SourcePath;
+            if (prefix != null)
+                basePath = Path.Combine(prefix, SourcePath);
+            var expandedPath = SpecializedDevice.ExpandVariables(basePath, device).Replace('\\', '/');
 
             foreach (var mask in Masks)
             {
