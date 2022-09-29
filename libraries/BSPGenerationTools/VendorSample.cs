@@ -11,5 +11,6 @@ namespace BSPGenerationTools
         public string SourceDirectory;
         public string ToolchainDirectory;
         public string BSPDirectory;
+        public string BSPVersion;
     }
 }

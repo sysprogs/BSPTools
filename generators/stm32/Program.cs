@@ -437,6 +437,20 @@ namespace stm32_bsp_generator
                             return false;
                         }) == 0);
 
+                        foreach(var fw in extraFrameworksWithoutMissingFolders)
+                        {
+                            foreach(var job in fw.CopyJobs)
+                            {
+                                if (job.SmartPropertyGroup?.StartsWith("com.sysprogs.bspoptions.stm32.usb.") == true)
+                                {
+                                    var physicalDir = bspBuilder.ExpandVariables(job.SourceFolder);
+                                    job.SmartFileConditions = job.SmartFileConditions.Where(c => Directory.Exists(Path.Combine(physicalDir, c.Split('|')[1].TrimEnd('*', '\\', '.')))).ToArray();
+                                    if (job.SmartFileConditions.Length < 6)
+                                        throw new Exception("Too little USB class conditions after filtering");
+                                }
+                            }
+                        }
+
                         fam.AdditionalFrameworks = (fam.AdditionalFrameworks ?? new Framework[0]).Concat(extraFrameworksWithoutMissingFolders).ToArray();
                     }
 

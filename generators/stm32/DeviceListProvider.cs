@@ -78,10 +78,13 @@ namespace stm32_bsp_generator
             }
 
             Dictionary<string, XmlElement> _DevicesBySpecializedName = new Dictionary<string, XmlElement>();
+            public readonly long STM32CubeTimestamp;
 
             public DeviceMemoryDatabase(string STM32CubeDir)
             {
-                var data = File.ReadAllBytes(Path.Combine(STM32CubeDir, "STM32CubeMX.exe"));
+                var fn = Path.Combine(STM32CubeDir, "STM32CubeMX.exe");
+                STM32CubeTimestamp = File.GetLastWriteTimeUtc(fn).ToFileTime();
+                var data = File.ReadAllBytes(fn);
                 int offset = LocateZipSignature(data);
                 var zf = new ZipFile(new MemoryStream(data, offset, data.Length - offset) { Position = offset });
                 MemoryStream output = null;
@@ -416,6 +419,9 @@ namespace stm32_bsp_generator
 
                     for (int i = 0; i < cores.Length; i++)
                     {
+                        if (db.STM32CubeTimestamp == 133047056504658633 && m.GetAttribute("Name").StartsWith("STM32MP13"))
+                            continue;
+
                         lstMCUs.Add(new ParsedMCU(m, familyDir, db, cores, i));
                     }
                 }
