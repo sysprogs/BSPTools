@@ -126,7 +126,10 @@ namespace KSDK2xImporter.HelperTypes
 
             foreach (var lst in SourceLists)
             {
-                foreach(var file in lst.LocateAllFiles(device, rootDir))
+                var foundFiles = lst.LocateAllFiles(device, rootDir, RelativePath).ToArray();
+                if (foundFiles.Length == 0)
+                    foundFiles = lst.LocateAllFiles(device, rootDir).ToArray();
+                foreach (var file in foundFiles)
                 {
                     var bspPath = file.GetBSPPath();
                     UpdateMatchingPathComponents(bspPath, ref matchingPathComponents);
