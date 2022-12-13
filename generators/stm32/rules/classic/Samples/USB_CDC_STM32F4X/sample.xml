@@ -54,5 +54,13 @@
 		<string>com.sysprogs.arm.stm32.ll</string>
 		<string>com.sysprogs.arm.stm32.usbdev</string>
 	</RequiredFrameworks>
+    <DefaultConfiguration>
+		<Entries>
+		  <KeyValue>
+			<Key>com.sysprogs.bspoptions.stm32.usb.devclass.cdc</Key>
+			<Value>1</Value>
+		  </KeyValue>
+		</Entries>
+    </DefaultConfiguration>
 	<DoNotUpgradeCToCpp>true</DoNotUpgradeCToCpp>
 </EmbeddedProjectSample>

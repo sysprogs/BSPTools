@@ -82,11 +82,8 @@ namespace stm32_bsp_generator
                     newReleases = newReleases.Where(r => r.HasPatch).ToArray(); //Prefer patched releases to unpatched ones.
 
                 if (newReleases.Length == 0 && g.Count() == 1) //Experimental pre-release family
-                {
-                    continue;
-                }
-
-                if (newReleases.Length == 1)
+                    bestReleaseForEachFamily.Add(g.First());
+                else if (newReleases.Length == 1)
                     bestReleaseForEachFamily.Add(newReleases[0]);
                 else if (newReleases.Length > 1)
                 {

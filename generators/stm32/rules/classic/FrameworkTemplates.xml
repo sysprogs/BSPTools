@@ -21,7 +21,7 @@
 					<!-- Note: stm32xxxx_ll_usb.c actually requires HAL headers -->
 					<!-- Note: "&gt;" (i.e. ">") before the mask below means "treat the rest of the mask as a regex" -->
 					<ProjectInclusionMask>-*_template.?;*stm32??xx_ll_usb.?;-&gt;.*stm32[^\\]+_ll_[^\\]+$;*</ProjectInclusionMask>
-					<AdvancedRenameRules>legacy\\(stm32..xx_hal_can)\.c$=>{1}_legacy.c</AdvancedRenameRules>
+					<AdvancedRenameRules>legacy\\(stm32..xx_hal_[^.]+)\.c$=>{1}_legacy.c</AdvancedRenameRules>
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Drivers\CMSIS</SourceFolder>
@@ -102,23 +102,22 @@
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\STM32_USB_Device_Library</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;*</ProjectInclusionMask>
-					<AutoIncludeMask/>
-					<AdditionalIncludeDirs>Core/Inc;Class/$$com.sysprogs.bspoptions.stm32.usb.devclass$$/Inc</AdditionalIncludeDirs>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.usb.|USB Device</SmartPropertyGroup>
 					<SmartFileConditions>
-						<string>USB Device Class[devclass]|
-Class\\AUDIO\\.*=>Audio Device[AUDIO];
-Class\\BillBoard\\.*=>Billboard Device[BillBoard];
-Class\\CDC\\.*=>+Communications Device (CDC)[CDC];
-Class\\CDC_ECM\\.*=>Ethernet Control Model (ECM)[CDC_ECM];
-Class\\CDC_RNDIS\\.*=>Remote NDIS (RNDIS)[CDC_RNDIS];
-Class\\CustomHID\\.*=>Custom Human Interface Device (CustomHID)[CustomHID];
-Class\\DFU\\.*=>Device Firmware Update (DFU)[DFU];
-Class\\HID\\.*=>Human Interface Device (HID)[HID];
-Class\\MSC\\.*=>Mass Storage (MSC)[MSC];
-Class\\VIDEO\\.*=>Video[Video];
-=>None[none]
-</string>
+						<string>-Audio Device Support[devclass.audio]|Class\\AUDIO\\.*</string>
+						<string>-Billboard Device Support[devclass.billboard]|Class\\BillBoard\\.*</string>
+						<string>-Integrated Circuit Card (CCID) Support[devclass.ccid]|Class\\CCID\\.*</string>
+						<string>Communications Device (CDC) Support[devclass.cdc]|Class\\CDC\\.*</string>
+						<string>-Composite Descriptor Builder[devclass.composite_builder]|Class\\CompositeBuilder\\.*</string>
+						<string>-Ethernet Control Model (ECM) Support[devclass.ecm]|Class\\CDC_ECM\\.*</string>
+						<string>-Remote NDIS (RNDIS) Support[devclass.rndis]|Class\\CDC_RNDIS\\.*</string>
+						<string>-Custom Human Interface Device (CustomHID) Support[devclass.customhid]|Class\\CustomHID\\.*</string>
+						<string>-Device Firmware Update (DFU) Support[devclass.dfu]|Class\\DFU\\.*</string>
+						<string>-Human Interface Device (HID)[devclass.hid]|Class\\HID\\.*</string>
+						<string>-Mass Storage (MSC) Support[devclass.msc]|Class\\MSC\\.*</string>
+						<string>-Media Transfer Protocol (MTP) Support[devclass.mtp]|Class\\MTP\\.*</string>
+						<string>-Printer Support[devclass.printer]|Class\\Printer\\.*</string>
+						<string>-Video Device Support[devclass.video]|Class\\VIDEO\\.*</string>
 					</SmartFileConditions>
 					<SmartPreprocessorMacros>
 						<string>USB Device Speed[speed]|USE_USB_{0}|FS=>USB 2.0 Full Speed;HS=>USB 2.0 High Speed</string>

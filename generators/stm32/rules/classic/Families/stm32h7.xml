@@ -26,7 +26,8 @@
 			<RangeFilters>-Components;*</RangeFilters>
 			<Template>
 				<Name>$$BSPGEN:FRAMEWORK$$ drivers</Name>
-				<ID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK_LOWER$$</ID>
+				<ID>com.sysprogs.arm.stm32.bspdrv.h7_$$BSPGEN:FRAMEWORK_LOWER$$</ID>
+				<ClassID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK_LOWER$$</ClassID>
 				<Filter>STM32H7.*</Filter>
 				<RequiredFrameworks>
 					<string>com.sysprogs.arm.stm32.STM32H7_hal</string>

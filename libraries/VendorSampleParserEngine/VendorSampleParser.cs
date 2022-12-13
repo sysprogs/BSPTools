@@ -279,7 +279,7 @@ namespace VendorSampleParserEngine
             if (File.Exists(sampleListFile) || File.Exists(sampleListFile + ".gz"))
             {
                 sampleDir = XmlTools.LoadObject<ConstructedVendorSampleDirectory>(sampleListFile);
-                if (sampleDir.SourceDirectory == SDKdir)
+                if (sampleDir.SourceDirectory == SDKdir && sampleDir.BSPVersion == BSP.BSP.PackageVersion)
                     directoryMatches = true;
             }
 
@@ -680,6 +680,7 @@ namespace VendorSampleParserEngine
 
                 sampleDir.ToolchainDirectory = ToolchainDirectory;
                 sampleDir.BSPDirectory = Path.GetFullPath(BSPDirectory);
+                sampleDir.BSPVersion = BSP.BSP.PackageVersion;
                 XmlTools.SaveObject(sampleDir, sampleListFile);
             }
 

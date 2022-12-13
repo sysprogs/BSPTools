@@ -132,7 +132,8 @@
 			<RangeFilters>-Components;*</RangeFilters>
 			<Template>
 				<Name>$$BSPGEN:FRAMEWORK$$ drivers</Name>
-				<ID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK_LOWER$$</ID>
+				<ID>com.sysprogs.arm.stm32.bspdrv.f4_$$BSPGEN:FRAMEWORK_LOWER$$</ID>
+				<ClassID>com.sysprogs.arm.stm32.bspdrv.$$BSPGEN:FRAMEWORK_LOWER$$</ClassID>
 				<Filter>STM32F4.*</Filter>
 				<RequiredFrameworks>
 					<string>com.sysprogs.arm.stm32.STM32F4_hal</string>

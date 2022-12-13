@@ -257,6 +257,8 @@ namespace stm32_bsp_generator
             {
                 if (macro.ToString() == "#define GTZC_MPCBB_LCKVTR2_LCKSB32_Msk ( 0x01UL << GTZC_MPCBB_LCKVTR2_LCKSB32_Msk )")
                     continue;   //Bug in the STM32L5 family
+                if (macro.ToString() == "#define TAMP_CR3_ITAMP7NOER_Msk ( 0x1UL << TAMP_CR3_ITAMP7NOER )")
+                    continue;
 
                 var expression = parsedFile.ResolveMacrosRecursively(macro.Value);
                 var value = resolver.ResolveAddressExpression(expression);
