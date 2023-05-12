@@ -209,7 +209,7 @@ namespace STM32ProjectImporter
                 LinkerScript = tools.Linker.ReadOptionalValue("fr.ac6.managedbuild.tool.gnu.cross.c.linker.script", PathTranslationFlags.AddExtraComponentToBaseDir),
 
                 LDFLAGS = tools.Linker.ReadValue("gnu.c.link.option.ldflags"),
-                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile)
+                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile, true)
             };
         }
 
@@ -255,7 +255,7 @@ namespace STM32ProjectImporter
                 UseCMSE = tools.Compiler.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.mcmse") == "true",
 
                 Libraries = tools.Linker.ResolveLibraries("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.libraries", LibraryDirsKey, libraryDirCache),
-                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile),
+                SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile, true),
                 LibrarySearchDirs = tools.Linker.ReadOptionalList(LibraryDirsKey, PathTranslationFlags.AddExtraComponentToBaseDir)
             };
         }
