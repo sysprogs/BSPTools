@@ -419,7 +419,7 @@ namespace stm32_bsp_generator
 
                     for (int i = 0; i < cores.Length; i++)
                     {
-                        if (db.STM32CubeTimestamp == 133047056504658633 && m.GetAttribute("Name").StartsWith("STM32MP13"))
+                        if ((db.STM32CubeTimestamp == 133047056504658633 || db.STM32CubeTimestamp == 133310388898546160) && m.GetAttribute("Name").StartsWith("STM32MP13"))
                             continue;
 
                         lstMCUs.Add(new ParsedMCU(m, familyDir, db, cores, i));

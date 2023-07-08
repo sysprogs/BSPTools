@@ -73,7 +73,7 @@
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F0xx_StdPeriph_Lib_V1.5.0\Libraries\STM32F0xx_StdPeriph_Driver</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F0xx_StdPeriph_Lib_V1.6.0\Libraries\STM32F0xx_StdPeriph_Driver</SourceFolder>
 					<FilesToCopy>*.c;*.h</FilesToCopy>
 					<Patches>
 						<Patch xsi:type="InsertLines">
@@ -86,7 +86,7 @@
 					</Patches>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F0xx_StdPeriph_Lib_V1.5.0\Libraries\CMSIS</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F0xx_StdPeriph_Lib_V1.6.0\Libraries\CMSIS</SourceFolder>
 					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
 					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<PreprocessorMacros>$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
