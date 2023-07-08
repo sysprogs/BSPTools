@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 using BSPGenerationTools.Parsing;
+using static BSPEngine.Condition;
 
 namespace stm32_bsp_generator
 {
@@ -251,6 +255,7 @@ namespace stm32_bsp_generator
             List<NamedSubregister> result = new List<NamedSubregister>();
             Dictionary<string, int> positionsByName = new Dictionary<string, int>();
             Dictionary<string, int> bitCountsByName = new Dictionary<string, int>();
+            Dictionary<string, ulong> splitted = new Dictionary<string, ulong>();
             var resolver = new BasicExpressionResolver(false);
 
             foreach (var macro in newStyleMacros)
@@ -272,11 +277,103 @@ namespace stm32_bsp_generator
                 else if (macro.Name.EndsWith("_Msk"))
                 {
                     if (!ExtractFirstBitAndSize(value.Value, out var size, out var firstBit))
-                    {
-                        _ReportWriter.HandleInvalidNewStyleBitMask(macro.Name, value.Value);
-                    }
+                        splitted.Add(key, value.Value);
                     else
                         bitCountsByName[key] = size;
+                }
+            }
+            //Pass 2: resolve non-continuous bit ranges (note: STM does not follow a clear naming convention)
+            foreach (var complex in splitted)
+            {
+                //Known case of simple masks
+                if (complex.Key.StartsWith("EXTI_"))
+                    continue;
+                // Store possible names
+                List<string> parts = new List<string>();
+                // The first naming convention is not appropriate for label ending with digit
+                for (int i = 0; i < 32; ++i)
+                {
+                    //METHOD 1: <key>_0, <key>_1, ...
+                    string key = complex.Key + "_" + i.ToString();
+                    if (bitCountsByName.ContainsKey(key))
+                    {
+                        //Clash!! Abort this method
+                        parts.Clear();
+                        break;
+                    }
+                    parts.Add(key);
+                }
+                if (parts.Count == 0
+                    && !Char.IsDigit(complex.Key[complex.Key.Length - 1]))
+                {
+                    //METHOD 2: <key>0, <key>1, ...
+                    for (int i = 0; i < 32; ++i)
+                    {
+                        string key = complex.Key + i.ToString();
+                        if (bitCountsByName.ContainsKey(key))
+                        {
+                            //Clash!! Abort this method
+                            parts.Clear();
+                            break;
+                        }
+                        parts.Add(key);
+                    }
+                }
+                // Invalid naming convention
+                if (parts.Count != 0)
+                {
+                    int part = 0;
+                    int firstBit = 0;
+                    ulong val = complex.Value;
+                    while (val != 0)
+                    {
+                        //Find the first non-zero bit
+                        while (firstBit < 64 && (val & (1UL << firstBit)) == 0)
+                            firstBit++;
+                        if (firstBit >= 64)
+                            break;
+                        int size = 0;
+                        //Count the sequential non-zero bits
+                        while ((firstBit + size) < 64 && (val & (1UL << (firstBit + size))) != 0)
+                        {
+                            val ^= (1UL << (firstBit + size));
+                            size++;
+                        }
+                        //Check if bit pos/size already exists (some fields have aliases)
+                        bool hasAlias = false;
+                        foreach (var kv in positionsByName)
+                        {
+                            //GUI handles first bit position as unique
+                            if (kv.Value == firstBit && bitCountsByName.ContainsKey(kv.Key))
+                            {
+                                hasAlias = true;
+                                break;
+                            }
+                        }
+                        //Add if no alias
+                        if(!hasAlias)
+                        {
+                            string key;
+                            // multiple bits are generally the "base name" inherited from older hardware
+                            if (!bitCountsByName.ContainsKey(complex.Key) 
+                                && positionsByName.TryGetValue(complex.Key, out var origFirstBit)
+                                && firstBit == origFirstBit)
+                                key = complex.Key;
+                            else
+                                key = parts[part];
+                            part++;
+                            // Add key for first bit if not provided
+                            if (!positionsByName.ContainsKey(key))
+                                positionsByName[key] = firstBit;
+                            bitCountsByName[key] = size;
+                            // prepare next step
+                            firstBit = firstBit + size;
+                        }
+                    }
+                }
+                else
+                {
+                    _ReportWriter.HandleInvalidNewStyleBitMask(complex.Key, complex.Value);
                 }
             }
 
