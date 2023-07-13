@@ -141,7 +141,7 @@ namespace esp32
 
             Regex rgiTimesNumber = new Regex(@"^[ (\t]*i[ \t)]*\*[ \t]*[ \t(]*0x([0-9a-fA-F]+)[ \t)]*$");
 
-            foreach (var match in File.ReadAllLines(Path.Combine(socDir, $@"include\soc\soc.h")).Select(line => rgBaseDefinition.Match(line)).Where(m => m.Success))
+            foreach (var match in File.ReadAllLines(Path.Combine(socDir, $@"include\soc\reg_base.h")).Select(line => rgBaseDefinition.Match(line)).Where(m => m.Success))
                 registerSets[match.Groups[1].Value] = new ConstructedRegisterSet
                 {
                     Name = match.Groups[1].Value,

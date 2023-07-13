@@ -47,6 +47,11 @@ namespace ESP32ToolchainUpdater
                 throw new Exception("Usage: ESP32ToolchainUpdater <old toolchain dir> <new toolchain dir>");
 
             string oldDir = Path.GetFullPath(args[0]), newDir = Path.GetFullPath(args[1]);
+            var bspXML = Path.Combine(newDir, @"esp32-bsp\BSP.xml");
+
+            //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C6", @"E:\projects\temp\EmbeddedProject7\build\VisualGDB\Debug\blink.map");
+            //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C3", @"E:\projects\temp\EmbeddedProject5\build\VisualGDB\Debug\blink.map");
+            return;
 
             var oldToolchain = XmlTools.LoadObject<Toolchain>(Path.Combine(oldDir, "toolchain.xml"));
             var newToolchain = XmlTools.LoadObject<Toolchain>(Path.Combine(newDir, "toolchain.xml"));
@@ -94,12 +99,12 @@ namespace ESP32ToolchainUpdater
             newToolchain.BinaryDirectory = Path.GetDirectoryName(newToolchainExesByName["xtensa-esp32-elf-gcc.exe"][0]);
 
             newToolchain.GCCVersion = QueryToolVersion(Path.Combine(newDir, newToolchain.BinaryDirectory, "xtensa-esp32-elf-gcc.exe"));
-            newToolchain.GDBVersion = QueryToolVersion(Path.Combine(newDir, newToolchain.BinaryDirectory, "xtensa-esp32-elf-gdb.exe"));
+            newToolchain.GDBVersion = QueryToolVersion(Path.Combine(newDir, newToolchainExesByName["xtensa-esp32-elf-gdb.exe"].First()));
             newToolchain.BinutilsVersion = QueryToolVersion(Path.Combine(newDir, newToolchain.BinaryDirectory, "xtensa-esp32-elf-as.exe"));
 
             XmlTools.SaveObject(newToolchain, Path.Combine(newDir, "toolchain.xml"));
 
-            var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(newDir, @"esp32-bsp\BSP.xml"));
+            var bsp = XmlTools.LoadObject<BoardSupportPackage>(bspXML);
             foreach (var mcu in bsp.SupportedMCUs)
             {
                 var v = mcu.AdditionalSystemVars.FirstOrDefault(kv => kv.Key == "com.sysprogs.visualgdb.gdb_override");
