@@ -268,6 +268,12 @@ namespace stm32_bsp_generator
                             break;
                         case "RSSLIB_S_CloseExitHDP_TypeDef":   //Actually a function pointer
                         case "RSSLIB_S_CloseExitHDP_t":
+                        case "NSSLIB_S_JumpHDPlvl2_TypeDef":
+                        case "NSSLIB_S_JumpHDPlvl3_TypeDef":
+                        case "RSSLIB_NSC_DataProvisioning_TypeDef":
+                        case "RSSLIB_S_JumpHDPlvl2_TypeDef":
+                        case "RSSLIB_S_JumpHDPlvl3_TypeDef":
+                        case "RSSLIB_S_JumpHDPlvl3NS_TypeDef":
                             size = 4;
                             break;
                         default:

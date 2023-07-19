@@ -28,8 +28,8 @@
 					<FilesToCopy>-*Examples\*;-DSP\*;-DSP_Lib\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS_HAL</TargetFolder>
 					<PreprocessorMacros>$$com.sysprogs.stm32.hal_device_family$$;USE_HAL_DRIVER</PreprocessorMacros>
-					<ProjectInclusionMask>-Examples\*;-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-*Include\stm32??????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;-NN\*;-Core_A\*;*.h</AutoIncludeMask>					
+					<ProjectInclusionMask>-Examples\*;-RTOS2\*;-Core\Template\*;-Core_A\*;-NN\*;-DAP\*;-*Include\stm32??????.h*;-*system_*.c;*</ProjectInclusionMask>
+					<AutoIncludeMask>-Examples\*;-RTOS\Template\*;-RTOS2\Template\*;-NN\*;-DAP\*;-Core_A\*;*.h</AutoIncludeMask>					
 				</CopyJob>
 			</CopyJobs>
 			<ConfigFiles>

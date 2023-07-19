@@ -20,7 +20,7 @@ namespace stm32_bsp_generator
             Directory.CreateDirectory(sdkRoot);
             var xml = new XmlDocument();
 
-            if (true)
+            if (false)
             {
                 WebClient wc0 = new WebClient();
                 wc0.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0";
@@ -49,7 +49,7 @@ namespace stm32_bsp_generator
             }
             else
             {
-                var catalogFile = cubeRoot + @"\db\plugins\updater\STMUpdaterDefinitions.xml";
+                var catalogFile = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\..\..\.stm32cubemx\plugins\updater\temp\STMUpdaterDefinitions.xml";
                 var daysOld = (DateTime.Now - File.GetLastWriteTime(catalogFile)).TotalDays;
                 if (daysOld > 40)
                     throw new Exception($"STM32CubeMX device list {daysOld:f0} days old. Please update STM32CubeMX.");

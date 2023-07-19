@@ -46,7 +46,7 @@ int main(void)
 {
 	MPU_Config();
 	SCB_EnableICache();
-	SCB_EnableDCache();
+	SCB_DisableDCache();	/* This example uses a simplified linker script that does not place the TX/RX descriptors into non-cacheable memory, so we disable the cache altogether. */
 	HAL_Init();  
 	SystemClock_Config(); 
   

@@ -234,7 +234,7 @@ namespace stm32_bsp_generator
                         tableStart: "g_pfnVectors:",
                         tableEnd: @"/\*{10,999}|^[^/\*]+\*/
                 $",
-                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ ]+)",
+                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ \t]+)",
                         vectorLineB: null,
                         ignoredLine: @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*|// External Interrupts",
                         macroDef: ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)",

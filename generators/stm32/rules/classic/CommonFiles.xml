@@ -536,6 +536,21 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<OldLine>#define HTTPD_USE_CUSTOM_FSDATA   1</OldLine>
 					<NewLine>#define HTTPD_USE_CUSTOM_FSDATA   0</NewLine>
 				</Patch>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>ethernetif.c</FilePath>
+					<OldLine>#include "../Components/lan8742/lan8742.h"</OldLine>
+					<NewLine>#include "lan8742.h"</NewLine>
+				</Patch>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>ethernetif.c</FilePath>
+					<OldLine>    Txbuffer[i].buffer = q->payload;</OldLine>
+					<NewLine>    Txbuffer[i].buffer = (uint8_t*)q->payload;</NewLine>
+				</Patch>
+					<Patch xsi:type="ReplaceLine">
+					<FilePath>ethernetif.c</FilePath>
+					<OldLine>  struct pbuf_custom *p = LWIP_MEMPOOL_ALLOC(RX_POOL);</OldLine>
+					<NewLine>  struct pbuf_custom *p = (struct pbuf_custom *)LWIP_MEMPOOL_ALLOC(RX_POOL);</NewLine>
+				</Patch>
 			</Patches>
 		</SmartSample>
 		<SmartSample>
@@ -559,6 +574,21 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<FilePath>lwipopts.h</FilePath>
 					<OldLine>#define HTTPD_USE_CUSTOM_FSDATA   1</OldLine>
 					<NewLine>#define HTTPD_USE_CUSTOM_FSDATA   0</NewLine>
+				</Patch>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>ethernetif.c</FilePath>
+					<OldLine>#include "../Components/lan8742/lan8742.h"</OldLine>
+					<NewLine>#include "lan8742.h"</NewLine>
+				</Patch>
+				<Patch xsi:type="ReplaceLine">
+					<FilePath>ethernetif.c</FilePath>
+					<OldLine>    Txbuffer[i].buffer = q->payload;</OldLine>
+					<NewLine>    Txbuffer[i].buffer = (uint8_t*)q->payload;</NewLine>
+				</Patch>
+					<Patch xsi:type="ReplaceLine">
+					<FilePath>ethernetif.c</FilePath>
+					<OldLine>  struct pbuf_custom *p = LWIP_MEMPOOL_ALLOC(RX_POOL);</OldLine>
+					<NewLine>  struct pbuf_custom *p = (struct pbuf_custom *)LWIP_MEMPOOL_ALLOC(RX_POOL);</NewLine>
 				</Patch>
 			</Patches>
 		</SmartSample>
