@@ -292,7 +292,7 @@ namespace GeneratorSampleStm32
                         FileBasedConfig = new[]
                         {
                             new FileBasedConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}"),
-                            new FileBasedConfigEntry(@"usbx/common/usbx_device_classes/src/ux_device_class_(audio|cdc_acm|cdc_ecm|dfu|hid|pima|rndis|storage)_.*", "com.sysprogs.bspoptions.stm32.usbx.device_class_{1}"),
+                            new FileBasedConfigEntry(@"usbx/common/usbx_device_classes/src/ux_device_class_(audio|ccid|cdc_acm|cdc_ecm|dfu|hid|pima|printer|rndis|storage|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.device_class_{1}"),
                             new FileBasedConfigEntry(@"usbx/common/usbx_host_classes/src/ux_host_class_(asix|audio|cdc_acm|cdc_ecm|gser|hid|hub|pima|printer|prolific|storage|swar|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.host_class_{1}"),
                             new FileBasedConfigEntry(@"usbx/common/usbx_(network|pictbridge)/.*", "com.sysprogs.bspoptions.stm32.usbx.{1}"),
                         }
