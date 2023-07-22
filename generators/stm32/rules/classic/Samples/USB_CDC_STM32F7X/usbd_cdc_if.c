@@ -98,7 +98,7 @@ USBD_CDC_LineCodingTypeDef linecoding =
   */
 extern USBD_HandleTypeDef USBD_Device;
 
-static struct
+static volatile struct
 {
 	uint8_t Buffer[CDC_DATA_HS_OUT_PACKET_SIZE];
 	int Position, Size;
