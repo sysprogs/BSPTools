@@ -437,9 +437,9 @@ namespace stm32_bsp_generator
                             return false;
                         }) == 0);
 
-                        foreach(var fw in extraFrameworksWithoutMissingFolders)
+                        foreach (var fw in extraFrameworksWithoutMissingFolders)
                         {
-                            foreach(var job in fw.CopyJobs)
+                            foreach (var job in fw.CopyJobs)
                             {
                                 if (job.SmartPropertyGroup?.StartsWith("com.sysprogs.bspoptions.stm32.usb.") == true)
                                 {
@@ -533,7 +533,31 @@ namespace stm32_bsp_generator
                 }
 
                 foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions(familySpecificFrameworkIDs))
+                {
                     frameworks.Add(fw);
+
+                    if (fw.ID == "com.sysprogs.arm.stm32.threadx")
+                    {
+                        const string secureModeOptionID = "secure_domain";
+                        fw.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Boolean { Name = "Run in secure domain (TrustZone CPUs)", ValueForTrue = "1", UniqueID = secureModeOptionID });
+
+                        foreach (var f in fw.AdditionalSourceFiles)
+                        {
+                            if (f.Contains("thread_secure_stack.c"))
+                            {
+                                var condRec = bspBuilder.MatchedFileConditions[f];
+                                condRec.ConditionToInclude = new Condition.And
+                                {
+                                    Arguments = new Condition[]
+                                    {
+                                        condRec.ConditionToInclude ,
+                                        new Condition.Equals{Expression = $"$${fw.ConfigurableProperties.PropertyGroups[0].UniqueID}{secureModeOptionID}$$", ExpectedValue = "1"}
+                                    }
+                                };
+                            }
+                        }
+                    }
+                }
 
                 foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
                     exampleDirs.Add(sample);

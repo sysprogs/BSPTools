@@ -83,7 +83,7 @@
 		</ErrorEntry>
 		<ErrorEntry>
 			<ID>Secure</ID>
-			<ErrorMessage>undefined reference to `SECURE_SystemCoreClockUpdate'</ErrorMessage>
+			<ErrorMessage>undefined reference to `SECURE_</ErrorMessage>
 			<Description>Secure</Description>
 		</ErrorEntry>
 		<ErrorEntry>

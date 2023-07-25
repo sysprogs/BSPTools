@@ -268,6 +268,10 @@ namespace GeneratorSampleStm32
                         DisableTriggerRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/ports/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         Configuration = new Dictionary<string, string>{ { "com.sysprogs.bspoptions.stm32.threadx.user_define", "TX_INCLUDE_USER_DEFINE_FILE"} },
                         SkipFrameworkRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/common_modules/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        FileBasedConfig = new[]
+                        {
+                            new FileBasedConfigEntry(@"threadx/ports/cortex[^/]+/gnu/src/tx_thread_secure_stack.c", "com.sysprogs.bspoptions.stm32.threadx.secure_domain"),
+                        }
                     },
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.filex",
@@ -317,17 +321,17 @@ namespace GeneratorSampleStm32
                 };
             }
 
-            public override Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter)
+            public override Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter, bool cleanCopy)
             {
-                var copiedFiles = base.InsertVendorSamplesIntoBSP(dir, sampleList, bspDirectory, reportWriter);
+                var copiedFilesByTarget = base.InsertVendorSamplesIntoBSP(dir, sampleList, bspDirectory, reportWriter, cleanCopy);
 
                 Regex rgDebugger = new Regex("#define[ \t]+CFG_DEBUGGER_SUPPORTED[ \t]+(0)$");
 
-                foreach (var kv in copiedFiles)
+                foreach (var kv in copiedFilesByTarget)
                 {
-                    if (kv.Value.EndsWith("app_conf.h", StringComparison.InvariantCultureIgnoreCase))
+                    if (kv.Key.EndsWith("app_conf.h", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        var lines = File.ReadAllLines(kv.Value);
+                        var lines = File.ReadAllLines(kv.Key);
                         bool modified = false;
                         for (int i = 0; i < lines.Length; i++)
                         {
@@ -340,11 +344,11 @@ namespace GeneratorSampleStm32
                         }
 
                         if (modified)
-                            File.WriteAllLines(kv.Value, lines);
+                            File.WriteAllLines(kv.Key, lines);
                     }
                 }
 
-                return copiedFiles;
+                return copiedFilesByTarget;
             }
 
             protected override void FilterPreprocessorMacros(ref string[] macros)
@@ -378,7 +382,7 @@ namespace GeneratorSampleStm32
             Regex rgFWFolder = new Regex(@"^(\$\$SYS:VSAMPLE_DIR\$\$)/[^/]+/STM32Cube_FW_([^_]+)_V[^/]+/(.*)$", RegexOptions.IgnoreCase);
             private STM32Ruleset _Ruleset;
 
-            public override string MapPath(string path)
+            string DoMapPath(string path)
             {
                 if (path?.StartsWith(Prefix1) == true)
                 {
@@ -409,6 +413,59 @@ namespace GeneratorSampleStm32
                     //Some linker script files have too long paths. Shorten them by moving them one step up.
                     result = result.Substring(0, idx2) + result.Substring(idx);
                 }
+
+                return result;
+            }
+
+            Dictionary<string, string> _DirectMappingDict = new Dictionary<string, string>();
+            Dictionary<string, string> _ReverseMappingDict = new Dictionary<string, string>();
+
+            public override string MapPath(string path)
+            {
+                if (path == null)
+                    return null;
+
+                var fullPath = Path.GetFullPath(path);
+                if (_DirectMappingDict.TryGetValue(fullPath, out var result))
+                    return result;
+
+                result = DoMapPath(path);
+
+                if (result == null)
+                    return result;
+
+                if (_ReverseMappingDict.TryGetValue(result, out var oldPath) && oldPath != fullPath && !Enumerable.SequenceEqual(File.ReadAllBytes(oldPath), File.ReadAllBytes(fullPath)))
+                {
+                    int idx = result.LastIndexOf('/');
+                    if (idx == -1)
+                        throw new Exception("Invalid mapped path: " + result);
+
+                    int idx2 = result.LastIndexOf('.');
+                    string pathBase, ext;
+                    if (idx2 > idx)
+                    {
+                        pathBase = result.Substring(0, idx2);
+                        ext = result.Substring(idx2);
+                    }
+                    else
+                    {
+                        pathBase = result;
+                        ext = "";
+                    }
+
+                    for (int i = 2; ;i++)
+                    {
+                        string candidate = $"{pathBase}v{i}{ext}";
+                        if (!_ReverseMappingDict.ContainsKey(candidate))
+                        {
+                            result = candidate;
+                            break;
+                        }
+                    }
+                }
+
+                _ReverseMappingDict[result] = fullPath;
+                _DirectMappingDict[fullPath] = result;
 
                 return result;
             }

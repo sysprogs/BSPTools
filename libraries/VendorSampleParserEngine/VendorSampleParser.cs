@@ -334,7 +334,7 @@ namespace VendorSampleParserEngine
                 if (samples.FailedSamples != null)
                 {
                     foreach (var fs in samples.FailedSamples)
-                        StoreError(_Report.ProvideEntryForSample(fs.UniqueID), fs.BuildLogFile, VendorSamplePass.InitialParse);
+                        StoreError(_Report.ProvideEntryForSample(fs.UniqueID), fs.BuildLogFile, VendorSamplePass.InitialParse, fs.ErrorDetails);
                 }
 
                 XmlTools.SaveObject(sampleDir, sampleListFile);
@@ -345,13 +345,14 @@ namespace VendorSampleParserEngine
             return sampleDir;
         }
 
-        private void StoreError(VendorSampleTestReport.Record record, string buildLogFile, VendorSamplePass pass)
+        private void StoreError(VendorSampleTestReport.Record record, string buildLogFile, VendorSamplePass pass, string errorDetails = null)
         {
             var prevPass = pass - 1;
             if (record.LastSucceededPass > prevPass)
                 record.LastSucceededPass = prevPass;
 
             record.BuildFailedExplicitly = true;
+            record.ExtraInformation = errorDetails;
             record.KnownProblemID = _KnownProblems.TryClassifyError(buildLogFile)?.ID;
         }
 
@@ -473,7 +474,7 @@ namespace VendorSampleParserEngine
                     if (keepDirectoryAfterSuccessfulBuild?.Invoke(vs) == true)
                         thisSampleFlags |= BSPValidationFlags.KeepDirectoryAfterSuccessfulTest;
 
-                    var result = StandaloneBSPValidator.Program.TestVendorSampleAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, thisSampleFlags);
+                    var result = StandaloneBSPValidator.Program.TestVendorSampleAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, thisSampleFlags, Path.Combine(CacheDirectory, "CMSELibs"));
                     record.BuildDuration = (int)(DateTime.Now - start).TotalMilliseconds;
                     record.TimeOfLastBuild = DateTime.Now;
 
@@ -669,6 +670,8 @@ namespace VendorSampleParserEngine
 
             if (pass1Queue.Length > 0)
             {
+                pass1Queue = pass1Queue.Where(s => !SampleHasDependencies(s)).Concat(pass1Queue.Where(s => SampleHasDependencies(s))).ToArray();
+
                 //Test the raw VendorSamples in-place and store AllDependencies
                 TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(vs.InternalUniqueID), validationFlags: BSPValidationFlags.ResolveNameCollisions);
 
@@ -688,7 +691,7 @@ namespace VendorSampleParserEngine
             using (var reportWriter = new BSPReportWriter(CacheDirectory, "RelocationReport.txt"))
             {
                 var relocator = CreateRelocator(sampleDir);
-                var copiedFiles = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory, reportWriter);
+                var copiedFilesByTarget = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory, reportWriter, false);
 
                 var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
                 bsp.VendorSampleDirectoryPath = VendorSampleDirectoryName;
@@ -705,7 +708,7 @@ namespace VendorSampleParserEngine
                 }
             }
 
-            if (mode != RunMode.Incremental && mode != RunMode.SingleSample)
+            if (false)  //mode != RunMode.Incremental && mode != RunMode.SingleSample
             {
                 Console.WriteLine("Creating new BSP archive...");
                 string statFile = Path.ChangeExtension(archiveName, ".xml");
@@ -759,6 +762,14 @@ namespace VendorSampleParserEngine
 
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
+        }
+
+        public bool SampleHasDependencies(VendorSample s)
+        {
+            if (s.RelatedSamples?.Any(r => r.Type == VendorSampleReferenceType.OutgoingReference) == true)
+                return true;
+
+            return false;
         }
 
         private HashSet<string> ParseBlacklistFile()

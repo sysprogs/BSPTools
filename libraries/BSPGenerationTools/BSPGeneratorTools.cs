@@ -628,6 +628,8 @@ namespace BSPGenerationTools
                 return ce.Expression;
             else if (cond is Condition.MatchesRegex cm)
                 return cm.Expression;
+            else if (cond is Condition.And a && a.Arguments.Length == 2 && (a.Arguments[1] as Condition.Equals)?.Expression == "$$com.sysprogs.bspoptions.stm32.threadx.secure_domain$$")
+                return (a.Arguments[0] as Condition.Equals)?.Expression;
             else
                 return null;
         }

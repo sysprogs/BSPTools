@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace STM32ProjectImporter
@@ -22,6 +23,12 @@ namespace STM32ProjectImporter
                 public string UserFriendlyNameSuffix;
 
                 public override string IDSuffix => DeviceSuffix;
+            }
+
+            public class Other : MultiConfigurationContext
+            {
+                public string Suffix;
+                public override string IDSuffix => Suffix;
             }
         }
 
@@ -43,12 +50,21 @@ namespace STM32ProjectImporter
             }
 
             List<ConfigurationWithContext> result = new List<ConfigurationWithContext>();
-            foreach (var cconfiguration in project.NonReleaseConfigurationsIfAny)
+            var nonReleaseConfigs = project.NonReleaseConfigurationsIfAny;
+            if (nonReleaseConfigs.Length > 0)
+            {
+                var cfgs = nonReleaseConfigs.OrderBy(c => c.ID.Length).ToArray();
+                var lastID = nonReleaseConfigs.Last().ID;
+                if (nonReleaseConfigs.Any(c => lastID.StartsWith(c.ID + ".")))
+                    nonReleaseConfigs = new[] { nonReleaseConfigs.Last() };
+            }
+
+            foreach (var cconfiguration in nonReleaseConfigs)
             {
                 MultiConfigurationContext mctx = null;
-                if (project.NonReleaseConfigurationsIfAny.Length > 1)
+                if (nonReleaseConfigs.Length > 1)
                 {
-                    if (project.NonReleaseConfigurationsIfAny.Length != 2)
+                    if (nonReleaseConfigs.Length != 2)
                         throw new Exception("Unexpected configuration count for " + project.CProjectFile);
 
                     string artifactName = cconfiguration.ArtifactName;
@@ -56,7 +72,17 @@ namespace STM32ProjectImporter
                         mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "_M4", UserFriendlyNameSuffix = " (Cortex-M4 Core)" };
                     else if (artifactName.EndsWith("_CM7"))
                         mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "", UserFriendlyNameSuffix = " (Cortex-M7 Core)" };
-                    else
+
+                    if (mctx == null && cconfiguration.Name.EndsWith("Debug"))
+                    {
+                        var name = cconfiguration.Name.Substring(0, cconfiguration.Name.Length - 6);
+                        if (name.StartsWith(project.Name, StringComparison.InvariantCultureIgnoreCase))
+                            name = name.Substring(project.Name.Length).TrimStart('_', '-');
+
+                        mctx = new MultiConfigurationContext.Other { Suffix = "_" + name };
+                    }
+
+                    if (mctx == null)
                         throw new Exception("Don't know how to interpret the difference between multiple configurations for a project. Please review it manually.");
                 }
 
@@ -158,6 +184,11 @@ namespace STM32ProjectImporter
                     sample.VirtualPath = string.Join("\\", virtualPathComponents.Take(virtualPathComponents.Length - 1).ToArray());
                     sample.UserFriendlyName = virtualPathComponents.Last();
                     sample.InternalUniqueID = sampleID;
+
+                    if (sample.InternalUniqueID.EndsWith("-NonSecure") && cfg.CConfiguration.OptionalToolchain.Linker.ReadOptionalList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.additionalobjs") is string[] lst && lst.Length > 0)
+                        sample.RelatedSamples = new[] { new VendorSampleReference { Type = VendorSampleReferenceType.OutgoingReference, ID = sample.InternalUniqueID.Substring(0, sample.InternalUniqueID.Length - 10) + "-Secure" } };
+                    else if (sample.InternalUniqueID.EndsWith("-Secure") && sample.CMSEImportLibraryName != null)
+                        sample.RelatedSamples = new[] { new VendorSampleReference { Type = VendorSampleReferenceType.IncomingReference, ID = sample.InternalUniqueID.Substring(0, sample.InternalUniqueID.Length - 7) + "-NonSecure" } };
 
                     result.Add(sample);
                 }
@@ -340,6 +371,11 @@ namespace STM32ProjectImporter
                 result.InternalUniqueID += mc.DeviceSuffix;
                 result.UserFriendlyName += mc.UserFriendlyNameSuffix;
             }
+            else if (multiConfigurationContext is MultiConfigurationContext.Other oth)
+            {
+                result.InternalUniqueID += oth.Suffix;
+                result.UserFriendlyName += oth.Suffix;
+            }
 
             ValidateFinalMCUName(ref mcu);
 
@@ -361,6 +397,7 @@ namespace STM32ProjectImporter
             if (opts.UseCMSE)
             {
                 mcuConfig.Add(new PropertyDictionary2.KeyValue { Key = "com.sysprogs.bspoptions.cmse", Value = "-mcmse" });
+                result.CMSEImportLibraryName = "secure_nsclib.o";
             }
 
             List<string> linkerScripts = new List<string>();
@@ -385,7 +422,7 @@ namespace STM32ProjectImporter
                 }
             }
 
-            foreach(var dir in opts.LibrarySearchDirs ?? new string[0])
+            foreach (var dir in opts.LibrarySearchDirs ?? new string[0])
             {
                 if (Directory.Exists(dir))
                     linkerScripts.AddRange(Directory.GetFiles(dir, "*.ld"));

@@ -333,7 +333,8 @@ namespace StandaloneBSPValidator
             string mcuDir,
             string sampleDirPath,
             bool codeRequiresDebugInfoFlag,
-            BSPValidationFlags validationFlags)
+            BSPValidationFlags validationFlags,
+            string cmseCacheDirectory)
         {
             if (Directory.Exists(mcuDir))
                 Directory.Delete(mcuDir, true);
@@ -403,12 +404,30 @@ namespace StandaloneBSPValidator
                 flags.CXXFLAGS += " -ggdb";
             }
 
+            Action successCallback = null;
+
+            if (prj.CMSEImportLibraryName != null)
+            {
+                flags.LDFLAGS += $" -Wl,--cmse-implib -Wl,--out-implib={prj.CMSEImportLibraryName}";
+                Directory.CreateDirectory(cmseCacheDirectory);
+                successCallback = () => File.Copy(Path.Combine(mcuDir, prj.CMSEImportLibraryName), Path.Combine(cmseCacheDirectory, vs.InternalUniqueID + "_cmse.o"), true);
+            }
+
+            if (prj.RelatedSamples?.Length == 1)
+            {
+                var cmseLibrary = Path.Combine(cmseCacheDirectory, $"{prj.RelatedSamples[0].ID}_cmse.o");
+                if (File.Exists(cmseLibrary))
+                {
+                    flags.LDFLAGS += " " + cmseLibrary.Replace('\\', '/');
+                }
+            }
+
             flags.IncludeDirectories = LoadedBSP.Combine(flags.IncludeDirectories, vs.IncludeDirectories).Distinct().ToArray();
             flags.PreprocessorMacros = LoadedBSP.Combine(flags.PreprocessorMacros, vs.PreprocessorMacros);
             var linkerScriptDirs = (vs.AuxiliaryLinkerScripts ?? new string[0]).Select(ld => Path.GetDirectoryName(ld)).Distinct().Select(dir => VariableHelper.ExpandVariables(dir, bspDict, frameworkCfg)).ToArray();
             flags.AdditionalLibraryDirectories = LoadedBSP.Combine(flags.AdditionalLibraryDirectories, linkerScriptDirs);
 
-            flags.LDFLAGS = flags.LDFLAGS + " " + vs.LDFLAGS;
+            flags.LDFLAGS += " " + vs.LDFLAGS;
             flags = LoadedBSP.ConfiguredMCU.ExpandToolFlags(flags, bspDict, null);
 
             Dictionary<string, bool> sourceExtensions = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
@@ -416,7 +435,7 @@ namespace StandaloneBSPValidator
             sourceExtensions.Add("cpp", true);
             sourceExtensions.Add("s", true);
 
-            return BuildAndRunValidationJob(mcu, mcuDir, prj, flags, sourceExtensions, vs, null, validationFlags);
+            return BuildAndRunValidationJob(mcu, mcuDir, prj, flags, sourceExtensions, vs, null, validationFlags, successCallback);
         }
 
         static void CreateEmptyDirectoryForTestingMCU(string mcuDir)
@@ -584,7 +603,8 @@ namespace StandaloneBSPValidator
             Dictionary<string, bool> sourceExtensions,
             VendorSample vendorSample = null,
             RegisterValidationParameters registerValidationParameters = null,
-            BSPValidationFlags validationFlags = BSPValidationFlags.None)
+            BSPValidationFlags validationFlags = BSPValidationFlags.None,
+            Action successCallback = null)
         {
             BuildJob job = new BuildJob();
             string prefix = string.Format("{0}\\{1}\\{2}", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.Prefix);
@@ -741,6 +761,7 @@ namespace StandaloneBSPValidator
                     .ToArray();
             }
 
+            successCallback?.Invoke();
             if ((validationFlags & BSPValidationFlags.KeepDirectoryAfterSuccessfulTest) == BSPValidationFlags.None)
                 Directory.Delete(mcuDir, true);
 

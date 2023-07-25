@@ -295,12 +295,12 @@ namespace BSPGenerationTools
             s.Path = mapping(s.Path);
         }
 
-        public virtual Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter)
+        public virtual Dictionary<string, string> InsertVendorSamplesIntoBSP(ConstructedVendorSampleDirectory dir, VendorSample[] sampleList, string bspDirectory, BSPReportWriter reportWriter, bool cleanCopy)
         {
             List<VendorSample> finalSamples = new List<VendorSample>();
 
             string outputDir = Path.Combine(bspDirectory, "VendorSamples");
-            if (Directory.Exists(outputDir))
+            if (Directory.Exists(outputDir) && cleanCopy)
             {
                 Console.WriteLine($"Deleting {outputDir}...");
                 Directory.Delete(outputDir, true);
@@ -308,10 +308,12 @@ namespace BSPGenerationTools
 
             var mapper = CreatePathMapper(dir) ?? new PathMapper(dir);
 
-            Dictionary<string, string> copiedFiles = new Dictionary<string, string>();
+            Dictionary<string, string> copiedFilesByTarget = new Dictionary<string, string>();
             Console.WriteLine("Processing sample list...");
 
             int shortPathIndex = 0;
+
+            Dictionary<string, string> shortenedPaths = new Dictionary<string, string>();
 
             foreach (var s in sampleList)
             {
@@ -364,8 +366,16 @@ namespace BSPGenerationTools
 
                     TranslateVendorSamplePaths(s, ref deps, path =>
                     {
+                        if (shortenedPaths.TryGetValue(path.Replace('\\', '/'), out var result))
+                            return result;
+
                         if (path.StartsWith(longPath))
-                            return shortPath + path.Substring(longPath.Length);
+                        {
+                            result = shortPath + path.Substring(longPath.Length);
+                            shortenedPaths[path.Replace('\\', '/')] = result;
+
+                            return result;
+                        }
                         return path;
                     });
                 }
@@ -374,7 +384,8 @@ namespace BSPGenerationTools
                 {
                     if (dep.MappedFile.StartsWith("$$SYS:BSP_ROOT$$/"))
                         continue;   //The file was already copied
-                    copiedFiles[dep.OriginalFile] = dep.MappedFile.Replace(SampleRootDirMarker, outputDir);
+                    
+                    copiedFilesByTarget[dep.MappedFile.Replace(SampleRootDirMarker, outputDir)] = Path.GetFullPath(dep.OriginalFile);
 
                     if (IsPathTooLong(dep))
                         reportWriter.ReportMergeableError("Path too long", dep.MappedFile);
@@ -385,14 +396,30 @@ namespace BSPGenerationTools
                 finalSamples.Add(s);
             }
 
-            Console.WriteLine($"Copying {copiedFiles.Count} files...");
-            foreach (var kv in copiedFiles)
+            Console.Write($"Copying {copiedFilesByTarget.Count} files...      ");
+            int filesProcessed = 0;
+            var updateTime = DateTime.Now;
+            foreach (var kv in copiedFilesByTarget)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(kv.Value));
-                if (!File.Exists(kv.Value))
-                    File.Copy(kv.Key, kv.Value);
-                File.SetAttributes(kv.Value, File.GetAttributes(kv.Value) & ~(FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System));
+                if (!Directory.Exists(Path.GetDirectoryName(kv.Key)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(kv.Key));
+
+                if (!File.Exists(kv.Key))
+                {
+                    File.Copy(kv.Value, kv.Key);
+                    File.SetAttributes(kv.Key, File.GetAttributes(kv.Key) & ~(FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System));
+                }
+
+                filesProcessed++;
+
+                if ((DateTime.Now - updateTime).TotalMilliseconds > 200)
+                {
+                    Console.Write($"\b\b\b\b\b[{filesProcessed * 100 / copiedFilesByTarget.Count:d2}%]");
+                    updateTime = DateTime.Now;
+                }
             }
+
+            Console.WriteLine($"\b\b\b\b\bdone ");
 
             Console.WriteLine("Updating BSP...");
             VendorSampleDirectory finalDir = new VendorSampleDirectory { Samples = finalSamples.ToArray() };
@@ -404,7 +431,7 @@ namespace BSPGenerationTools
                 XmlTools.SaveObjectToStream(finalDir, gs);
             }
 
-            return copiedFiles;
+            return copiedFilesByTarget;
         }
 
         static bool IsPathTooLong(ParsedDependency dep)

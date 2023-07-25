@@ -14,6 +14,8 @@ namespace StandaloneBSPValidator
         List<string> _SourceFiles = new List<string>();
         List<string> _LibFiles = new List<string>();
         readonly LoadedBSP.ConfiguredMCU MCU;
+        public readonly string CMSEImportLibraryName;
+        public readonly VendorSampleReference[] RelatedSamples;
         List<EmbeddedFramework> _Frameworks = new List<EmbeddedFramework>();
 
         string _LinkerScript;
@@ -73,6 +75,9 @@ namespace StandaloneBSPValidator
 
             if (cf != null)
                 _SourceFiles.AddRange(cf);
+
+            CMSEImportLibraryName = vs.CMSEImportLibraryName;
+            RelatedSamples = vs.RelatedSamples;
         }
 
         public void DoGenerateProjectFromEmbeddedSample(ConfiguredSample sample, bool plainC, Dictionary<string, string> bspDict)
