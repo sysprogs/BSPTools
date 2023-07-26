@@ -550,6 +550,7 @@ namespace VendorSampleParserEngine
             string specificSampleName = null;
             bool pass2Incremental = false;
             RunMode mode = RunMode.Invalid;
+            bool cleanCopy = !args.Contains("/dirtycopy");
 
             foreach (var arg in args)
             {
@@ -691,7 +692,7 @@ namespace VendorSampleParserEngine
             using (var reportWriter = new BSPReportWriter(CacheDirectory, "RelocationReport.txt"))
             {
                 var relocator = CreateRelocator(sampleDir);
-                var copiedFilesByTarget = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory, reportWriter, false);
+                var copiedFilesByTarget = relocator.InsertVendorSamplesIntoBSP(sampleDir, insertionQueue, BSPDirectory, reportWriter, cleanCopy);
 
                 var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(BSPDirectory, LoadedBSP.PackageFileName));
                 bsp.VendorSampleDirectoryPath = VendorSampleDirectoryName;

@@ -463,7 +463,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>-DFU Device Class[device_class_dfu]|common\\usbx_device_classes\\src\\ux_device_class_dfu.*</string>
 						<string>-HID Device Class[device_class_hid]|common\\usbx_device_classes\\src\\ux_device_class_hid.*</string>
 						<string>-PIMA Device Class[device_class_pima]|common\\usbx_device_classes\\src\\ux_device_class_pima.*</string>
-						<string>-Printer Device Class[device_class_pima]|common\\usbx_device_classes\\src\\ux_device_class_printer.*</string>
+						<string>-Printer Device Class[device_class_printer]|common\\usbx_device_classes\\src\\ux_device_class_printer.*</string>
 						<string>-RNDIS Device Class[device_class_rndis]|common\\usbx_device_classes\\src\\ux_device_class_rndis.*</string>
 						<string>-Storage Device Class[device_class_storage]|common\\usbx_device_classes\\src\\ux_device_class_storage.*</string>
 						<string>-Video Device Class[device_class_video]|common\\usbx_device_classes\\src\\ux_device_class_video.*</string>

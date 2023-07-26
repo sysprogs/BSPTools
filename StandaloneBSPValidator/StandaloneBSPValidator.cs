@@ -694,6 +694,9 @@ namespace StandaloneBSPValidator
                 comments.Add("Referenced frameworks:");
                 foreach(var fw in vendorSample.Configuration.Frameworks)
                     comments.Add("\t" + fw);
+                comments.Add("Framework configuration:");
+                foreach (var kv in vendorSample.Configuration.Configuration?.Entries ?? new PropertyDictionary2.KeyValue[0])
+                    comments.Add($"\t{kv.Key} = {kv.Value}");
             }
 
             job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"),
