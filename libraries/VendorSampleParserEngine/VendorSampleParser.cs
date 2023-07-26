@@ -550,7 +550,7 @@ namespace VendorSampleParserEngine
             string specificSampleName = null;
             bool pass2Incremental = false;
             RunMode mode = RunMode.Invalid;
-            bool cleanCopy = !args.Contains("/dirtycopy");
+            bool cleanCopy = true;
 
             foreach (var arg in args)
             {
@@ -560,6 +560,8 @@ namespace VendorSampleParserEngine
                     mode = RunMode.SingleSample;
                     specificSampleName = arg.Substring(singlePrefix.Length);
                 }
+                else if (arg == "/dirtycopy")
+                    cleanCopy = false;
                 else if (arg == "/pass2")
                     pass2Incremental = true;
                 else if (arg.StartsWith("/"))

@@ -362,7 +362,14 @@ namespace BSPGenerationTools
                 {
                     //Relocate the sample to a shorter path
                     string longPath = s.Path;
-                    string shortPath = $"{SampleRootDirMarker}/_/{shortPathIndex++:d3}";
+                    string shortPath;
+                    
+                    if (shortenedPaths.TryGetValue(longPath.Replace('\\', '/'), out shortPath))
+                    {
+                        //Another sample with the same base path (e.g. Secure/NonSecure pair) got moved under a shorter path. Reuse it.
+                    }
+                    else
+                        shortPath = $"{SampleRootDirMarker}/_/{shortPathIndex++:d3}";
 
                     TranslateVendorSamplePaths(s, ref deps, path =>
                     {
