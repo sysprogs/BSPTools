@@ -8,7 +8,7 @@
 		<TestedSample>
 			<Name>LEDBlink</Name>
 			<SkipIfNotFound>true</SkipIfNotFound>
-			`<ValidateRegisters>true</ValidateRegisters>
+			<ValidateRegisters>true</ValidateRegisters>
 			<SampleConfiguration>
 				<Entries>
 					<KeyValue>
@@ -17,6 +17,14 @@
 					</KeyValue>
 				</Entries>
 			</SampleConfiguration>
+			<MCUConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.bspoptions.cmse</Key>
+						<Value>-mcmse</Value>
+					</KeyValue>
+				</Entries>
+			</MCUConfiguration>
 		</TestedSample>
 	</Samples>
 </TestJob>

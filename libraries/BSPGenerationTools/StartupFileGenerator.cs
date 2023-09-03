@@ -41,7 +41,8 @@ namespace BSPGenerationTools
                                                               string macroDef,
                                                               int nameGroup,
                                                               int commentGroup,
-                                                              VectorLineHook hook = null)
+                                                              VectorLineHook hook = null,
+                                                              bool useLastStartSymbol = false)
         {
             var rgTableStart = new Regex(tableStart);
             var rgTableEnd = new Regex(tableEnd);
@@ -76,6 +77,12 @@ namespace BSPGenerationTools
                 }
                 else
                 {
+                    if (rgTableStart.IsMatch(line))
+                    {
+                        result.Clear();
+                        continue;
+                    }
+
                     if (string.IsNullOrWhiteSpace(line) || rgIgnoredLine.IsMatch(line))
                         continue;
                     else if (rgTableEnd.IsMatch(line))

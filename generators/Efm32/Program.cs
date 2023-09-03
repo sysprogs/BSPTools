@@ -94,36 +94,41 @@ namespace SLab_bsp_generator
             var line = lines[lineIndex];
             if (line.StartsWith("#ifdef"))
             {
-                if (line != "#ifdef BOOTLOADER_ENABLE")
-                    throw new Exception("Unexpected conditional interrupt vector");
+                if (line == "#ifdef SL_APP_PROPERTIES")
+                {
+                    lineIndex += 4;
+                    return new StartupFileGenerator.InterruptVector { Name = "sl_app_properties" };
+                }
 
-                lineIndex += 4;
-                return new StartupFileGenerator.InterruptVector { Name = "Bootloader_MainStageTable" };
+                else if (line == "#ifdef BOOTLOADER_ENABLE")
+                {
+                    lineIndex += 4;
+                    return new StartupFileGenerator.InterruptVector { Name = "Bootloader_MainStageTable" };
+                }
+
+                throw new Exception("Unexpected conditional interrupt vector");
             }
 
             return null;
         }
 
 
-        static IEnumerable<StartupFileGenerator.InterruptVectorTable> ParseStartupFiles(string startupFileName, MCUFamilyBuilder fam)
+        static StartupFileGenerator.InterruptVectorTable ParseStartupFiles(string startupFileName, MCUFamilyBuilder fam)
         {
-            List<StartupFileGenerator.InterruptVector[]> list = new List<StartupFileGenerator.InterruptVector[]>();
-            list.Add(StartupFileGenerator.ParseInterruptVectors(startupFileName,
-                     @"const [\w\W]+[ \t]+__Vectors\[\][ \t]+__attribute__",
+            var vectors = StartupFileGenerator.ParseInterruptVectors(startupFileName,
+                     @"const[ \t]+tVectorEntry[ \t]+__VECTOR_TABLE\[TOTAL_INTERRUPTS\][ \t]+__VECTOR_TABLE_ATTRIBUTE[ \t]+=[ \t]+\{",
                      @"[ \t]*\};",
                      @"\{[ \t]+([^ \t]+)[ \t]+\},[ \t]+/\*(.*)\*/",
                      @"([^ \t,]+)[,]?.*",
-                     @"^[ \t]*/.*",
+                     @"^([ \t]*/.*|#endif)",
                      null,
                      1,
                      2,
-                     VectorLineHook));
-
-            List<StartupFileGenerator.InterruptVector> vectors = new List<StartupFileGenerator.InterruptVector>(list[0]);
-            list.RemoveAt(0);
+                     VectorLineHook,
+                     true);
 
             //Fix the vector names from comments
-            for (int i = 0; i < vectors.Count; i++)
+            for (int i = 0; i < vectors.Length; i++)
             {
                 if (vectors[i] == null)
                     continue;
@@ -149,8 +154,14 @@ namespace SLab_bsp_generator
                         vectors[i] = null;
                 }
 
+                if (vectors[i]?.Name is string s && s.IndexOfAny(new[] { '#', '/', '{' }) != -1)
+                    throw new Exception("Invalid vector: " + vectors[i].Name);
             }
-            yield return new StartupFileGenerator.InterruptVectorTable
+
+            if (vectors.Length < 16)
+                throw new Exception("Too little vectors parsed");
+
+            return new StartupFileGenerator.InterruptVectorTable
             {
                 FileName = Path.ChangeExtension(Path.GetFileName(startupFileName), ".c"),
                 MatchPredicate = null,
@@ -185,9 +196,10 @@ namespace SLab_bsp_generator
 
         static bool IsMcuFull(MCUBuilder mcu)
         {
-            if (mcu.RAMSize != 0 && mcu.FlashSize != 0 && mcu.Core != CortexCore.Invalid)
+            if (mcu.Name != null && mcu.RAMSize != 0 && mcu.FlashSize != 0 && mcu.Core != CortexCore.Invalid)
                 return true;
-            else return false;
+            else
+                return false;
         }
         public static bool GetPropertyMCU(string str, string nameproperty, ref int property)
         {
@@ -211,16 +223,18 @@ namespace SLab_bsp_generator
                 if (m.Success)
                     mcu.Name = m.Groups[1].Value;
 
-                if (mcu.Name == null)
-                    continue;
+                if (mcu.Name != null)
+                {
+                    GetPropertyMCU(lnstr, "FLASH_SIZE", ref mcu.FlashSize);
+                    GetPropertyMCU(lnstr, "SRAM_SIZE", ref mcu.RAMSize);
+                }
 
-                GetPropertyMCU(lnstr, "FLASH_SIZE", ref mcu.FlashSize);
-                GetPropertyMCU(lnstr, "SRAM_SIZE", ref mcu.RAMSize);
-                if (mcu.Core != CortexCore.Invalid)
-                    continue;
-                m = Regex.Match(lnstr, @"#define __CM([\d\w]+)_REV[0-9xU /*<]+(Cortex-M[0-7+]+).*");
-                if (m.Success)
-                    mcu.Core = BSPGeneratorTools.ParseCoreName(m.Groups[2].Value, out mcu.FPU);
+                if (mcu.Core == CortexCore.Invalid)
+                {
+                    m = Regex.Match(lnstr, @"#define __CM([\d\w]+)_REV[0-9xU /*<]+(Cortex-M[0-7+]+).*");
+                    if (m.Success)
+                        mcu.Core = BSPGeneratorTools.ParseCoreName(m.Groups[2].Value, out mcu.FPU);
+                }
 
                 if (IsMcuFull(mcu))
                     break;
@@ -228,10 +242,9 @@ namespace SLab_bsp_generator
 
             if (mcu.Name == null)
                 return null;
-            if (mcu.Core == CortexCore.Invalid || mcu.Name.StartsWith("EFR32BG21"))
-                mcu.Core = CortexCore.M4;
-            if (mcu.Core == CortexCore.Invalid || mcu.FlashSize == 0 || mcu.RAMSize == 0)
-                throw new Exception($"mcu '{mcu.Name}' have not size of memory , file {fileinc}");
+
+            if (!IsMcuFull(mcu))
+                throw new Exception($"Failed to detect some parameters for '{mcu.Name}'");
 
             mcu.FPU = BSPGeneratorTools.GetDefaultFPU(mcu.Core);
 
@@ -303,9 +316,11 @@ namespace SLab_bsp_generator
                 if (!File.Exists(propertiesFile))
                     propertiesFile = Path.Combine(bspBuilder.Directories.InputDir, @".studio\efm32.properties");
 
-                var version = File.ReadAllLines(propertiesFile).First(l => l.StartsWith(versionPrefix)).Substring(versionPrefix.Length).Trim();
-                if (version.Count(c => c == '.') == 3 && version.EndsWith(".0"))
-                    version = version.Substring(0, version.Length - 2);
+                var innerVersion = File.ReadAllLines(propertiesFile).First(l => l.StartsWith(versionPrefix)).Substring(versionPrefix.Length).Trim();
+                if (innerVersion.Count(c => c == '.') == 3 && innerVersion.EndsWith(".0"))
+                    innerVersion = innerVersion.Substring(0, innerVersion.Length - 2);
+
+                var outerVersion = File.ReadAllLines(Path.Combine(bspBuilder.Directories.InputDir, ".properties")).First(l => l.StartsWith(versionPrefix)).Substring(versionPrefix.Length).Trim();
 
                 string DirDevices = Path.Combine(bspBuilder.Directories.InputDir, @"platform\Device\SiliconLabs");
                 string[] allFamilySubdirectories = Directory.GetDirectories(DirDevices);
@@ -327,7 +342,7 @@ namespace SLab_bsp_generator
                     if (devices.Count == 0)
                         throw new Exception("No devices for " + familyName);
 
-                    string StartupFile = Directory.GetFiles(Path.Combine(DirDevices, familyName, @"Source\GCC"), "startup_*.c")[0].Replace(bspBuilder.Directories.InputDir, @"$$BSPGEN:INPUT_DIR$$");
+                    string StartupFile = Directory.GetFiles(Path.Combine(DirDevices, familyName, @"Source"), "startup_*.c")[0].Replace(bspBuilder.Directories.InputDir, @"$$BSPGEN:INPUT_DIR$$");
 
                     var copyJob = new CopyJob()
                     {
@@ -388,7 +403,7 @@ namespace SLab_bsp_generator
                     }
 
 
-                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam));
+                    fam.AttachStartupFiles(new[] { ParseStartupFiles(fam.Definition.StartupFileDir, fam) });
 
                     var famObj = fam.GenerateFamilyObject(true, true);
 
@@ -426,8 +441,15 @@ namespace SLab_bsp_generator
                     Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray(),
                     FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
-                    PackageVersion = version
+                    PackageVersion = innerVersion,
                 };
+
+                File.WriteAllLines(Path.Combine(bspBuilder.Directories.OutputDir, "SDKVersions.txt"), new[]
+                {
+                    $"Gecko SDK version:      {outerVersion}",
+                    $"Git tag:                https://github.com/SiliconLabs/gecko_sdk/releases/tag/v{outerVersion}",
+                    $"32-Bit MCU SDK version: {innerVersion}"
+                });
 
                 Console.WriteLine("Saving BSP...");
                 bspBuilder.Save(bsp, true);

@@ -1646,8 +1646,8 @@ namespace BSPGenerationTools
                     return CortexCore.M0Plus;
                 case "Cortex-M3":
                     return CortexCore.M3;
-                case "Cortex-M3 ":
-                    return CortexCore.M3;
+                case "Cortex-M33":
+                    return CortexCore.M33;
                 case "Cortex-M4":
                     return CortexCore.M4;
                 case "Cortex-M4F": //FPU

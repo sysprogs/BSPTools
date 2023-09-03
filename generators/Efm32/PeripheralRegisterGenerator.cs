@@ -131,14 +131,16 @@ namespace SLab_bsp_generator
 
         public class AdrTypReg
         {
-            public string mStrTypAdr;
-            public string mStrNameBaseAdr;
+            public string StructTypeName;
+            public string BaseExpression;
+
+            public override string ToString() => $"{BaseExpression}: {StructTypeName}";
         }
 
-        public static List<HardwareRegisterSet> ProcessRegisterSetBaseAdress(string pFileName, List<HardwareRegisterSet> pLstHardReg)
+        public static List<HardwareRegisterSet> ProcessRegisterSetBaseAdress(string pFileName, List<HardwareRegisterSet> parsedRegisterSets)
         {
-            Dictionary<string, Int32> aDicBaseAdr = new Dictionary<string, Int32>();
-            List<AdrTypReg> aLstTypBase = new List<AdrTypReg>();
+            var baseAddressesByName = new Dictionary<string, Int32>();
+            List<AdrTypReg> typedBaseDefinitions = new List<AdrTypReg>();
             List<HardwareRegisterSet> oPerReg = new List<HardwareRegisterSet>();
             foreach (var ln in File.ReadAllLines(pFileName))
             {
@@ -146,40 +148,45 @@ namespace SLab_bsp_generator
                 if (m.Success)
                 {
                     int aAdrBase;
+                    if (baseAddressesByName.TryGetValue(m.Groups[2].Value.Trim(), out aAdrBase))
+                    {
+                        baseAddressesByName[m.Groups[1].Value + "_BASE"] = aAdrBase;
+                        continue;
+                    }
+
                     var str = m.Groups[2].Value.Replace("UL", "").Replace(" ", "");
-                    if (aDicBaseAdr.ContainsKey(str))
+                    if (baseAddressesByName.ContainsKey(str))
                         //aAdrBase = aDicBaseAdr[str];
                         continue;
                     else
                         aAdrBase = Convert.ToInt32(str, 16);
-                    aDicBaseAdr.Add(m.Groups[1].Value + "_BASE", aAdrBase);
+                    baseAddressesByName.Add(m.Groups[1].Value + "_BASE", aAdrBase);
                 }
                 m = Regex.Match(ln, @"#define[ \t]+([\w]+)[ \t]+[\(]*([\w]+)_TypeDef[ \t\*\)]+([\w]+).*");
                 if (m.Success)
-                    aLstTypBase.Add(new AdrTypReg() { mStrTypAdr = m.Groups[2].Value, mStrNameBaseAdr = m.Groups[3].Value });
+                    typedBaseDefinitions.Add(new AdrTypReg() { StructTypeName = m.Groups[2].Value, BaseExpression = m.Groups[3].Value });
             }
 
-            foreach (var aPointBase in aLstTypBase)
+            foreach (var def in typedBaseDefinitions)
             {
-                foreach (var aPerepReg in pLstHardReg)
+                var set = parsedRegisterSets.FirstOrDefault(s => s.UserFriendlyName == def.StructTypeName);
+
+                if (set != null)
                 {
-                    if (aPointBase.mStrTypAdr == aPerepReg.UserFriendlyName)
+                    HardwareRegisterSet aPerepMcuReg = DeepCopy(set);
+                    var aBaseAdrUnit = baseAddressesByName[def.BaseExpression];
+                    int aCntAdr = 0;
+                    foreach (var aHardReg in aPerepMcuReg.Registers)
                     {
-                        HardwareRegisterSet aPerepMcuReg = DeepCopy(aPerepReg);
-                        var aBaseAdrUnit = aDicBaseAdr[aPointBase.mStrNameBaseAdr];
-                        int aCntAdr = 0;
-                        foreach (var aHardReg in aPerepMcuReg.Registers)
-                        {
-                            aBaseAdrUnit += aCntAdr;
-                            aHardReg.Address = FormatToHex((ulong)aBaseAdrUnit);
-                            aCntAdr = aHardReg.SizeInBits / 8;
-                        }
-                        aPerepMcuReg.UserFriendlyName = aPointBase.mStrNameBaseAdr.Replace("_BASE", "");
-                        oPerReg.Add(aPerepMcuReg);
-                        break;
+                        aBaseAdrUnit += aCntAdr;
+                        aHardReg.Address = FormatToHex((ulong)aBaseAdrUnit);
+                        aCntAdr = aHardReg.SizeInBits / 8;
                     }
+                    aPerepMcuReg.UserFriendlyName = def.BaseExpression.Replace("_BASE", "");
+                    oPerReg.Add(aPerepMcuReg);
                 }
             }
+
             return oPerReg;
         }
 

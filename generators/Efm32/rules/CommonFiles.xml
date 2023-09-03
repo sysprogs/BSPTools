@@ -3,7 +3,7 @@
 	<CoreFramework>
 		<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\CMSIS\Include</SourceFolder>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\CMSIS\Core\Include</SourceFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<TargetFolder>CMSIS</TargetFolder>
 					<AutoIncludeMask>*.h</AutoIncludeMask>	
@@ -12,10 +12,27 @@
 	</CoreFramework>
 	<AdditionalFrameworks>
 		<Framework>
-			<Name>EFM32 EMLib</Name>
-			<ID>com.sysprogs.arm.silabs.efm32.emlib</ID>
+			<Name>Common EFM32 Files</Name>
+			<ID>com.sysprogs.arm.silabs.efm32.common</ID>
 			<IncompatibleFrameworks>
 			</IncompatibleFrameworks>
+			<ProjectFolderName>Common</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\common</SourceFolder>
+					<FilesToCopy>*.h;*.c</FilesToCopy>
+					<TargetFolder>framework\common</TargetFolder>
+					<ProjectInclusionMask>-*os2_ext_task_register*;-*sl_stdio.c;-*sl_storage.c;*</ProjectInclusionMask>
+				</CopyJob>		
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>EFM32 EMLib</Name>
+			<ID>com.sysprogs.arm.silabs.efm32.emlib</ID>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.silabs.efm32.common</string>
+			</RequiredFrameworks>
 			<ProjectFolderName>Emlib</ProjectFolderName>
 			<DefaultEnabled>false</DefaultEnabled>
 			<CopyJobs>
@@ -23,11 +40,10 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\emlib</SourceFolder>
 					<FilesToCopy>-host\*;*.h;*.c</FilesToCopy>
 					<TargetFolder>framework\emlib</TargetFolder>
-					<AutoIncludeMask>*.h</AutoIncludeMask>	
 				</CopyJob>		
-		</CopyJobs>
+			</CopyJobs>
 		</Framework>
-			<Framework>
+		<Framework>
 			<Name>EFM32 USB Library</Name>
 			<ID>com.sysprogs.arm.silabs.efm32.usb</ID>
 			<IncompatibleFrameworks>
@@ -39,11 +55,9 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\middleware\usb_gecko</SourceFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<TargetFolder>framework\usb</TargetFolder>
-					<AutoIncludeMask>*.h</AutoIncludeMask>	
 				</CopyJob>		
-		</CopyJobs>
+			</CopyJobs>
 		</Framework>
-
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>

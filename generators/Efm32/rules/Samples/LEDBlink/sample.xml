@@ -4,6 +4,7 @@
 	<Description>This is a very basic sample project - a classical blinking LED example.</Description>
 	<MCUFilterRegex>E.*</MCUFilterRegex>
 	<RequiredFrameworks>
+		<string>com.sysprogs.arm.silabs.efm32.common</string>
 		<string>com.sysprogs.arm.silabs.efm32.emlib</string>
 	</RequiredFrameworks>
 	<ConfigurableProperties>
