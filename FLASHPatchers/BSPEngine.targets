@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Condition="!Exists('$(MSBuildThisFileDirectory)..\..\..\products\VisualGDB\BSPEngine\BSPEngine.csproj')">
+		<Reference Include="BSPEngine">
+		  <HintPath>$(MSBuildThisFileDirectory)BSPEngine.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	
+	<ItemGroup Condition="Exists('$(MSBuildThisFileDirectory)..\..\..\products\VisualGDB\BSPEngine\BSPEngine.csproj')">
+		<ProjectReference Include="$(MSBuildThisFileDirectory)..\..\..\products\VisualGDB\BSPEngine\BSPEngine.csproj">
+			<Project>{583896AC-11C2-4FD3-990B-07E215C5382D}</Project>
+			<Name>BSPEngine</Name>
+		</ProjectReference>
+	</ItemGroup>
+
+</Project>

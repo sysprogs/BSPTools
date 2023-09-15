@@ -42,3 +42,6 @@ Output
 /VendorSampleParsers/Nordic/Cache
 BSPReport.txt
 RelocationReport.txt
+.visualgdb
+build
+*.log

@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
 using Microsoft.Win32;
+using System.Security.Policy;
 
 namespace BSPGenerationTools
 {
@@ -1797,11 +1798,13 @@ namespace BSPGenerationTools
     {
         public MemoryLayout Layout;
         public Dictionary<string, string> MemorySubstitutionsForRAMScript;
+        public string ReferenceDir;
 
         public MemoryLayoutAndSubstitutionRules(MemoryLayout layout, Dictionary<string, string> memorySubstitutionRulesForRAMMode = null)
         {
             Layout = layout;
             MemorySubstitutionsForRAMScript = memorySubstitutionRulesForRAMMode;
+            ReferenceDir = null;
         }
     }
 }

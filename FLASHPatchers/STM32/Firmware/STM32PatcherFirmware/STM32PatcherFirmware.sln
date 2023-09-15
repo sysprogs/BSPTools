@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{803FD0C6-D64E-4E16-9DC3-1DAEC859A3D2}") = "STM32PatcherFirmware", "STM32PatcherFirmware.vgdbcmake", "{1AB07770-2A80-4344-AC39-34391F3377EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|VisualGDB = Debug|VisualGDB
+		MinSizeRel|VisualGDB = MinSizeRel|VisualGDB
+		Release|VisualGDB = Release|VisualGDB
+		RelWithDebInfo|VisualGDB = RelWithDebInfo|VisualGDB
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.Debug|VisualGDB.ActiveCfg = Debug|VisualGDB
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.Debug|VisualGDB.Build.0 = Debug|VisualGDB
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.MinSizeRel|VisualGDB.ActiveCfg = MinSizeRel|VisualGDB
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.MinSizeRel|VisualGDB.Build.0 = MinSizeRel|VisualGDB
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.Release|VisualGDB.ActiveCfg = Release|VisualGDB
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.Release|VisualGDB.Build.0 = Release|VisualGDB
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.RelWithDebInfo|VisualGDB.ActiveCfg = RelWithDebInfo|VisualGDB
+		{1AB07770-2A80-4344-AC39-34391F3377EC}.RelWithDebInfo|VisualGDB.Build.0 = RelWithDebInfo|VisualGDB
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {42F76C23-5E72-411F-BB8D-888756E7FADB}
+	EndGlobalSection
+EndGlobal
