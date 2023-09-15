@@ -50,7 +50,8 @@ namespace SLab_bsp_generator
                 MemoryLayout layout = new MemoryLayout();
                 layout.Memories = new List<Memory>();
                 layout.DeviceName = mcu.Name;
-                string aFileName = family.BSP.Directories.InputDir + "\\platform\\Device\\SiliconLabs\\" + family.FamilyFilePrefix.Substring(0, family.FamilyFilePrefix.Length - 1) + "\\Include\\" + mcu + ".h";
+                string familyDir = family.BSP.Directories.InputDir + "\\platform\\Device\\SiliconLabs\\" + family.FamilyFilePrefix.Substring(0, family.FamilyFilePrefix.Length - 1);
+                string aFileName =  familyDir + "\\Include\\" + mcu + ".h";
                 Match m;
                 Regex rg = new Regex(@"(#define RAM_MEM_BASE[ \t]*.*0x)([0-9][U][L])+.*");
                 var RAMStart = 0;
@@ -83,7 +84,7 @@ namespace SLab_bsp_generator
                     Size = (uint)mcu.RAMSize
                 });
 
-                return new MemoryLayoutAndSubstitutionRules(layout);
+                return new MemoryLayoutAndSubstitutionRules(layout) { ReferenceDir = familyDir };
             }
         }
 

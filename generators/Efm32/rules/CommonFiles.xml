@@ -23,7 +23,7 @@
 					<SourceFolder>$$BSPGEN:INPUT_DIR$$\platform\common</SourceFolder>
 					<FilesToCopy>*.h;*.c</FilesToCopy>
 					<TargetFolder>framework\common</TargetFolder>
-					<ProjectInclusionMask>-*os2_ext_task_register*;-*sl_stdio.c;-*sl_storage.c;*</ProjectInclusionMask>
+					<ProjectInclusionMask>-*os2_ext_task_register*;-*sl_stdio.c;-toolchain\*;*</ProjectInclusionMask>
 				</CopyJob>		
 			</CopyJobs>
 		</Framework>
