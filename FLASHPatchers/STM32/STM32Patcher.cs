@@ -36,7 +36,15 @@ namespace STM32FLASHPatcher
                     for (int i = 0; i < pageSizes.Length; i++)
                     {
                         if (isDualBank && i == (pageSizes.Length / 2))
-                            throw new NotImplementedException();
+                        {
+                            //Set page ID to 0b100..0, where the trailing zeroes are sufficient to fit the page number within the bank.
+                            for (int x = 31; x >= 0; x--)
+                                if ((i & (1 << x)) != 0)
+                                {
+                                    pageID = 1 << (x + 1);
+                                    break;
+                                }
+                        }
 
                         Pages[i] = new FLASHPage(pageID++, addr, pageSizes[i]);
                         addr += pageSizes[i];

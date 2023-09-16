@@ -1,4 +1,11 @@
+#if defined (STM32F7)
+#include <stm32f7xx_hal.h>
+#elif defined (STM32F4)
 #include <stm32f4xx_hal.h>
+#else
+#error Unknown device family
+#endif
+
 #include <stm32_hal_legacy.h>
 #include "../FLASHPatcherAPI.h"
 
@@ -26,6 +33,10 @@ int FLASHPatcher_EraseSectors(int firstSector, int count)
 int FLASHPatcher_ProgramWord(void *address, uint32_t word)
 {
 	return HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)address, word);
+}
+
+extern "C" void __attribute__((weak)) FLASH_FlushCaches()
+{
 }
 
 int FLASHPatcher_Complete()

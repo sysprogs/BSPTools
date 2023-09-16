@@ -11,13 +11,43 @@ find_bsp(
 	CXX_STANDARD 17
 	DISABLE_GNU_EXTENSIONS)
 
-if (NOT ("${CMAKE_BUILD_TYPE}" STREQUAL DEBUG))
-bsp_compile_flags(-flto -Os)
-endif()
 
 add_bsp_based_executable(
-	NAME STM32F4xPatcher
-	SOURCES STM32PatcherFirmware.cpp stm32f4xx_hal_conf.h ../startup.S ../FLASHPatcherEntry.cpp
+	NAME UniversalFLASHTester
+	SOURCES ../UniversalFLASHTester.cpp
 	GENERATE_BIN
 	GENERATE_MAP
-	OUTPUT_RELOCATION_RECORDS)
+	OUTPUT_RELOCATION_RECORDS
+	LINKER_SCRIPT STM32_SRAM_moved.lds)
+
+
+function(build_patcher_executable TARGET_DEVICE)
+
+	string(SUBSTRING ${TARGET_DEVICE} 0 7 TARGET_FAMILY)
+
+	find_bsp(
+		ID com.sysprogs.arm.stm32
+		VERSION 2023.07
+		MCU ${TARGET_DEVICE}
+		CONFIGURATION com.sysprogs.bspoptions.primary_memory=sram com.sysprogs.mcuoptions.ignore_startup_file=1
+		FRAMEWORKS com.sysprogs.arm.stm32.hal_systeminit com.sysprogs.arm.stm32.hal com.sysprogs.arm.stm32.ll
+		CXX_STANDARD 17
+		DISABLE_GNU_EXTENSIONS
+		ALIAS BSP-${TARGET_FAMILY})
+
+	bsp_compile_definitions(ALIAS BSP-${TARGET_FAMILY} ${TARGET_FAMILY})
+
+	if (NOT ("${CMAKE_BUILD_TYPE}" STREQUAL DEBUG))
+	bsp_compile_flags(ALIAS BSP-${TARGET_FAMILY} -flto -Os)
+	endif()
+
+	add_bsp_based_executable(
+		NAME ${TARGET_FAMILY}Patcher
+		SOURCES STM32PatcherFirmware.cpp ../startup.S ../FLASHPatcherEntry.cpp
+		BSP_ALIAS BSP-${TARGET_FAMILY}
+		GENERATE_BIN
+		GENERATE_MAP
+		OUTPUT_RELOCATION_RECORDS)
+endfunction()
+
+build_patcher_executable(STM32F746NG)

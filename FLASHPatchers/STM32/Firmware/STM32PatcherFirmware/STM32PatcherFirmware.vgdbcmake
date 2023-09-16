@@ -18,22 +18,31 @@
     <ToolchainID>
       <ID>com.visualgdb.arm-eabi</ID>
       <Version>
-        <GCC>12.2.1</GCC>
-        <GDB>12.2</GDB>
-        <Revision>2</Revision>
+        <GCC>12.3.1</GCC>
+        <GDB>13.2</GDB>
+        <Revision>1</Revision>
       </Version>
     </ToolchainID>
     <RelativeSourceDirectory />
     <ConfigurationType>DEBUG</ConfigurationType>
     <BinaryDirectory>build/$(PlatformName)/$(ConfigurationName)</BinaryDirectory>
+    <MainCMakeTarget>STM32F4Patcher</MainCMakeTarget>
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
+      </RemoteHost>
       <Command>$(VISUALGDB_DIR)/ninja.exe</Command>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <BackgroundMode xsi:nil="true" />
     </MakeCommandTemplate>
     <CMakeCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
+      </RemoteHost>
       <Command>$(SYSPROGS_CMAKE_PATH)</Command>
       <BackgroundMode xsi:nil="true" />
     </CMakeCommand>
@@ -65,6 +74,7 @@
       <ConfigurationNameCase>Upper</ConfigurationNameCase>
       <DefaultHeaderDiscoveryMode>None</DefaultHeaderDiscoveryMode>
       <EnableFastUpToDateCheck>true</EnableFastUpToDateCheck>
+      <StartupTarget>STM32F4Patcher</StartupTarget>
     </ProjectModeSettings>
   </Build>
   <CustomBuild>
