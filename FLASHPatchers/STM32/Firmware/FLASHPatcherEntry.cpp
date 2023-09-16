@@ -68,12 +68,15 @@ public:
 			case fpcProgramWords:
 				arg1 = ReadWordBlocking(offset, BufferSize);
 				arg2 = ReadWordBlocking(offset, BufferSize);
-				for (int i = 0; i < arg2; i+=2)
+				if (arg2 & 3)
+					return 1003;
+				for (int i = 0; i < arg2; i+=4)
 				{
-					uint32_t lo, hi;
-					lo = ReadWordBlocking(offset, BufferSize);
-					hi = ReadWordBlocking(offset, BufferSize);
-					st = FLASHPatcher_ProgramQWord((void *)(arg1 + i * 4), lo, hi);
+					uint32_t words[4];
+					for (int j = 0; j < 4; j++)
+						words[j] = ReadWordBlocking(offset, BufferSize);
+					
+					st = FLASHPatcher_ProgramQWord((void *)(arg1 + i * 4), words);
 					if (st)
 						return Status = st;
 				}
@@ -96,9 +99,9 @@ public:
 
 extern "C" int __attribute__((noinline, noclone, externally_visible)) FLASHPatcher_ProgramBuffer(void *addr, int wordCount, const uint32_t *buffer)
 {
-	for (int i = 0; i < wordCount; i += 2)
+	for (int i = 0; i < wordCount; i += 4)
 	{
-		int st = FLASHPatcher_ProgramQWord((uint32_t *)addr + i, buffer[i], buffer[i + 1]);
+		int st = FLASHPatcher_ProgramQWord((uint32_t *)addr + i, buffer + i);
 		if (st)
 			return st;
 	}

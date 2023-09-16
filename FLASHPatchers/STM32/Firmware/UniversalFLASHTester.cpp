@@ -12,11 +12,11 @@ struct FLASHTesterConfiguration
 {
 	int(*FLASHPatcher_Init)();
 	int(*FLASHPatcher_EraseSectors)(int bank, int firstSector, int count);
-	int(*FLASHPatcher_ProgramQWord)(void *address, uint32_t lo, uint32_t hi);
+	int(*FLASHPatcher_ProgramQWord)(void *address, uint32_t *words);
 	int(*FLASHPatcher_Complete)();
 	int SectorCount;
 	uint32_t GlobalStart, GlobalEnd;
-	TestedSector Sectors[128];
+	TestedSector Sectors[512];
 };
 
 
@@ -33,9 +33,16 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	TestedSector *sectors = cfg->Sectors;
 	cfg->FLASHPatcher_Init();
 	
-	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 8)
+	for (int i = 0; i < cfg->SectorCount; i++)
 	{
-		if (cfg->FLASHPatcher_ProgramQWord((void *)addr, 0, 0))
+		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
+			return -7;
+	}
+	
+	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 16)
+	{
+		uint32_t words[4] = { 0, 0, 0, 0 };
+		if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
 			return -1;
 	}
 	
@@ -71,9 +78,15 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		
 		cfg->FLASHPatcher_Init();
 		
-		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 8)
-			if (cfg->FLASHPatcher_ProgramQWord((void *)addr, WordFromAddr(addr), WordFromAddr(addr + 4)))
+		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 16)
+		{
+			uint32_t words[4];
+			for (int j = 0; j < 4; j++)
+				words[j] = WordFromAddr(addr + j * 4);
+			
+			if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
 				return -5;
+		}
 		
 		cfg->FLASHPatcher_Complete();
 		for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 4)

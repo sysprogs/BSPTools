@@ -2,6 +2,8 @@
 #include <stm32f7xx_hal.h>
 #elif defined (STM32U5)
 #include <stm32u5xx_hal.h>
+#elif defined (STM32L4)
+#include <stm32l4xx_hal.h>
 #else
 #error Unknown device family
 #endif
@@ -37,14 +39,24 @@ int FLASHPatcher_EraseSectors(int bank, int firstSector, int count)
 	return HAL_FLASHEx_Erase(&erase, &error);
 }
 
-int FLASHPatcher_ProgramQWord(void *address, uint32_t lo, uint32_t hi)
+int FLASHPatcher_ProgramQWord(void *address, const uint32_t *words)
 {
-	int st = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)address, lo);
+#ifdef FLASH_TYPEPROGRAM_WORD
+	for (int i = 0; i < 4; i++)
+	{
+		int st = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)address + i * 4, words[i]);
+		if (st)
+			return st;
+	}
+	return 0;
+#elif defined (FLASH_TYPEPROGRAM_DOUBLEWORD)
+	int st = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)address, ((uint64_t)words[1] << 32) | words[0]);
 	if (st)
 		return st;
-	return HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)address + 4, hi);
-	
-	//return HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)address, (((uint64_t)hi) << 32) | lo);
+	return HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)address + 8, ((uint64_t)words[3] << 32) | words[2]);
+#else
+	return HAL_FLASH_Program(FLASH_TYPEPROGRAM_QUADWORD, (uint32_t)address, (uint32_t)words);
+#endif
 }
 
 extern "C" void __attribute__((weak)) FLASH_FlushCaches()

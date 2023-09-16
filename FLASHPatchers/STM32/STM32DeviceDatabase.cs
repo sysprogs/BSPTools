@@ -10,6 +10,8 @@ namespace STM32FLASHPatcher
 {
     public class STM32DeviceDatabase
     {
+        public const uint FLASHStart = 0x08000000;
+
         [XmlInclude(typeof(Or))]
         [XmlInclude(typeof(MinimumFLASHSize))]
         [XmlInclude(typeof(Masked))]
@@ -30,6 +32,7 @@ namespace STM32FLASHPatcher
 
                 public override bool IsTrue(ConditionMatchingContext ctx) => ctx.FLASHSize >= ParseUInt32(Size, "FLASH size threshold");
             }
+
 
             public class Masked : Condition
             {
@@ -78,8 +81,9 @@ namespace STM32FLASHPatcher
 
             public string FLASHSizeRegister;
             public string MaxFLASHSize;
-            public string MaxSectorSize;
-            public Condition DualBankCondition;
+            public string BaseSectorSize;
+            public bool IsDualBank;
+            public DeviceOverrides[] Overrides;
 
             public DeviceDefinition OverrideWith(DeviceDefinition dev)
             {
@@ -94,23 +98,41 @@ namespace STM32FLASHPatcher
                     SectorLayout = dev.SectorLayout ?? SectorLayout,
                     FLASHSizeRegister = dev.FLASHSizeRegister ?? FLASHSizeRegister,
                     MaxFLASHSize = dev.MaxFLASHSize ?? MaxFLASHSize,
-                    MaxSectorSize = dev.MaxSectorSize ?? MaxSectorSize,
-                    DualBankCondition = dev.DualBankCondition ?? DualBankCondition,
+                    BaseSectorSize = dev.BaseSectorSize ?? BaseSectorSize,
+                    IsDualBank = dev.IsDualBank || IsDualBank,
                 };
             }
+
+            public bool MatchesID(uint id) => HardwareID != null && HardwareID.Split('|').Select(s => ParseUInt32(s, "ID for " + Name)).Any(i => i == id);
         }
 
-        public class DeviceFamily
+        public class DeviceFamily : DeviceDefinition
         {
-            public DeviceDefinition BaseDefinition;
-            public DeviceDefinition[] Devices;
+            public DeviceDefinition[] NestedDefinitions;
+        }
+
+        public class DeviceOverrides : DeviceDefinition
+        {
+            public Condition Condition;
+        }
+
+        static int GetSecondBankMask(int pageCount)
+        {
+            //Set page ID to 0b100..0, where the trailing zeroes are sufficient to fit the page number within the bank.
+            for (int x = 31; x >= 0; x--)
+                if ((pageCount & (1 << x)) != 0)
+                {
+                    return 1 << (x + 1);
+                }
+
+            return 0;
         }
 
         [XmlInclude(typeof(FirstSplitInto5))]
         [XmlInclude(typeof(Linear))]
         public abstract class SectorLayout
         {
-            public abstract uint[] ComputePageSizes(uint FLASHSize, uint sectorSize, bool isDualBank);
+            public abstract FLASHBankDefinition[] ComputeLayout(uint FLASHSize, uint sectorSize, bool isDualBank);
 
             static IEnumerable<uint> Repeat(uint value, uint count) => Enumerable.Range(0, (int)count).Select(x => value);
 
@@ -121,28 +143,59 @@ namespace STM32FLASHPatcher
                     var normalSectorCount = totalSize / normalSectorSize;
                     if (normalSectorCount < 1)
                         throw new Exception($"Invalid FLASH size ({totalSize}) for sector size of {normalSectorSize}");
+
                     return Repeat(normalSectorSize / 8, 4).Concat(new[] { normalSectorSize / 2 }).Concat(Repeat(normalSectorSize, normalSectorCount - 1)).ToArray();
                 }
 
-                public override uint[] ComputePageSizes(uint FLASHSize, uint sectorSize, bool isDualBank)
+                public override FLASHBankDefinition[] ComputeLayout(uint FLASHSize, uint sectorSize, bool isDualBank)
                 {
                     if (isDualBank)
-                        return DoComputePageSizes(FLASHSize / 2, sectorSize).Concat(DoComputePageSizes(FLASHSize / 2, sectorSize)).ToArray();
+                    {
+                        var sizes = DoComputePageSizes(FLASHSize / 2, sectorSize);
+
+                        return new[] {
+                            new FLASHBankDefinition { FirstPageAddress = FLASHStart, PageSizes = sizes },
+                            new FLASHBankDefinition { FirstPageAddress = FLASHStart + FLASHSize / 2, PageSizes = sizes, FirstPageID = GetSecondBankMask(sizes.Length) },
+                        };
+                    }
                     else
-                        return DoComputePageSizes(FLASHSize, sectorSize);
+                        return new[] { new FLASHBankDefinition { FirstPageAddress = FLASHStart, PageSizes = DoComputePageSizes(FLASHSize, sectorSize) } };
                 }
-            }           
-            
+            }
+
             public class Linear : SectorLayout
             {
-                public override uint[] ComputePageSizes(uint FLASHSize, uint sectorSize, bool isDualBank)
+                public bool HasBankIDs;
+
+                public override FLASHBankDefinition[] ComputeLayout(uint FLASHSize, uint sectorSize, bool isDualBank)
                 {
-                    throw new NotImplementedException();
+                    uint pageCount = FLASHSize / sectorSize;
+
+                    if (isDualBank)
+                    {
+                        var sizes = Enumerable.Range(0, (int)pageCount / 2).Select(x => sectorSize).ToArray();
+
+                        return new[] {
+                            new FLASHBankDefinition { FirstPageAddress = FLASHStart, PageSizes = sizes, BankID = 1, },
+                            new FLASHBankDefinition {
+                                FirstPageAddress = FLASHStart + FLASHSize / 2,
+                                PageSizes = sizes,
+                                FirstPageID = HasBankIDs ? 0 : GetSecondBankMask(sizes.Length),
+                                BankID = 2,
+                            }
+                        };
+                    }
+                    else
+                        return new[] { new FLASHBankDefinition { 
+                            FirstPageAddress = FLASHStart,
+                            PageSizes = Enumerable.Range(0, (int)pageCount).Select(x => sectorSize).ToArray(),
+                            BankID = 1,
+                        } };
                 }
             }
         }
 
-        public string DeviceIDRegister;
+        public string DeviceIDRegisters;
         public string DeviceIDMask;
         public string BreakpointCountRegister;
         public string BreakpointCountMask;
@@ -188,6 +241,13 @@ namespace STM32FLASHPatcher
 
             return result;
         }
+    }
 
+    public struct FLASHBankDefinition
+    {
+        public int BankID;
+        public int FirstPageID;
+        public uint FirstPageAddress;
+        public uint[] PageSizes;
     }
 }

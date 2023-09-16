@@ -7,7 +7,7 @@ ENTRY(Reset_Handler)
 
 MEMORY
 {
-	SRAM (RWX)   : ORIGIN = 0x20001000, LENGTH = 4K
+	SRAM (RWX)   : ORIGIN = 0x20001000, LENGTH = 16K
 }
 
 _estack = 0x2001c000;
