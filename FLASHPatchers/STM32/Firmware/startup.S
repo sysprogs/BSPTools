@@ -8,16 +8,17 @@
 .global EndOfProgram
 
 Reset_Handler:
-push {r0-r7}
-mov r0, r12
-push {r0, lr}
+ldr r0, =0x20002000
+ldr r1, =end
+ldr r2, =0x55555555
+.FillStack:
+str r2, [r1, #0]
+add r1, #4
+cmp r1, r0
+bne .FillStack
+mov sp, r0
+
 ldr r0, =g_pBuffer
-ldr r0, [r0, #0]
 blx FLASHPatcher_RunRequestLoop
-pop {r0, r1}
-mov lr, r1
-mov r12, r0
-pop {r0-r7}
-EndOfProgram:
 bkpt 0
 blx FLASHPatcher_ProgramBuffer	//Only needed to keep a reference to the function

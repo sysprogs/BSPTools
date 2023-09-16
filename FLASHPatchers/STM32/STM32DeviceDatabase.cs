@@ -107,6 +107,7 @@ namespace STM32FLASHPatcher
         }
 
         [XmlInclude(typeof(FirstSplitInto5))]
+        [XmlInclude(typeof(Linear))]
         public abstract class SectorLayout
         {
             public abstract uint[] ComputePageSizes(uint FLASHSize, uint sectorSize, bool isDualBank);
@@ -129,6 +130,14 @@ namespace STM32FLASHPatcher
                         return DoComputePageSizes(FLASHSize / 2, sectorSize).Concat(DoComputePageSizes(FLASHSize / 2, sectorSize)).ToArray();
                     else
                         return DoComputePageSizes(FLASHSize, sectorSize);
+                }
+            }           
+            
+            public class Linear : SectorLayout
+            {
+                public override uint[] ComputePageSizes(uint FLASHSize, uint sectorSize, bool isDualBank)
+                {
+                    throw new NotImplementedException();
                 }
             }
         }

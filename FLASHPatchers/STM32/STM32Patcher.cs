@@ -76,7 +76,7 @@ namespace STM32FLASHPatcher
                 SyncCompletionFunction = "FLASHPatcher_Complete",
                 BufferPointerSymbol = "g_pBuffer",
                 RegistersToPreserve = new[] { new PreservedRegister("primask", "1"), new PreservedRegister("faultmask", "1") },
-                StackSize = 128,
+                StackSize = 256,
             };
 
             public FLASHAlias[] Aliases { get; } = new[] { new FLASHAlias(0x0, FLASHStart, FLASHStart) };

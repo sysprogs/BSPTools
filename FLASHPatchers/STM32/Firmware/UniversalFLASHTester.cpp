@@ -2,6 +2,7 @@
 
 struct TestedSector
 {
+	uint32_t Bank;
 	uint32_t ID;	
 	uint32_t Start;
 	uint32_t Size;
@@ -10,8 +11,8 @@ struct TestedSector
 struct FLASHTesterConfiguration
 {
 	int(*FLASHPatcher_Init)();
-	int(*FLASHPatcher_EraseSectors)(int firstSector, int count);
-	int(*FLASHPatcher_ProgramWord)(void *address, uint32_t word);
+	int(*FLASHPatcher_EraseSectors)(int bank, int firstSector, int count);
+	int(*FLASHPatcher_ProgramQWord)(void *address, uint32_t lo, uint32_t hi);
 	int(*FLASHPatcher_Complete)();
 	int SectorCount;
 	uint32_t GlobalStart, GlobalEnd;
@@ -32,9 +33,9 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	TestedSector *sectors = cfg->Sectors;
 	cfg->FLASHPatcher_Init();
 	
-	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 4)
+	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 8)
 	{
-		if (cfg->FLASHPatcher_ProgramWord((void *)addr, 0))
+		if (cfg->FLASHPatcher_ProgramQWord((void *)addr, 0, 0))
 			return -1;
 	}
 	
@@ -48,7 +49,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	{
 		cfg->FLASHPatcher_Init();
 		
-		if (cfg->FLASHPatcher_EraseSectors(sectors[i].ID, 1))
+		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
 			return -3;
 		
 		cfg->FLASHPatcher_Complete();
@@ -70,8 +71,8 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		
 		cfg->FLASHPatcher_Init();
 		
-		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 4)
-			if (cfg->FLASHPatcher_ProgramWord((void *)addr, WordFromAddr(addr)))
+		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 8)
+			if (cfg->FLASHPatcher_ProgramQWord((void *)addr, WordFromAddr(addr), WordFromAddr(addr + 4)))
 				return -5;
 		
 		cfg->FLASHPatcher_Complete();

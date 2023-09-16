@@ -52,25 +52,28 @@ public:
 		for (;;)
 		{
 			uint8_t byte = ReadByteBlocking(offset, BufferSize);
-			uint32_t arg1, arg2;
+			uint32_t arg1, arg2, arg3;
 			int st;
 			switch (byte)
 			{
 			case fpcEraseSector:
 				arg1 = ReadWordBlocking(offset, BufferSize);
 				arg2 = ReadWordBlocking(offset, BufferSize);
+				arg3 = ReadWordBlocking(offset, BufferSize);
 			
-				st = FLASHPatcher_EraseSectors(arg1, arg2);
+				st = FLASHPatcher_EraseSectors(arg1, arg2, arg3);
 				if (st != 0)
 					return Status = st;
 				break;
 			case fpcProgramWords:
 				arg1 = ReadWordBlocking(offset, BufferSize);
 				arg2 = ReadWordBlocking(offset, BufferSize);
-				for (int i = 0; i < arg2; i++)
+				for (int i = 0; i < arg2; i+=2)
 				{
-					uint32_t word = ReadWordBlocking(offset, BufferSize);
-					st = FLASHPatcher_ProgramWord((void *)(arg1 + i * 4), word);
+					uint32_t lo, hi;
+					lo = ReadWordBlocking(offset, BufferSize);
+					hi = ReadWordBlocking(offset, BufferSize);
+					st = FLASHPatcher_ProgramQWord((void *)(arg1 + i * 4), lo, hi);
 					if (st)
 						return Status = st;
 				}
@@ -93,9 +96,9 @@ public:
 
 extern "C" int __attribute__((noinline, noclone, externally_visible)) FLASHPatcher_ProgramBuffer(void *addr, int wordCount, const uint32_t *buffer)
 {
-	for (int i = 0; i < wordCount; i++)
+	for (int i = 0; i < wordCount; i += 2)
 	{
-		int st = FLASHPatcher_ProgramWord((uint32_t *)addr + i, buffer[i]);
+		int st = FLASHPatcher_ProgramQWord((uint32_t *)addr + i, buffer[i], buffer[i + 1]);
 		if (st)
 			return st;
 	}
