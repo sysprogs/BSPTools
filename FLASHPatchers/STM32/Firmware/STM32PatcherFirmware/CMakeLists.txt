@@ -55,5 +55,6 @@ function(build_patcher_executable TARGET_DEVICE )
 		OUTPUT_RELOCATION_RECORDS)
 endfunction()
 
-build_patcher_executable(STM32F746NG)
+#build_patcher_executable(STM32F746NG)
+build_patcher_executable(STM32L476RG)
 #build_patcher_executable(STM32U575ZI SYSTEM_FILE system_stm32u5xx.c)

@@ -16,7 +16,7 @@ struct FLASHTesterConfiguration
 	int(*FLASHPatcher_Complete)();
 	int SectorCount;
 	uint32_t GlobalStart, GlobalEnd;
-	TestedSector Sectors[512];
+	TestedSector Sectors[4096];
 };
 
 
@@ -25,40 +25,98 @@ static inline uint32_t WordFromAddr(uint32_t addr)
 	return (addr * 81247345);
 }
 
-static volatile FLASHTesterConfiguration g_FLASHTesterConfiguration;
+static volatile struct
+{
+	int Phase, SubPhase;
+	uint32_t Address, Sector;
+} g_ObservableState;
+
+
+void Error_Handler()
+{
+	asm("bkpt #0");
+}
+
+extern "C" void Reset_Handler();
+
+
+extern volatile FLASHTesterConfiguration _EndOfStackStartOfConfigTable;
+void * g_FLASHPatcherTesterVectors[0x30] __attribute__((section(".isr_vector"), used)) = 
+{
+	(void *)&_EndOfStackStartOfConfigTable,
+	(void *)&Reset_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+	(void *)&Error_Handler,
+};
+
+
 
 extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHTest()
 {
-	FLASHTesterConfiguration *cfg = (FLASHTesterConfiguration *)&g_FLASHTesterConfiguration;
+	*((void **)0xE000ED08) = g_FLASHPatcherTesterVectors;
+	
+	FLASHTesterConfiguration *cfg = (FLASHTesterConfiguration *)&_EndOfStackStartOfConfigTable;
 	TestedSector *sectors = cfg->Sectors;
 	cfg->FLASHPatcher_Init();
+	g_ObservableState.Phase = 10;
+	g_ObservableState.SubPhase = 0;
+	g_ObservableState.Address = 0;
+	g_ObservableState.Sector = 0;
 	
 	for (int i = 0; i < cfg->SectorCount; i++)
 	{
 		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
-			return -7;
+			return -g_ObservableState.Phase;
+		g_ObservableState.Sector = i;
 	}
+	
+	g_ObservableState.Phase += 10;
 	
 	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 16)
 	{
 		uint32_t words[4] = { 0, 0, 0, 0 };
 		if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
-			return -1;
+			return -g_ObservableState.Phase;
+		g_ObservableState.Address = addr;
 	}
+	
+	g_ObservableState.Phase += 10;
 	
 	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 4)
 	{
 		if (*((uint32_t *)addr) != 0)
-			return -2;
+			return -g_ObservableState.Phase;
 	}
 
+	g_ObservableState.Phase += 10;
+	
 	for (int i = 0; i < cfg->SectorCount; i++)
 	{
+		g_ObservableState.Sector = i;
+		g_ObservableState.SubPhase = 0;
+		
 		cfg->FLASHPatcher_Init();
 		
 		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
-			return -3;
+			return -g_ObservableState.Phase - g_ObservableState.SubPhase;
 		
+		g_ObservableState.SubPhase++;
 		cfg->FLASHPatcher_Complete();
 		
 		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 4)
@@ -73,9 +131,10 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 				expected = 0;
 			
 			if (word != expected)
-				return -4;
+				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
 		}
 		
+		g_ObservableState.SubPhase++;
 		cfg->FLASHPatcher_Init();
 		
 		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 16)
@@ -85,28 +144,60 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 				words[j] = WordFromAddr(addr + j * 4);
 			
 			if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
-				return -5;
+				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+			
+			g_ObservableState.Address = addr;
 		}
 		
 		cfg->FLASHPatcher_Complete();
-		for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 4)
+		g_ObservableState.SubPhase++;
+		for (uint32_t addr = cfg->GlobalStart; addr < sectors[i].Start; addr += 1024)
 		{
 			uint32_t word = *((uint32_t *)addr);
-			uint32_t expected;
-			if (addr < (sectors[i].Start + sectors[i].Size))
-				expected = WordFromAddr(addr);
-			else
-				expected = 0;
+			uint32_t expected = WordFromAddr(addr);
 			
 			if (word != expected)
-				return -6;
+				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+			
+			g_ObservableState.Address = addr;
+		}
+		
+		g_ObservableState.SubPhase++;
+		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 4)
+		{
+			uint32_t word = *((uint32_t *)addr);
+			uint32_t expected = WordFromAddr(addr);
+			
+			if (word != expected)
+				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+			
+			g_ObservableState.Address = addr;
+		}
+		
+		g_ObservableState.SubPhase++;
+		for (uint32_t addr = (sectors[i].Start + sectors[i].Size); addr < cfg->GlobalEnd; addr += 1024)
+		{
+			uint32_t word = *((uint32_t *)addr);
+			uint32_t expected = 0;
+			
+			if (word != expected)
+				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+			
+			g_ObservableState.Address = addr;
 		}
 	}
-
+	
+	g_ObservableState.Phase += 10;
 	return 0;
 }
 
-extern "C" int Reset_Handler()
+volatile int g_FinalResult;
+extern "C" void __attribute__((naked)) Reset_Handler()
 {
-	return RunFLASHTest();
+	asm("ldr r0, =_EndOfStackStartOfConfigTable");
+	asm("mov sp, r0");
+	asm("bkpt 0");
+	g_FinalResult = RunFLASHTest();
+	for (;;)
+		asm("bkpt 255");
 }

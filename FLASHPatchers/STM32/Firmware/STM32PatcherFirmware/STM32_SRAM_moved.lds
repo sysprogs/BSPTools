@@ -7,10 +7,10 @@ ENTRY(Reset_Handler)
 
 MEMORY
 {
-	SRAM (RWX)   : ORIGIN = 0x20001000, LENGTH = 16K
+	SRAM (RWX)   : ORIGIN = 0x20001000, LENGTH = 4K
 }
 
-_estack = 0x2001c000;
+_EndOfStackStartOfConfigTable = ORIGIN(SRAM) + LENGTH(SRAM) + 4096;
 
 SECTIONS
 {
