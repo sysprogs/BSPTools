@@ -24,7 +24,7 @@ namespace STM32FLASHPatcher
 
             class Bank : IFLASHBank
             {
-                public Bank(FLASHBankDefinition definition)
+                public Bank(FLASHBankDefinition definition, bool sectorIndexesAreAddresses)
                 {
                     ID = definition.BankID;
                     Pages = new FLASHPage[definition.PageSizes.Length];
@@ -33,7 +33,7 @@ namespace STM32FLASHPatcher
 
                     for (int i = 0; i < definition.PageSizes.Length; i++)
                     {
-                        Pages[i] = new FLASHPage(this, pageID++, addr, definition.PageSizes[i]);
+                        Pages[i] = new FLASHPage(this, sectorIndexesAreAddresses ? (int)addr : pageID++, addr, definition.PageSizes[i]);
                         addr += definition.PageSizes[i];
                     }
                 }
@@ -49,7 +49,7 @@ namespace STM32FLASHPatcher
                 _Definition = def;
                 var layout = def.SectorLayout ?? throw new Exception("Missing sector layout for " + def.Name);
 
-                Banks = layout.ComputeLayout(FLASHSize, sectorSize, isDualBank).Select(l => new Bank(l)).ToArray();
+                Banks = layout.ComputeLayout(FLASHSize, sectorSize, isDualBank).Select(l => new Bank(l, layout.SectorIndexesAreAddresses)).ToArray();
             }
 
             public PatcherModuleInfo PatcherModule => new PatcherModuleInfo
@@ -115,6 +115,9 @@ namespace STM32FLASHPatcher
                         else
                             FLASHSize = rawSize * 1024U;
 
+                        if (effectiveDef.PatchableFLASHAreaSize is string limit)
+                            FLASHSize = Math.Min(FLASHSize, ParseUInt32(limit, "normal FLASH size limit"));
+
                         var cctx = new ConditionMatchingContext(accessor, FLASHSize);
 
                         foreach (var subDef in dev.Overrides ?? new DeviceOverrides[0])
@@ -135,6 +138,7 @@ namespace STM32FLASHPatcher
         public void ValidateConfiguration(string baseDirectory)
         {
             var config = Configuration ?? throw new Exception("Missing configuration for the STM32 patcher");
+            HashSet<uint> ids = new HashSet<uint>();
             foreach(var family in config.Families)
             {
                 if (family.Overrides != null)
@@ -149,8 +153,13 @@ namespace STM32FLASHPatcher
                     if (x.Name == null || x.Patcher == null)
                         throw new Exception("Incomplete definition");
 
-                    foreach(var id in x.HardwareID.Split('|'))
-                        ParseUInt32(id, "hardware ID");
+                    foreach (var id in x.HardwareID.Split('|'))
+                    {
+                        var parsedID = ParseUInt32(id, "hardware ID");
+                        if (ids.Contains(parsedID))
+                            throw new Exception("Duplicate hardware ID: " + parsedID);
+                        ids.Add(parsedID);
+                    }
                     ParseUInt32(x.FLASHSizeRegister, "FLASH size register");
                     ParseUInt32(x.MaxFLASHSize, "max FLASH size");
                     ParseUInt32(x.BaseSectorSize, "sector size");

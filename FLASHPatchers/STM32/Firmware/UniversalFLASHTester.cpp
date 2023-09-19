@@ -65,11 +65,21 @@ void * g_FLASHPatcherTesterVectors[0x30] __attribute__((section(".isr_vector"), 
 	(void *)&Error_Handler,
 };
 
+static int WrapError(int err)
+{
+	asm("bkpt #255");
+	return err;
+}
 
+#ifdef DEBUG
+#define UNEXPECTED(x) WrapError(x)
+#else
+#define UNEXPECTED(x) (x)
+#endif
 
 extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHTest()
 {
-	*((void **)0xE000ED08) = g_FLASHPatcherTesterVectors;
+	//*((void **)0xE000ED08) = g_FLASHPatcherTesterVectors;
 	
 	FLASHTesterConfiguration *cfg = (FLASHTesterConfiguration *)&_EndOfStackStartOfConfigTable;
 	TestedSector *sectors = cfg->Sectors;
@@ -82,26 +92,27 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	for (int i = 0; i < cfg->SectorCount; i++)
 	{
 		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
-			return -g_ObservableState.Phase;
+			return UNEXPECTED(-g_ObservableState.Phase);
 		g_ObservableState.Sector = i;
 	}
-	
+
 	g_ObservableState.Phase += 10;
 	
 	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 16)
 	{
 		uint32_t words[4] = { 0, 0, 0, 0 };
 		if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
-			return -g_ObservableState.Phase;
+			return UNEXPECTED(-g_ObservableState.Phase);
 		g_ObservableState.Address = addr;
 	}
 	
+	cfg->FLASHPatcher_Complete();
 	g_ObservableState.Phase += 10;
 	
 	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 4)
 	{
 		if (*((uint32_t *)addr) != 0)
-			return -g_ObservableState.Phase;
+			return UNEXPECTED(-g_ObservableState.Phase);
 	}
 
 	g_ObservableState.Phase += 10;
@@ -114,7 +125,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		cfg->FLASHPatcher_Init();
 		
 		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
-			return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+			return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 		
 		g_ObservableState.SubPhase++;
 		cfg->FLASHPatcher_Complete();
@@ -131,7 +142,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 				expected = 0;
 			
 			if (word != expected)
-				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 		}
 		
 		g_ObservableState.SubPhase++;
@@ -144,7 +155,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 				words[j] = WordFromAddr(addr + j * 4);
 			
 			if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
-				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 			
 			g_ObservableState.Address = addr;
 		}
@@ -157,7 +168,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 			uint32_t expected = WordFromAddr(addr);
 			
 			if (word != expected)
-				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 			
 			g_ObservableState.Address = addr;
 		}
@@ -169,7 +180,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 			uint32_t expected = WordFromAddr(addr);
 			
 			if (word != expected)
-				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 			
 			g_ObservableState.Address = addr;
 		}
@@ -181,7 +192,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 			uint32_t expected = 0;
 			
 			if (word != expected)
-				return -g_ObservableState.Phase - g_ObservableState.SubPhase;
+				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 			
 			g_ObservableState.Address = addr;
 		}

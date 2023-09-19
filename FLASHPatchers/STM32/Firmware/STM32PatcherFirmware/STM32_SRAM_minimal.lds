@@ -7,7 +7,7 @@ ENTRY(Reset_Handler)
 
 MEMORY
 {
-	SRAM (RWX)   : ORIGIN = (0x20000000 + 2K), LENGTH = 2K
+	SRAM (RWX)   : ORIGIN = (0x20000000), LENGTH = 2K
 }
 
 _EndOfStackStartOfConfigTable = ORIGIN(SRAM) + LENGTH(SRAM) + 1024;

@@ -99,6 +99,7 @@ namespace STM32FLASHPatcher
             public string MaxFLASHSize;
             public string BaseSectorSize;
             public bool IsDualBank;
+            public string PatchableFLASHAreaSize;
             public DeviceOverrides[] Overrides;
 
             public DeviceDefinition OverrideWith(DeviceDefinition dev)
@@ -116,6 +117,7 @@ namespace STM32FLASHPatcher
                     MaxFLASHSize = dev.MaxFLASHSize ?? MaxFLASHSize,
                     BaseSectorSize = dev.BaseSectorSize ?? BaseSectorSize,
                     IsDualBank = dev.IsDualBank || IsDualBank,
+                    PatchableFLASHAreaSize = dev.PatchableFLASHAreaSize ?? PatchableFLASHAreaSize,
                 };
             }
 
@@ -148,6 +150,8 @@ namespace STM32FLASHPatcher
         [XmlInclude(typeof(Linear))]
         public abstract class SectorLayout
         {
+            public bool SectorIndexesAreAddresses;
+
             public abstract FLASHBankDefinition[] ComputeLayout(uint FLASHSize, uint sectorSize, bool isDualBank);
 
             static IEnumerable<uint> Repeat(uint value, uint count) => Enumerable.Range(0, (int)count).Select(x => value);

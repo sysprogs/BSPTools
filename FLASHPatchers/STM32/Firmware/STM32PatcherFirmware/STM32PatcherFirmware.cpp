@@ -8,6 +8,12 @@
 #include <stm32l5xx_hal.h>
 #elif defined (STM32G0)
 #include <stm32g0xx_hal.h>
+#elif defined (STM32C0)
+#include <stm32c0xx_hal.h>
+#elif defined (STM32F0)
+#include <stm32f0xx_hal.h>
+#elif defined (STM32F1)
+#include <stm32f1xx_hal.h>
 #elif defined (STM32WL)
 #include <stm32wlxx_hal.h>
 #else
@@ -33,16 +39,21 @@ int FLASHPatcher_EraseSectors(int bank, int firstSector, int count)
 	uint32_t error;
 #ifdef FLASH_TYPEERASE_PAGES
 	erase.TypeErase = FLASH_TYPEERASE_PAGES;
+#if defined(STM32F0) || defined (STM32F1)
+	erase.PageAddress = firstSector;
+#else
 	erase.Page = firstSector;
-	erase.NbPages= count;
-#ifndef STM32WL
-	erase.Banks = bank;
 #endif
+	erase.NbPages = count;
 #else
 	erase.TypeErase = FLASH_TYPEERASE_SECTORS;
 	erase.Sector = firstSector;
 	erase.NbSectors = count;
 	erase.VoltageRange = FLASH_VOLTAGE_RANGE_1;
+#endif
+
+#ifdef FLASH_BANK_1
+	erase.Banks = bank;
 #endif
 	return HAL_FLASHEx_Erase(&erase, &error);
 }

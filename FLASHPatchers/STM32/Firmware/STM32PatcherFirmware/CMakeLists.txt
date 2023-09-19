@@ -5,7 +5,7 @@ project(STM32PatcherFirmware LANGUAGES C CXX ASM)
 find_bsp(
 	ID com.sysprogs.arm.stm32
 	VERSION 2023.07
-	MCU STM32F407VG
+	MCU STM32C011D6
 	CONFIGURATION com.sysprogs.bspoptions.primary_memory=sram com.sysprogs.mcuoptions.ignore_startup_file=1
 	FRAMEWORKS com.sysprogs.arm.stm32.hal_systeminit com.sysprogs.arm.stm32.hal com.sysprogs.arm.stm32.ll
 	CXX_STANDARD 17
@@ -62,7 +62,8 @@ function(build_patcher_executable TARGET_DEVICE )
 		BSP_ALIAS BSP-${TARGET_FAMILY}
 		GENERATE_BIN
 		GENERATE_MAP
-		OUTPUT_RELOCATION_RECORDS)
+		OUTPUT_RELOCATION_RECORDS
+		LINKER_SCRIPT STM32_SRAM_minimal.lds)
 endfunction()
 
 #build_patcher_executable(STM32F746NG)
@@ -70,4 +71,7 @@ endfunction()
 #build_patcher_executable(STM32G0B1RE)
 #build_patcher_executable(STM32L552ZE CUSTOM_SYSTEM_FILE)
 #build_patcher_executable(STM32U575ZI CUSTOM_SYSTEM_FILE)
-build_patcher_executable(STM32WL55JC)
+#build_patcher_executable(STM32WL55JC)
+#build_patcher_executable(STM32C011D6)
+#build_patcher_executable(STM32F103RG)
+build_patcher_executable(STM32F030R8)
