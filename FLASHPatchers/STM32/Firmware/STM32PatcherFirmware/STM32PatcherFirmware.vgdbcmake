@@ -26,7 +26,7 @@
     <RelativeSourceDirectory />
     <ConfigurationType>DEBUG</ConfigurationType>
     <BinaryDirectory>build/$(PlatformName)/$(ConfigurationName)</BinaryDirectory>
-    <MainCMakeTarget>STM32F4Patcher</MainCMakeTarget>
+    <MainCMakeTarget>UniversalFLASHTester</MainCMakeTarget>
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
@@ -74,7 +74,7 @@
       <ConfigurationNameCase>Upper</ConfigurationNameCase>
       <DefaultHeaderDiscoveryMode>None</DefaultHeaderDiscoveryMode>
       <EnableFastUpToDateCheck>true</EnableFastUpToDateCheck>
-      <StartupTarget>STM32F4Patcher</StartupTarget>
+      <StartupTarget>UniversalFLASHTester</StartupTarget>
     </ProjectModeSettings>
   </Build>
   <CustomBuild>

@@ -22,17 +22,27 @@ add_bsp_based_executable(
 
 
 function(build_patcher_executable TARGET_DEVICE )
-    cmake_parse_arguments(_EXE "" "SYSTEM_FILE" "" ${ARGN})
+    cmake_parse_arguments(_EXE "CUSTOM_SYSTEM_FILE" "" "" ${ARGN})
 
 	string(SUBSTRING ${TARGET_DEVICE} 0 7 TARGET_FAMILY)
+	set(_BSP_ID com.sysprogs.arm.stm32)
+	set(_BSP_VERSION 2023.07)
 
-	if("${_EXE_SYSTEM_FILE}" STREQUAL "")
+	if(_EXE_CUSTOM_SYSTEM_FILE)
+		set(_EXE_SYSTEM_FILE "system_${TARGET_FAMILY}xx.c")
+	else()
 		set(SYSTEMINIT_FRAMEWORK com.sysprogs.arm.stm32.hal_systeminit)
 	endif()
 
+	if("${TARGET_FAMILY}" STREQUAL "STM32WL")
+		set(_BSP_ID com.sysprogs.arm.stm32wl)
+		set(_BSP_VERSION 2021.12)
+	endif()
+
+
 	find_bsp(
-		ID com.sysprogs.arm.stm32
-		VERSION 2023.07
+		ID ${_BSP_ID}
+		VERSION ${_BSP_VERSION}
 		MCU ${TARGET_DEVICE}
 		CONFIGURATION com.sysprogs.bspoptions.primary_memory=sram com.sysprogs.mcuoptions.ignore_startup_file=1
 		FRAMEWORKS ${SYSTEMINIT_FRAMEWORK} com.sysprogs.arm.stm32.hal com.sysprogs.arm.stm32.ll
@@ -56,5 +66,8 @@ function(build_patcher_executable TARGET_DEVICE )
 endfunction()
 
 #build_patcher_executable(STM32F746NG)
-build_patcher_executable(STM32L476RG)
-#build_patcher_executable(STM32U575ZI SYSTEM_FILE system_stm32u5xx.c)
+#build_patcher_executable(STM32L476RG)
+#build_patcher_executable(STM32G0B1RE)
+#build_patcher_executable(STM32L552ZE CUSTOM_SYSTEM_FILE)
+#build_patcher_executable(STM32U575ZI CUSTOM_SYSTEM_FILE)
+build_patcher_executable(STM32WL55JC)

@@ -131,6 +131,34 @@ namespace STM32FLASHPatcher
 
             throw new Exception($"No STM32 device matches 0x{id:x3}. Please update device definitions.");
         }
+
+        public void ValidateConfiguration(string baseDirectory)
+        {
+            var config = Configuration ?? throw new Exception("Missing configuration for the STM32 patcher");
+            foreach(var family in config.Families)
+            {
+                if (family.Overrides != null)
+                    throw new Exception("MCU families should use " + nameof(family.NestedDefinitions));
+
+                foreach(var dev in family.NestedDefinitions)
+                {
+                    var x = family.OverrideWith(dev);
+                    foreach (var sub in dev.Overrides ?? new DeviceOverrides[0])
+                        x = x.OverrideWith(sub);
+
+                    if (x.Name == null || x.Patcher == null)
+                        throw new Exception("Incomplete definition");
+
+                    foreach(var id in x.HardwareID.Split('|'))
+                        ParseUInt32(id, "hardware ID");
+                    ParseUInt32(x.FLASHSizeRegister, "FLASH size register");
+                    ParseUInt32(x.MaxFLASHSize, "max FLASH size");
+                    ParseUInt32(x.BaseSectorSize, "sector size");
+                    if (!File.Exists(Path.Combine(baseDirectory, x.Patcher)))
+                        throw new Exception("Missing patcher executable: " + x.Patcher);
+                }
+            }
+        }
     }
 
 }

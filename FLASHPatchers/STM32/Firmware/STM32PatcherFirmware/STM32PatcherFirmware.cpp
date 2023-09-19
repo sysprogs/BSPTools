@@ -4,6 +4,12 @@
 #include <stm32u5xx_hal.h>
 #elif defined (STM32L4)
 #include <stm32l4xx_hal.h>
+#elif defined (STM32L5)
+#include <stm32l5xx_hal.h>
+#elif defined (STM32G0)
+#include <stm32g0xx_hal.h>
+#elif defined (STM32WL)
+#include <stm32wlxx_hal.h>
 #else
 #error Unknown device family
 #endif
@@ -29,7 +35,9 @@ int FLASHPatcher_EraseSectors(int bank, int firstSector, int count)
 	erase.TypeErase = FLASH_TYPEERASE_PAGES;
 	erase.Page = firstSector;
 	erase.NbPages= count;
+#ifndef STM32WL
 	erase.Banks = bank;
+#endif
 #else
 	erase.TypeErase = FLASH_TYPEERASE_SECTORS;
 	erase.Sector = firstSector;

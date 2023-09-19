@@ -13,7 +13,9 @@ namespace STM32FLASHPatcher
         public const uint FLASHStart = 0x08000000;
 
         [XmlInclude(typeof(Or))]
+        [XmlInclude(typeof(And))]
         [XmlInclude(typeof(MinimumFLASHSize))]
+        [XmlInclude(typeof(FLASHSizeBelow))]
         [XmlInclude(typeof(Masked))]
         public abstract class Condition
         {
@@ -26,11 +28,25 @@ namespace STM32FLASHPatcher
                 public override bool IsTrue(ConditionMatchingContext ctx) => Conditions?.Any(c => c.IsTrue(ctx)) == true;
             }
 
+            public class And : Condition
+            {
+                public Condition[] Conditions;
+
+                public override bool IsTrue(ConditionMatchingContext ctx) => Conditions?.All(c => c.IsTrue(ctx)) == true;
+            }
+
             public class MinimumFLASHSize : Condition
             {
                 public string Size;
 
                 public override bool IsTrue(ConditionMatchingContext ctx) => ctx.FLASHSize >= ParseUInt32(Size, "FLASH size threshold");
+            }
+
+            public class FLASHSizeBelow : Condition
+            {
+                public string Size;
+
+                public override bool IsTrue(ConditionMatchingContext ctx) => ctx.FLASHSize < ParseUInt32(Size, "FLASH size threshold");
             }
 
 
