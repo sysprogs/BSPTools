@@ -21,4 +21,3 @@ mov sp, r0
 ldr r0, =g_pBuffer
 blx FLASHPatcher_RunRequestLoop
 bkpt 0
-blx FLASHPatcher_ProgramBuffer	//Only needed to keep a reference to the function

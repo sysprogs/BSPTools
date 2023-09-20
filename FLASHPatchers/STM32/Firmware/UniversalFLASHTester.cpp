@@ -12,7 +12,7 @@ struct FLASHTesterConfiguration
 {
 	int(*FLASHPatcher_Init)();
 	int(*FLASHPatcher_EraseSectors)(int bank, int firstSector, int count);
-	int(*FLASHPatcher_ProgramQWord)(void *address, uint32_t *words);
+	int(*FLASHPatcher_ProgramWords)(int bank, void *address, const uint32_t *words, int wordCount);
 	int(*FLASHPatcher_Complete)();
 	int SectorCount;
 	uint32_t GlobalStart, GlobalEnd;
@@ -78,6 +78,7 @@ static int WrapError(int err)
 #define UNEXPECTED(x) (x)
 #endif
 
+static const int ProgramBurstSize = 8;
 
 extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHTest()
 {
@@ -86,7 +87,6 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	//*((void **)0xE000ED08) = g_FLASHPatcherTesterVectors;
 	
 	FLASHTesterConfiguration *cfg = (FLASHTesterConfiguration *)&_EndOfStackStartOfConfigTable;
-	TestedSector *sectors = cfg->Sectors;
 	cfg->FLASHPatcher_Init();
 	g_ObservableState.Phase = 10;
 	g_ObservableState.SubPhase = 0;
@@ -95,20 +95,31 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	
 	for (int i = 0; i < cfg->SectorCount; i++)
 	{
-		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
+		if (cfg->FLASHPatcher_EraseSectors(cfg->Sectors[i].Bank, cfg->Sectors[i].ID, 1))
 			return UNEXPECTED(-g_ObservableState.Phase);
 		g_ObservableState.Sector = i;
 	}
 
 	g_ObservableState.Phase += 10;
+	static uint32_t words[ProgramBurstSize];
+	for (int i = 0; i < ProgramBurstSize; i++)
+		words[i] = ProgrammedFillerValue;
 	
-	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 16)
+	for (int i = 0; i < cfg->SectorCount; i++)
 	{
-		uint32_t words[4] = { ProgrammedFillerValue, ProgrammedFillerValue, ProgrammedFillerValue, ProgrammedFillerValue };
-		if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
-			return UNEXPECTED(-g_ObservableState.Phase);
-		g_ObservableState.Address = addr;
+		TestedSector *sector = &cfg->Sectors[i];
+		
+		for (uint32_t addr = sector->Start; addr < (sector->Start + sector->Size); addr += sizeof(words))
+		{
+			if (cfg->FLASHPatcher_ProgramWords(sector->Bank, (void *)addr, words, sizeof(words) / sizeof(words[0])))
+				return UNEXPECTED(-g_ObservableState.Phase);
+			
+			g_ObservableState.Address = addr;
+		}
+		
+		g_ObservableState.Sector = i;
 	}
+
 	
 	cfg->FLASHPatcher_Complete();
 	g_ObservableState.Phase += 10;
@@ -123,24 +134,26 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	
 	for (int i = 0; i < cfg->SectorCount; i++)
 	{
+		TestedSector *sector = &cfg->Sectors[i];
+		
 		g_ObservableState.Sector = i;
 		g_ObservableState.SubPhase = 0;
 		
 		cfg->FLASHPatcher_Init();
 		
-		if (cfg->FLASHPatcher_EraseSectors(sectors[i].Bank, sectors[i].ID, 1))
+		if (cfg->FLASHPatcher_EraseSectors(sector->Bank, sector->ID, 1))
 			return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 		
 		g_ObservableState.SubPhase++;
 		cfg->FLASHPatcher_Complete();
 		
-		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 4)
+		for (uint32_t addr = sector->Start; addr < (sector->Start + sector->Size); addr += 4)
 		{
 			uint32_t word = *((uint32_t *)addr);
 			uint32_t expected;
-			if (addr < sectors[i].Start)
+			if (addr < sector->Start)
 				expected = WordFromAddr(addr);
-			else if (addr < (sectors[i].Start + sectors[i].Size))
+			else if (addr < (sector->Start + sector->Size))
 				expected = cfg->ErasedValue;
 			else
 				expected = ProgrammedFillerValue;
@@ -152,13 +165,12 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		g_ObservableState.SubPhase++;
 		cfg->FLASHPatcher_Init();
 		
-		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 16)
+		for (uint32_t addr = sector->Start; addr < (sector->Start + sector->Size); addr += sizeof(words))
 		{
-			uint32_t words[4];
-			for (int j = 0; j < 4; j++)
+			for (int j = 0; j < ProgramBurstSize; j++)
 				words[j] = WordFromAddr(addr + j * 4);
 			
-			if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
+			if (cfg->FLASHPatcher_ProgramWords(sector->Bank, (void *)addr, words, ProgramBurstSize))
 				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 			
 			g_ObservableState.Address = addr;
@@ -166,7 +178,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		
 		cfg->FLASHPatcher_Complete();
 		g_ObservableState.SubPhase++;
-		for (uint32_t addr = cfg->GlobalStart; addr < sectors[i].Start; addr += 1024)
+		for (uint32_t addr = cfg->GlobalStart; addr < sector->Start; addr += 1024)
 		{
 			uint32_t word = *((uint32_t *)addr);
 			uint32_t expected = WordFromAddr(addr);
@@ -178,7 +190,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		}
 		
 		g_ObservableState.SubPhase++;
-		for (uint32_t addr = sectors[i].Start; addr < (sectors[i].Start + sectors[i].Size); addr += 4)
+		for (uint32_t addr = sector->Start; addr < (sector->Start + sector->Size); addr += 4)
 		{
 			uint32_t word = *((uint32_t *)addr);
 			uint32_t expected = WordFromAddr(addr);
@@ -190,7 +202,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		}
 		
 		g_ObservableState.SubPhase++;
-		for (uint32_t addr = (sectors[i].Start + sectors[i].Size); addr < cfg->GlobalEnd; addr += 1024)
+		for (uint32_t addr = (sector->Start + sector->Size); addr < cfg->GlobalEnd; addr += 1024)
 		{
 			uint32_t word = *((uint32_t *)addr);
 			

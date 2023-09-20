@@ -58,7 +58,12 @@ function(build_patcher_executable TARGET_DEVICE )
 
 	add_bsp_based_executable(
 		NAME ${TARGET_FAMILY}Patcher
-		SOURCES STM32PatcherFirmware.cpp ../startup.S ../FLASHPatcherEntry.cpp ${_EXE_SYSTEM_FILE}
+		SOURCES
+			STM32PatcherFirmware.cpp
+			../startup.S
+			../FLASHPatcherEntry.cpp
+			${_EXE_SYSTEM_FILE}
+			SpecialFLASHRoutines.cpp
 		BSP_ALIAS BSP-${TARGET_FAMILY}
 		GENERATE_BIN
 		GENERATE_MAP
@@ -66,14 +71,21 @@ function(build_patcher_executable TARGET_DEVICE )
 		LINKER_SCRIPT STM32_SRAM_minimal.lds)
 endfunction()
 
-#build_patcher_executable(STM32F746NG)
-#build_patcher_executable(STM32L476RG)
-#build_patcher_executable(STM32G0B1RE)
-#build_patcher_executable(STM32L552ZE CUSTOM_SYSTEM_FILE)
-#build_patcher_executable(STM32U575ZI CUSTOM_SYSTEM_FILE)
-#build_patcher_executable(STM32WL55JC)
-#build_patcher_executable(STM32C011D6)
-#build_patcher_executable(STM32F103RG)
-#build_patcher_executable(STM32F030R8)
-#build_patcher_executable(STM32L031K6)
+if (1)
+build_patcher_executable(STM32F746NG)
+build_patcher_executable(STM32L476RG)
+build_patcher_executable(STM32G0B1RE)
+build_patcher_executable(STM32L552ZE CUSTOM_SYSTEM_FILE)
+build_patcher_executable(STM32U575ZI CUSTOM_SYSTEM_FILE)
+build_patcher_executable(STM32WL55JC)
+build_patcher_executable(STM32C011D6)
+build_patcher_executable(STM32F103RG)
+build_patcher_executable(STM32F030R8)
+build_patcher_executable(STM32L031K6)
 build_patcher_executable(STM32L100RC)
+build_patcher_executable(STM32H743ZI)
+#build_patcher_executable(STM32H563ZI)
+endif()
+
+set_source_files_properties(${BSP_ROOT}/STM32H7xxxx/CMSIS_HAL/Device/ST/STM32H7xx/Source/Templates/system_stm32h7xx_dualcore_bootcm7_cm4gated.c ${BSP_ROOT}/STM32H7xxxx/CMSIS_HAL/Device/ST/STM32H7xx/Source/Templates/system_stm32h7xx_dualcore_bootcm4_cm7gated.c ${BSP_ROOT}/STM32H7xxxx/CMSIS_HAL/Device/ST/STM32H7xx/Source/Templates/system_stm32h7xx_dualcore_boot_cm4_cm7.c ${BSP_ROOT}/STM32H7xxxx/CMSIS_HAL/Device/ST/STM32H7xx/Source/Templates/system_stm32h7xx.c PROPERTIES HEADER_FILE_ONLY TRUE)
+

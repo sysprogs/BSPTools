@@ -48,39 +48,44 @@ public:
 	int RunRequestLoop()
 	{
 		uint32_t offset = 0;
+		static uint32_t words[8];
 		FLASHPatcher_Init();
 		for (;;)
 		{
 			uint8_t byte = ReadByteBlocking(offset, BufferSize);
-			uint32_t arg1, arg2, arg3;
 			int st;
 			switch (byte)
 			{
 			case fpcEraseSector:
-				arg1 = ReadWordBlocking(offset, BufferSize);
-				arg2 = ReadWordBlocking(offset, BufferSize);
-				arg3 = ReadWordBlocking(offset, BufferSize);
-			
-				st = FLASHPatcher_EraseSectors(arg1, arg2, arg3);
-				if (st != 0)
-					return Status = st;
-				break;
-			case fpcProgramWords:
-				arg1 = ReadWordBlocking(offset, BufferSize);
-				arg2 = ReadWordBlocking(offset, BufferSize);
-				if (arg2 & 3)
-					return 1003;
-				for (int i = 0; i < arg2; i+=4)
 				{
-					uint32_t words[4];
-					for (int j = 0; j < 4; j++)
-						words[j] = ReadWordBlocking(offset, BufferSize);
-					
-					st = FLASHPatcher_ProgramQWord((void *)(arg1 + i * 4), words);
-					if (st)
+					uint32_t bank = ReadWordBlocking(offset, BufferSize);
+					uint32_t firstSector = ReadWordBlocking(offset, BufferSize);
+					uint32_t count = ReadWordBlocking(offset, BufferSize);
+			
+					st = FLASHPatcher_EraseSectors(bank, firstSector, count);
+					if (st != 0)
 						return Status = st;
+					break;
 				}
-				break;
+			case fpcProgramWords:
+				{
+					uint32_t bank = ReadWordBlocking(offset, BufferSize);
+					uint32_t address = ReadWordBlocking(offset, BufferSize);
+					uint32_t burstSize = ReadWordBlocking(offset, BufferSize);
+					uint32_t totalSize = ReadWordBlocking(offset, BufferSize);
+					if (burstSize > (sizeof(words) / sizeof(words[0])))
+						return Status = 1003;
+					for (int i = 0; i < totalSize; i += burstSize)
+					{
+						for (int j = 0; j < burstSize; j++)
+							words[j] = ReadWordBlocking(offset, BufferSize);
+					
+						st = FLASHPatcher_ProgramWords(bank, (void *)(address + i * 4), words, burstSize);
+						if (st)
+							return Status = st;
+					}
+					break;
+				}
 			case fpcEnd:
 				st = FLASHPatcher_Complete();
 				if (st)
@@ -96,18 +101,6 @@ public:
 		}
 	}
 };
-
-extern "C" int __attribute__((noinline, noclone, externally_visible)) FLASHPatcher_ProgramBuffer(void *addr, int wordCount, const uint32_t *buffer)
-{
-	for (int i = 0; i < wordCount; i += 4)
-	{
-		int st = FLASHPatcher_ProgramQWord((uint32_t *)addr + i, buffer + i);
-		if (st)
-			return st;
-	}
-	
-	return 0;
-}
 
 extern "C" uint32_t HAL_GetTick(void)
 {

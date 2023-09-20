@@ -18,6 +18,10 @@
 #include <stm32l0xx_hal.h>
 #elif defined (STM32L1)
 #include <stm32l1xx_hal.h>
+#elif defined (STM32H5)
+#include <stm32h5xx_hal.h>
+#elif defined (STM32H7)
+#include <stm32h7xx_hal.h>
 #elif defined (STM32WL)
 #include <stm32wlxx_hal.h>
 #else
@@ -33,9 +37,15 @@ int FLASHPatcher_Init()
 	if (st != HAL_OK)
 		return st;
 	
+#if defined (STM32H7)
+	FLASH_WaitForLastOperation(HAL_MAX_DELAY, FLASH_BANK_1);
+	FLASH_WaitForLastOperation(HAL_MAX_DELAY, FLASH_BANK_2);
+#else
 	FLASH_WaitForLastOperation(HAL_MAX_DELAY);
+#endif
 	return HAL_OK;
 }
+
 
 int FLASHPatcher_EraseSectors(int bank, int firstSector, int count)
 {
@@ -62,10 +72,10 @@ int FLASHPatcher_EraseSectors(int bank, int firstSector, int count)
 	return HAL_FLASHEx_Erase(&erase, &error);
 }
 
-int FLASHPatcher_ProgramQWord(void *address, const uint32_t *words)
+int FLASHPatcher_ProgramWords(int bank, void *address, const uint32_t *words, int wordCount)
 {
-#ifdef FLASH_TYPEPROGRAM_WORD
-	for (int i = 0; i < 4; i++)
+#if defined (FLASH_TYPEPROGRAM_WORD)
+	for (int i = 0; i < wordCount; i++)
 	{
 		int st = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)address + i * 4, words[i]);
 		if (st)
@@ -73,12 +83,42 @@ int FLASHPatcher_ProgramQWord(void *address, const uint32_t *words)
 	}
 	return 0;
 #elif defined (FLASH_TYPEPROGRAM_DOUBLEWORD)
-	int st = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)address, ((uint64_t)words[1] << 32) | words[0]);
-	if (st)
-		return st;
-	return HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)address + 8, ((uint64_t)words[3] << 32) | words[2]);
+	const int BurstSize = 2;
+	if (wordCount % BurstSize)
+		return -10;
+	
+	for (int i = 0; i < wordCount; i += BurstSize)
+	{
+		int st = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)address + i * 4, ((uint64_t)words[i + 1] << 32) | words[i]);
+		if (st)
+			return st;
+	}
+	return 0;
+#elif defined (STM32H7)
+	HAL_StatusTypeDef HAL_FLASH_ProgramEx(uint32_t bank, uint32_t TypeProgram, uint32_t FlashAddress, uint32_t DataAddress);
+	const int BurstSize = 8;
+	if (wordCount % BurstSize)
+		return -10;
+	
+	for (int i = 0; i < wordCount; i += BurstSize)
+	{
+		int st = HAL_FLASH_ProgramEx(bank, FLASH_TYPEPROGRAM_FLASHWORD, (uint32_t)address + i * 4, (uint32_t)words + i * 4);
+		if (st)
+			return st;
+	}
+	return 0;
 #else
-	return HAL_FLASH_Program(FLASH_TYPEPROGRAM_QUADWORD, (uint32_t)address, (uint32_t)words);
+	const int BurstSize = 4;
+	if (wordCount % BurstSize)
+		return -10;
+	
+	for (int i = 0; i < wordCount; i += BurstSize)
+	{
+		int st = HAL_FLASH_Program(FLASH_TYPEPROGRAM_QUADWORD, (uint32_t)address + i * 4, (uint32_t)words + i * 4);
+		if (st)
+			return st;
+	}
+	return 0;
 #endif
 }
 

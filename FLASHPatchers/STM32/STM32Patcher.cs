@@ -60,7 +60,7 @@ namespace STM32FLASHPatcher
                 AsyncEntryPointSymbol = "FLASHPatcher_RunRequestLoop",
                 SyncInitFunction = "FLASHPatcher_Init",
                 SyncEraseFunction = "FLASHPatcher_EraseSectors",
-                SyncProgramFunction = "FLASHPatcher_ProgramBuffer",
+                SyncProgramFunction = "FLASHPatcher_ProgramWords",
                 SyncCompletionFunction = "FLASHPatcher_Complete",
                 BufferPointerSymbol = "g_pBuffer",
                 RegistersToPreserve = new[] { new PreservedRegister("primask", "1"), new PreservedRegister("faultmask", "1") },
