@@ -50,6 +50,7 @@ namespace STM32FLASHPatcher
                 var layout = def.SectorLayout ?? throw new Exception("Missing sector layout for " + def.Name);
 
                 Banks = layout.ComputeLayout(FLASHSize, sectorSize, isDualBank).Select(l => new Bank(l, layout.SectorIndexesAreAddresses)).ToArray();
+                ValueAfterErasing = ParseUInt32(def.ValueAfterErasing ?? "0xFFFFFFFF", "erased value");
             }
 
             public PatcherModuleInfo PatcherModule => new PatcherModuleInfo
@@ -69,6 +70,7 @@ namespace STM32FLASHPatcher
             public FLASHAlias[] Aliases { get; } = new[] { new FLASHAlias(0x0, FLASHStart, FLASHStart) };
             public FLASHAlias PrimaryRegion { get; } = new FLASHAlias(FLASHStart, FLASHStart, 0x01000000);
             public byte[] BreakpointInstruction { get; } = new byte[] { 0xFF, 0xBE };
+            public uint ValueAfterErasing { get; }
             public IFLASHBank[] Banks { get; }
 
             public override string ToString() => _Definition.Name;

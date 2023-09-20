@@ -101,6 +101,7 @@ namespace STM32FLASHPatcher
             public bool IsDualBank;
             public string PatchableFLASHAreaSize;
             public DeviceOverrides[] Overrides;
+            public string ValueAfterErasing;
 
             public DeviceDefinition OverrideWith(DeviceDefinition dev)
             {
@@ -118,6 +119,7 @@ namespace STM32FLASHPatcher
                     BaseSectorSize = dev.BaseSectorSize ?? BaseSectorSize,
                     IsDualBank = dev.IsDualBank || IsDualBank,
                     PatchableFLASHAreaSize = dev.PatchableFLASHAreaSize ?? PatchableFLASHAreaSize,
+                    ValueAfterErasing = dev.ValueAfterErasing ?? ValueAfterErasing,
                 };
             }
 

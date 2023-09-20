@@ -16,6 +16,7 @@ struct FLASHTesterConfiguration
 	int(*FLASHPatcher_Complete)();
 	int SectorCount;
 	uint32_t GlobalStart, GlobalEnd;
+	uint32_t ErasedValue;
 	TestedSector Sectors[4096];
 };
 
@@ -77,8 +78,11 @@ static int WrapError(int err)
 #define UNEXPECTED(x) (x)
 #endif
 
+
 extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHTest()
 {
+	static const uint32_t ProgrammedFillerValue = 0x55555555;
+	
 	//*((void **)0xE000ED08) = g_FLASHPatcherTesterVectors;
 	
 	FLASHTesterConfiguration *cfg = (FLASHTesterConfiguration *)&_EndOfStackStartOfConfigTable;
@@ -100,7 +104,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	
 	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 16)
 	{
-		uint32_t words[4] = { 0, 0, 0, 0 };
+		uint32_t words[4] = { ProgrammedFillerValue, ProgrammedFillerValue, ProgrammedFillerValue, ProgrammedFillerValue };
 		if (cfg->FLASHPatcher_ProgramQWord((void *)addr, words))
 			return UNEXPECTED(-g_ObservableState.Phase);
 		g_ObservableState.Address = addr;
@@ -111,7 +115,7 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 	
 	for (uint32_t addr = cfg->GlobalStart; addr < cfg->GlobalEnd; addr += 4)
 	{
-		if (*((uint32_t *)addr) != 0)
+		if (*((uint32_t *)addr) != ProgrammedFillerValue)
 			return UNEXPECTED(-g_ObservableState.Phase);
 	}
 
@@ -137,9 +141,9 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 			if (addr < sectors[i].Start)
 				expected = WordFromAddr(addr);
 			else if (addr < (sectors[i].Start + sectors[i].Size))
-				expected = -1;
+				expected = cfg->ErasedValue;
 			else
-				expected = 0;
+				expected = ProgrammedFillerValue;
 			
 			if (word != expected)
 				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
@@ -189,9 +193,8 @@ extern "C" int  __attribute__((noinline, noclone, externally_visible)) RunFLASHT
 		for (uint32_t addr = (sectors[i].Start + sectors[i].Size); addr < cfg->GlobalEnd; addr += 1024)
 		{
 			uint32_t word = *((uint32_t *)addr);
-			uint32_t expected = 0;
 			
-			if (word != expected)
+			if (word != ProgrammedFillerValue)
 				return UNEXPECTED(-g_ObservableState.Phase - g_ObservableState.SubPhase);
 			
 			g_ObservableState.Address = addr;
