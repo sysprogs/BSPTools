@@ -89,11 +89,15 @@ namespace STM32FLASHPatcher
 
             foreach (var idReg in idRegs)
             {
-                id = accessor.ReadHardwareRegister(idReg);
-                id = ExtractMaskedValue(id, mask);
+                try
+                {
+                    id = accessor.ReadHardwareRegister(idReg);
+                    id = ExtractMaskedValue(id, mask);
 
-                if (id != 0 && id != mask)
-                    break;
+                    if (id != 0 && id != mask)
+                        break;
+                }
+                catch { }
             }
 
             foreach(var fam in config.Families ?? new DeviceFamily[0])

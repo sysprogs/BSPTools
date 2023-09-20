@@ -188,6 +188,7 @@ namespace STM32FLASHPatcher
             public class Linear : SectorLayout
             {
                 public bool HasBankIDs;
+                public string SecondBankOffset;
 
                 public override FLASHBankDefinition[] ComputeLayout(uint FLASHSize, uint sectorSize, bool isDualBank)
                 {
@@ -200,7 +201,7 @@ namespace STM32FLASHPatcher
                         return new[] {
                             new FLASHBankDefinition { FirstPageAddress = FLASHStart, PageSizes = sizes, BankID = 1, },
                             new FLASHBankDefinition {
-                                FirstPageAddress = FLASHStart + FLASHSize / 2,
+                                FirstPageAddress = FLASHStart + (SecondBankOffset != null ? ParseUInt32(SecondBankOffset, "second bank offset") : (FLASHSize / 2)),
                                 PageSizes = sizes,
                                 FirstPageID = HasBankIDs ? 0 : GetSecondBankMask(sizes.Length),
                                 BankID = 2,

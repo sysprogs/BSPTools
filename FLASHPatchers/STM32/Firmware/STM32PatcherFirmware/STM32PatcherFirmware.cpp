@@ -63,7 +63,11 @@ int FLASHPatcher_EraseSectors(int bank, int firstSector, int count)
 	erase.TypeErase = FLASH_TYPEERASE_SECTORS;
 	erase.Sector = firstSector;
 	erase.NbSectors = count;
+#ifdef FLASH_VOLTAGE_RANGE_1
 	erase.VoltageRange = FLASH_VOLTAGE_RANGE_1;
+#elif !defined(STM32H5)
+	erase.VoltageRange = 0;
+#endif
 #endif
 
 #ifdef FLASH_BANK_1
