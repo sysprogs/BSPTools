@@ -21,3 +21,8 @@ mov sp, r0
 ldr r0, =g_pBuffer
 blx FLASHPatcher_RunRequestLoop
 bkpt 0
+//The calls below are needed to prevent the link-time optimizer from hardcoding values implied from the async handler
+b FLASHPatcher_Init
+b FLASHPatcher_EraseSectors
+b FLASHPatcher_ProgramWords
+b FLASHPatcher_Complete

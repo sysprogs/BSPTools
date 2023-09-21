@@ -132,6 +132,10 @@ extern "C" void __attribute__((weak)) FLASH_FlushCaches()
 
 int FLASHPatcher_Complete()
 {
+#ifdef CORE_CM7
+	SCB_InvalidateICache();
+	SCB_InvalidateDCache(); 
+#endif
 	FLASH_FlushCaches();
 	return 0;
 }
