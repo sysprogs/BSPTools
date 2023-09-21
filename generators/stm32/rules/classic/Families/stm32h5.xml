@@ -10,7 +10,7 @@
 	<CompilationFlags>
 	<PreprocessorMacros>
 		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
-		<string>CORE_CM7</string>
+		<string>CORE_CM33</string>
 	</PreprocessorMacros>
 			<IncludeDirectories>
 			<string>.</string>
