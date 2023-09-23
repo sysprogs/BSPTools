@@ -50,33 +50,41 @@ namespace STM32ProjectImporter
             ImportedExternalProject.ConstructedVirtualDirectory rootDir = new ImportedExternalProject.ConstructedVirtualDirectory();
 
             Dictionary<string, string> physicalDirToVirtualPaths = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            var processedFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
             var sample = result[0];
             if (parser.OptionDictionary.TryGetValue(sample, out var opts) && opts.SourceFiles != null)
             {
                 foreach(var sf in opts.SourceFiles)
                 {
+                    bool isHeader = sf.FullPath.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase) || sf.FullPath.EndsWith(".hpp", StringComparison.InvariantCultureIgnoreCase);
                     string virtualDir = Path.GetDirectoryName(sf.VirtualPath);
                     physicalDirToVirtualPaths[Path.GetDirectoryName(sf.FullPath)] = virtualDir;
-                    rootDir.ProvideSudirectory(virtualDir).AddFile(sf.FullPath, false);
+                    rootDir.ProvideSudirectory(virtualDir).AddFile(sf.FullPath, isHeader);
+                    processedFiles.Add(sf.FullPath);
                 }
             }
             else
             {
                 foreach (var src in sample.SourceFiles ?? new string[0])
                 {
-                    rootDir.AddFile(src, false);
+                    bool isHeader = src.EndsWith(".h", StringComparison.InvariantCultureIgnoreCase) || src.EndsWith(".hpp", StringComparison.InvariantCultureIgnoreCase);
+                    rootDir.AddFile(src, isHeader);
+                    processedFiles.Add(src);
                 }
             }
 
-            foreach (var src in sample.HeaderFiles ?? new string[0])
+            foreach (var hdr in sample.HeaderFiles ?? new string[0])
             {
-                if (physicalDirToVirtualPaths.TryGetValue(Path.GetDirectoryName(src), out string virtualDir))
-                    rootDir.ProvideSudirectory(virtualDir).AddFile(src, true);
-                else if (physicalDirToVirtualPaths.TryGetValue(Path.GetDirectoryName(src).Replace(@"\Inc", @"\Src"), out virtualDir))
-                    rootDir.ProvideSudirectory(virtualDir).AddFile(src, true);
+                if (processedFiles.Contains(hdr))
+                    continue;
+
+                if (physicalDirToVirtualPaths.TryGetValue(Path.GetDirectoryName(hdr), out string virtualDir))
+                    rootDir.ProvideSudirectory(virtualDir).AddFile(hdr, true);
+                else if (physicalDirToVirtualPaths.TryGetValue(Path.GetDirectoryName(hdr).Replace(@"\Inc", @"\Src"), out virtualDir))
+                    rootDir.ProvideSudirectory(virtualDir).AddFile(hdr, true);
                 else
-                    rootDir.AddFile(src, true);
+                    rootDir.AddFile(hdr, true);
             }
 
             return new ImportedExternalProject
