@@ -1,4 +1,6 @@
-#if defined (STM32F7)
+#if defined (STM32F4)
+#include <stm32f4xx_hal.h>
+#elif defined (STM32F7)
 #include <stm32f7xx_hal.h>
 #elif defined (STM32U5)
 #include <stm32u5xx_hal.h>

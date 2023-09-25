@@ -76,6 +76,7 @@ function(build_patcher_executable TARGET_DEVICE )
 endfunction()
 
 build_patcher_executable(STM32F746NG)
+build_patcher_executable(STM32F407VG)
 build_patcher_executable(STM32L476RG)
 build_patcher_executable(STM32G0B1RE)
 build_patcher_executable(STM32L552ZE CUSTOM_SYSTEM_FILE)
