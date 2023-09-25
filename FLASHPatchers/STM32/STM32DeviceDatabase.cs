@@ -99,6 +99,7 @@ namespace STM32FLASHPatcher
             public string MaxFLASHSize;
             public string BaseSectorSize;
             public bool IsDualBank;
+            public string MPUControlRegister;
             public string PatchableFLASHAreaSize;
             public DeviceOverrides[] Overrides;
             public string ValueAfterErasing;
@@ -120,6 +121,7 @@ namespace STM32FLASHPatcher
                     IsDualBank = dev.IsDualBank || IsDualBank,
                     PatchableFLASHAreaSize = dev.PatchableFLASHAreaSize ?? PatchableFLASHAreaSize,
                     ValueAfterErasing = dev.ValueAfterErasing ?? ValueAfterErasing,
+                    MPUControlRegister = dev.MPUControlRegister ?? MPUControlRegister,
                 };
             }
 

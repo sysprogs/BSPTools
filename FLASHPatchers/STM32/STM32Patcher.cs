@@ -51,6 +51,10 @@ namespace STM32FLASHPatcher
 
                 Banks = layout.ComputeLayout(FLASHSize, sectorSize, isDualBank).Select(l => new Bank(l, layout.SectorIndexesAreAddresses)).ToArray();
                 ValueAfterErasing = ParseUInt32(def.ValueAfterErasing ?? "0xFFFFFFFF", "erased value");
+
+                RegistersToPreserve = new[] { new PreservedRegister("primask", "1"), new PreservedRegister("faultmask", "1") };
+                if (def.MPUControlRegister != null)
+                    RegistersToPreserve = RegistersToPreserve.Concat(new[] { new PreservedRegister("MPU_CTRL", ParseUInt32(def.MPUControlRegister, "MPU control register address"), "0")}).ToArray();
             }
 
             public PatcherModuleInfo PatcherModule => new PatcherModuleInfo
@@ -64,7 +68,6 @@ namespace STM32FLASHPatcher
                 SyncFillFunction = "FLASHPatcher_ProgramRepeatedWords",
                 SyncCompletionFunction = "FLASHPatcher_Complete",
                 BufferPointerSymbol = "g_pBuffer",
-                RegistersToPreserve = new[] { new PreservedRegister("primask", "1"), new PreservedRegister("faultmask", "1") },
                 StackSize = 256,
             };
 
@@ -73,6 +76,8 @@ namespace STM32FLASHPatcher
             public byte[] BreakpointInstruction { get; } = new byte[] { 0xFF, 0xBE };
             public uint ValueAfterErasing { get; }
             public IFLASHBank[] Banks { get; }
+
+            public PreservedRegister[] RegistersToPreserve { get; }
 
             public override string ToString() => _Definition.Name;
         }
@@ -172,6 +177,9 @@ namespace STM32FLASHPatcher
                     ParseUInt32(x.BaseSectorSize, "sector size");
                     if (!File.Exists(Path.Combine(baseDirectory, x.Patcher)))
                         throw new Exception("Missing patcher executable: " + x.Patcher);
+
+                    if (x.MPUControlRegister != null)
+                        ParseUInt32(x.MPUControlRegister, "MPU control register");
                 }
             }
         }
