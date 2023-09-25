@@ -3,10 +3,12 @@
 enum FLASHPatcherCommand
 {
 	fpcEraseSector = 0xA0, //<sector>, <count>
-	fpcProgramWords, //<address>, <count>, <data>
+	fpcProgramWords, //<bank>, <address>, <burst size>, <normal size>, <tail repeat size>, <data>
 	fpcFlushCache,
 	fpcEnd,
 };
+
+static uint32_t FLASHPatcher_BurstBuffer[FLASHPatcher_ProgramBurstSizeInWords];
 
 class CircularBuffer
 {
@@ -48,13 +50,12 @@ public:
 	int RunRequestLoop()
 	{
 		uint32_t offset = 0;
-		static uint32_t words[8];
 		FLASHPatcher_Init();
 		for (;;)
 		{
-			uint8_t byte = ReadByteBlocking(offset, BufferSize);
+			uint8_t cmd = ReadByteBlocking(offset, BufferSize);
 			int st;
-			switch (byte)
+			switch (cmd)
 			{
 			case fpcEraseSector:
 				{
@@ -73,16 +74,28 @@ public:
 					uint32_t address = ReadWordBlocking(offset, BufferSize);
 					uint32_t burstSize = ReadWordBlocking(offset, BufferSize);
 					uint32_t totalSize = ReadWordBlocking(offset, BufferSize);
-					if (burstSize > (sizeof(words) / sizeof(words[0])))
+					uint32_t tailSize = ReadWordBlocking(offset, BufferSize);
+					if (burstSize > (sizeof(FLASHPatcher_BurstBuffer) / sizeof(FLASHPatcher_BurstBuffer[0])))
 						return Status = 1003;
 					for (int i = 0; i < totalSize; i += burstSize)
 					{
 						for (int j = 0; j < burstSize; j++)
-							words[j] = ReadWordBlocking(offset, BufferSize);
-					
-						st = FLASHPatcher_ProgramWords(bank, (void *)(address + i * 4), words, burstSize);
+							FLASHPatcher_BurstBuffer[j] = ReadWordBlocking(offset, BufferSize);
+						
+						st = FLASHPatcher_ProgramWords(bank, (void *)address, FLASHPatcher_BurstBuffer, burstSize);
 						if (st)
 							return Status = st;
+						
+						address += burstSize * 4;
+					}
+					
+					for (int i = 0; i < tailSize; i += burstSize)
+					{
+						st = FLASHPatcher_ProgramWords(bank, (void *)address, FLASHPatcher_BurstBuffer, burstSize);
+						if (st)
+							return Status = st;
+						
+						address += burstSize * 4;
 					}
 					break;
 				}
@@ -102,8 +115,19 @@ public:
 	}
 };
 
-extern "C" uint32_t HAL_GetTick(void)
+int __attribute__((noinline, noclone)) FLASHPatcher_ProgramRepeatedWords(int bank, void *address, const uint32_t *words, int wordCount, int totalWordCount)
 {
+	int i = 0;
+	for (i = 0; i < totalWordCount; i += wordCount)
+	{
+		int st = FLASHPatcher_ProgramWords(bank, (char *)address + i * 4, words, wordCount);
+		if (st)
+			return st;
+	}
+	
+	if (i != totalWordCount)
+		return -1005;
+	
 	return 0;
 }
 

@@ -26,3 +26,4 @@ b FLASHPatcher_Init
 b FLASHPatcher_EraseSectors
 b FLASHPatcher_ProgramWords
 b FLASHPatcher_Complete
+b FLASHPatcher_ProgramRepeatedWords

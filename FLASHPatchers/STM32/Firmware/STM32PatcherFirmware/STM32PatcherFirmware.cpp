@@ -139,3 +139,8 @@ int FLASHPatcher_Complete()
 	FLASH_FlushCaches();
 	return 0;
 }
+
+extern "C" uint32_t HAL_GetTick(void)
+{
+	return 0;
+}
