@@ -13,8 +13,9 @@ namespace STM32FLASHPatcher
     public class STM32InternalFLASHPatcher : IFLASHPatcherWithConfiguration<STM32DeviceDatabase>
     {
         public string UniqueID => "com.sysprogs.flash.stm32";
-        public string Name => "STM32 Internal FLASH";
+        public string Name => UserFriendlyName;
 
+        public const string UserFriendlyName = "STM32 Internal FLASH";
 
         public STM32DeviceDatabase Configuration { private get; set; }
 
@@ -78,6 +79,7 @@ namespace STM32FLASHPatcher
             public IFLASHBank[] Banks { get; }
 
             public PreservedRegister[] RegistersToPreserve { get; }
+            public string UserFriendlyName => STM32InternalFLASHPatcher.UserFriendlyName;
 
             public override string ToString() => _Definition.Name;
         }
