@@ -1,6 +1,11 @@
 #pragma once
 #include <string.h>
 #include <math.h>
+
+#if !defined(__ARMCC_VERSION) && !defined(__IAR_SYSTEMS_ICC__)
+#include <strings.h>
+#endif
+
 #include <setjmp.h>
 
 class TestGroup;
