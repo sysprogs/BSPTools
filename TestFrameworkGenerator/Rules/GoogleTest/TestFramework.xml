@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.googletest</ID>
 	<Name>GoogleTest</Name>
-	<Version>20220517-1.10.0</Version>
+	<Version>20231020-1.10.0</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelectionViaNames">
 		  <HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -14,6 +14,8 @@
 		</TestReportChannel>
 		<AdditionalPreprocessorMacros>
 			<string>SYSPROGS_TEST_PLATFORM_EMBEDDED</string>
+			<string>_GNU_SOURCE</string>
+			<string>_POSIX_PATH_MAX=260</string>
 		</AdditionalPreprocessorMacros>
 		<AdditionalIncludeDirs>
 			<string>platforms\Embedded</string>
