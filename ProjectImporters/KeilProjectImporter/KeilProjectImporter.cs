@@ -121,7 +121,7 @@ namespace KeilProjectImporter
             var optionsNode = target.SelectSingleNode("TargetOption/TargetArmAds/Cads/VariousControls");
             if (optionsNode != null)
             {
-                macros.AddRange((optionsNode.SelectSingleNode("Define")?.InnerText ?? "").Split(',').Select(m=>m.Trim()));
+                macros.AddRange((optionsNode.SelectSingleNode("Define")?.InnerText ?? "").Split(',').Select(m => m.Trim()).Where(m => m != ""));
                 includeDirs.AddRange((optionsNode.SelectSingleNode("IncludePath")?.InnerText ?? "")
                     .Split(';')
                     .Select(p => TryAdjustPath(baseDir, p.Trim(), service))
