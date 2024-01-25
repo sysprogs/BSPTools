@@ -8,20 +8,6 @@ STM32H747I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotific
 STM32H745I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification_M4
 STM32H747I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification_M4
 
-
-#The MPU samples don't build after conversion because they rely on the older FreeRTOS shipped with the F4 SDK.
-#This should get rectified once the F4 SDK is updated to use the same FreeRTOS version as the L4 SDK.
-STM32446E_EVAL-Applications-FreeRTOS-FreeRTOS_MPU
-STM32469I-Discovery-Applications-FreeRTOS-FreeRTOS_MPU
-STM32469I_EVAL-Applications-FreeRTOS-FreeRTOS_MPU
-STM32469I_EVAL-Examples-CRYP-CRYP_TDESModes
-STM324x9I_EVAL-Applications-FreeRTOS-FreeRTOS_MPU
-STM324xG_EVAL-Applications-FreeRTOS-FreeRTOS_MPU
-STM32F412G-Discovery-Applications-FreeRTOS-FreeRTOS_MPU
-STM32F413H-Discovery-Applications-FreeRTOS-FreeRTOS_MPU
-STM32F413ZH-Nucleo-Applications-FreeRTOS-FreeRTOS_MPU
-STM32F429I-Discovery-Applications-FreeRTOS-FreeRTOS_MPU
-
 #The following examples appear to use invalid device type definition and fail once we pick up the one from the BSP
 NUCLEO-G031K8-Examples-I2C-I2C_WakeUpFromStop
 STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes
@@ -30,3 +16,7 @@ STM32L476G-EVAL-Examples-CRYP-CRYP_DMA
 STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Modes
 STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Suspension
 32L476GDISCOVERY-Demonstrations
+
+
+#The example below fails due to mismatching LevelX versions between F7 and H7. Should be resolved in future SDK releases.
+STM32H743I-EVAL-Applications-FileX-Fx_Nand_Write_Read_File

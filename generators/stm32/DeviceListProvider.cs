@@ -9,6 +9,7 @@ using System.Xml;
 using LinkerScriptGenerator;
 using BSPEngine;
 using System.Text.RegularExpressions;
+using static stm32_bsp_generator.DeviceListProviders.CubeProvider;
 
 namespace stm32_bsp_generator
 {
@@ -157,7 +158,7 @@ namespace stm32_bsp_generator
             {
                 XmlElement node;
                 if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
-                    throw new Exception("Could not find memory layout for " + RefName);
+                    throw new MissingMemoryLayoutException(RefName);
 
                 linkerScripts = node.SelectNodes("SW4STM32/linkers/linker").OfType<XmlElement>().Select(n => n.InnerText).ToArray();
                 fpu = ((XmlElement)node.ParentNode).GetAttribute("fpu");
@@ -404,6 +405,17 @@ namespace stm32_bsp_generator
                 public string Define;
             }
 
+            public class MissingMemoryLayoutException : Exception
+            {
+                public readonly string MCUName;
+
+                public MissingMemoryLayoutException(string mcuName)
+                    : base("Could not find memory layout for " + mcuName)
+                {
+                    MCUName = mcuName;
+                }
+            }
+
             public List<MCUBuilder> LoadDeviceList(Program.STM32BSPBuilder bspBuilder)
             {
                 List<MCUBuilder> result = new List<MCUBuilder>();
@@ -413,18 +425,32 @@ namespace stm32_bsp_generator
 
                 doc.Load(Path.Combine(familyDir, @"families.xml"));
                 List<ParsedMCU> lstMCUs = new List<ParsedMCU>();
+                List<string> missingMCUs = new List<string>();
                 foreach (var m in doc.DocumentElement.SelectNodes("Family/SubFamily/Mcu").OfType<XmlElement>())
                 {
                     string[] cores = m.SelectNodes("Core").OfType<XmlNode>().Select(n => n.InnerText).ToArray();
 
                     for (int i = 0; i < cores.Length; i++)
                     {
-                        if ((db.STM32CubeTimestamp == 133047056504658633 || db.STM32CubeTimestamp == 133310388898546160) && m.GetAttribute("Name").StartsWith("STM32MP13"))
+                        if ((db.STM32CubeTimestamp == 133499175909379949) && m.GetAttribute("Name") == "STM32U5A5QIIxQ")
                             continue;
 
-                        lstMCUs.Add(new ParsedMCU(m, familyDir, db, cores, i));
+                        try
+                        {
+                            lstMCUs.Add(new ParsedMCU(m, familyDir, db, cores, i));
+                        }
+                        catch (MissingMemoryLayoutException ex)
+                        {
+                            missingMCUs.Add(ex.MCUName);
+                        }
                     }
                 }
+
+                if (missingMCUs.Count > 0)
+                {
+                    throw new Exception($"Found {missingMCUs} MCUs with missing memory layouts");
+                }
+
                 var rawMCUs = lstMCUs.ToArray();
 
                 foreach (var grp in rawMCUs.GroupBy(m => m.RPN))

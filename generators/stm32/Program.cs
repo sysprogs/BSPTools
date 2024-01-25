@@ -236,7 +236,7 @@ namespace stm32_bsp_generator
                 $",
                         vectorLineA: @"^[ \t]+\.word[ \t]+([^ \t]+)",
                         vectorLineB: null,
-                        ignoredLine: @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*|// External Interrupts",
+                        ignoredLine: @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*|// External Interrupts|^[ \t]*.size[ \t]+g_pfnVectors",
                         macroDef: ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)",
                         nameGroup: 1,
                         commentGroup: 2)

@@ -58,10 +58,10 @@ void __attribute__((naked, noreturn)) Reset_Handler()
 	#endif
 
 	void **pSource, **pDest;
-	for (pSource = &_sidata, pDest = &_sdata; pDest != &_edata; pSource++, pDest++)
+	for (pSource = &_sidata, pDest = &_sdata; pDest < &_edata; pSource++, pDest++)
 		*pDest = *pSource;
 
-	for (pDest = &_sbss; pDest != &_ebss; pDest++)
+	for (pDest = &_sbss; pDest < &_ebss; pDest++)
 		*pDest = 0;
 
 	SystemInit();
