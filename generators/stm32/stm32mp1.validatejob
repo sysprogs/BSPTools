@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <BSPPath>$$JOBDIR$$\Output\stm32mp1</BSPPath>
+	<DeviceRegex>STM32.*</DeviceRegex>
+	<Samples>
+		 <TestedSample>
+ 			<Name>LEDBlink (HAL)</Name>
+			<SkipIfNotFound>true</SkipIfNotFound>
+			<ValidateRegisters>true</ValidateRegisters>
+			<TestDirSuffix>-LEDBlink</TestDirSuffix>
+			<DeviceRegex>.*</DeviceRegex>
+			<SampleConfiguration>
+				<Entries>
+					<KeyValue>
+						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
+						<Value>GPIOA</Value>
+					</KeyValue>
+				</Entries>
+			</SampleConfiguration>
+		 </TestedSample>
+	</Samples>
+</TestJob>

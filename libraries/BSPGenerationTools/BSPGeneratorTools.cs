@@ -1575,20 +1575,14 @@ namespace BSPGenerationTools
             var allFiles = files.ToArray();
             foreach (var mcu in MCUs)
             {
-                bool matched = false;
-                foreach (var f in allFiles)
-                {
-                    if (f.MatchPredicate == null || f.MatchPredicate(mcu))
-                    {
-                        mcu.StartupFile = "$$SYS:BSP_ROOT$$/" + FamilyFilePrefix + startupFileFolder + "/" + f.FileName;
-                        f.Save(Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory ?? ".", startupFileFolder, f.FileName), pFileNameTemplate);
-                        matched = true;
-                        break;
-                    }
-                }
+                StartupFileGenerator.InterruptVectorTable match = allFiles.FirstOrDefault(f => f.MatchPredicate?.Invoke(mcu) != false);
 
-                if (!matched)
+                match ??= allFiles.FirstOrDefault(f => f.IsFallbackFile);
+                if (match == null)
                     throw new Exception("Cannot find a startup file for " + mcu.Name);
+
+                mcu.StartupFile = "$$SYS:BSP_ROOT$$/" + FamilyFilePrefix + startupFileFolder + "/" + match.FileName;
+                match.Save(Path.Combine(BSP.BSPRoot, Definition.FamilySubdirectory ?? ".", startupFileFolder, match.FileName), pFileNameTemplate);
             }
         }
 

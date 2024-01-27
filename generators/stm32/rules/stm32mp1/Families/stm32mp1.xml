@@ -10,8 +10,8 @@
 			<VariableName>com.sysprogs.stm32.hal_device_family</VariableName>
 			<Required>true</Required>
 			<IsPrimary>true</IsPrimary>
-			<AutoOptions>STM32MP157Axx;STM32MP157Cxx;STM32MP153Axx;STM32MP153Cxx;STM32MP151Axx;STM32MP151Cxx</AutoOptions>
-			<UnsupportedMCUs>STM32MP1.{3}</UnsupportedMCUs>	<!-- This matches the A7 cores that are not supported by the barebone toolchain. We are only interested in the M4 cores (STM32MP1xxx_M4) -->
+			<AutoOptions>STM32MP157Axx;STM32MP157Cxx;STM32MP157Dxx;STM32MP157Fxx;STM32MP153Axx;STM32MP153Cxx;STM32MP153Dxx;STM32MP153Fxx;STM32MP151Axx;STM32MP151Cxx;STM32MP151Dxx;STM32MP151Fxx</AutoOptions>
+			<UnsupportedMCUs>STM32MP1.{3}$</UnsupportedMCUs>	<!-- This matches the A7 cores that are not supported by the barebone toolchain. We are only interested in the M4 cores (STM32MP1xxx_M4) -->
 			<Options/>
 		</MCUClassifier>
 	</Subfamilies>
@@ -32,6 +32,7 @@
 				<FilesToCopy>stm32mp1xx_hal_conf.h</FilesToCopy>
 				<ProjectInclusionMask>-*</ProjectInclusionMask>
 				<AutoIncludeMask/>
+				<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
 			</CopyJob>
 		</CopyJobs>
 	</CoreFramework>

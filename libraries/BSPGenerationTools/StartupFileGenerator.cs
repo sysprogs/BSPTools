@@ -125,6 +125,7 @@ namespace BSPGenerationTools
         public class InterruptVectorTable
         {
             public Predicate<MCUBuilder> MatchPredicate;
+            public bool IsFallbackFile;
             public string FileName;
             public InterruptVector[] Vectors;
 

@@ -10,6 +10,7 @@
     <RootNamespace>BSPGenerationTools</RootNamespace>
     <AssemblyName>BSPGenerationTools</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+	<LangVersion>8.0</LangVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
