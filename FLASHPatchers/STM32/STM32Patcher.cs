@@ -53,15 +53,14 @@ namespace STM32FLASHPatcher
                 Banks = layout.ComputeLayout(FLASHSize, sectorSize, isDualBank).Select(l => new Bank(l, layout.SectorIndexesAreAddresses)).ToArray();
                 ValueAfterErasing = ParseUInt32(def.ValueAfterErasing ?? "0xFFFFFFFF", "erased value");
 
-                RegistersToPreserve = new[] { new PreservedRegister("primask", "1"), new PreservedRegister("faultmask", "1") };
+                RegistersToPreserve = new[] { new PreservedRegister("primask", "1", true), new PreservedRegister("faultmask", "1", true) };
                 if (def.MPUControlRegister != null)
-                    RegistersToPreserve = RegistersToPreserve.Concat(new[] { new PreservedRegister("MPU_CTRL", ParseUInt32(def.MPUControlRegister, "MPU control register address"), "0")}).ToArray();
+                    RegistersToPreserve = RegistersToPreserve.Concat(new[] { new PreservedRegister("MPU_CTRL", ParseUInt32(def.MPUControlRegister, "MPU control register address"), "0") }).ToArray();
             }
 
             public PatcherModuleInfo PatcherModule => new PatcherModuleInfo
             {
                 Path = _Definition.Patcher ?? throw new Exception($"Patcher for {_Definition.Name} is undefined"),
-                RAMBase = 0x20000000,
                 AsyncEntryPointSymbol = "FLASHPatcher_RunRequestLoop",
                 SyncInitFunction = "FLASHPatcher_Init",
                 SyncEraseFunction = "FLASHPatcher_EraseSectors",
@@ -71,6 +70,8 @@ namespace STM32FLASHPatcher
                 BufferPointerSymbol = "g_pBuffer",
                 StackSize = 256,
             };
+
+            public RAMLayout RAMLayout => new RAMLayout(0x20000000, 1024 * 1024, "_estack", "__StackTop");
 
             public FLASHAlias[] Aliases { get; } = new[] { new FLASHAlias(0x0, FLASHStart, FLASHStart) };
             public FLASHAlias PrimaryRegion { get; } = new FLASHAlias(FLASHStart, FLASHStart, 0x01000000);
@@ -108,9 +109,9 @@ namespace STM32FLASHPatcher
                 catch { }
             }
 
-            foreach(var fam in config.Families ?? new DeviceFamily[0])
+            foreach (var fam in config.Families ?? new DeviceFamily[0])
             {
-                foreach(var dev in fam.NestedDefinitions ?? new DeviceDefinition[0])
+                foreach (var dev in fam.NestedDefinitions ?? new DeviceDefinition[0])
                 {
                     if (dev.MatchesID(id))
                     {
@@ -153,12 +154,12 @@ namespace STM32FLASHPatcher
         {
             var config = Configuration ?? throw new Exception("Missing configuration for the STM32 patcher");
             HashSet<uint> ids = new HashSet<uint>();
-            foreach(var family in config.Families)
+            foreach (var family in config.Families)
             {
                 if (family.Overrides != null)
                     throw new Exception("MCU families should use " + nameof(family.NestedDefinitions));
 
-                foreach(var dev in family.NestedDefinitions)
+                foreach (var dev in family.NestedDefinitions)
                 {
                     var x = family.OverrideWith(dev);
                     foreach (var sub in dev.Overrides ?? new DeviceOverrides[0])
