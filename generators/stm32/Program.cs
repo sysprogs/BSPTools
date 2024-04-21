@@ -76,7 +76,9 @@ namespace stm32_bsp_generator
 
                 foreach (var sdk in SDKList.SDKs)
                 {
-                    SystemVars[$"STM32:{sdk.Family.ToUpper()}_DIR"] = Directory.GetDirectories(Path.Combine(dirs.InputDir, sdk.FolderName), "STM32Cube_FW_*").First();
+                    var dir = Path.Combine(dirs.InputDir, sdk.FolderName);
+                    if (Directory.Exists(dir))
+                        SystemVars[$"STM32:{sdk.Family.ToUpper()}_DIR"] = Directory.GetDirectories(dir, "STM32Cube_FW_*").First();
                 }
             }
 
@@ -230,6 +232,7 @@ namespace stm32_bsp_generator
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
                     MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(ruleset, m), subfamily) == 0,
+                    IsFallbackFile = (ruleset == STM32Ruleset.STM32MP1 && fn.EndsWith("startup_stm32mp15xx.s")),
                     Vectors = StartupFileGenerator.ParseInterruptVectors(fn,
                         tableStart: "g_pfnVectors:",
                         tableEnd: @"/\*{10,999}|^[^/\*]+\*/

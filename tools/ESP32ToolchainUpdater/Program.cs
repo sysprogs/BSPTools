@@ -51,7 +51,7 @@ namespace ESP32ToolchainUpdater
 
             //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C6", @"E:\projects\temp\EmbeddedProject7\build\VisualGDB\Debug\blink.map");
             //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C3", @"E:\projects\temp\EmbeddedProject5\build\VisualGDB\Debug\blink.map");
-            return;
+            //return;
 
             var oldToolchain = XmlTools.LoadObject<Toolchain>(Path.Combine(oldDir, "toolchain.xml"));
             var newToolchain = XmlTools.LoadObject<Toolchain>(Path.Combine(newDir, "toolchain.xml"));
