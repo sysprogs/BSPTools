@@ -754,6 +754,8 @@ namespace BSPGenerationTools
                 string testFile = Path.Combine(temporaryDir, "test.c");
                 File.WriteAllLines(testFile, cf.Template.TestableHeaderFiles.Select(hf => $"#include <{hf}>"));
 
+                int totalNewSymbols = 0;
+
                 using (var analyzer = new ConfigFileAnalyzer(clangExe, temporaryDir, testFile, rspFile, configFile, cf.Template))
                 {
                     var initialSymbols = analyzer.BuildGlobalSymbolList();
@@ -769,6 +771,8 @@ namespace BSPGenerationTools
 
                         Console.WriteLine($" => {newSymbols.Length} symbols");
 
+                        totalNewSymbols += newSymbols.Length;
+
                         if (newSymbols.Length > 0)
                         {
                             autofixEntries.Add(new ConfigurationFixDatabase.ConfigurationFileEntry
@@ -781,6 +785,8 @@ namespace BSPGenerationTools
                         }
                     }
 
+                   if (totalNewSymbols < 100)
+                        throw new Exception($"Too little new symbols for {cf.Family.Definition.Name}");
                 }
             }
 

@@ -9,17 +9,35 @@
 	</Subfamilies>
 	<CompilationFlags>
 	<PreprocessorMacros>
-		<string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>		
 		<string>CORE_CM7</string>
 	</PreprocessorMacros>
-			<IncludeDirectories>
-			<string>.</string>
-		</IncludeDirectories>
+	<IncludeDirectories>
+		<string>.</string>
+	</IncludeDirectories>
 	</CompilationFlags>
 	<CoreFramework>
 		<CopyJobs>
 		</CopyJobs>
 	</CoreFramework>
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>DSP Functions</Name>
+			<ID>com.sysprogs.arm.stm32.dsp.STM32H7RS</ID>
+			<ClassID>com.sysprogs.arm.stm32.dsp</ClassID>
+			<ProjectFolderName>DSP</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Drivers\CMSIS\DSP</SourceFolder>
+					<TargetFolder>DSP</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-DSP_Lib_TestSuite\*;-Examples\*;-*template_*;*.c;*.h</ProjectInclusionMask>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+	</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
 			<RangeFromDir>$$STM32:H7RS_DIR$$\Drivers\BSP</RangeFromDir>

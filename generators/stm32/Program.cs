@@ -580,12 +580,16 @@ namespace stm32_bsp_generator
                 bsp.Frameworks = frameworks.ToArray();
                 bsp.Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
                 bsp.TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
-                bsp.PackageVersion = bspBuilder.SDKList.BSPVersion;
                 bsp.FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray();
                 bsp.InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints;
                 bsp.ConditionalFlags = allConditionalToolFlags.ToArray();
 
                 bspBuilder.SDKList.SDKs = referencedSDKs.Distinct().ToArray();
+                if (ruleset == STM32Ruleset.STM32H7RS)
+                    bsp.PackageVersion = bspBuilder.SDKList.SDKs[0].Version;
+                else
+                    bsp.PackageVersion = bspBuilder.SDKList.BSPVersion;
+
                 XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
 
                 bspBuilder.ValidateBSP(bsp);
