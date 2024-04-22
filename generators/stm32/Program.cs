@@ -473,6 +473,9 @@ namespace stm32_bsp_generator
                         case STM32Ruleset.STM32WL:
                             allFamilies.Add(new STM32WLFamilyBuilder(bspBuilder, fam));
                             break;
+                        case STM32Ruleset.STM32H7RS:
+                            allFamilies.Add(new STM32H7RSFamilyBuilder(bspBuilder, fam));
+                            break;
                         case STM32Ruleset.Classic:
                         default:
                             allFamilies.Add(new STM32ClassicFamilyBuilder(bspBuilder, fam));
@@ -792,6 +795,7 @@ namespace stm32_bsp_generator
         STM32MP1,
         BlueNRG_LP,
         STM32WL,
+        STM32H7RS,
     }
 
 

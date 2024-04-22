@@ -274,6 +274,13 @@ namespace stm32_bsp_generator
                         case "RSSLIB_S_JumpHDPlvl2_TypeDef":
                         case "RSSLIB_S_JumpHDPlvl3_TypeDef":
                         case "RSSLIB_S_JumpHDPlvl3NS_TypeDef":
+                        case "RSSLIB_SetSecOB_TypeDef":
+                        case "RSSLIB_GetRssStatus_TypeDef":
+                        case "RSSLIB_GetProductState_TypeDef":
+                        case "RSSLIB_DataProvisioning_TypeDef":
+                        case "RSSLIB_SetProductState_TypeDef":
+                        case "RSSLIB_JumpHDPlvl2_TypeDef":
+                        case "RSSLIB_JumpHDPlvl3_TypeDef":
                             size = 4;
                             break;
                         default:
@@ -285,7 +292,9 @@ namespace stm32_bsp_generator
                                 else
                                     extraPrefix = $"{field.Name}[{i}].";
 
-                                TranslateStructureFieldsToRegistersRecursively(parsedFile.Structures[type[0]], parsedFile, ref ctx, prefix + extraPrefix);
+                                if (!parsedFile.Structures.TryGetValue(type[0], out var v))
+                                    throw new Exception("Unknown size of " + type[0]);
+                                TranslateStructureFieldsToRegistersRecursively(v, parsedFile, ref ctx, prefix + extraPrefix);
                             }
                             continue;
                     }

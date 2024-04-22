@@ -138,7 +138,7 @@ namespace stm32_bsp_generator
                 }
 
                 static Regex rgFLASH = new Regex("^FLASH[0-9]*$");
-                static Regex rgRAM = new Regex("^(S?RAM[0-9]*|.*RAM)(|_D[0-9]+)$");
+                static Regex rgRAM = new Regex("^(S?RAM[0-9]*|.*RAM)(|_D[0-9]+)|([ID]TCM)$");
 
                 public Memory ToMemoryDefinition()
                 {
@@ -182,6 +182,7 @@ namespace stm32_bsp_generator
                 public readonly ParsedMCU MCU;
                 public string[] PredefinedLinkerScripts => MCU.LinkerScripts;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
+                public PropertyEntry.Enumerated.Suggestion[] DiscoveredLinkerScripts;
 
                 public STM32MCUBuilder(ParsedMCU parsedMCU, DeviceMemoryDatabase db)
                 {
@@ -258,6 +259,18 @@ namespace stm32_bsp_generator
 
                     mcu.MemoryMap = layout.Layout.ToMemoryMap();
                     mcu.AdditionalSystemVars = LoadedBSP.Combine(new[] { new SysVarEntry { Key = "com.sysprogs.stm32.hal_device_family", Value = MCU.Define } }, mcu.AdditionalSystemVars);
+
+                    if (DiscoveredLinkerScripts != null)
+                    {
+                        if (mcu.ConfigurableProperties == null)
+                            mcu.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
+
+                        mcu.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated {
+                            Name = "Memory Layout",
+                            UniqueID = "com.sysprogs.stm32.memory_layout",
+                            SuggestionList = DiscoveredLinkerScripts,
+                        });
+                    }
 
                     return mcu;
                 }
@@ -432,7 +445,7 @@ namespace stm32_bsp_generator
 
                     for (int i = 0; i < cores.Length; i++)
                     {
-                        if ((db.STM32CubeTimestamp == 133499175909379949) && m.GetAttribute("Name") == "STM32U5A5QIIxQ")
+                        if ((db.STM32CubeTimestamp == 133580471866301743) && (m.GetAttribute("Name") == "STM32U5A5QIIxQ" || m.GetAttribute("Name").StartsWith("STM32U073")))
                             continue;
 
                         try
