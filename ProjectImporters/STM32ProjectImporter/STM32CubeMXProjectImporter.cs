@@ -33,9 +33,13 @@ namespace STM32ProjectImporter
             {
             }
 
-            public override string TryDetectLocation(RegistryKey nonWow64HLKMKey)
+            public static string FindSTM32CubeMXExe(RegistryKey nonWow64HLKMKey)
             {
-                var path = nonWow64HLKMKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\STM32CubeMX.exe")?.GetValue(null) as string;
+                var path = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\STM32CubeMX.exe")?.GetValue(null) as string;
+                if (path != null && File.Exists(path))
+                    return path;
+
+                path = nonWow64HLKMKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\STM32CubeMX.exe")?.GetValue(null) as string;
                 if (path != null && File.Exists(path))
                     return path;
 
@@ -54,6 +58,8 @@ namespace STM32ProjectImporter
 
                 return null;
             }
+
+            public override string TryDetectLocation(RegistryKey nonWow64HLKMKey) => FindSTM32CubeMXExe(nonWow64HLKMKey);
         }
 
         class JDKJavaTool : ProjectReconfigurationTool
@@ -65,6 +71,14 @@ namespace STM32ProjectImporter
 
             public override string TryDetectLocation(RegistryKey nonWow64HLKMKey)
             {
+                var exe = STM32CubeExeTool.FindSTM32CubeMXExe(nonWow64HLKMKey);
+                if (exe != null && File.Exists(exe))
+                {
+                    var javaExe = Path.Combine(Path.GetDirectoryName(exe), @"jre\bin\java.exe");
+                    if (File.Exists(javaExe))
+                        return javaExe;
+                }
+
                 var version = nonWow64HLKMKey.OpenSubKey(@"SOFTWARE\JavaSoft\JDK")?.GetValue("CurrentVersion") as string;
                 if (version == null)
                     return version;
@@ -655,6 +669,7 @@ namespace STM32ProjectImporter
             string args = "";
             string temporaryScriptFile = null;
             string text = "Launching STM32CubeMX...";
+            string checkedFile = null;
 
             switch (context.Reason)
             {
@@ -672,6 +687,8 @@ namespace STM32ProjectImporter
                             "project generate",
                             "exit",
                         });
+
+                        checkedFile = Path.Combine(Path.GetDirectoryName(context.ProjectFile), ".project");
                     }
                     else
                     {
@@ -684,6 +701,8 @@ namespace STM32ProjectImporter
                             "project generate",
                             "exit",
                             });
+
+                        checkedFile = Path.ChangeExtension(context.ProjectFile, ".gpdsc");
                     }
 
                     args = $"\"{context.ProjectFile}\" -s \"{temporaryScriptFile}\"";
@@ -722,6 +741,7 @@ namespace STM32ProjectImporter
                 },
 
                 Title = text,
+                ExpectedOutputFile = checkedFile,
             };
 
             if (temporaryScriptFile != null)
