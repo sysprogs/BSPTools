@@ -356,8 +356,9 @@ namespace stm32_bsp_generator
                 else
                 {
                     devices = provider.LoadDeviceList(bspBuilder);
-                    if (devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP1")).Count() > 0)
-                        throw new Exception($"Some deviceshave FLASH Size({devices.Where(d => d.FlashSize == 0).Count()})  = 0 ");
+                    var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP")).ToArray();
+                    if (incompleteDevices.Length > 0)
+                        throw new Exception($"{incompleteDevices.Length} devices have FLASH Size = 0 ");
                 }
 
                 List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();

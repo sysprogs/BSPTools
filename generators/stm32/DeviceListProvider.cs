@@ -319,6 +319,8 @@ namespace stm32_bsp_generator
                             return CortexCore.M4;
                         case "M7":
                             return CortexCore.M7;
+                        case "A35":
+                            return CortexCore.A35;
                         case "A7":
                             return CortexCore.A7;
                         default:
@@ -445,7 +447,7 @@ namespace stm32_bsp_generator
 
                     for (int i = 0; i < cores.Length; i++)
                     {
-                        if ((db.STM32CubeTimestamp == 133580471866301743) && (m.GetAttribute("Name") == "STM32U5A5QIIxQ" || m.GetAttribute("Name").StartsWith("STM32U073")))
+                        if ((db.STM32CubeTimestamp == 133657063208138291) && (m.GetAttribute("Name") == "STM32G473QETxZ" || m.GetAttribute("Name") == "STM32U5A5QIIxQ" || m.GetAttribute("Name").StartsWith("STM32U073")))
                             continue;
 
                         try
