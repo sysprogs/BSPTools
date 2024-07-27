@@ -165,6 +165,8 @@ namespace BSPGenerationTools.Parsing
     {
         public string Path;
         public Dictionary<string, ParsedStructure> Structures = new Dictionary<string, ParsedStructure>();
+
+        public string ShortName => System.IO.Path.GetFileNameWithoutExtension(Path);
     }
 
     public class HeaderFileParser

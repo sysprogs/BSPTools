@@ -80,6 +80,7 @@ static void MainThread(void const * argument)
 	gnetif.ip_addr.addr = 0;
 	gnetif.netmask.addr = 0;
 	gnetif.gw.addr = 0;
+	netif_set_up(&gnetif);
 	printf("Waiting for DHCP reply...\n");
 	dhcp_start(&gnetif);
 	while (!*((volatile u32_t *)&gnetif.ip_addr.addr))

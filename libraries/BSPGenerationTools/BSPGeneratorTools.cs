@@ -31,6 +31,7 @@ namespace BSPGenerationTools
         M33,
         M4,
         M7,
+        A35,
         A7,
         R4,
         R5,
@@ -1728,6 +1729,7 @@ namespace BSPGenerationTools
                         found = true;
                         break;
                     }
+
                 if (!found)
                     orphanedDevices.Add(mcu);
             }

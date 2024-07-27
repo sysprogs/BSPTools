@@ -46,8 +46,14 @@ namespace VendorSampleReportViewer
             {
                 var ctx = (sender as FrameworkElement).DataContext as ControllerImpl.SampleRow.SampleCell ?? throw new Exception("Invalid data context");
 
-                var fn = VendorSampleParserEngine.VendorSampleParser.LocateLogFile(_Controller.BSPID, ctx.SampleSubdir) ?? throw new Exception("Could not find the log file");
-                Process.Start(fn);
+                var fn = VendorSampleParserEngine.VendorSampleParser.LocateLogFile(_Controller.BSPID, ctx.SampleSubdir);
+                
+                if (fn != null)
+                    Process.Start(fn);
+                else if (ctx.EmbeddedError != null)
+                    MessageBox.Show(ctx.EmbeddedError, "Vendor Sample Result Viewer", MessageBoxButton.OK, MessageBoxImage.Information);
+                else
+                    throw new Exception("Could not find the log file");
             }
             catch (Exception ex)
             {

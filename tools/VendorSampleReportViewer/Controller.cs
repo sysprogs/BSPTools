@@ -61,6 +61,7 @@ namespace VendorSampleReportViewer
                 public SampleCell(string id, VendorSampleTestReport.Record record)
                 {
                     SampleSubdir = id.ToString();
+
                     if (!record.BuildFailedExplicitly)
                     {
                         if (record.LastSucceededPass == VendorSamplePass.Final)
@@ -76,12 +77,16 @@ namespace VendorSampleReportViewer
                         else
                             State = SampleState.Failed;
                     }
+
+                    if (record.LastSucceededPass == VendorSamplePass.None && record.ExtraInformation != null)
+                        EmbeddedError = record.ExtraInformation;
                 }
 
                 public SampleState State { get; }
                 public string KnownError { get; }
 
                 public string SampleSubdir { get; }
+                public string EmbeddedError { get; }
             }
 
             public SampleCell[] Cells { get; }

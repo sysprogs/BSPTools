@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Name>STM32H7</Name>
-	<DeviceRegex>^STM32H7[0-9].*[^M4]$</DeviceRegex>
+	<DeviceRegex>^STM32H7[0-9A-B].*[^M4]$</DeviceRegex>
 	<FamilySubdirectory>STM32H7xxxx</FamilySubdirectory>
 	<PrimaryHeaderDir>$$STM32:H7_DIR$$\Drivers\CMSIS\Device\ST\STM32H7xx\Include</PrimaryHeaderDir>
 	<StartupFileDir>$$STM32:H7_DIR$$\Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\gcc</StartupFileDir>

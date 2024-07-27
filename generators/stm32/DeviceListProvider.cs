@@ -154,24 +154,57 @@ namespace stm32_bsp_generator
                 }
             }
 
-            internal RawMemory[] LookupMemories(string RPN, string RefName, string explicitCore, out string[] linkerScripts, out string define, out string fpu)
+            public struct MCUDetails
+            {
+                public RawMemory[] Memories;
+                public string[] LinkerScripts;
+                public string Define;
+                public string FPU;
+                public string HeaderFile;
+                public CoreSpecificFile[] StartupFiles;
+            }
+
+            public struct CoreSpecificFile
+            {
+                public string Core; //NULL if matches all
+                public string File;
+
+                public string NameOnly => Path.GetFileName(File);
+
+                public override string ToString() => File;
+            }
+
+            internal MCUDetails LookupDetails(string RPN, string RefName, string explicitCore)
             {
                 XmlElement node;
                 if (!_DevicesBySpecializedName.TryGetValue(RefName, out node))
                     throw new MissingMemoryLayoutException(RefName);
 
-                linkerScripts = node.SelectNodes("SW4STM32/linkers/linker").OfType<XmlElement>().Select(n => n.InnerText).ToArray();
-                fpu = ((XmlElement)node.ParentNode).GetAttribute("fpu");
+                var details = new MCUDetails
+                {
+                    LinkerScripts = node.SelectNodes("SW4STM32/linkers/linker").OfType<XmlElement>().Select(n => n.InnerText).ToArray(),
+                    FPU = ((XmlElement)node.ParentNode).GetAttribute("fpu"),
+                    Memories = node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray(),
+                    Define = node.SelectSingleNode("define")?.InnerText ?? node.ParentNode.SelectSingleNode("define")?.InnerText ?? throw new Exception("Unknown preprocessor macro for " + RPN),
+                    HeaderFile = node.SelectSingleNode("header")?.InnerText ?? throw new Exception("Missing header file for " + RPN),
+                };
 
-                var memories = node.SelectNodes("memories/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
-                if (memories.Length == 0 && explicitCore != null)
-                    memories = node.SelectNodes($"memories/C{explicitCore}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
+                var gccNode = node.SelectSingleNode("SW4STM32") ?? node.SelectSingleNode("TrueSTUDIO") ?? throw new Exception("Missing CubeIDE node");
+                if (gccNode.SelectSingleNode("startup")?.InnerText is string txt)
+                    details.StartupFiles = new[] { new CoreSpecificFile { File = txt } };
+                else
+                    details.StartupFiles = gccNode.SelectSingleNode("startups").ChildNodes.OfType<XmlElement>().Select(e => new CoreSpecificFile { Core = e.Name, File = e.SelectSingleNode("startup")?.InnerText ?? throw new Exception("Missing startup file value") }).ToArray();
 
-                if (memories.Length == 0)
+                if (details.StartupFiles.Length == 0)
+                    throw new Exception("Failed to locate startup files");
+
+                if (details.Memories.Length == 0 && explicitCore != null)
+                    details.Memories = node.SelectNodes($"memories/C{explicitCore}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
+
+                if (details.Memories.Length == 0)
                     throw new Exception("Missing memories for " + RefName);
 
-                define = node.SelectSingleNode("define")?.InnerText ?? node.ParentNode.SelectSingleNode("define")?.InnerText ?? throw new Exception("Unknown preprocessor macro for " + RPN);
-                return memories;
+                return details;
             }
         }
 
@@ -180,7 +213,7 @@ namespace stm32_bsp_generator
             public class STM32MCUBuilder : MCUBuilder
             {
                 public readonly ParsedMCU MCU;
-                public string[] PredefinedLinkerScripts => MCU.LinkerScripts;
+                public string[] PredefinedLinkerScripts => MCU.Details.LinkerScripts;
                 public readonly DeviceMemoryDatabase.RawMemory[] Memories;
                 public PropertyEntry.Enumerated.Suggestion[] DiscoveredLinkerScripts;
 
@@ -188,7 +221,7 @@ namespace stm32_bsp_generator
                 {
                     MCU = parsedMCU;
 
-                    Memories = parsedMCU.Memories.ToArray();
+                    Memories = parsedMCU.Details.Memories.ToArray();
                     if (Memories.Length == 0)
                         throw new Exception("Could not locate memories for " + parsedMCU.Name);
 
@@ -258,14 +291,15 @@ namespace stm32_bsp_generator
                     }
 
                     mcu.MemoryMap = layout.Layout.ToMemoryMap();
-                    mcu.AdditionalSystemVars = LoadedBSP.Combine(new[] { new SysVarEntry { Key = "com.sysprogs.stm32.hal_device_family", Value = MCU.Define } }, mcu.AdditionalSystemVars);
+                    mcu.AdditionalSystemVars = LoadedBSP.Combine(new[] { new SysVarEntry { Key = "com.sysprogs.stm32.hal_device_family", Value = MCU.Details.Define } }, mcu.AdditionalSystemVars);
 
                     if (DiscoveredLinkerScripts != null)
                     {
                         if (mcu.ConfigurableProperties == null)
                             mcu.ConfigurableProperties = new PropertyList { PropertyGroups = new List<PropertyGroup> { new PropertyGroup() } };
 
-                        mcu.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated {
+                        mcu.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Enumerated
+                        {
                             Name = "Memory Layout",
                             UniqueID = "com.sysprogs.stm32.memory_layout",
                             SuggestionList = DiscoveredLinkerScripts,
@@ -282,19 +316,16 @@ namespace stm32_bsp_generator
                 public readonly string RefName; //Specialized name (e.g. STM32F031C4Tx)
                 public readonly string RPN;     //Short name (e.g.STM32F031C4)
 
-                public readonly string[] LinkerScripts;
-
                 public readonly CortexCore Core;
+                public readonly DeviceMemoryDatabase.MCUDetails Details;
+
                 public readonly FPUType FPU;
                 public readonly string CoreSuffix;
-                public readonly DeviceMemoryDatabase.RawMemory[] Memories;
 
                 public bool IsMultiCore => CoreSuffix != null;
 
                 public readonly int[] RAMs;
                 public readonly int FLASH;
-
-                public readonly string Define;
 
                 static XmlElement LoadMCUDefinition(string familyDir, string name)
                 {
@@ -358,9 +389,9 @@ namespace stm32_bsp_generator
                     else
                         CoreSuffix = null;
 
-                    Memories = db.LookupMemories(RPN, RefName, CoreSuffix, out LinkerScripts, out Define, out string fpu);
+                    Details = db.LookupDetails(RPN, RefName, CoreSuffix);
 
-                    FPU = ParseFPU(fpu);
+                    FPU = ParseFPU(Details.FPU);
 
                     if (cores.Length > 1 && coreIndex > 0 && Core == CortexCore.M4)
                         FPU = FPUType.SP;
@@ -409,7 +440,7 @@ namespace stm32_bsp_generator
                     };
                 }
 
-                public ConfigSnapshot Config => new ConfigSnapshot { FLASH = FLASH, RAMs = string.Join("|", Memories.Select(r => $"{r.Name}={r.Size}").ToArray()), Define = Define };
+                public ConfigSnapshot Config => new ConfigSnapshot { FLASH = FLASH, RAMs = string.Join("|", Details.Memories.Select(r => $"{r.Name}={r.Size}").ToArray()), Define = Details.Define };
             }
 
             //MCUs with the same value of ConfigSnapshot can use the same linker script, MCU definition, etc
@@ -449,6 +480,9 @@ namespace stm32_bsp_generator
                     {
                         if ((db.STM32CubeTimestamp == 133657063208138291) && (m.GetAttribute("Name") == "STM32G473QETxZ" || m.GetAttribute("Name") == "STM32U5A5QIIxQ" || m.GetAttribute("Name").StartsWith("STM32U073")))
                             continue;
+
+                        if ((db.STM32CubeTimestamp == 133657063208138291) && m.GetAttribute("Name").StartsWith("STM32G411"))
+                            continue;   //The startup file is missing as of SDK 1.6.0
 
                         try
                         {

@@ -64,7 +64,7 @@ namespace STM32ProjectImporter
                 MultiConfigurationContext mctx = null;
                 if (nonReleaseConfigs.Length > 1)
                 {
-                    if (nonReleaseConfigs.Length != 2)
+                    if (nonReleaseConfigs.Length > 3)
                         throw new Exception("Unexpected configuration count for " + project.CProjectFile);
 
                     string artifactName = cconfiguration.ArtifactName;

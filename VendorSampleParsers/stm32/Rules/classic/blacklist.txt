@@ -8,15 +8,14 @@ STM32H747I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotific
 STM32H745I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification_M4
 STM32H747I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification_M4
 
-#The following examples appear to use invalid device type definition and fail once we pick up the one from the BSP
-NUCLEO-G031K8-Examples-I2C-I2C_WakeUpFromStop
-STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes
-STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes_Suspension
-STM32L476G-EVAL-Examples-CRYP-CRYP_DMA
-STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Modes
-STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Suspension
-32L476GDISCOVERY-Demonstrations
+#This appears to be a glitch with a specific SDK version
+STM32469I_EVAL-Examples-CRYP-CRYP_TDESModes
 
+#The examples below fail due to mismatching USBX versions between F7 and H7. Should be resolved in future SDK releases.
+NUCLEO-C071RB-Applications-USBX-Ux_Device_CDC_ACM
+NUCLEO-C071RB-Applications-USBX-Ux_Device_HID
+NUCLEO-C071RB-Applications-USBX-Ux_Device_HID_CDC_ACM
+NUCLEO-C071RB-Applications-USBX-Ux_Device_HID_Standalone
+NUCLEO-C071RB-Applications-USBX-Ux_Host_CDC_ACM
+NUCLEO-C071RB-Applications-USBX-Ux_Host_HID_Standalone
 
-#The example below fails due to mismatching LevelX versions between F7 and H7. Should be resolved in future SDK releases.
-STM32H743I-EVAL-Applications-FileX-Fx_Nand_Write_Read_File

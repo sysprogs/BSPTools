@@ -18,6 +18,7 @@ using System.Xml;
 using BSPGenerationTools.Parsing;
 using Microsoft.Win32;
 using stm32_bsp_generator.Rulesets;
+using System.Reflection;
 
 namespace stm32_bsp_generator
 {
@@ -211,7 +212,32 @@ namespace stm32_bsp_generator
         {
             if (ruleset == STM32Ruleset.BlueNRG_LP)
                 return "BLUENRG_LP";
-            return (builder as DeviceListProviders.CubeProvider.STM32MCUBuilder)?.MCU.Define ?? throw new Exception("Unknown primary macro for " + builder.Name);
+            return (builder as DeviceListProviders.CubeProvider.STM32MCUBuilder)?.MCU.Details.Define ?? throw new Exception("Unknown primary macro for " + builder.Name);
+        }
+
+        class MCUMatcher
+        {
+            private string _Subfamily;
+            private bool _IsOnlyFile;
+
+            public MCUMatcher(string subfamily, bool v)
+            {
+                _Subfamily = subfamily;
+                _IsOnlyFile = v;
+            }
+
+            internal bool Match(MCUBuilder mcu)
+            {
+                if (_IsOnlyFile)
+                    return true;
+
+                var startupFiles = (mcu as DeviceListProviders.CubeProvider.STM32MCUBuilder)?.MCU.Details.StartupFiles ?? throw new Exception("Missing startup file reference");
+
+                if (startupFiles.Length == 1)
+                    return StringComparer.InvariantCultureIgnoreCase.Compare(startupFiles[0].NameOnly, _Subfamily) == 0;
+                else
+                    throw new NotImplementedException("TODO: match per-core startup files");
+            }
         }
 
         static IEnumerable<StartupFileGenerator.InterruptVectorTable> ParseStartupFiles(string dir, MCUFamilyBuilder fam, STM32Ruleset ruleset)
@@ -220,18 +246,12 @@ namespace stm32_bsp_generator
 
             foreach (var fn in allFiles)
             {
-                string subfamily = Path.GetFileNameWithoutExtension(fn);
-                if (!subfamily.StartsWith("startup_"))
-                    continue;
-                subfamily = subfamily.Substring(8);
-
-                if (subfamily.EndsWith("_cm4"))
-                    subfamily = subfamily.Substring(0, subfamily.Length - 4);
+                string name = Path.GetFileName(fn);
 
                 yield return new StartupFileGenerator.InterruptVectorTable
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
-                    MatchPredicate = m => (allFiles.Length == 1) || StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(ruleset, m), subfamily) == 0,
+                    MatchPredicate = new MCUMatcher(name, allFiles.Length == 1).Match,
                     IsFallbackFile = (ruleset == STM32Ruleset.STM32MP1 && fn.EndsWith("startup_stm32mp15xx.s")),
                     Vectors = StartupFileGenerator.ParseInterruptVectors(fn,
                         tableStart: "g_pfnVectors:",
