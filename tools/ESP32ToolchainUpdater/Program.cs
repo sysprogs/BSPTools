@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPGenerationTools;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -48,6 +49,7 @@ namespace ESP32ToolchainUpdater
 
             string oldDir = Path.GetFullPath(args[0]), newDir = Path.GetFullPath(args[1]);
             var bspXML = Path.Combine(newDir, @"esp32-bsp\BSP.xml");
+            UpdateHardwareRegisters(bspXML);
 
             //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C6", @"E:\projects\temp\EmbeddedProject7\build\VisualGDB\Debug\blink.map");
             //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C3", @"E:\projects\temp\EmbeddedProject5\build\VisualGDB\Debug\blink.map");
@@ -113,6 +115,22 @@ namespace ESP32ToolchainUpdater
 
             }
             XmlTools.SaveObject(bsp, Path.Combine(newDir, @"esp32-bsp\BSP.xml"));
+        }
+
+        private static void UpdateHardwareRegisters(string bspXML)
+        {
+            var bsp = XmlTools.LoadObject<BoardSupportPackage>(bspXML);
+            foreach(var dev in bsp.SupportedMCUs)
+            {
+                var fn = Path.GetFullPath($@"..\..\esp32-svd\svd\{dev.ID}.svd");
+                var registerSet = SVDParser.ParseSVDFile(fn, dev.ID);
+
+                var mcuDef = Path.Combine(Path.GetDirectoryName(bspXML), dev.MCUDefinitionFile);
+                if (!File.Exists(mcuDef))
+                    throw new Exception("Missing old MCU definition file");
+
+                XmlTools.SaveObject(registerSet, mcuDef);
+            }
         }
     }
 }

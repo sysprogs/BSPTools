@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2015-2020 Sysprogs OU. All Rights Reserved.
+﻿/* Copyright (c) 2015-2024 Sysprogs OU. All Rights Reserved.
    This software is licensed under the Sysprogs BSP Generator License.
    https://github.com/sysprogs/BSPTools/blob/master/LICENSE
 */
@@ -32,7 +32,7 @@ namespace BSPGenerationTools
             {
                 count = (int)ParseScaledNonNegativeInteger(dim);
                 step = (int)ParseScaledNonNegativeInteger(reg.SelectSingleNode("dimIncrement").InnerText);
-                if (step * 8 != (int)regSize)
+                if (defaultRegisterSize != null && step * 8 != defaultRegisterSize)
                     throw new Exception("Mismatching array step for " + regName);
             }
 
@@ -51,7 +51,7 @@ namespace BSPGenerationTools
                     if (bitRange != null)
                     {
                         int bit1, bit2;
-                        
+
                         if ((m = rgBitRange.Match(bitRange)).Success)
                         {
                             bit1 = int.Parse(m.Groups[1].Value);
@@ -100,13 +100,13 @@ namespace BSPGenerationTools
                             foreach (XmlElement ev in vals)
                             {
                                 var knownValueProp = ev.SelectSingleNode("value");
-                                if (DoNotCareBits(knownValueProp.InnerText))
+                                if (string.IsNullOrEmpty(knownValueProp?.InnerText) || DoNotCareBits(knownValueProp.InnerText))
                                 {
                                     continue;
                                 }
                                 var knownValueIndex = (int)ParseScaledNonNegativeInteger(knownValueProp.InnerText);
                                 var knowValueName = ev.SelectSingleNode("name").InnerText;
-                                if (IsUserFriendlyName(knowValueName))
+                                if (IsUserFriendlyName(knowValueName) && knownValueIndex >= 0 && knownValueIndex < values.Length)
                                 {
                                     values[knownValueIndex] = new KnownSubRegisterValue { Name = knowValueName };
                                     ++numOfAddedKnownValues;
@@ -148,7 +148,7 @@ namespace BSPGenerationTools
         }
 
 
-        public static MCUDefinitionWithPredicate ParseSVDFile(string file, string deviceName)
+        public static MCUDefinition ParseSVDFile(string file, string deviceName)
         {
             var doc = new XmlDocument();
             doc.Load(file);
@@ -188,7 +188,7 @@ namespace BSPGenerationTools
             }
 
 
-            return new MCUDefinitionWithPredicate { MCUName = deviceName, RegisterSets = sets.ToArray() };
+            return new MCUDefinition { MCUName = deviceName, RegisterSets = sets.ToArray() };
         }
 
         public static HardwareRegisterSet ParseSVDFileToHardSet(string file, string pDesPerpherals)

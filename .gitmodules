@@ -1,3 +1,6 @@
 [submodule "generators/esp8266/rules/gdbstub"]
 	path = generators/esp8266/rules/gdbstub
 	url = https://github.com/espressif/esp-gdbstub.git
+[submodule "tools/ESP32ToolchainUpdater/esp32-svd"]
+	path = tools/ESP32ToolchainUpdater/esp32-svd
+	url = https://github.com/espressif/svd

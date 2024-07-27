@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESP32ToolchainUpdater", "ESP32ToolchainUpdater.csproj", "{5AA6563D-C6E9-4E27-82CB-3B42A573DC04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{5AA6563D-C6E9-4E27-82CB-3B42A573DC04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AA6563D-C6E9-4E27-82CB-3B42A573DC04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AA6563D-C6E9-4E27-82CB-3B42A573DC04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
