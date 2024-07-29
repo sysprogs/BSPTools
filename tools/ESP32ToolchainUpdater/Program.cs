@@ -16,7 +16,8 @@ namespace ESP32ToolchainUpdater
     {
         static string QueryToolVersion(string tool)
         {
-            Regex rgVersion = new Regex(@".* \(crosstool-.*\) ([0-9]+\.[0-9]+\.[0-9]+)");
+            Regex rgVersion = new Regex(@".* \(crosstool-.*\) ([0-9]+\.[0-9]+\.[0-9]+|[0-9]+\.[0-9]+)");
+            Regex rgGDBVersion = new Regex(@"GNU gdb \(esp-gdb\) ([0-9\.]+)_.*");
 
             var proc = new Process();
             proc.StartInfo.FileName = tool;
@@ -28,6 +29,9 @@ namespace ESP32ToolchainUpdater
             var firstLine = proc.StandardOutput.ReadLine();
 
             var m = rgVersion.Match(firstLine);
+            if (!m.Success)
+                m = rgGDBVersion.Match(firstLine);
+
             if (!m.Success)
                 throw new Exception("Unexpected version output: " + firstLine);
 
@@ -49,7 +53,7 @@ namespace ESP32ToolchainUpdater
 
             string oldDir = Path.GetFullPath(args[0]), newDir = Path.GetFullPath(args[1]);
             var bspXML = Path.Combine(newDir, @"esp32-bsp\BSP.xml");
-            UpdateHardwareRegisters(bspXML);
+            //UpdateHardwareRegisters(bspXML);
 
             //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C6", @"E:\projects\temp\EmbeddedProject7\build\VisualGDB\Debug\blink.map");
             //MemoryMapUpdater.UpdateMemoryMap(bspXML, "ESP32C3", @"E:\projects\temp\EmbeddedProject5\build\VisualGDB\Debug\blink.map");
@@ -86,10 +90,30 @@ namespace ESP32ToolchainUpdater
                     }
 
                 }
-                if (candidateDirs.Count != 1)
-                    throw new Exception($"Ambiguous new directory for {oldToolchain.AdditionalPathDirs[i]}!");
 
-                newToolchain.AdditionalPathDirs[i] = candidateDirs.First().Key;
+                string bestMatch = null;
+
+                if (candidateDirs.Count == 1)
+                    bestMatch = candidateDirs.First().Key;
+                else
+                {
+                    //Find a directory that differs in the version/date, (e.g. tools\xtensa-esp-elf\esp-12.x => tools\xtensa-esp-elf\esp-13.x)
+                    foreach (var k in candidateDirs.Keys)
+                    {
+                        int idx = CountMatchingChars(oldToolchain.AdditionalPathDirs[i], k);
+                        if (idx < 0 || (char.IsDigit(oldToolchain.AdditionalPathDirs[i][idx]) && char.IsDigit(k[idx])))
+                        {
+                            if (bestMatch != null)
+                                throw new Exception("Could not find a non-ambiguous substitute for " + oldToolchain.AdditionalPathDirs[i]);
+                            bestMatch = k;
+                        }
+                    }
+
+                    if (bestMatch == null)
+                        throw new Exception("Failed to find a substitute for " + oldToolchain.AdditionalPathDirs[i]);
+                }
+
+                newToolchain.AdditionalPathDirs[i] = bestMatch;
                 if (!Directory.Exists(Path.Combine(newDir, newToolchain.AdditionalPathDirs[i])))
                     throw new Exception("Invalid path: " + newToolchain.AdditionalPathDirs[i]);
 
@@ -115,6 +139,15 @@ namespace ESP32ToolchainUpdater
 
             }
             XmlTools.SaveObject(bsp, Path.Combine(newDir, @"esp32-bsp\BSP.xml"));
+        }
+
+        static int CountMatchingChars(string x, string y)
+        {
+            for (int i = 0; i < x.Length && i < y.Length; i++)
+                if (x[i] != y[i])
+                    return i;
+
+            return -1;
         }
 
         private static void UpdateHardwareRegisters(string bspXML)
