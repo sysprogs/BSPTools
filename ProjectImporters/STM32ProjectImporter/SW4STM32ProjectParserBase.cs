@@ -65,7 +65,7 @@ namespace STM32ProjectImporter
                 if (nonReleaseConfigs.Length > 1)
                 {
                     if (nonReleaseConfigs.Length > 3)
-                        throw new Exception("Unexpected configuration count for " + project.CProjectFile);
+                        throw new Exception("Unexpected configuration count for " + project.CProjectFile + ":" + string.Join(", ", nonReleaseConfigs.Select(c => c.ToString()).ToArray()));
 
                     string artifactName = cconfiguration.ArtifactName;
                     if (artifactName.EndsWith("_CM4"))

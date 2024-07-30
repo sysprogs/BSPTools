@@ -10,6 +10,13 @@ STM32H747I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotific
 
 #This appears to be a glitch with a specific SDK version
 STM32469I_EVAL-Examples-CRYP-CRYP_TDESModes
+32L476GDISCOVERY-Demonstrations
+STM32H743I-EVAL-Applications-FileX-Fx_Nand_Write_Read_File
+STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes
+STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes_Suspension
+STM32L476G-EVAL-Examples-CRYP-CRYP_DMA
+STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Modes
+STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Suspension
 
 #The examples below fail due to mismatching USBX versions between F7 and H7. Should be resolved in future SDK releases.
 NUCLEO-C071RB-Applications-USBX-Ux_Device_CDC_ACM
