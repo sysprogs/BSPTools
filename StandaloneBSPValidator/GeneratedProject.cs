@@ -65,9 +65,9 @@ namespace StandaloneBSPValidator
             {
                 var s2 = VariableHelper.ExpandVariables(s1.SourcePath, bspDict);
                 var targetFile = projectDir + "\\" + s1.TargetPath.Replace("/", "\\");
-                var pth = Path.GetDirectoryName(targetFile);
-                if (!Directory.Exists(pth))
-                    Directory.CreateDirectory(pth);
+                var targetDir = Path.GetDirectoryName(targetFile);
+                if (!Directory.Exists(targetDir))
+                    Directory.CreateDirectory(targetDir);
                 if (!File.Exists(targetFile))
                     File.Copy(s2.Replace("/", "\\"), targetFile);
                 return s1.TargetPath;
@@ -95,7 +95,7 @@ namespace StandaloneBSPValidator
             ignoredFiles[Path.Combine(sample.Sample.Directory, LoadedBSP.SampleDescriptionFile)] = true;
             DoImportSampleRecursively(bspDict, sample, sample.Sample.Directory, _ProjectDir, binaryFiles, ignoredFiles, plainC, "");
             if (data.AdditionalSourcesFromBSP != null)
-                AddBSPFilesRecursively(data.AdditionalSourcesFromBSP, bspDict, _ProjectDir);
+                AddBSPFilesRecursively(data.AdditionalSourcesFromBSP, bspDict);
             if (data.AdditionalSourcesToCopy != null)
                 foreach (var fobj in data.AdditionalSourcesToCopy)
                 {
@@ -151,7 +151,14 @@ namespace StandaloneBSPValidator
             }
         }
 
-        void DoImportSampleRecursively(Dictionary<string, string> bspDict, ConfiguredSample sample, string sourceDir, string targetDir, Dictionary<string, bool> binaryFiles, Dictionary<string, bool> ignoredFiles, bool plainC, string relativePath)
+        void DoImportSampleRecursively(Dictionary<string, string> bspDict,
+            ConfiguredSample sample,
+            string sourceDir,
+            string targetDir,
+            Dictionary<string, bool> binaryFiles,
+            Dictionary<string, bool> ignoredFiles,
+            bool plainC,
+            string relativePath)
         {
             foreach (var fn in Directory.GetFiles(sourceDir))
             {
@@ -186,6 +193,7 @@ namespace StandaloneBSPValidator
                 {
                 }
             }
+
             foreach (var fn in Directory.GetDirectories(sourceDir))
             {
                 string target;
@@ -202,7 +210,7 @@ namespace StandaloneBSPValidator
             }
         }
 
-        void AddBSPFilesRecursively(VirtualSourceDir dir, Dictionary<string, string> systemDict, string projectDir)
+        void AddBSPFilesRecursively(VirtualSourceDir dir, Dictionary<string, string> systemDict)
         {
             if (dir.Files != null)
                 foreach (var fn in dir.Files)
@@ -212,7 +220,7 @@ namespace StandaloneBSPValidator
                 }
             if (dir.Subdirs != null)
                 foreach (var subdir in dir.Subdirs)
-                    AddBSPFilesRecursively(subdir, systemDict, projectDir);
+                    AddBSPFilesRecursively(subdir, systemDict);
         }
 
         public const string MapFileName = "test.map";

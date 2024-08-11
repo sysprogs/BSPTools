@@ -283,7 +283,7 @@ namespace VendorSampleParserEngine
                     directoryMatches = true;
             }
 
-            if (directoryMatches && mode == RunMode.Release)
+            if (directoryMatches && (mode == RunMode.Release || mode == RunMode.CodeScope))
             {
                 Console.WriteLine($"Loaded {sampleDir.Samples.Length} samples from cache");
                 HashSet<string> blacklist = ParseBlacklistFile();
@@ -426,9 +426,19 @@ namespace VendorSampleParserEngine
         }
 
 
-        Program.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples, string sampleDirPath, VendorSamplePass pass, Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null, double testProbability = 1, BSPValidationFlags validationFlags = BSPValidationFlags.None)
+        BSPValidator.TestStatistics TestVendorSamplesAndUpdateReportAndDependencies(VendorSample[] samples,
+            string sampleDirPath,
+            VendorSamplePass pass,
+            Predicate<VendorSample> keepDirectoryAfterSuccessfulBuild = null,
+            double testProbability = 1,
+            BSPValidationFlags validationFlags = BSPValidationFlags.None,
+            RawCodeScopeSampleList codeScopeSampleList = null)
         {
-            Console.WriteLine($"Building {samples.Length} samples...");
+            if (codeScopeSampleList != null)
+                Console.WriteLine($"Computing CodeScope definitions for {samples.Length} samples...");
+            else
+                Console.WriteLine($"Building {samples.Length} samples...");
+
             if (pass != VendorSamplePass.RelocatedBuild && pass != VendorSamplePass.InPlaceBuild)
                 throw new Exception("Invalid build pass: " + pass);
 
@@ -474,11 +484,18 @@ namespace VendorSampleParserEngine
                     if (keepDirectoryAfterSuccessfulBuild?.Invoke(vs) == true)
                         thisSampleFlags |= BSPValidationFlags.KeepDirectoryAfterSuccessfulTest;
 
-                    var result = StandaloneBSPValidator.Program.TestVendorSampleAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, thisSampleFlags, Path.Combine(CacheDirectory, "CMSELibs"));
+                    var job = BSPValidator.CreateValidationJobAndUpdateDependencies(mcu, vs, mcuDir, sampleDirPath, CodeRequiresDebugInfoFlag, thisSampleFlags, Path.Combine(CacheDirectory, "CMSELibs"));
+                    if (codeScopeSampleList != null)
+                    {
+                        codeScopeSampleList.Samples.Add(job.MakeCodeScopeSample());
+                        continue;
+                    }
+                    
+                    var result = job.Run();
                     record.BuildDuration = (int)(DateTime.Now - start).TotalMilliseconds;
                     record.TimeOfLastBuild = DateTime.Now;
 
-                    if (result.Result != StandaloneBSPValidator.Program.TestBuildResult.Succeeded)
+                    if (result.Result != BSPValidator.TestBuildResult.Succeeded)
                     {
                         StoreError(record, result.LogFile, pass);
                         samplesFailed++;
@@ -518,7 +535,7 @@ namespace VendorSampleParserEngine
                 }
             }
 
-            return new StandaloneBSPValidator.Program.TestStatistics { Passed = sampleCount - samplesFailed, Failed = samplesFailed };
+            return new BSPValidator.TestStatistics { Passed = sampleCount - samplesFailed, Failed = samplesFailed };
         }
 
         public static void OutputKeyValueList(List<KeyValuePair<string, string>> fields)
@@ -540,13 +557,17 @@ namespace VendorSampleParserEngine
             CleanRelease,
             SingleSample,
             UpdateErrors,
+            CodeScope,
         }
 
         protected virtual string FilterSDKDir(string dir) => dir;
 
+        protected virtual ICodeScopeModuleLocator ModuleLocator => null;
+
+        protected string _SDKdir;
+
         public void Run(string[] args)
         {
-            string SDKdir = null;
             string specificSampleName = null;
             bool pass2Incremental = false;
             RunMode mode = RunMode.Invalid;
@@ -569,10 +590,10 @@ namespace VendorSampleParserEngine
                     mode = Enum.GetValues(typeof(RunMode)).OfType<RunMode>().First(v => v.ToString().ToLower() == arg.Substring(1).ToLower());
                 }
                 else
-                    SDKdir = FilterSDKDir(arg);
+                    _SDKdir = FilterSDKDir(arg);
             }
 
-            if (SDKdir == null || mode == RunMode.Invalid)
+            if (_SDKdir == null || mode == RunMode.Invalid)
             {
                 Console.WriteLine($"Usage: {Path.GetFileName(Assembly.GetEntryAssembly().Location)} <mode> <SW package directory>");
                 Console.WriteLine($"Modes:");
@@ -581,6 +602,7 @@ namespace VendorSampleParserEngine
                 Console.WriteLine($"       /release       - Reuse cached definitions, retest all samples. Update BSP.");
                 Console.WriteLine($"       /cleanRelease  - Reparse/retest all samples. Update BSP.");
                 Console.WriteLine($"       /updateErrors  - Re-categorize errors based on KnownProblems.xml");
+                Console.WriteLine($"       /CodeScope     - Export samples to a CodeScope job");
                 Console.WriteLine($"       /single:<name> - Run all phases of just one sample.");
                 Console.WriteLine($"Press any key to continue...");
                 Console.ReadKey();
@@ -622,7 +644,7 @@ namespace VendorSampleParserEngine
 
             string sampleListFile = Path.Combine(CacheDirectory, "Samples.xml");
 
-            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, SDKdir, mode, specificSampleName);
+            var sampleDir = BuildOrLoadSampleDirectoryAndUpdateReportForFailedSamples(sampleListFile, _SDKdir, mode, specificSampleName);
             Dictionary<string, string> encounteredIDs = new Dictionary<string, string>();
 
             foreach (var vs in sampleDir.Samples)
@@ -660,6 +682,7 @@ namespace VendorSampleParserEngine
                         pass1Queue = new VendorSample[0];
                     break;
                 case RunMode.CleanRelease:
+                case RunMode.CodeScope:
                     pass1Queue = insertionQueue = sampleDir.Samples;
                     break;
                 case RunMode.SingleSample:
@@ -675,8 +698,31 @@ namespace VendorSampleParserEngine
             {
                 pass1Queue = pass1Queue.Where(s => !SampleHasDependencies(s)).Concat(pass1Queue.Where(s => SampleHasDependencies(s))).ToArray();
 
+                RawCodeScopeSampleList codeScopeSampleList = mode == RunMode.CodeScope ? new RawCodeScopeSampleList() : null;
+
                 //Test the raw VendorSamples in-place and store AllDependencies
-                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue, null, VendorSamplePass.InPlaceBuild, vs => _Report.HasSampleFailed(vs.InternalUniqueID), validationFlags: BSPValidationFlags.ResolveNameCollisions);
+                TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue,
+                    null, 
+                    VendorSamplePass.InPlaceBuild, 
+                    vs => _Report.HasSampleFailed(vs.InternalUniqueID),
+                    1,
+                    BSPValidationFlags.ResolveNameCollisions,
+                    codeScopeSampleList);
+
+                if (codeScopeSampleList != null)
+                {
+                    var baseFlags = new BaseFlagSetBuilder();
+                    var jobs = CodeScopeJobBuilder.ComputeJobs(_SDKdir, codeScopeSampleList, ModuleLocator ?? throw new Exception("Missing CodeScope module locator"), baseFlags);
+                    var jobDir = Path.Combine(TestDirectory, BSP.BSP.PackageID, "CodeScopeJobs");
+                    Directory.CreateDirectory(jobDir);
+                    if (jobs != null)
+                        foreach(var job in jobs)
+                            XmlTools.SaveObject(job, Path.Combine(jobDir, job.Name + ".csjx"));
+
+                    File.WriteAllLines(Path.Combine(jobDir, "BaseFlags.txt"), baseFlags.Complete());
+                    Console.WriteLine("CodeScope sample list saved to the test directory.");
+                    return;
+                }
 
                 foreach (var vs in pass1Queue)
                 {

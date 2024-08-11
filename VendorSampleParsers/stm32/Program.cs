@@ -453,7 +453,7 @@ namespace GeneratorSampleStm32
                         ext = "";
                     }
 
-                    for (int i = 2; ;i++)
+                    for (int i = 2; ; i++)
                     {
                         string candidate = $"{pathBase}v{i}{ext}";
                         if (!_ReverseMappingDict.ContainsKey(candidate))
@@ -665,6 +665,40 @@ namespace GeneratorSampleStm32
                     return new ParsedVendorSamples { VendorSamples = allSamples.ToArray(), FailedSamples = parser.FailedSamples.ToArray() };
                 }
             }
+
+            class STM32CodeScopeModuleLocator : ICodeScopeModuleLocator
+            {
+                public CodeScopeSDKMatchingRule[] SDKMatchingRules => new[]
+                {
+                    new CodeScopeSDKMatchingRule(@"^([^_]+)_([0-9.]+)\\STM32Cube_FW_([^_]+)_V([0-9.]+)", "{1}", "{2}", ValidateFamilyMatch)
+                };
+
+                static void ValidateFamilyMatch(Match m)
+                {
+                    if (m.Groups[1].Value != m.Groups[3].Value)
+                        throw new Exception("Mismatching family");
+                    if (m.Groups[2].Value != m.Groups[4].Value)
+                        throw new Exception("Mismatching version");
+                }
+
+                public CodeScopeModuleMatchingRule[] ModuleMatchingRules => new[]
+                {
+                    new CodeScopeModuleMatchingRule(@"Drivers\\STM32[^_\\]+_HAL_Driver", "HAL"),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\CMSIS", @"CMSIS"),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\Components\\([^\\]+)", @"Drivers\Peripherals\{1}"),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\Adafruit_Shield", @"Drivers\Peripherals\Adafruit_Shield"),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\([^\\]+)", @"Drivers\Boards\{1}"),
+                    new CodeScopeModuleMatchingRule(@"Middlewares\\(ST|Third_Party)\\([^\\]+)", @"Libraries\{2}"),
+                    new CodeScopeModuleMatchingRule(@"Utilities", @"Utilities"),
+                };
+
+                public CodeScopeModuleMatchingRule[] SampleMatchingRules => new[]
+                {
+                    new CodeScopeModuleMatchingRule(@"Projects\\([^\\]+)", @"Examples\{1}\{2}"),
+                };
+            }
+
+            protected override ICodeScopeModuleLocator ModuleLocator { get; } = new STM32CodeScopeModuleLocator();
         }
 
         static void Main(string[] args)

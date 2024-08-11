@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Serialization;
+using static StandaloneBSPValidator.BSPValidator;
 
 namespace StandaloneBSPValidator
 {
@@ -106,7 +107,7 @@ namespace StandaloneBSPValidator
         public string BSPSubfolderMask;
     }
 
-    public class Program
+    public class BSPValidator
     {
         static Dictionary<string, string> GetDefaultPropertyValues(PropertyList propertyList)
         {
@@ -328,7 +329,7 @@ namespace StandaloneBSPValidator
         }
 
 
-        public static TestResult TestVendorSampleAndUpdateDependencies(LoadedBSP.LoadedMCU mcu,
+        public static ValidationJob CreateValidationJobAndUpdateDependencies(LoadedBSP.LoadedMCU mcu,
             VendorSample vs,
             string mcuDir,
             string sampleDirPath,
@@ -338,7 +339,6 @@ namespace StandaloneBSPValidator
         {
             if (Directory.Exists(mcuDir))
                 Directory.Delete(mcuDir, true);
-            Directory.CreateDirectory(mcuDir);
 
             var configuredMCU = new LoadedBSP.ConfiguredMCU(mcu, GetDefaultPropertyValues(mcu.ExpandedMCU.ConfigurableProperties));
 
@@ -435,7 +435,7 @@ namespace StandaloneBSPValidator
             sourceExtensions.Add("cpp", true);
             sourceExtensions.Add("s", true);
 
-            return BuildAndRunValidationJob(mcu, mcuDir, prj, flags, sourceExtensions, vs, null, validationFlags, successCallback);
+            return new ValidationJob(mcu, mcuDir, prj, flags, sourceExtensions, vs, null, validationFlags, successCallback);
         }
 
         static void CreateEmptyDirectoryForTestingMCU(string mcuDir)
@@ -593,183 +593,214 @@ namespace StandaloneBSPValidator
                 sourceExtensions[ext] = true;
 
             Console.WriteLine("Building {0}...", Path.GetFileName(testDirectory));
-            return BuildAndRunValidationJob(mcu, testDirectory, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null, validationFlags);
+            return new ValidationJob(mcu, testDirectory, prj, flags, sourceExtensions, null, sample.ValidateRegisters ? registerValidationParameters : null, validationFlags).Run();
         }
 
-        private static TestResult BuildAndRunValidationJob(LoadedBSP.LoadedMCU mcu,
-            string mcuDir,
-            GeneratedProject prj,
-            ToolFlags flags,
-            Dictionary<string, bool> sourceExtensions,
-            VendorSample vendorSample = null,
-            RegisterValidationParameters registerValidationParameters = null,
-            BSPValidationFlags validationFlags = BSPValidationFlags.None,
-            Action successCallback = null)
+        public class ValidationJob
         {
-            BuildJob job = new BuildJob();
-            string prefix = string.Format("{0}\\{1}\\{2}", mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, mcu.BSP.Toolchain.Toolchain.Prefix);
+            private LoadedBSP.LoadedMCU _MCU;
+            private string _Directory;
+            private GeneratedProject _Project;
+            private ToolFlags _Flags;
+            private Dictionary<string, bool> _SourceExtensions;
+            private VendorSample _VendorSample;
+            private RegisterValidationParameters _RegisterValidationParameters;
+            private BSPValidationFlags _ValidationFlags;
+            private Action _SuccessCallback;
 
-            foreach (var sf in prj.SourceFiles)
+            internal ValidationJob(LoadedBSP.LoadedMCU mcu, string mcuDir, GeneratedProject prj, ToolFlags flags, Dictionary<string, bool> sourceExtensions, VendorSample vs, RegisterValidationParameters value, BSPValidationFlags validationFlags, Action successCallback = null)
             {
-                var sfE = sf.Replace('\\', '/');
-                string ext = Path.GetExtension(sf);
-                if (!sourceExtensions.ContainsKey(ext.TrimStart('.')))
+                _MCU = mcu;
+                _Directory = mcuDir;
+                _Project = prj;
+                _Flags = flags;
+                _SourceExtensions = sourceExtensions;
+                _VendorSample = vs;
+                _RegisterValidationParameters = value;
+                _ValidationFlags = validationFlags;
+                _SuccessCallback = successCallback;
+            }
+
+            public CodeScopeSample MakeCodeScopeSample()
+            {
+                return new CodeScopeSample
                 {
-                    if (ext != ".txt" && ext != ".a" && ext != ".h")
-                        Console.WriteLine($"#{sf} is not a recognized source file");
+                    VendorSample = _VendorSample,
+                    SuggestedBuildDirectory = _Directory,
+                    SourceFiles = _Project.SourceFiles.Where(f => _SourceExtensions.ContainsKey(Path.GetExtension(f).TrimStart('.'))).ToArray(),
+                    Flags = _Flags
+                };
+            }
+
+            public TestResult Run()
+            {
+                Directory.CreateDirectory(_Directory);
+                BuildJob job = new BuildJob();
+                string prefix = string.Format("{0}\\{1}\\{2}", _MCU.BSP.Toolchain.Directory, _MCU.BSP.Toolchain.Toolchain.BinaryDirectory, _MCU.BSP.Toolchain.Toolchain.Prefix);
+
+                foreach (var sf in _Project.SourceFiles)
+                {
+                    var sfE = sf.Replace('\\', '/');
+                    string ext = Path.GetExtension(sf);
+                    if (!_SourceExtensions.ContainsKey(ext.TrimStart('.')))
+                    {
+                        if (ext != ".txt" && ext != ".a" && ext != ".h")
+                            Console.WriteLine($"#{sf} is not a recognized source file");
+                    }
+                    else
+                    {
+                        bool isCpp = ext.ToLower() != ".c";
+                        string obj = Path.ChangeExtension(Path.GetFileName(sfE), ".o");
+                        job.CompileTasks.Add(new BuildTask
+                        {
+                            PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sfE), ".o"),
+                            AllInputs = new[] { sfE },
+                            Executable = prefix + (isCpp ? "g++" : "gcc"),
+                            Arguments = $"-c -o $@ $< {(isCpp ? "-std=gnu++11 " : " ")} {_Flags.GetEffectiveCFLAGS(isCpp, ToolchainSubtype.GCC, ToolFlags.FlagEscapingMode.ForMakefile)}".Replace('\\', '/').Replace("/\"", "\\\""),
+                        });
+                    }
+                }
+
+
+                List<string> errorLines = new List<string>();
+                foreach (var g in job.CompileTasks.GroupBy(t => t.PrimaryOutput.ToLower()))
+                {
+                    if (g.Count() > 1)
+                    {
+                        int i = 0;
+                        foreach (var j2 in g)
+                            j2.AttachDisambiguationSuffix($"_{++i}");
+
+                        errorLines.Add($"ERROR: {g.Key} corresponds to the following files:");
+                        foreach (var f in g)
+                            errorLines.Add("\t" + f.AllInputs.FirstOrDefault());
+                    }
+                }
+
+                job.OtherTasks.Add(new BuildTask
+                {
+                    Executable = prefix + "g++",
+                    Arguments = $"{_Flags.StartGroup} {_Flags.EffectiveLDFLAGS} $^ {_Flags.EndGroup} -o $@",
+                    AllInputs = job.CompileTasks.Select(t => t.PrimaryOutput)
+                        .Concat(_Project.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).Select(fn => fn.Replace('\\', '/')))
+                        .ToArray(),
+                    PrimaryOutput = "test.elf",
+                });
+
+                job.OtherTasks.Add(new BuildTask
+                {
+                    Executable = prefix + "objcopy",
+                    Arguments = "-O binary $< $@",
+                    AllInputs = new[] { "test.elf" },
+                    PrimaryOutput = "test.bin",
+                });
+
+                List<string> comments = new List<string>();
+                comments.Add("Original directory:" + _VendorSample?.Path);
+                comments.Add("Tool flags:");
+                comments.Add("\tInclude directories:");
+                foreach (var dir in _Flags.IncludeDirectories ?? new string[0])
+                    comments.Add("\t\t" + dir);
+                comments.Add("\tPreprocessor macros:");
+                foreach (var dir in _Flags.PreprocessorMacros ?? new string[0])
+                    comments.Add("\t\t" + dir);
+                comments.Add("\tLibrary directories:");
+                foreach (var dir in _Flags.AdditionalLibraryDirectories ?? new string[0])
+                    comments.Add("\t\t" + dir);
+                comments.Add("\tLibrary names:");
+                foreach (var dir in _Flags.AdditionalLibraries ?? new string[0])
+                    comments.Add("\t\t" + dir);
+                comments.Add("\tExtra linker inputs:");
+                foreach (var dir in _Flags.AdditionalLinkerInputs ?? new string[0])
+                    comments.Add("\t\t" + dir);
+                comments.Add("\tCFLAGS:" + _Flags.CFLAGS);
+                comments.Add("\tCXXFLAGS:" + _Flags.CXXFLAGS);
+                comments.Add("\tLDFLAGS:" + _Flags.LDFLAGS);
+                comments.Add("\tCOMMONFLAGS:" + _Flags.COMMONFLAGS);
+
+                if (_VendorSample?.Configuration.Frameworks != null)
+                {
+                    comments.Add("Referenced frameworks:");
+                    foreach (var fw in _VendorSample.Configuration.Frameworks)
+                        comments.Add("\t" + fw);
+                    comments.Add("Framework configuration:");
+                    foreach (var kv in _VendorSample.Configuration.Configuration?.Entries ?? new PropertyDictionary2.KeyValue[0])
+                        comments.Add($"\t{kv.Key} = {kv.Value}");
+                }
+
+                job.GenerateMakeFile(Path.Combine(_Directory, "Makefile"),
+                    "test.bin",
+                    comments,
+                    (_ValidationFlags & BSPValidationFlags.ContinuePastCompilationErrors) != BSPValidationFlags.None);
+
+                if (!string.IsNullOrEmpty(_MCU.MCUDefinitionFile) && _RegisterValidationParameters != null)
+                {
+                    string firstSrcFileInPrjDir = _Project.SourceFiles.First(fn => Path.GetDirectoryName(fn) == _Directory);
+                    InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(_MCU.MCUDefinitionFile), _RegisterValidationParameters);
+                }
+
+                if (errorLines.Count > 0 && (_ValidationFlags & BSPValidationFlags.ResolveNameCollisions) == BSPValidationFlags.None)
+                {
+                    errorLines.Insert(0, "Found critical errors while trying to generate Makefile:");
+                    var buildLog = Path.Combine(_Directory, "build.log");
+                    File.WriteAllLines(buildLog, errorLines);
+                    return new TestResult(TestBuildResult.Failed, buildLog);
+                }
+
+                bool buildSucceeded;
+                if (true)
+                {
+                    var proc = Process.Start(new ProcessStartInfo("cmd.exe", "/c " + Path.Combine(_MCU.BSP.Toolchain.Directory, _MCU.BSP.Toolchain.Toolchain.BinaryDirectory, "make.exe") + " -j" + Environment.ProcessorCount + " > build.log 2>&1") { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = _Directory });
+                    proc.WaitForExit();
+                    buildSucceeded = proc.ExitCode == 0;
                 }
                 else
                 {
-                    bool isCpp = ext.ToLower() != ".c";
-                    string obj = Path.ChangeExtension(Path.GetFileName(sfE), ".o");
-                    job.CompileTasks.Add(new BuildTask
+                    buildSucceeded = job.BuildFast(_Directory, Environment.ProcessorCount);
+                }
+
+
+                bool success = false;
+                string mapFile = Path.Combine(_Directory, GeneratedProject.MapFileName);
+                if (buildSucceeded && File.Exists(mapFile))
+                {
+                    success = File.ReadAllLines(Path.Combine(_Directory, mapFile)).Where(l => RgMainMap.IsMatch(l)).Count() > 0;
+
+                    if (success)
                     {
-                        PrimaryOutput = Path.ChangeExtension(Path.GetFileName(sfE), ".o"),
-                        AllInputs = new[] { sfE },
-                        Executable = prefix + (isCpp ? "g++" : "gcc"),
-                        Arguments = $"-c -o $@ $< { (isCpp ? "-std=gnu++11 " : " ")} {flags.GetEffectiveCFLAGS(isCpp, ToolchainSubtype.GCC, ToolFlags.FlagEscapingMode.ForMakefile)}".Replace('\\', '/').Replace("/\"", "\\\""),
-                    });
+                        string binFile = Path.Combine(_Directory, "test.bin");
+                        using (var fs = File.Open(binFile, FileMode.Open))
+                            if (fs.Length < 512)
+                                success = false;
+
+                    }
                 }
-            }
 
-
-            List<string> errorLines = new List<string>();
-            foreach (var g in job.CompileTasks.GroupBy(t => t.PrimaryOutput.ToLower()))
-            {
-                if (g.Count() > 1)
+                if (!success)
                 {
-                    int i = 0;
-                    foreach (var j2 in g)
-                        j2.AttachDisambiguationSuffix($"_{++i}");
-
-                    errorLines.Add($"ERROR: {g.Key} corresponds to the following files:");
-                    foreach (var f in g)
-                        errorLines.Add("\t" + f.AllInputs.FirstOrDefault());
+                    if (_VendorSample != null)
+                        _VendorSample.AllDependencies = null;
+                    return new TestResult(TestBuildResult.Failed, Path.Combine(_Directory, "build.log"));
                 }
-            }
 
-            job.OtherTasks.Add(new BuildTask
-            {
-                Executable = prefix + "g++",
-                Arguments = $"{flags.StartGroup} {flags.EffectiveLDFLAGS} $^ {flags.EndGroup} -o $@",
-                AllInputs = job.CompileTasks.Select(t => t.PrimaryOutput)
-                    .Concat(prj.SourceFiles.Where(f => f.EndsWith(".a", StringComparison.InvariantCultureIgnoreCase)).Select(fn => fn.Replace('\\', '/')))
-                    .ToArray(),
-                PrimaryOutput = "test.elf",
-            });
-
-            job.OtherTasks.Add(new BuildTask
-            {
-                Executable = prefix + "objcopy",
-                Arguments = "-O binary $< $@",
-                AllInputs = new[] { "test.elf" },
-                PrimaryOutput = "test.bin",
-            });
-
-            List<string> comments = new List<string>();
-            comments.Add("Original directory:" + vendorSample?.Path);
-            comments.Add("Tool flags:");
-            comments.Add("\tInclude directories:");
-            foreach (var dir in flags.IncludeDirectories ?? new string[0])
-                comments.Add("\t\t" + dir);
-            comments.Add("\tPreprocessor macros:");
-            foreach (var dir in flags.PreprocessorMacros ?? new string[0])
-                comments.Add("\t\t" + dir);
-            comments.Add("\tLibrary directories:");
-            foreach (var dir in flags.AdditionalLibraryDirectories ?? new string[0])
-                comments.Add("\t\t" + dir);
-            comments.Add("\tLibrary names:");
-            foreach (var dir in flags.AdditionalLibraries ?? new string[0])
-                comments.Add("\t\t" + dir);
-            comments.Add("\tExtra linker inputs:");
-            foreach (var dir in flags.AdditionalLinkerInputs ?? new string[0])
-                comments.Add("\t\t" + dir);
-            comments.Add("\tCFLAGS:" + flags.CFLAGS);
-            comments.Add("\tCXXFLAGS:" + flags.CXXFLAGS);
-            comments.Add("\tLDFLAGS:" + flags.LDFLAGS);
-            comments.Add("\tCOMMONFLAGS:" + flags.COMMONFLAGS);
-
-            if (vendorSample?.Configuration.Frameworks != null)
-            {
-                comments.Add("Referenced frameworks:");
-                foreach(var fw in vendorSample.Configuration.Frameworks)
-                    comments.Add("\t" + fw);
-                comments.Add("Framework configuration:");
-                foreach (var kv in vendorSample.Configuration.Configuration?.Entries ?? new PropertyDictionary2.KeyValue[0])
-                    comments.Add($"\t{kv.Key} = {kv.Value}");
-            }
-
-            job.GenerateMakeFile(Path.Combine(mcuDir, "Makefile"),
-                "test.bin", 
-                comments, 
-                (validationFlags & BSPValidationFlags.ContinuePastCompilationErrors) != BSPValidationFlags.None);
-
-            if (!string.IsNullOrEmpty(mcu.MCUDefinitionFile) && registerValidationParameters != null)
-            {
-                string firstSrcFileInPrjDir = prj.SourceFiles.First(fn => Path.GetDirectoryName(fn) == mcuDir);
-                InsertRegisterValidationCode(firstSrcFileInPrjDir, XmlTools.LoadObject<MCUDefinition>(mcu.MCUDefinitionFile), registerValidationParameters);
-            }
-
-            if (errorLines.Count > 0 && (validationFlags & BSPValidationFlags.ResolveNameCollisions) == BSPValidationFlags.None)
-            {
-                errorLines.Insert(0, "Found critical errors while trying to generate Makefile:");
-                var buildLog = Path.Combine(mcuDir, "build.log");
-                File.WriteAllLines(buildLog, errorLines);
-                return new TestResult(TestBuildResult.Failed, buildLog);
-            }
-
-            bool buildSucceeded;
-            if (true)
-            {
-                var proc = Process.Start(new ProcessStartInfo("cmd.exe", "/c " + Path.Combine(mcu.BSP.Toolchain.Directory, mcu.BSP.Toolchain.Toolchain.BinaryDirectory, "make.exe") + " -j" + Environment.ProcessorCount + " > build.log 2>&1") { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = mcuDir });
-                proc.WaitForExit();
-                buildSucceeded = proc.ExitCode == 0;
-            }
-            else
-            {
-                buildSucceeded = job.BuildFast(mcuDir, Environment.ProcessorCount);
-            }
-
-
-            bool success = false;
-            string mapFile = Path.Combine(mcuDir, GeneratedProject.MapFileName);
-            if (buildSucceeded && File.Exists(mapFile))
-            {
-                success = File.ReadAllLines(Path.Combine(mcuDir, mapFile)).Where(l => RgMainMap.IsMatch(l)).Count() > 0;
-
-                if (success)
+                if (_VendorSample != null)
                 {
-                    string binFile = Path.Combine(mcuDir, "test.bin");
-                    using (var fs = File.Open(binFile, FileMode.Open))
-                        if (fs.Length < 512)
-                            success = false;
-
+                    _VendorSample.AllDependencies = Directory.GetFiles(_Directory, "*.d")
+                        .SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":")))
+                        .Concat(_Project.SourceFiles.SelectMany(sf => FindIncludedResources(_VendorSample.Path, sf)))
+                        .Concat(_VendorSample.AuxiliaryLinkerScripts ?? new string[0])
+                        .Distinct()
+                        .ToArray();
                 }
+
+                _SuccessCallback?.Invoke();
+                if ((_ValidationFlags & BSPValidationFlags.KeepDirectoryAfterSuccessfulTest) == BSPValidationFlags.None)
+                    Directory.Delete(_Directory, true);
+
+                return new TestResult(TestBuildResult.Succeeded, Path.Combine(_Directory, "build.log"));
             }
-
-            if (!success)
-            {
-                if (vendorSample != null)
-                    vendorSample.AllDependencies = null;
-                return new TestResult(TestBuildResult.Failed, Path.Combine(mcuDir, "build.log"));
-            }
-
-            if (vendorSample != null)
-            {
-                vendorSample.AllDependencies = Directory.GetFiles(mcuDir, "*.d")
-                    .SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":")))
-                    .Concat(prj.SourceFiles.SelectMany(sf => FindIncludedResources(vendorSample.Path, sf)))
-                    .Concat(vendorSample.AuxiliaryLinkerScripts ?? new string[0])
-                    .Distinct()
-                    .ToArray();
-            }
-
-            successCallback?.Invoke();
-            if ((validationFlags & BSPValidationFlags.KeepDirectoryAfterSuccessfulTest) == BSPValidationFlags.None)
-                Directory.Delete(mcuDir, true);
-
-            return new TestResult(TestBuildResult.Succeeded, Path.Combine(mcuDir, "build.log"));
         }
+
 
         private static IEnumerable<string> FindIncludedResources(string baseDir, string sourceFile)
         {
@@ -996,13 +1027,6 @@ namespace StandaloneBSPValidator
             TestBSP(job, bsp, outputDir);
         }
 
-        static void Main(string[] args)
-        {
-            if (args.Length < 2)
-                throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
-
-            RunJob(args[0], args[1]);
-        }
 
         static bool IsNoValid(string pNameFrend, string[] NonValid)
         {
@@ -1099,5 +1123,18 @@ namespace StandaloneBSPValidator
 
         ContinuePastCompilationErrors = 4,
     }
+
+    public static class Program
+    {
+        static void Main(string[] args)
+        {
+            if (args.Length < 2)
+                throw new Exception("Usage: StandaloneBSPValidator <job file> <output dir>");
+
+            BSPValidator.RunJob(args[0], args[1]);
+        }
+
+    }
+
 
 }

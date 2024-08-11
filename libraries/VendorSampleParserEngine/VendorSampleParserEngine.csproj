@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeScopeJobBuilder.cs" />
     <Compile Include="ConfigurationFixDatabaseBuilder.cs" />
     <Compile Include="VendorSampleParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

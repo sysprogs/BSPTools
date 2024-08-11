@@ -160,7 +160,7 @@ namespace VendorSampleParserEngine
                             rejects.Add(i);
                     }
 
-                    var buildResult = Program.TestSingleSample(sampleObj, mcu, _TestDirectory, cfg.ToSampleJobObject(), null, null, BSPValidationFlags.KeepDirectoryAfterSuccessfulTest | BSPValidationFlags.ContinuePastCompilationErrors);
+                    var buildResult = BSPValidator.TestSingleSample(sampleObj, mcu, _TestDirectory, cfg.ToSampleJobObject(), null, null, BSPValidationFlags.KeepDirectoryAfterSuccessfulTest | BSPValidationFlags.ContinuePastCompilationErrors);
                     BuildSymbolTableFromBuildResults(handledFiles, result, fileBuildStatus);
 
                     if (rejects.Count == queue.Count)
