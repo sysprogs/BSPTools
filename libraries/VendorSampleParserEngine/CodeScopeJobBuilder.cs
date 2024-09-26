@@ -17,12 +17,14 @@ namespace VendorSampleParserEngine
         {
             public readonly ModuleContext Module;
             public readonly string PathInModule, PathInSDK;
+            public readonly bool IsSource;
 
-            public FileContext(ModuleContext mctx, string pathInModule, string pathInSDK)
+            public FileContext(ModuleContext mctx, string pathInModule, string pathInSDK, bool isSource)
             {
                 Module = mctx;
                 PathInModule = pathInModule;
                 PathInSDK = pathInSDK;
+                IsSource = isSource;
 
                 if (string.IsNullOrEmpty(pathInModule))
                     throw new ArgumentNullException(nameof(pathInModule));
@@ -50,7 +52,18 @@ namespace VendorSampleParserEngine
             public ModuleContext ProvideModule(CodeScopeModuleMatchingRule rule, string physicalPath, string virtualPath)
             {
                 if (!_Modules.TryGetValue(virtualPath, out var mc))
-                    _Modules[virtualPath] = mc = new ModuleContext(new CodeScopeSampleJob.Module { PhysicalPath = physicalPath, VirtualPath = virtualPath, ID = Path.GetFileName(virtualPath) });
+                    _Modules[virtualPath] = mc = new ModuleContext(new CodeScopeSampleJob.Module
+                    {
+                        PhysicalPath = physicalPath,
+                        Summary = new CodeScopeModuleSummary
+                        {
+                            ModuleType = rule.ModuleType,
+                            VirtualPath = virtualPath,
+                            ReasonablyUniqueName = Path.GetFileName(virtualPath),
+                            UserFriendlyName = Path.GetFileName(virtualPath),
+                            DeviceName = null,
+                        }
+                    });
                 return mc;
             }
 
@@ -72,11 +85,11 @@ namespace VendorSampleParserEngine
                     SampleProjects = _Samples.Select(s => s.Complete(this, baseFlags)).ToArray(),
                 };
 
-                foreach (var g in job.Modules.GroupBy(m => m.ID))
+                foreach (var g in job.Modules.GroupBy(m => m.Summary.ReasonablyUniqueName))
                     if (g.Count() > 1)
                         throw new Exception("Found multiple modules with ID of " + g.Key);
 
-                foreach (var g in job.SampleProjects.GroupBy(m => m.Self.ID))
+                foreach (var g in job.SampleProjects.GroupBy(m => m.Self.Summary.ReasonablyUniqueName))
                     if (g.Count() > 1)
                         throw new Exception("Found multiple projects with ID of " + g.Key);
 
@@ -138,7 +151,7 @@ namespace VendorSampleParserEngine
         public class SampleContext : ModuleContext
         {
             private readonly CodeScopeSample _Sample;
-            public List<FileContext> Files = new List<FileContext>();
+            public HashSet<FileContext> Files = new HashSet<FileContext>();
             public List<string> OutOfDirFiles = new List<string>();
 
             public SampleContext(CodeScopeSampleJob.Module def, CodeScopeSample sample)
@@ -153,7 +166,7 @@ namespace VendorSampleParserEngine
                 {
                     Self = Definition,
                     Flags = sdk.SplitFlags(_Sample.Flags, Definition.PhysicalPath, flagSet),
-                    SourceFiles = Files.Select(f => f.PathInSDK).ToArray(),
+                    SourceFiles = Files.Where(f=>f.IsSource).Select(f => f.PathInSDK).ToArray(),
                     UsedModules = Files.Select(f => f.Module).Distinct().Where(m => m != this && m.HasAssignedIndex).Select(m => m.AssignedIndex).ToArray(),
                     ExternalFiles = OutOfDirFiles.Count > 0 ? OutOfDirFiles.ToArray() : null,
                 };
@@ -191,8 +204,14 @@ namespace VendorSampleParserEngine
                         var def = new CodeScopeSampleJob.Module
                         {
                             PhysicalPath = samplePathInSDK,
-                            VirtualPath = modulePath,
-                            ID = sample.VendorSample.InternalUniqueID
+                            Summary = new CodeScopeModuleSummary
+                            {
+                                VirtualPath = modulePath,
+                                ReasonablyUniqueName = sample.VendorSample.InternalUniqueID,
+                                ModuleType = CodeScopeModuleType.Example,
+                                UserFriendlyName = sample.VendorSample.UserFriendlyName,
+                                DeviceName = sample.VendorSample.DeviceID,
+                            }
                         };
 
                         sampleCtx = new SampleContext(def, sample);
@@ -204,8 +223,15 @@ namespace VendorSampleParserEngine
                 if (sampleCtx == null)
                     throw new Exception("No rule matches " + samplePathInSDK);
 
+                var directSources = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
                 foreach (var file in sample.SourceFiles)
+                    directSources.Add(Path.GetFullPath(file));
+
+                foreach (var rawPath in sample.SourceFiles.Concat(sample.VendorSample.AllDependencies ?? new string[0]))
                 {
+                    var file = Path.GetFullPath(rawPath);
+                    bool isSource = directSources.Contains(file);
+
                     if (!allFiles.TryGetValue(file, out var fctx))
                     {
                         if (!file.StartsWith(sdkDir + "\\"))
@@ -249,7 +275,7 @@ namespace VendorSampleParserEngine
                             }
                         }
 
-                        allFiles[file] = fctx = new FileContext(mctx, pathInModule, pathInSDK);
+                        allFiles[file] = fctx = new FileContext(mctx, pathInModule, pathInSDK, isSource);
                     }
 
                     sampleCtx.Files.Add(fctx);
@@ -310,11 +336,13 @@ namespace VendorSampleParserEngine
     {
         public Regex Regex;
         public string ModulePath;
+        public CodeScopeModuleType ModuleType;
 
-        public CodeScopeModuleMatchingRule(string regex, string modulePathFormat)
+        public CodeScopeModuleMatchingRule(string regex, string modulePathFormat, CodeScopeModuleType moduleType)
         {
             Regex = new Regex("^" + regex + @"\\(.*)$", RegexOptions.IgnoreCase);
             ModulePath = modulePathFormat;
+            ModuleType = moduleType;
         }
 
         public override string ToString() => Regex.ToString();

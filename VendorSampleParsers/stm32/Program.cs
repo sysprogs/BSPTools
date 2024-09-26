@@ -1,6 +1,7 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
 using GeneratorSampleStm32.ProjectParsers;
+using StandaloneBSPValidator;
 using stm32_bsp_generator;
 using System;
 using System.Collections.Generic;
@@ -683,18 +684,18 @@ namespace GeneratorSampleStm32
 
                 public CodeScopeModuleMatchingRule[] ModuleMatchingRules => new[]
                 {
-                    new CodeScopeModuleMatchingRule(@"Drivers\\STM32[^_\\]+_HAL_Driver", "HAL"),
-                    new CodeScopeModuleMatchingRule(@"Drivers\\CMSIS", @"CMSIS"),
-                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\Components\\([^\\]+)", @"Drivers\Peripherals\{1}"),
-                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\Adafruit_Shield", @"Drivers\Peripherals\Adafruit_Shield"),
-                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\([^\\]+)", @"Drivers\Boards\{1}"),
-                    new CodeScopeModuleMatchingRule(@"Middlewares\\(ST|Third_Party)\\([^\\]+)", @"Libraries\{2}"),
-                    new CodeScopeModuleMatchingRule(@"Utilities", @"Utilities"),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\STM32[^_\\]+_HAL_Driver", "HAL", CodeScopeModuleType.Core),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\CMSIS", @"CMSIS", CodeScopeModuleType.Core),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\Components\\([^\\]+)", @"Drivers\Peripherals\{1}", CodeScopeModuleType.Driver),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\Adafruit_Shield", @"Drivers\Peripherals\Adafruit_Shield", CodeScopeModuleType.Driver),
+                    new CodeScopeModuleMatchingRule(@"Drivers\\BSP\\([^\\]+)", @"Drivers\Boards\{1}", CodeScopeModuleType.Driver),
+                    new CodeScopeModuleMatchingRule(@"Middlewares\\(ST|Third_Party)\\([^\\]+)", @"Libraries\{2}", CodeScopeModuleType.Library),
+                    new CodeScopeModuleMatchingRule(@"Utilities", @"Utilities", CodeScopeModuleType.Library),
                 };
 
                 public CodeScopeModuleMatchingRule[] SampleMatchingRules => new[]
                 {
-                    new CodeScopeModuleMatchingRule(@"Projects\\([^\\]+)", @"Examples\{1}\{2}"),
+                    new CodeScopeModuleMatchingRule(@"Projects\\([^\\]+)", @"Examples\{1}\{2}", CodeScopeModuleType.Example),
                 };
             }
 

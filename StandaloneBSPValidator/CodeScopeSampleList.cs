@@ -19,15 +19,24 @@ namespace StandaloneBSPValidator
         public string SuggestedBuildDirectory;
     }
 
+    public struct CodeScopeModuleSummary
+    {
+        public CodeScopeModuleType ModuleType;
+        public string UserFriendlyName;
+        public string VirtualPath;
+        public string DeviceName;
+        public string ReasonablyUniqueName;     //Used for cookies
+    }
+
+
     public class CodeScopeSampleJob
     {
         public struct Module
         {
-            public string ID;
             public string PhysicalPath;
-            public string VirtualPath;
+            public CodeScopeModuleSummary Summary;
 
-            public override string ToString() => ID;
+            public override string ToString() => Summary.UserFriendlyName;
         }
 
         public struct SimplifiedToolFlags
@@ -52,5 +61,14 @@ namespace StandaloneBSPValidator
         public string RelativePath;
         public Module[] Modules;
         public SampleProject[] SampleProjects;
+    }
+
+    public enum CodeScopeModuleType //Higher value means higher priority when picking the "owning module" for a function
+    {
+        Unknown,
+        Example,
+        Library,
+        Driver,
+        Core,
     }
 }
