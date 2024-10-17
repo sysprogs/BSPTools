@@ -28,6 +28,7 @@ namespace VendorSampleParserEngine
         readonly VendorSampleTestReport _Report;
 
         readonly KnownSampleProblemDatabase _KnownProblems;
+        protected bool _ForceCSemanticsForCodeScope;
 
         protected readonly RegistryKey _SettingsKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPTools\VendorSampleParsers");
 
@@ -712,7 +713,7 @@ namespace VendorSampleParserEngine
                 if (codeScopeSampleList != null)
                 {
                     var baseFlags = new BaseFlagSetBuilder();
-                    var jobs = CodeScopeJobBuilder.ComputeJobs(_SDKdir, codeScopeSampleList, ModuleLocator ?? throw new Exception("Missing CodeScope module locator"), baseFlags);
+                    var jobs = CodeScopeJobBuilder.ComputeJobs(_SDKdir, codeScopeSampleList, ModuleLocator ?? throw new Exception("Missing CodeScope module locator"), baseFlags, _ForceCSemanticsForCodeScope);
                     var jobDir = Path.Combine(TestDirectory, BSP.BSP.PackageID, "CodeScopeJobs");
                     Directory.CreateDirectory(jobDir);
                     if (jobs != null)

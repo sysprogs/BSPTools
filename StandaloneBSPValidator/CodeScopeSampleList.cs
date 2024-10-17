@@ -59,6 +59,7 @@ namespace StandaloneBSPValidator
 
         public string Name, Version;
         public string RelativePath;
+        public bool ForceCSemantics;
         public Module[] Modules;
         public SampleProject[] SampleProjects;
     }

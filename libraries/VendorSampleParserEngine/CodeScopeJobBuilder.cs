@@ -67,7 +67,7 @@ namespace VendorSampleParserEngine
                 return mc;
             }
 
-            public CodeScopeSampleJob BuildJob(BaseFlagSetBuilder baseFlags)
+            public CodeScopeSampleJob BuildJob(BaseFlagSetBuilder baseFlags, bool forceCSemantics)
             {
                 List<CodeScopeSampleJob.Module> modules = new List<CodeScopeSampleJob.Module>();
                 foreach (var m in _Modules.Values)
@@ -83,6 +83,7 @@ namespace VendorSampleParserEngine
                     RelativePath = RelativePath,
                     Modules = modules.ToArray(),
                     SampleProjects = _Samples.Select(s => s.Complete(this, baseFlags)).ToArray(),
+                    ForceCSemantics = forceCSemantics,
                 };
 
                 foreach (var g in job.Modules.GroupBy(m => m.Summary.ReasonablyUniqueName))
@@ -177,7 +178,8 @@ namespace VendorSampleParserEngine
         public static CodeScopeSampleJob[] ComputeJobs(string sdkDir,
             RawCodeScopeSampleList sampleList,
             ICodeScopeModuleLocator locator,
-            BaseFlagSetBuilder baseFlags)
+            BaseFlagSetBuilder baseFlags,
+            bool forceCSemantics)
         {
             var allFiles = new Dictionary<string, FileContext>(StringComparer.InvariantCultureIgnoreCase);
             var sdkContexts = new Dictionary<string, SDKContext>();
@@ -282,7 +284,7 @@ namespace VendorSampleParserEngine
                 }
             }
 
-            return sdkContexts.Values.Select(c => c.BuildJob(baseFlags)).ToArray();
+            return sdkContexts.Values.Select(c => c.BuildJob(baseFlags, forceCSemantics)).ToArray();
         }
 
         private static SDKContext ProvideSDKContext(Dictionary<string, SDKContext> sdkContexts,

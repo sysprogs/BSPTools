@@ -478,6 +478,7 @@ namespace GeneratorSampleStm32
                 : base(@"..\..\generators\stm32\output\" + ruleset, (ruleset == "bluenrg-lp") ? "BlueNRG SDK Samples" : "STM32 CubeMX Samples", ruleset)
             {
                 _Ruleset = (STM32Ruleset)Enum.Parse(typeof(STM32Ruleset), ruleset, true);
+                _ForceCSemanticsForCodeScope = true;
             }
 
             STM32Ruleset _Ruleset;
