@@ -151,7 +151,8 @@ namespace IARProjectFileImporter
 
         public string UniqueID => "com.sysprogs.project_importers.iar";
 
-        public object SettingsControl { get; } = new GUI.IARImporterSettingsControl();
+        object _SettingsControl;
+        public object SettingsControl => _SettingsControl ??= new GUI.IARImporterSettingsControl();
         public object Settings
         {
             get => _Settings;

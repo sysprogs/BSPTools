@@ -20,7 +20,8 @@ namespace KeilProjectImporter
 
         public string UniqueID => "com.sysprogs.project_importers.keil";
 
-        public object SettingsControl { get; } = new GUI.KeilImporterSettingsControl();
+        object _SettingsControl;
+        public object SettingsControl => _SettingsControl ??= new GUI.KeilImporterSettingsControl();
         public object Settings
         {
             get => _Settings;

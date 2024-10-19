@@ -830,7 +830,7 @@ namespace STM32ProjectImporter
         public string[] LocateTargetSubdirectories(IProjectImportService service, ProjectReconfigurationContext context)
         {
             var baseDir = Path.GetDirectoryName(context.ProjectFile);
-            if (File.Exists(Path.Combine(baseDir, ".project")) && !EclipseProject.ExistsInDirectory(baseDir))
+            if ((File.Exists(Path.Combine(baseDir, ".project")) || File.Exists(Path.Combine(baseDir, ".mxproject"))) && !EclipseProject.ExistsInDirectory(baseDir))
             {
                 List<string> result = new List<string>();
                 foreach (var subdir in Directory.GetDirectories(baseDir))
