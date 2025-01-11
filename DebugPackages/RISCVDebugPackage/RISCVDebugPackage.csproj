@@ -90,8 +90,7 @@
     <Resource Include="GUI\Icons\bulb16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props" 
-		  Condition="Exists('$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props')"/>
+  <Import Project="$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props" Condition="Exists('$(MSBuildThisFileDir)..\..\..\..\..\support\_BuildFiles\AutoVersion.props')" />
   <Import Project="..\..\BSPEngine.targets" />
   <Import Project="..\OpenOCDPackage.targets" />
 </Project>
