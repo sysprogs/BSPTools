@@ -30,6 +30,7 @@ namespace BSPGenerationTools
         M3,
         M33,
         M4,
+        M55,
         M7,
         A35,
         A7,
@@ -949,6 +950,7 @@ namespace BSPGenerationTools
                     flag = $"-mfpu=vfpv3{sp}-d16";
                     break;
                 case CortexCore.M7:
+                case CortexCore.M55:
                 case CortexCore.M33:
                     flag = $"-mfpu=fpv5{sp}-d16";
                     break;
@@ -1013,6 +1015,12 @@ namespace BSPGenerationTools
                     else
                         freertosPort = "ARM_CM4F";
                     coreName = "M4";
+                    break;
+                case CortexCore.M55:
+                    family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m55 -mthumb";
+                    family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM55" };
+                    coreName = "M55";
+                    freertosPort = "ARM_CM55_NTZ/non_secure";
                     break;
                 case CortexCore.M7:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb";
@@ -1661,6 +1669,8 @@ namespace BSPGenerationTools
                 case "Cortex-M4F; Cortex-M0+"://MultiCore
                     fpu = FPUType.SP;
                     return CortexCore.M4;
+                case "Cortex-M55":
+                    return CortexCore.M55;
                 case "Cortex-M7":
                     fpu = FPUType.DP;
                     return CortexCore.M7;

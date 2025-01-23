@@ -82,6 +82,219 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
 				</CopyJob>
 			</CopyJobs>
 		</Framework>
+		<Framework>
+			<Name>AzureRTOS - ThreadX</Name>
+			<ID>com.sysprogs.arm.stm32.threadx</ID>
+			<ProjectFolderName>ThreadX</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\threadx</SourceFolder>
+					<TargetFolder>AzureRTOS\threadx</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
+					<!-- tx_initialize_low_level.S included in m23/m33 ports is redundant against the sample projects -->
+					<ProjectInclusionMask>common\*.c;common\*.h;-*\example_build\*;-*\tx_initialize_low_level.*;ports\cortex_*\gnu\*</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.threadx.|ThreadX</SmartPropertyGroup>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
+					<AdditionalIncludeDirs>common/inc;ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
+					<SmartPreprocessorMacros>
+						<string>Include user-provided definition file[user_define]|{0}|TX_INCLUDE_USER_DEFINE_FILE</string>
+					</SmartPreprocessorMacros>
+					<SimpleFileConditions> 
+						<string>ports\\cortex_a7\\.*:$$com.sysprogs.bspoptions.arm.core$$==A7</string>
+						<string>ports\\cortex_m0\\.*:$$com.sysprogs.bspoptions.arm.core$$==M0</string>
+						<string>ports\\cortex_m3\\.*:$$com.sysprogs.bspoptions.arm.core$$==M3</string>
+						<string>ports\\cortex_m4\\.*:$$com.sysprogs.bspoptions.arm.core$$==M4</string>
+						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
+						<string>ports\\cortex_m23\\.*:$$com.sysprogs.bspoptions.arm.core$$==M23</string>
+						<string>ports\\cortex_m33\\.*:$$com.sysprogs.bspoptions.arm.core$$==M33</string>
+						<string>ports\\cortex_m55\\.*:$$com.sysprogs.bspoptions.arm.core$$==M55</string>
+						<string>ports\\cortex_m85\\.*:$$com.sysprogs.bspoptions.arm.core$$==M85</string>
+						<string>common\\src\\tx_thread_stack_error_(handler|notify)\.[ch]:$$com.sysprogs.bspoptions.arm.core$$=~[AM][0-9]$</string>
+					</SimpleFileConditions>
+					<AdvancedRenameRules>\\(tx_misra)\.c$=>{1}_c.c</AdvancedRenameRules>					
+				</CopyJob>
+			</CopyJobs>
+			<AdditionalSystemVars>
+				<SysVarEntry>
+					<Key>com.sysprogs.rtos_type</Key>
+					<Value>com.sysprogs.threadx</Value>
+				</SysVarEntry>
+			</AdditionalSystemVars>
+		</Framework>
+		<Framework>
+			<Name>AzureRTOS - FileX</Name>
+			<ID>com.sysprogs.arm.stm32.filex</ID>
+			<ProjectFolderName>FileX</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\filex</SourceFolder>
+					<TargetFolder>AzureRTOS\filex</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
+					<ProjectInclusionMask>-common\drivers\template\*;common\*.c;common\*.h;ports\cortex_*\*.c;ports\cortex_*\*.h;</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.filex.|FileX</SmartPropertyGroup>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
+					<AdditionalIncludeDirs>common/inc;ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
+					<SimpleFileConditions> 
+						<string>ports\\cortex_m0\\.*:$$com.sysprogs.bspoptions.arm.core$$==M0</string>
+						<string>ports\\cortex_m3\\.*:$$com.sysprogs.bspoptions.arm.core$$==M3</string>
+						<string>ports\\cortex_m4\\.*:$$com.sysprogs.bspoptions.arm.core$$==M4</string>
+						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
+					</SimpleFileConditions>
+					<SmartFileConditions>
+						<string>-NAND driver[levelx_nand]|.*\\fx_stm32_levelx_nand_driver\.(h|c)</string>
+						<string>-NOR driver[levelx_nor]|.*\\fx_stm32_levelx_nor_driver\.(h|c)</string>
+						<string>-MMC driver[mmc]|.*\\fx_stm32_mmc_driver\.(h|c)</string>
+						<string>-SD driver[sd]|.*\\fx_stm32_sd_driver\.(h|c)</string>
+						<string>-SRAM driver[sram]|.*\\fx_stm32_sram_driver\.(h|c)</string>
+					</SmartFileConditions>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\filex\ports\generic</SourceFolder>
+					<TargetFolder>AzureRTOS\filex\ports\cortex_m33\gnu</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>AzureRTOS - LevelX</Name>
+			<ID>com.sysprogs.arm.stm32.levelx</ID>
+			<ProjectFolderName>LevelX</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\levelx</SourceFolder>
+					<TargetFolder>AzureRTOS\levelx</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
+					<ProjectInclusionMask>-common\drivers\template\*;common\*.c;common\*.h;ports\cortex_*\*.c;ports\cortex_*\*.h;</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.levelx.|LevelX</SmartPropertyGroup>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
+					<AdditionalIncludeDirs>common/inc</AdditionalIncludeDirs>
+					<SmartFileConditions>
+						<string>-NAND simulator driver[nand_simulator]|.*\\lx_stm32_nand_simulator_driver\.(h|c)</string>
+						<string>-NOR simulator driver[nor_simulator]|.*\\lx_stm32_nor_simulator_driver\.(h|c)</string>
+						<string>-OSPI simulator driver[ospi]|.*\\lx_stm32_ospi_driver\.(h|c)</string>
+						<string>-QSPI simulator driver[qspi]|.*\\lx_stm32_qspi_driver\.(h|c)</string>
+					</SmartFileConditions>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>AzureRTOS - USBX</Name>
+			<ID>com.sysprogs.arm.stm32.usbx</ID>
+			<ProjectFolderName>USBX</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\usbx</SourceFolder>
+					<TargetFolder>AzureRTOS\usbx</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask>-ports*;*.h</AutoIncludeMask>
+					<AdditionalIncludeDirs>ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
+					<ProjectInclusionMask>common\*.c;common\*.h;ports\cortex_*\gnu\*.c;ports\cortex_*\gnu\*.h;</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.usbx.|USBX</SmartPropertyGroup>
+					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
+					<SimpleFileConditions> 
+						<string>ports\\cortex_a7\\.*:$$com.sysprogs.bspoptions.arm.core$$==A7</string>
+						<string>ports\\cortex_m0\\.*:$$com.sysprogs.bspoptions.arm.core$$==M0</string>
+						<string>ports\\cortex_m3\\.*:$$com.sysprogs.bspoptions.arm.core$$==M3</string>
+						<string>ports\\cortex_m4\\.*:$$com.sysprogs.bspoptions.arm.core$$==M4</string>
+						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
+					</SimpleFileConditions>
+					<SmartFileConditions>
+						<string>-USB Host Support[host_controllers]|common\\usbx(|_stm32)_host_controllers\\.*</string>
+						<string>-USB Device Support[device_controllers]|common\\usbx(|_stm32)_device_controllers\\.*</string>
+						<string>-Network Support[network]|common\\usbx_network\\.*</string>
+						<string>-Pictbridge Support[pictbridge]|common\\usbx_pictbridge\\.*</string>
+						
+						<string>-Audio Device Class[device_class_audio]|common\\usbx_device_classes\\src\\ux_device_class_audio.*</string>
+						<string>-CCID Class[device_class_ccid]|common\\usbx_device_classes\\src\\ux_device_class_ccid.*</string>
+						<string>-CDC ACM Device Class[device_class_cdc_acm]|common\\usbx_device_classes\\src\\ux_device_class_cdc_acm.*</string>
+						<string>-CDC ECM Device Class[device_class_cdc_ecm]|common\\usbx_device_classes\\src\\ux_device_class_cdc_ecm.*</string>
+						<string>-DFU Device Class[device_class_dfu]|common\\usbx_device_classes\\src\\ux_device_class_dfu.*</string>
+						<string>-HID Device Class[device_class_hid]|common\\usbx_device_classes\\src\\ux_device_class_hid.*</string>
+						<string>-PIMA Device Class[device_class_pima]|common\\usbx_device_classes\\src\\ux_device_class_pima.*</string>
+						<string>-Printer Device Class[device_class_printer]|common\\usbx_device_classes\\src\\ux_device_class_printer.*</string>
+						<string>-RNDIS Device Class[device_class_rndis]|common\\usbx_device_classes\\src\\ux_device_class_rndis.*</string>
+						<string>-Storage Device Class[device_class_storage]|common\\usbx_device_classes\\src\\ux_device_class_storage.*</string>
+						<string>-Video Device Class[device_class_video]|common\\usbx_device_classes\\src\\ux_device_class_video.*</string>
+
+						<string>-ASIX Host Class[host_class_asix]|common\\usbx_host_classes\\src\\ux_host_class_asix.*</string>
+						<string>-Audio Host Class[host_class_audio]|common\\usbx_host_classes\\src\\ux_host_class_audio.*</string>
+						<string>-CDC_ACM Host Class[host_class_cdc_acm]|common\\usbx_host_classes\\src\\ux_host_class_cdc_acm.*</string>
+						<string>-CDC_ECM Host Class[host_class_cdc_ecm]|common\\usbx_host_classes\\src\\ux_host_class_cdc_ecm.*</string>
+						<string>-GSER Host Class[host_class_gser]|common\\usbx_host_classes\\src\\ux_host_class_gser.*</string>
+						<string>-HID Host Class[host_class_hid]|common\\usbx_host_classes\\src\\ux_host_class_hid.*</string>
+						<string>-Hub Host Class[host_class_hub]|common\\usbx_host_classes\\src\\ux_host_class_hub.*</string>
+						<string>-PIMA Host Class[host_class_pima]|common\\usbx_host_classes\\src\\ux_host_class_pima.*</string>
+						<string>-Printer Host Class[host_class_printer]|common\\usbx_host_classes\\src\\ux_host_class_printer.*</string>
+						<string>-Prolific Host Class[host_class_prolific]|common\\usbx_host_classes\\src\\ux_host_class_prolific.*</string>
+						<string>-Storage Host Class[host_class_storage]|common\\usbx_host_classes\\src\\ux_host_class_storage.*</string>
+						<string>-SWAR Host Class[host_class_swar]|common\\usbx_host_classes\\src\\ux_host_class_swar.*</string>
+						<string>-Video Host Class[host_class_video]|common\\usbx_host_classes\\src\\ux_host_class_video.*</string>
+					</SmartFileConditions>
+				</CopyJob>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\usbx\ports\generic</SourceFolder>
+					<TargetFolder>AzureRTOS\usbx\ports\cortex_m33\gnu</TargetFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<AutoIncludeMask/>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>STM32 External Memory Loader</Name>
+			<ID>com.sysprogs.arm.stm32.extmem.loader.h7rs</ID>
+			<ClassID>com.sysprogs.arm.stm32.extmem.loader</ClassID>
+			<ProjectFolderName>External Memory Loader</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\STM32_ExtMem_Loader</SourceFolder>
+					<FilesToCopy>-EWARM\*;-MDK-ARM\*;*</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;*.c;*.h</ProjectInclusionMask>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		<Framework>
+			<Name>STM32 External Memory Manager</Name>
+			<ID>com.sysprogs.arm.stm32.extmem.manager.h7rs</ID>
+			<ClassID>com.sysprogs.arm.stm32.extmem.manager</ClassID>
+			<ProjectFolderName>External Memory Manager</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:H7RS_DIR$$\Middlewares\ST\STM32_ExtMem_Manager</SourceFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;*.c;*.h</ProjectInclusionMask>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.extmem.manager.|External Memory Manager</SmartPropertyGroup>
+					<SmartFileConditions>
+						<string>-LRUN support[lrun]|.*\\stm32_boot_lrun.c</string>
+					</SmartFileConditions>					
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
+		
 	</AdditionalFrameworks>
 	<SmartSamples>
 		<SmartSample>

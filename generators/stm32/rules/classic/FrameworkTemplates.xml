@@ -211,6 +211,22 @@
 				</PropertyGroups>
 			</ConfigurableProperties>			
 		</Framework>
-
+		<Framework>
+			<Name>STM32 USB Power Delivery Support</Name>
+			<ID>com.sysprogs.arm.stm32.usbpd.$$STM32:FAMILY_EX$$</ID>
+			<ClassID>com.sysprogs.arm.stm32.usbpd</ClassID>
+			<ProjectFolderName>USB Power Delivery</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>
+			<CopyJobs>
+				<CopyJob>
+					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\STM32_USBPD_Library</SourceFolder>
+					<FilesToCopy>*</FilesToCopy>
+					<ProjectInclusionMask>-*template.c;-*template.h;*.c;*.h</ProjectInclusionMask>
+				</CopyJob>
+			</CopyJobs>
+		</Framework>
 	</AdditionalFrameworks>	
 </FamilyDefinition>

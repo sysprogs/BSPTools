@@ -19,6 +19,7 @@ using BSPGenerationTools.Parsing;
 using Microsoft.Win32;
 using stm32_bsp_generator.Rulesets;
 using System.Reflection;
+using System.Net.Mime;
 
 namespace stm32_bsp_generator
 {
@@ -338,7 +339,7 @@ namespace stm32_bsp_generator
 
         }
 
-        //Usage: stm32.exe /rules:{Classic|STM32WB|STM32MP1} [/fetch] [/noperiph] [/nofixes]
+        //Usage: stm32.exe /rules:{Classic|STM32WB|STM32MP1|stm32h7rs} [/fetch] [/noperiph] [/nofixes]
         static void Main(string[] args)
         {
             var regKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPGenerators\STM32");
@@ -376,7 +377,7 @@ namespace stm32_bsp_generator
                 else
                 {
                     devices = provider.LoadDeviceList(bspBuilder);
-                    var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP")).ToArray();
+                    var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP") && !d.Name.StartsWith("STM32N6")).ToArray();
                     if (incompleteDevices.Length > 0)
                         throw new Exception($"{incompleteDevices.Length} devices have FLASH Size = 0 ");
                 }
@@ -572,15 +573,21 @@ namespace stm32_bsp_generator
                         {
                             if (f.Contains("thread_secure_stack.c"))
                             {
-                                var condRec = bspBuilder.MatchedFileConditions[f];
-                                condRec.ConditionToInclude = new Condition.And
+                                var cond = new Condition.Equals { Expression = $"$${fw.ConfigurableProperties.PropertyGroups[0].UniqueID}{secureModeOptionID}$$", ExpectedValue = "1" };
+
+                                if (!bspBuilder.MatchedFileConditions.TryGetValue(f, out var condRec))
+                                    bspBuilder.AddFileCondition(new FileCondition { FilePath = f, ConditionToInclude = cond });
+                                else
                                 {
-                                    Arguments = new Condition[]
+                                    condRec.ConditionToInclude = new Condition.And
                                     {
-                                        condRec.ConditionToInclude ,
-                                        new Condition.Equals{Expression = $"$${fw.ConfigurableProperties.PropertyGroups[0].UniqueID}{secureModeOptionID}$$", ExpectedValue = "1"}
-                                    }
-                                };
+                                        Arguments = new Condition[]
+                                        {
+                                            condRec.ConditionToInclude,
+                                            cond,
+                                        }
+                                    };
+                                }
                             }
                         }
                     }

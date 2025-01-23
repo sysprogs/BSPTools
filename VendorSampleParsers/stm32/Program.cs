@@ -18,7 +18,6 @@ using VendorSampleParserEngine;
 
 namespace GeneratorSampleStm32
 {
-
     class Program
     {
         static public List<string> ToAbsolutePaths(string dir, string topLevelDir, List<string> relativePaths)
@@ -301,7 +300,19 @@ namespace GeneratorSampleStm32
                             new FileBasedConfigEntry(@"usbx/common/usbx_host_classes/src/ux_host_class_(asix|audio|cdc_acm|cdc_ecm|gser|hid|hub|pima|printer|prolific|storage|swar|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.host_class_{1}"),
                             new FileBasedConfigEntry(@"usbx/common/usbx_(network|pictbridge)/.*", "com.sysprogs.bspoptions.stm32.usbx.{1}"),
                         }
-                    }
+                    },
+
+                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.extmem.manager",
+                        FileRegex = new Regex(@"\$\$SYS:BSP_ROOT\$\$/STM32_ExtMem_Manager/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                        FileBasedConfig = new[]
+                        {
+                            new FileBasedConfigEntry(@"/stm32_boot_lrun\.c", "com.sysprogs.bspoptions.stm32.extmem.manager.lrun")
+                        }
+                    },                    
+                    
+                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.bspdrv.lan8742",
+                        FileRegex = new Regex(@"\$\$SYS:BSP_ROOT\$\$/STM32[^/]+/BSP/Components/lan8742/lan8742.c", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                    },
                 };
 
 

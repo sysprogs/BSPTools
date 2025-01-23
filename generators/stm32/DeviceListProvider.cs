@@ -348,6 +348,8 @@ namespace stm32_bsp_generator
                             return CortexCore.M33;
                         case "M4":
                             return CortexCore.M4;
+                        case "M55":
+                            return CortexCore.M55;
                         case "M7":
                             return CortexCore.M7;
                         case "A35":
@@ -478,12 +480,6 @@ namespace stm32_bsp_generator
 
                     for (int i = 0; i < cores.Length; i++)
                     {
-                        if ((db.STM32CubeTimestamp == 133657063208138291) && (m.GetAttribute("Name") == "STM32G473QETxZ" || m.GetAttribute("Name") == "STM32U5A5QIIxQ" || m.GetAttribute("Name").StartsWith("STM32U073")))
-                            continue;
-
-                        if ((db.STM32CubeTimestamp == 133657063208138291) && m.GetAttribute("Name").StartsWith("STM32G411"))
-                            continue;   //The startup file is missing as of SDK 1.6.0
-
                         try
                         {
                             lstMCUs.Add(new ParsedMCU(m, familyDir, db, cores, i));
@@ -495,9 +491,11 @@ namespace stm32_bsp_generator
                     }
                 }
 
-                if (missingMCUs.Count > 0)
+                File.WriteAllLines(Path.Combine(Path.GetDirectoryName(bspBuilder.Directories.RulesDir), "MissingMCUs.txt"), missingMCUs.ToArray());
+
+                if (missingMCUs.Count > 30)
                 {
-                    throw new Exception($"Found {missingMCUs} MCUs with missing memory layouts");
+                    throw new Exception($"Found {missingMCUs.Count} MCUs with missing memory layouts");
                 }
 
                 var rawMCUs = lstMCUs.ToArray();

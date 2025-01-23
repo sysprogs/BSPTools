@@ -347,6 +347,8 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
 						<string>ports\\cortex_m23\\.*:$$com.sysprogs.bspoptions.arm.core$$==M23</string>
 						<string>ports\\cortex_m33\\.*:$$com.sysprogs.bspoptions.arm.core$$==M33</string>
+						<string>ports\\cortex_m55\\.*:$$com.sysprogs.bspoptions.arm.core$$==M55</string>
+						<string>ports\\cortex_m85\\.*:$$com.sysprogs.bspoptions.arm.core$$==M85</string>
 						<string>common\\src\\tx_thread_stack_error_(handler|notify)\.[ch]:$$com.sysprogs.bspoptions.arm.core$$=~[AM][0-9]$</string>
 					</SimpleFileConditions>
 				</CopyJob>
