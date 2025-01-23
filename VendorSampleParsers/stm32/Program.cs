@@ -251,13 +251,7 @@ namespace GeneratorSampleStm32
                 */
 
                 AutoDetectedFrameworks = new AutoDetectedFramework[]
-                {/*
-                    new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.hal",
-                        FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Drivers/[^/\\]+_HAL_Driver", RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                        DisableTriggerRegex = new Regex(@"_ll_[^/\\]+\.c", RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                        Configuration = new Dictionary<string, string>() }
-                        */
-
+                {
                     /*new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.LwIP",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/Third_Party/LwIP", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         DisableTriggerRegex = new Regex(@"^$", RegexOptions.Compiled | RegexOptions.IgnoreCase),
@@ -270,7 +264,7 @@ namespace GeneratorSampleStm32
                         SkipFrameworkRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/threadx/common_modules/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         FileBasedConfig = new[]
                         {
-                            new FileBasedConfigEntry(@"threadx/ports/cortex[^/]+/gnu/src/tx_thread_secure_stack.c", "com.sysprogs.bspoptions.stm32.threadx.secure_domain"),
+                            new ConditionalConfigEntry(@"threadx/ports/cortex[^/]+/gnu/src/tx_thread_secure_stack.c", "com.sysprogs.bspoptions.stm32.threadx.secure_domain"),
                         }
                     },
 
@@ -278,7 +272,7 @@ namespace GeneratorSampleStm32
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/filex/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         FileBasedConfig = new[]
                         {
-                            new FileBasedConfigEntry(@"filex/common/drivers/fx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.filex.{1}")
+                            new ConditionalConfigEntry(@"filex/common/drivers/fx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.filex.{1}")
                         }
                     },
 
@@ -286,7 +280,7 @@ namespace GeneratorSampleStm32
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/levelx/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         FileBasedConfig = new[]
                         {
-                            new FileBasedConfigEntry(@"levelx/common/drivers/lx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.levelx.{1}")
+                            new ConditionalConfigEntry(@"levelx/common/drivers/lx_stm32_(.*)_driver\.c", "com.sysprogs.bspoptions.stm32.levelx.{1}")
                         }
                     },
 
@@ -295,10 +289,10 @@ namespace GeneratorSampleStm32
                         UnsupportedDeviceRegex = new Regex("STM32(G4|L5).*"),    //The HAL for these families does not have the HAL_PCD_EP_Abort() call and requires a slightly different USBX port
                         FileBasedConfig = new[]
                         {
-                            new FileBasedConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}"),
-                            new FileBasedConfigEntry(@"usbx/common/usbx_device_classes/src/ux_device_class_(audio|ccid|cdc_acm|cdc_ecm|dfu|hid|pima|printer|rndis|storage|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.device_class_{1}"),
-                            new FileBasedConfigEntry(@"usbx/common/usbx_host_classes/src/ux_host_class_(asix|audio|cdc_acm|cdc_ecm|gser|hid|hub|pima|printer|prolific|storage|swar|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.host_class_{1}"),
-                            new FileBasedConfigEntry(@"usbx/common/usbx_(network|pictbridge)/.*", "com.sysprogs.bspoptions.stm32.usbx.{1}"),
+                            new ConditionalConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}"),
+                            new ConditionalConfigEntry(@"usbx/common/usbx_device_classes/src/ux_device_class_(audio|ccid|cdc_acm|cdc_ecm|dfu|hid|pima|printer|rndis|storage|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.device_class_{1}"),
+                            new ConditionalConfigEntry(@"usbx/common/usbx_host_classes/src/ux_host_class_(asix|audio|cdc_acm|cdc_ecm|gser|hid|hub|pima|printer|prolific|storage|swar|video)_.*", "com.sysprogs.bspoptions.stm32.usbx.host_class_{1}"),
+                            new ConditionalConfigEntry(@"usbx/common/usbx_(network|pictbridge)/.*", "com.sysprogs.bspoptions.stm32.usbx.{1}"),
                         }
                     },
 
@@ -306,15 +300,40 @@ namespace GeneratorSampleStm32
                         FileRegex = new Regex(@"\$\$SYS:BSP_ROOT\$\$/STM32_ExtMem_Manager/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                         FileBasedConfig = new[]
                         {
-                            new FileBasedConfigEntry(@"/stm32_boot_lrun\.c", "com.sysprogs.bspoptions.stm32.extmem.manager.lrun")
+                            new ConditionalConfigEntry(@"/stm32_boot_(lrun|xip)\.c", "com.sysprogs.bspoptions.stm32.extmem.manager.bootmode={1}")
                         }
-                    },                    
-                    
+                    },
+
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.bspdrv.lan8742",
                         FileRegex = new Regex(@"\$\$SYS:BSP_ROOT\$\$/STM32[^/]+/BSP/Components/lan8742/lan8742.c", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                     },
                 };
 
+                if (ruleset == STM32Ruleset.STM32H7RS)
+                {
+                    AutoDetectedFrameworks = AutoDetectedFrameworks.Concat(new[] {
+                        new AutoDetectedFramework
+                        {
+                            FrameworkID = "com.sysprogs.arm.stm32.hal",
+                            FileRegex = new Regex(@"\$\$SYS:BSP_ROOT\$\$/STM32[^/\\]+/STM32[^/\\]+_HAL_Driver/.*/stm32[^/\\_]+_(hal|util)[^/\\]*.[ch]", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                            Configuration = new Dictionary<string, string>(),
+                            RequiredConfigHeader = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/.*/stm32[^/_]+_hal_conf.h"),
+                        },
+                        new AutoDetectedFramework
+                        {
+                            FrameworkID = "com.sysprogs.arm.stm32.ll",
+                            FileRegex = new Regex(@"\$\$SYS:BSP_ROOT\$\$/STM32[^/\\]+/STM32[^/\\]+_HAL_Driver/.*/stm32[^/\\_]+_ll[^/\\]*.[ch]", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                            Configuration = new Dictionary<string, string>{
+                                {"com.sysprogs.bspoptions.stm32.ll_driver", ""} //Prevents validation errors with undefined macro. Can be overwritten by the 
+                            },
+                            RequiredConfigHeader = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/.*/stm32[^/_]+_hal_conf.h"),
+                            MacroBasedConfig = new[]
+                            {
+                                new ConditionalConfigEntry("USE_FULL_LL_DRIVER", "com.sysprogs.bspoptions.stm32.ll_driver=USE_FULL_LL_DRIVER")
+                            }
+                        }
+                    }).ToArray();
+                }
 
                 AutoPathMappings = new PathMapping[]
                 {
@@ -673,6 +692,34 @@ namespace GeneratorSampleStm32
                         }
 
                         Console.WriteLine($"Found {sampleCount} samples for {sdk.Family}.");
+
+                        if (_Ruleset == STM32Ruleset.STM32H7RS)
+                        {
+                            foreach (var g in allSamples.GroupBy(s => s.Path))
+                            {
+                                if (g.Count() != 2)
+                                    continue;
+
+                                var pair = g.OrderBy(x => x.InternalUniqueID).ToArray();
+                                if (pair[0].InternalUniqueID.EndsWith("-Appli") && pair[1].InternalUniqueID.EndsWith("-Boot"))
+                                {
+                                    pair[0].RelatedSamples = new[] {new VendorSampleReference
+                                    {
+                                        ID = pair[1].InternalUniqueID,
+                                        Type = VendorSampleReferenceType.IncomingReference,
+                                        BSPName = "Bootloader",
+                                        Role = "Bootloader",
+                                    } };
+                                    pair[1].RelatedSamples = new[] {new VendorSampleReference
+                                    {
+                                        ID = pair[0].InternalUniqueID,
+                                        Type = VendorSampleReferenceType.OutgoingReference,
+                                        BSPName = "Application",
+                                        Role = "Application",
+                                    } };
+                                }
+                            }
+                        }
                     }
 
                     return new ParsedVendorSamples { VendorSamples = allSamples.ToArray(), FailedSamples = parser.FailedSamples.ToArray() };

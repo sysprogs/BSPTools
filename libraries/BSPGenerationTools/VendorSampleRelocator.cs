@@ -103,12 +103,12 @@ namespace BSPGenerationTools
             }
         }
 
-        protected struct FileBasedConfigEntry
+        protected struct ConditionalConfigEntry
         {
             public readonly Regex Regex;
             public readonly string Format;
 
-            public FileBasedConfigEntry(string regex, string format)
+            public ConditionalConfigEntry(string regex, string format)
             {
                 Regex = new Regex(regex, RegexOptions.IgnoreCase);
                 Format = format;
@@ -123,9 +123,11 @@ namespace BSPGenerationTools
             public string FrameworkID;
 
             public Dictionary<string, string> Configuration = new Dictionary<string, string>();
-            public FileBasedConfigEntry[] FileBasedConfig;
+            public ConditionalConfigEntry[] FileBasedConfig;
+            public ConditionalConfigEntry[] MacroBasedConfig;
 
             public Regex UnsupportedDeviceRegex;
+            public Regex RequiredConfigHeader;
 
             public bool FindAndFilterOut<_Ty>(ref _Ty[] sources, Func<_Ty, string> conv = null)
             {
@@ -149,6 +151,8 @@ namespace BSPGenerationTools
 
                 return true;
             }
+
+            public override string ToString() => $"{FrameworkID}";
         }
 
         protected class PathMapping
@@ -202,24 +206,18 @@ namespace BSPGenerationTools
                 if (fw.SkipFrameworkRegex != null && sources?.FirstOrDefault(s => fw.SkipFrameworkRegex.IsMatch(s)) != null)
                     continue;
 
-                if (fw.FileBasedConfig != null)
+                if (fw.RequiredConfigHeader != null && headers?.Any(h => fw.RequiredConfigHeader.IsMatch(h)) == false)
+                    continue;
+
+                foreach (var kv in fw.Configuration)
+                    extraConfiguration[kv.Key] = kv.Value;
+
+                ProcessConditionalConfigs(fw.FileBasedConfig, sources, extraConfiguration);
+
+                if (fw.MacroBasedConfig != null)
                 {
-                    foreach(var e in fw.FileBasedConfig)
-                    {
-                        foreach(var fn in sources)
-                        {
-                            var m = e.Regex.Match(fn);
-                            if (m.Success)
-                            {
-                                var kv = string.Format(e.Format, m.Groups.Cast<object>().ToArray());
-                                int idx = kv.IndexOf('=');
-                                if (idx == -1)
-                                    extraConfiguration[kv] = "1";
-                                else
-                                    extraConfiguration[kv.Substring(0, idx)] = kv.Substring(idx + 1);
-                            }
-                        }
-                    }
+                    var matches = ProcessConditionalConfigs(fw.MacroBasedConfig, preprocessorMacros, extraConfiguration);
+                    preprocessorMacros = preprocessorMacros.Except(matches).ToArray();
                 }
 
                 fw.FindAndFilterOut(ref sources);
@@ -248,9 +246,6 @@ namespace BSPGenerationTools
 
             HashSet<string> extraFrameworks = new HashSet<string>();
 
-            foreach (var fw in matchedFrameworks)
-                foreach (var kv in fw.Configuration)
-                    extraConfiguration[kv.Key] = kv.Value;
             foreach (var kv in existingConfiguration.Configuration?.Entries ?? new PropertyDictionary2.KeyValue[0])
                 extraConfiguration[kv.Key] = kv.Value;
 
@@ -261,10 +256,37 @@ namespace BSPGenerationTools
                 Frameworks = matchedFrameworks.Select(f => f.FrameworkID).Concat(existingConfiguration.Frameworks ?? new string[0]).Concat(extraFrameworks).Distinct().ToArray(),
                 Configuration = new PropertyDictionary2()
                 {
-                    Entries = extraConfiguration.Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value}).ToArray()
+                    Entries = extraConfiguration.Select(kv => new PropertyDictionary2.KeyValue { Key = kv.Key, Value = kv.Value }).ToArray()
                 },
                 MCUConfiguration = existingConfiguration.MCUConfiguration
             };
+        }
+
+        private static List<string> ProcessConditionalConfigs(ConditionalConfigEntry[] config, string[] items, Dictionary<string, string> extraConfiguration)
+        {
+            List<string> result = new List<string>();
+            if (config == null)
+                return result;
+
+            foreach (var e in config)
+            {
+                foreach (var fn in items)
+                {
+                    var m = e.Regex.Match(fn);
+                    if (m.Success)
+                    {
+                        result.Add(fn);
+                        var kv = string.Format(e.Format, m.Groups.Cast<object>().ToArray());
+                        int idx = kv.IndexOf('=');
+                        if (idx == -1)
+                            extraConfiguration[kv] = "1";
+                        else
+                            extraConfiguration[kv.Substring(0, idx)] = kv.Substring(idx + 1);
+                    }
+                }
+            }
+
+            return result;
         }
 
         protected virtual void FilterPreprocessorMacros(ref string[] macros)
@@ -363,7 +385,7 @@ namespace BSPGenerationTools
                     //Relocate the sample to a shorter path
                     string longPath = s.Path;
                     string shortPath;
-                    
+
                     if (shortenedPaths.TryGetValue(longPath.Replace('\\', '/'), out shortPath))
                     {
                         //Another sample with the same base path (e.g. Secure/NonSecure pair) got moved under a shorter path. Reuse it.
@@ -391,7 +413,7 @@ namespace BSPGenerationTools
                 {
                     if (dep.MappedFile.StartsWith("$$SYS:BSP_ROOT$$/"))
                         continue;   //The file was already copied
-                    
+
                     copiedFilesByTarget[dep.MappedFile.Replace(SampleRootDirMarker, outputDir)] = Path.GetFullPath(dep.OriginalFile);
 
                     if (IsPathTooLong(dep))

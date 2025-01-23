@@ -291,6 +291,12 @@ namespace stm32_bsp_generator
                     }
 
                     mcu.MemoryMap = layout.Layout.ToMemoryMap();
+                    mcu.MemoryMap.Memories = mcu.MemoryMap.Memories.Concat(new[]
+                    {
+                        new MCUMemory{Name = "XSPI1", Address = 0x90000000, Size = 0x08000000 },
+                        new MCUMemory{Name = "XSPI2", Address = 0x70000000, Size = 0x08000000 },
+                    }).ToArray();
+
                     mcu.AdditionalSystemVars = LoadedBSP.Combine(new[] { new SysVarEntry { Key = "com.sysprogs.stm32.hal_device_family", Value = MCU.Details.Define } }, mcu.AdditionalSystemVars);
 
                     if (DiscoveredLinkerScripts != null)

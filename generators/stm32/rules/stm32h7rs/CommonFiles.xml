@@ -289,7 +289,10 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
 					<ProjectInclusionMask>-*template.c;-*template.h;*.c;*.h</ProjectInclusionMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.extmem.manager.|External Memory Manager</SmartPropertyGroup>
 					<SmartFileConditions>
-						<string>-LRUN support[lrun]|.*\\stm32_boot_lrun.c</string>
+						<string>Boot mode[bootmode]|
+.*\\stm32_boot_lrun.c=>LRUN [lrun];
+.*\\stm32_boot_xip.c=>+XIP [xip]
+						</string>
 					</SmartFileConditions>					
 				</CopyJob>
 			</CopyJobs>
