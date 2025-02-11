@@ -327,7 +327,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\threadx</SourceFolder>
+					<SourceFolder>$$STM32:LATEST_THREADX_SDK_DIR$$\Middlewares\ST\threadx</SourceFolder>
 					<TargetFolder>AzureRTOS\threadx</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
@@ -370,7 +370,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\filex</SourceFolder>
+					<SourceFolder>$$STM32:LATEST_THREADX_SDK_DIR$$\Middlewares\ST\filex</SourceFolder>
 					<TargetFolder>AzureRTOS\filex</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
@@ -393,7 +393,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					</SmartFileConditions>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\filex\ports\generic</SourceFolder>
+					<SourceFolder>$$STM32:LATEST_THREADX_SDK_DIR$$\Middlewares\ST\filex\ports\generic</SourceFolder>
 					<TargetFolder>AzureRTOS\filex\ports\cortex_m33\gnu</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
@@ -410,7 +410,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:F7_DIR$$\Middlewares\ST\levelx</SourceFolder>
+					<SourceFolder>$$STM32:LATEST_THREADX_SDK_DIR$$\Middlewares\ST\levelx</SourceFolder>
 					<TargetFolder>AzureRTOS\levelx</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
@@ -437,7 +437,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Middlewares\ST\usbx</SourceFolder>
+					<SourceFolder>$$STM32:LATEST_THREADX_SDK_DIR$$\Middlewares\ST\usbx</SourceFolder>
 					<TargetFolder>AzureRTOS\usbx</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask>-ports*;*.h</AutoIncludeMask>
@@ -486,7 +486,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					</SmartFileConditions>
 				</CopyJob>
 				<CopyJob>
-					<SourceFolder>$$STM32:H7_DIR$$\Middlewares\ST\usbx\ports\generic</SourceFolder>
+					<SourceFolder>$$STM32:LATEST_THREADX_SDK_DIR$$\Middlewares\ST\usbx\ports\generic</SourceFolder>
 					<TargetFolder>AzureRTOS\usbx\ports\cortex_m33\gnu</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>

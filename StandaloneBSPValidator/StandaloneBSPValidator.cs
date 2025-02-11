@@ -549,7 +549,7 @@ namespace StandaloneBSPValidator
             ApplyConfiguration(configuredSample.FrameworkParameters, extraParameters?.FrameworkConfiguration, sample.FrameworkConfiguration);
             ApplyConfiguration(configuredSample.Parameters, extraParameters?.SampleConfiguration, sample.SampleConfiguration);
 
-            foreach(var kv in configuredSample.Parameters.ToArray())
+            foreach (var kv in configuredSample.Parameters.ToArray())
             {
                 if (kv.Value.Contains("$$"))
                 {
@@ -1011,7 +1011,7 @@ namespace StandaloneBSPValidator
 
             if (job.BSPSubfolderMask != null)
             {
-                foreach(var dir in Directory.GetDirectories(job.BSPPath, job.BSPSubfolderMask))
+                foreach (var dir in Directory.GetDirectories(job.BSPPath, job.BSPSubfolderMask))
                 {
                     job.BSPPath = dir;
                     TestBSP(job, outputDir);
@@ -1053,59 +1053,59 @@ namespace StandaloneBSPValidator
 
             if (mcuDefinition != null)
             {
-                using (var sw = new StreamWriter(sourceFile, true))
-                {
-                    sw.WriteLine();
-                    sw.WriteLine("#define STATIC_ASSERT(COND) typedef char static_assertion[(COND)?1:-1]");
-                    sw.WriteLine("void ValidateOffsets()");
-                    sw.WriteLine("{");
-                    foreach (var regset in mcuDefinition.RegisterSets)
-                        foreach (var reg in regset.Registers)
-                        {
-                            string regName = reg.Name;
-                            if (IsNoValid(regset.UserFriendlyName, parameters.NonValidatedRegisters))
-                                continue;
-                            if (IsNoValid(regName, parameters.NonValidatedRegisters))
-                                continue;
-                            if (IsNoValid(regName, parameters.UndefinedMacros))
-                                sw.WriteLine($"#undef {regName}");
-                            if (parameters.RenameRules != null)
-                                foreach (var rule in parameters.RenameRules)
+                var lines = File.ReadAllLines(sourceFile).ToList();
+                lines.Insert(0, "#define CPU_IN_SECURE_STATE"); //Some peripheral registers are defined conditionally on this
+                lines.Add("");
+                lines.Add("#define STATIC_ASSERT(COND) typedef char static_assertion[(COND)?1:-1]");
+                lines.Add("void ValidateOffsets()");
+                lines.Add("{");
+                foreach (var regset in mcuDefinition.RegisterSets)
+                    foreach (var reg in regset.Registers)
+                    {
+                        string regName = reg.Name;
+                        if (IsNoValid(regset.UserFriendlyName, parameters.NonValidatedRegisters))
+                            continue;
+                        if (IsNoValid(regName, parameters.NonValidatedRegisters))
+                            continue;
+                        if (IsNoValid(regName, parameters.UndefinedMacros))
+                            lines.Add($"#undef {regName}");
+                        if (parameters.RenameRules != null)
+                            foreach (var rule in parameters.RenameRules)
+                            {
+                                if (rule.RegisterSetRegex?.IsMatch(regset.UserFriendlyName) != false)
                                 {
-                                    if (rule.RegisterSetRegex?.IsMatch(regset.UserFriendlyName) != false)
+                                    var match = rule.RegisterRegex.Match(regName);
+                                    if (match.Success)
                                     {
-                                        var match = rule.RegisterRegex.Match(regName);
-                                        if (match.Success)
+                                        switch (rule.Mode)
                                         {
-                                            switch (rule.Mode)
-                                            {
-                                                case RegisterRenamingMode.Normal:
-                                                    regName = string.Format("{0}[{1}]", match.Groups[1], int.Parse(match.Groups[2].ToString()) + rule.Offset);
-                                                    break;
-                                                case RegisterRenamingMode.HighLow:
-                                                    regName = string.Format("{0}[{1}]", match.Groups[1], match.Groups[2].ToString() == "H" ? 1 : 0);
-                                                    break;
-                                                case RegisterRenamingMode.WithSuffix:
-                                                    regName = string.Format("{0}[{1}].{2}", match.Groups[1], int.Parse(match.Groups[2].ToString()) + rule.Offset, match.Groups[3]);
-                                                    break;
-                                            }
-                                            break;
+                                            case RegisterRenamingMode.Normal:
+                                                regName = string.Format("{0}[{1}]", match.Groups[1], int.Parse(match.Groups[2].ToString()) + rule.Offset);
+                                                break;
+                                            case RegisterRenamingMode.HighLow:
+                                                regName = string.Format("{0}[{1}]", match.Groups[1], match.Groups[2].ToString() == "H" ? 1 : 0);
+                                                break;
+                                            case RegisterRenamingMode.WithSuffix:
+                                                regName = string.Format("{0}[{1}].{2}", match.Groups[1], int.Parse(match.Groups[2].ToString()) + rule.Offset, match.Groups[3]);
+                                                break;
                                         }
+                                        break;
                                     }
                                 }
-                            if (regset.UserFriendlyName.StartsWith("ARM Cortex M"))
-                                continue;
-                            if (mcuDefinition.MCUName.StartsWith("MSP432"))
-                            {
-                                if (regName.Contains("RESERVED"))
-                                    continue;
-                                sw.WriteLine("STATIC_ASSERT((unsigned)&({0}->r{1}) == {2});", regset.UserFriendlyName, regName, reg.Address);
                             }
-                            else
-                                sw.WriteLine("STATIC_ASSERT((unsigned)&({0}->{1}) == {2});", regset.UserFriendlyName, regName, reg.Address);
+                        if (regset.UserFriendlyName.StartsWith("ARM Cortex M"))
+                            continue;
+                        if (mcuDefinition.MCUName.StartsWith("MSP432"))
+                        {
+                            if (regName.Contains("RESERVED"))
+                                continue;
+                            lines.Add(string.Format("STATIC_ASSERT((unsigned)&({0}->r{1}) == {2});", regset.UserFriendlyName, regName, reg.Address));
                         }
-                    sw.WriteLine("}");
-                }
+                        else
+                            lines.Add(string.Format("STATIC_ASSERT((unsigned)&({0}->{1}) == {2});", regset.UserFriendlyName, regName, reg.Address));
+                    }
+                lines.Add("}");
+                File.WriteAllLines(sourceFile, lines.ToArray());
             }
         }
     }

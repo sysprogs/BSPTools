@@ -56,7 +56,7 @@ namespace BSPGenerationTools
             bool insideTable = false;
             List<InterruptVector> result = new List<InterruptVector>();
             var lines = File.ReadAllLines(file);
-            for (int i = 0; i <lines.Length; i++)
+            for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
 
@@ -142,7 +142,7 @@ namespace BSPGenerationTools
                 return input.Select(i => i.Replace("$$ALIGN_SPACE_OFFSET$$", new string(' ', maxOff - i.IndexOf("$$ALIGN_SPACE_OFFSET$$")))).ToList();
             }
 
-            internal void Save(string fn,string pFileNameTemplate)
+            internal void Save(string fn, string pFileNameTemplate)
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fn));
                 using (var sw = File.CreateText(fn))
@@ -151,7 +151,7 @@ namespace BSPGenerationTools
                         throw new Exception("Unexpected vector table layout");
 
                     var templateLines = File.ReadAllLines(pFileNameTemplate);
-                    for (int l = 0; l < templateLines.Length; l++ )
+                    for (int l = 0; l < templateLines.Length; l++)
                     {
                         var line = templateLines[l];
                         if (line.Contains("$$EXTRA_RESET_HANDLER_CODE$$"))

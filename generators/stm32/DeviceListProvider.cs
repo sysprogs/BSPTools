@@ -256,6 +256,9 @@ namespace stm32_bsp_generator
                     else
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x20000000));
 
+                    if (ram == null && MCU.Name.EndsWith("M4"))
+                        ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByName("SRAM"));
+
                     if (MCU.Name.StartsWith("STM32H7") && !MCU.Name.EndsWith("M4"))
                     {
                         //STM32H7 system file expects the ISR to be located at address 0x24000000  (D1_AXISRAM_BASE) and not at 0x20000000.

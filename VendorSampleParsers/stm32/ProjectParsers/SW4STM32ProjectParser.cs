@@ -66,6 +66,13 @@ namespace GeneratorSampleStm32.ProjectParsers
                     return;
                 }
 
+                if (mcu.StartsWith("STM32G") && _SupportedMCUNames.Contains(mcu + "Ix"))
+                {
+                    //Appears to be a bug in the device definition list where multiple MCU variants are reported to have different FLASH sizes.
+                    mcu += "Ix";
+                    return;
+                }
+
                 _Report.ReportMergeableError("Invalid MCU", mcu);
             }
         }

@@ -188,6 +188,8 @@ namespace stm32_bsp_generator
 
                         if (addressExpression.Count(t => t.Value == "*") == 0)
                             continue;   //Not an address
+                        if (addressExpression.Any(t => t.Value == "=="))
+                            continue;
 
                         BasicExpressionResolver.TypedInteger addr;
 
@@ -209,6 +211,9 @@ namespace stm32_bsp_generator
 
                             throw;
                         }
+
+                        if (macro.Name.EndsWith("_PFUNC"))
+                            continue;
 
                         if (addr.Type?.First().Value == obj.Name)
                             structs.Add(new DiscoveredPeripheral
@@ -269,24 +274,13 @@ namespace stm32_bsp_generator
                         case "uint8_t":
                             size = 1;
                             break;
-                        case "RSSLIB_S_CloseExitHDP_TypeDef":   //Actually a function pointer
-                        case "RSSLIB_S_CloseExitHDP_t":
-                        case "NSSLIB_S_JumpHDPlvl2_TypeDef":
-                        case "NSSLIB_S_JumpHDPlvl3_TypeDef":
-                        case "RSSLIB_NSC_DataProvisioning_TypeDef":
-                        case "RSSLIB_S_JumpHDPlvl2_TypeDef":
-                        case "RSSLIB_S_JumpHDPlvl3_TypeDef":
-                        case "RSSLIB_S_JumpHDPlvl3NS_TypeDef":
-                        case "RSSLIB_SetSecOB_TypeDef":
-                        case "RSSLIB_GetRssStatus_TypeDef":
-                        case "RSSLIB_GetProductState_TypeDef":
-                        case "RSSLIB_DataProvisioning_TypeDef":
-                        case "RSSLIB_SetProductState_TypeDef":
-                        case "RSSLIB_JumpHDPlvl2_TypeDef":
-                        case "RSSLIB_JumpHDPlvl3_TypeDef":
-                            size = 4;
-                            break;
                         default:
+                            if (type[0].StartsWith("RSSLIB_") || type[0].StartsWith("NSSLIB_")) //Function pointers
+                            {
+                                size = 4;
+                                break;
+                            }
+
                             for (int i = 0; i < field.ArraySize; i++)
                             {
                                 string extraPrefix;
@@ -297,6 +291,7 @@ namespace stm32_bsp_generator
 
                                 if (!parsedFile.Structures.TryGetValue(type[0], out var v))
                                     throw new Exception("Unknown size of " + type[0]);
+
                                 TranslateStructureFieldsToRegistersRecursively(v, parsedFile, ref ctx, prefix + extraPrefix);
                             }
                             continue;

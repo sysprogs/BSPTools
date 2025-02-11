@@ -68,6 +68,32 @@ namespace stm32_bsp_generator
                 }
             }
 
+            static string DetectThreadXVersion(string sdkDir)
+            {
+                var fn = Path.Combine(sdkDir, @"Middlewares\ST\threadx\st_readme.txt");
+                if (!File.Exists(fn))
+                    return null;
+
+                Regex rgVer = new Regex("### V([0-9\\.]+) \\([0-9\\-]+\\) ###");
+
+                foreach(var line in File.ReadAllLines(fn))
+                {
+                    var m = rgVer.Match(line);
+                    if (m.Success)
+                        return m.Groups[1].Value;
+                }
+
+                return null;
+            }
+
+            public struct ImportedPackageVersions
+            {
+                public string ThreadX;
+                public string BaseDir;
+            }
+
+            Dictionary<string, ImportedPackageVersions> _ImportedPackageVersions = new Dictionary<string, ImportedPackageVersions>(StringComparer.OrdinalIgnoreCase);
+
             public STM32BSPBuilder(BSPDirectories dirs, string cubeDir)
                 : base(dirs)
             {
@@ -80,7 +106,16 @@ namespace stm32_bsp_generator
                 {
                     var dir = Path.Combine(dirs.InputDir, sdk.FolderName);
                     if (Directory.Exists(dir))
-                        SystemVars[$"STM32:{sdk.Family.ToUpper()}_DIR"] = Directory.GetDirectories(dir, "STM32Cube_FW_*").First();
+                    {
+                        var familyDir = Directory.GetDirectories(dir, "STM32Cube_FW_*").First();
+                        _ImportedPackageVersions[sdk.Family] = new ImportedPackageVersions
+                        {
+                            BaseDir = familyDir,
+                            ThreadX  = DetectThreadXVersion(familyDir),
+                        };
+
+                        SystemVars[$"STM32:{sdk.Family.ToUpper()}_DIR"] = familyDir;
+                    }
                 }
             }
 
@@ -207,6 +242,11 @@ namespace stm32_bsp_generator
                     reverseFileConditions?.GetHandleForFramework(halFramework)?.AttachMinimalConfigurationValue("com.sysprogs.bspoptions.stm32.hal_legacy", "");
                 }
             }
+
+            public ImportedPackageVersions LookupImportedPackageVersions(STM32SDKCollection.SDK sdk)
+            {
+                return _ImportedPackageVersions[sdk.Family];
+            }
         }
 
         static string GetSubfamilyDefine(STM32Ruleset ruleset, MCUBuilder builder)
@@ -256,9 +296,8 @@ namespace stm32_bsp_generator
                     IsFallbackFile = (ruleset == STM32Ruleset.STM32MP1 && fn.EndsWith("startup_stm32mp15xx.s")),
                     Vectors = StartupFileGenerator.ParseInterruptVectors(fn,
                         tableStart: "g_pfnVectors:",
-                        tableEnd: @"/\*{10,999}|^[^/\*]+\*/
-                $",
-                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ \t]+)",
+                        tableEnd: @"/\*{10,999}|^[^/\*]+\*/$",
+                        vectorLineA: @"^[ \t]+\.word[ \t]+([^ \t/]+)",
                         vectorLineB: null,
                         ignoredLine: @"^[ \t]+/\*|[ \t]+stm32.*|[ \t]+STM32.*|// External Interrupts|^[ \t]*.size[ \t]+g_pfnVectors",
                         macroDef: ".equ[ \t]+([^ \t]+),[ \t]+(0x[0-9a-fA-F]+)",
@@ -390,6 +429,9 @@ namespace stm32_bsp_generator
                 Dictionary<string, STM32SDKCollection.SDK> sdksByVariable = bspBuilder.SDKList.SDKs.ToDictionary(s => $"$$STM32:{s.Family}_DIR$$");
                 List<STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
 
+                string latestThreadX = "0.0";
+                var comparer = new SimpleVersionComparer();
+
                 foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
                 {
                     var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
@@ -405,9 +447,6 @@ namespace stm32_bsp_generator
                         if (baseFamName.EndsWith("_M4"))
                             baseFamName = baseFamName.Substring(0, baseFamName.Length - 3);
 
-                        if (ruleset != STM32Ruleset.BlueNRG_LP)
-                            referencedSDKs.Add(sdksByVariable[baseDir]);
-
                         var dict = new Dictionary<string, string>
                         {
                             { "STM32:FAMILY_EX"  , fam.Name },
@@ -415,6 +454,19 @@ namespace stm32_bsp_generator
                             { "STM32:FAMILY_L"   , baseFamName.ToLower() },
                             { "STM32:FAMILY_DIR" , baseDir },
                         };
+
+                        if (ruleset != STM32Ruleset.BlueNRG_LP)
+                        {
+                            var sdk = sdksByVariable[baseDir];
+                            referencedSDKs.Add(sdk);
+
+                            var versions = bspBuilder.LookupImportedPackageVersions(sdk);
+                            if (comparer.Compare(latestThreadX, versions.ThreadX ?? "0.0") < 0)
+                            {
+                                latestThreadX = versions.ThreadX;
+                                bspBuilder.SystemVars["STM32:LATEST_THREADX_SDK_DIR"] = versions.BaseDir;
+                            }
+                        }
 
                         if (!string.IsNullOrEmpty(fam.FamilySubdirectory))
                             dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$/" + fam.FamilySubdirectory;
@@ -511,8 +563,12 @@ namespace stm32_bsp_generator
                 {
                     foreach (var r in rejects)
                     {
-                        if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB") || r.Name.StartsWith("STM32WL"))
+                        if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32MP2") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB") || r.Name.StartsWith("STM32WL"))
                             continue;
+                        if (r.Name.StartsWith("STM32H7R") || r.Name.StartsWith("STM32H7S"))
+                            continue;   //Separate BSP
+                        if (r.Name.StartsWith("STM32N6"))
+                            continue;   //Separate BSP
 
                         bspBuilder.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
                     }
