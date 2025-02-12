@@ -351,6 +351,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>ports\\cortex_m85\\.*:$$com.sysprogs.bspoptions.arm.core$$==M85</string>
 						<string>common\\src\\tx_thread_stack_error_(handler|notify)\.[ch]:$$com.sysprogs.bspoptions.arm.core$$=~[AM][0-9]$</string>
 					</SimpleFileConditions>
+					<AdvancedRenameRules>\\(tx_misra)\.c$=>{1}_c.c</AdvancedRenameRules>					
 				</CopyJob>
 			</CopyJobs>
 			<AdditionalSystemVars>
