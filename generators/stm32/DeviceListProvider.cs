@@ -210,6 +210,13 @@ namespace stm32_bsp_generator
 
         public class CubeProvider : IDeviceListProvider
         {
+            private HashSet<string> _ExistingUnspecializedDevices;
+
+            public CubeProvider(HashSet<string> existingUnspecializedDevices)
+            {
+                _ExistingUnspecializedDevices = existingUnspecializedDevices;
+            }
+
             public class STM32MCUBuilder : MCUBuilder
             {
                 public readonly ParsedMCU MCU;
@@ -515,11 +522,12 @@ namespace stm32_bsp_generator
                     //We need to detect this and create multiple MCU entries for them, e.g. STM32F103RCTx and STM32F103RCYx
                     var mcusByConfig = grp.GroupBy(m => m.Config).ToArray();
 
-                    if (mcusByConfig.Length == 1)
-                    {
+                    //As of February 2025, some MCUs appear to be incorrectly reported with different memory configurations (e.g. STM32F431RB).
+                    //We work around it by always creating an unspecialized MCU entry, followed by specialized entries if needed.
+                    if (mcusByConfig.Length == 1 || _ExistingUnspecializedDevices.Contains(grp.Key))
                         result.Add(mcusByConfig.First().First().ToMCUBuilder(db));
-                    }
-                    else
+
+                    if (mcusByConfig.Length > 1)
                     {
                         foreach (var subGrp in mcusByConfig)
                         {

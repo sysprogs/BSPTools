@@ -76,7 +76,7 @@ namespace stm32_bsp_generator
 
                 Regex rgVer = new Regex("### V([0-9\\.]+) \\([0-9\\-]+\\) ###");
 
-                foreach(var line in File.ReadAllLines(fn))
+                foreach (var line in File.ReadAllLines(fn))
                 {
                     var m = rgVer.Match(line);
                     if (m.Success)
@@ -111,7 +111,7 @@ namespace stm32_bsp_generator
                         _ImportedPackageVersions[sdk.Family] = new ImportedPackageVersions
                         {
                             BaseDir = familyDir,
-                            ThreadX  = DetectThreadXVersion(familyDir),
+                            ThreadX = DetectThreadXVersion(familyDir),
                         };
 
                         SystemVars[$"STM32:{sdk.Family.ToUpper()}_DIR"] = familyDir;
@@ -401,8 +401,14 @@ namespace stm32_bsp_generator
                 .OfType<STM32Ruleset>()
                 .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), rulesetName.Replace('-', '_')) == 0);
 
+            var existingUnspecializedDevices = new HashSet<string>();
+            var unspecDeviceFile = @"..\..\rules\UnspecializedDevices.txt";
+
+            foreach (var fn in File.ReadAllLines(unspecDeviceFile))
+                existingUnspecializedDevices.Add(fn);
+
             ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
-            IDeviceListProvider provider = new DeviceListProviders.CubeProvider();
+            IDeviceListProvider provider = new DeviceListProviders.CubeProvider(existingUnspecializedDevices);
 
             using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output\" + rulesetName, @"..\..\rules\" + rulesetName, @"..\..\Logs\" + rulesetName), cubeRoot))
             using (var wr = new ParseReportWriter(Path.Combine(bspBuilder.Directories.LogDir, "registers.log")))
@@ -601,7 +607,12 @@ namespace stm32_bsp_generator
                     fam.GenerateLinkerScripts(false);
 
                     foreach (var mcu in fam.MCUs)
-                        mcuDefinitions.Add(mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null));
+                    {
+                        var builtMCU = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null);
+                        if (builtMCU.ID == (mcu as DeviceListProviders.CubeProvider.STM32MCUBuilder).MCU.RPN)
+                            existingUnspecializedDevices.Add(builtMCU.ID);
+                        mcuDefinitions.Add(builtMCU);
+                    }
 
                     foreach (var fw in fam.GenerateFrameworkDefinitions())
                     {
@@ -615,6 +626,8 @@ namespace stm32_bsp_generator
                     if (fam.Definition.ConditionalFlags != null)
                         allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
                 }
+
+                File.WriteAllLines(unspecDeviceFile, existingUnspecializedDevices.OrderBy(x => x).ToArray());
 
                 foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions(familySpecificFrameworkIDs))
                 {
