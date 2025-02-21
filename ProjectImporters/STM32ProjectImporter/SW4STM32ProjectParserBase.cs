@@ -73,7 +73,7 @@ namespace STM32ProjectImporter
                     else if (artifactName.EndsWith("_CM7"))
                         mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "", UserFriendlyNameSuffix = " (Cortex-M7 Core)" };
 
-                    if (mctx == null && cconfiguration.Name.EndsWith("Debug"))
+                    if (mctx == null && cconfiguration.Name.Length > 6 && cconfiguration.Name.EndsWith("Debug"))
                     {
                         var name = cconfiguration.Name.Substring(0, cconfiguration.Name.Length - 6);
                         if (name.StartsWith(project.Name, StringComparison.InvariantCultureIgnoreCase))
