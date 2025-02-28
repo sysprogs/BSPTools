@@ -13,34 +13,38 @@ namespace ESP32ToolchainUpdater
 {
     internal class MemoryMapUpdater
     {
-        struct MemoryExtents
+        public struct MemoryExtents
         {
+            public string Name;
             public uint Start, Length;
             public uint End => Start + Length;
 
-            public override string ToString() => $"{Start:x8}..{End:x8}";
+            public override string ToString() => $"{Name}: {Start:x8}..{End:x8}";
         }
 
-        static string MapMemoryName(string nameFromBSP) => nameFromBSP switch
+        public static Dictionary<string, string> GetXtensaMemoryMappings()
         {
-            "DATA_FLASH" => "drom0_0_seg",
-            "INSTR_FLASH" => "iram0_2_seg",
-            "INSTR_RAM" => "iram0_0_seg",
-            "DATA_RAM" => "dram0_0_seg",
+            return new Dictionary<string, string>
+            {
+                { "drom0_0_seg", "DATA_FLASH" },
+                { "iram0_2_seg", "INSTR_FLASH" },
+                { "iram0_0_seg", "INSTR_RAM" },
+                { "dram0_0_seg", "DATA_RAM" },
+                { "irom_seg", "FLASH" },
+                { "lp_reserved_seg", "LPRAM" },
+            };
+        }
 
-            "FLASH" => "irom_seg",
-            "RAM" => "iram0_0_seg",
-            "LPRAM" => "lp_reserved_seg",
-        };
+        public static readonly string[] CanonicalMemoryOrder = new[] { "DATA_FLASH", "INSTR_FLASH", "DATA_RAM", "INSTR_RAM", "FLASH", "LPRAM", "RAM" };
 
-        public static void UpdateMemoryMap(string bspXML, string deviceName, string mapFile)
+        public static List<MemoryExtents> LocateMemories(string mapFile)
         {
-            Dictionary<string, MemoryExtents> memories = null;
-            var rgMem = new Regex("([id]r[ao]m[^ \t]+|lp_reserved_seg)[ \t]+0x([0-9a-f]+)[ \t]+0x([0-9a-f]+)(.*)$");
-            foreach(var line in File.ReadAllLines(mapFile))
+            List<MemoryExtents> memories = null;
+            var rgMem = new Regex("([^ \t]+)[ \t]+0x([0-9a-f]+)[ \t]+0x([0-9a-f]+)(.*)$");
+            foreach (var line in File.ReadAllLines(mapFile))
             {
                 if (line == "Memory Configuration")
-                    memories = new Dictionary<string, MemoryExtents>();
+                    memories = new List<MemoryExtents>();
                 else if (line == "Linker script and memory map")
                     break;
                 else if (memories != null)
@@ -48,27 +52,21 @@ namespace ESP32ToolchainUpdater
                     var m = rgMem.Match(line);
                     if (m.Success)
                     {
-                        var extents = new MemoryExtents { Start = uint.Parse(m.Groups[2].Value, NumberStyles.HexNumber), Length = uint.Parse(m.Groups[3].Value, NumberStyles.HexNumber) };
+                        var extents = new MemoryExtents { Name = m.Groups[1].Value, Start = uint.Parse(m.Groups[2].Value, NumberStyles.HexNumber), Length = uint.Parse(m.Groups[3].Value, NumberStyles.HexNumber) };
                         uint padding = extents.Start & 0xFFFFU;
 
                         extents.Start -= padding;
                         extents.Length += padding;
 
-                        memories[m.Groups[1].Value] = extents;
+                        if (extents.Name.Contains("*"))
+                            continue;
+                        memories.Add(extents);
                     }
                 }
             }
 
-            var bsp = XmlTools.LoadObject<BoardSupportPackage>(bspXML);
-            var dev = bsp.SupportedMCUs.FirstOrDefault(m => m.ID == deviceName) ?? throw new Exception("Unknown MCU:" + deviceName);
-            foreach(var mem in dev.MemoryMap.Memories)
-            {
-                var extents = memories[MapMemoryName(mem.Name)];
-                mem.Address = extents.Start;
-                mem.Size = extents.Length;
-            }
 
-            XmlTools.SaveObject(bsp, bspXML);
+            return memories;
         }
     }
 }
