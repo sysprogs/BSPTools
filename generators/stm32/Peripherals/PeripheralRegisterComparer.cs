@@ -31,7 +31,7 @@ namespace stm32_bsp_generator
                     continue;
 
                 foreach (var reg in set.Registers)
-                    oldRegisters[HeaderFileParser.ParseMaybeHex(reg.Address)] = reg;
+                    oldRegisters[HeaderFileParser.ParseMaybeHex(new SimpleToken(CppTokenizer.TokenType.Identifier, reg.Address, -1))] = reg;
             }
 
             Dictionary<ulong, HardwareRegister> remainingOldRegisters = new Dictionary<ulong, HardwareRegister>(oldRegisters);

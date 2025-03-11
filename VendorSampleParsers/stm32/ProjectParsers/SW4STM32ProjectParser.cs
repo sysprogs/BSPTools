@@ -73,6 +73,16 @@ namespace GeneratorSampleStm32.ProjectParsers
                     return;
                 }
 
+                for (int i = 11; i < mcu.Length; i++)
+                {
+                    var candidate = mcu.Substring(0, i) + "_M33";
+                    if (_SupportedMCUNames.Contains(candidate))
+                    {
+                        mcu = candidate;
+                        continue;
+                    }
+                }
+
                 _Report.ReportMergeableError("Invalid MCU", mcu);
             }
         }

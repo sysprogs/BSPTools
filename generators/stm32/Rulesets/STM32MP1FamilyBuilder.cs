@@ -25,21 +25,16 @@ namespace stm32_bsp_generator.Rulesets
 
         public override MemoryLayoutCollection GenerateLinkerScripts(bool generalizeWherePossible)
         {
-            foreach (var mcu in MCUs)
-            {
-                var stMCU = (DeviceListProviders.CubeProvider.STM32MCUBuilder)mcu;
-                if (stMCU.PredefinedLinkerScripts.Length != 1)
-                    throw new Exception($"Unexpected predefined linker scripts for {mcu.Name}");
+            char num = Definition.Name[7];
+            string[] sourcePaths = new[] {
+                $"$$STM32:MP{num}_DIR$$/Drivers/CMSIS/Device/ST/STM32MP{num}xx/Source/Templates/gcc/linker",
+            };
 
-                string relPath = $"{FamilyFilePrefix}LinkerScripts/{Path.GetFileName(stMCU.PredefinedLinkerScripts[0])}";
-                mcu.LinkerScriptPath = "$$SYS:BSP_ROOT$$/" + relPath;
-                string sourcePath = "$$STM32:MP1_DIR$$/Drivers/CMSIS/" + stMCU.PredefinedLinkerScripts[0];
-                var targetPath = Path.Combine(BSP.Directories.OutputDir, relPath);
-                BSP.ExpandVariables(ref sourcePath);
-                Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-                File.Copy(sourcePath, targetPath, true);
-            }
+            for (int i = 0; i < sourcePaths.Length; i++)
+                BSP.ExpandVariables(ref sourcePaths[i]);
 
+            var targetPath = Path.Combine(BSP.Directories.OutputDir, $"{FamilyFilePrefix}LinkerScripts");
+            DeviceListProviders.AssignLinkerScripts(targetPath, FamilyFilePrefix, MCUs, sourcePaths);
             return null;
         }
 

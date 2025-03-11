@@ -209,6 +209,9 @@ namespace stm32_bsp_generator
                             if ((ex.Token.Value == "TIM13_NS" || ex.Token.Value == "TIM13_BASE_NS" || ex.Token.Value == "TIM14_BASE_NS") && (parsedFile.ShortName == "stm32h523xx" || parsedFile.ShortName == "stm32h533xx"))
                                 continue;
 
+                            if ((ex.Token.Value == "HASH1_DIGEST_BASE_S"))
+                                continue;
+
                             throw;
                         }
 

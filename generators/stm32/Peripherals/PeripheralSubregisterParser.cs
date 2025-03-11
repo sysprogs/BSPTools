@@ -261,6 +261,8 @@ namespace stm32_bsp_generator
                     continue;   //Bug in the STM32L5 family
                 if (macro.ToString() == "#define TAMP_CR3_ITAMP7NOER_Msk ( 0x1UL << TAMP_CR3_ITAMP7NOER )")
                     continue;
+                if (macro.ToString() == "#define TAMP_CR3_ITAMP7NOER_Msk ( 0x1U << TAMP_CR3_ITAMP7NOER )")
+                    continue;   //Bug in STM32MP2
 
                 var expression = parsedFile.ResolveMacrosRecursively(macro.Value);
                 var value = resolver.ResolveAddressExpression(expression);

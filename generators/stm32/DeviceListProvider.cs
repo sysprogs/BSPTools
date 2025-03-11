@@ -256,7 +256,7 @@ namespace stm32_bsp_generator
 
                     if (MCU.Name.StartsWith("STM32H7") && MCU.Name.EndsWith("M4"))
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByAddress(0x30000000), MemoryLocationRule.ByName("RAM_D2"));
-                    else if (MCU.Name.StartsWith("STM32MP1"))
+                    else if (MCU.Name.StartsWith("STM32MP"))
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByName("RAM1"));
                     else if (MCU.Name.StartsWith("STM32WL"))
                         ram = layout.TryLocateAndMarkPrimaryMemory(MemoryType.RAM, MemoryLocationRule.ByName("SRAM", "SRAM1")) ?? layout.TryLocateOnlyMemory(MemoryType.RAM, true);
@@ -537,6 +537,109 @@ namespace stm32_bsp_generator
                 }
 
                 return result;
+            }
+        }
+
+        struct ParsedLinkerScript
+        {
+            public string DeviceQualifier, Suffix, FileName, FileNameWithoutExtension;
+
+            public int SortOrder
+            {
+                get
+                {
+                    if (Suffix == "flash")
+                        return 0;
+                    else if (Suffix == "sram")
+                        return 1;
+                    else
+                        return 100;
+                }
+            }
+
+            public ParsedLinkerScript(string fn)
+            {
+                int idx = fn.IndexOf('_');
+                if (idx < 0 || !fn.EndsWith(".ld"))
+                    throw new Exception("Unexpected linker script name: " + fn);
+
+                FileName = fn;
+                FileNameWithoutExtension = fn.Substring(0, fn.Length - 3);
+
+                DeviceQualifier = fn.Substring(0, idx);
+                Suffix = fn.Substring(idx + 1, fn.Length - idx - 4);
+            }
+
+            public override string ToString() => FileName;
+
+            public bool IsCompatibleWith(MCUBuilder mcu)
+            {
+                if (DeviceQualifier.StartsWith("stm32mp", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var prefix = DeviceQualifier.TrimEnd('x');
+                    return mcu.Name.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase);
+                }
+
+                switch (DeviceQualifier)
+                {
+                    case "stm32h7r3xx":
+                    case "stm32h7r7xx":
+                    case "stm32h7s3xx":
+                    case "stm32h7s7xx":
+                        return mcu.Name.StartsWith(DeviceQualifier.Substring(0, 9), StringComparison.InvariantCultureIgnoreCase);
+                    case "stm32h7rsxx":
+                        return true;
+                    default:
+                        throw new NotImplementedException("Unsupported linker script qualifier: " + DeviceQualifier);
+                }
+            }
+
+            public PropertyEntry.Enumerated.Suggestion ToSuggestion()
+            {
+                var s = new PropertyEntry.Enumerated.Suggestion
+                {
+                    InternalValue = FileNameWithoutExtension,
+                    UserFriendlyName = Suffix,
+                };
+
+                if (Suffix == "flash" || Suffix == "sram")
+                    s.UserFriendlyName = s.UserFriendlyName.ToUpper();
+
+                return s;
+            }
+        }
+
+
+        public static void AssignLinkerScripts(string targetPath, string familyFilePrefix, IEnumerable<MCUBuilder> MCUs, params string[] sourcePaths)
+        {
+            Directory.CreateDirectory(targetPath);
+            List<ParsedLinkerScript> allLinkerScripts = new List<ParsedLinkerScript>();
+
+            foreach (var sourcePath in sourcePaths)
+            {
+                ParsedLinkerScript[] linkerScripts = Directory.GetFiles(sourcePath, "*.ld").Select(fn => new ParsedLinkerScript(Path.GetFileName(fn))).ToArray();
+                foreach (var n in linkerScripts)
+                    File.Copy(Path.Combine(sourcePath, n.FileName), Path.Combine(targetPath, n.FileName));
+
+                allLinkerScripts.AddRange(linkerScripts);
+            }
+
+            foreach (var mcu in MCUs.OfType<STM32MCUBuilder>())
+            {
+                if (mcu.DiscoveredLinkerScripts != null)
+                    continue;
+
+                var compatibleScripts = allLinkerScripts.Where(s => s.IsCompatibleWith(mcu)).OrderBy(s => s.SortOrder).ToArray();
+                if (compatibleScripts.Length == 0)
+                    throw new Exception("No linker scripts for " + mcu.Name);
+
+                if (compatibleScripts.Length == 1)
+                    mcu.LinkerScriptPath = $"$$SYS:BSP_ROOT$$/{familyFilePrefix}LinkerScripts/" + compatibleScripts[0].FileName;
+                else
+                {
+                    mcu.DiscoveredLinkerScripts = compatibleScripts.Select(s => s.ToSuggestion()).ToArray();
+                    mcu.LinkerScriptPath = $"$$SYS:BSP_ROOT$$/{familyFilePrefix}LinkerScripts/$$com.sysprogs.stm32.memory_layout$$.ld";
+                }
             }
         }
     }
