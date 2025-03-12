@@ -202,6 +202,9 @@ namespace stm32_bsp_generator
                     details.Memories = node.SelectNodes($"memories/C{explicitCore}/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
 
                 if (details.Memories.Length == 0)
+                    details.Memories = node.SelectNodes($"memories/AppliNonSecure/memory").OfType<XmlElement>().Select(n => new RawMemory(n)).ToArray();
+
+                if (details.Memories.Length == 0)
                     throw new Exception("Missing memories for " + RefName);
 
                 return details;
@@ -276,6 +279,14 @@ namespace stm32_bsp_generator
                             { FLASHMemoryName2, mainMemoryForRAMMode.Name } ,
                             { ram.Name, mainMemoryForRAMMode.Name } ,
                         };
+                    }
+
+                    if (MCU.Name.StartsWith("STM32MP2"))
+                    {
+                        if (!layout.Memories.Any(m => m.ContainsAddress(0x80100000)))
+                            layout.Memories.Add(new Memory { Name = "DDR1", Access = MemoryAccess.Readable | MemoryAccess.Writable, Start = 0x80100000, Size = 8 * 1024 * 1024, Type = MemoryType.FLASH });
+                        if (!layout.Memories.Any(m => m.ContainsAddress(0x80A00000)))
+                            layout.Memories.Add(new Memory { Name = "DDR2", Access = MemoryAccess.Readable | MemoryAccess.Writable, Start = 0x80A00000, Size = 8 * 1024 * 1024, Type = MemoryType.FLASH });
                     }
 
                     if (ram == null)

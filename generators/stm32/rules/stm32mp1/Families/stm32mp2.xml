@@ -54,7 +54,7 @@
         </SysVarEntry>
         <SysVarEntry>
           <Key>com.sysprogs.bspoptions.stm32.hal_system_file</Key>
-          <Value>STM32MP2xxxx/CMSIS_HAL/Device/ST/STM32MP2xx/Source/Templates/system_stm32mp2xx.c</Value>
+          <Value>STM32MP2xxxx/CMSIS_HAL/Device/ST/STM32MP2xx/Source/Templates/system_stm32mp2xx_m33.c</Value>
         </SysVarEntry>
         <SysVarEntry>
           <Key>com.sysprogs.bspoptions.stm32.hal_config_template_file</Key>

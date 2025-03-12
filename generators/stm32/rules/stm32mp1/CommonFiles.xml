@@ -105,7 +105,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:MP1_DIR$$\Middlewares\Third_Party\OpenAMP</SourceFolder>
+					<SourceFolder>$$STM32:MP2_DIR$$\Middlewares\Third_Party\OpenAMP</SourceFolder>
 					<FilesToCopy>-CMakeLists.txt;*.c;*.h;*.url;*.txt</FilesToCopy>
 					<AdvancedRenameRules>libmetal\\lib\\(device|init|io|shmem|log)\.c=>libmetal_{1}.c;libmetal\\lib\\irq.c=>irq_base.c;libmetal\\lib\\version.c=>libmetal_version.c</AdvancedRenameRules>
 					<ProjectInclusionMask>-*\zynq*;-*\microblaze*;-*\template\*;-*\xlnx_common\*;open-amp\lib\*;libmetal\lib\system\generic\*;-libmetal\lib\system\*;libmetal\lib\*</ProjectInclusionMask>

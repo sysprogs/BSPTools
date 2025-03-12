@@ -77,3 +77,5 @@ void __attribute__((naked, noreturn)) Default_Handler()
 	//This will pinpoint a specific missing vector.
 	for (;;) ;
 }
+
+extern __attribute__((weak, alias("g_pfnVectors"))) int __Vectors[sizeof(g_pfnVectors) / sizeof(g_pfnVectors[0])];

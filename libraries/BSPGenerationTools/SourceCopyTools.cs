@@ -675,6 +675,7 @@ namespace BSPGenerationTools
                     copiedFileMonitor?.RememberFileMapping(absSourcePath, targetFile, encodedPath);
 
                 bool includedInProject = projectContents.IsMatch(f);
+
                 var m = configTemplateRegex?.Match(f);
                 if (m?.Success == true)
                 {
