@@ -776,11 +776,19 @@ namespace StandaloneBSPValidator
                     }
                 }
 
+                var logFile = Path.Combine(_Directory, "build.log");
+                if (!success && (_ValidationFlags & BSPValidationFlags.IgnoreLinkerErrors) != 0 && File.Exists(logFile))
+                {
+                    var text = File.ReadAllText(logFile);
+                    if (text.Contains("undefined reference to"))
+                        success = true;
+                }
+
                 if (!success)
                 {
                     if (_VendorSample != null)
                         _VendorSample.AllDependencies = null;
-                    return new TestResult(TestBuildResult.Failed, Path.Combine(_Directory, "build.log"));
+                    return new TestResult(TestBuildResult.Failed, logFile);
                 }
 
                 if (_VendorSample != null)
@@ -1122,6 +1130,7 @@ namespace StandaloneBSPValidator
         ResolveNameCollisions = 2,
 
         ContinuePastCompilationErrors = 4,
+        IgnoreLinkerErrors = 8,
     }
 
     public static class Program

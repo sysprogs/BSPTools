@@ -335,6 +335,30 @@ namespace GeneratorSampleStm32
                     }).ToArray();
                 }
 
+                if (ruleset == STM32Ruleset.STM32MP1)
+                {
+                    AutoDetectedFrameworks = AutoDetectedFrameworks.Concat(new[] {
+                        new AutoDetectedFramework
+                        {
+                            FrameworkID = "com.sysprogs.arm.stm32.openamp",
+                            FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/MP\d/Middlewares/Third_Party/OpenAMP", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                            Configuration = new Dictionary<string, string>
+                            {
+                                {"com.sysprogs.bspoptions.stm32.openamp.platform", "generic" },
+                            },
+                            FileBasedConfig = new[]
+                            {
+                                new ConditionalConfigEntry(@".*/OpenAMP/libmetal/lib/system/freertos/.*", "com.sysprogs.bspoptions.stm32.openamp.platform=freertos"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/libmetal/lib/system/freertos/.*", "com.sysprogs.bspoptions.stm32.openamp.platform=freertos"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/virtual_driver/virt_i2c.*", "com.sysprogs.bspoptions.stm32.openamp.virtio.i2c=1"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/virtual_driver/virt_intc.*", "com.sysprogs.bspoptions.stm32.openamp.virtio.intc=1"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/virtual_driver/virt_uart.*", "com.sysprogs.bspoptions.stm32.openamp.virtio.uart=1"),
+                            }
+                        },
+
+                    }).ToArray();
+                }
+
                 AutoPathMappings = new PathMapping[]
                 {
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/STM32[^/\\]+xx_HAL_Driver/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32{1}xx_HAL_Driver/{2}"),
@@ -346,7 +370,7 @@ namespace GeneratorSampleStm32
 
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/WB/Middlewares/ST/STM32_WPAN(.*)", "$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN{1}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(WB)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
-                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP1/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP[12]/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
 
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(F4|F7|H7)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
                 };
