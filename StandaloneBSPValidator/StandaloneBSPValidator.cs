@@ -199,6 +199,7 @@ namespace StandaloneBSPValidator
 
             public void GenerateMakeFile(string filePath, string primaryTarget, IEnumerable<string> comments, bool continuePastCompilationErrors)
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
                 using (var sw = new StreamWriter(filePath))
                 {
                     if (comments != null)

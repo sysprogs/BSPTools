@@ -100,9 +100,14 @@ namespace STM32ProjectImporter
 
         protected virtual void OnMultipleConfigurationsFound(string projectFile) { }
         protected virtual void OnParseFailed(Exception ex, string sampleID, string projectFileDir, string warningText) { }
-        protected virtual void AdjustMCUName(ref string mcu) { }
+        protected virtual void AdjustMCUName(ref string mcu, string cprojectFileDir) { }
         protected virtual void ValidateFinalMCUName(ref string mcu) { }
-        protected virtual void OnFileNotFound(string fullPath) { }
+        
+        protected virtual void OnFileNotFound(EclipseProject.FileNotFoundEventArgs args)
+        {
+            if (args.RelativePath == "./libmetal/lib/include")
+                _HasMissingLibmetal = true;
+        }
         protected virtual void OnVendorSampleParsed(VendorSample sample, CommonConfigurationOptions options) { }
 
         public List<VendorSample> ParseProjectFolder(string optionalProjectRootForLocatingHeaders,
@@ -199,7 +204,7 @@ namespace STM32ProjectImporter
             }
         }
 
-        private void Project_FileNotFound(ref string missingFilePath) => OnFileNotFound(missingFilePath);
+        private void Project_FileNotFound(object sender, EclipseProject.FileNotFoundEventArgs e) => OnFileNotFound(e);
 
         public enum ProjectSubtype
         {
@@ -231,7 +236,7 @@ namespace STM32ProjectImporter
             return new CommonConfigurationOptions
             {
                 IncludeDirectories = tools.Compiler.ReadList("gnu.c.compiler.option.include.paths", PathTranslationFlags.AddExtraComponentToBaseDir),
-                PreprocessorMacros = tools.Compiler.ReadList("gnu.c.compiler.option.preprocessor.def.symbols"),
+                PreprocessorMacros = CleanupMacros(tools.Compiler.ReadList("gnu.c.compiler.option.preprocessor.def.symbols")),
 
                 BoardName = tools.ReadOptionalValue("fr.ac6.managedbuild.option.gnu.cross.board"),
                 MCU = tools.ReadValue("fr.ac6.managedbuild.option.gnu.cross.mcu"),
@@ -260,6 +265,26 @@ namespace STM32ProjectImporter
             return true;
         }
 
+        static string[] CleanupMacros(string[] macros)
+        {
+            for (int i = 0; i < macros.Length; i++)
+            {
+                int equalsIndex = macros[i].IndexOf('=');
+                if (equalsIndex != -1)
+                {
+                    int leftSpaces = 0;
+                    while (equalsIndex - leftSpaces - 1 >= 0 && char.IsWhiteSpace(macros[i][equalsIndex - leftSpaces - 1]))
+                        leftSpaces++;
+                    int rightSpaces = 0;
+                    while (equalsIndex + rightSpaces + 1 < macros[i].Length && char.IsWhiteSpace(macros[i][equalsIndex + rightSpaces + 1]))
+                        rightSpaces++;
+                    if (leftSpaces + rightSpaces > 0)
+                        macros[i] = macros[i].Substring(0, equalsIndex - leftSpaces) + "=" + macros[i].Substring(equalsIndex + rightSpaces + 1);
+                }
+            }
+            return macros;
+        }
+
         public static CommonConfigurationOptions ExtractSTM32CubeIDEOptions(EclipseProject.CConfiguration configuration, Dictionary<string, HashSet<string>> libraryDirCache = null)
         {
             var tools = configuration.RequireTools(EclipseTool.CCompiler | EclipseTool.CLinker | EclipseTool.CPPLinker);
@@ -274,7 +299,7 @@ namespace STM32ProjectImporter
             return new CommonConfigurationOptions
             {
                 IncludeDirectories = tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths", PathTranslationFlags.AddExtraComponentToBaseDir),
-                PreprocessorMacros = tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols", "DEBUG", "RELEASE"),
+                PreprocessorMacros = CleanupMacros(tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols", "DEBUG", "RELEASE")),
 
                 MCU = tools.ReadValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu"),
                 BoardName = tools.ReadValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board"),
@@ -300,7 +325,7 @@ namespace STM32ProjectImporter
             return new CommonConfigurationOptions
             {
                 IncludeDirectories = tools.Compiler.ReadList("fr.ac6.ide.wise.managedbuild.option.c.compiler.include.paths", PathTranslationFlags.AddExtraComponentToBaseDir),
-                PreprocessorMacros = tools.Compiler.ReadList("fr.ac6.ide.wise.managedbuild.option.c.compiler.defs", "DEBUG", "RELEASE"),
+                PreprocessorMacros = CleanupMacros(tools.Compiler.ReadList("fr.ac6.ide.wise.managedbuild.option.c.compiler.defs", "DEBUG", "RELEASE")),
 
                 MCU = "BlueNRG-LP",
                 BoardName = "STEVAL-IDB011V1",
@@ -313,6 +338,8 @@ namespace STM32ProjectImporter
                 SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile, true)
             };
         }
+
+        bool _HasMissingLibmetal;
 
         private VendorSample ParseSingleConfiguration(EclipseProject.CConfiguration configuration,
             string optionalProjectRootForLocatingHeaders,
@@ -342,6 +369,8 @@ namespace STM32ProjectImporter
                     throw new Exception("Failed to detect the project type");
             }
 
+            _HasMissingLibmetal = false;
+
             if (subtype == ProjectSubtype.SW4STM32)
                 opts = ExtractSW4STM32Options(configuration);
             else if (subtype == ProjectSubtype.WiSEStudio)
@@ -351,19 +380,17 @@ namespace STM32ProjectImporter
 
             var mcu = opts.MCU;
 
-            if (mcu.EndsWith("x"))
+            if (_HasMissingLibmetal)
             {
-                if (mcu.StartsWith("STM32MP1"))
-                    mcu = mcu.Substring(0, mcu.Length - 3) + "_M4";
-                else
-                    mcu = mcu.Remove(mcu.Length - 2, 2);
-            }
-            else if (mcu.EndsWith("xP"))
-            {
-                mcu = mcu.Remove(mcu.Length - 3, 3);
+                const string openAMP = @"\Third_Party\OpenAMP";
+                var dir = opts.IncludeDirectories.FirstOrDefault(d => d.Contains(openAMP)) ?? throw new Exception("Could not find the OpenAMP directory");
+                dir = dir.Substring(0, dir.IndexOf(openAMP) + openAMP.Length) + @"\libmetal\lib\include";
+
+                if (!opts.IncludeDirectories.Contains(dir))
+                    opts.IncludeDirectories = opts.IncludeDirectories.Concat(new[] { dir }).ToArray();
             }
 
-            AdjustMCUName(ref mcu);
+            AdjustMCUName(ref mcu, cprojectFileDir);
 
             if (multiConfigurationContext is MultiConfigurationContext.MultiCore mc)
             {

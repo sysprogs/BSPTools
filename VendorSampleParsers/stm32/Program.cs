@@ -341,7 +341,7 @@ namespace GeneratorSampleStm32
                         new AutoDetectedFramework
                         {
                             FrameworkID = "com.sysprogs.arm.stm32.openamp",
-                            FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/MP\d/Middlewares/Third_Party/OpenAMP", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                            FileRegex = new Regex(@"(\$\$SYS:VSAMPLE_DIR\$\$/MP\d/Middlewares/Third_Party|\$\$SYS:BSP_ROOT\$\$)/OpenAMP", RegexOptions.Compiled | RegexOptions.IgnoreCase),
                             Configuration = new Dictionary<string, string>
                             {
                                 {"com.sysprogs.bspoptions.stm32.openamp.platform", "generic" },
