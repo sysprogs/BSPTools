@@ -9,6 +9,8 @@
 		<PreprocessorMacros>
 			<string>CORE_CM33</string>
 			<string>INITIALIZE_SP_AT_RESET</string>
+			<string>VECTOR_TABLE_SECTION_NAME=.isr_vectors</string>
+			<string>VECTOR_TABLE_ALIAS_NAME=__Vectors</string>
 		</PreprocessorMacros>
 		<IncludeDirectories>
 			<string>.</string>

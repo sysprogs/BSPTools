@@ -34,7 +34,14 @@ void __attribute__ ((weak, naked)) $$VECTOR$$() $@+7
 void $$VECTOR$$() $$ALIGN_SPACE_OFFSET$$ __attribute__ ((weak, alias ("Default_Handler")));
 #endif
 
-void * g_pfnVectors[$$VECTOR_TABLE_SIZE$$] __attribute__ ((section (".isr_vector"), used)) = 
+#ifndef VECTOR_TABLE_SECTION_NAME
+#define VECTOR_TABLE_SECTION_NAME .isr_vector
+#endif
+
+#define MAKE_QUOTED_STRING(x) #x
+#define MAKE_SECTION_NAME_STRING(x) MAKE_QUOTED_STRING(x)
+
+void * g_pfnVectors[$$VECTOR_TABLE_SIZE$$] __attribute__ ((section (MAKE_SECTION_NAME_STRING(VECTOR_TABLE_SECTION_NAME)), used)) =
 {
 	&_estack,
 	&Reset_Handler,
@@ -78,4 +85,6 @@ void __attribute__((naked, noreturn)) Default_Handler()
 	for (;;) ;
 }
 
-extern __attribute__((weak, alias("g_pfnVectors"))) int __Vectors[sizeof(g_pfnVectors) / sizeof(g_pfnVectors[0])];
+#ifdef VECTOR_TABLE_ALIAS_NAME
+extern __attribute__((weak, alias("g_pfnVectors"))) int VECTOR_TABLE_ALIAS_NAME[sizeof(g_pfnVectors) / sizeof(g_pfnVectors[0])];
+#endif

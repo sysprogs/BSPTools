@@ -233,12 +233,14 @@ namespace GeneratorSampleStm32
         {
             private ConstructedVendorSampleDirectory _Directory;
             private STM32Ruleset _Ruleset;
+            private readonly LoadedBSP _BSP;
 
-            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping, STM32Ruleset ruleset)
+            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping, STM32Ruleset ruleset, LoadedBSP bsp)
                 : base(optionalConditionTableForFrameworkMapping)
             {
                 _Directory = dir;
                 _Ruleset = ruleset;
+                _BSP = bsp;
                 /*
                     Known problems with trying to map frameworks:
                       HAL:
@@ -406,14 +408,32 @@ namespace GeneratorSampleStm32
                 return copiedFilesByTarget;
             }
 
-            protected override void FilterPreprocessorMacros(ref string[] macros)
+            protected override void FilterPreprocessorMacros(string deviceID, ref string[] macros)
             {
-                base.FilterPreprocessorMacros(ref macros);
+                base.FilterPreprocessorMacros(deviceID, ref macros);
+
+                var matchingMCU = _BSP.FindMCUByID(deviceID) ?? throw new Exception($"Unknown MCU referenced by sample: {deviceID}");
 
                 if (_Ruleset == STM32Ruleset.BlueNRG_LP)
                     macros = macros.Where(m => m != "CONFIG_DEVICE_BLUENRG_LP").ToArray();
                 else
-                    macros = macros.Where(m => !m.StartsWith("STM32") || m.Contains("_")).Concat(new string[] { "$$com.sysprogs.stm32.hal_device_family$$" }).ToArray();
+                {
+                    /* On STM32MP2, some examples have mismatching MCU type definition, e.g. STM32MP257F-DK-Applications-OpenAMP-OpenAMP_TTY_echo
+                     * references the STM32MP257F_M33 device, but defines STM32MP257Cxx, not Fxx.
+                     * This condition is actually checked in the code responsible for building the OpenAMP descriptor tables, so we must preserve the
+                     * mismatching value.
+                     * 
+                     * Hence, to maximize compatibility, we leave all device-specific macros, except the ones that are explicitly redundant against
+                     * the matched MCU definition.
+                     */
+                    const string DeviceFamilyMacro = "com.sysprogs.stm32.hal_device_family";
+                    var familyMacro = matchingMCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(kv => kv.Key == DeviceFamilyMacro).Value;
+
+                    macros = macros.Except(matchingMCU.ExpandedMCU.CompilationFlags.PreprocessorMacros ?? new string[0]).ToArray();
+
+                    if (familyMacro != null)
+                        macros = macros.Except(new[] { familyMacro }).Concat(new string[] { $"$${DeviceFamilyMacro}$$" }).ToArray();
+                }
             }
 
             protected override string BuildVirtualSamplePath(string originalPath)
@@ -544,7 +564,7 @@ namespace GeneratorSampleStm32
                 if (File.Exists(conditionTableFile))
                     table = XmlTools.LoadObject<ReverseConditionTable>(conditionTableFile);
 
-                return new STM32SampleRelocator(sampleDir, table, _Ruleset);
+                return new STM32SampleRelocator(sampleDir, table, _Ruleset, BSP);
             }
 
             static bool IsNonGCCFile(VendorSample vs, string fn)

@@ -289,7 +289,7 @@ namespace BSPGenerationTools
             return result;
         }
 
-        protected virtual void FilterPreprocessorMacros(ref string[] macros)
+        protected virtual void FilterPreprocessorMacros(string deviceID, ref string[] macros)
         {
         }
 
@@ -357,7 +357,7 @@ namespace BSPGenerationTools
                 TranslateVendorSamplePaths(s, ref deps, mapper.MapPath);
 
                 s.Configuration = DetectKnownFrameworksAndFilterPaths(s.DeviceID, ref s.SourceFiles, ref s.HeaderFiles, ref s.IncludeDirectories, ref s.PreprocessorMacros, ref deps, s.Configuration);
-                FilterPreprocessorMacros(ref s.PreprocessorMacros);
+                FilterPreprocessorMacros(s.DeviceID, ref s.PreprocessorMacros);
 
                 if (s.Path == null)
                     throw new Exception("Invalid sample path for " + s.UserFriendlyName);
