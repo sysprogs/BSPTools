@@ -105,16 +105,23 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2]
 			</RequiredFrameworks>
 			<CopyJobs>
 				<CopyJob>
-					<SourceFolder>$$STM32:MP1_DIR$$\Middlewares\Third_Party\OpenAMP</SourceFolder>
-					<FilesToCopy>-CMakeLists.txt;*.c;*.h;*.url;*.txt</FilesToCopy>
-					<AdvancedRenameRules>libmetal\\lib\\(device|init|io|shmem|log)\.c=>libmetal_{1}.c;libmetal\\lib\\irq.c=>irq_base.c;libmetal\\lib\\version.c=>libmetal_version.c</AdvancedRenameRules>
-					<ProjectInclusionMask>-*\zynq*;-*\microblaze*;-*\template\*;-*\xlnx_common\*;open-amp\lib\*;libmetal\lib\system\generic\*;-libmetal\lib\system\*;libmetal\lib\*</ProjectInclusionMask>
+					<SourceFolder>$$STM32:MP2_DIR$$\Middlewares\Third_Party\OpenAMP</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
+					<AdvancedRenameRules>libmetal\\lib\\(device|init|io|shmem|log)\.c=>libmetal_{1}.c;libmetal\\lib\\irq\.c=>irq_base.c;libmetal\\lib\\version\.c=>libmetal_version.c</AdvancedRenameRules>
+					<ProjectInclusionMask>-*\zynq*;-*\microblaze*;-*\xlnx_common\*;open-amp\lib\*;libmetal\lib\system\generic\*;libmetal\lib\system\freertos\*;-libmetal\lib\system\*;libmetal\lib\*.c;libmetal\lib\*.h;virtual_driver\*</ProjectInclusionMask>
 					<AutoIncludeMask/>
-					<PreprocessorMacros>METAL_INTERNAL;NO_ATOMIC_64_SUPPORT;METAL_MAX_DEVICE_REGIONS=2;VIRTIO_SLAVE_ONLY;OPENAMP_VERSION_MAJOR=1;OPENAMP_VERSION_MINOR=1;OPENAMP_VERSION_PATCH=0;OPENAMP_VERSION="1.1.0"</PreprocessorMacros>
+					<PreprocessorMacros>METAL_INTERNAL;NO_ATOMIC_64_SUPPORT;METAL_MAX_DEVICE_REGIONS=2;VIRTIO_SLAVE_ONLY;OPENAMP_VERSION_MAJOR=1;OPENAMP_VERSION_MINOR=1;OPENAMP_VERSION_PATCH=0;OPENAMP_VERSION="1.3.0"</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/OpenAMP/open-amp/lib/include;$$SYS:BSP_ROOT$$/OpenAMP/libmetal/lib/include;$$SYS:BSP_ROOT$$/OpenAMP/virtual_driver</AdditionalIncludeDirs>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.openamp.|OpenAMP</SmartPropertyGroup>
 					<SmartFileConditions>
 						<string>-Redirect printf() output to OpenAMP[proxy]|^open-amp\\lib\\proxy\\.*</string>
+						<string>OpenAMP Platform[platform]|
+^libmetal\\lib\\system\\generic\\*=>Generic[generic];
+^libmetal\\lib\\system\\freertos\\*=>FreeRTOS[freertos];
+						</string>
+						<string>-Include virtual I2C driver[virtio.i2c]|^virtual_driver\\virt_i2c.*</string>
+						<string>-Include virtual INTC driver[virtio.intc]|^virtual_driver\\virt_intc.*</string>
+						<string>-Include virtual UART driver[virtio.uart]|^virtual_driver\\virt_uart.*</string>
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>

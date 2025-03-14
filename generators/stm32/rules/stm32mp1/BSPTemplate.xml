@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <BoardSupportPackage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <PackageID>com.sysprogs.arm.stm32mp1</PackageID>
-  <PackageDescription>STM32MP1 Devices</PackageDescription>
+  <PackageDescription>STM32MP Devices</PackageDescription>
   <GNUTargetID>arm-eabi</GNUTargetID>
   <GeneratedMakFileName>stm32mp1.mak</GeneratedMakFileName>
   <IntelliSenseSetupFile>stm32_compat.h</IntelliSenseSetupFile>

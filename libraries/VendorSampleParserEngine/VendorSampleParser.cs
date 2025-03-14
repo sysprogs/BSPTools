@@ -491,7 +491,7 @@ namespace VendorSampleParserEngine
                         codeScopeSampleList.Samples.Add(job.MakeCodeScopeSample());
                         continue;
                     }
-                    
+
                     var result = job.Run();
                     record.BuildDuration = (int)(DateTime.Now - start).TotalMilliseconds;
                     record.TimeOfLastBuild = DateTime.Now;
@@ -703,11 +703,11 @@ namespace VendorSampleParserEngine
 
                 //Test the raw VendorSamples in-place and store AllDependencies
                 TestVendorSamplesAndUpdateReportAndDependencies(pass1Queue,
-                    null, 
-                    VendorSamplePass.InPlaceBuild, 
+                    null,
+                    VendorSamplePass.InPlaceBuild,
                     vs => _Report.HasSampleFailed(vs.InternalUniqueID),
                     1,
-                    BSPValidationFlags.ResolveNameCollisions,
+                    BSPValidationFlags.ResolveNameCollisions | BSPValidationFlags.IgnoreLinkerErrors,
                     codeScopeSampleList);
 
                 if (codeScopeSampleList != null)
@@ -717,7 +717,7 @@ namespace VendorSampleParserEngine
                     var jobDir = Path.Combine(TestDirectory, BSP.BSP.PackageID, "CodeScopeJobs");
                     Directory.CreateDirectory(jobDir);
                     if (jobs != null)
-                        foreach(var job in jobs)
+                        foreach (var job in jobs)
                             XmlTools.SaveObject(job, Path.Combine(jobDir, job.Name + ".csjx"));
 
                     File.WriteAllLines(Path.Combine(jobDir, "BaseFlags.txt"), baseFlags.Complete());
@@ -828,7 +828,7 @@ namespace VendorSampleParserEngine
             var file = Path.Combine(RulesDirectory, "blacklist.txt");
             if (File.Exists(file))
             {
-                foreach(var rawLine in File.ReadAllLines(file))
+                foreach (var rawLine in File.ReadAllLines(file))
                 {
                     string line = rawLine.Trim();
                     if (line.StartsWith("#") || line == "")

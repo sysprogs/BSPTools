@@ -1,4 +1,5 @@
 ﻿using BSPEngine;
+using BSPEngine.Eclipse;
 using BSPGenerationTools;
 using BSPGenerationTools.Parsing;
 using STM32ProjectImporter;
@@ -44,13 +45,31 @@ namespace GeneratorSampleStm32.ProjectParsers
             _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, warningText, projectFileDir, false);
         }
 
-        protected override void AdjustMCUName(ref string mcu)
+        protected override void AdjustMCUName(ref string mcu, string cprojectFileDir)
         {
-            base.AdjustMCUName(ref mcu);
+            base.AdjustMCUName(ref mcu, cprojectFileDir);
+
+            if (mcu.EndsWith("x"))
+            {
+                if (mcu.StartsWith("STM32MP1"))
+                    mcu = mcu.Substring(0, mcu.Length - 3) + "_M4";
+                else
+                    mcu = mcu.Remove(mcu.Length - 2, 2);
+            }
+            else if (mcu.EndsWith("xP"))
+            {
+                mcu = mcu.Remove(mcu.Length - 3, 3);
+            }
 
             if (!_SupportedMCUNames.Contains(mcu) && mcu.EndsWith("xQ"))
             {
                 mcu = mcu.Remove(mcu.Length - 3, 3);
+            }
+
+            if (cprojectFileDir.Contains("STM32MP235F-DK") && mcu.StartsWith("STM32MP25"))
+            {
+                //Appears to be a bug in the example files in SDK 1.1.0. Taking the MCU from the project file causes build errors.
+                mcu = "STM32MP235F_M33";
             }
         }
 
@@ -73,6 +92,16 @@ namespace GeneratorSampleStm32.ProjectParsers
                     return;
                 }
 
+                for (int i = 11; i < mcu.Length; i++)
+                {
+                    var candidate = mcu.Substring(0, i) + "_M33";
+                    if (_SupportedMCUNames.Contains(candidate))
+                    {
+                        mcu = candidate;
+                        continue;
+                    }
+                }
+
                 _Report.ReportMergeableError("Invalid MCU", mcu);
             }
         }
@@ -82,10 +111,11 @@ namespace GeneratorSampleStm32.ProjectParsers
             _Report.Dispose();
         }
 
-        protected override void OnFileNotFound(string fullPath)
+        protected override void OnFileNotFound(EclipseProject.FileNotFoundEventArgs args)
         {
-            base.OnFileNotFound(fullPath);
-            _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Missing file/directory", fullPath, false);
+            base.OnFileNotFound(args);
+
+            _Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, "Missing file/directory", args.FullPath, false);
         }
     }
 

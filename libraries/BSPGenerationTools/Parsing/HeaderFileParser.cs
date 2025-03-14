@@ -227,39 +227,36 @@ namespace BSPGenerationTools.Parsing
                 if (tokens.Length == 0)
                     continue;
 
-                if (tokens[0].Type == CppTokenizer.TokenType.PreprocessorDirective)
+                if (tokens[0].Type == CppTokenizer.TokenType.PreprocessorDirective && line.Substring(tokens[0].Start, tokens[0].Length) == "#define")
                 {
-                    if (line.Substring(tokens[0].Start, tokens[0].Length) == "#define")
+                    while (tokens.Last().Type == CppTokenizer.TokenType.Operator &&
+                           line.Substring(tokens.Last().Start, tokens.Last().Length) == "\\")
                     {
-                        while (tokens.Last().Type == CppTokenizer.TokenType.Operator &&
-                               line.Substring(tokens.Last().Start, tokens.Last().Length) == "\\")
-                        {
-                            //This is a multi-line #define statement. Combine it with the next line until we reach a line without a trailing backslash
-                            var newTokens = tokenizer.TokenizeLine(lines[++lineIndex], ref tt, false);
-                            tokens = tokens.Take(tokens.Length - 1).Concat(newTokens).ToArray();
-                        }
-
-                        List<SimpleToken> macroTokens = new List<SimpleToken>();
-                        List<string> comment = new List<string>();
-
-                        foreach (var token in tokens.Skip(2))
-                        {
-                            if (token.Type == CppTokenizer.TokenType.Comment)
-                                comment.Add(line.Substring(token.Start, token.Length));
-                            else
-                                macroTokens.Add(new SimpleToken(token.Type, line.Substring(token.Start, token.Length), lineIndex));
-                        }
-
-                        PreprocessorMacro macro = new PreprocessorMacro
-                        {
-                            Name = line.Substring(tokens[1].Start, tokens[1].Length),
-                            Value = macroTokens.ToArray(),
-                            CombinedComments = comment.Count == 0 ? null : string.Join(" ", comment.ToArray())
-                        };
-
-                        builder.OnPreprocessorMacroDefined(macro);
-                        collection.PreprocessorMacros[macro.Name] = macro;
+                        //This is a multi-line #define statement. Combine it with the next line until we reach a line without a trailing backslash
+                        var newTokens = tokenizer.TokenizeLine(lines[++lineIndex], ref tt, false);
+                        tokens = tokens.Take(tokens.Length - 1).Concat(newTokens).ToArray();
                     }
+
+                    List<SimpleToken> macroTokens = new List<SimpleToken>();
+                    List<string> comment = new List<string>();
+
+                    foreach (var token in tokens.Skip(2))
+                    {
+                        if (token.Type == CppTokenizer.TokenType.Comment)
+                            comment.Add(line.Substring(token.Start, token.Length));
+                        else
+                            macroTokens.Add(new SimpleToken(token.Type, line.Substring(token.Start, token.Length), lineIndex));
+                    }
+
+                    PreprocessorMacro macro = new PreprocessorMacro
+                    {
+                        Name = line.Substring(tokens[1].Start, tokens[1].Length),
+                        Value = macroTokens.ToArray(),
+                        CombinedComments = comment.Count == 0 ? null : string.Join(" ", comment.ToArray())
+                    };
+
+                    builder.OnPreprocessorMacroDefined(macro);
+                    collection.PreprocessorMacros[macro.Name] = macro;
                 }
                 else
                 {
@@ -321,10 +318,24 @@ namespace BSPGenerationTools.Parsing
 
                 List<ParsedStructure.Entry> entries = new List<ParsedStructure.Entry>();
                 List<SimpleToken> tokensInThisStatement = new List<SimpleToken>();
+                bool skipStruct = false;
 
                 while (!reader.EOF)
                 {
                     token = reader.ReadNext(false);
+                    if (token.Type == CppTokenizer.TokenType.PreprocessorDirective)
+                    {
+                        if (token.Value == "#ifdef" || token.Value == "#if" || token.Value == "#elif" || token.Value == "#else" || token.Value == "#endif")
+                        {
+                            var line = token.Line;
+                            while (token.Line == line)
+                                token = reader.ReadNext(false);
+                            skipStruct = true;
+                        }
+                        else
+                            throw new NotImplementedException("Unsupported preprocessor directive");
+                    }
+
                     if (token.Type == CppTokenizer.TokenType.Comment)
                     {
                         if (entries.Count > 0)
@@ -342,13 +353,25 @@ namespace BSPGenerationTools.Parsing
                         if (token.Type != CppTokenizer.TokenType.Identifier)
                             ReportUnexpectedToken(token);
                         else
-                            structures[token.Value] = new ParsedStructure(token.Value, entries.ToArray());
+                        {
+                            if (skipStruct)
+                                Console.WriteLine($"Skipping {token.Value} due to unparseable fields");
+                            else
+                                structures[token.Value] = new ParsedStructure(token.Value, entries.ToArray());
+                        }
 
                         break;
                     }
                     else if (token.Type == CppTokenizer.TokenType.Operator && token.Value == ";")
                     {
-                        entries.Add(ParseSingleStructureMember(tokensInThisStatement));
+                        try
+                        {
+                            entries.Add(ParseSingleStructureMember(tokensInThisStatement));
+                        }
+                        catch (BasicExpressionResolver.UnexpectedNonNumberException)
+                        {
+                            skipStruct = true;
+                        }
                         tokensInThisStatement.Clear();
                     }
                     else
@@ -375,7 +398,7 @@ namespace BSPGenerationTools.Parsing
                 if (tokensInThisStatement[idx - 2].Value == "[")
                 {
                     //Simple "Type Name[Size];" statement.
-                    arraySize = (int)ParseMaybeHex(tokensInThisStatement[idx - 1].Value);
+                    arraySize = (int)ParseMaybeHex(tokensInThisStatement[idx - 1]);
                     idx -= 3;
                 }
                 else
@@ -406,13 +429,15 @@ namespace BSPGenerationTools.Parsing
             };
         }
 
-        public static ulong ParseMaybeHex(string text)
+        public static ulong ParseMaybeHex(SimpleToken token)
         {
-            text = text.TrimEnd('U', 'L');
+            var text = token.Value.TrimEnd('U', 'L');
             if (text.StartsWith("0x"))
                 return ulong.Parse(text.Substring(2), NumberStyles.AllowHexSpecifier, null);
+            else if (ulong.TryParse(text, out var value))
+                return value;
             else
-                return ulong.Parse(text);
+                throw new BasicExpressionResolver.UnexpectedNonNumberException(token);
         }
 
         public static ulong? TryParseMaybeHex(string text)

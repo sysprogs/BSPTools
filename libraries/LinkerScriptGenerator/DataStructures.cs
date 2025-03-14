@@ -41,6 +41,8 @@ namespace LinkerScriptGenerator
         public MemoryType Type;
         public bool IsPrimary;  //Primary FLASH or SRAM
 
+        public bool ContainsAddress(uint addr) => addr >= Start && (addr < (Start + Size));
+
         public override string ToString()
         {
             return string.Format("{0}: {1}", Name, SizeWithSuffix);

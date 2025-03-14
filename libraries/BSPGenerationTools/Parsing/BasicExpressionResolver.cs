@@ -51,12 +51,14 @@ namespace BSPGenerationTools.Parsing
                 if (value == null || next == null)
                     return null;
 
-                switch(op)
+                switch (op)
                 {
                     case "+":
                     case "-":
+                    case "*":
+                    case "/":
                         if (next.IsAPointer)
-                            throw new Exception("Cannot add pointers");
+                            throw new Exception("Cannot operate on pointers");
 
                         if (value.IsAPointer)
                         {
@@ -64,10 +66,23 @@ namespace BSPGenerationTools.Parsing
                             throw new NotImplementedException();
                         }
 
-                        if (op == "+")
-                            value = new TypedInteger { Value = value.Value + next.Value, Type = value.Type };
-                        else
-                            value = new TypedInteger { Value = value.Value - next.Value, Type = value.Type };
+                        switch (op)
+                        {
+                            case "+":
+                                value = new TypedInteger { Value = value.Value + next.Value, Type = value.Type };
+                                break;
+                            case "-":
+                                value = new TypedInteger { Value = value.Value - next.Value, Type = value.Type };
+                                break;
+                            case "*":
+                                value = new TypedInteger { Value = value.Value * next.Value, Type = value.Type };
+                                break;
+                            case "/":
+                                if (next.Value == 0)
+                                    throw new Exception("Division by zero");
+                                value = new TypedInteger { Value = value.Value / next.Value, Type = value.Type };
+                                break;
+                        }
 
                         break;
                     case "<<":

@@ -288,13 +288,14 @@ namespace stm32_bsp_generator
             foreach (var fn in allFiles)
             {
                 string name = Path.GetFileName(fn);
+                string expandedFile = fn + ".expanded";
 
                 yield return new StartupFileGenerator.InterruptVectorTable
                 {
                     FileName = Path.ChangeExtension(Path.GetFileName(fn), ".c"),
                     MatchPredicate = new MCUMatcher(name, allFiles.Length == 1).Match,
                     IsFallbackFile = (ruleset == STM32Ruleset.STM32MP1 && fn.EndsWith("startup_stm32mp15xx.s")),
-                    Vectors = StartupFileGenerator.ParseInterruptVectors(fn,
+                    Vectors = StartupFileGenerator.ParseInterruptVectors(File.Exists(expandedFile) ? expandedFile : fn,
                         tableStart: "g_pfnVectors:",
                         tableEnd: @"/\*{10,999}|^[^/\*]+\*/$",
                         vectorLineA: @"^[ \t]+\.word[ \t]+([^ \t/]+)",
@@ -310,32 +311,28 @@ namespace stm32_bsp_generator
         private static IEnumerable<MCUDefinitionWithPredicate> ParsePeripheralRegisters(string dir, MCUFamilyBuilder fam, string specificDevice, ParseReportWriter writer, STM32Ruleset ruleset)
         {
             List<MCUDefinitionWithPredicate> result = new List<MCUDefinitionWithPredicate>();
-            string subfamilySuffix = "";
-            if (fam.Definition.Name.EndsWith("_M4"))
-                subfamilySuffix += "_m4";
+
+            string addedSubfamilySuffix = "";
+            var match = Regex.Match(fam.Definition.Name, @"_m(\d+)$", RegexOptions.IgnoreCase);
+            if (match.Success)
+                addedSubfamilySuffix = $"_m{match.Groups[1].Value}";
 
             Console.Write("Parsing {0} registers using the new parsing logic...", fam.Definition.Name);
             foreach (var fn in Directory.GetFiles(dir, "*.h"))
             {
                 string subfamily = Path.GetFileNameWithoutExtension(fn);
-                string subfamilyForMatching = subfamily;
-                if (subfamily.Length != 11 && subfamily.Length != 12)
-                {
-                    if (subfamily.EndsWith("_cm4", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        //This is a header file for the Cortex-M4 core of an STM32MP1 device
-                        subfamilyForMatching = subfamily.Substring(0, subfamily.Length - 4);
-                    }
-                    else
-                        continue;
-                }
+                var subfamilyMatch = Regex.Match(subfamily, @"(stm32[^_]+)(|_.*)", RegexOptions.IgnoreCase);
+                if (!subfamilyMatch.Success)
+                    continue;
+
+                string subfamilyForMatching = subfamilyMatch.Groups[1].Value;
 
                 if (specificDevice != null && subfamily != specificDevice)
                     continue;
 
                 var r = new MCUDefinitionWithPredicate
                 {
-                    MCUName = subfamily + subfamilySuffix,
+                    MCUName = subfamily + addedSubfamilySuffix,
                     RegisterSets = PeripheralRegisterGenerator2.GeneratePeripheralRegisterDefinitionsFromHeaderFile(fn, fam.MCUs[0].Core, writer),
                     MatchPredicate = m => StringComparer.InvariantCultureIgnoreCase.Compare(GetSubfamilyDefine(ruleset, m), subfamilyForMatching) == 0,
                 };
@@ -346,7 +343,6 @@ namespace stm32_bsp_generator
             Console.WriteLine("done");
             return result;
         }
-
 
         class SamplePrioritizer
         {

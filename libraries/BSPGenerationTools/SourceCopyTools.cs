@@ -614,6 +614,8 @@ namespace BSPGenerationTools
             }
 
             var includeDirs = filesToCopy.Where(f => autoIncludes.IsMatch(f)).Select(f => Path.GetDirectoryName(f).Replace('\\', '/')).Distinct().Select(d => "$$SYS:BSP_ROOT$$" + folderInsideBSPPrefix + (string.IsNullOrEmpty(d) ? "" : ("/" + d))).ToList();
+            Dictionary<string, string> renamedFileToOriginalFile = new Dictionary<string, string>();
+
             foreach (var f in filesToCopy)
             {
                 string renamedRelativePath = f;
@@ -638,6 +640,11 @@ namespace BSPGenerationTools
                     targetFile = Path.Combine(Path.GetDirectoryName(targetFile), newName);
                     renamedRelativePath = Path.Combine(Path.GetDirectoryName(renamedRelativePath), newName);
                     bsp.RenamedFileTable[oldTargetFile] = newName;
+
+                    if (renamedFileToOriginalFile.TryGetValue(newName, out var oldPath))
+                        throw new Exception($"{newName} corresponds to both {oldPath} and {oldTargetFile}");
+
+                    renamedFileToOriginalFile[newName] = oldTargetFile;
                 }
 
                 var absSourcePath = Path.Combine(expandedSourceFolder, f);
@@ -675,6 +682,7 @@ namespace BSPGenerationTools
                     copiedFileMonitor?.RememberFileMapping(absSourcePath, targetFile, encodedPath);
 
                 bool includedInProject = projectContents.IsMatch(f);
+
                 var m = configTemplateRegex?.Match(f);
                 if (m?.Success == true)
                 {

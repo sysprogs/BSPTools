@@ -233,12 +233,14 @@ namespace GeneratorSampleStm32
         {
             private ConstructedVendorSampleDirectory _Directory;
             private STM32Ruleset _Ruleset;
+            private readonly LoadedBSP _BSP;
 
-            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping, STM32Ruleset ruleset)
+            public STM32SampleRelocator(ConstructedVendorSampleDirectory dir, ReverseConditionTable optionalConditionTableForFrameworkMapping, STM32Ruleset ruleset, LoadedBSP bsp)
                 : base(optionalConditionTableForFrameworkMapping)
             {
                 _Directory = dir;
                 _Ruleset = ruleset;
+                _BSP = bsp;
                 /*
                     Known problems with trying to map frameworks:
                       HAL:
@@ -335,6 +337,30 @@ namespace GeneratorSampleStm32
                     }).ToArray();
                 }
 
+                if (ruleset == STM32Ruleset.STM32MP1)
+                {
+                    AutoDetectedFrameworks = AutoDetectedFrameworks.Concat(new[] {
+                        new AutoDetectedFramework
+                        {
+                            FrameworkID = "com.sysprogs.arm.stm32.openamp",
+                            FileRegex = new Regex(@"(\$\$SYS:VSAMPLE_DIR\$\$/MP\d/Middlewares/Third_Party|\$\$SYS:BSP_ROOT\$\$)/OpenAMP", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                            Configuration = new Dictionary<string, string>
+                            {
+                                {"com.sysprogs.bspoptions.stm32.openamp.platform", "generic" },
+                            },
+                            FileBasedConfig = new[]
+                            {
+                                new ConditionalConfigEntry(@".*/OpenAMP/libmetal/lib/system/freertos/.*", "com.sysprogs.bspoptions.stm32.openamp.platform=freertos"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/libmetal/lib/system/freertos/.*", "com.sysprogs.bspoptions.stm32.openamp.platform=freertos"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/virtual_driver/virt_i2c.*", "com.sysprogs.bspoptions.stm32.openamp.virtio.i2c=1"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/virtual_driver/virt_intc.*", "com.sysprogs.bspoptions.stm32.openamp.virtio.intc=1"),
+                                new ConditionalConfigEntry(@".*/OpenAMP/virtual_driver/virt_uart.*", "com.sysprogs.bspoptions.stm32.openamp.virtio.uart=1"),
+                            }
+                        },
+
+                    }).ToArray();
+                }
+
                 AutoPathMappings = new PathMapping[]
                 {
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/([^_]+)/Drivers/STM32[^/\\]+xx_HAL_Driver/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/STM32{1}xx_HAL_Driver/{2}"),
@@ -346,7 +372,7 @@ namespace GeneratorSampleStm32
 
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/WB/Middlewares/ST/STM32_WPAN(.*)", "$$SYS:BSP_ROOT$$/STM32WBxxxx/STM32_WPAN{1}"),
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(WB)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
-                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP1/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
+                    new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/MP[12]/Middlewares/Third_Party/OpenAMP/(.*)", "$$SYS:BSP_ROOT$$/OpenAMP/{1}"),
 
                     new PathMapping(@"\$\$SYS:VSAMPLE_DIR\$\$/(F4|F7|H7)/Drivers/BSP/(.*)", "$$SYS:BSP_ROOT$$/STM32{1}xxxx/BSP/{2}"),
                 };
@@ -382,14 +408,32 @@ namespace GeneratorSampleStm32
                 return copiedFilesByTarget;
             }
 
-            protected override void FilterPreprocessorMacros(ref string[] macros)
+            protected override void FilterPreprocessorMacros(string deviceID, ref string[] macros)
             {
-                base.FilterPreprocessorMacros(ref macros);
+                base.FilterPreprocessorMacros(deviceID, ref macros);
+
+                var matchingMCU = _BSP.FindMCUByID(deviceID) ?? throw new Exception($"Unknown MCU referenced by sample: {deviceID}");
 
                 if (_Ruleset == STM32Ruleset.BlueNRG_LP)
                     macros = macros.Where(m => m != "CONFIG_DEVICE_BLUENRG_LP").ToArray();
                 else
-                    macros = macros.Where(m => !m.StartsWith("STM32") || m.Contains("_")).Concat(new string[] { "$$com.sysprogs.stm32.hal_device_family$$" }).ToArray();
+                {
+                    /* On STM32MP2, some examples have mismatching MCU type definition, e.g. STM32MP257F-DK-Applications-OpenAMP-OpenAMP_TTY_echo
+                     * references the STM32MP257F_M33 device, but defines STM32MP257Cxx, not Fxx.
+                     * This condition is actually checked in the code responsible for building the OpenAMP descriptor tables, so we must preserve the
+                     * mismatching value.
+                     * 
+                     * Hence, to maximize compatibility, we leave all device-specific macros, except the ones that are explicitly redundant against
+                     * the matched MCU definition.
+                     */
+                    const string DeviceFamilyMacro = "com.sysprogs.stm32.hal_device_family";
+                    var familyMacro = matchingMCU.ExpandedMCU.AdditionalSystemVars.FirstOrDefault(kv => kv.Key == DeviceFamilyMacro).Value;
+
+                    macros = macros.Except(matchingMCU.ExpandedMCU.CompilationFlags.PreprocessorMacros ?? new string[0]).ToArray();
+
+                    if (familyMacro != null)
+                        macros = macros.Except(new[] { familyMacro }).Concat(new string[] { $"$${DeviceFamilyMacro}$$" }).ToArray();
+                }
             }
 
             protected override string BuildVirtualSamplePath(string originalPath)
@@ -520,7 +564,7 @@ namespace GeneratorSampleStm32
                 if (File.Exists(conditionTableFile))
                     table = XmlTools.LoadObject<ReverseConditionTable>(conditionTableFile);
 
-                return new STM32SampleRelocator(sampleDir, table, _Ruleset);
+                return new STM32SampleRelocator(sampleDir, table, _Ruleset, BSP);
             }
 
             static bool IsNonGCCFile(VendorSample vs, string fn)
