@@ -2,7 +2,7 @@
 <TestFrameworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<ID>com.sysprogs.unittest.CppUTest</ID>
 	<Name>CppUTest</Name>
-	<Version>3.8r2</Version>
+	<Version>4.0</Version>
 	<Embedded>
 		<TestSelection xsi:type="HookBasedTestSelection">
 			<HookedEntry>SysprogsTestHook_SelectTests</HookedEntry>
@@ -93,7 +93,7 @@
 			<string>#include &lt;CppUTest/CommandLineTestRunner.h&gt;</string>
 		</IncludeLines>
 		<RequiredFunctions>
-			<string>_ZN21CommandLineTestRunner11RunAllTestsEiPPKc</string>
+			<string>_ZN21CommandLineTestRunner15runAllTestsMainEv</string>
 		</RequiredFunctions>
 		<Samples>
 			<TestFrameworkSample>

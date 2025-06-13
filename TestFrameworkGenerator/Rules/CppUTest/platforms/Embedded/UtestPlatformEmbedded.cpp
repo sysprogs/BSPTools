@@ -26,6 +26,7 @@
  */
 
 #include <stdlib.h>
+#include <math.h>
 #include "CppUTest/TestHarness.h"
 #undef malloc
 #undef free
@@ -38,7 +39,6 @@
 #include <stdarg.h>
 #include <setjmp.h>
 #include <string.h>
-#include <math.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <signal.h>
@@ -153,7 +153,7 @@ static int PlatformSpecificSetJmpImplementation(void (*function) (void* data), v
  * The later clang compilers complain when it isn't there. So only way is to check the clang compiler here :(
  */
 #if !((__clang_major__ == 3) && (__clang_minor__ == 0))
-__no_return__
+__attribute__((noreturn))
 #endif
 static void PlatformSpecificLongJmpImplementation()
 {
@@ -224,6 +224,8 @@ void* (*PlatformSpecificRealloc)(void*, size_t) = realloc;
 void (*PlatformSpecificFree)(void* memory) = free;
 void* (*PlatformSpecificMemCpy)(void*, const void*, size_t) = memcpy;
 void* (*PlatformSpecificMemset)(void*, int, size_t) = memset;
+void (*PlatformSpecificSrand)(unsigned int) = srand;
+int (*PlatformSpecificRand)(void) = rand;
 
 /* GCC 4.9.x introduces -Wfloat-conversion, which causes a warning / error
  * in GCC's own (macro) implementation of isnan() and isinf().

@@ -31,7 +31,7 @@
 				</Patch>	
 				<Patch xsi:type="InsertLines">
 					<FilePath>src\CppUTest\MemoryLeakWarningPlugin.cpp</FilePath>
-					<AfterLine>        result.addFailure(f);</AfterLine>
+					<AfterLine>            result.addFailure(f);</AfterLine>
 					<InsertedLines>
 						<string>        SysprogsTestHook_TestFailed(&amp;test, f.getMessage().asCharString(), 0);</string>
 					</InsertedLines>
@@ -45,15 +45,15 @@
 				</Patch>	
 				<Patch xsi:type="ReplaceLine">
 					<FilePath>src\CppUTest\TestRegistry.cpp</FilePath>
-					<OldLine>    for (UtestShell *test = tests_; test != NULL; test = test-&gt;getNext()) {</OldLine>
+					<OldLine>    for (UtestShell *test = tests_; test != NULLPTR; test = test->getNext()) {</OldLine>
 					<NewLine>    int testCount = 0, testNumber = 0;
-    for (UtestShell *test = tests_; test != NULL; test = test->getNext()) 
+    for (UtestShell *test = tests_; test != NULLPTR; test = test->getNext()) 
         testCount++;
     
     UtestShell **pTests = (UtestShell **)malloc(testCount * sizeof(UtestShell));
     UtestShell **pEnabledTests = (UtestShell **)malloc(testCount * sizeof(UtestShell));
     
-    for (UtestShell *test = tests_; test != NULL &amp;&amp; testNumber &lt; testCount; test = test-&gt;getNext(), testNumber++) 
+    for (UtestShell *test = tests_; test != NULLPTR &amp;&amp; testNumber &lt; testCount; test = test-&gt;getNext(), testNumber++) 
     {
         pTests[testNumber] = test;
         pEnabledTests[testNumber] = test;
@@ -103,10 +103,11 @@
 						<string>    SysprogsTestHook_TestFailed(this, failure.getMessage().asCharString(), 0);</string>
 					</InsertedLines>
 				</Patch>	
-			</Patches>			
-			<SimpleFileConditions>
-				<string>[^\\]+\\CppUTestExt\\.*: $$platform$$ == linux</string>
-			</SimpleFileConditions>		</CopyJob>			
+			</Patches>	
+			<SmartFileConditions>
+				<string>-Enable CppUTestExt (mocks, etc)[com.sysprogs.testfw.cpputest.ext]|[^\\]+\\CppUTestExt\\.*</string>
+			</SmartFileConditions>
+			</CopyJob>			
 		<CopyJob>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\platforms</SourceFolder>
 			<FilesToCopy>*</FilesToCopy>
