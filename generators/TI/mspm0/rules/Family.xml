@@ -22,8 +22,6 @@
 			<ID>com.sysprogs.arm.ti.mspm0.driverlib</ID>
 			<ProjectFolderName>Drivers</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
-			<IncompatibleFrameworks>
-			</IncompatibleFrameworks>
 			<RequiredFrameworks>
 			</RequiredFrameworks>
 			<CopyJobs>
@@ -35,6 +33,57 @@
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<AutoIncludeMask></AutoIncludeMask>	
 				<AdditionalIncludeDirs></AdditionalIncludeDirs>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>		
+		<Framework>
+			<Name>Non-RTOS Kernel</Name>
+			<ID>com.sysprogs.arm.ti.mspm0.kernel.nonrtos</ID>
+			<ProjectFolderName>Kernel</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.ti.mspm0.kernel.freertos</string>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\nortos</SourceFolder>
+				<TargetFolder>kernel\nortos</TargetFolder>
+				<FilesToCopy>dpl\*</FilesToCopy>
+				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+				<AutoIncludeMask></AutoIncludeMask>	
+				<AdditionalIncludeDirs></AdditionalIncludeDirs>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>		
+		<Framework>
+			<Name>FreeRTOS</Name>
+			<ID>com.sysprogs.arm.ti.mspm0.kernel.freertos</ID>
+			<ProjectFolderName>Kernel</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<IncompatibleFrameworks>
+				<string>com.sysprogs.arm.ti.mspm0.kernel.nonrtos</string>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\kernel\freertos</SourceFolder>
+				<TargetFolder>kernel\freertos</TargetFolder>
+				<FilesToCopy>dpl\*;Source\*</FilesToCopy>
+				<ProjectInclusionMask>-*\IAR\*;-*\TI_ARM_CLANG\*;*.c;*.h</ProjectInclusionMask>
+				<AdditionalIncludeDirs>.</AdditionalIncludeDirs>
+				<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.freertos.|FreeRTOS</SmartPropertyGroup>
+				<SmartFileConditions>
+					<string>Heap Implementation[heap]|
+	Source\\portable\\MemMang\\heap_1.c=>Heap1 - no support for freeing[heap_1];
+	Source\\portable\\MemMang\\heap_2.c=>Heap2 - no block consolidation[heap_2];
+	Source\\portable\\MemMang\\heap_3.c=>Heap3 - use newlib malloc()/free()[heap_3];
+	Source\\portable\\MemMang\\heap_4.c=>+Heap4 - contiguous heap area[heap_4];
+	Source\\portable\\MemMang\\heap_5.c=>Heap5 - scattered heap area[heap_5]
+					</string>
+				</SmartFileConditions>
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>		

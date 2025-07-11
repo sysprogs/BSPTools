@@ -12,21 +12,22 @@ namespace mspm0_bsp_generator
 {
     internal class Program
     {
-        public readonly struct QualifiedStartupFile
-        {
-            public readonly string Prefix;
-            public readonly string FileName;
-            public QualifiedStartupFile(string prefix, string fileName)
-            {
-                Prefix = prefix;
-                FileName = fileName;
-            }
-
-            public override string ToString() => $"{Prefix} => {FileName}";
-        }
-
         class StartupFileCollection
         {
+            public readonly struct QualifiedStartupFile
+            {
+                public readonly string Prefix;
+                public readonly string FileName;
+                public QualifiedStartupFile(string prefix, string fileName)
+                {
+                    Prefix = prefix;
+                    FileName = fileName;
+                }
+
+                public override string ToString() => $"{Prefix} => {FileName}";
+            }
+
+
             public readonly List<QualifiedStartupFile> Files = new List<QualifiedStartupFile>();
             public readonly string StartupFilesDir;
 
@@ -87,12 +88,45 @@ namespace mspm0_bsp_generator
             }
         }
 
+
+        class SVDFileCollection
+        {
+            public readonly struct QualifiedSVDFile
+            {
+                public readonly string Prefix;
+                public readonly string FileName;
+                public readonly MCUDefinition MCUDefinition;
+
+                public QualifiedSVDFile(string prefix, string fullPath)
+                {
+                    Prefix = prefix;
+                    FileName = Path.GetFileName(fullPath);
+
+                    MCUDefinition = SVDParser.ParseSVDFile(fullPath, prefix);
+                }
+
+                public override string ToString() => $"{Prefix} => {FileName}";
+            }
+
+
+            public readonly List<QualifiedSVDFile> Files = new List<QualifiedSVDFile>();
+
+            public SVDFileCollection(string dir)
+            {
+                var svdFiles = Directory.GetFiles(dir, "*.svd");
+                foreach (var file in svdFiles)
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(file);
+                    Files.Add(new QualifiedSVDFile(fileName.TrimEnd('X'), file));
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
-            if (args.Length < 1)
-                throw new Exception("Usage: mspm0_bsp_generator.exe <MSPM0 SW package directory>");
+            if (args.Length < 2)
+                throw new Exception("Usage: mspm0_bsp_generator.exe <MSPM0 SW package directory> <SVD file directory>");
 
-            bool noPeripheralRegisters = args.Contains("/noperiph");
             var familyDefinitions = new List<MCUFamily>();
             var mcuDefinitions = new List<MCU>();
             var frameworks = new List<EmbeddedFramework>();
@@ -108,6 +142,8 @@ namespace mspm0_bsp_generator
                 var startupDir = @"source\ti\devices\msp\m0p\startup_system_files\gcc";
                 var startupFiles = new StartupFileCollection(bspBuilder.Directories.InputDir, startupDir);
 
+                var svdFiles = new SVDFileCollection(args[1]);
+
                 var commonFamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\Family.xml"));
                 var flags = new ToolFlags();
                 var projectFiles = new List<string>();
@@ -117,14 +153,21 @@ namespace mspm0_bsp_generator
                 {
                     var startupFile = startupFiles.FindBestMatch(mcu.Name) ?? throw new Exception("Missing startup file");
                     mcu.StartupFile = $"$$SYS:BSP_ROOT$$/{startupFiles.StartupFilesDir}/{startupFile.FileName}";
-
-
-                    mcuDefinitions.Add(mcu.GenerateDefinition(commonFamily, bspBuilder, !noPeripheralRegisters));
                     commonFamily.MCUs.Add(mcu);
                 }
 
-                familyDefinitions.Add(commonFamily.GenerateFamilyObject(true));
+                commonFamily.AttachPeripheralRegisters(svdFiles.Files.Select(f => new MCUDefinitionWithPredicate
+                {
+                    MCUName = f.MCUDefinition.MCUName,
+                    RegisterSets = f.MCUDefinition.RegisterSets,
+                    MatchPredicate = m => m.Name.StartsWith(f.Prefix, StringComparison.OrdinalIgnoreCase)
+                }), throwIfNotFound: false);
 
+                foreach (var mcu in commonFamily.MCUs)
+                    mcuDefinitions.Add(mcu.GenerateDefinition(commonFamily, bspBuilder, false));
+
+
+                familyDefinitions.Add(commonFamily.GenerateFamilyObject(true));
 
                 foreach (var fw in commonFamily.GenerateFrameworkDefinitions())
                 {
@@ -146,6 +189,7 @@ namespace mspm0_bsp_generator
                     SupportedMCUs = mcuDefinitions.ToArray(),
                     Frameworks = frameworks.ToArray(),
                     Examples = exampleDirs.ToArray(),
+                    FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray(),
                     PackageVersion = "2.05.01"
                 };
 
@@ -175,7 +219,7 @@ namespace mspm0_bsp_generator
                         Memories = memories.Select(m => new Memory
                         {
                             Name = m.Name,
-                            Type = m.Name.ToLower() == "flash" ? MemoryType.FLASH : 
+                            Type = m.Name.ToLower() == "flash" ? MemoryType.FLASH :
                                      m.Name.ToLower().StartsWith("sram") ? MemoryType.RAM : MemoryType.Unknown,
                             Start = (uint)m.Address,
                             Size = (uint)m.Size
