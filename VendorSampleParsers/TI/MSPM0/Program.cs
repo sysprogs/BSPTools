@@ -75,6 +75,10 @@ namespace MSPM0VendorSampleParser
                             DeviceID = doc.SelectSingleNode("/projectSpec/project")?.Attributes["device"]?.Value,
                         };
 
+                        var frameworks = new List<string> { "com.sysprogs.arm.ti.mspm0.driverlib" };
+                        if (parsedSpec.LDFLAGS.Contains("-l:arm_cortexM0l_math.a"))
+                            frameworks.Add("com.sysprogs.arm.ti.mspm0.dsp_lib");
+
                         var vs = new VendorSample
                         {
                             InternalUniqueID = relPath.Replace('\\', '-'),
@@ -84,9 +88,20 @@ namespace MSPM0VendorSampleParser
                             Path = sampleDir,
                             DeviceID = parsedSpec.DeviceID,
                             SourceFiles = parsedSpec.RelativeSourcePaths.Select(f => TranslateSourcePath(Path.GetDirectoryName(primaryFN), f)).Where(f => f != null).ToArray(),
+                            Configuration = new VendorSampleConfiguration
+                            {
+                                Frameworks = frameworks.ToArray(),
+                                Configuration = new PropertyDictionary2
+                                {
+                                    Entries = new[]
+                                    {
+                                        new PropertyDictionary2.KeyValue{Key = "com.sysprogs.bspoptions.mspm0.driverlib.dl_factoryregion", Value = "1"}
+                                    }
+                                }
+                            }
                         };
 
-                        vs.SourceFiles = vs.SourceFiles.Where(s=>!Path.GetFileName(s).StartsWith("startup_")).Concat(commonFiles).Append(Path.Combine(sampleDir, "ti_msp_dl_config.c")).ToArray();
+                        vs.SourceFiles = vs.SourceFiles.Where(s => !Path.GetFileName(s).StartsWith("startup_"))/*.Concat(commonFiles)*/.Append(Path.Combine(sampleDir, "ti_msp_dl_config.c")).Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
                         vendorSamples.Add(vs);
                     }
                     catch (Exception ex)

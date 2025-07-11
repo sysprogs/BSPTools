@@ -6,7 +6,7 @@
 			<CopyJob>
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source</SourceFolder>
 				<TargetFolder>source</TargetFolder>
-				<FilesToCopy>-*\keil\*;-*\iar\*;-*\ticlang\*;*</FilesToCopy>
+				<FilesToCopy>-*\keil\*;-*\iar\*;-*\ticlang\*;-*\lib\*;*</FilesToCopy>
 				<ProjectInclusionMask></ProjectInclusionMask>
 				<AutoIncludeMask></AutoIncludeMask>
 				<AdditionalIncludeDirs>third_party/CMSIS/Core/Include;?</AdditionalIncludeDirs>
@@ -29,10 +29,15 @@
 				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\driverlib</SourceFolder>
 				<TargetFolder>source\ti\driverlib</TargetFolder>
 				<AlreadyCopied>true</AlreadyCopied>
-				<FilesToCopy>-*\keil\*;-*\iar\*;-*\ticlang\*;*</FilesToCopy>
+				<FilesToCopy>-*\keil\*;-*\iar\*;-*\ticlang\*;-*\lib\*;-lib\*;*</FilesToCopy>
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<AutoIncludeMask></AutoIncludeMask>	
 				<AdditionalIncludeDirs></AdditionalIncludeDirs>
+				<SmartPropertyGroup>com.sysprogs.bspoptions.mspm0.driverlib.|Driver Library</SmartPropertyGroup>
+				<SmartFileConditions>
+					<string>-Include RAM Vector Table[dl_interrupt]|m0p\\dl_interrupt.*</string>
+					<string>Include Factory Region Table[dl_factoryregion]|m0p\\dl_factoryregion.*</string>
+				</SmartFileConditions>
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>		
@@ -54,6 +59,25 @@
 				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
 				<AutoIncludeMask></AutoIncludeMask>	
 				<AdditionalIncludeDirs></AdditionalIncludeDirs>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>		
+		<Framework>
+			<Name>DSP Library</Name>
+			<ID>com.sysprogs.arm.ti.mspm0.dsp_lib</ID>
+			<ProjectFolderName>DSP</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\third_party\CMSIS\DSP</SourceFolder>
+				<TargetFolder>source\third_party\CMSIS\DSP</TargetFolder>
+				<FilesToCopy>-*\keil\*;-*\iar\*;-*\ticlang\*;-*\lib\*;-lib\*;*</FilesToCopy>
+				<AlreadyCopied>true</AlreadyCopied>
+				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+				<AutoIncludeMask></AutoIncludeMask>	
+				<AdditionalIncludeDirs>Include;PrivateInclude</AdditionalIncludeDirs>
 			</CopyJob>	
 			</CopyJobs>
 		</Framework>		

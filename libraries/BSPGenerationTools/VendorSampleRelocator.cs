@@ -395,6 +395,8 @@ namespace BSPGenerationTools
 
                     TranslateVendorSamplePaths(s, ref deps, path =>
                     {
+                        if (path == null)
+                            return null;
                         if (shortenedPaths.TryGetValue(path.Replace('\\', '/'), out var result))
                             return result;
 
