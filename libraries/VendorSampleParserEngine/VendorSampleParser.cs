@@ -39,7 +39,8 @@ namespace VendorSampleParserEngine
             var baseDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"..\.."));
 
             string problemClassifierFile = Path.Combine(baseDirectory, "KnownProblems.xml");
-            _KnownProblems = XmlTools.LoadObject<KnownSampleProblemDatabase>(problemClassifierFile);
+            if (File.Exists(problemClassifierFile))
+                _KnownProblems = XmlTools.LoadObject<KnownSampleProblemDatabase>(problemClassifierFile);
 
             BSPDirectory = Path.GetFullPath(Path.Combine(baseDirectory, testedBSPDirectory));
             CacheDirectory = Path.Combine(baseDirectory, "Cache");
@@ -354,7 +355,7 @@ namespace VendorSampleParserEngine
 
             record.BuildFailedExplicitly = true;
             record.ExtraInformation = errorDetails;
-            record.KnownProblemID = _KnownProblems.TryClassifyError(buildLogFile)?.ID;
+            record.KnownProblemID = _KnownProblems?.TryClassifyError(buildLogFile)?.ID;
         }
 
         public string CreateBuildDirectory(VendorSamplePass pass)
@@ -629,7 +630,7 @@ namespace VendorSampleParserEngine
                         var logFile = LocateLogFile(_Report.BSPID, rec.UniqueID, rec.LastSucceededPass + 1);
                         if (logFile != null)
                         {
-                            rec.KnownProblemID = _KnownProblems.TryClassifyError(logFile)?.ID;
+                            rec.KnownProblemID = _KnownProblems?.TryClassifyError(logFile)?.ID;
                         }
                     }
                 }

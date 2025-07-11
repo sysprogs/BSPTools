@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSPM0VendorSampleParser", "MSPM0VendorSampleParser.csproj", "{5655539C-8663-4673-867C-2ABF5FCEAD05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSPGenerationTools", "..\..\..\libraries\BSPGenerationTools\BSPGenerationTools.csproj", "{9FE2706C-E100-4EF2-8498-C25C7FF3B122}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandaloneBSPValidator", "..\..\..\StandaloneBSPValidator\StandaloneBSPValidator.csproj", "{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorSampleParserEngine", "..\..\..\libraries\VendorSampleParserEngine\VendorSampleParserEngine.csproj", "{62944C6C-B57E-449C-8BCC-98F22E665F5F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5655539C-8663-4673-867C-2ABF5FCEAD05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5655539C-8663-4673-867C-2ABF5FCEAD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5655539C-8663-4673-867C-2ABF5FCEAD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5655539C-8663-4673-867C-2ABF5FCEAD05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FE2706C-E100-4EF2-8498-C25C7FF3B122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADD117B0-6AC5-4E07-BA8B-8FDF35BDF421}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62944C6C-B57E-449C-8BCC-98F22E665F5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62944C6C-B57E-449C-8BCC-98F22E665F5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62944C6C-B57E-449C-8BCC-98F22E665F5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62944C6C-B57E-449C-8BCC-98F22E665F5F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
