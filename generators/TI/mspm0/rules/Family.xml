@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<FamilyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Name>MSPM0xxxx</Name>
+	<CoreFramework>
+		<CopyJobs>	
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source</SourceFolder>
+				<TargetFolder>source</TargetFolder>
+				<FilesToCopy>-*\keil\*;-*\iar\*;-*\ticlang\*;*</FilesToCopy>
+				<ProjectInclusionMask></ProjectInclusionMask>
+				<AutoIncludeMask></AutoIncludeMask>
+				<AdditionalIncludeDirs>third_party/CMSIS/Core/Include;?</AdditionalIncludeDirs>
+			</CopyJob>
+		</CopyJobs>
+	</CoreFramework>
+	<CompilationFlags>
+		<COMMONFLAGS>-march=armv6-m -mfloat-abi=soft</COMMONFLAGS>
+	</CompilationFlags>
+	<AdditionalFrameworks>
+		<Framework>
+			<Name>Driver Library</Name>
+			<ID>com.sysprogs.arm.ti.mspm0.driverlib</ID>
+			<ProjectFolderName>Drivers</ProjectFolderName>
+			<DefaultEnabled>true</DefaultEnabled>
+			<IncompatibleFrameworks>
+			</IncompatibleFrameworks>
+			<RequiredFrameworks>
+			</RequiredFrameworks>
+			<CopyJobs>
+			<CopyJob>
+				<SourceFolder>$$BSPGEN:INPUT_DIR$$\source\ti\driverlib</SourceFolder>
+				<TargetFolder>source\ti\driverlib</TargetFolder>
+				<AlreadyCopied>true</AlreadyCopied>
+				<FilesToCopy>-*\keil\*;-*\iar\*;-*\ticlang\*;*</FilesToCopy>
+				<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
+				<AutoIncludeMask></AutoIncludeMask>	
+				<AdditionalIncludeDirs></AdditionalIncludeDirs>
+			</CopyJob>	
+			</CopyJobs>
+		</Framework>		
+	</AdditionalFrameworks>
+	<SmartSamples>
+		<SmartSample>
+			<SourceFolder>$$BSPGEN:RULES_DIR$$\Samples\LEDBlink</SourceFolder>
+			<DestinationFolder>Samples\LEDBlink</DestinationFolder>
+		</SmartSample>
+	</SmartSamples>
+</FamilyDefinition>
