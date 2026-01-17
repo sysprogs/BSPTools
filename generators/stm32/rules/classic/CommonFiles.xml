@@ -441,7 +441,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<SourceFolder>$$STM32:LATEST_THREADX_SDK_DIR$$\Middlewares\ST\usbx</SourceFolder>
 					<TargetFolder>AzureRTOS\usbx</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
-					<AutoIncludeMask>-ports*;*.h</AutoIncludeMask>
+					<AutoIncludeMask>-ports*;-test*;*.h</AutoIncludeMask>
 					<AdditionalIncludeDirs>ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
 					<ProjectInclusionMask>common\*.c;common\*.h;ports\cortex_*\gnu\*.c;ports\cortex_*\gnu\*.h;</ProjectInclusionMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.usbx.|USBX</SmartPropertyGroup>
