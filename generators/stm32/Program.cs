@@ -94,8 +94,8 @@ namespace stm32_bsp_generator
 
             Dictionary<string, ImportedPackageVersions> _ImportedPackageVersions = new Dictionary<string, ImportedPackageVersions>(StringComparer.OrdinalIgnoreCase);
 
-            public STM32BSPBuilder(BSPDirectories dirs, string cubeDir)
-                : base(dirs)
+            public STM32BSPBuilder(BSPDirectories dirs, string cubeDir, BSPReportWriter commonReportWriter)
+                : base(dirs, commonReportWriter: commonReportWriter)
             {
                 STM32CubeDir = cubeDir;
                 ShortName = "STM32";
@@ -379,7 +379,7 @@ namespace stm32_bsp_generator
             private string[] _Args;
             private string _SDKRoot;
             private string _CubeRoot;
-            private string _RulesDir;
+            private string _RulesDir, _LogDir;
             private string _ExplicitSource;
             private string _RulesetName;
             private STM32Ruleset _Ruleset;
@@ -412,6 +412,7 @@ namespace stm32_bsp_generator
                     .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), _RulesetName.Replace('-', '_')) == 0);
 
                 _RulesDir = @"..\..\rules\" + _RulesetName;
+                _LogDir = @"..\..\Logs\" + _RulesetName;
                 _ExistingUnspecializedDevices = new HashSet<string>();
                 _UnspecDeviceFile = @"..\..\rules\UnspecializedDevices.txt";
 
@@ -421,30 +422,30 @@ namespace stm32_bsp_generator
                 /// If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface,
                 /// switch to using it, but keep the old one for reference & easy comparison.
                 _Provider = new DeviceListProviders.CubeProvider(_ExistingUnspecializedDevices);
+
+                List<MCUBuilder> devices;
+                if (_Ruleset == STM32Ruleset.BlueNRG_LP)
+                    devices = new List<MCUBuilder> { new BlueNRGFamilyBuilder.BlueNRGMCUBuilder() };
+                else
+                {
+                    devices = _Provider.LoadDeviceList(bspBuilder);
+                    var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP") && !d.Name.StartsWith("STM32N6")).ToArray();
+                    if (incompleteDevices.Length > 0)
+                        throw new Exception($"{incompleteDevices.Length} devices have FLASH Size = 0 ");
+                }
             }
 
-            void DoRun(string subsetName = null)
+            void DoRun(string subsetName = null, BSPReportWriter commonReportWriter = null)
             {
                 var dirSuffix = "";
                 if (subsetName != null)
                     dirSuffix = @"\" + subsetName;
 
-                using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(_SDKRoot, @"..\..\Output\" + _RulesetName + dirSuffix, _RulesDir, @"..\..\Logs\" + _RulesetName + dirSuffix), _CubeRoot))
-                using (var wr = new ParseReportWriter(Path.Combine(bspBuilder.Directories.LogDir, "registers.log")))
+                using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(_SDKRoot, @"..\..\Output\" + _RulesetName + dirSuffix, _RulesDir, @"..\..\Logs\" + _RulesetName + dirSuffix), _CubeRoot, commonReportWriter))
+                using (var wr = new ParseReportWriter(Path.Combine(_LogDir, $"registers-{subsetName}.log")))
                 {
                     if (_ExplicitSource != null)
                         bspBuilder.SystemVars["BSPGEN:INPUT_DIR"] = _ExplicitSource;
-
-                    List<MCUBuilder> devices;
-                    if (_Ruleset == STM32Ruleset.BlueNRG_LP)
-                        devices = new List<MCUBuilder> { new BlueNRGFamilyBuilder.BlueNRGMCUBuilder() };
-                    else
-                    {
-                        devices = _Provider.LoadDeviceList(bspBuilder);
-                        var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP") && !d.Name.StartsWith("STM32N6")).ToArray();
-                        if (incompleteDevices.Length > 0)
-                            throw new Exception($"{incompleteDevices.Length} devices have FLASH Size = 0 ");
-                    }
 
                     List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
                     string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
@@ -736,8 +737,13 @@ namespace stm32_bsp_generator
             {
                 if (_Ruleset == STM32Ruleset.Classic)
                 {
-                    foreach (var fn in Directory.GetFiles(_RulesDir + @"\families", "*.xml"))
-                        DoRun(Path.GetFileNameWithoutExtension(fn));
+                    using (var commonReportWriter = new BSPReportWriter(_LogDir))
+                    {
+                        foreach (var fn in Directory.GetFiles(_RulesDir + @"\families", "*.xml"))
+                        {
+                            DoRun(Path.GetFileNameWithoutExtension(fn), commonReportWriter);
+                        }
+                    }
                 }
                 else
                     DoRun();
