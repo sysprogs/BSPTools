@@ -374,328 +374,383 @@ namespace stm32_bsp_generator
 
         }
 
+        class OuterSTM32BSPGenerator
+        {
+            private string[] _Args;
+            private string _SDKRoot;
+            private string _CubeRoot;
+            private string _RulesDir;
+            private string _ExplicitSource;
+            private string _RulesetName;
+            private STM32Ruleset _Ruleset;
+            private HashSet<string> _ExistingUnspecializedDevices;
+            private string _UnspecDeviceFile;
+            private IDeviceListProvider _Provider;
+
+            public OuterSTM32BSPGenerator(string[] args)
+            {
+                _Args = args;                      // store args in a field
+
+                var regKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPGenerators\STM32");
+                _SDKRoot = regKey.GetValue("SDKRoot") as string ?? throw new Exception("Please specify STM32 SDK root via registry");
+                _CubeRoot = regKey.GetValue("CubeMXRoot") as string ?? throw new Exception("Please specify STM32CubeMX location via registry");
+
+                if (args.Contains("/fetch"))
+                {
+                    // This will load the latest SDK list from the STM32CubeMX directory and will fetch/unpack them to our SDKRoot directory.
+                    // Before running this, ensure the STM32CubeMX has the up‑to‑date SDK definitions (using the 'check for update' function), as
+                    // otherwise the BSP generator will fetch the old versions.
+
+                    SDKFetcher.FetchLatestSDKs(_SDKRoot, _CubeRoot);
+                }
+
+                _ExplicitSource = args.FirstOrDefault(a => a.StartsWith("/source:"))?.Substring(8);
+
+                _RulesetName = args.FirstOrDefault(a => a.StartsWith("/rules:"))?.Substring(7) ?? STM32Ruleset.Classic.ToString();
+                _Ruleset = Enum.GetValues(typeof(STM32Ruleset))
+                    .OfType<STM32Ruleset>()
+                    .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), _RulesetName.Replace('-', '_')) == 0);
+
+                _RulesDir = @"..\..\rules\" + _RulesetName;
+                _ExistingUnspecializedDevices = new HashSet<string>();
+                _UnspecDeviceFile = @"..\..\rules\UnspecializedDevices.txt";
+
+                foreach (var fn in File.ReadAllLines(_UnspecDeviceFile))
+                    _ExistingUnspecializedDevices.Add(fn);
+
+                /// If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface,
+                /// switch to using it, but keep the old one for reference & easy comparison.
+                _Provider = new DeviceListProviders.CubeProvider(_ExistingUnspecializedDevices);
+            }
+
+            void DoRun(string subsetName = null)
+            {
+                var dirSuffix = "";
+                if (subsetName != null)
+                    dirSuffix = @"\" + subsetName;
+
+                using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(_SDKRoot, @"..\..\Output\" + _RulesetName + dirSuffix, _RulesDir, @"..\..\Logs\" + _RulesetName + dirSuffix), _CubeRoot))
+                using (var wr = new ParseReportWriter(Path.Combine(bspBuilder.Directories.LogDir, "registers.log")))
+                {
+                    if (_ExplicitSource != null)
+                        bspBuilder.SystemVars["BSPGEN:INPUT_DIR"] = _ExplicitSource;
+
+                    List<MCUBuilder> devices;
+                    if (_Ruleset == STM32Ruleset.BlueNRG_LP)
+                        devices = new List<MCUBuilder> { new BlueNRGFamilyBuilder.BlueNRGMCUBuilder() };
+                    else
+                    {
+                        devices = _Provider.LoadDeviceList(bspBuilder);
+                        var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP") && !d.Name.StartsWith("STM32N6")).ToArray();
+                        if (incompleteDevices.Length > 0)
+                            throw new Exception($"{incompleteDevices.Length} devices have FLASH Size = 0 ");
+                    }
+
+                    List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
+                    string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
+                    if (!File.Exists(extraFrameworksFile) && File.Exists(Path.ChangeExtension(extraFrameworksFile, ".txt")))
+                        extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, File.ReadAllText(Path.ChangeExtension(extraFrameworksFile, ".txt")));
+
+                    Dictionary<string, STM32SDKCollection.SDK> sdksByVariable = bspBuilder.SDKList.SDKs.ToDictionary(s => $"$$STM32:{s.Family}_DIR$$");
+                    List<STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
+
+                    string latestThreadX = "0.0";
+                    var comparer = new SimpleVersionComparer();
+
+                    string[] familyFiles;
+                    if (subsetName != null)
+                        familyFiles = new[] { Path.Combine(bspBuilder.Directories.RulesDir, "families", subsetName + ".xml") };
+                    else
+                        familyFiles = Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml");
+
+                    foreach (var fn in familyFiles)
+                    {
+                        var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
+
+                        if (File.Exists(extraFrameworksFile))
+                        {
+                            int idx = fam.PrimaryHeaderDir.IndexOf('\\');
+                            string baseDir = fam.PrimaryHeaderDir.Substring(0, idx);
+                            if (!baseDir.StartsWith("$$STM32:"))
+                                baseDir = _ExplicitSource ?? throw new Exception("Invalid base directory. Please recheck the family definition.");
+
+                            string baseFamName = fam.Name;
+                            if (baseFamName.EndsWith("_M4"))
+                                baseFamName = baseFamName.Substring(0, baseFamName.Length - 3);
+
+                            var dict = new Dictionary<string, string>
+                            {
+                                { "STM32:FAMILY_EX"  , fam.Name },
+                                { "STM32:FAMILY"     , baseFamName },
+                                { "STM32:FAMILY_L"   , baseFamName.ToLower() },
+                                { "STM32:FAMILY_DIR" , baseDir },
+                            };
+
+                            if (_Ruleset != STM32Ruleset.BlueNRG_LP)
+                            {
+                                var sdk = sdksByVariable[baseDir];
+                                referencedSDKs.Add(sdk);
+
+                                var versions = bspBuilder.LookupImportedPackageVersions(sdk);
+                                if (comparer.Compare(latestThreadX, versions.ThreadX ?? "0.0") < 0)
+                                {
+                                    latestThreadX = versions.ThreadX;
+                                    bspBuilder.SystemVars["STM32:LATEST_THREADX_SDK_DIR"] = versions.BaseDir;
+                                }
+                            }
+
+                            if (!string.IsNullOrEmpty(fam.FamilySubdirectory))
+                                dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$/" + fam.FamilySubdirectory;
+                            else
+                                dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$";
+
+                            var extraFrameworkFamily = XmlTools.LoadObject<FamilyDefinition>(extraFrameworksFile);
+
+                            //USB host/device libraries are not always compatible between different device families. Hence we need to ship separate per-family copies of those.
+                            var expandedExtraFrameworks = extraFrameworkFamily.AdditionalFrameworks.Select(fw =>
+                            {
+                                fw.ID = VariableHelper.ExpandVariables(fw.ID, dict);
+                                fw.Name = VariableHelper.ExpandVariables(fw.Name, dict);
+                                fw.RequiredFrameworks = ExpandVariables(fw.RequiredFrameworks, dict);
+                                fw.IncompatibleFrameworks = ExpandVariables(fw.IncompatibleFrameworks, dict);
+                                foreach (var job in fw.CopyJobs)
+                                {
+                                    job.SourceFolder = VariableHelper.ExpandVariables(job.SourceFolder, dict);
+                                    job.TargetFolder = VariableHelper.ExpandVariables(job.TargetFolder, dict);
+                                    job.AdditionalIncludeDirs = VariableHelper.ExpandVariables(job.AdditionalIncludeDirs, dict);
+                                }
+
+                                if (fw.ConfigFiles != null)
+                                {
+                                    foreach (var file in fw.ConfigFiles)
+                                    {
+                                        file.Path = VariableHelper.ExpandVariables(file.Path, dict);
+                                        file.FinalName = VariableHelper.ExpandVariables(file.FinalName, dict);
+                                        file.TargetPathForInsertingIntoProject = VariableHelper.ExpandVariables(file.TargetPathForInsertingIntoProject, dict);
+                                        file.TestableHeaderFiles = file.TestableHeaderFiles?.Select(f => VariableHelper.ExpandVariables(f, dict))?.ToArray();
+                                    }
+                                }
+
+                                return fw;
+                            });
+
+                            //Furthermore, some families do not include a USB host peripheral and hence do not contain a USB Host library. We need to skip it automatically.
+                            var extraFrameworksWithoutMissingFolders = expandedExtraFrameworks.Where(fw => fw.CopyJobs.Count(j =>
+                            {
+                                string expandedJobSourceDir = j.SourceFolder;
+                                bspBuilder.ExpandVariables(ref expandedJobSourceDir);
+                                if (!Directory.Exists(expandedJobSourceDir))
+                                    return true;
+
+                                return false;
+                            }) == 0);
+
+                            foreach (var fw in extraFrameworksWithoutMissingFolders)
+                            {
+                                foreach (var job in fw.CopyJobs)
+                                {
+                                    if (job.SmartPropertyGroup?.StartsWith("com.sysprogs.bspoptions.stm32.usb.") == true)
+                                    {
+                                        var physicalDir = bspBuilder.ExpandVariables(job.SourceFolder);
+                                        job.SmartFileConditions = job.SmartFileConditions.Where(c => Directory.Exists(Path.Combine(physicalDir, c.Split('|')[1].TrimEnd('*', '\\', '.')))).ToArray();
+                                        if (job.SmartFileConditions.Length < 6)
+                                            throw new Exception("Too little USB class conditions after filtering");
+                                    }
+                                }
+                            }
+
+                            fam.AdditionalFrameworks = (fam.AdditionalFrameworks ?? new Framework[0]).Concat(extraFrameworksWithoutMissingFolders).ToArray();
+                        }
+
+                        if (_Ruleset != STM32Ruleset.BlueNRG_LP)
+                            bspBuilder.InsertLegacyHALRulesIfNecessary(fam, bspBuilder.ReverseFileConditions);
+                        switch (_Ruleset)
+                        {
+                            case STM32Ruleset.STM32WB:
+                                allFamilies.Add(new STM32WBFamilyBuilder(bspBuilder, fam));
+                                break;
+                            case STM32Ruleset.STM32MP1:
+                                allFamilies.Add(new STM32MP1FamilyBuilder(bspBuilder, fam));
+                                break;
+                            case STM32Ruleset.BlueNRG_LP:
+                                allFamilies.Add(new BlueNRGFamilyBuilder(bspBuilder, fam));
+                                break;
+                            case STM32Ruleset.STM32WL:
+                                allFamilies.Add(new STM32WLFamilyBuilder(bspBuilder, fam));
+                                break;
+                            case STM32Ruleset.STM32H7RS:
+                                allFamilies.Add(new STM32H7RSFamilyBuilder(bspBuilder, fam));
+                                break;
+                            case STM32Ruleset.Classic:
+                            default:
+                                allFamilies.Add(new STM32ClassicFamilyBuilder(bspBuilder, fam));
+                                break;
+                        }
+                    }
+
+                    var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
+
+                    if (_Ruleset == STM32Ruleset.Classic)
+                    {
+                        foreach (var r in rejects)
+                        {
+                            if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32MP2") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB") || r.Name.StartsWith("STM32WL"))
+                                continue;
+                            if (r.Name.StartsWith("STM32H7R") || r.Name.StartsWith("STM32H7S"))
+                                continue;   //Separate BSP
+                            if (r.Name.StartsWith("STM32N6"))
+                                continue;   //Separate BSP
+
+                            bspBuilder.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
+                        }
+                    }
+
+                    List<MCUFamily> familyDefinitions = new List<MCUFamily>();
+                    List<MCU> mcuDefinitions = new List<MCU>();
+                    List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
+                    List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
+
+                    bool noPeripheralRegisters = _Args.Contains("/noperiph");
+                    bool noAutoFixes = _Args.Contains("/nofixes");
+                    string specificDeviceForDebuggingPeripheralRegisterGenerator = _Args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
+
+                    var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
+                    HashSet<string> familySpecificFrameworkIDs = new HashSet<string>();
+
+                    List<ConditionalToolFlags> allConditionalToolFlags = new List<ConditionalToolFlags>();
+
+                    foreach (var fam in allFamilies)
+                    {
+                        fam.RemoveUnsupportedMCUs();
+
+                        fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam, _Ruleset));
+                        if (!noPeripheralRegisters)
+                            fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam, specificDeviceForDebuggingPeripheralRegisterGenerator, wr, _Ruleset),
+                                throwIfNotFound: specificDeviceForDebuggingPeripheralRegisterGenerator == null);
+
+                        familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
+                        fam.GenerateLinkerScripts(false);
+
+                        foreach (var mcu in fam.MCUs)
+                        {
+                            var builtMCU = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null);
+                            if (builtMCU.ID == (mcu as DeviceListProviders.CubeProvider.STM32MCUBuilder).MCU.RPN)
+                                _ExistingUnspecializedDevices.Add(builtMCU.ID);
+                            mcuDefinitions.Add(builtMCU);
+                        }
+
+                        foreach (var fw in fam.GenerateFrameworkDefinitions())
+                        {
+                            familySpecificFrameworkIDs.Add(fw.ID);
+                            frameworks.Add(fw);
+                        }
+
+                        foreach (var sample in fam.CopySamples())
+                            exampleDirs.Add(sample);
+
+                        if (fam.Definition.ConditionalFlags != null)
+                            allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
+                    }
+
+                    foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions(familySpecificFrameworkIDs))
+                    {
+                        frameworks.Add(fw);
+
+                        if (fw.ID == "com.sysprogs.arm.stm32.threadx")
+                        {
+                            const string secureModeOptionID = "secure_domain";
+                            fw.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Boolean { Name = "Run in secure domain (TrustZone CPUs)", ValueForTrue = "1", UniqueID = secureModeOptionID });
+
+                            foreach (var f in fw.AdditionalSourceFiles)
+                            {
+                                if (f.Contains("thread_secure_stack.c"))
+                                {
+                                    var cond = new Condition.Equals { Expression = $"$${fw.ConfigurableProperties.PropertyGroups[0].UniqueID}{secureModeOptionID}$$", ExpectedValue = "1" };
+
+                                    if (!bspBuilder.MatchedFileConditions.TryGetValue(f, out var condRec))
+                                        bspBuilder.AddFileCondition(new FileCondition { FilePath = f, ConditionToInclude = cond });
+                                    else
+                                    {
+                                        condRec.ConditionToInclude = new Condition.And
+                                        {
+                                            Arguments = new Condition[]
+                                            {
+                                                condRec.ConditionToInclude,
+                                                cond,
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
+                        exampleDirs.Add(sample);
+
+                    var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
+                    exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
+
+                    var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.Directories.RulesDir, "BSPTemplate.xml"));
+
+                    frameworks.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.UserFriendlyName, b.UserFriendlyName));
+
+                    bsp.MCUFamilies = familyDefinitions.ToArray();
+                    bsp.SupportedMCUs = mcuDefinitions.ToArray();
+                    bsp.Frameworks = frameworks.ToArray();
+                    bsp.Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
+                    bsp.TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
+                    bsp.FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray();
+                    bsp.InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints;
+                    bsp.ConditionalFlags = allConditionalToolFlags.ToArray();
+
+                    bspBuilder.SDKList.SDKs = referencedSDKs.Distinct().ToArray();
+                    if (_Ruleset == STM32Ruleset.STM32H7RS || subsetName != null)
+                        bsp.PackageVersion = bspBuilder.SDKList.SDKs[0].Version;
+                    else
+                        bsp.PackageVersion = bspBuilder.SDKList.BSPVersion;
+
+                    if (subsetName != null)
+                    {
+                        bsp.ReplacesBSP = bsp.PackageID;
+                        bsp.PackageID += "." + subsetName.ToLower();
+                        bsp.PackageDescription = bsp.PackageDescription.Replace("$$STM32:SUBSET$$", subsetName.ToUpper());
+                    }
+
+                    XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
+
+                    bspBuilder.ValidateBSP(bsp);
+
+                    if (!noAutoFixes)
+                        bspBuilder.ComputeAutofixHintsForConfigurationFiles(bsp);
+
+                    bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), _Ruleset == STM32Ruleset.STM32WB);
+
+                    File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
+                    Console.WriteLine("Saving BSP...");
+                    bspBuilder.Save(bsp, false);
+                }
+            }
+        
+            public void Run()
+            {
+                if (_Ruleset == STM32Ruleset.Classic)
+                {
+                    foreach (var fn in Directory.GetFiles(_RulesDir + @"\families", "*.xml"))
+                        DoRun(Path.GetFileNameWithoutExtension(fn));
+                }
+                else
+                    DoRun();
+
+                File.WriteAllLines(_UnspecDeviceFile, _ExistingUnspecializedDevices.OrderBy(x => x).ToArray());
+            }
+
+        }
+
         //Usage: stm32.exe /rules:{Classic|STM32WB|STM32MP1|stm32h7rs} [/fetch] [/noperiph] [/nofixes]
         static void Main(string[] args)
         {
-            var regKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPGenerators\STM32");
-            var sdkRoot = regKey.GetValue("SDKRoot") as string ?? throw new Exception("Please specify STM32 SDK root via registry");
-            var cubeRoot = regKey.GetValue("CubeMXRoot") as string ?? throw new Exception("Please specify STM32CubeMX location via registry");
-
-            if (args.Contains("/fetch"))
-            {
-                //This will load the latest SDK list from the STM32CubeMX directory and will fetch/unpack them to our SDKRoot directory.
-                //Before running this, ensure the STM32CubeMX has the up-to-date SDK definitions (using the 'check for update' function), as
-                //otherwise the BSP generator will fetch the old versions.
-
-                SDKFetcher.FetchLatestSDKs(sdkRoot, cubeRoot);
-            }
-
-            string explicitSource = args.FirstOrDefault(a => a.StartsWith("/source:"))?.Substring(8);
-
-            string rulesetName = args.FirstOrDefault(a => a.StartsWith("/rules:"))?.Substring(7) ?? STM32Ruleset.Classic.ToString();
-            STM32Ruleset ruleset = Enum.GetValues(typeof(STM32Ruleset))
-                .OfType<STM32Ruleset>()
-                .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), rulesetName.Replace('-', '_')) == 0);
-
-            var existingUnspecializedDevices = new HashSet<string>();
-            var unspecDeviceFile = @"..\..\rules\UnspecializedDevices.txt";
-
-            foreach (var fn in File.ReadAllLines(unspecDeviceFile))
-                existingUnspecializedDevices.Add(fn);
-
-            ///If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface, switch to using it, but keep the old one for reference & easy comparison.
-            IDeviceListProvider provider = new DeviceListProviders.CubeProvider(existingUnspecializedDevices);
-
-            using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(sdkRoot, @"..\..\Output\" + rulesetName, @"..\..\rules\" + rulesetName, @"..\..\Logs\" + rulesetName), cubeRoot))
-            using (var wr = new ParseReportWriter(Path.Combine(bspBuilder.Directories.LogDir, "registers.log")))
-            {
-                if (explicitSource != null)
-                    bspBuilder.SystemVars["BSPGEN:INPUT_DIR"] = explicitSource;
-
-                List<MCUBuilder> devices;
-                if (ruleset == STM32Ruleset.BlueNRG_LP)
-                    devices = new List<MCUBuilder> { new BlueNRGFamilyBuilder.BlueNRGMCUBuilder() };
-                else
-                {
-                    devices = provider.LoadDeviceList(bspBuilder);
-                    var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP") && !d.Name.StartsWith("STM32N6")).ToArray();
-                    if (incompleteDevices.Length > 0)
-                        throw new Exception($"{incompleteDevices.Length} devices have FLASH Size = 0 ");
-                }
-
-                List<MCUFamilyBuilder> allFamilies = new List<MCUFamilyBuilder>();
-                string extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, "FrameworkTemplates.xml");
-                if (!File.Exists(extraFrameworksFile) && File.Exists(Path.ChangeExtension(extraFrameworksFile, ".txt")))
-                    extraFrameworksFile = Path.Combine(bspBuilder.Directories.RulesDir, File.ReadAllText(Path.ChangeExtension(extraFrameworksFile, ".txt")));
-
-                Dictionary<string, STM32SDKCollection.SDK> sdksByVariable = bspBuilder.SDKList.SDKs.ToDictionary(s => $"$$STM32:{s.Family}_DIR$$");
-                List<STM32SDKCollection.SDK> referencedSDKs = new List<STM32SDKCollection.SDK>();
-
-                string latestThreadX = "0.0";
-                var comparer = new SimpleVersionComparer();
-
-                foreach (var fn in Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml"))
-                {
-                    var fam = XmlTools.LoadObject<FamilyDefinition>(fn);
-
-                    if (File.Exists(extraFrameworksFile))
-                    {
-                        int idx = fam.PrimaryHeaderDir.IndexOf('\\');
-                        string baseDir = fam.PrimaryHeaderDir.Substring(0, idx);
-                        if (!baseDir.StartsWith("$$STM32:"))
-                            baseDir = explicitSource ?? throw new Exception("Invalid base directory. Please recheck the family definition.");
-
-                        string baseFamName = fam.Name;
-                        if (baseFamName.EndsWith("_M4"))
-                            baseFamName = baseFamName.Substring(0, baseFamName.Length - 3);
-
-                        var dict = new Dictionary<string, string>
-                        {
-                            { "STM32:FAMILY_EX"  , fam.Name },
-                            { "STM32:FAMILY"     , baseFamName },
-                            { "STM32:FAMILY_L"   , baseFamName.ToLower() },
-                            { "STM32:FAMILY_DIR" , baseDir },
-                        };
-
-                        if (ruleset != STM32Ruleset.BlueNRG_LP)
-                        {
-                            var sdk = sdksByVariable[baseDir];
-                            referencedSDKs.Add(sdk);
-
-                            var versions = bspBuilder.LookupImportedPackageVersions(sdk);
-                            if (comparer.Compare(latestThreadX, versions.ThreadX ?? "0.0") < 0)
-                            {
-                                latestThreadX = versions.ThreadX;
-                                bspBuilder.SystemVars["STM32:LATEST_THREADX_SDK_DIR"] = versions.BaseDir;
-                            }
-                        }
-
-                        if (!string.IsNullOrEmpty(fam.FamilySubdirectory))
-                            dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$/" + fam.FamilySubdirectory;
-                        else
-                            dict["STM32:TARGET_FAMILY_DIR"] = "$$SYS:BSP_ROOT$$";
-
-                        var extraFrameworkFamily = XmlTools.LoadObject<FamilyDefinition>(extraFrameworksFile);
-
-                        //USB host/device libraries are not always compatible between different device families. Hence we need to ship separate per-family copies of those.
-                        var expandedExtraFrameworks = extraFrameworkFamily.AdditionalFrameworks.Select(fw =>
-                        {
-                            fw.ID = VariableHelper.ExpandVariables(fw.ID, dict);
-                            fw.Name = VariableHelper.ExpandVariables(fw.Name, dict);
-                            fw.RequiredFrameworks = ExpandVariables(fw.RequiredFrameworks, dict);
-                            fw.IncompatibleFrameworks = ExpandVariables(fw.IncompatibleFrameworks, dict);
-                            foreach (var job in fw.CopyJobs)
-                            {
-                                job.SourceFolder = VariableHelper.ExpandVariables(job.SourceFolder, dict);
-                                job.TargetFolder = VariableHelper.ExpandVariables(job.TargetFolder, dict);
-                                job.AdditionalIncludeDirs = VariableHelper.ExpandVariables(job.AdditionalIncludeDirs, dict);
-                            }
-
-                            if (fw.ConfigFiles != null)
-                            {
-                                foreach (var file in fw.ConfigFiles)
-                                {
-                                    file.Path = VariableHelper.ExpandVariables(file.Path, dict);
-                                    file.FinalName = VariableHelper.ExpandVariables(file.FinalName, dict);
-                                    file.TargetPathForInsertingIntoProject = VariableHelper.ExpandVariables(file.TargetPathForInsertingIntoProject, dict);
-                                    file.TestableHeaderFiles = file.TestableHeaderFiles?.Select(f => VariableHelper.ExpandVariables(f, dict))?.ToArray();
-                                }
-                            }
-
-                            return fw;
-                        });
-
-                        //Furthermore, some families do not include a USB host peripheral and hence do not contain a USB Host library. We need to skip it automatically.
-                        var extraFrameworksWithoutMissingFolders = expandedExtraFrameworks.Where(fw => fw.CopyJobs.Count(j =>
-                        {
-                            string expandedJobSourceDir = j.SourceFolder;
-                            bspBuilder.ExpandVariables(ref expandedJobSourceDir);
-                            if (!Directory.Exists(expandedJobSourceDir))
-                                return true;
-
-                            return false;
-                        }) == 0);
-
-                        foreach (var fw in extraFrameworksWithoutMissingFolders)
-                        {
-                            foreach (var job in fw.CopyJobs)
-                            {
-                                if (job.SmartPropertyGroup?.StartsWith("com.sysprogs.bspoptions.stm32.usb.") == true)
-                                {
-                                    var physicalDir = bspBuilder.ExpandVariables(job.SourceFolder);
-                                    job.SmartFileConditions = job.SmartFileConditions.Where(c => Directory.Exists(Path.Combine(physicalDir, c.Split('|')[1].TrimEnd('*', '\\', '.')))).ToArray();
-                                    if (job.SmartFileConditions.Length < 6)
-                                        throw new Exception("Too little USB class conditions after filtering");
-                                }
-                            }
-                        }
-
-                        fam.AdditionalFrameworks = (fam.AdditionalFrameworks ?? new Framework[0]).Concat(extraFrameworksWithoutMissingFolders).ToArray();
-                    }
-
-                    if (ruleset != STM32Ruleset.BlueNRG_LP)
-                        bspBuilder.InsertLegacyHALRulesIfNecessary(fam, bspBuilder.ReverseFileConditions);
-                    switch (ruleset)
-                    {
-                        case STM32Ruleset.STM32WB:
-                            allFamilies.Add(new STM32WBFamilyBuilder(bspBuilder, fam));
-                            break;
-                        case STM32Ruleset.STM32MP1:
-                            allFamilies.Add(new STM32MP1FamilyBuilder(bspBuilder, fam));
-                            break;
-                        case STM32Ruleset.BlueNRG_LP:
-                            allFamilies.Add(new BlueNRGFamilyBuilder(bspBuilder, fam));
-                            break;
-                        case STM32Ruleset.STM32WL:
-                            allFamilies.Add(new STM32WLFamilyBuilder(bspBuilder, fam));
-                            break;
-                        case STM32Ruleset.STM32H7RS:
-                            allFamilies.Add(new STM32H7RSFamilyBuilder(bspBuilder, fam));
-                            break;
-                        case STM32Ruleset.Classic:
-                        default:
-                            allFamilies.Add(new STM32ClassicFamilyBuilder(bspBuilder, fam));
-                            break;
-                    }
-                }
-
-                var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
-
-                if (ruleset == STM32Ruleset.Classic)
-                {
-                    foreach (var r in rejects)
-                    {
-                        if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32MP2") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB") || r.Name.StartsWith("STM32WL"))
-                            continue;
-                        if (r.Name.StartsWith("STM32H7R") || r.Name.StartsWith("STM32H7S"))
-                            continue;   //Separate BSP
-                        if (r.Name.StartsWith("STM32N6"))
-                            continue;   //Separate BSP
-
-                        bspBuilder.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
-                    }
-                }
-
-                List<MCUFamily> familyDefinitions = new List<MCUFamily>();
-                List<MCU> mcuDefinitions = new List<MCU>();
-                List<EmbeddedFramework> frameworks = new List<EmbeddedFramework>();
-                List<MCUFamilyBuilder.CopiedSample> exampleDirs = new List<MCUFamilyBuilder.CopiedSample>();
-
-                bool noPeripheralRegisters = args.Contains("/noperiph");
-                bool noAutoFixes = args.Contains("/nofixes");
-                string specificDeviceForDebuggingPeripheralRegisterGenerator = args.FirstOrDefault(a => a.StartsWith("/periph:"))?.Substring(8);
-
-                var commonPseudofamily = new MCUFamilyBuilder(bspBuilder, XmlTools.LoadObject<FamilyDefinition>(bspBuilder.Directories.RulesDir + @"\CommonFiles.xml"));
-                HashSet<string> familySpecificFrameworkIDs = new HashSet<string>();
-
-                List<ConditionalToolFlags> allConditionalToolFlags = new List<ConditionalToolFlags>();
-
-                foreach (var fam in allFamilies)
-                {
-                    fam.RemoveUnsupportedMCUs();
-
-                    fam.AttachStartupFiles(ParseStartupFiles(fam.Definition.StartupFileDir, fam, ruleset));
-                    if (!noPeripheralRegisters)
-                        fam.AttachPeripheralRegisters(ParsePeripheralRegisters(fam.Definition.PrimaryHeaderDir, fam, specificDeviceForDebuggingPeripheralRegisterGenerator, wr, ruleset),
-                            throwIfNotFound: specificDeviceForDebuggingPeripheralRegisterGenerator == null);
-
-                    familyDefinitions.Add(fam.GenerateFamilyObject(MCUFamilyBuilder.CoreSpecificFlags.All, true));
-                    fam.GenerateLinkerScripts(false);
-
-                    foreach (var mcu in fam.MCUs)
-                    {
-                        var builtMCU = mcu.GenerateDefinition(fam, bspBuilder, !noPeripheralRegisters && specificDeviceForDebuggingPeripheralRegisterGenerator == null);
-                        if (builtMCU.ID == (mcu as DeviceListProviders.CubeProvider.STM32MCUBuilder).MCU.RPN)
-                            existingUnspecializedDevices.Add(builtMCU.ID);
-                        mcuDefinitions.Add(builtMCU);
-                    }
-
-                    foreach (var fw in fam.GenerateFrameworkDefinitions())
-                    {
-                        familySpecificFrameworkIDs.Add(fw.ID);
-                        frameworks.Add(fw);
-                    }
-
-                    foreach (var sample in fam.CopySamples())
-                        exampleDirs.Add(sample);
-
-                    if (fam.Definition.ConditionalFlags != null)
-                        allConditionalToolFlags.AddRange(fam.Definition.ConditionalFlags);
-                }
-
-                File.WriteAllLines(unspecDeviceFile, existingUnspecializedDevices.OrderBy(x => x).ToArray());
-
-                foreach (var fw in commonPseudofamily.GenerateFrameworkDefinitions(familySpecificFrameworkIDs))
-                {
-                    frameworks.Add(fw);
-
-                    if (fw.ID == "com.sysprogs.arm.stm32.threadx")
-                    {
-                        const string secureModeOptionID = "secure_domain";
-                        fw.ConfigurableProperties.PropertyGroups[0].Properties.Add(new PropertyEntry.Boolean { Name = "Run in secure domain (TrustZone CPUs)", ValueForTrue = "1", UniqueID = secureModeOptionID });
-
-                        foreach (var f in fw.AdditionalSourceFiles)
-                        {
-                            if (f.Contains("thread_secure_stack.c"))
-                            {
-                                var cond = new Condition.Equals { Expression = $"$${fw.ConfigurableProperties.PropertyGroups[0].UniqueID}{secureModeOptionID}$$", ExpectedValue = "1" };
-
-                                if (!bspBuilder.MatchedFileConditions.TryGetValue(f, out var condRec))
-                                    bspBuilder.AddFileCondition(new FileCondition { FilePath = f, ConditionToInclude = cond });
-                                else
-                                {
-                                    condRec.ConditionToInclude = new Condition.And
-                                    {
-                                        Arguments = new Condition[]
-                                        {
-                                            condRec.ConditionToInclude,
-                                            cond,
-                                        }
-                                    };
-                                }
-                            }
-                        }
-                    }
-                }
-
-                foreach (var sample in commonPseudofamily.CopySamples(null, allFamilies.Where(f => f.Definition.AdditionalSystemVars != null).SelectMany(f => f.Definition.AdditionalSystemVars)))
-                    exampleDirs.Add(sample);
-
-                var prioritizer = new SamplePrioritizer(Path.Combine(bspBuilder.Directories.RulesDir, "SamplePriorities.txt"));
-                exampleDirs.Sort((a, b) => prioritizer.Prioritize(a.RelativePath, b.RelativePath));
-
-                var bsp = XmlTools.LoadObject<BoardSupportPackage>(Path.Combine(bspBuilder.Directories.RulesDir, "BSPTemplate.xml"));
-
-                frameworks.Sort((a, b) => StringComparer.InvariantCultureIgnoreCase.Compare(a.UserFriendlyName, b.UserFriendlyName));
-
-                bsp.MCUFamilies = familyDefinitions.ToArray();
-                bsp.SupportedMCUs = mcuDefinitions.ToArray();
-                bsp.Frameworks = frameworks.ToArray();
-                bsp.Examples = exampleDirs.Where(s => !s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
-                bsp.TestExamples = exampleDirs.Where(s => s.IsTestProjectSample).Select(s => s.RelativePath).ToArray();
-                bsp.FileConditions = bspBuilder.MatchedFileConditions.Values.ToArray();
-                bsp.InitializationCodeInsertionPoints = commonPseudofamily.Definition.InitializationCodeInsertionPoints;
-                bsp.ConditionalFlags = allConditionalToolFlags.ToArray();
-
-                bspBuilder.SDKList.SDKs = referencedSDKs.Distinct().ToArray();
-                if (ruleset == STM32Ruleset.STM32H7RS)
-                    bsp.PackageVersion = bspBuilder.SDKList.SDKs[0].Version;
-                else
-                    bsp.PackageVersion = bspBuilder.SDKList.BSPVersion;
-
-                XmlTools.SaveObject(bspBuilder.SDKList, Path.Combine(bspBuilder.BSPRoot, "SDKVersions.xml"));
-
-                bspBuilder.ValidateBSP(bsp);
-
-                if (!noAutoFixes)
-                    bspBuilder.ComputeAutofixHintsForConfigurationFiles(bsp);
-
-                bspBuilder.ReverseFileConditions.SaveIfConsistent(bspBuilder.Directories.OutputDir, bspBuilder.ExportRenamedFileTable(), ruleset == STM32Ruleset.STM32WB);
-
-                File.Copy(@"..\..\stm32_compat.h", Path.Combine(bspBuilder.BSPRoot, "stm32_compat.h"), true);
-                Console.WriteLine("Saving BSP...");
-                bspBuilder.Save(bsp, false);
-            }
+            new OuterSTM32BSPGenerator(args).Run();
         }
 
         private static string[] ExpandVariables(string[] strings, Dictionary<string, string> dict)
