@@ -242,6 +242,7 @@
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\Third_Party\FreeRTOS</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.url;*.txt</FilesToCopy>
 					<ProjectInclusionMask>-*template.c;-*template.h;-*.url;Source\Portable\MemMang\*;Source\portable\GCC\*;-Source\Portable\*;*</ProjectInclusionMask>
+					<Flags>IgnoreFamilySubdir</Flags>
 					<AutoIncludeMask/>
 					<PreprocessorMacros>USE_FREERTOS</PreprocessorMacros>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FreeRTOS/Source/$$com.sysprogs.bspoptions.stm32.freertos.cmsis$$;$$SYS:BSP_ROOT$$/FreeRTOS/Source/include;$$SYS:BSP_ROOT$$/FreeRTOS/Source/portable/GCC/ARM_$$com.sysprogs.bspoptions.stm32.freertos.portcore$$</AdditionalIncludeDirs>
@@ -336,6 +337,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
+					<Flags>IgnoreFamilySubdir</Flags>
 					<ProjectInclusionMask>-doc\*;system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/LwIP/src/include;$$SYS:BSP_ROOT$$/LwIP/system;$$SYS:BSP_ROOT$$/LwIP/src/include/ipv4</AdditionalIncludeDirs>
@@ -386,28 +388,17 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Utilities</SourceFolder>
 					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
+					<Flags>IgnoreFamilySubdir</Flags>
+					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.utils.|STM32 Utilities</SmartPropertyGroup>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
-					<SimpleFileConditions>
-						<string>CPU\\*: $$com.sysprogs.bspoptions.stm32.utils.cpu$$ == 1</string>
-						<string>Fonts\\*: $$com.sysprogs.bspoptions.stm32.utils.fonts$$ == 1</string>
-						<string>Log\\*: $$com.sysprogs.bspoptions.stm32.utils.log$$ == 1</string>
-					</SimpleFileConditions>
+					<Flags>AutoTrimFileConditions</Flags>
+					<SmartFileConditions>
+						<string>-CPU Usage Monitor (FreeRTOS)[cpu]|CPU\\.*</string>
+						<string>-Fonts[fonts]|Fonts\\.*</string>
+						<string>-LCD Logging Support[log]|Log\\.*</string>
+					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
-			<ConfigurableProperties>
-				<PropertyGroups>
-				  <PropertyGroup>
-					<Name>STM32 Utilities</Name>
-					<UniqueID>com.sysprogs.bspoptions.stm32.utils.</UniqueID>
-					<Properties>
-						<PropertyEntry xsi:type="Boolean"><Name>CPU Usage Monitor (FreeRTOS)</Name><UniqueID>cpu</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>Fonts</Name><UniqueID>fonts</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-						<PropertyEntry xsi:type="Boolean"><Name>LCD Logging Support</Name><UniqueID>log</UniqueID><DefaultValue>false</DefaultValue><ValueForTrue>1</ValueForTrue></PropertyEntry>
-					</Properties>
-					<CollapsedByDefault>false</CollapsedByDefault>
-				  </PropertyGroup>
-				</PropertyGroups>
-			</ConfigurableProperties>			
 		</Framework>
 		<Framework>
 			<Name>STM32 Audio</Name>
@@ -420,6 +411,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\STM32_Audio</SourceFolder>
+					<Flags>IgnoreFamilySubdir</Flags>
 					<TargetFolder>Middlewares\ST\STM32_Audio</TargetFolder>
 					<FilesToCopy>*.c;*.h;*_GCC_*.a</FilesToCopy>
 					<ProjectInclusionMask>*.c;*.h</ProjectInclusionMask>
@@ -448,6 +440,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<SmartPreprocessorMacros>
 						<string>Include user-provided definition file[user_define]|{0}|TX_INCLUDE_USER_DEFINE_FILE</string>
 					</SmartPreprocessorMacros>
+					<Flags>AutoTrimFileConditions IgnoreFamilySubdir</Flags>
 					<SimpleFileConditions> 
 						<string>ports\\cortex_a7\\.*:$$com.sysprogs.bspoptions.arm.core$$==A7</string>
 						<string>ports\\cortex_m0\\.*:$$com.sysprogs.bspoptions.arm.core$$==M0</string>
@@ -483,6 +476,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\filex</SourceFolder>
 					<TargetFolder>AzureRTOS\filex</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
+					<Flags>IgnoreFamilySubdir</Flags>
 					<AutoIncludeMask/>
 					<ProjectInclusionMask>-common\drivers\template\*;common\*.c;common\*.h;ports\cortex_*\*.c;ports\cortex_*\*.h;</ProjectInclusionMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.filex.|FileX</SmartPropertyGroup>
@@ -505,6 +499,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\filex\ports\generic</SourceFolder>
 					<TargetFolder>AzureRTOS\filex\ports\cortex_m33\gnu</TargetFolder>
+					<Flags>IgnoreFamilySubdir</Flags>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
 				</CopyJob>
@@ -524,6 +519,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<TargetFolder>AzureRTOS\levelx</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
+					<Flags>IgnoreFamilySubdir</Flags>
 					<ProjectInclusionMask>-common\drivers\template\*;common\*.c;common\*.h;ports\cortex_*\*.c;ports\cortex_*\*.h;</ProjectInclusionMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.levelx.|LevelX</SmartPropertyGroup>
 					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
@@ -549,6 +545,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\usbx</SourceFolder>
 					<TargetFolder>AzureRTOS\usbx</TargetFolder>
+					<Flags>AutoTrimFileConditions IgnoreFamilySubdir</Flags>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask>-ports*;-test*;*.h</AutoIncludeMask>
 					<AdditionalIncludeDirs>ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
@@ -597,6 +594,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 				</CopyJob>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\usbx\ports\generic</SourceFolder>
+					<Flags>IgnoreFamilySubdir</Flags>
 					<TargetFolder>AzureRTOS\usbx\ports\cortex_m33\gnu</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>

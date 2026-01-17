@@ -235,7 +235,7 @@ namespace BSPGenerationTools
         public string[] SimpleFileConditions;   //See <CONDITION SYNTAX> above
 
         public string SmartPropertyGroup;   //Syntax: [Group ID]|[Name]
-        public string[] AutoSmartFileConditions; 
+        public string[] AutoSmartFileConditions;
         public string[] SmartFileConditions; //Will be automatically translated to SimpleFileConditions & properties. Option name|list of (regex => option value). See CC3220 BSP for examples.
         public string[] SmartPreprocessorMacros;
 
@@ -258,7 +258,9 @@ namespace BSPGenerationTools
         public enum CopyJobFlags
         {
             None = 0,
-            SimpleFileConditionsAreSecondary,
+            SimpleFileConditionsAreSecondary = 1,
+            AutoTrimFileConditions = 2,
+            IgnoreFamilySubdir = 4,
         }
 
         class ParsedCondition
@@ -323,10 +325,10 @@ namespace BSPGenerationTools
         }
 
         public ToolFlags CopyAndBuildFlags(BSPBuilder bsp,
-            List<string> projectFiles, 
-            string subdir, 
+            List<string> projectFiles,
+            string subdir,
             ref PropertyList configurableProperties,
-            ReverseFileConditionBuilder.Handle reverseConditions, 
+            ReverseFileConditionBuilder.Handle reverseConditions,
             List<ConfigurationFileTemplate> configFiles,
             CopiedFileMonitor copiedFileMonitor)
         {
@@ -335,10 +337,20 @@ namespace BSPGenerationTools
             List<string> preprocessorMacros = new List<string>();
 
             Regex configTemplateRegex = TemplateFileSpec == null ? null : new Regex(TemplateFileSpec);
+            string expandedSourceFolder = SourceFolder;
+            bsp.ExpandVariables(ref expandedSourceFolder);
+
+            if ((Flags & CopyJobFlags.IgnoreFamilySubdir) != 0)
+                subdir = null;
 
             if (SimpleFileConditions != null)
             {
-                allConditions.AddRange(SimpleFileConditions.Select(c => new ConditionRecord(c, null)));
+                var effectiveConditions = SimpleFileConditions;
+                if ((Flags & CopyJobFlags.AutoTrimFileConditions) != 0)
+                    effectiveConditions = effectiveConditions.Where(c => !ShouldTrimCondition(c, expandedSourceFolder)).ToArray();
+
+                allConditions.AddRange(effectiveConditions.Select(c => new ConditionRecord(c, null)));
+
                 if ((Flags & CopyJobFlags.SimpleFileConditionsAreSecondary) == CopyJobFlags.None)
                     reverseConditions?.FlagIncomplete(ReverseFileConditionWarning.HasRegularConditions);
             }
@@ -349,9 +361,6 @@ namespace BSPGenerationTools
                 foreach (var macro in preprocessorMacros)
                     reverseConditions?.AttachPreprocessorMacro(macro, null);
             }
-
-            string expandedSourceFolder = SourceFolder;
-            bsp.ExpandVariables(ref expandedSourceFolder);
 
             var copyMasks = new CopyFilters(FilesToCopy);
             var projectContents = new CopyFilters(ProjectInclusionMask);
@@ -369,7 +378,7 @@ namespace BSPGenerationTools
                 if (SmartFileConditions != null)
                     throw new Exception($"The copy job for {SourceFolder} defines AutoSmartFileConditions and hence cannot define regular SmartFileConditions");
 
-                foreach(var cond in AutoSmartFileConditions)
+                foreach (var cond in AutoSmartFileConditions)
                 {
                     const string marker = "(***)";
                     int idx = cond.IndexOf(marker);
@@ -427,6 +436,13 @@ namespace BSPGenerationTools
                     if (def.Items.Length == 1)
                     {
                         var item = def.Items[0];
+
+                        if ((Flags & CopyJobFlags.AutoTrimFileConditions) != 0)
+                        {
+                            if (ShouldTrimCondition(item.Key + ":", expandedSourceFolder))
+                                continue;
+                        }
+
                         allConditions.Add(new ConditionRecord($"{item.Key}: $${def.IDWithPrefix}$$ == {item.Value.ID}", reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Value.ID)));
 
                         reverseConditions?.AttachMinimalConfigurationValue(def.IDWithPrefix, "");
@@ -628,6 +644,7 @@ namespace BSPGenerationTools
 
                 string targetFile = Path.Combine(absTarget, f);
                 string newName = rules?.FirstOrDefault(r => r.Matches(f))?.Apply(targetFile);
+                bool includedInProject = projectContents.IsMatch(f);
 
                 if (newName == null)
                     if (bsp.RenamedFileTable.TryGetValue(targetFile, out newName) || bsp.RenamedFileTable.TryGetValue(targetFile.Replace('/', '\\'), out newName))
@@ -641,10 +658,12 @@ namespace BSPGenerationTools
                     renamedRelativePath = Path.Combine(Path.GetDirectoryName(renamedRelativePath), newName);
                     bsp.RenamedFileTable[oldTargetFile] = newName;
 
-                    if (renamedFileToOriginalFile.TryGetValue(newName, out var oldPath))
-                        throw new Exception($"{newName} corresponds to both {oldPath} and {oldTargetFile}");
-
-                    renamedFileToOriginalFile[newName] = oldTargetFile;
+                    if (includedInProject)
+                    {
+                        if (renamedFileToOriginalFile.TryGetValue(newName, out var oldPath))
+                            throw new Exception($"{newName} corresponds to both {oldPath} and {oldTargetFile}");
+                        renamedFileToOriginalFile[newName] = oldTargetFile;
+                    }
                 }
 
                 var absSourcePath = Path.Combine(expandedSourceFolder, f);
@@ -680,8 +699,6 @@ namespace BSPGenerationTools
 
                 if (!ExcludeFromVendorSampleMapping)
                     copiedFileMonitor?.RememberFileMapping(absSourcePath, targetFile, encodedPath);
-
-                bool includedInProject = projectContents.IsMatch(f);
 
                 var m = configTemplateRegex?.Match(f);
                 if (m?.Success == true)
@@ -803,6 +820,34 @@ namespace BSPGenerationTools
                 PreprocessorMacros = (preprocessorMacros.Count == 0) ? null : preprocessorMacros.ToArray(),
                 IncludeDirectories = includeDirs.ToArray()
             };
+        }
+
+        private bool ShouldTrimCondition(string conditionString, string expandedSourceFolder)
+        {
+            int idx = conditionString.IndexOf(':');
+            if (idx < 0)
+                return false;
+
+            string prefix = conditionString.Substring(0, idx);
+            if (prefix.EndsWith(@"\\.*") && !prefix.Contains("|"))
+            {
+                var sourceDir = Path.Combine(expandedSourceFolder, prefix.Substring(0, prefix.Length - 2));
+                if (!Directory.Exists(sourceDir))
+                    return true;
+                return false;
+            }
+
+            if (prefix.EndsWith(@".*") && !prefix.Contains("|"))
+            {
+                idx = prefix.LastIndexOf('\\');
+                var dir = Path.Combine(expandedSourceFolder, prefix.Substring(0, idx));
+                if (!Directory.Exists(dir))
+                    return true;
+                if (!Directory.GetFiles(dir, prefix.Substring(idx + 1).Replace(".*", "*")).Any())
+                    return true;
+            }
+
+            return false;
         }
 
         private string MapIncludeDir(string absTarget, string subdir, string dir)
@@ -1063,7 +1108,7 @@ namespace BSPGenerationTools
 
                 if (deepCopy.ConfigurableProperties?.PropertyGroups != null)
                 {
-                    foreach(var g in deepCopy.ConfigurableProperties.PropertyGroups)
+                    foreach (var g in deepCopy.ConfigurableProperties.PropertyGroups)
                     {
                         Expand(ref g.Name, n);
                         Expand(ref g.UniqueID, n);
