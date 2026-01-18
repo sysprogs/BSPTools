@@ -13,12 +13,6 @@ using static stm32_bsp_generator.DeviceListProviders.CubeProvider;
 
 namespace stm32_bsp_generator
 {
-    interface IDeviceListProvider
-    {
-        List<MCUBuilder> LoadDeviceList(Program.STM32BSPBuilder bspBuilder);
-    }
-
-
     static class DeviceListProviders
     {
         public class DeviceMemoryDatabase
@@ -211,9 +205,9 @@ namespace stm32_bsp_generator
             }
         }
 
-        public class CubeProvider : IDeviceListProvider
+        public class CubeProvider
         {
-            private HashSet<string> _ExistingUnspecializedDevices;
+            private readonly HashSet<string> _ExistingUnspecializedDevices;
 
             public CubeProvider(HashSet<string> existingUnspecializedDevices)
             {
@@ -491,12 +485,12 @@ namespace stm32_bsp_generator
                 }
             }
 
-            public List<MCUBuilder> LoadDeviceList(Program.STM32BSPBuilder bspBuilder)
+            public List<MCUBuilder> LoadDeviceList(STM32Directories dirs)
             {
                 List<MCUBuilder> result = new List<MCUBuilder>();
                 XmlDocument doc = new XmlDocument();
-                string familyDir = Path.Combine(bspBuilder.STM32CubeDir, @"db\mcu");
-                var db = new DeviceMemoryDatabase(bspBuilder.STM32CubeDir);
+                string familyDir = Path.Combine(dirs.STM32CubeDir, @"db\mcu");
+                var db = new DeviceMemoryDatabase(dirs.STM32CubeDir);
 
                 doc.Load(Path.Combine(familyDir, @"families.xml"));
                 List<ParsedMCU> lstMCUs = new List<ParsedMCU>();
@@ -518,7 +512,7 @@ namespace stm32_bsp_generator
                     }
                 }
 
-                File.WriteAllLines(Path.Combine(Path.GetDirectoryName(bspBuilder.Directories.RulesDir), "MissingMCUs.txt"), missingMCUs.ToArray());
+                File.WriteAllLines(Path.Combine(Path.GetDirectoryName(dirs.RulesDir), "MissingMCUs.txt"), missingMCUs.ToArray());
 
                 if (missingMCUs.Count > 30)
                 {
@@ -652,6 +646,18 @@ namespace stm32_bsp_generator
                     mcu.LinkerScriptPath = $"$$SYS:BSP_ROOT$$/{familyFilePrefix}LinkerScripts/$$com.sysprogs.stm32.memory_layout$$.ld";
                 }
             }
+        }
+    }
+
+    struct STM32Directories
+    {
+        public readonly string STM32CubeDir;
+        public readonly string RulesDir;
+
+        public STM32Directories(string stm32CubeDir, string rulesDir)
+        {
+            STM32CubeDir = stm32CubeDir;
+            RulesDir = rulesDir;
         }
     }
 }

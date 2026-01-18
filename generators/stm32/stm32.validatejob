@@ -2,6 +2,7 @@
 <TestJob xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <BSPPath>$$JOBDIR$$\Output\Classic</BSPPath>
 	<DeviceRegex>STM32.*</DeviceRegex>
+	<BSPSubfolderMask>stm32*</BSPSubfolderMask>
 	<Samples>
 		 <TestedSample>
  			<Name>LEDBlink (HAL)</Name>

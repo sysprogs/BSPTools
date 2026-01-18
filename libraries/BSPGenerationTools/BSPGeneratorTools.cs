@@ -76,6 +76,8 @@ namespace BSPGenerationTools
         public string StartupFile;
         public string MCUDefinitionFile;
         public MemoryLayout AttachedMemoryLayout;
+        
+        public MCUFamilyBuilder AssignedFamily { get; set; }
 
         public override bool Equals(Object obj)
         {
@@ -253,7 +255,7 @@ namespace BSPGenerationTools
         public readonly CopiedFileMonitor CopiedFileMonitor = new CopiedFileMonitor();
 
         public readonly BSPReportWriter Report;
-
+        private readonly bool _UsingCommonReportWriter;
         public LinkerScriptTemplate LDSTemplate;
         public readonly string BSPRoot;
         public string ShortName;
@@ -277,9 +279,10 @@ namespace BSPGenerationTools
                 MatchedFileConditions[cond.FilePath] = cond;
         }
 
-        public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = null, int linkerScriptLevel = 4)
+        public BSPBuilder(BSPDirectories dirs, string linkerScriptTemplate = null, int linkerScriptLevel = 4, BSPReportWriter commonReportWriter = null)
         {
-            Report = new BSPReportWriter(dirs.LogDir);
+            Report = commonReportWriter ?? new BSPReportWriter(dirs.LogDir);
+            _UsingCommonReportWriter = commonReportWriter != null;
 
             if (linkerScriptTemplate == null)
             {
@@ -639,7 +642,8 @@ namespace BSPGenerationTools
 
         public void Dispose()
         {
-            Report.Dispose();
+            if (!_UsingCommonReportWriter)
+                Report.Dispose();
             CopiedFileMonitor.SaveMapping(Directories.OutputDir);
         }
 
@@ -787,7 +791,7 @@ namespace BSPGenerationTools
                         }
                     }
 
-                   if (totalNewSymbols < 100)
+                    if (totalNewSymbols < 100)
                         throw new Exception($"Too little new symbols for {cf.Family.Definition.Name}");
                 }
             }
@@ -1736,6 +1740,7 @@ namespace BSPGenerationTools
                     if (fam.Key.IsMatch(mcu.Name))
                     {
                         fam.Value.MCUs.Add(mcu);
+                        mcu.AssignedFamily = fam.Value;
                         found = true;
                         break;
                     }

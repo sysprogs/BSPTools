@@ -139,7 +139,7 @@ namespace BSPGenerationTools
                 bool found = false;
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    if (lines[i] != OldLine)
+                    if (lines[i] != OldLine && lines[i] != OldLine.Replace("\t", "    "))
                         continue;
 
                     if (AnchorLine != null)
@@ -469,6 +469,12 @@ namespace BSPGenerationTools
                             }
                             else
                             {
+                                if ((Flags & CopyJobFlags.AutoTrimFileConditions) != 0)
+                                {
+                                    if (ShouldTrimCondition(item.Key + ":", expandedSourceFolder))
+                                        continue;
+                                }
+
                                 allConditions.Add(new ConditionRecord($"{item.Key}: $${def.IDWithPrefix}$$ == {item.Value.ID}", reverseConditions?.CreateSimpleCondition(def.IDWithPrefix, item.Value.ID)));
                             }
 

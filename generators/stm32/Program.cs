@@ -379,21 +379,24 @@ namespace stm32_bsp_generator
             private string[] _Args;
             private string _SDKRoot;
             private string _CubeRoot;
-            private string _RulesDir, _LogDir;
+            private string _LogDir;
             private string _ExplicitSource;
             private string _RulesetName;
             private STM32Ruleset _Ruleset;
             private HashSet<string> _ExistingUnspecializedDevices;
             private string _UnspecDeviceFile;
-            private IDeviceListProvider _Provider;
+            private readonly STM32Directories _STM32Directories;
+            private readonly MCUBuilder[] _Devices;
 
             public OuterSTM32BSPGenerator(string[] args)
             {
-                _Args = args;                      // store args in a field
+                _Args = args;
 
                 var regKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Sysprogs\BSPGenerators\STM32");
                 _SDKRoot = regKey.GetValue("SDKRoot") as string ?? throw new Exception("Please specify STM32 SDK root via registry");
                 _CubeRoot = regKey.GetValue("CubeMXRoot") as string ?? throw new Exception("Please specify STM32CubeMX location via registry");
+                _RulesetName = args.FirstOrDefault(a => a.StartsWith("/rules:"))?.Substring(7) ?? STM32Ruleset.Classic.ToString();
+                _STM32Directories = new STM32Directories(_CubeRoot, @"..\..\rules\" + _RulesetName);
 
                 if (args.Contains("/fetch"))
                 {
@@ -406,12 +409,10 @@ namespace stm32_bsp_generator
 
                 _ExplicitSource = args.FirstOrDefault(a => a.StartsWith("/source:"))?.Substring(8);
 
-                _RulesetName = args.FirstOrDefault(a => a.StartsWith("/rules:"))?.Substring(7) ?? STM32Ruleset.Classic.ToString();
                 _Ruleset = Enum.GetValues(typeof(STM32Ruleset))
                     .OfType<STM32Ruleset>()
                     .First(v => StringComparer.InvariantCultureIgnoreCase.Compare(v.ToString(), _RulesetName.Replace('-', '_')) == 0);
 
-                _RulesDir = @"..\..\rules\" + _RulesetName;
                 _LogDir = @"..\..\Logs\" + _RulesetName;
                 _ExistingUnspecializedDevices = new HashSet<string>();
                 _UnspecDeviceFile = @"..\..\rules\UnspecializedDevices.txt";
@@ -419,29 +420,31 @@ namespace stm32_bsp_generator
                 foreach (var fn in File.ReadAllLines(_UnspecDeviceFile))
                     _ExistingUnspecializedDevices.Add(fn);
 
-                /// If the MCU list format changes again, create a new implementation of the IDeviceListProvider interface,
-                /// switch to using it, but keep the old one for reference & easy comparison.
-                _Provider = new DeviceListProviders.CubeProvider(_ExistingUnspecializedDevices);
+                var provider = new DeviceListProviders.CubeProvider(_ExistingUnspecializedDevices);
 
                 List<MCUBuilder> devices;
                 if (_Ruleset == STM32Ruleset.BlueNRG_LP)
                     devices = new List<MCUBuilder> { new BlueNRGFamilyBuilder.BlueNRGMCUBuilder() };
                 else
                 {
-                    devices = _Provider.LoadDeviceList(bspBuilder);
+                    devices = provider.LoadDeviceList(_STM32Directories);
                     var incompleteDevices = devices.Where(d => d.FlashSize == 0 && !d.Name.StartsWith("STM32MP") && !d.Name.StartsWith("STM32N6")).ToArray();
                     if (incompleteDevices.Length > 0)
                         throw new Exception($"{incompleteDevices.Length} devices have FLASH Size = 0 ");
                 }
+
+                _Devices = devices.ToArray();
             }
 
-            void DoRun(string subsetName = null, BSPReportWriter commonReportWriter = null)
+            void DoRun(string subsetName = null, BSPReportWriter existingReportWriter = null)
             {
                 var dirSuffix = "";
                 if (subsetName != null)
                     dirSuffix = @"\" + subsetName;
 
-                using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(_SDKRoot, @"..\..\Output\" + _RulesetName + dirSuffix, _RulesDir, @"..\..\Logs\" + _RulesetName + dirSuffix), _CubeRoot, commonReportWriter))
+                var addedFrameworks = new HashSet<string>();
+
+                using (var bspBuilder = new STM32BSPBuilder(new BSPDirectories(_SDKRoot, @"..\..\Output\" + _RulesetName + dirSuffix, _STM32Directories.RulesDir, @"..\..\Logs\" + _RulesetName + dirSuffix), _CubeRoot, existingReportWriter))
                 using (var wr = new ParseReportWriter(Path.Combine(_LogDir, $"registers-{subsetName}.log")))
                 {
                     if (_ExplicitSource != null)
@@ -460,7 +463,7 @@ namespace stm32_bsp_generator
 
                     string[] familyFiles;
                     if (subsetName != null)
-                        familyFiles = new[] { Path.Combine(bspBuilder.Directories.RulesDir, "families", subsetName + ".xml") };
+                        familyFiles = Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml").Where(f => Path.GetFileNameWithoutExtension(f).StartsWith(subsetName)).ToArray();
                     else
                         familyFiles = Directory.GetFiles(bspBuilder.Directories.RulesDir + @"\families", "*.xml");
 
@@ -546,8 +549,12 @@ namespace stm32_bsp_generator
                                 return false;
                             }) == 0);
 
+                            extraFrameworksWithoutMissingFolders = extraFrameworksWithoutMissingFolders.Where(fw => !addedFrameworks.Contains(fw.ID)).ToArray();
+
                             foreach (var fw in extraFrameworksWithoutMissingFolders)
                             {
+                                addedFrameworks.Add(fw.ID);
+
                                 foreach (var job in fw.CopyJobs)
                                 {
                                     if (job.SmartPropertyGroup?.StartsWith("com.sysprogs.bspoptions.stm32.usb.") == true)
@@ -589,22 +596,7 @@ namespace stm32_bsp_generator
                         }
                     }
 
-                    var rejects = BSPGeneratorTools.AssignMCUsToFamilies(devices, allFamilies);
-
-                    if (_Ruleset == STM32Ruleset.Classic)
-                    {
-                        foreach (var r in rejects)
-                        {
-                            if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32MP2") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB") || r.Name.StartsWith("STM32WL"))
-                                continue;
-                            if (r.Name.StartsWith("STM32H7R") || r.Name.StartsWith("STM32H7S"))
-                                continue;   //Separate BSP
-                            if (r.Name.StartsWith("STM32N6"))
-                                continue;   //Separate BSP
-
-                            bspBuilder.Report.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
-                        }
-                    }
+                    BSPGeneratorTools.AssignMCUsToFamilies(_Devices, allFamilies);
 
                     List<MCUFamily> familyDefinitions = new List<MCUFamily>();
                     List<MCU> mcuDefinitions = new List<MCU>();
@@ -732,21 +724,39 @@ namespace stm32_bsp_generator
                     bspBuilder.Save(bsp, false);
                 }
             }
-        
+
             public void Run()
             {
-                if (_Ruleset == STM32Ruleset.Classic)
+                using (var reportWriter = new BSPReportWriter(_LogDir))
                 {
-                    using (var commonReportWriter = new BSPReportWriter(_LogDir))
+                    if (_Ruleset == STM32Ruleset.Classic)
                     {
-                        foreach (var fn in Directory.GetFiles(_RulesDir + @"\families", "*.xml"))
+                        //Families like stm32h7 and stm32h7m4 should go into the same final SDK
+                        var subsets = Directory.GetFiles(_STM32Directories.RulesDir + @"\families", "*.xml").Select(fn => Path.GetFileNameWithoutExtension(fn).Substring(0, 7)).Distinct().ToArray();
+
+                        foreach (var subset in subsets)
+                            DoRun(subset, reportWriter);
+                    }
+                    else
+                        DoRun(null, reportWriter);
+
+
+                    if (_Ruleset == STM32Ruleset.Classic)
+                    {
+                        foreach (var r in _Devices.Where(d => d.AssignedFamily == null))
                         {
-                            DoRun(Path.GetFileNameWithoutExtension(fn), commonReportWriter);
+                            if (r.Name.StartsWith("STM32MP1") || r.Name.StartsWith("STM32MP2") || r.Name.StartsWith("STM32GBK") || r.Name.StartsWith("STM32WB") || r.Name.StartsWith("STM32WL"))
+                                continue;
+                            if (r.Name.StartsWith("STM32H7R") || r.Name.StartsWith("STM32H7S"))
+                                continue;   //Separate BSP
+                            if (r.Name.StartsWith("STM32N6"))
+                                continue;   //Separate BSP
+
+                            reportWriter.ReportMergeableMessage(BSPReportWriter.MessageSeverity.Warning, $"Could not find the family for {r.Name.Substring(0, 7)} MCU(s)", r.Name, true);
                         }
                     }
+
                 }
-                else
-                    DoRun();
 
                 File.WriteAllLines(_UnspecDeviceFile, _ExistingUnspecializedDevices.OrderBy(x => x).ToArray());
             }

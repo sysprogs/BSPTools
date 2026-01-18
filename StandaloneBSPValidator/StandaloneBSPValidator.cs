@@ -858,7 +858,7 @@ namespace StandaloneBSPValidator
                     dict[kv.Key] = kv.Value;
         }
 
-        class TestResultLogger : IDisposable
+        public class TestResultLogger : IDisposable
         {
             StreamWriter _Writer;
             string _CurSample;
@@ -868,6 +868,7 @@ namespace StandaloneBSPValidator
 
             public TestResultLogger(string fn)
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(fn));
                 _Writer = new StreamWriter(fn);
                 _Writer.AutoFlush = true;
             }
@@ -920,79 +921,75 @@ namespace StandaloneBSPValidator
             public int Total => Passed + Failed;
         }
 
-        public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory, Regex additionalMCUFilter = null)
+        public static TestStatistics TestBSP(TestJob job, LoadedBSP bsp, string temporaryDirectory, TestResultLogger logger, Regex additionalMCUFilter = null, bool ignoreUnmatchedSamples = false)
         {
             TestStatistics stats = new TestStatistics();
-            Directory.CreateDirectory(temporaryDirectory);
-            using (var r = new TestResultLogger(Path.Combine(temporaryDirectory, "bsptest.log")))
+            LoadedBSP.LoadedMCU[] MCUs;
+            if (job.DeviceRegex == null)
+                MCUs = bsp.MCUs.ToArray();
+            else
             {
-                LoadedBSP.LoadedMCU[] MCUs;
-                if (job.DeviceRegex == null)
-                    MCUs = bsp.MCUs.ToArray();
-                else
+                var rgFilter = new Regex(job.DeviceRegex);
+                MCUs = bsp.MCUs.Where(mcu => rgFilter.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
+            }
+
+            if (job.SkippedDeviceRegex != null)
+            {
+                var rg = new Regex(job.SkippedDeviceRegex);
+                MCUs = MCUs.Where(mcu => !rg.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
+            }
+
+            var registerValidationParameters = new RegisterValidationParameters
+            {
+                RenameRules = job.RegisterRenamingRules?.Select(rule => new LoadedRenamingRule(rule))?.ToArray(),
+                NonValidatedRegisters = job.NonValidatedRegisters,
+                UndefinedMacros = job.UndefinedMacros
+            };
+
+            foreach (var sample in job.Samples)
+            {
+                logger.BeginSample(sample.Name);
+                int cnt = 0, failed = 0, succeeded = 0;
+
+                var effectiveMCUs = MCUs;
+                if (!string.IsNullOrEmpty(sample.DeviceRegex))
                 {
-                    var rgFilter = new Regex(job.DeviceRegex);
-                    MCUs = bsp.MCUs.Where(mcu => rgFilter.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
+                    Regex rgDevice = new Regex(sample.DeviceRegex);
+                    effectiveMCUs = MCUs.Where(mcu => rgDevice.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
                 }
 
-                if (job.SkippedDeviceRegex != null)
+                if (additionalMCUFilter != null)
+                    effectiveMCUs = effectiveMCUs.Where(mcu => additionalMCUFilter.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
+
+                foreach (var mcu in effectiveMCUs)
                 {
-                    var rg = new Regex(job.SkippedDeviceRegex);
-                    MCUs = MCUs.Where(mcu => !rg.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
+                    if (string.IsNullOrEmpty(mcu.ExpandedMCU.ID))
+                        throw new Exception("Invalid MCU ID!");
+
+                    var extraParams = job.DeviceParameterSets?.FirstOrDefault(s => s.DeviceRegexObject?.IsMatch(mcu.ExpandedMCU.ID) == true);
+
+                    string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
+                    DateTime start = DateTime.Now;
+
+                    var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, registerValidationParameters);
+                    Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
+                    if (result.Result == TestBuildResult.Failed)
+                        failed++;
+                    else if (result.Result == TestBuildResult.Succeeded)
+                        succeeded++;
+
+                    logger.LogTestResult(mcu.ExpandedMCU.ID, result);
+
+                    cnt++;
+                    Console.WriteLine("{0}: {1}% done ({2}/{3} devices, {4} failed)", sample.Name, (cnt * 100) / effectiveMCUs.Length, cnt, effectiveMCUs.Length, failed);
                 }
 
-                var registerValidationParameters = new RegisterValidationParameters
-                {
-                    RenameRules = job.RegisterRenamingRules?.Select(rule => new LoadedRenamingRule(rule))?.ToArray(),
-                    NonValidatedRegisters = job.NonValidatedRegisters,
-                    UndefinedMacros = job.UndefinedMacros
-                };
+                if ((succeeded + failed) == 0)
+                    throw new Exception("Not a single MCU supports " + sample.Name);
+                logger.EndSample();
 
-                foreach (var sample in job.Samples)
-                {
-                    r.BeginSample(sample.Name);
-                    int cnt = 0, failed = 0, succeeded = 0;
-
-                    var effectiveMCUs = MCUs;
-                    if (!string.IsNullOrEmpty(sample.DeviceRegex))
-                    {
-                        Regex rgDevice = new Regex(sample.DeviceRegex);
-                        effectiveMCUs = MCUs.Where(mcu => rgDevice.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
-                    }
-
-                    if (additionalMCUFilter != null)
-                        effectiveMCUs = effectiveMCUs.Where(mcu => additionalMCUFilter.IsMatch(mcu.ExpandedMCU.ID)).ToArray();
-
-                    foreach (var mcu in effectiveMCUs)
-                    {
-                        if (string.IsNullOrEmpty(mcu.ExpandedMCU.ID))
-                            throw new Exception("Invalid MCU ID!");
-
-                        var extraParams = job.DeviceParameterSets?.FirstOrDefault(s => s.DeviceRegexObject?.IsMatch(mcu.ExpandedMCU.ID) == true);
-
-                        string mcuDir = Path.Combine(temporaryDirectory, mcu.ExpandedMCU.ID);
-                        DateTime start = DateTime.Now;
-
-                        var result = TestMCU(mcu, mcuDir + sample.TestDirSuffix, sample, extraParams, registerValidationParameters);
-                        Console.WriteLine($"[{(DateTime.Now - start).TotalMilliseconds:f0} msec]");
-                        if (result.Result == TestBuildResult.Failed)
-                            failed++;
-                        else if (result.Result == TestBuildResult.Succeeded)
-                            succeeded++;
-
-                        r.LogTestResult(mcu.ExpandedMCU.ID, result);
-
-                        cnt++;
-                        Console.WriteLine("{0}: {1}% done ({2}/{3} devices, {4} failed)", sample.Name, (cnt * 100) / effectiveMCUs.Length, cnt, effectiveMCUs.Length, failed);
-                    }
-
-                    if ((succeeded + failed) == 0)
-                        throw new Exception("Not a single MCU supports " + sample.Name);
-                    r.EndSample();
-
-                    stats.Passed += succeeded;
-                    stats.Failed += failed;
-                }
+                stats.Passed += succeeded;
+                stats.Failed += failed;
             }
             return stats;
         }
@@ -1018,22 +1015,25 @@ namespace StandaloneBSPValidator
             var job = XmlTools.LoadObject<TestJob>(jobFile);
             job.BSPPath = job.BSPPath.Replace("$$JOBDIR$$", Path.GetDirectoryName(jobFile));
 
-            if (job.BSPSubfolderMask != null)
+            using (var logger = new TestResultLogger(Path.Combine(outputDir, "bsptest.log")))
             {
-                foreach (var dir in Directory.GetDirectories(job.BSPPath, job.BSPSubfolderMask))
+                if (job.BSPSubfolderMask != null)
                 {
-                    job.BSPPath = dir;
-                    TestBSP(job, outputDir);
+                    foreach (var dir in Directory.GetDirectories(job.BSPPath, job.BSPSubfolderMask))
+                    {
+                        job.BSPPath = dir;
+                        TestBSP(job, outputDir, logger);
+                    }
                 }
+                else
+                    TestBSP(job, outputDir, logger);
             }
-            else
-                TestBSP(job, outputDir);
         }
 
-        static void TestBSP(TestJob job, string outputDir)
+        static void TestBSP(TestJob job, string outputDir, TestResultLogger logger)
         {
             var bsp = LoadBSP(job.ToolchainPath, job.BSPPath);
-            TestBSP(job, bsp, outputDir);
+            TestBSP(job, bsp, outputDir, logger);
         }
 
 

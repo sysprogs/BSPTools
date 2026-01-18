@@ -382,7 +382,43 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 				  </PropertyGroup>
 				</PropertyGroups>
 			</ConfigurableProperties>	
-		</Framework>	
+		</Framework>
+		<Framework>
+			<Name>FatFs</Name>
+			<ID>com.sysprogs.arm.stm32.FatFs</ID>
+               <ConfigurationFileTemplates>
+                    <ConfigurationFileTemplate>
+                        <SourcePath>$$SYS:BSP_ROOT$$/FatFs/src/ffconf_template.h</SourcePath>
+                        <TargetFileName>ffconf.h</TargetFileName>
+                        <ExpandMacros>false</ExpandMacros>
+                        </ConfigurationFileTemplate>
+					</ConfigurationFileTemplates>				  
+			<ProjectFolderName>FatFs</ProjectFolderName>
+			<DefaultEnabled>false</DefaultEnabled>
+			<RequiredFrameworks>
+				<string>com.sysprogs.arm.stm32.hal</string>
+			</RequiredFrameworks>		
+			<CopyJobs>			
+				<CopyJob>
+					<Flags>IgnoreFamilySubdir</Flags>
+					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\Third_Party\FatFs</SourceFolder>
+					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
+					<ProjectInclusionMask>-src\drivers\*;-src\option\cc*.c;-doc\*;*.c;*.h</ProjectInclusionMask>
+					<AutoIncludeMask/>
+					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/FatFs/src;$$SYS:BSP_ROOT$$/FatFs/src/drivers</AdditionalIncludeDirs>
+					<PreprocessorMacros></PreprocessorMacros>
+				</CopyJob>
+				<CopyJob>
+					<Flags>IgnoreFamilySubdir</Flags>
+					<SourceFolder>$$BSPGEN:RULES_DIR$$\\config</SourceFolder>
+					<FilesToCopy>ffconf.h</FilesToCopy>
+					<TargetFolder>BSP\ConfigTemplates</TargetFolder>
+					<AutoIncludeMask/>
+					<!--<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/STM32F7xxxx/BSP/STM32756G_EVAL</AdditionalIncludeDirs>-->
+					<ProjectInclusionMask>*.h</ProjectInclusionMask>				
+				</CopyJob>
+			</CopyJobs>
+		</Framework>		
 		<Framework>
 			<Name>STM32 Utilities</Name>
 			<ID>com.sysprogs.arm.stm32.utilities</ID>
