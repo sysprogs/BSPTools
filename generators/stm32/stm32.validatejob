@@ -19,20 +19,5 @@
 				</Entries>
 			</SampleConfiguration>
 		 </TestedSample>
-		 <TestedSample>
-				<Name>LEDBlink (StdPeriph)</Name>
-			<SkipIfNotFound>true</SkipIfNotFound>
-			<ValidateRegisters>false</ValidateRegisters>
-			<TestDirSuffix>-LEDBlinkStdPeriph</TestDirSuffix>
-			<DeviceRegex>STM32[^GH].*</DeviceRegex>
-			<SampleConfiguration>
-				<Entries>
-					<KeyValue>
-						<Key>com.sysprogs.examples.ledblink.LEDPORT</Key>
-						<Value>GPIOA</Value>
-					</KeyValue>
-				</Entries>
-			</SampleConfiguration>
-		 </TestedSample>
 	</Samples>
 </TestJob>

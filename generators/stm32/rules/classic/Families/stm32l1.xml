@@ -41,49 +41,7 @@
 		<CopyJobs>
 		</CopyJobs>
 	</CoreFramework>
-	<AdditionalFrameworks>
-		<Framework>
-			<Name>STM32L1 Legacy Peripheral Library</Name>
-			<ID>com.sysprogs.arm.stm32.l1_stdperiph</ID>
-			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.l1_hal</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>StdPeriph</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32L1xx_StdPeriph_Lib_V1.4.0\Libraries\STM32L1xx_StdPeriph_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32L1xx_StdPeriph_Lib_V1.4.0\Libraries\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
-					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
-					<PreprocessorMacros>$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-*Include\stm32l1????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32L1xx\Include\stm32l1xx.h</FilePath>
-							<AfterLine>#define __STM32L1XX_H</AfterLine>
-							<InsertedLines>
-								<string></string>
-								<string>#define assert_param(expr)</string>
-							</InsertedLines>
-						</Patch>
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-	</AdditionalFrameworks>
 	<SmartSamples>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_STM32L1X</SourceFolder>
-			<DestinationFolder>samples\LEDBlink_STM32L1X</DestinationFolder>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/STM32L1xxxx/CMSIS_StdPeriph/Device/ST/STM32L1xx/Source/Templates/system_stm32l1xx.c</string>
-			</AdditionalSources>
-		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32L1X</SourceFolder>
 			<DestinationFolder>samples\USB_CDC_STM32L1X</DestinationFolder>

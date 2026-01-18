@@ -9,9 +9,6 @@
 			<RequiredFrameworks>
 				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_ll</string>
 			</RequiredFrameworks>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_stdperiph</string>
-			</IncompatibleFrameworks>
 			<ProjectFolderName>HAL</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>
@@ -48,9 +45,6 @@
 			<Name>$$STM32:FAMILY_EX$$ Low-level Driver Library</Name>
 			<ID>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_ll</ID>
 			<ClassID>com.sysprogs.arm.stm32.ll</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.$$STM32:FAMILY_EX$$_stdperiph</string>
-			</IncompatibleFrameworks>
 			<ProjectFolderName>LL</ProjectFolderName>
 			<DefaultEnabled>true</DefaultEnabled>
 			<CopyJobs>

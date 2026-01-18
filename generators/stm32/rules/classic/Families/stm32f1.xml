@@ -57,61 +57,7 @@
 		<CopyJobs>
 		</CopyJobs>
 	</CoreFramework>
-	<AdditionalFrameworks>
-		<Framework>
-			<Name>STM32F1 Legacy Peripheral Library</Name>
-			<ID>com.sysprogs.arm.stm32.STM32F1_stdperiph</ID>
-			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.STM32F1_hal</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>StdPeriph</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F10x_StdPeriph_Lib_V3.6.0\Libraries\STM32F10x_StdPeriph_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F10x_StdPeriph_Lib_V3.6.0\Libraries\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
-					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
-					<PreprocessorMacros>$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-*Include\stm32f1????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>CM3\DeviceSupport\ST\STM32F10x\stm32f10x.h</FilePath>
-							<AfterLine>#define __STM32F10x_H</AfterLine>
-							<InsertedLines>
-								<string></string>
-								<string>#ifndef assert_param</string>
-								<string>#define assert_param(expr)</string>
-								<string>#endif</string>
-							</InsertedLines>
-						</Patch>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>CM3\CoreSupport\core_cm3.c</FilePath>
-							<OldLine>   __ASM volatile ("strexb %0, %2, [%1]" : "=r" (result) : "r" (addr), "r" (value) );</OldLine>
-							<NewLine>   __ASM volatile ("strexb %0, %2, [%1]" : "=&amp;r" (result) : "r" (addr), "r" (value) );</NewLine>
-						</Patch>
-						<Patch xsi:type="ReplaceLine">
-							<FilePath>CM3\CoreSupport\core_cm3.c</FilePath>
-							<OldLine>   __ASM volatile ("strexh %0, %2, [%1]" : "=r" (result) : "r" (addr), "r" (value) );</OldLine>
-							<NewLine>   __ASM volatile ("strexh %0, %2, [%1]" : "=&amp;r" (result) : "r" (addr), "r" (value) );</NewLine>
-						</Patch>
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-	</AdditionalFrameworks>
 	<SmartSamples>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_STM32F1X</SourceFolder>
-			<DestinationFolder>samples\LEDBlink_STM32F1X</DestinationFolder>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/STM32F1xxxx/CMSIS_StdPeriph/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.c</string>
-			</AdditionalSources>
-		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32F1X</SourceFolder>
 			<DestinationFolder>samples\USB_CDC_STM32F1X</DestinationFolder>

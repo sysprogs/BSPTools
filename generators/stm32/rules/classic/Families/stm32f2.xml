@@ -19,51 +19,7 @@
 		<CopyJobs>
 		</CopyJobs>
 	</CoreFramework>
-	<AdditionalFrameworks>
-		<Framework>
-			<Name>STM32F2 Legacy Peripheral Library</Name>
-			<ID>com.sysprogs.arm.stm32.STM32F2_stdperiph</ID>
-			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.STM32F2_hal</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>StdPeriph</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F2xx_StdPeriph_Lib_V1.2.0\Libraries\STM32F2xx_StdPeriph_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F2xx_StdPeriph_Lib_V1.2.0\Libraries\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
-					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
-					<PreprocessorMacros></PreprocessorMacros>
-					<ProjectInclusionMask>-*Include\stm32f2????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32F2xx\Include\stm32f2xx.h</FilePath>
-							<AfterLine>#define __STM32F2xx_H</AfterLine>
-							<InsertedLines>
-								<string></string>
-								<string>#ifndef assert_param</string>
-								<string>#define assert_param(expr)</string>
-								<string>#endif</string>
-							</InsertedLines>
-						</Patch>
-					</Patches>					
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-	</AdditionalFrameworks>
 	<SmartSamples>
-		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_STM32F2X</SourceFolder>
-			<DestinationFolder>samples\LEDBlink_STM32F2X</DestinationFolder>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/STM32F2xxxx/CMSIS_StdPeriph/Device/ST/STM32F2xx/Source/Templates/system_stm32f2xx.c</string>
-			</AdditionalSources>
-		</SmartSample>
 		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32F2X</SourceFolder>
 			<DestinationFolder>samples\USB_CDC_STM32F2X</DestinationFolder>

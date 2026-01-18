@@ -61,71 +61,6 @@
 		<CopyJobs>
 		</CopyJobs>
 	</CoreFramework>
-	<AdditionalFrameworks>
-		<Framework>
-			<Name>STM32F4 Legacy Peripheral Library</Name>
-			<ID>com.sysprogs.arm.stm32.STM32F4_stdperiph</ID>
-			<ClassID>com.sysprogs.arm.stm32.stdperiph</ClassID>
-			<IncompatibleFrameworks>
-				<string>com.sysprogs.arm.stm32.STM32F4_hal</string>
-			</IncompatibleFrameworks>
-			<ProjectFolderName>StdPeriph</ProjectFolderName>
-			<DefaultEnabled>false</DefaultEnabled>
-			<CopyJobs>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F4xx_DSP_StdPeriph_Lib_V1.9.0\Libraries\STM32F4xx_StdPeriph_Driver</SourceFolder>
-					<FilesToCopy>*.c;*.h</FilesToCopy>
-					<ProjectInclusionMask>-*stm32f4xx_fmc.c;*</ProjectInclusionMask>
-					<SimpleFileConditions>
-						<string>\\stm32f4xx_fsmc.c: $$com.sysprogs.stm32.legacy_device_family$$ == STM32F40_41xxx</string>
-						<string>\\stm32f4xx_qspi.c: $$com.sysprogs.stm32.legacy_device_family$$ != STM32F446xx</string>
-					</SimpleFileConditions>
-					<Patches>
-				
-					<Patch xsi:type="InsertLines">
-                        <FilePath>src\stm32f4xx_dsi.c</FilePath>
-                        <AfterLine>#include "stm32f4xx_dsi.h"</AfterLine>
-                        <InsertedLines>
-                             <string>#include "stm32f4xx_rcc.h"</string>
-                        </InsertedLines>
-					</Patch>
-					<Patch xsi:type="InsertLines">
-                        <FilePath>src\stm32f4xx_lptim.c</FilePath>
-                        <AfterLine>#include "stm32f4xx_lptim.h"</AfterLine>
-                        <InsertedLines>
-                             <string>#include "stm32f4xx_rcc.h"</string>
-                        </InsertedLines>
-					</Patch>
-					<Patch xsi:type="InsertLines">
-                        <FilePath>src\stm32f4xx_qspi.c</FilePath>
-                        <AfterLine>#include "stm32f4xx_qspi.h"</AfterLine>
-                        <InsertedLines>
-                             <string>#include "stm32f4xx_rcc.h"</string>
-                        </InsertedLines>
-					</Patch>
-				
-				</Patches>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$BSPGEN:INPUT_DIR$$\Legacy\STM32F4xx_DSP_StdPeriph_Lib_V1.9.0\Libraries\CMSIS</SourceFolder>
-					<TargetFolder>CMSIS_StdPeriph</TargetFolder>
-					<FilesToCopy>-DSP_Lib\*;*.h;*.c</FilesToCopy>
-					<PreprocessorMacros>$$com.sysprogs.stm32.legacy_device_family$$</PreprocessorMacros>
-					<ProjectInclusionMask>-*Include\stm32f4????.h*;-*system_*.c;*</ProjectInclusionMask>
-					<Patches>
-						<Patch xsi:type="InsertLines">
-							<FilePath>Device\ST\STM32F4xx\Include\stm32f4xx.h</FilePath>
-							<AfterLine>#define __STM32F4xx_H</AfterLine>
-							<InsertedLines>
-								<string></string>
-								<string>#define assert_param(expr)</string>
-							</InsertedLines>
-						</Patch>
-					</Patches>
-				</CopyJob>
-			</CopyJobs>			
-		</Framework>
-	</AdditionalFrameworks>
 	<AdditionalFrameworkTemplates>
 		<FrameworkTemplate>
 			<RangeFromDir>$$STM32:F4_DIR$$\Drivers\BSP</RangeFromDir>
@@ -181,13 +116,6 @@
 	</AdditionalFrameworkTemplates>
 	<SmartSamples>
 		<SmartSample>
-			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\LEDBlink_STM32F4X</SourceFolder>
-			<DestinationFolder>samples\LEDBlink_STM32F4X</DestinationFolder>
-			<AdditionalSources>
-				<string>$$SYS:BSP_ROOT$$/STM32F4xxxx/CMSIS_StdPeriph/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c</string>
-			</AdditionalSources>
-		</SmartSample>
-		<SmartSample>
 			<SourceFolder>$$BSPGEN:RULES_DIR$$\samples\USB_CDC_STM32F4X</SourceFolder>
 			<DestinationFolder>samples\USB_CDC_STM32F4X</DestinationFolder>
 			<AdditionalSources>
@@ -195,7 +123,6 @@
 				<string>$$SYS:BSP_ROOT$$/$$com.sysprogs.bspoptions.stm32.hal_config_template_file$$=>$$com.sysprogs.stm32.hal_header_prefix$$_hal_conf.h</string>
 			</AdditionalSources>
 		</SmartSample>
-			
 	</SmartSamples>
       <AdditionalSystemVars>
         <SysVarEntry>
