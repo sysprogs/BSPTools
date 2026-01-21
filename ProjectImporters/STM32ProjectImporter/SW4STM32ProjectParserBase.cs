@@ -59,6 +59,7 @@ namespace STM32ProjectImporter
                     nonReleaseConfigs = new[] { nonReleaseConfigs.Last() };
             }
 
+            var suffixMap = new Dictionary<string, string>();
             foreach (var cconfiguration in nonReleaseConfigs)
             {
                 MultiConfigurationContext mctx = null;
@@ -73,11 +74,21 @@ namespace STM32ProjectImporter
                     else if (artifactName.EndsWith("_CM7"))
                         mctx = new MultiConfigurationContext.MultiCore { DeviceSuffix = "", UserFriendlyNameSuffix = " (Cortex-M7 Core)" };
 
-                    if (mctx == null && cconfiguration.Name.Length > 6 && cconfiguration.Name.EndsWith("Debug"))
+                    int suffixLen = -1;
+                    if (cconfiguration.Name.EndsWith("Debug"))
+                        suffixLen = "Debug".Length + 1;
+                    else if (cconfiguration.Name.EndsWith("Release"))
+                        suffixLen = "Release".Length + 1;
+
+                    if (suffixLen > 0)
                     {
-                        var name = cconfiguration.Name.Substring(0, cconfiguration.Name.Length - 6);
+                        var name = cconfiguration.Name.Substring(0, cconfiguration.Name.Length - suffixLen);
                         if (name.StartsWith(project.Name, StringComparison.InvariantCultureIgnoreCase))
                             name = name.Substring(project.Name.Length).TrimStart('_', '-');
+
+                        if (suffixMap.TryGetValue(name, out string existingName))
+                            throw new Exception($"{name} suffix was already derived from {existingName}");
+                        suffixMap[name] = cconfiguration.Name;
 
                         mctx = new MultiConfigurationContext.Other { Suffix = "_" + name };
                     }
@@ -296,6 +307,9 @@ namespace STM32ProjectImporter
 
             const string LibraryDirsKey = "com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.directories";
 
+            var cLibraries = tools.Linker.ResolveLibraries("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.libraries", LibraryDirsKey, libraryDirCache);
+            var cppLibraries = tools.CPPLinker.ResolveLibraries("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.option.libraries", LibraryDirsKey.Replace(".c.", ".cpp."), libraryDirCache);
+
             return new CommonConfigurationOptions
             {
                 IncludeDirectories = tools.Compiler.ReadList("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths", PathTranslationFlags.AddExtraComponentToBaseDir),
@@ -310,7 +324,7 @@ namespace STM32ProjectImporter
                 LDFLAGS = ldflags,
                 UseCMSE = tools.Compiler.ReadOptionalValue("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.mcmse") == "true",
 
-                Libraries = tools.Linker.ResolveLibraries("com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.option.libraries", LibraryDirsKey, libraryDirCache),
+                Libraries = cLibraries.Concat(cppLibraries).Distinct().ToList(),
                 SourceFiles = configuration.ParseSourceList(ShouldIncludeSourceFile, true),
                 LibrarySearchDirs = tools.Linker.ReadOptionalList(LibraryDirsKey, PathTranslationFlags.AddExtraComponentToBaseDir)
             };

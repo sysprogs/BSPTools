@@ -1,5 +1,6 @@
 ﻿using BSPEngine;
 using BSPGenerationTools;
+using Microsoft.SqlServer.Server;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -778,11 +779,23 @@ namespace StandaloneBSPValidator
                 }
 
                 var logFile = Path.Combine(_Directory, "build.log");
+                string stubsFile = null;
                 if (!success && (_ValidationFlags & BSPValidationFlags.IgnoreLinkerErrors) != 0 && File.Exists(logFile))
                 {
                     var text = File.ReadAllText(logFile);
-                    if (text.Contains("undefined reference to"))
+                    if (IsIgnorableError(text))
+                    {
+                        if (text.Contains("undefined reference to `initialise_monitor_handles'"))
+                        {
+                            stubsFile = Path.Combine(_VendorSample.Path, "_stubs.c");
+                            if (!File.Exists(stubsFile))
+                                File.WriteAllText(stubsFile, "void __attribute__((weak)) initialise_monitor_handles(void){}\r\n");
+
+                            _VendorSample.SourceFiles = _VendorSample.SourceFiles.Concat(new[] { stubsFile }).Distinct().ToArray();
+                        }
+
                         success = true;
+                    }
                 }
 
                 if (!success)
@@ -798,6 +811,7 @@ namespace StandaloneBSPValidator
                         .SelectMany(f => SplitDependencyFile(f).Where(t => !t.EndsWith(":")))
                         .Concat(_Project.SourceFiles.SelectMany(sf => FindIncludedResources(_VendorSample.Path, sf)))
                         .Concat(_VendorSample.AuxiliaryLinkerScripts ?? new string[0])
+                        .Concat(stubsFile == null ? new string[0] : new[] {stubsFile})
                         .Distinct()
                         .ToArray();
                 }
@@ -807,6 +821,19 @@ namespace StandaloneBSPValidator
                     Directory.Delete(_Directory, true);
 
                 return new TestResult(TestBuildResult.Succeeded, Path.Combine(_Directory, "build.log"));
+            }
+
+            private bool IsIgnorableError(string logText)
+            {
+                if (!logText.Contains("undefined reference to"))
+                    return false;
+
+                if (logText.Contains("undefined reference to `__copy_table_start__'"))
+                    return false;   //Sample needs special preprocessed linker script
+                if (logText.Contains("undefined reference to `SECURE_"))
+                    return false;   //Bugs related to the secure interface. No workarounds yet.
+
+                return true;
             }
         }
 

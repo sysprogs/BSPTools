@@ -193,7 +193,7 @@ namespace VendorSampleParserEngine
 
                 fileBuildStatus[_ReverseConditionTable.FileTable[i].ObjectName] = true;
 
-                var objdump = _BSP.Toolchain.MakeToolName("objdump", false);
+                var objdump = _BSP.Toolchain.MakeToolName("objdump");
                 var proc = new Process();
                 proc.StartInfo.FileName = "cmd.exe";
                 proc.StartInfo.Arguments = $"/c {objdump} -t {nameBase}.o > {nameBase}.lst";

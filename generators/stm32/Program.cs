@@ -706,7 +706,7 @@ namespace stm32_bsp_generator
                     if (subsetName != null)
                     {
                         bsp.ReplacesBSP = bsp.PackageID;
-                        bsp.PackageID += "." + subsetName.ToLower();
+                        bsp.PackageID = "com.sysprogs.arm." + subsetName.ToLower();
                         bsp.PackageDescription = bsp.PackageDescription.Replace("$$STM32:SUBSET$$", subsetName.ToUpper());
                     }
 

@@ -1,28 +1,24 @@
-#The following 2 samples trigger the 'path too long' errors.
-#E.g. $$SYS:VSAMPLE_DIR$$/L4/Projects/32L4R9IDISCOVERY/Demonstrations/STemWin/Gui/Core/power_measurement/generated/buttons/button_run/animation/cercle1/animation_circle1_opacity100.c
-#This can be addressed via path mapping rules, however for now, we simply skip them.
-32L4R9IDISCOVERY-Demonstrations-STemWin-STemWin-STM32L4R9I-Discovery
-32L4R9IDISCOVERY-Demonstrations-STemWin-STemWin-STM32L4R9I-Discovery_OoB
-STM32H745I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification
-STM32H747I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification
-STM32H745I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification_M4
-STM32H747I-DISCO-Applications-ResourcesManager-ResourcesManager_UsageWithNotification_M4
+STM32F303ZE-Nucleo-Applications-USB_Device-MSC_Standalone-STM32303ZE_Nucleo
 
-#This appears to be a glitch with a specific SDK version
+#Crypto example targets STM32F469NI, but manually defines -DSTM32F479xx to enable the Crypto module. This breaks our build and looks like a bug.
 STM32469I_EVAL-Examples-CRYP-CRYP_TDESModes
-32L476GDISCOVERY-Demonstrations
-STM32H743I-EVAL-Applications-FileX-Fx_Nand_Write_Read_File
+
+#Similar mismatching device type here
+NUCLEO-L010RB-Examples-ADC-ADC_DMA_Transfer
+NUCLEO-L010RB-Examples-RCC-RCC_LSIConfig
 STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes
 STM32L476G-EVAL-Examples-CRYP-CRYP_AESModes_Suspension
 STM32L476G-EVAL-Examples-CRYP-CRYP_DMA
 STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Modes
 STM32L476G-EVAL-Examples-CRYP-CRYP_GCM_GMAC_CMAC_Suspension
 
-#The examples below fail due to mismatching USBX versions between F7 and H7. Should be resolved in future SDK releases.
-NUCLEO-C071RB-Applications-USBX-Ux_Device_CDC_ACM
-NUCLEO-C071RB-Applications-USBX-Ux_Device_HID
-NUCLEO-C071RB-Applications-USBX-Ux_Device_HID_CDC_ACM
-NUCLEO-C071RB-Applications-USBX-Ux_Device_HID_Standalone
-NUCLEO-C071RB-Applications-USBX-Ux_Host_CDC_ACM
-NUCLEO-C071RB-Applications-USBX-Ux_Host_HID_Standalone
+#Missing arm_math.h
+32L476GDISCOVERY-Demonstrations
 
+#Fails due to multiple definition of _tx_thread_secure_mode_stack_initialize. Should be fixable by adding secure/non-secure mode #ifdef into that file.
+NUCLEO-H563ZI-Applications-ThreadX-Tx_SecureLEDToggle_TrustZone-NonSecure
+STM32L562E-DK-Applications-ThreadX-Tx_SecureLEDToggle_TrustZone-NonSecure
+NUCLEO-U545RE-Q-Applications-ThreadX-Tx_SecureLEDToggle_TrustZone-NonSecure
+NUCLEO-U575ZI-Q-Applications-ThreadX-Tx_SecureLEDToggle_TrustZone-NonSecure
+NUCLEO-U5A5ZJ-Q-Applications-ThreadX-Tx_SecureLEDToggle_TrustZone-NonSecure
+STM32U5G9J-DK2-Applications-ThreadX-Tx_SecureLEDToggle_TrustZone-NonSecure

@@ -70,6 +70,8 @@ namespace VendorSampleParserEngine
                 _Report = XmlTools.LoadObject<VendorSampleTestReport>(ReportFile);
             else
                 _Report = new VendorSampleTestReport { BSPVersion = BSP.BSP.PackageVersion, BSPID = BSP.BSP.PackageID };
+
+            _Blacklist = ParseBlacklistFile();
         }
 
         public static string LocateLogFile(string bspID, string sampleID, VendorSamplePass specificPass = VendorSamplePass.None)
@@ -288,8 +290,7 @@ namespace VendorSampleParserEngine
             if (directoryMatches && (mode == RunMode.Release || mode == RunMode.CodeScope))
             {
                 Console.WriteLine($"Loaded {sampleDir.Samples.Length} samples from cache");
-                HashSet<string> blacklist = ParseBlacklistFile();
-                sampleDir.Samples = sampleDir.Samples.Where(s => !blacklist.Contains(s.InternalUniqueID)).ToArray();
+                sampleDir.Samples = sampleDir.Samples.Where(s => !_Blacklist.Contains(s.InternalUniqueID)).ToArray();
                 return sampleDir;
             }
 
@@ -308,8 +309,7 @@ namespace VendorSampleParserEngine
             {
                 var samples = ParseVendorSamples(SDKdir, filter);
 
-                HashSet<string> blacklist = ParseBlacklistFile();
-                samples.VendorSamples = samples.VendorSamples.Where(s => !blacklist.Contains(s.InternalUniqueID)).ToArray();
+                samples.VendorSamples = samples.VendorSamples.Where(s => !_Blacklist.Contains(s.InternalUniqueID)).ToArray();
 
                 if (directoryMatches && (mode == RunMode.Incremental || mode == RunMode.SingleSample))
                 {
@@ -567,6 +567,7 @@ namespace VendorSampleParserEngine
         protected virtual ICodeScopeModuleLocator ModuleLocator => null;
 
         protected string _SDKdir;
+        private HashSet<string> _Blacklist;
 
         public void Run(string[] args)
         {
@@ -674,7 +675,7 @@ namespace VendorSampleParserEngine
             switch (mode)
             {
                 case RunMode.Incremental:
-                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => _Report.ShouldBuildIncrementally(s.InternalUniqueID, pass2Incremental ? VendorSamplePass.RelocatedBuild : VendorSamplePass.InPlaceBuild)).ToArray();
+                    pass1Queue = insertionQueue = sampleDir.Samples.Where(s => !_Blacklist.Contains(s.InternalUniqueID) && _Report.ShouldBuildIncrementally(s.InternalUniqueID, pass2Incremental ? VendorSamplePass.RelocatedBuild : VendorSamplePass.InPlaceBuild)).ToArray();
                     break;
                 case RunMode.Release:
                     insertionQueue = sampleDir.Samples;
@@ -811,8 +812,8 @@ namespace VendorSampleParserEngine
             if (finalStats.Failed > 0 && mode != RunMode.Incremental)
                 throw new Exception("Some of the vendor samples have failed the final test. Fix this before releasing the BSP.");
 
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
+            //Console.WriteLine("Press any key to continue...");
+            //Console.ReadKey();
         }
 
         public bool SampleHasDependencies(VendorSample s)
@@ -827,6 +828,9 @@ namespace VendorSampleParserEngine
         {
             HashSet<string> result = new HashSet<string>();
             var file = Path.Combine(RulesDirectory, "blacklist.txt");
+            if (!File.Exists(file))
+                file = Path.Combine(RulesDirectory, @"..\blacklist.txt");
+
             if (File.Exists(file))
             {
                 foreach (var rawLine in File.ReadAllLines(file))

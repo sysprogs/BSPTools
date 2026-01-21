@@ -424,14 +424,17 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 			<CopyJobs>
 				<CopyJob>
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Utilities</SourceFolder>
-					<FilesToCopy>CPU\*;Fonts\*;Log\*</FilesToCopy>
+					<FilesToCopy>CPU\*;Fonts\*;Log\*;LCD\*;GUI_INTERFACE\*;TRACER_EMB\*</FilesToCopy>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.utils.|STM32 Utilities</SmartPropertyGroup>
 					<ProjectInclusionMask>-*conf_template.h;*.c;*.h</ProjectInclusionMask>
 					<Flags>IgnoreFamilySubdir AutoTrimFileConditions</Flags>
 					<SmartFileConditions>
 						<string>-CPU Usage Monitor (FreeRTOS)[cpu]|CPU\\.*</string>
 						<string>-Fonts[fonts]|Fonts\\.*</string>
+						<string>-LCD Drawing Functions[lcd]|LCD\\.*</string>
 						<string>-LCD Logging Support[log]|Log\\.*</string>
+						<string>-GUI Interface Functions[gui_iface]|GUI_INTERFACE\\.*</string>
+						<string>-Tracing Functions[tracer]|TRACER_EMB\\.*</string>
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
@@ -555,7 +558,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<TargetFolder>AzureRTOS\levelx</TargetFolder>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask/>
-					<Flags>IgnoreFamilySubdir</Flags>
+					<Flags>AutoTrimFileConditions IgnoreFamilySubdir</Flags>
 					<ProjectInclusionMask>-common\drivers\template\*;common\*.c;common\*.h;ports\cortex_*\*.c;ports\cortex_*\*.h;</ProjectInclusionMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.levelx.|LevelX</SmartPropertyGroup>
 					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
@@ -565,6 +568,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>-NOR simulator driver[nor_simulator]|.*\\lx_stm32_nor_simulator_driver\.(h|c)</string>
 						<string>-OSPI simulator driver[ospi]|.*\\lx_stm32_ospi_driver\.(h|c)</string>
 						<string>-QSPI simulator driver[qspi]|.*\\lx_stm32_qspi_driver\.(h|c)</string>
+						<string>-XSPI simulator driver[xspi]|common\\drivers\\lx_stm32_xspi_driver.*</string><!-- Auto-trimmable syntax -->
 					</SmartFileConditions>
 				</CopyJob>
 			</CopyJobs>
@@ -584,17 +588,10 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<Flags>AutoTrimFileConditions IgnoreFamilySubdir</Flags>
 					<FilesToCopy>*</FilesToCopy>
 					<AutoIncludeMask>-ports*;-test*;*.h</AutoIncludeMask>
-					<AdditionalIncludeDirs>ports/cortex_$$com.sysprogs.bspoptions.arm.core$$/gnu/inc</AdditionalIncludeDirs>
-					<ProjectInclusionMask>common\*.c;common\*.h;ports\cortex_*\gnu\*.c;ports\cortex_*\gnu\*.h;</ProjectInclusionMask>
+					<AdditionalIncludeDirs>ports/generic/inc</AdditionalIncludeDirs>
+					<ProjectInclusionMask>common\*.c;common\*.h;ports\generic\*.h;</ProjectInclusionMask>
 					<SmartPropertyGroup>com.sysprogs.bspoptions.stm32.usbx.|USBX</SmartPropertyGroup>
 					<ExcludeFromVendorSampleMapping>true</ExcludeFromVendorSampleMapping>
-					<SimpleFileConditions> 
-						<string>ports\\cortex_a7\\.*:$$com.sysprogs.bspoptions.arm.core$$==A7</string>
-						<string>ports\\cortex_m0\\.*:$$com.sysprogs.bspoptions.arm.core$$==M0</string>
-						<string>ports\\cortex_m3\\.*:$$com.sysprogs.bspoptions.arm.core$$==M3</string>
-						<string>ports\\cortex_m4\\.*:$$com.sysprogs.bspoptions.arm.core$$==M4</string>
-						<string>ports\\cortex_m7\\.*:$$com.sysprogs.bspoptions.arm.core$$==M7</string>
-					</SimpleFileConditions>
 					<SmartFileConditions>
 						<string>-USB Host Support[host_controllers]|common\\usbx(|_stm32)_host_controllers\\.*</string>
 						<string>-USB Device Support[device_controllers]|common\\usbx(|_stm32)_device_controllers\\.*</string>
@@ -627,13 +624,6 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 						<string>-SWAR Host Class[host_class_swar]|common\\usbx_host_classes\\src\\ux_host_class_swar.*</string>
 						<string>-Video Host Class[host_class_video]|common\\usbx_host_classes\\src\\ux_host_class_video.*</string>
 					</SmartFileConditions>
-				</CopyJob>
-				<CopyJob>
-					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\ST\usbx\ports\generic</SourceFolder>
-					<Flags>IgnoreFamilySubdir</Flags>
-					<TargetFolder>AzureRTOS\usbx\ports\cortex_m33\gnu</TargetFolder>
-					<FilesToCopy>*</FilesToCopy>
-					<AutoIncludeMask/>
 				</CopyJob>
 			</CopyJobs>
 		</Framework>

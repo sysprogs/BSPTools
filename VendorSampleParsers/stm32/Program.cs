@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -288,7 +289,6 @@ namespace GeneratorSampleStm32
 
                     new AutoDetectedFramework {FrameworkID = "com.sysprogs.arm.stm32.usbx",
                         FileRegex = new Regex(@"\$\$SYS:VSAMPLE_DIR\$\$/[^/\\]+/Middlewares/ST/usbx/.*", RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                        UnsupportedDeviceRegex = new Regex("STM32(G4|L5).*"),    //The HAL for these families does not have the HAL_PCD_EP_Abort() call and requires a slightly different USBX port
                         FileBasedConfig = new[]
                         {
                             new ConditionalConfigEntry(@"usbx/common/usbx(|_stm32)_(host_controllers|device_controllers)/.*", "com.sysprogs.bspoptions.stm32.usbx.{2}"),
@@ -548,10 +548,11 @@ namespace GeneratorSampleStm32
 
         class STM32VendorSampleParser : VendorSampleParser
         {
-            public STM32VendorSampleParser(string ruleset)
-                : base(@"..\..\generators\stm32\output\" + ruleset, (ruleset == "bluenrg-lp") ? "BlueNRG SDK Samples" : "STM32 CubeMX Samples", ruleset)
+            public const string RelativeOutputPath = @"..\..\generators\stm32\output";
+            public STM32VendorSampleParser(string rulesetName, string extraSubdirSuffix = null)
+                : base(RelativeOutputPath + "\\" + rulesetName + extraSubdirSuffix, (rulesetName == "bluenrg-lp") ? "BlueNRG SDK Samples" : "STM32 CubeMX Samples", rulesetName + extraSubdirSuffix)
             {
-                _Ruleset = (STM32Ruleset)Enum.Parse(typeof(STM32Ruleset), ruleset, true);
+                _Ruleset = (STM32Ruleset)Enum.Parse(typeof(STM32Ruleset), rulesetName, true);
                 _ForceCSemanticsForCodeScope = true;
             }
 
@@ -808,16 +809,29 @@ namespace GeneratorSampleStm32
         static void Main(string[] args)
         {
             List<string> regularArgs = new List<string>();
-            string ruleset = "classic";
+            string ruleset = null, subset = null;
             foreach (var arg in args)
             {
                 if (arg.StartsWith("/rules:"))
                     ruleset = arg.Substring(7);
+                else if (arg.StartsWith("/subset:"))
+                    subset = arg.Substring(8);
                 else
                     regularArgs.Add(arg);
             }
 
-            new STM32VendorSampleParser(ruleset).Run(regularArgs.ToArray());
+            if (ruleset != null)
+                new STM32VendorSampleParser(ruleset).Run(regularArgs.ToArray());
+            else
+            {
+                foreach (var r in Directory.GetDirectories(@"..\..\" + STM32VendorSampleParser.RelativeOutputPath + @"\\Classic"))
+                {
+                    var subBSP = Path.GetFileName(r);
+                    if (subset != null && subset != subBSP)
+                        continue;
+                    new STM32VendorSampleParser("Classic", "\\" + subBSP).Run(regularArgs.ToArray());
+                }
+            }
         }
     }
 }
