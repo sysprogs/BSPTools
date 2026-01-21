@@ -339,7 +339,7 @@ Source\\CMSIS_RTOS_V2\\.*=>v2[CMSIS_RTOS_V2];
 					<SourceFolder>$$STM32:FAMILY_DIR$$\Middlewares\Third_Party\LwIP</SourceFolder>
 					<FilesToCopy>*.c;*.h;*.txt</FilesToCopy>
 					<Flags>IgnoreFamilySubdir</Flags>
-					<ProjectInclusionMask>-doc\*;system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;*.c;*.h</ProjectInclusionMask>
+					<ProjectInclusionMask>-doc\*;system\OS\sys_arch.c;-test\*;-system\*;-*template.c;-*template.h;-*\fsdata.c;-*\makefsdata\*;-*\ethernetif.c;-src\core\ipv6\*;-contrib\*;*.c;*.h</ProjectInclusionMask>
 					<AutoIncludeMask/>
 					<AdditionalIncludeDirs>$$SYS:BSP_ROOT$$/LwIP/src/include;$$SYS:BSP_ROOT$$/LwIP/system;$$SYS:BSP_ROOT$$/LwIP/src/include/ipv4</AdditionalIncludeDirs>
 					<PreprocessorMacros>LWIP_IPV4;LWIP_TIMEVAL_PRIVATE=0</PreprocessorMacros>

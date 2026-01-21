@@ -984,53 +984,53 @@ namespace BSPGenerationTools
                 case CortexCore.M0:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m0 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM0" };
-                    freertosPort = "ARM_CM0";
+                    freertosPort = "CM0";
                     coreName = "M0";
                     break;
                 case CortexCore.M0Plus:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m0plus -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM0PLUS" };
-                    freertosPort = "ARM_CM0";
+                    freertosPort = "CM0";
                     coreName = "M0";
                     break;
                 case CortexCore.M23:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m23 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM23" };
                     coreName = "M23";
-                    freertosPort = "ARM_CM23";
+                    freertosPort = "CM23";
                     break;
                 case CortexCore.M3:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m3 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM3" };
                     coreName = "M3";
-                    freertosPort = "ARM_CM3";
+                    freertosPort = "CM3";
                     break;
                 case CortexCore.M33:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m33 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM33" };
                     coreName = "M33";
-                    freertosPort = "ARM_CM33_NTZ/non_secure";
+                    freertosPort = "CM33_NTZ/non_secure";
                     break;
                 case CortexCore.M4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m4 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM4" };
                     if (fpuType == FPUType.None)
-                        freertosPort = "ARM_CM3";
+                        freertosPort = "CM3";
                     else
-                        freertosPort = "ARM_CM4F";
+                        freertosPort = "CM4F";
                     coreName = "M4";
                     break;
                 case CortexCore.M55:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m55 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM55" };
                     coreName = "M55";
-                    freertosPort = "ARM_CM55_NTZ/non_secure";
+                    freertosPort = "CM55_NTZ/non_secure";
                     break;
                 case CortexCore.M7:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-m7 -mthumb";
                     family.CompilationFlags.PreprocessorMacros = new string[] { "ARM_MATH_CM7" };
                     coreName = "M7";
-                    freertosPort = "ARM_CM7/r0p1";
+                    freertosPort = "CM7/r0p1";
                     break;
                 case CortexCore.R4:
                     family.CompilationFlags.COMMONFLAGS = "-mcpu=cortex-r4 -mthumb";

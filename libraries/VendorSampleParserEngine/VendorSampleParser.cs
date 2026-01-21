@@ -287,7 +287,7 @@ namespace VendorSampleParserEngine
                     directoryMatches = true;
             }
 
-            if (directoryMatches && (mode == RunMode.Release || mode == RunMode.CodeScope))
+            if (directoryMatches && (mode == RunMode.Release || mode == RunMode.CodeScope || mode == RunMode.Publish))
             {
                 Console.WriteLine($"Loaded {sampleDir.Samples.Length} samples from cache");
                 sampleDir.Samples = sampleDir.Samples.Where(s => !_Blacklist.Contains(s.InternalUniqueID)).ToArray();
@@ -560,6 +560,7 @@ namespace VendorSampleParserEngine
             SingleSample,
             UpdateErrors,
             CodeScope,
+            Publish,
         }
 
         protected virtual string FilterSDKDir(string dir) => dir;
@@ -603,6 +604,7 @@ namespace VendorSampleParserEngine
                 Console.WriteLine($"       /incremental   - Only retest/rebuild previously failed samples.");
                 Console.WriteLine($"                       This doesn't update the BSP archive.");
                 Console.WriteLine($"       /release       - Reuse cached definitions, retest all samples. Update BSP.");
+                Console.WriteLine($"       /publish       - Publish all samples to the BSP. Don't re-run tests.");
                 Console.WriteLine($"       /cleanRelease  - Reparse/retest all samples. Update BSP.");
                 Console.WriteLine($"       /updateErrors  - Re-categorize errors based on KnownProblems.xml");
                 Console.WriteLine($"       /CodeScope     - Export samples to a CodeScope job");
@@ -684,6 +686,10 @@ namespace VendorSampleParserEngine
                     else
                         pass1Queue = new VendorSample[0];
                     break;
+                case RunMode.Publish:
+                    insertionQueue = sampleDir.Samples;
+                    pass1Queue = new VendorSample[0];
+                    break;
                 case RunMode.CleanRelease:
                 case RunMode.CodeScope:
                     pass1Queue = insertionQueue = sampleDir.Samples;
@@ -760,12 +766,8 @@ namespace VendorSampleParserEngine
                 }
             }
 
-            if (false)  //mode != RunMode.Incremental && mode != RunMode.SingleSample
-            {
-                Console.WriteLine("Creating new BSP archive...");
-                string statFile = Path.ChangeExtension(archiveName, ".xml");
-                TarPacker.PackDirectoryToTGZ(BSPDirectory, archiveFilePath, fn => Path.GetExtension(fn).ToLower() != ".vgdbxbsp" && Path.GetFileName(fn) != statFile && !fn.Contains(ReverseFileConditionBuilder.ReverseConditionListFileName));
-            }
+            if (mode == RunMode.Publish)
+                return;
 
             var vendorSampleListInBSP = Path.Combine(BSPDirectory, VendorSampleDirectoryName, "VendorSamples.xml");
             // Finally verify that everything builds
